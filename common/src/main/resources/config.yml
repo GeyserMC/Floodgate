@@ -1,0 +1,4 @@
+key-file-name: key.pem
+disconnect:
+  invalid-key: Please connect through the official Geyser
+  invalid-arguments-length: Expected {0} arguments, got {1}. Is Geyser up-to-date?

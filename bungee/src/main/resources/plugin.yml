@@ -1,0 +1,4 @@
+name: ${project.name}
+version: ${project.version}
+author: ${project.organization.name}
+main: org.geysermc.flootgate.BungeePlugin
