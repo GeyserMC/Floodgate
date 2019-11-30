@@ -1,8 +1,6 @@
 package org.geysermc.floodgate.util;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 public class ReflectionUtil {
     public static Field getField(Class<?> clazz, String fieldName, boolean isPublic) {

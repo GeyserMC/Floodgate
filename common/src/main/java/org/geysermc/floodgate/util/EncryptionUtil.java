@@ -29,7 +29,7 @@ public class EncryptionUtil {
                 Base64.getEncoder().encodeToString(encryptedText);
     }
 
-    public static String encryptFromInstance(Key key, BedrockData data) throws IllegalBlockSizeException,
+    public static String encryptBedrockData(Key key, BedrockData data) throws IllegalBlockSizeException,
             InvalidKeyException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException {
         return encrypt(key, data.toString());
     }
@@ -51,7 +51,7 @@ public class EncryptionUtil {
         return cipher.doFinal(Base64.getDecoder().decode(split[1]));
     }
 
-    public static BedrockData decryptToInstance(Key key, String encryptedData) throws IllegalBlockSizeException,
+    public static BedrockData decryptBedrockData(Key key, String encryptedData) throws IllegalBlockSizeException,
             InvalidKeyException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException {
         return BedrockData.fromRawData(decrypt(key, encryptedData));
     }

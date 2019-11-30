@@ -50,9 +50,8 @@ public class BungeePlugin extends Plugin implements Listener {
 
                 if (data.length == 4 && data[1].equals("Geyser-Floodgate")) {
                     try {
-                        BedrockData bedrockData = EncryptionUtil.decryptToInstance(
-                                config.getPrivateKey(),
-                                data[2] + '\0' + data[3]
+                        BedrockData bedrockData = EncryptionUtil.decryptBedrockData(
+                                config.getPrivateKey(), data[2] + '\0' + data[3]
                         );
 
                         if (bedrockData.getDataLength() != BedrockData.EXPECTED_LENGTH) {
