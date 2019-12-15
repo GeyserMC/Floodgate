@@ -37,8 +37,8 @@
 
     <repositories>
         <repository>
-            <id>bungeecord-repo</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>Lucko.me</id><!-- for Bungeecord -->
+            <url>https://nexus.lucko.me/repository/maven-snapshots/</url>
         </repository>
         <repository>
             <id>nukkitx-release-repo</id>
