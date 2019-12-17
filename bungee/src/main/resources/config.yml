@@ -5,6 +5,11 @@
 # - bukkit (craftbukkit, spigot etc.)
 key-file-name: key.pem
 
+# Should Bungeecord send the bedrock player data to the servers it is connecting to?
+# This requires Floodgate to be installed on the servers.
+# You'll get kicked if you don't use the plugin. The default value is false because of it
+send-floodgate-data: false
+
 disconnect:
   # The disconnect message Geyser users should get when connecting
   # to the server with an invalid key

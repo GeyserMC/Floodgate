@@ -27,7 +27,7 @@ public class FloodgateConfig {
     private DisconnectMessages messages;
 
     @JsonIgnore
-    private PrivateKey privateKey = null;
+    PrivateKey privateKey = null;
 
     @Getter
     public static class DisconnectMessages {
@@ -37,12 +37,16 @@ public class FloodgateConfig {
         private String invalidArgumentsLength;
     }
 
-    public static FloodgateConfig load(Logger logger, Path path) {
-        FloodgateConfig config = null;
+    public static FloodgateConfig load(Logger logger, Path configPath) {
+        return load(logger, configPath, FloodgateConfig.class);
+    }
+
+    public static <T extends FloodgateConfig> T load(Logger logger, Path configPath, Class<T> configClass) {
+        T config = null;
         try {
             try {
-                if (!path.toFile().exists()) {
-                    Files.copy(FloodgateConfig.class.getClassLoader().getResourceAsStream("config.yml"), path);
+                if (!configPath.toFile().exists()) {
+                    Files.copy(FloodgateConfig.class.getClassLoader().getResourceAsStream("config.yml"), configPath);
 
                     KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
                     generator.initialize(2048);
@@ -61,17 +65,17 @@ public class FloodgateConfig {
                         );
                     }
 
-                    Files.write(path.getParent().resolve("encrypted.txt"), encrypted.getBytes());
+                    Files.write(configPath.getParent().resolve("encrypted.txt"), encrypted.getBytes());
 
-                    Files.write(path.getParent().resolve("public-key.pem"), keyPair.getPublic().getEncoded());
-                    Files.write(path.getParent().resolve("key.pem"), keyPair.getPrivate().getEncoded());
+                    Files.write(configPath.getParent().resolve("public-key.pem"), keyPair.getPublic().getEncoded());
+                    Files.write(configPath.getParent().resolve("key.pem"), keyPair.getPrivate().getEncoded());
                 }
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error while creating config", e);
             }
 
             config = new ObjectMapper(new YAMLFactory()).readValue(
-                    Files.readAllBytes(path), FloodgateConfig.class
+                    Files.readAllBytes(configPath), configClass
             );
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error while loading config", e);
@@ -80,7 +84,7 @@ public class FloodgateConfig {
 
         try {
             config.privateKey = EncryptionUtil.getKeyFromFile(
-                    path.getParent().resolve(config.getKeyFileName()),
+                    configPath.getParent().resolve(config.getKeyFileName()),
                     PrivateKey.class
             );
         } catch (IOException | InvalidKeySpecException | NoSuchAlgorithmException e) {
