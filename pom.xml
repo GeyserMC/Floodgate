@@ -61,6 +61,10 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
+        <repository>
+            <id>Lucko.me</id>
+            <url>https://nexus.lucko.me/repository/maven-snapshots/</url>
+        </repository>
     </repositories>
 
     <distributionManagement>
