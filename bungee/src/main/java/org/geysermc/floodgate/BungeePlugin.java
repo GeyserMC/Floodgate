@@ -89,7 +89,7 @@ public class BungeePlugin extends Plugin implements Listener {
                         event.getConnection().setUniqueId(player.getJavaUniqueId());
                         ReflectionUtil.setValue(event.getConnection(), "name", player.getJavaUsername());
                         ChannelWrapper wrapper = ReflectionUtil.getCastedValue(event.getConnection(), "ch", ChannelWrapper.class);
-                        wrapper.setRemoteAddress(InetSocketAddress.createUnresolved(bedrockData.getIp(), wrapper.getRemoteAddress().getPort()));
+                        wrapper.setRemoteAddress(new InetSocketAddress(bedrockData.getIp(), wrapper.getRemoteAddress().getPort()));
 
                         System.out.println("Added " + player.getUsername() + " " + player.getJavaUniqueId());
                     } catch (NullPointerException | NoSuchPaddingException | NoSuchAlgorithmException |
