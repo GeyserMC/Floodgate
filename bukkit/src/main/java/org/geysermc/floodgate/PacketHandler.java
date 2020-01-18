@@ -89,7 +89,7 @@ public class PacketHandler extends MessageToMessageDecoder<Object> {
                         // Use a spoofedUUID for initUUID (just like Bungeecord)
                         setValue(networkManager, "spoofedUUID", player.getJavaUniqueId());
                         // Use the player his IP for stuff instead of Geyser his IP
-                        SocketAddress newAddress = InetSocketAddress.createUnresolved(
+                        SocketAddress newAddress = new InetSocketAddress(
                                 bedrockData.getIp(),
                                 ((InetSocketAddress)ctx.channel().remoteAddress()).getPort()
                         );
