@@ -2,7 +2,6 @@ package org.geysermc.floodgate.injector;
 
 import io.netty.channel.*;
 import lombok.Getter;
-import org.geysermc.floodgate.BukkitPlugin;
 import org.geysermc.floodgate.PacketHandler;
 import org.geysermc.floodgate.util.ReflectionUtil;
 
@@ -12,11 +11,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class BukkitInjector {
-    private static Logger logger = BukkitPlugin.getInstance().getLogger();
     private static Object serverConnection;
     private static List<ChannelFuture> injectedClients = new ArrayList<>();
 
@@ -27,18 +23,15 @@ public class BukkitInjector {
         if (getServerConnection() != null) {
             for (Field f : serverConnection.getClass().getDeclaredFields()) {
                 if (f.getType() == List.class) {
-                    logger.finest("Injector step 0");
                     f.setAccessible(true);
                     boolean rightList = ((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0] == ChannelFuture.class;
                     if (!rightList) continue;
-                    logger.finest("Injector step 1");
 
                     injectedFieldName = f.getName();
                     List<?> newList = new CustomList((List<?>) f.get(serverConnection)) {
                         @Override
                         public void onAdd(Object o) {
                             try {
-                                logger.finest("Injector step 2");
                                 injectClient((ChannelFuture) o);
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -49,7 +42,6 @@ public class BukkitInjector {
                     synchronized (newList) {
                         for (Object o : newList) {
                             try {
-                                logger.finest("Injector step 2");
                                 injectClient((ChannelFuture) o);
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -67,18 +59,15 @@ public class BukkitInjector {
     }
 
     public static void injectClient(ChannelFuture future) {
-        logger.finest("Injector step 3");
         future.channel().pipeline().addFirst("floodgate-init", new ChannelInboundHandlerAdapter() {
             @Override
             public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-                logger.finest("Injector step 4");
                 super.channelRead(ctx, msg);
 
                 Channel channel = (Channel) msg;
                 channel.pipeline().addLast(new ChannelInitializer<Channel>() {
                     @Override
                     protected void initChannel(Channel channel) throws Exception {
-                        logger.finest("Injector step 5");
                         channel.pipeline().addBefore("packet_handler", "floodgate_handler", new PacketHandler(future));
                     }
                 });

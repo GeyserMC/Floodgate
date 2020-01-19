@@ -47,10 +47,10 @@ public class BungeePlugin extends Plugin implements Listener {
     @EventHandler(priority = EventPriority.LOW)
     public void onServerConnect(ServerConnectEvent e) {
         // Passes the information through to the connecting server if enabled
-        if (config.isSendFloodgateData()) {
+        if (config.isSendFloodgateData() && BungeeFloodgateAPI.isBedrockPlayer(e.getPlayer())) {
             Handshake handshake = ReflectionUtil.getCastedValue(e.getPlayer().getPendingConnection(), "handshake", Handshake.class);
             handshake.setHost(
-                    handshake.getHost().split("\0")[0] + // Ensures that only the hostname remains!
+                    handshake.getHost().split("\0")[0] + '\0' + // Ensures that only the hostname remains!
                             FLOODGATE_IDENTIFIER + '\0' + BungeeFloodgateAPI.getEncryptedData(e.getPlayer().getUniqueId())
             );
         }

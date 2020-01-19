@@ -1,6 +1,7 @@
 package org.geysermc.floodgate;
 
 import net.md_5.bungee.api.connection.PendingConnection;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,5 +27,9 @@ public class BungeeFloodgateAPI extends FloodgateAPI {
      */
     public static FloodgatePlayer getPlayerByConnection(PendingConnection connection) {
         return getPlayer(connection.getUniqueId());
+    }
+
+    public static boolean isBedrockPlayer(ProxiedPlayer player) {
+        return isBedrockPlayer(player.getUniqueId());
     }
 }

@@ -15,13 +15,13 @@
         <dependency>
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-api</artifactId>
-            <version>1.14-SNAPSHOT</version>
+            <version>${bungee-version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-proxy</artifactId>
-            <version>1.12-SNAPSHOT</version>
+            <version>${bungee-version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

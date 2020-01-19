@@ -15,7 +15,7 @@
         <dependency>
             <groupId>org.geysermc</groupId>
             <artifactId>common</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${geyser-version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

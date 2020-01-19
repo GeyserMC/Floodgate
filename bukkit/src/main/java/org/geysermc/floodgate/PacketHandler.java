@@ -52,12 +52,10 @@ public class PacketHandler extends MessageToMessageDecoder<Object> {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, Object packet, List<Object> out) throws Exception {
-        plugin.getLogger().finest("Injector step 6");
         boolean isHandhake = handshakePacketClass.isInstance(packet);
         boolean isLogin = loginStartPacketClass.isInstance(packet);
         try {
             if (isHandhake) {
-                plugin.getLogger().finest("Injector step 7");
                 networkManager = ctx.channel().pipeline().get("packet_handler");
 
                 String[] host = getCastedValue(packet, hostField, String.class).split("\0");
@@ -91,7 +89,7 @@ public class PacketHandler extends MessageToMessageDecoder<Object> {
                         // Use the player his IP for stuff instead of Geyser his IP
                         SocketAddress newAddress = new InetSocketAddress(
                                 bedrockData.getIp(),
-                                ((InetSocketAddress)ctx.channel().remoteAddress()).getPort()
+                                ((InetSocketAddress) ctx.channel().remoteAddress()).getPort()
                         );
                         setValue(networkManager, getFieldOfType(networkManagerClass, SocketAddress.class, false), newAddress);
                     }
@@ -99,7 +97,6 @@ public class PacketHandler extends MessageToMessageDecoder<Object> {
                 }
                 out.add(packet);
             } else if (isLogin) {
-                plugin.getLogger().finest("Injector step 8");
                 if (!bungee) {
                     // we have to fake the offline player cycle
                     Object loginListener = packetListenerField.get(networkManager);
