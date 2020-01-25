@@ -47,7 +47,8 @@ class FloodgateAPI {
         WIN32,
         DEDICATED,
         ORBIS,
-        NX;
+        NX,
+        SWITCH;
 
         private static final DeviceOS[] VALUES = values();
 
