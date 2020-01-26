@@ -19,12 +19,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>net.md-5</groupId>
-            <artifactId>bungeecord-proxy</artifactId>
-            <version>${bungee-version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.geysermc</groupId>
             <artifactId>floodgate-common</artifactId>
             <version>${project.version}</version>

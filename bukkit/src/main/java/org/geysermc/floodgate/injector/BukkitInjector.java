@@ -77,7 +77,6 @@ public class BukkitInjector {
     }
 
     public static void removeInjectedClient(ChannelFuture future, Channel channel) {
-        future.channel().pipeline().remove("floodgate-init");
         if (channel != null) channel.pipeline().remove("floodgate_handler");
         injectedClients.remove(future);
     }

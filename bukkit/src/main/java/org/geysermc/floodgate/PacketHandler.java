@@ -113,7 +113,7 @@ public class PacketHandler extends MessageToMessageDecoder<Object> {
                 // out.add(packet); don't let this packet through as we want to skip the login cycle
             }
         } finally {
-            if (isHandhake && bungee || isLogin && !bungee) {
+            if (isHandhake && bungee || isLogin && !bungee || floodgatePlayer == null) {
                 // remove the injection of the client because we're finished
                 BukkitInjector.removeInjectedClient(future, ctx.channel());
             }

@@ -61,6 +61,10 @@ public class ReflectionUtil {
         }
     }
 
+    public static Object getValue(Object instance, String fieldName) {
+        return getValue(instance, getField(instance.getClass(), fieldName));
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> T getCastedValue(Object instance, Field field, Class<T> returnType) {
         return (T) getValue(instance, field);

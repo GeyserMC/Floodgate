@@ -7,10 +7,8 @@ import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
-import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
-import net.md_5.bungee.netty.ChannelWrapper;
 import net.md_5.bungee.protocol.packet.Handshake;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.EncryptionUtil;
@@ -19,7 +17,9 @@ import org.geysermc.floodgate.util.ReflectionUtil;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
@@ -28,6 +28,7 @@ import static org.geysermc.floodgate.util.BedrockData.FLOODGATE_IDENTIFIER;
 public class BungeePlugin extends Plugin implements Listener {
     @Getter private static BungeePlugin instance;
     @Getter private BungeeFloodgateConfig config = null;
+    private static Field extraHandshakeData;
 
     @Override
     public void onLoad() {
@@ -63,8 +64,8 @@ public class BungeePlugin extends Plugin implements Listener {
             event.registerIntent(this);
 
             getProxy().getScheduler().runAsync(this, () -> {
-                String[] data = ((InitialHandler) event.getConnection()).getExtraDataInHandshake().split("\0");
-                System.out.println(data.length);
+                String extraData = ReflectionUtil.getCastedValue(event.getConnection(), extraHandshakeData, String.class);
+                String[] data = extraData.split("\0");
 
                 if (data.length == 4 && data[1].equals(FLOODGATE_IDENTIFIER)) {
                     try {
@@ -87,9 +88,21 @@ public class BungeePlugin extends Plugin implements Listener {
 
                         event.getConnection().setOnlineMode(false);
                         event.getConnection().setUniqueId(player.getJavaUniqueId());
+
                         ReflectionUtil.setValue(event.getConnection(), "name", player.getJavaUsername());
-                        ChannelWrapper wrapper = ReflectionUtil.getCastedValue(event.getConnection(), "ch", ChannelWrapper.class);
-                        wrapper.setRemoteAddress(new InetSocketAddress(bedrockData.getIp(), wrapper.getRemoteAddress().getPort()));
+                        Object channelWrapper = ReflectionUtil.getValue(event.getConnection(), "ch");
+                        SocketAddress remoteAddress = ReflectionUtil.getCastedValue(channelWrapper, "remoteAddress", SocketAddress.class);
+                        if (!(remoteAddress instanceof InetSocketAddress)) {
+                            getLogger().info(
+                                    "Player " + player.getUsername() + " doesn't use a InetSocketAddress. " +
+                                    "It uses " + remoteAddress.getClass().getSimpleName() + ". Ignoring the player, I guess."
+                            );
+                            return;
+                        }
+                        ReflectionUtil.setValue(
+                                channelWrapper, "remoteAddress",
+                                new InetSocketAddress(bedrockData.getIp(), ((InetSocketAddress) remoteAddress).getPort())
+                        );
 
                         System.out.println("Added " + player.getUsername() + " " + player.getJavaUniqueId());
                     } catch (NullPointerException | NoSuchPaddingException | NoSuchAlgorithmException |
@@ -112,5 +125,10 @@ public class BungeePlugin extends Plugin implements Listener {
             BungeeFloodgateAPI.removeEncryptedData(player.getJavaUniqueId());
             System.out.println("Removed " + player.getUsername() + " " + event.getPlayer().getUniqueId());
         }
+    }
+
+    static {
+        Class<?> initial_handler = ReflectionUtil.getClass("net.md_5.bungee.connection.InitialHandler");
+        extraHandshakeData = ReflectionUtil.getField(initial_handler, "getExtraDataInHandshake");
     }
 }

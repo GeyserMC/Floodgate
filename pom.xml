@@ -19,7 +19,7 @@
 
     <properties>
         <geyser-version>1.0-SNAPSHOT</geyser-version>
-        <bungee-version>1.12-SNAPSHOT</bungee-version>
+        <bungee-version>1.15-SNAPSHOT</bungee-version>
         <outputName>${project.name}</outputName>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -86,7 +86,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.4</version>
+            <version>1.18.10</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
