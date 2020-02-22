@@ -1,11 +1,9 @@
 # In Floodgate bedrock player data is send encrypted
 # The following value should point to the key Floodgate generated.
-# The public key should be used for the Geyser(s) and the private key for
-# - bungeecord
-# - bukkit (craftbukkit, spigot etc.)
+# The public key should be used for the Geyser(s) and the private key for the Floodgate(s)
 key-file-name: key.pem
 
-# Should Bungeecord send the bedrock player data to the servers it is connecting to?
+# Should Velocity send the bedrock player data to the servers it is connecting to?
 # This requires Floodgate to be installed on the servers.
 # You'll get kicked if you don't use the plugin. The default value is false because of it
 send-floodgate-data: false

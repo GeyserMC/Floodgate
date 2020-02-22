@@ -7,11 +7,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class BungeeFloodgateAPI extends FloodgateAPI {
+public class FloodgateAPI extends AbstractFloodgateAPI {
     private static Map<UUID, String> encryptedData = new HashMap<>();
 
     static void addEncryptedData(UUID uuid, String encryptedData) {
-        BungeeFloodgateAPI.encryptedData.put(uuid, encryptedData); // just override it I guess
+        FloodgateAPI.encryptedData.put(uuid, encryptedData); // just override it I guess
     }
 
     static void removeEncryptedData(UUID uuid) {
@@ -23,7 +23,7 @@ public class BungeeFloodgateAPI extends FloodgateAPI {
     }
 
     /**
-     * See {@link FloodgateAPI#getPlayer(UUID)}
+     * See {@link AbstractFloodgateAPI#getPlayer(UUID)}
      */
     public static FloodgatePlayer getPlayerByConnection(PendingConnection connection) {
         return getPlayer(connection.getUniqueId());

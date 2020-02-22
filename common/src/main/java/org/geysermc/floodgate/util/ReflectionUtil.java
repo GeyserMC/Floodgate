@@ -1,22 +1,24 @@
 package org.geysermc.floodgate.util;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class ReflectionUtil {
-    /*
-     * Used in the Bukkit version
+    /**
+     * Prefix without dot<br>
+     * Example net.minecraft.server.v1_8R3.PacketHandhakingInSetProtocol will become:<br>
+     *     net.minecraft.server.v1_8R3
      */
-    private static String nmsPackage = null;
+    @Getter @Setter
+    private static String prefix = null;
 
-    public static Class<?> getNMSClass(String className) {
-        return getClass(nmsPackage + className);
-    }
-
-    public static void setServerVersion(String serverVersion) {
-        nmsPackage = "net.minecraft.server." + serverVersion + ".";
+    public static Class<?> getPrefixedClass(String className) {
+        return getClass(prefix +"."+ className);
     }
 
     public static Class<?> getClass(String className) {
@@ -101,8 +103,27 @@ public class ReflectionUtil {
         }
     }
 
-    public static Object invokeStatic(Class<?> clazz, String method) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        return clazz.getDeclaredMethod(method).invoke(null);
+    public static Object invoke(Object instance, Method method) {
+        try {
+            return method.invoke(instance);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T invokeCasted(Object instance, Method method, Class<T> cast) {
+        return (T) invoke(instance, method);
+    }
+
+    public static Object invokeStatic(Class<?> clazz, String method) {
+        try {
+            return getMethod(clazz, method).invoke(null);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static <T extends AccessibleObject> T makeAccessible(T accessibleObject) {

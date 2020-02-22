@@ -20,6 +20,7 @@ public class BukkitInjector {
     private static String injectedFieldName;
 
     public static boolean inject() throws Exception {
+        if (isInjected()) return true;
         if (getServerConnection() != null) {
             for (Field f : serverConnection.getClass().getDeclaredFields()) {
                 if (f.getType() == List.class) {
@@ -102,7 +103,7 @@ public class BukkitInjector {
 
     public static Object getServerConnection() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (serverConnection != null) return serverConnection;
-        Class<?> minecraftServer = ReflectionUtil.getNMSClass("MinecraftServer");
+        Class<?> minecraftServer = ReflectionUtil.getPrefixedClass("MinecraftServer");
         assert minecraftServer != null;
 
         Object minecraftServerInstance = ReflectionUtil.invokeStatic(minecraftServer, "getServer");

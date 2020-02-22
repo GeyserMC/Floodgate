@@ -2,6 +2,7 @@ package org.geysermc.floodgate;
 
 import lombok.Getter;
 import org.geysermc.floodgate.util.BedrockData;
+import org.geysermc.floodgate.util.DeviceOS;
 
 import java.util.UUID;
 
@@ -26,7 +27,7 @@ public class FloodgatePlayer {
     /**
      * The operation system of the bedrock client
      */
-    private FloodgateAPI.DeviceOS deviceOS;
+    private DeviceOS deviceOS;
     /**
      * The language code of the bedrock client
      */
@@ -41,8 +42,8 @@ public class FloodgatePlayer {
         username = data.getUsername();
         javaUsername = "*" + data.getUsername().substring(0, Math.min(data.getUsername().length(), 15));
         xuid = data.getXuid();
-        deviceOS = FloodgateAPI.DeviceOS.getById(data.getDeviceId());
+        deviceOS = DeviceOS.getById(data.getDeviceId());
         languageCode = data.getLanguageCode();
-        javaUniqueId = FloodgateAPI.createJavaPlayerId(Long.parseLong(data.getXuid()));
+        javaUniqueId = AbstractFloodgateAPI.createJavaPlayerId(Long.parseLong(data.getXuid()));
     }
 }

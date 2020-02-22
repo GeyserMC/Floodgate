@@ -80,7 +80,10 @@ public class FloodgateConfig {
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error while loading config", e);
         }
-        if (config == null) return null;
+
+        if (config == null) {
+            throw new RuntimeException("Failed to load config file! Try to delete the data folder of Floodgate");
+        }
 
         try {
             config.privateKey = EncryptionUtil.getKeyFromFile(

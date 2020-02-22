@@ -1,0 +1,1 @@
+{"id": "floodgate", "name": "${project.artifactId}", "version": "${project.version}", "description": "${project.description}", "url": "${project.url}", "authors": ["${project.organization.name}"], "main": "org.geysermc.floodgate.VelocityPlugin"}

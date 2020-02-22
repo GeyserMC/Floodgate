@@ -11,15 +11,19 @@
         <module>bungee</module>
         <module>common</module>
         <module>bukkit</module>
+        <module>velocity</module>
     </modules>
     <packaging>pom</packaging>
     <name>floodgate</name>
     <description>Allows Bedrock players to join Java edition servers while keeping online mode</description>
-    <url>https://geysermc.org</url>
+    <url>https://github.com/GeyserMC/Floodgate/</url>
 
     <properties>
         <geyser-version>1.0-SNAPSHOT</geyser-version>
+        <bukkit-version>1.8.8-R0.1-SNAPSHOT</bukkit-version>
         <bungee-version>1.15-SNAPSHOT</bungee-version>
+        <velocity-version>1.1.0-SNAPSHOT</velocity-version>
+
         <outputName>${project.name}</outputName>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -29,45 +33,14 @@
 
     <organization>
         <name>GeyserMC</name>
-        <url>https://github.com/GeyserMC/Floodgate/blob/master/pom.xml</url>
+        <url>https://geysermc.org/</url>
     </organization>
 
     <scm>
         <connection>scm:git:https://github.com/GeyserMC/Floodgate.git</connection>
         <developerConnection>scm:git:git@github.com:GeyserMC/Floodgate.git</developerConnection>
-        <url>https://github.com/GeyserMC/Floodgate</url>
+        <url>https://github.com/GeyserMC/Floodgate/</url>
     </scm>
-
-    <repositories>
-        <repository>
-            <id>bungeecord-repo</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </repository>
-        <repository>
-            <id>nukkitx-release-repo</id>
-            <url>https://repo.nukkitx.com/maven-releases/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>nukkitx-snapshot-repo</id>
-            <url>https://repo.nukkitx.com/maven-snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>Lucko.me</id>
-            <url>https://nexus.lucko.me/repository/maven-snapshots/</url>
-        </repository>
-    </repositories>
 
     <distributionManagement>
         <repository>

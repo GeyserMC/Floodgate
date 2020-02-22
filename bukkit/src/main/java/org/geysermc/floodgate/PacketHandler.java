@@ -4,9 +4,9 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import lombok.RequiredArgsConstructor;
+import org.geysermc.floodgate.HandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.injector.BukkitInjector;
 import org.geysermc.floodgate.util.BedrockData;
-import org.geysermc.floodgate.util.EncryptionUtil;
 import org.geysermc.floodgate.util.ReflectionUtil;
 
 import java.lang.reflect.Constructor;
@@ -17,12 +17,13 @@ import java.net.SocketAddress;
 import java.util.List;
 import java.util.UUID;
 
-import static org.geysermc.floodgate.util.BedrockData.FLOODGATE_IDENTIFIER;
 import static org.geysermc.floodgate.util.ReflectionUtil.*;
 
 @RequiredArgsConstructor
 public class PacketHandler extends MessageToMessageDecoder<Object> {
     private static BukkitPlugin plugin = BukkitPlugin.getInstance();
+    private static HandshakeHandler handshakeHandler;
+
     private static Class<?> networkManagerClass;
     private static Class<?> handshakePacketClass;
     private static Field hostField;
@@ -47,54 +48,52 @@ public class PacketHandler extends MessageToMessageDecoder<Object> {
 
     private final ChannelFuture future;
     private Object networkManager;
-    private FloodgatePlayer floodgatePlayer;
+    private FloodgatePlayer fPlayer;
     private boolean bungee;
 
     @Override
     protected void decode(ChannelHandlerContext ctx, Object packet, List<Object> out) throws Exception {
         boolean isHandhake = handshakePacketClass.isInstance(packet);
         boolean isLogin = loginStartPacketClass.isInstance(packet);
+
         try {
             if (isHandhake) {
                 networkManager = ctx.channel().pipeline().get("packet_handler");
 
-                String[] host = getCastedValue(packet, hostField, String.class).split("\0");
-                bungee = host.length == 6 || host.length == 7; // 4 = normal | 6, 7 = bungee
-
-                if ((host.length == 4 || bungee) && host[1].equals(FLOODGATE_IDENTIFIER)) {
-                    BedrockData bedrockData = EncryptionUtil.decryptBedrockData(
-                            plugin.getConfiguration().getPrivateKey(),
-                            host[2] + '\0' + host[3]
-                    );
-
-                    if (bedrockData.getDataLength() != BedrockData.EXPECTED_LENGTH) {
+                HandshakeResult result = handshakeHandler.handle(getCastedValue(packet, hostField, String.class));
+                switch (result.getResultType()) {
+                    case SUCCESS:
+                        break;
+                    case INVALID_DATA_LENGTH:
                         plugin.getLogger().info(String.format(
                                 plugin.getConfiguration().getMessages().getInvalidArgumentsLength(),
-                                BedrockData.EXPECTED_LENGTH, bedrockData.getDataLength()
+                                BedrockData.EXPECTED_LENGTH, result.getBedrockData().getDataLength()
                         ));
-                        ctx.close(); //todo add option to see disconnect message?
-                    }
-
-                    FloodgatePlayer player = floodgatePlayer = new FloodgatePlayer(bedrockData);
-                    FloodgateAPI.players.put(player.getJavaUniqueId(), player);
-
-                    if (bungee) {
-                        setValue(packet, hostField, host[0] + '\0' +
-                                bedrockData.getIp() + '\0' + player.getJavaUniqueId() +
-                                (host.length == 7 ? '\0' + host[6] : "")
-                        );
-                    } else {
-                        // Use a spoofedUUID for initUUID (just like Bungeecord)
-                        setValue(networkManager, "spoofedUUID", player.getJavaUniqueId());
-                        // Use the player his IP for stuff instead of Geyser his IP
-                        SocketAddress newAddress = new InetSocketAddress(
-                                bedrockData.getIp(),
-                                ((InetSocketAddress) ctx.channel().remoteAddress()).getPort()
-                        );
-                        setValue(networkManager, getFieldOfType(networkManagerClass, SocketAddress.class, false), newAddress);
-                    }
-                    plugin.getLogger().info("Added " + player.getJavaUsername() + " " + player.getJavaUniqueId());
+                        ctx.close();
+                    default: // only continue when SUCCESS
+                        return;
                 }
+
+                fPlayer = result.getFloodgatePlayer();
+                BedrockData bedrockData = result.getBedrockData();
+                String[] data = result.getHandshakeData();
+
+                if (bungee = (data.length == 6 || data.length == 7)) {
+                    setValue(packet, hostField, data[0] + '\0' +
+                            bedrockData.getIp() + '\0' + fPlayer.getJavaUniqueId() +
+                            (data.length == 7 ? '\0' + data[6] : "")
+                    );
+                } else {
+                    // Use a spoofedUUID for initUUID (just like Bungeecord)
+                    setValue(networkManager, "spoofedUUID", fPlayer.getJavaUniqueId());
+                    // Use the player his IP for stuff instead of Geyser his IP
+                    SocketAddress newAddress = new InetSocketAddress(
+                            bedrockData.getIp(),
+                            ((InetSocketAddress) ctx.channel().remoteAddress()).getPort()
+                    );
+                    setValue(networkManager, getFieldOfType(networkManagerClass, SocketAddress.class, false), newAddress);
+                }
+                plugin.getLogger().info("Added " + fPlayer.getJavaUsername() + " " + fPlayer.getJavaUniqueId());
                 out.add(packet);
             } else if (isLogin) {
                 if (!bungee) {
@@ -102,7 +101,7 @@ public class PacketHandler extends MessageToMessageDecoder<Object> {
                     Object loginListener = packetListenerField.get(networkManager);
 
                     // Set the player his GameProfile
-                    Object gameProfile = gameProfileConstructor.newInstance(floodgatePlayer.getJavaUniqueId(), floodgatePlayer.getJavaUsername());
+                    Object gameProfile = gameProfileConstructor.newInstance(fPlayer.getJavaUniqueId(), fPlayer.getJavaUsername());
                     setValue(loginListener, gameProfileField, gameProfile);
 
                     initUUIDMethod.invoke(loginListener); // LoginListener#initUUID
@@ -113,7 +112,7 @@ public class PacketHandler extends MessageToMessageDecoder<Object> {
                 // out.add(packet); don't let this packet through as we want to skip the login cycle
             }
         } finally {
-            if (isHandhake && bungee || isLogin && !bungee || floodgatePlayer == null) {
+            if (isHandhake && bungee || isLogin && !bungee || fPlayer == null) {
                 // remove the injection of the client because we're finished
                 BukkitInjector.removeInjectedClient(future, ctx.channel());
             }
@@ -127,8 +126,10 @@ public class PacketHandler extends MessageToMessageDecoder<Object> {
     }
 
     static {
-        networkManagerClass = getNMSClass("NetworkManager");
-        loginStartPacketClass = getNMSClass("PacketLoginInStart");
+        handshakeHandler = new HandshakeHandler(plugin.getConfiguration().getPrivateKey(), false);
+
+        networkManagerClass = getPrefixedClass("NetworkManager");
+        loginStartPacketClass = getPrefixedClass("PacketLoginInStart");
 
         gameProfileClass = ReflectionUtil.getClass("com.mojang.authlib.GameProfile");
         assert gameProfileClass != null;
@@ -138,11 +139,11 @@ public class PacketHandler extends MessageToMessageDecoder<Object> {
             e.printStackTrace();
         }
 
-        handshakePacketClass = getNMSClass("PacketHandshakingInSetProtocol");
+        handshakePacketClass = getPrefixedClass("PacketHandshakingInSetProtocol");
         assert handshakePacketClass != null;
         hostField = getFieldOfType(handshakePacketClass, String.class, true);
 
-        loginListenerClass = getNMSClass("LoginListener");
+        loginListenerClass = getPrefixedClass("LoginListener");
         assert loginListenerClass != null;
         gameProfileField = getFieldOfType(loginListenerClass, gameProfileClass, true);
         initUUIDMethod = getMethod(loginListenerClass, "initUUID");
@@ -161,10 +162,10 @@ public class PacketHandler extends MessageToMessageDecoder<Object> {
             }
         }
 
-        Class<?> packetListenerClass = getNMSClass("PacketListener");
+        Class<?> packetListenerClass = getPrefixedClass("PacketListener");
         packetListenerField = getFieldOfType(networkManagerClass, packetListenerClass, true);
 
-        loginHandlerClass = getNMSClass("LoginListener$LoginHandler");
+        loginHandlerClass = getPrefixedClass("LoginListener$LoginHandler");
         assert loginHandlerClass != null;
         try {
             loginHandlerConstructor = makeAccessible(loginHandlerClass.getDeclaredConstructor(loginListenerClass));

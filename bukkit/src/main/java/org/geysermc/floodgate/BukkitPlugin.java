@@ -17,7 +17,7 @@ public class BukkitPlugin extends JavaPlugin {
         if (!getDataFolder().exists()) {
             getDataFolder().mkdir();
         }
-        ReflectionUtil.setServerVersion(getServer().getClass().getPackage().getName().split("\\.")[3]);
+        ReflectionUtil.setPrefix("net.minecraft.server." + getServer().getClass().getPackage().getName().split("\\.")[3]);
 
         configuration = FloodgateConfig.load(getLogger(), getDataFolder().toPath().resolve("config.yml"));
     }
