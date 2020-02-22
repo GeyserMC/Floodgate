@@ -25,27 +25,21 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.velocitypowered</groupId>
+            <artifactId>velocity-api</artifactId>
+            <version>${velocity-version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
             <version>3.26.0-GA</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>net.openhft</groupId>
-            <artifactId>compiler</artifactId>
-            <version>2.3.5</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
             <version>4.1.45.Final</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.velocitypowered</groupId>
-            <artifactId>velocity-api</artifactId>
-            <version>${velocity-version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
