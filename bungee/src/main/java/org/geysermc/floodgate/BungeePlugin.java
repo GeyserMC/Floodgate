@@ -72,6 +72,7 @@ public class BungeePlugin extends Plugin implements Listener {
                             BedrockData.EXPECTED_LENGTH, result.getBedrockData().getDataLength()
                     ));
                 default: // only continue when SUCCESS
+                    event.completeIntent(this);
                     return;
             }
 
