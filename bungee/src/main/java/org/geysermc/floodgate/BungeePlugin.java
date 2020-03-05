@@ -10,6 +10,7 @@ import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import net.md_5.bungee.protocol.packet.Handshake;
 import org.geysermc.floodgate.HandshakeHandler.HandshakeResult;
+import org.geysermc.floodgate.HandshakeHandler.ResultType;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.ReflectionUtil;
 
@@ -66,14 +67,19 @@ public class BungeePlugin extends Plugin implements Listener {
                     break;
                 case EXCEPTION:
                     event.setCancelReason(config.getMessages().getInvalidKey());
+                    break;
                 case INVALID_DATA_LENGTH:
                     event.setCancelReason(String.format(
                             config.getMessages().getInvalidArgumentsLength(),
                             BedrockData.EXPECTED_LENGTH, result.getBedrockData().getDataLength()
                     ));
-                default: // only continue when SUCCESS
-                    event.completeIntent(this);
-                    return;
+                    break;
+            }
+
+            // only continue when SUCCESS
+            if (result.getResultType() != ResultType.SUCCESS) {
+                event.completeIntent(this);
+                return;
             }
 
             FloodgatePlayer player = result.getFloodgatePlayer();
