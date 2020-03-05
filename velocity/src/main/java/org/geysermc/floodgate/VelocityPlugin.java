@@ -96,8 +96,10 @@ public class VelocityPlugin {
                     break;
                 case EXCEPTION:
                     playersToKick.put(event.getConnection(), config.getMessages().getInvalidKey());
+                    return;
                 case INVALID_DATA_LENGTH:
                     playersToKick.put(event.getConnection(), config.getMessages().getInvalidArgumentsLength());
+                    return;
                 default:
                     return;
             }
