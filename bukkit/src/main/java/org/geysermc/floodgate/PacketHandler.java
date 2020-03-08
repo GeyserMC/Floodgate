@@ -2,7 +2,7 @@ package org.geysermc.floodgate;
 
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToMessageDecoder;
+import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.HandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.injector.BukkitInjector;
@@ -14,13 +14,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.List;
 import java.util.UUID;
 
 import static org.geysermc.floodgate.util.ReflectionUtil.*;
 
 @RequiredArgsConstructor
-public class PacketHandler extends MessageToMessageDecoder<Object> {
+public class PacketHandler extends SimpleChannelInboundHandler<Object> {
     private static BukkitPlugin plugin = BukkitPlugin.getInstance();
     private static HandshakeHandler handshakeHandler;
 
@@ -52,7 +51,7 @@ public class PacketHandler extends MessageToMessageDecoder<Object> {
     private boolean bungee;
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, Object packet, List<Object> out) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, Object packet) throws Exception {
         boolean isHandhake = handshakePacketClass.isInstance(packet);
         boolean isLogin = loginStartPacketClass.isInstance(packet);
 
@@ -94,7 +93,6 @@ public class PacketHandler extends MessageToMessageDecoder<Object> {
                     setValue(networkManager, getFieldOfType(networkManagerClass, SocketAddress.class, false), newAddress);
                 }
                 plugin.getLogger().info("Added " + fPlayer.getJavaUsername() + " " + fPlayer.getJavaUniqueId());
-                out.add(packet);
             } else if (isLogin) {
                 if (!bungee) {
                     // we have to fake the offline player cycle
@@ -109,9 +107,12 @@ public class PacketHandler extends MessageToMessageDecoder<Object> {
                     setValue(loginListener, protocolStateField, readyToAcceptState); // LoginLister#protocolState = READY_TO_ACCEPT
                     // The tick of LoginListener will do the rest
                 }
-                // out.add(packet); don't let this packet through as we want to skip the login cycle
             }
         } finally {
+            // don't let the packet through if the packet is the login packet
+            // because we want to skip the login cycle
+            if (!isLogin) ctx.fireChannelRead(packet);
+
             if (isHandhake && bungee || isLogin && !bungee || fPlayer == null) {
                 // remove the injection of the client because we're finished
                 BukkitInjector.removeInjectedClient(future, ctx.channel());

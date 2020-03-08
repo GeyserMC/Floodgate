@@ -25,6 +25,7 @@ public class BungeePlugin extends Plugin implements Listener {
     private static Field extraHandshakeData;
 
     @Getter private BungeeFloodgateConfig config;
+    private BungeeDebugger debugger;
     private HandshakeHandler handshakeHandler;
 
     @Override
@@ -40,6 +41,16 @@ public class BungeePlugin extends Plugin implements Listener {
     @Override
     public void onEnable() {
         getProxy().getPluginManager().registerListener(this, this);
+        if (config.isDebug()) {
+            debugger = new BungeeDebugger();
+        }
+    }
+
+    @Override
+    public void onDisable() {
+        if (config.isDebug()) {
+            getLogger().warning("Please note that it is not possible to reload this plugin when debug mode is enabled. At least for now");
+        }
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -93,15 +104,15 @@ public class BungeePlugin extends Plugin implements Listener {
             SocketAddress remoteAddress = ReflectionUtil.getCastedValue(channelWrapper, "remoteAddress", SocketAddress.class);
             if (!(remoteAddress instanceof InetSocketAddress)) {
                 getLogger().info(
-                        "Player " + player.getUsername() + " doesn't use a InetSocketAddress. " +
+                        "Player " + player.getUsername() + " doesn't use an InetSocketAddress. " +
                         "It uses " + remoteAddress.getClass().getSimpleName() + ". Ignoring the player, I guess."
                 );
-                return;
+            } else {
+                ReflectionUtil.setValue(
+                        channelWrapper, "remoteAddress",
+                        new InetSocketAddress(result.getBedrockData().getIp(), ((InetSocketAddress) remoteAddress).getPort())
+                );
             }
-            ReflectionUtil.setValue(
-                    channelWrapper, "remoteAddress",
-                    new InetSocketAddress(result.getBedrockData().getIp(), ((InetSocketAddress) remoteAddress).getPort())
-            );
             event.completeIntent(this);
         });
     }
@@ -117,7 +128,8 @@ public class BungeePlugin extends Plugin implements Listener {
     }
 
     static {
-        Class<?> initial_handler = ReflectionUtil.getClass("net.md_5.bungee.connection.InitialHandler");
+        ReflectionUtil.setPrefix("net.md_5.bungee");
+        Class<?> initial_handler = ReflectionUtil.getPrefixedClass("connection.InitialHandler");
         extraHandshakeData = ReflectionUtil.getField(initial_handler, "extraDataInHandshake");
     }
 }

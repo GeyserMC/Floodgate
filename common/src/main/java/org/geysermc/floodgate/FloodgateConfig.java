@@ -26,6 +26,9 @@ public class FloodgateConfig {
     @JsonProperty(value = "disconnect")
     private DisconnectMessages messages;
 
+    @JsonProperty
+    private boolean debug;
+
     @JsonIgnore
     PrivateKey privateKey = null;
 

@@ -3,10 +3,7 @@ package org.geysermc.floodgate.util;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 
 public class ReflectionUtil {
     /**
@@ -91,6 +88,39 @@ public class ReflectionUtil {
             field.set(instance, value);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static boolean setFinalValue(Object instance, Field field, Object value) {
+        try {
+            makeAccessible(field);
+
+            Field modifiersField = null;
+            int modifiers = field.getModifiers();
+            if (Modifier.isFinal(modifiers)) {
+                try {
+                    modifiersField = Field.class.getDeclaredField("modifiers");
+                } catch (NoSuchFieldException e) {
+                    // Java 12 compatibility, thanks to https://github.com/powermock/powermock/pull/1010
+                    Method getDeclaredFields0 = Class.class.getDeclaredMethod("getDeclaredFields0", boolean.class);
+                    makeAccessible(getDeclaredFields0);
+                    Field[] fields = (Field[]) getDeclaredFields0.invoke(Field.class, false);
+                    for (Field classField : fields) {
+                        if ("modifiers".equals(classField.getName())) {
+                            modifiersField = classField;
+                            break;
+                        }
+                    }
+                }
+                assert modifiersField != null;
+                makeAccessible(modifiersField);
+                modifiersField.setInt(field, modifiers & ~Modifier.FINAL);
+            }
+            setValue(instance, field, value);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
