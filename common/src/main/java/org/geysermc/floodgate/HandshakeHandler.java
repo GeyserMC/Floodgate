@@ -41,7 +41,7 @@ public class HandshakeHandler {
             }
 
             FloodgatePlayer player = new FloodgatePlayer(bedrockData);
-            AbstractFloodgateAPI.players.put(player.getJavaUniqueId(), player);
+            AbstractFloodgateAPI.players.put(player.getBedrockId(), player);
             return new HandshakeResult(ResultType.SUCCESS, data, bedrockData, player);
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
             e.printStackTrace();

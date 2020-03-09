@@ -21,9 +21,9 @@ public class FloodgatePlayer {
      */
     private String javaUsername;
     /**
-     * The Xbox Unique Identifier
+     * The Unique Identifier of the Bedrock client.
      */
-    private String xuid;
+    private UUID bedrockId;
     /**
      * The operation system of the bedrock client
      */
@@ -32,18 +32,13 @@ public class FloodgatePlayer {
      * The language code of the bedrock client
      */
     private String languageCode;
-    /**
-     * The Java UUID used to identify the bedrock client
-     */
-    private UUID javaUniqueId;
 
     FloodgatePlayer(BedrockData data) {
         version = data.getVersion();
         username = data.getUsername();
         javaUsername = "*" + data.getUsername().substring(0, Math.min(data.getUsername().length(), 15));
-        xuid = data.getXuid();
+        bedrockId = data.getBedrockId();
         deviceOS = DeviceOS.getById(data.getDeviceId());
         languageCode = data.getLanguageCode();
-        javaUniqueId = AbstractFloodgateAPI.createJavaPlayerId(Long.parseLong(data.getXuid()));
     }
 }
