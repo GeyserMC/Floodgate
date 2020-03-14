@@ -79,12 +79,12 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
 
                 if (bungee = (data.length == 6 || data.length == 7)) {
                     setValue(packet, hostField, data[0] + '\0' +
-                            bedrockData.getIp() + '\0' + fPlayer.getBedrockId() +
+                            bedrockData.getIp() + '\0' + fPlayer.getJavaUniqueId() +
                             (data.length == 7 ? '\0' + data[6] : "")
                     );
                 } else {
                     // Use a spoofedUUID for initUUID (just like Bungeecord)
-                    setValue(networkManager, "spoofedUUID", fPlayer.getBedrockId());
+                    setValue(networkManager, "spoofedUUID", fPlayer.getJavaUniqueId());
                     // Use the player his IP for stuff instead of Geyser his IP
                     SocketAddress newAddress = new InetSocketAddress(
                             bedrockData.getIp(),
@@ -92,14 +92,14 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                     );
                     setValue(networkManager, getFieldOfType(networkManagerClass, SocketAddress.class, false), newAddress);
                 }
-                plugin.getLogger().info("Added " + fPlayer.getJavaUsername() + " " + fPlayer.getBedrockId());
+                plugin.getLogger().info("Added " + fPlayer.getJavaUsername() + " " + fPlayer.getJavaUniqueId());
             } else if (isLogin) {
                 if (!bungee) {
                     // we have to fake the offline player cycle
                     Object loginListener = packetListenerField.get(networkManager);
 
                     // Set the player his GameProfile
-                    Object gameProfile = gameProfileConstructor.newInstance(fPlayer.getBedrockId(), fPlayer.getJavaUsername());
+                    Object gameProfile = gameProfileConstructor.newInstance(fPlayer.getJavaUniqueId(), fPlayer.getJavaUsername());
                     setValue(loginListener, gameProfileField, gameProfile);
 
                     initUUIDMethod.invoke(loginListener); // LoginListener#initUUID
