@@ -10,3 +10,18 @@ disconnect:
   # The disconnect message Geyser users should get when connecting
   # to the server with the correct key but not with the correct data format
   invalid-arguments-length: Expected {0} arguments, got {1}. Is Geyser up-to-date?
+
+# Configuration for the /linkaccount and /unlinkaccount commands
+player-link:
+  # Whether to enable the linking system. Turning this off will prevent
+  # players from using the linking feature even if they are already linked.
+  enable: true
+  # Whether to allow the use of /linkaccount and /unlinkaccount
+  # You can also use a permissions manager and the floodgate.unlinkaccount
+  # and floodgate.unlinkaccount permissions
+  # Note that this setting will not stop existing linked players from
+  # using link features. Use the "enable" setting above for that.
+  allow-linking: true
+  # The amount of time until a link code expires in seconds
+  # 300 = 5 minutes
+  link-code-timeout: 300
