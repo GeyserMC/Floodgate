@@ -1,9 +1,6 @@
 package org.geysermc.floodgate;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NonNull;
+import lombok.*;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.EncryptionUtil;
 
@@ -44,6 +41,7 @@ public class HandshakeHandler {
             }
 
             FloodgatePlayer player = new FloodgatePlayer(bedrockData);
+            // AbstractFloodgateAPI.players.put(player.getBedrockId(), player);
             AbstractFloodgateAPI.players.put(player.getJavaUniqueId(), player);
             return new HandshakeResult(ResultType.SUCCESS, data, bedrockData, player);
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
@@ -53,7 +51,7 @@ public class HandshakeHandler {
     }
 
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
-    @Getter
+    @Getter @ToString
     public static class HandshakeResult {
         private ResultType resultType;
         private String[] handshakeData;

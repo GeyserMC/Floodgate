@@ -1,0 +1,1 @@
+{"id": "floodgate", "name": "floodgate-velocity", "version": "1.0-SNAPSHOT", "description": "Allows Bedrock players to join Java edition servers while keeping online mode", "url": "https://github.com/GeyserMC/Floodgate/", "authors": ["GeyserMC"], "main": "org.geysermc.floodgate.VelocityPlugin"}

@@ -1,0 +1,9 @@
+org/geysermc/floodgate/BukkitPlugin.class
+org/geysermc/floodgate/injector/CustomList.class
+org/geysermc/floodgate/injector/BukkitInjector$2$1.class
+org/geysermc/floodgate/injector/BukkitInjector$2.class
+org/geysermc/floodgate/PacketHandler$1.class
+org/geysermc/floodgate/injector/BukkitInjector.class
+org/geysermc/floodgate/injector/BukkitInjector$1.class
+org/geysermc/floodgate/FloodgateAPI.class
+org/geysermc/floodgate/PacketHandler.class

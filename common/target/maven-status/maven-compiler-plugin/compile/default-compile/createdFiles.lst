@@ -1,0 +1,12 @@
+org/geysermc/floodgate/HandshakeHandler$ResultType.class
+org/geysermc/floodgate/util/ReflectionUtil.class
+org/geysermc/floodgate/LinkRequest.class
+org/geysermc/floodgate/FloodgateConfig$DisconnectMessages.class
+org/geysermc/floodgate/FloodgateConfig$PlayerLinkConfig.class
+org/geysermc/floodgate/HandshakeHandler$HandshakeResult.class
+org/geysermc/floodgate/LinkedPlayer.class
+org/geysermc/floodgate/FloodgatePlayer.class
+org/geysermc/floodgate/AbstractFloodgateAPI.class
+org/geysermc/floodgate/HandshakeHandler.class
+org/geysermc/floodgate/PlayerLink.class
+org/geysermc/floodgate/FloodgateConfig.class

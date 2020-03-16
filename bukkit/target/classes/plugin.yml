@@ -1,0 +1,24 @@
+name: floodgate-bukkit
+description: Allows Bedrock players to join Java edition servers while keeping online mode
+version: 1.0-SNAPSHOT
+author: GeyserMC
+website: https://github.com/GeyserMC/Floodgate/floodgate-bukkit/
+main: org.geysermc.floodgate.BukkitPlugin
+commands:
+    linkaccount:
+        description: Link your Java and Bedrock accounts
+        usage: /linkaccount [code]
+        permission: floodgate.linkaccount
+        permission-message: You don't have the floodgate.linkaccount permission.
+    unlinkaccount:
+        description: Unlink your Java account from your Bedrock account
+        usage: /unlinkaccount
+        permission: floodgate.unlinkaccount
+        permission-message: You don't have the floodgate.unlinkaccount permission.
+permissions:
+    floodgate.linkaccount:
+        description: Allows players to link their Bedrock and Java accounts
+        default: true
+    floodgate.unlinkaccount:
+        description: Allows players to unlink their Bedrock and Java accounts
+        default: true

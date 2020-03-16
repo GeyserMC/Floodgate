@@ -1,0 +1,10 @@
+org/geysermc/floodgate/BungeeDebugger$1.class
+org/geysermc/floodgate/BungeePlugin.class
+org/geysermc/floodgate/BungeePlugin$1.class
+org/geysermc/floodgate/BungeeDebugger$BungeeInPacketHandler.class
+org/geysermc/floodgate/BungeeDebugger$CustomVarint21LengthFieldPrepender.class
+org/geysermc/floodgate/FloodgateAPI.class
+org/geysermc/floodgate/BungeeDebugger.class
+org/geysermc/floodgate/BungeeDebugger$BungeeChannelInitializer.class
+org/geysermc/floodgate/BungeeDebugger$BungeeOutPacketHandler.class
+org/geysermc/floodgate/BungeeFloodgateConfig.class

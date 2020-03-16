@@ -1,0 +1,5 @@
+name: floodgate-bungee
+description: Allows Bedrock players to join Java edition servers while keeping online mode
+version: 1.0-SNAPSHOT
+author: GeyserMC
+main: org.geysermc.floodgate.BungeePlugin

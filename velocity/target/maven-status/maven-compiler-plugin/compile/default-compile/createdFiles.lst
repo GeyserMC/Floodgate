@@ -1,0 +1,5 @@
+org/geysermc/floodgate/VelocityPlugin.class
+org/geysermc/floodgate/VelocityFloodgateConfig.class
+org/geysermc/floodgate/injector/VelocityInjector.class
+org/geysermc/floodgate/FloodgateAPI.class
+org/geysermc/floodgate/VelocityPlugin$1.class

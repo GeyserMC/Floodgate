@@ -26,6 +26,12 @@ public class FloodgateConfig {
     @JsonProperty(value = "disconnect")
     private DisconnectMessages messages;
 
+    @JsonProperty(value = "player-link")
+    private PlayerLinkConfig playerLink;
+
+    @JsonProperty
+    private boolean debug;
+
     @JsonIgnore
     PrivateKey privateKey = null;
 
@@ -35,6 +41,18 @@ public class FloodgateConfig {
         private String invalidKey;
         @JsonProperty("invalid-arguments-length")
         private String invalidArgumentsLength;
+    }
+
+    @Getter
+    public static class PlayerLinkConfig {
+        @JsonProperty("enable")
+        @Getter
+        private boolean enabled;
+        @JsonProperty("allow-linking")
+        @Getter
+        private boolean allowLinking;
+        @JsonProperty("link-code-timeout")
+        private long linkCodeTimeout;
     }
 
     public static FloodgateConfig load(Logger logger, Path configPath) {
@@ -93,6 +111,9 @@ public class FloodgateConfig {
         } catch (IOException | InvalidKeySpecException | NoSuchAlgorithmException e) {
             logger.log(Level.SEVERE, "Error while reading private key", e);
         }
+
+        PlayerLink.load(configPath, config);
+
         return config;
     }
 }

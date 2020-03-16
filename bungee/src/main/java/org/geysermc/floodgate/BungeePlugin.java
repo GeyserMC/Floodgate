@@ -25,6 +25,7 @@ public class BungeePlugin extends Plugin implements Listener {
     private static Field extraHandshakeData;
 
     @Getter private BungeeFloodgateConfig config;
+    private BungeeDebugger debugger;
     private HandshakeHandler handshakeHandler;
 
     @Override
@@ -40,6 +41,16 @@ public class BungeePlugin extends Plugin implements Listener {
     @Override
     public void onEnable() {
         getProxy().getPluginManager().registerListener(this, this);
+        if (config.isDebug()) {
+            debugger = new BungeeDebugger();
+        }
+    }
+
+    @Override
+    public void onDisable() {
+        if (config.isDebug()) {
+            getLogger().warning("Please note that it is not possible to reload this plugin when debug mode is enabled. At least for now");
+        }
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -76,32 +87,32 @@ public class BungeePlugin extends Plugin implements Listener {
                     break;
             }
 
-            // only continue when SUCCESS
             if (result.getResultType() != ResultType.SUCCESS) {
+                // only continue when SUCCESS
                 event.completeIntent(this);
                 return;
             }
 
             FloodgatePlayer player = result.getFloodgatePlayer();
-            FloodgateAPI.addEncryptedData(player.getJavaUniqueId(), result.getHandshakeData()[2] + '\0' + result.getHandshakeData()[3]);
+            FloodgateAPI.addEncryptedData(player.getBedrockId(), result.getHandshakeData()[2] + '\0' + result.getHandshakeData()[3]);
 
             event.getConnection().setOnlineMode(false);
-            event.getConnection().setUniqueId(player.getJavaUniqueId());
+            event.getConnection().setUniqueId(player.getBedrockId());
 
             ReflectionUtil.setValue(event.getConnection(), "name", player.getJavaUsername());
             Object channelWrapper = ReflectionUtil.getValue(event.getConnection(), "ch");
             SocketAddress remoteAddress = ReflectionUtil.getCastedValue(channelWrapper, "remoteAddress", SocketAddress.class);
             if (!(remoteAddress instanceof InetSocketAddress)) {
                 getLogger().info(
-                        "Player " + player.getUsername() + " doesn't use a InetSocketAddress. " +
+                        "Player " + player.getUsername() + " doesn't use an InetSocketAddress. " +
                         "It uses " + remoteAddress.getClass().getSimpleName() + ". Ignoring the player, I guess."
                 );
-                return;
+            } else {
+                ReflectionUtil.setValue(
+                        channelWrapper, "remoteAddress",
+                        new InetSocketAddress(result.getBedrockData().getIp(), ((InetSocketAddress) remoteAddress).getPort())
+                );
             }
-            ReflectionUtil.setValue(
-                    channelWrapper, "remoteAddress",
-                    new InetSocketAddress(result.getBedrockData().getIp(), ((InetSocketAddress) remoteAddress).getPort())
-            );
             event.completeIntent(this);
         });
     }
@@ -110,14 +121,15 @@ public class BungeePlugin extends Plugin implements Listener {
     public void onPlayerDisconnect(PlayerDisconnectEvent event) {
         FloodgatePlayer player = FloodgateAPI.getPlayerByConnection(event.getPlayer().getPendingConnection());
         if (player != null) {
-            FloodgateAPI.players.remove(player.getJavaUniqueId());
-            FloodgateAPI.removeEncryptedData(player.getJavaUniqueId());
+            FloodgateAPI.players.remove(player.getBedrockId());
+            FloodgateAPI.removeEncryptedData(player.getBedrockId());
             System.out.println("Removed " + player.getUsername() + " " + event.getPlayer().getUniqueId());
         }
     }
 
     static {
-        Class<?> initial_handler = ReflectionUtil.getClass("net.md_5.bungee.connection.InitialHandler");
+        ReflectionUtil.setPrefix("net.md_5.bungee");
+        Class<?> initial_handler = ReflectionUtil.getPrefixedClass("connection.InitialHandler");
         extraHandshakeData = ReflectionUtil.getField(initial_handler, "extraDataInHandshake");
     }
 }

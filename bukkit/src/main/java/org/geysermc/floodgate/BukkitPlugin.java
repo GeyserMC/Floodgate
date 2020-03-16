@@ -4,6 +4,9 @@ import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.injector.BukkitInjector;
 import org.geysermc.floodgate.util.ReflectionUtil;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.logging.Level;
 
@@ -42,5 +45,20 @@ public class BukkitPlugin extends JavaPlugin {
         } catch (Exception e) {
             getLogger().log(Level.SEVERE, "Failed to remove the injection!", e);
         }
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender,
+                             Command command,
+                             String label,
+                             String[] args) {
+        if (command.getName().equalsIgnoreCase("linkaccount")) {
+            sender.sendMessage(PlayerLink.linkPlayer(args, ((Player)sender).getUniqueId(), sender.getName()));
+            return true;
+        } else if (command.getName().equalsIgnoreCase("unlinkaccount")) {
+          sender.sendMessage(PlayerLink.unlinkPlayer(((Player)sender).getUniqueId()));
+          return true;
+        }
+        return false;
     }
 }

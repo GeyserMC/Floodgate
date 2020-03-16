@@ -99,14 +99,15 @@ public class VelocityPlugin {
                     return;
                 case INVALID_DATA_LENGTH:
                     playersToKick.put(event.getConnection(), config.getMessages().getInvalidArgumentsLength());
+                    return;
                 default:
                     return;
             }
 
             FloodgatePlayer player = result.getFloodgatePlayer();
-            FloodgateAPI.addEncryptedData(player.getJavaUniqueId(), result.getHandshakeData()[2] + '\0' + result.getHandshakeData()[3]);
+            FloodgateAPI.addEncryptedData(player.getBedrockId(), result.getHandshakeData()[2] + '\0' + result.getHandshakeData()[3]);
             playerCache.put(event.getConnection(), player);
-            logger.info("Added " + player.getJavaUsername() + " " + player.getJavaUniqueId());
+            logger.info("Added " + player.getJavaUsername() + " " + player.getBedrockId());
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -158,7 +159,7 @@ public class VelocityPlugin {
         FloodgatePlayer player = playerCache.getIfPresent(event.getConnection());
         if (player != null) {
             playerCache.invalidate(event.getConnection());
-            event.setGameProfile(new GameProfile(player.getJavaUniqueId(), player.getJavaUsername(), new ArrayList<>()));
+            event.setGameProfile(new GameProfile(player.getBedrockId(), player.getJavaUsername(), new ArrayList<>()));
         }
     }
 
