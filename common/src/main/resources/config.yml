@@ -5,7 +5,7 @@ key-file-name: key.pem
 
 # Floodgate appends a prefix to bedrock usernames to avoid conflicts
 # However, certain conflicts can cause issues with some plugins so this prefix is configurable using the property below
-username-prefix: *
+username-prefix: "*"
 
 disconnect:
   # The disconnect message Geyser users should get when connecting
