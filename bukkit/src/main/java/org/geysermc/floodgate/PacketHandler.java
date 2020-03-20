@@ -127,7 +127,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     static {
-        handshakeHandler = new HandshakeHandler(plugin.getConfiguration().getPrivateKey(), false);
+        handshakeHandler = new HandshakeHandler(plugin.getConfiguration().getPrivateKey(), false, plugin.getConfiguration().getUsernamePrefix());
 
         networkManagerClass = getPrefixedClass("NetworkManager");
         loginStartPacketClass = getPrefixedClass("PacketLoginInStart");
