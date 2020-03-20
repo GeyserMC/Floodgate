@@ -40,7 +40,7 @@ public class FloodgatePlayer {
     FloodgatePlayer(BedrockData data, String prefix) {
         version = data.getVersion();
         username = data.getUsername();
-        javaUsername = prefix + data.getUsername().substring(0, Math.min(data.getUsername().length(), 15));
+        javaUsername = prefix + data.getUsername().substring(0, Math.min(data.getUsername().length(), 16 - prefix.length()));
         xuid = data.getXuid();
         deviceOS = DeviceOS.getById(data.getDeviceId());
         languageCode = data.getLanguageCode();
