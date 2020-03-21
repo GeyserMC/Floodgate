@@ -3,6 +3,11 @@
 # The public key should be used for the Geyser(s) and the private key for the Floodgate(s)
 key-file-name: key.pem
 
+# Floodgate appends a prefix to bedrock usernames to avoid conflicts
+# However, certain conflicts can cause issues with some plugins so this prefix is configurable using the property below
+# It is recommended to use a prefix that does not contain alphanumerical to avoid the possibility of duplicate usernames.
+username-prefix: "*"
+
 disconnect:
   # The disconnect message Geyser users should get when connecting
   # to the server with an invalid key

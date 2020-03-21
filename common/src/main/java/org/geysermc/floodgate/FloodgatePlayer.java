@@ -47,15 +47,16 @@ public class FloodgatePlayer {
      */
     private LinkedPlayer linkedPlayer;
 
-    FloodgatePlayer(BedrockData data) {
+    FloodgatePlayer(BedrockData data, String prefix) {
         xuid = data.getXuid();
         version = data.getVersion();
         username = data.getUsername();
+        if (prefix.length() < 1) prefix = "*";
+        javaUsername = prefix + data.getUsername().substring(0, Math.min(data.getUsername().length(), 16 - prefix.length()));
         deviceOS = DeviceOS.getById(data.getDeviceId());
         languageCode = data.getLanguageCode();
         inputMode = data.getInputMode();
         javaUniqueId = AbstractFloodgateAPI.createJavaPlayerId(Long.parseLong(data.getXuid()));
-        javaUsername = "*" + data.getUsername().substring(0, Math.min(data.getUsername().length(), 15));
         if (PlayerLink.isEnabledAndAllowed()) {
             linkedPlayer = PlayerLink.getInstance().getLinkedPlayer(javaUniqueId); //todo change to bedrockId once fixed
         }

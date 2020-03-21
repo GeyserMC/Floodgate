@@ -78,7 +78,7 @@ public class VelocityPlugin {
         }
 
         config = FloodgateConfig.load(logger, dataFolder.toPath().resolve("config.yml"), VelocityFloodgateConfig.class);
-        handshakeHandler = new HandshakeHandler(config.getPrivateKey(), true);
+        handshakeHandler = new HandshakeHandler(config.getPrivateKey(), true, config.getUsernamePrefix());
     }
 
     @Subscribe

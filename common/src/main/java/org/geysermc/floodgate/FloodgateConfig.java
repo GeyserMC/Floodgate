@@ -25,6 +25,8 @@ public class FloodgateConfig {
     private String keyFileName;
     @JsonProperty(value = "disconnect")
     private DisconnectMessages messages;
+    @JsonProperty(value = "username-prefix")
+    private String usernamePrefix;
 
     @JsonProperty(value = "player-link")
     private PlayerLinkConfig playerLink;

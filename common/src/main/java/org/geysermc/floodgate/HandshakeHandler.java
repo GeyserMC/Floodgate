@@ -17,10 +17,12 @@ import static org.geysermc.floodgate.util.BedrockData.FLOODGATE_IDENTIFIER;
 public class HandshakeHandler {
     private PrivateKey privateKey;
     private boolean bungee;
+    private String usernamePrefix;
 
-    public HandshakeHandler(@NonNull PrivateKey privateKey, boolean bungee) {
+    public HandshakeHandler(@NonNull PrivateKey privateKey, boolean bungee, String usernamePrefix) {
         this.privateKey = privateKey;
         this.bungee = bungee;
+        this.usernamePrefix = usernamePrefix;
     }
 
     public HandshakeResult handle(@NonNull String handshakeData) {
@@ -40,7 +42,7 @@ public class HandshakeHandler {
                 return ResultType.INVALID_DATA_LENGTH.getCachedResult();
             }
 
-            FloodgatePlayer player = new FloodgatePlayer(bedrockData);
+            FloodgatePlayer player = new FloodgatePlayer(bedrockData, usernamePrefix);
             AbstractFloodgateAPI.players.put(player.getCorrectUniqueId(), player);
             return new HandshakeResult(ResultType.SUCCESS, data, bedrockData, player);
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {

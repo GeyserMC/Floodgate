@@ -35,7 +35,7 @@ public class BungeePlugin extends Plugin implements Listener {
             getDataFolder().mkdir();
         }
         config = FloodgateConfig.load(getLogger(), getDataFolder().toPath().resolve("config.yml"), BungeeFloodgateConfig.class);
-        handshakeHandler = new HandshakeHandler(config.getPrivateKey(), true);
+        handshakeHandler = new HandshakeHandler(config.getPrivateKey(), true, config.getUsernamePrefix());
     }
 
     @Override
