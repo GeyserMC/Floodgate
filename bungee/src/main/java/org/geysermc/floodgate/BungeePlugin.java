@@ -94,10 +94,10 @@ public class BungeePlugin extends Plugin implements Listener {
             }
 
             FloodgatePlayer player = result.getFloodgatePlayer();
-            FloodgateAPI.addEncryptedData(player.getBedrockId(), result.getHandshakeData()[2] + '\0' + result.getHandshakeData()[3]);
+            FloodgateAPI.addEncryptedData(player.getCorrectUniqueId(), result.getHandshakeData()[2] + '\0' + result.getHandshakeData()[3]);
 
             event.getConnection().setOnlineMode(false);
-            event.getConnection().setUniqueId(player.getBedrockId());
+            event.getConnection().setUniqueId(player.getCorrectUniqueId());
 
             ReflectionUtil.setValue(event.getConnection(), "name", player.getJavaUsername());
             Object channelWrapper = ReflectionUtil.getValue(event.getConnection(), "ch");
@@ -121,8 +121,8 @@ public class BungeePlugin extends Plugin implements Listener {
     public void onPlayerDisconnect(PlayerDisconnectEvent event) {
         FloodgatePlayer player = FloodgateAPI.getPlayerByConnection(event.getPlayer().getPendingConnection());
         if (player != null) {
-            FloodgateAPI.players.remove(player.getBedrockId());
-            FloodgateAPI.removeEncryptedData(player.getBedrockId());
+            FloodgateAPI.players.remove(player.getCorrectUniqueId());
+            FloodgateAPI.removeEncryptedData(player.getCorrectUniqueId());
             System.out.println("Removed " + player.getUsername() + " " + event.getPlayer().getUniqueId());
         }
     }

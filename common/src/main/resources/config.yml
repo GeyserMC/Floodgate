@@ -11,17 +11,18 @@ disconnect:
   # to the server with the correct key but not with the correct data format
   invalid-arguments-length: Expected {0} arguments, got {1}. Is Geyser up-to-date?
 
-# Configuration for the /linkaccount and /unlinkaccount commands
+# Configuration for player linking
 player-link:
   # Whether to enable the linking system. Turning this off will prevent
   # players from using the linking feature even if they are already linked.
   enable: true
+  # The type of storage system you want to use
+  # Currently implemented: SQLite
+  type: sqlite
   # Whether to allow the use of /linkaccount and /unlinkaccount
-  # You can also use a permissions manager and the floodgate.unlinkaccount
-  # and floodgate.unlinkaccount permissions
-  # Note that this setting will not stop existing linked players from
-  # using link features. Use the "enable" setting above for that.
+  # You can also use allow specific people to use the commands using the
+  # permissions floodgate.linkaccount and floodgate.unlinkaccount.
+  # This is only for linking, already connected people will stay connected
   allow-linking: true
   # The amount of time until a link code expires in seconds
-  # 300 = 5 minutes
   link-code-timeout: 300

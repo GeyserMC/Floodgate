@@ -2,8 +2,8 @@ package org.geysermc.floodgate;
 
 import lombok.Getter;
 
-import java.util.UUID;
 import java.time.Instant;
+import java.util.UUID;
 
 @Getter
 public class LinkRequest {
@@ -38,7 +38,6 @@ public class LinkRequest {
 
     public boolean isExpired() {
       long timePassed = Instant.now().getEpochSecond() - unixTime;
-      // System.out.println("Time passed: " + timePassed);
-      return timePassed > PlayerLink.linkCodeTimeout;
+      return timePassed > PlayerLink.getVerifyLinkTimeout();
     }
 }

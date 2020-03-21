@@ -46,10 +46,10 @@ public class FloodgateConfig {
     @Getter
     public static class PlayerLinkConfig {
         @JsonProperty("enable")
-        @Getter
         private boolean enabled;
+        @JsonProperty("type")
+        private String type;
         @JsonProperty("allow-linking")
-        @Getter
         private boolean allowLinking;
         @JsonProperty("link-code-timeout")
         private long linkCodeTimeout;
@@ -111,9 +111,6 @@ public class FloodgateConfig {
         } catch (IOException | InvalidKeySpecException | NoSuchAlgorithmException e) {
             logger.log(Level.SEVERE, "Error while reading private key", e);
         }
-
-        PlayerLink.load(configPath, config);
-
         return config;
     }
 }

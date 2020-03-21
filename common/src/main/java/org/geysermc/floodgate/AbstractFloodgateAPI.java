@@ -17,7 +17,7 @@ abstract class AbstractFloodgateAPI {
     }
 
     /**
-     * Method to determine if the given player is a Bedrock player
+     * Method to determine if the given online player is a Bedrock player
      * @param uuid The uuid of the player
      * @return true if the given player is a Bedrock player
      */
@@ -26,14 +26,14 @@ abstract class AbstractFloodgateAPI {
         return players.containsKey(uuid);
     }
 
-    /**
-     * Method to determine if the given player is a Java player
-     * @param uuid The uuid of the player
-     * @return true if the given player is a Bedrock player
-     */
-    /* public static boolean isJavaPlayer(UUID uuid) {
-        return uuid.version() == 4;
-    } */
+//    /**
+//     * Method to determine if the given player is a Java player
+//     * @param uuid The uuid of the player
+//     * @return true if the given player is a Bedrock player
+//     */
+//    public static boolean isJavaPlayer(UUID uuid) {
+//        return uuid.version() == 4;
+//    }
 
     public static UUID createJavaPlayerId(long xuid) {
         return new UUID(0, xuid);

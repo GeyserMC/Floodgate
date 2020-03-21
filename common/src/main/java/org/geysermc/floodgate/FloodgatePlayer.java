@@ -17,53 +17,55 @@ public class FloodgatePlayer {
      */
     private String username;
     /**
-     * Bedrock username with > identifier
+     * Bedrock username with the given identifier<br>
+     * This won't be null if it is an {@link LinkedPlayer LinkedPlayer}, but it isn't used
      */
     private String javaUsername;
     /**
-     * The Unique Identifier of the Bedrock client, whether there is a linked Java account or not.
+     * The Unique Identifier used at the server to identify the bedrock client.<br>
+     * Note that this field is only used when the player is not an {@link LinkedPlayer LinkedPlayer}
      */
-    private UUID trueBedrockId;
+    private UUID javaUniqueId;
     /**
-     * The Unique Identifier of the Bedrock client, or the UUID of the linked Java account.
+     * The Xbox Unique Identifier
      */
-    private UUID bedrockId;
-    /**
-     * The Java UUID used to identify the bedrock client
-     */
-    private UUID javaUniqueId; ///////////////////////////////////////////////////////////////////////
+    private String xuid;
     /**
      * The operation system of the bedrock client
      */
-    private String xuid; //////////////////////////////////////////////////
     private DeviceOS deviceOS;
     /**
      * The language code of the bedrock client
      */
     private String languageCode;
     /**
+     * The InputMode of the bedrock client
+     */
+    private int inputMode;
+    /**
      * The LinkedPlayer object if the player is linked to Java account, or otherwise null.
      */
-    private LinkedPlayer linkedplayer;
+    private LinkedPlayer linkedPlayer;
 
     FloodgatePlayer(BedrockData data) {
-        xuid = data.getXuid(); //////////////////////////////////////////////////////////////////////////
+        xuid = data.getXuid();
         version = data.getVersion();
         username = data.getUsername();
         deviceOS = DeviceOS.getById(data.getDeviceId());
         languageCode = data.getLanguageCode();
-        trueBedrockId = AbstractFloodgateAPI.createJavaPlayerId(Long.parseLong(data.getXuid())); // data.getBedrockId(); ////////////////////////////////////////////
-        if (PlayerLink.enabled && PlayerLink.isLinkedPlayer(trueBedrockId)) { // If the account is linked to a Java account
-            linkedplayer = PlayerLink.getLinkedPlayer(trueBedrockId);
-            javaUsername = linkedplayer.javaUsername;
-            bedrockId = linkedplayer.javaUniqueId;
-            javaUniqueId = bedrockId;
-        } else {
-            javaUniqueId = AbstractFloodgateAPI.createJavaPlayerId(Long.parseLong(data.getXuid())); ////////////////////////////////////////////
-            linkedplayer = null;
-            javaUsername = "*" + data.getUsername().substring(0, Math.min(data.getUsername().length(), 15));
-            bedrockId = trueBedrockId;
+        inputMode = data.getInputMode();
+        javaUniqueId = AbstractFloodgateAPI.createJavaPlayerId(Long.parseLong(data.getXuid()));
+        javaUsername = "*" + data.getUsername().substring(0, Math.min(data.getUsername().length(), 15));
+        if (PlayerLink.isEnabledAndAllowed()) {
+            linkedPlayer = PlayerLink.getInstance().getLinkedPlayer(javaUniqueId); //todo change to bedrockId once fixed
         }
+    }
 
+    public UUID getCorrectUniqueId() {
+        return linkedPlayer != null ? linkedPlayer.javaUniqueId : javaUniqueId;
+    }
+
+    public String getCorrectUsername() {
+        return linkedPlayer != null ? linkedPlayer.javaUsername : javaUsername;
     }
 }

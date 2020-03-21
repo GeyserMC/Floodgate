@@ -20,9 +20,8 @@ public class LinkedPlayer {
     public UUID bedrockId;
 
     LinkedPlayer(String username, UUID uuid, UUID bedrockId) {
-        bedrockId = bedrockId;
-
-        javaUniqueId = uuid;
-        javaUsername = username;
+        this.bedrockId = bedrockId;
+        this.javaUniqueId = uuid;
+        this.javaUsername = username;
     }
 }
