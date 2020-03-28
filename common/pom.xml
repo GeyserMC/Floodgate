@@ -11,6 +11,13 @@
 
     <artifactId>floodgate-common</artifactId>
 
+    <repositories>
+        <repository>
+            <id>nukkitx-repo</id>
+            <url>https://repo.nukkitx.com/maven-snapshots</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>org.geysermc</groupId>
