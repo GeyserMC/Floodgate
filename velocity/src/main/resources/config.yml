@@ -3,6 +3,11 @@
 # The public key should be used for the Geyser(s) and the private key for the Floodgate(s)
 key-file-name: key.pem
 
+# Floodgate prepends a prefix to bedrock usernames to avoid conflicts
+# However, certain conflicts can cause issues with some plugins so this prefix is configurable using the property below
+# It is recommended to use a prefix that does not contain alphanumerical to avoid the possibility of duplicate usernames.
+username-prefix: "*"
+
 # Should Velocity send the bedrock player data to the servers it is connecting to?
 # This requires Floodgate to be installed on the servers.
 # You'll get kicked if you don't use the plugin. The default value is false because of it
