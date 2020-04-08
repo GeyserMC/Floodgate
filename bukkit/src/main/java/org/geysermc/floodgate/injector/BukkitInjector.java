@@ -84,7 +84,7 @@ public class BukkitInjector {
 
     public static boolean removeInjection() throws Exception {
         if (!isInjected()) return true;
-        for (ChannelFuture future : injectedClients) {
+        for (ChannelFuture future : new ArrayList<>(injectedClients)) {
             removeInjectedClient(future, null);
         }
 

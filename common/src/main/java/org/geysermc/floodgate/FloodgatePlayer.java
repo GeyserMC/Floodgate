@@ -51,7 +51,6 @@ public class FloodgatePlayer {
         xuid = data.getXuid();
         version = data.getVersion();
         username = data.getUsername();
-        if (prefix.length() < 1) prefix = "*";
         javaUsername = prefix + data.getUsername().substring(0, Math.min(data.getUsername().length(), 16 - prefix.length()));
         deviceOS = DeviceOS.getById(data.getDeviceId());
         languageCode = data.getLanguageCode();
