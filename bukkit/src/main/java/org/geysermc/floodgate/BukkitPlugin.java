@@ -71,6 +71,7 @@ public class BukkitPlugin extends JavaPlugin {
                 if (playerLink.isLinkedPlayer(uuid)) {
                     sendFormat(sender, "&cYour account is already linked!");
                     sendFormat(sender, "&cIf you want to link to a different account, run &6/unlinkaccount&c and try it again");
+                    return true;
                 }
                 // when the player is a Java player
                 if (!AbstractFloodgateAPI.isBedrockPlayer(uuid)) {
@@ -92,7 +93,7 @@ public class BukkitPlugin extends JavaPlugin {
                 String javaUsername = args[0];
                 String code = args[1];
                 LinkRequest request = activeLinkRequests.getOrDefault(javaUsername, null);
-                if (request != null) {
+                if (request != null && request.checkGamerTag(AbstractFloodgateAPI.getPlayer(uuid))) {
                     if (request.linkCode.equals(code)) {
                         activeLinkRequests.remove(javaUsername); // Delete the request, whether it has expired or is successful
                         if (request.isExpired()) {
@@ -122,6 +123,8 @@ public class BukkitPlugin extends JavaPlugin {
                         "&aUnlink successful!" :
                         "&cAn error occurred while unlinking player! Please check the console"
                 );
+            } else {
+                sendFormat(sender, "&cLinking is not enabled on this server");
             }
         }
         return true;

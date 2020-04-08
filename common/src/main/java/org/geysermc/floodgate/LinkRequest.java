@@ -40,4 +40,12 @@ public class LinkRequest {
       long timePassed = Instant.now().getEpochSecond() - unixTime;
       return timePassed > PlayerLink.getVerifyLinkTimeout();
     }
+
+    public boolean checkGamerTag(FloodgatePlayer player) {
+      if (bedrockUsername.equals(player.username) || bedrockUsername.equals(player.javaUsername)) { // Accept the request whether the prefix was used or not
+        return true;
+      } else {
+        return false;
+      }
+    }
 }

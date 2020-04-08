@@ -15,12 +15,12 @@ public class FloodgatePlayer {
     /**
      * Bedrock username (full version)
      */
-    private String username;
+    public String username;
     /**
      * Bedrock username with the given identifier<br>
      * This won't be null if it is an {@link LinkedPlayer LinkedPlayer}, but it isn't used
      */
-    private String javaUsername;
+    public String javaUsername;
     /**
      * The Unique Identifier used at the server to identify the bedrock client.<br>
      * Note that this field is only used when the player is not an {@link LinkedPlayer LinkedPlayer}

@@ -15,7 +15,7 @@ public final class SQLiteImpl extends PlayerLink {
     @Override
     public void load(Path dataFolder) {
         Path databasePath = dataFolder.resolve("linked-players.db");
-        getLogger().info("Loading linked player database...");
+        getLogger().info("[floodgate] Loading linked player database...");
         try {
             Class.forName("org.sqlite.JDBC");
 
