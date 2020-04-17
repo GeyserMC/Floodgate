@@ -5,6 +5,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.injector.BukkitInjector;
 import org.geysermc.floodgate.link.SQLiteImpl;
@@ -54,6 +56,15 @@ public class BukkitPlugin extends JavaPlugin {
             if (!BukkitInjector.removeInjection()) getLogger().severe("Failed to remove the injection!");
         } catch (Exception e) {
             getLogger().log(Level.SEVERE, "Failed to remove the injection!", e);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        FloodgatePlayer player = FloodgateAPI.getPlayer(event.getPlayer());
+        if (player != null) {
+            FloodgateAPI.players.remove(player.getCorrectUniqueId());
+            System.out.println("Removed " + player.getUsername() + " " + event.getPlayer().getUniqueId());
         }
     }
 
