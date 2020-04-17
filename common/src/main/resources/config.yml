@@ -20,7 +20,7 @@ disconnect:
 player-link:
   # Whether to enable the linking system. Turning this off will prevent
   # players from using the linking feature even if they are already linked.
-  enable: true
+  enable: false
   # The type of storage system you want to use
   # Currently implemented: SQLite
   type: sqlite
