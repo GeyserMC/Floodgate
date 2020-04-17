@@ -42,7 +42,7 @@ public class LinkRequest {
     }
 
     public boolean checkGamerTag(FloodgatePlayer player) {
-      if (bedrockUsername.equals(player.username) || bedrockUsername.equals(player.javaUsername)) { // Accept the request whether the prefix was used or not
+      if (bedrockUsername.equals(player.getUsername()) || bedrockUsername.equals(player.getJavaUsername())) { // Accept the request whether the prefix was used or not
         return true;
       } else {
         return false;

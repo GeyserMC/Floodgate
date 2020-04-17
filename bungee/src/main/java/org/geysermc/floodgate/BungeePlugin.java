@@ -25,6 +25,7 @@ public class BungeePlugin extends Plugin implements Listener {
     private static Field extraHandshakeData;
 
     @Getter private BungeeFloodgateConfig config;
+    @Getter private PlayerLink playerLink;
     private BungeeDebugger debugger;
     private HandshakeHandler handshakeHandler;
 
@@ -35,6 +36,9 @@ public class BungeePlugin extends Plugin implements Listener {
             getDataFolder().mkdir();
         }
         config = FloodgateConfig.load(getLogger(), getDataFolder().toPath().resolve("config.yml"), BungeeFloodgateConfig.class);
+        playerLink = PlayerLink.initialize(getLogger(), getDataFolder().toPath(), config);
+        LinkAccountCommand.init(playerLink);
+        UnlinkAccountCommand.init(playerLink);
         handshakeHandler = new HandshakeHandler(config.getPrivateKey(), true, config.getUsernamePrefix(), config.isReplaceSpaces());
     }
 
@@ -44,6 +48,8 @@ public class BungeePlugin extends Plugin implements Listener {
         if (config.isDebug()) {
             debugger = new BungeeDebugger();
         }
+        getProxy().getPluginManager().registerCommand(this, new LinkAccountCommand());
+        getProxy().getPluginManager().registerCommand(this, new UnlinkAccountCommand());
     }
 
     @Override
@@ -99,7 +105,7 @@ public class BungeePlugin extends Plugin implements Listener {
             event.getConnection().setOnlineMode(false);
             event.getConnection().setUniqueId(player.getCorrectUniqueId());
 
-            ReflectionUtil.setValue(event.getConnection(), "name", player.getJavaUsername());
+            ReflectionUtil.setValue(event.getConnection(), "name", player.getCorrectUsername());
             Object channelWrapper = ReflectionUtil.getValue(event.getConnection(), "ch");
             SocketAddress remoteAddress = ReflectionUtil.getCastedValue(channelWrapper, "remoteAddress", SocketAddress.class);
             if (!(remoteAddress instanceof InetSocketAddress)) {

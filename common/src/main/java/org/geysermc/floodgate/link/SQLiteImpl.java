@@ -15,7 +15,7 @@ public final class SQLiteImpl extends PlayerLink {
     @Override
     public void load(Path dataFolder) {
         Path databasePath = dataFolder.resolve("linked-players.db");
-        getLogger().info("[floodgate] Loading linked player database...");
+        getLogger().info("Loading Floodgate linked player database...");
         try {
             Class.forName("org.sqlite.JDBC");
 
@@ -43,7 +43,7 @@ public final class SQLiteImpl extends PlayerLink {
             String javaUsername = result.getString("javaUsername");
             UUID javaUniqueId = UUID.fromString(result.getString("javaUniqueId"));
             return createLinkedPlayer(javaUsername, javaUniqueId, bedrockId);
-        } catch (SQLException e) {
+        } catch (SQLException | NullPointerException e) {
             getLogger().log(Level.SEVERE, "Error while getting LinkedPlayer", e);
             return null;
         }
@@ -57,7 +57,7 @@ public final class SQLiteImpl extends PlayerLink {
             query.setString(2, bedrockId.toString());
             ResultSet result = query.executeQuery();
             return result.next();
-        } catch (SQLException e) {
+        } catch (SQLException | NullPointerException e) {
             getLogger().log(Level.SEVERE, "Error while checking if player is a LinkedPlayer", e);
             return false;
         }
@@ -72,7 +72,7 @@ public final class SQLiteImpl extends PlayerLink {
             query.setString(3, username);
             query.executeUpdate();
             return true;
-        } catch (SQLException e) {
+        } catch (SQLException | NullPointerException e) {
             getLogger().log(Level.SEVERE, "Error while linking player", e);
             return false;
         }
@@ -87,7 +87,7 @@ public final class SQLiteImpl extends PlayerLink {
                 query.setString(2, uuid.toString());
                 query.executeUpdate();
                 return true;
-            } catch (SQLException e) {
+            } catch (SQLException | NullPointerException e) {
                 getLogger().log(Level.SEVERE, "Error while unlinking player: ", e);
                 return false;
             }

@@ -15,12 +15,12 @@ public class FloodgatePlayer {
     /**
      * Bedrock username (full version)
      */
-    public String username;
+    private String username;
     /**
      * Bedrock username with the given identifier<br>
      * This won't be null if it is an {@link LinkedPlayer LinkedPlayer}, but it isn't used
      */
-    public String javaUsername;
+    private String javaUsername;
     /**
      * The Unique Identifier used at the server to identify the bedrock client.<br>
      * Note that this field is only used when the player is not an {@link LinkedPlayer LinkedPlayer}
@@ -55,11 +55,11 @@ public class FloodgatePlayer {
         if (replaceSpaces) {
             javaUsername = javaUsername.replaceAll(" ", "_");
         }
-        xuid = data.getXuid();
         deviceOS = DeviceOS.getById(data.getDeviceId());
         languageCode = data.getLanguageCode();
         inputMode = data.getInputMode();
         javaUniqueId = AbstractFloodgateAPI.createJavaPlayerId(Long.parseLong(data.getXuid()));
+        System.out.println(javaUniqueId.toString());
         if (PlayerLink.isEnabledAndAllowed()) {
             linkedPlayer = PlayerLink.getInstance().getLinkedPlayer(javaUniqueId); //todo change to bedrockId once fixed
         }

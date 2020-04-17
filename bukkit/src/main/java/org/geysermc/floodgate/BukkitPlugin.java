@@ -81,7 +81,7 @@ public class BukkitPlugin extends JavaPlugin {
             if (PlayerLink.isEnabledAndAllowed()) {
                 if (playerLink.isLinkedPlayer(uuid)) {
                     sendFormat(sender, "&cYour account is already linked!");
-                    sendFormat(sender, "&cIf you want to link to a different account, run &6/unlinkaccount&c and try it again");
+                    sendFormat(sender, "&cIf you want to link to a different account, run &6/unlinkaccount&c and try it again.");
                     return true;
                 }
                 // when the player is a Java player
@@ -94,6 +94,8 @@ public class BukkitPlugin extends JavaPlugin {
                     String bedrockUsername = args[0];
                     activeLinkRequests.put(username, new LinkRequest(username, uuid, code, bedrockUsername));
                     sendFormat(sender, "&aLog in as " + bedrockUsername + " on Bedrock and run &6/linkaccount " + username + " " + code);
+                    sendFormat(sender, "&cWarning: Any progress on your Bedrock account will not be carried over! Save any items in your inventory first.");
+                    sendFormat(sender, "&cIf you change your mind you can run &6/unlinkaccount&c to get your progess back.");
                     return true;
                 }
                 // when the player is a Bedrock player
@@ -112,30 +114,35 @@ public class BukkitPlugin extends JavaPlugin {
                             return true;
                         }
                         if (playerLink.linkPlayer(uuid, request.javaUniqueId, request.javaUsername)) {
-                            sendFormat(sender, "&aYou are successfully linked to " + request.javaUsername + "!");
+                            ((Player) sender).kickPlayer("You are successfully linked to " + request.javaUsername + "!\nIf you want to undo this run /unlinkaccount");
                             return true;
                         }
-                        sendFormat(sender, "&cAn error occurred while linking. Please check the console");
+                        sendFormat(sender, "&cAn error occurred while linking. Please check the console.");
                         return true;
                     }
-                    sendFormat(sender, "&cInvalid code! Please check your code or run the &6/linkaccount&c command again on your Java account");
+                    sendFormat(sender, "&cInvalid code! Please check your code or run the &6/linkaccount&c command again on your Java account.");
                     return true;
                 }
                 sendFormat(sender, "&cThis player has not requested an account link! Please log in on Java and request one with &6/linkaccount");
                 return true;
             }
-            sendFormat(sender, "&cLinking is not enabled on this server");
+            sendFormat(sender, "&cLinking is not enabled on this server.");
             return true;
         }
 
         if (command.getName().equalsIgnoreCase("unlinkaccount")) {
+            UUID uuid = ((Player) sender).getUniqueId();
+            if (!playerLink.isLinkedPlayer(uuid)) {
+                sendFormat(sender, "&cYour account isn't linked!");
+                return true;
+            }
             if (SQLiteImpl.isEnabledAndAllowed()) {
-                sendFormat(sender, playerLink.unlinkPlayer(((Player) sender).getUniqueId()) ?
+                sendFormat(sender, playerLink.unlinkPlayer(uuid) ?
                         "&aUnlink successful!" :
-                        "&cAn error occurred while unlinking player! Please check the console"
+                        "&cAn error occurred while unlinking player! Please check the console."
                 );
             } else {
-                sendFormat(sender, "&cLinking is not enabled on this server");
+                sendFormat(sender, "&cLinking is not enabled on this server.");
             }
         }
         return true;

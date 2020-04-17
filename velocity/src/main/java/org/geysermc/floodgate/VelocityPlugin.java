@@ -12,6 +12,7 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.proxy.InboundConnection;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.util.GameProfile;
+import com.velocitypowered.api.command.CommandManager;
 import lombok.Getter;
 import net.kyori.text.TextComponent;
 import org.geysermc.floodgate.HandshakeHandler.HandshakeResult;
@@ -31,6 +32,7 @@ import static org.geysermc.floodgate.util.ReflectionUtil.getPrefixedClass;
 
 public class VelocityPlugin {
     @Getter private VelocityFloodgateConfig config;
+    @Getter private PlayerLink playerLink;
     private HandshakeHandler handshakeHandler;
 
     private Set<InboundConnection> workingSet;
@@ -39,9 +41,10 @@ public class VelocityPlugin {
 
     private Logger logger;
     private boolean injectSucceed;
+    private CommandManager commandManager;
 
     @Inject
-    public VelocityPlugin(ProxyServer server, Logger logger) {
+    public VelocityPlugin(ProxyServer server, Logger logger, CommandManager commandManager) {
         // we're too late if we would do this in the init event
         injectSucceed = false;
         try {
@@ -61,6 +64,10 @@ public class VelocityPlugin {
                 .maximumSize(500)
                 .expireAfterAccess(50, TimeUnit.SECONDS)
                 .build();
+
+        this.commandManager = commandManager;
+        this.commandManager.register(new LinkAccountCommand(), "linkaccount");
+        this.commandManager.register(new UnlinkAccountCommand(), "unlinkaccount");
     }
 
     @Subscribe
@@ -78,6 +85,9 @@ public class VelocityPlugin {
         }
 
         config = FloodgateConfig.load(logger, dataFolder.toPath().resolve("config.yml"), VelocityFloodgateConfig.class);
+        playerLink = PlayerLink.initialize(logger, dataFolder.toPath(), config);
+        LinkAccountCommand.init(playerLink);
+        UnlinkAccountCommand.init(playerLink);
         handshakeHandler = new HandshakeHandler(config.getPrivateKey(), true, config.getUsernamePrefix(), config.isReplaceSpaces());
     }
 
