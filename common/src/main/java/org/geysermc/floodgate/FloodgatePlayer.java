@@ -47,11 +47,15 @@ public class FloodgatePlayer {
      */
     private LinkedPlayer linkedPlayer;
 
-    FloodgatePlayer(BedrockData data, String prefix) {
+    FloodgatePlayer(BedrockData data, String prefix, boolean replaceSpaces) {
         xuid = data.getXuid();
         version = data.getVersion();
         username = data.getUsername();
         javaUsername = prefix + data.getUsername().substring(0, Math.min(data.getUsername().length(), 16 - prefix.length()));
+        if (replaceSpaces) {
+            javaUsername = javaUsername.replaceAll(" ", "_");
+        }
+        xuid = data.getXuid();
         deviceOS = DeviceOS.getById(data.getDeviceId());
         languageCode = data.getLanguageCode();
         inputMode = data.getInputMode();

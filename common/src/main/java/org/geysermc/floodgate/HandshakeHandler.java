@@ -18,11 +18,13 @@ public class HandshakeHandler {
     private PrivateKey privateKey;
     private boolean bungee;
     private String usernamePrefix;
+    private boolean replaceSpaces;
 
-    public HandshakeHandler(@NonNull PrivateKey privateKey, boolean bungee, String usernamePrefix) {
+    public HandshakeHandler(@NonNull PrivateKey privateKey, boolean bungee, String usernamePrefix, boolean replaceSpaces) {
         this.privateKey = privateKey;
         this.bungee = bungee;
         this.usernamePrefix = usernamePrefix;
+        this.replaceSpaces = replaceSpaces;
     }
 
     public HandshakeResult handle(@NonNull String handshakeData) {
@@ -42,7 +44,7 @@ public class HandshakeHandler {
                 return ResultType.INVALID_DATA_LENGTH.getCachedResult();
             }
 
-            FloodgatePlayer player = new FloodgatePlayer(bedrockData, usernamePrefix);
+            FloodgatePlayer player = new FloodgatePlayer(bedrockData, usernamePrefix, replaceSpaces);
             AbstractFloodgateAPI.players.put(player.getCorrectUniqueId(), player);
             return new HandshakeResult(ResultType.SUCCESS, data, bedrockData, player);
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
