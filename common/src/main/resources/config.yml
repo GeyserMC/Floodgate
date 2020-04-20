@@ -8,6 +8,9 @@ key-file-name: key.pem
 # It is recommended to use a prefix that does not contain alphanumerical to avoid the possibility of duplicate usernames.
 username-prefix: "*"
 
+# Should spaces be replaced with '_' in bedrock usernames?
+replace-spaces: true
+
 disconnect:
   # The disconnect message Geyser users should get when connecting
   # to the server with an invalid key
