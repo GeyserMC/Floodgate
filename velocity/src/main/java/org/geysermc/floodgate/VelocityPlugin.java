@@ -12,11 +12,13 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.proxy.InboundConnection;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.util.GameProfile;
-import com.velocitypowered.api.command.CommandManager;
 import lombok.Getter;
 import net.kyori.text.TextComponent;
 import org.geysermc.floodgate.HandshakeHandler.HandshakeResult;
+import org.geysermc.floodgate.command.LinkAccountCommand;
+import org.geysermc.floodgate.command.UnlinkAccountCommand;
 import org.geysermc.floodgate.injector.VelocityInjector;
+import org.geysermc.floodgate.util.CommandUtil;
 import org.geysermc.floodgate.util.ReflectionUtil;
 
 import java.io.File;
@@ -39,12 +41,13 @@ public class VelocityPlugin {
     private Cache<InboundConnection, FloodgatePlayer> playerCache;
     private Cache<InboundConnection, String> playersToKick;
 
-    private Logger logger;
+    private final ProxyServer server;
+    private final Logger logger;
     private boolean injectSucceed;
-    private CommandManager commandManager;
 
     @Inject
-    public VelocityPlugin(ProxyServer server, Logger logger, CommandManager commandManager) {
+    public VelocityPlugin(ProxyServer server, Logger logger) {
+        this.server = server;
         // we're too late if we would do this in the init event
         injectSucceed = false;
         try {
@@ -64,10 +67,6 @@ public class VelocityPlugin {
                 .maximumSize(500)
                 .expireAfterAccess(50, TimeUnit.SECONDS)
                 .build();
-
-        this.commandManager = commandManager;
-        this.commandManager.register(new LinkAccountCommand(), "linkaccount");
-        this.commandManager.register(new UnlinkAccountCommand(), "unlinkaccount");
     }
 
     @Subscribe
@@ -86,9 +85,11 @@ public class VelocityPlugin {
 
         config = FloodgateConfig.load(logger, dataFolder.toPath().resolve("config.yml"), VelocityFloodgateConfig.class);
         playerLink = PlayerLink.initialize(logger, dataFolder.toPath(), config);
-        LinkAccountCommand.init(playerLink);
-        UnlinkAccountCommand.init(playerLink);
         handshakeHandler = new HandshakeHandler(config.getPrivateKey(), true, config.getUsernamePrefix(), config.isReplaceSpaces());
+
+        CommandUtil commandUtil = new CommandUtil();
+        server.getCommandManager().register(CommandUtil.LINK_ACCOUNT_COMMAND, new LinkAccountCommand(playerLink, commandUtil));
+        server.getCommandManager().register(CommandUtil.UNLINK_ACCOUNT_COMMAND, new UnlinkAccountCommand(playerLink, commandUtil));
     }
 
     @Subscribe
