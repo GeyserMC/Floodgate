@@ -60,6 +60,7 @@ public class BungeePlugin extends Plugin implements Listener {
         if (config.isDebug()) {
             getLogger().warning("Please note that it is not possible to reload this plugin when debug mode is enabled. At least for now");
         }
+        playerLink.stop();
     }
 
     @EventHandler(priority = EventPriority.LOW)

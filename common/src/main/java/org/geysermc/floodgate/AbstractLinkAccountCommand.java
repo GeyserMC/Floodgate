@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.geysermc.floodgate.command.CommandMessage;
+import org.geysermc.floodgate.util.CommonMessage;
 import org.geysermc.floodgate.util.ICommandUtil;
 
 import java.util.HashMap;
@@ -19,8 +20,16 @@ public class AbstractLinkAccountCommand<PLAYER, COMMAND_UTIL extends ICommandUti
     private final COMMAND_UTIL commandUtil;
 
     public void execute(PLAYER player, UUID uuid, String username, String[] args) {
-        if (PlayerLink.isEnabledAndAllowed()) {
-            if (link.isLinkedPlayer(uuid)) {
+        if (!PlayerLink.isEnabledAndAllowed()) {
+            sendMessage(player, Message.LINK_REQUEST_DISABLED);
+            return;
+        }
+        link.isLinkedPlayer(uuid).whenComplete((linked, throwable) -> {
+            if (throwable != null) {
+                sendMessage(player, CommonMessage.IS_LINKED_ERROR);
+                return;
+            }
+            if (linked) {
                 sendMessage(player, Message.ALREADY_LINKED);
                 return;
             }
@@ -45,29 +54,29 @@ public class AbstractLinkAccountCommand<PLAYER, COMMAND_UTIL extends ICommandUti
             String code = args[1];
             LinkRequest request = activeLinkRequests.getOrDefault(javaUsername, null);
             if (request != null && request.checkGamerTag(AbstractFloodgateAPI.getPlayer(uuid))) {
-                if (request.linkCode.equals(code)) {
+                if (request.getLinkCode().equals(code)) {
                     activeLinkRequests.remove(javaUsername); // Delete the request, whether it has expired or is successful
                     if (request.isExpired()) {
                         sendMessage(player, Message.LINK_REQUEST_EXPIRED);
                         return;
                     }
-                    if (link.linkPlayer(uuid, request.javaUniqueId, request.javaUsername)) {
-                        commandUtil.kickPlayer(player, Message.LINK_REQUEST_COMPLETED, request.javaUsername);
-                        return;
-                    }
-                    sendMessage(player, Message.LINK_REQUEST_ERROR);
+                    link.linkPlayer(uuid, request.getJavaUniqueId(), request.getJavaUsername()).whenComplete((aVoid, throwable1) -> {
+                        if (throwable1 != null) {
+                            sendMessage(player, Message.LINK_REQUEST_ERROR);
+                            return;
+                        }
+                        commandUtil.kickPlayer(player, Message.LINK_REQUEST_COMPLETED, request.getJavaUsername());
+                    });
                     return;
                 }
                 sendMessage(player, Message.INVALID_CODE);
                 return;
             }
             sendMessage(player, Message.NO_LINK_REQUESTED);
-            return;
-        }
-        sendMessage(player, Message.LINK_REQUEST_DISABLED);
+        });
     }
 
-    private void sendMessage(PLAYER player, Message message, Object... args) {
+    private void sendMessage(PLAYER player, CommandMessage message, Object... args) {
         commandUtil.sendMessage(player, message, args);
     }
 
@@ -85,7 +94,7 @@ public class AbstractLinkAccountCommand<PLAYER, COMMAND_UTIL extends ICommandUti
         BEDROCK_USAGE("&cStart the process from Java! Usage: /linkaccount <gamertag>"),
         LINK_REQUEST_EXPIRED("&cThe code you entered is expired! Run &6/linkaccount&c again on your Java account"),
         LINK_REQUEST_COMPLETED("You are successfully linked to %s!\nIf you want to undo this run /unlinkaccount"),
-        LINK_REQUEST_ERROR("&cAn error occurred while linking. Please check the console."),
+        LINK_REQUEST_ERROR("&cAn error occurred while linking. " + CommonMessage.CHECK_CONSOLE),
         INVALID_CODE("&cInvalid code! Please check your code or run the &6/linkaccount&c command again on your Java account."),
         NO_LINK_REQUESTED("&cThis player has not requested an account link! Please log in on Java and request one with &6/linkaccount"),
         LINK_REQUEST_DISABLED("&cLinking is not enabled on this server.");

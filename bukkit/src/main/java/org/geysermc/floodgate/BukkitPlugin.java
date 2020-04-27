@@ -52,6 +52,7 @@ public class BukkitPlugin extends JavaPlugin {
         } catch (Exception e) {
             getLogger().log(Level.SEVERE, "Failed to remove the injection!", e);
         }
+        playerLink.stop();
     }
 
     @EventHandler

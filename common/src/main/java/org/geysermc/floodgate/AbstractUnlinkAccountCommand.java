@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.geysermc.floodgate.command.CommandMessage;
-import org.geysermc.floodgate.link.SQLiteImpl;
+import org.geysermc.floodgate.util.CommonMessage;
 import org.geysermc.floodgate.util.ICommandUtil;
 
 import java.util.UUID;
@@ -16,22 +16,33 @@ public class AbstractUnlinkAccountCommand<PLAYER, COMMAND_UTIL extends ICommandU
     private final COMMAND_UTIL commandUtil;
 
     public void execute(PLAYER player, UUID uuid) {
-        if (!SQLiteImpl.isEnabledAndAllowed()) sendMessage(player, Message.LINKING_NOT_ENABLED);
-        if (!link.isLinkedPlayer(uuid)) {
-            sendMessage(player, Message.NOT_LINKED);
+        if (!PlayerLink.isEnabledAndAllowed()) {
+            sendMessage(player, Message.LINKING_NOT_ENABLED);
             return;
         }
-        sendMessage(player, link.unlinkPlayer(uuid) ? Message.UNLINK_SUCCESS : Message.UNLINK_ERROR);
+        link.isLinkedPlayer(uuid).whenComplete((linked, throwable) -> {
+            if (throwable != null) {
+                sendMessage(player, CommonMessage.IS_LINKED_ERROR);
+                return;
+            }
+            if (!linked) {
+                sendMessage(player, Message.NOT_LINKED);
+                return;
+            }
+            link.unlinkPlayer(uuid).whenComplete((aVoid, throwable1) ->
+                    sendMessage(player, throwable1 == null ? Message.UNLINK_SUCCESS : Message.UNLINK_ERROR)
+            );
+        });
     }
 
-    private void sendMessage(PLAYER player, Message message, Object... args) {
+    private void sendMessage(PLAYER player, CommandMessage message, Object... args) {
         commandUtil.sendMessage(player, message, args);
     }
 
     public enum Message implements CommandMessage {
         NOT_LINKED("&cYour account isn't linked"),
-        UNLINK_SUCCESS("&cUnlink successful!"),
-        UNLINK_ERROR("&cAn error occurred while unlinking player! Please check the console"),
+        UNLINK_SUCCESS("&cUnlink successful! Rejoin to return to your Bedrock account"),
+        UNLINK_ERROR("&cAn error occurred while unlinking player! " + CommonMessage.CHECK_CONSOLE),
         LINKING_NOT_ENABLED("&cLinking is not enabled on this server");
 
         @Getter private final String message;

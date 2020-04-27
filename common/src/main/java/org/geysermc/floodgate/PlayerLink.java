@@ -2,10 +2,13 @@ package org.geysermc.floodgate;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.geysermc.floodgate.link.SQLiteImpl;
+import org.geysermc.floodgate.link.SQLitePlayerLink;
 
 import java.nio.file.Path;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
@@ -15,15 +18,16 @@ public abstract class PlayerLink {
     @Getter private static long verifyLinkTimeout;
     @Getter private static boolean allowLinking;
 
+    @Getter private final ExecutorService executorService = Executors.newFixedThreadPool(11);
     @Getter private Logger logger;
 
     protected abstract void load(Path dataFolder);
 
-    public abstract LinkedPlayer getLinkedPlayer(UUID bedrockId);
-    public abstract boolean isLinkedPlayer(UUID bedrockId);
+    public abstract CompletableFuture<LinkedPlayer> getLinkedPlayer(UUID bedrockId);
+    public abstract CompletableFuture<Boolean> isLinkedPlayer(UUID bedrockId);
 
-    public abstract boolean linkPlayer(UUID bedrockId, UUID uuid, String username);
-    public abstract boolean unlinkPlayer(UUID uuid);
+    public abstract CompletableFuture<Void> linkPlayer(UUID bedrockId, UUID uuid, String username);
+    public abstract CompletableFuture<Void> unlinkPlayer(UUID uuid);
 
     public static PlayerLink initialize(Logger logger, Path dataFolder, FloodgateConfig config) {
         if (PlayerLink.instance == null) {
@@ -44,6 +48,14 @@ public abstract class PlayerLink {
         return instance;
     }
 
+    /**
+     * Shutdown the thread pool and invalidates the PlayerLink instance
+     */
+    public void stop() {
+        instance = null;
+        executorService.shutdown();
+    }
+
     protected LinkedPlayer createLinkedPlayer(String javaUsername, UUID javaUniqueId, UUID bedrockId) {
         return new LinkedPlayer(javaUsername, javaUniqueId, bedrockId);
     }
@@ -55,7 +67,7 @@ public abstract class PlayerLink {
     @AllArgsConstructor
     @Getter
     public enum ImplementationType {
-        SQLITE(SQLiteImpl::new);
+        SQLITE(SQLitePlayerLink::new);
 
         private Supplier<? extends PlayerLink> instanceSupplier;
 
@@ -70,5 +82,11 @@ public abstract class PlayerLink {
             }
             return null;
         }
+    }
+
+    public static <U> CompletableFuture<U> failedFuture(Throwable exception) {
+        CompletableFuture<U> future = new CompletableFuture<>();
+        future.completeExceptionally(exception);
+        return future;
     }
 }

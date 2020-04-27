@@ -5,6 +5,8 @@ import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.DeviceOS;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Getter
 public class FloodgatePlayer {
@@ -43,7 +45,7 @@ public class FloodgatePlayer {
      */
     private int inputMode;
     /**
-     * The LinkedPlayer object if the player is linked to Java account, or otherwise null.
+     * The LinkedPlayer object if the player is linked to Java account.
      */
     private LinkedPlayer linkedPlayer;
 
@@ -59,9 +61,10 @@ public class FloodgatePlayer {
         languageCode = data.getLanguageCode();
         inputMode = data.getInputMode();
         javaUniqueId = AbstractFloodgateAPI.createJavaPlayerId(Long.parseLong(data.getXuid()));
-        System.out.println(javaUniqueId.toString());
+        // every implementation (Bukkit, Bungee and Velocity) all run this async,
+        // so we can block this thread
         if (PlayerLink.isEnabledAndAllowed()) {
-            linkedPlayer = PlayerLink.getInstance().getLinkedPlayer(javaUniqueId); //todo change to bedrockId once fixed
+            linkedPlayer = fetchLinkedPlayer();
         }
     }
 
@@ -71,5 +74,32 @@ public class FloodgatePlayer {
 
     public String getCorrectUsername() {
         return linkedPlayer != null ? linkedPlayer.javaUsername : javaUsername;
+    }
+
+    /**
+     * This will return the LinkedPlayer object if the player is linked.<br>
+     * Please note that the LinkedPlayer will be loaded (sync) when used for the first time.<br>
+     * This method also checks if linking is enabled
+     * @return LinkedPlayer or null if the player isn't linked or linking isn't enabled
+     * @see #fetchLinkedPlayerAsync() for the async alternative
+     */
+    public LinkedPlayer fetchLinkedPlayer() {
+        if (!PlayerLink.isEnabledAndAllowed()) return null;
+        try {
+            return PlayerLink.getInstance().getLinkedPlayer(javaUniqueId).get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * async alternative to {@link #fetchLinkedPlayer()}
+     * @see #fetchLinkedPlayer() for the sync versionnon
+     */
+    public CompletableFuture<LinkedPlayer> fetchLinkedPlayerAsync() {
+        return PlayerLink.isEnabledAndAllowed() ?
+                PlayerLink.getInstance().getLinkedPlayer(javaUniqueId) :
+                CompletableFuture.completedFuture(null);
     }
 }
