@@ -13,13 +13,13 @@ import java.util.Random;
 import java.util.UUID;
 
 @AllArgsConstructor
-public class AbstractLinkAccountCommand<PLAYER, COMMAND_UTIL extends ICommandUtil<PLAYER>> {
+public class AbstractLinkAccountCommand<P, C extends ICommandUtil<P>> {
     private final Map<String, LinkRequest> activeLinkRequests = new HashMap<>();
     private final PlayerLink link;
     @Getter(AccessLevel.PROTECTED)
-    private final COMMAND_UTIL commandUtil;
+    private final C commandUtil;
 
-    public void execute(PLAYER player, UUID uuid, String username, String[] args) {
+    public void execute(P player, UUID uuid, String username, String[] args) {
         if (!PlayerLink.isEnabledAndAllowed()) {
             sendMessage(player, Message.LINK_REQUEST_DISABLED);
             return;
@@ -76,7 +76,7 @@ public class AbstractLinkAccountCommand<PLAYER, COMMAND_UTIL extends ICommandUti
         });
     }
 
-    private void sendMessage(PLAYER player, CommandMessage message, Object... args) {
+    private void sendMessage(P player, CommandMessage message, Object... args) {
         commandUtil.sendMessage(player, message, args);
     }
 

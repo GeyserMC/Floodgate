@@ -10,12 +10,12 @@ import org.geysermc.floodgate.util.ICommandUtil;
 import java.util.UUID;
 
 @AllArgsConstructor
-public class AbstractUnlinkAccountCommand<PLAYER, COMMAND_UTIL extends ICommandUtil<PLAYER>> {
+public class AbstractUnlinkAccountCommand<P, C extends ICommandUtil<P>> {
     private final PlayerLink link;
     @Getter(AccessLevel.PROTECTED)
-    private final COMMAND_UTIL commandUtil;
+    private final C commandUtil;
 
-    public void execute(PLAYER player, UUID uuid) {
+    public void execute(P player, UUID uuid) {
         if (!PlayerLink.isEnabledAndAllowed()) {
             sendMessage(player, Message.LINKING_NOT_ENABLED);
             return;
@@ -35,7 +35,7 @@ public class AbstractUnlinkAccountCommand<PLAYER, COMMAND_UTIL extends ICommandU
         });
     }
 
-    private void sendMessage(PLAYER player, CommandMessage message, Object... args) {
+    private void sendMessage(P player, CommandMessage message, Object... args) {
         commandUtil.sendMessage(player, message, args);
     }
 

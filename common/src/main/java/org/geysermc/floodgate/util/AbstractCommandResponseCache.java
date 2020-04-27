@@ -6,15 +6,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @param <TYPE> Message Type stored. For example BaseComponent[] for Bungeecord
+ * @param <T> Message Type stored. For example BaseComponent[] for Bungeecord
  */
-public abstract class AbstractCommandResponseCache<TYPE> {
-    private final Map<CommandMessage, TYPE> cachedResponses = new HashMap<>(0);
+public abstract class AbstractCommandResponseCache<T> {
+    private final Map<CommandMessage, T> cachedResponses = new HashMap<>(0);
 
     /**
      * Transforms a string (raw input) into a format that can be sent to the player
      */
-    protected abstract TYPE transformMessage(String message);
+    protected abstract T transformMessage(String message);
 
     /**
      * If the message has no arguments:<br>
@@ -22,12 +22,12 @@ public abstract class AbstractCommandResponseCache<TYPE> {
      *     If not cached: transform it, add the message to cache and return the message.<br>
      * It will only transform the message if the message has one or more arguments
      */
-    public TYPE getOrAddCachedMessage(CommandMessage message, Object... args) {
+    public T getOrAddCachedMessage(CommandMessage message, Object... args) {
         if (args != null && args.length > 0) {
             return transformMessage(format(message, args));
         }
         if (!cachedResponses.containsKey(message)) {
-            TYPE components = transformMessage(message.getMessage());
+            T components = transformMessage(message.getMessage());
             cachedResponses.put(message, components);
             return components;
         }

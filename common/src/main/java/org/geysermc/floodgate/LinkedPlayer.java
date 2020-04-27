@@ -1,9 +1,12 @@
 package org.geysermc.floodgate;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.UUID;
 
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter
 public class LinkedPlayer {
     /**
@@ -18,10 +21,4 @@ public class LinkedPlayer {
      * The UUID of the Bedrock player
      */
     public UUID bedrockId;
-
-    LinkedPlayer(String username, UUID uuid, UUID bedrockId) {
-        this.bedrockId = bedrockId;
-        this.javaUniqueId = uuid;
-        this.javaUsername = username;
-    }
 }
