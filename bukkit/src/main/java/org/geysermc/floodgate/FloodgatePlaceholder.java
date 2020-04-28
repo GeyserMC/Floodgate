@@ -57,36 +57,40 @@ public class FloodgatePlaceholder extends PlaceholderExpansion {
      */
     private String getPlayerDeviceString(Player player) {
         if (FloodgateAPI.isBedrockPlayer(player.getUniqueId())) {
-            FloodgatePlayer floodgatePlayer = FloodgateAPI.getPlayer(player.getUniqueId());
-            switch (floodgatePlayer.getDeviceOS()) {
-                case ANDROID:
-                    return plugin.getConfiguration().getPlaceholders().getAndroid().replace("&", "§");
-                case IOS:
-                    return plugin.getConfiguration().getPlaceholders().getIOS().replace("&", "§");
-                case OSX:
-                    return plugin.getConfiguration().getPlaceholders().getOSX().replace("&", "§");
-                case FIREOS:
-                    return plugin.getConfiguration().getPlaceholders().getFireos().replace("&", "§");
-                case GEARVR:
-                    return plugin.getConfiguration().getPlaceholders().getGearVR().replace("&", "§");
-                case HOLOLENS:
-                    return plugin.getConfiguration().getPlaceholders().getHololens().replace("&", "§");
-                case WIN10:
-                    return plugin.getConfiguration().getPlaceholders().getWin10().replace("&", "§");
-                case WIN32:
-                    return plugin.getConfiguration().getPlaceholders().getWin32().replace("&", "§");
-                case DEDICATED:
-                    return plugin.getConfiguration().getPlaceholders().getDedicated().replace("&", "§");
-                case ORBIS:
-                    return plugin.getConfiguration().getPlaceholders().getOrbis().replace("&", "§");
-                case NX:
-                    return plugin.getConfiguration().getPlaceholders().getNX().replace("&", "§");
-                case SWITCH:
-                    return plugin.getConfiguration().getPlaceholders().getNintendoSwitch().replace("&", "§");
-                case XBOX_ONE:
-                    return plugin.getConfiguration().getPlaceholders().getXboxOne().replace("&", "§");
-                default:
-                    return plugin.getConfiguration().getPlaceholders().getUnknown().replace("&", "§");
+            if (plugin.getConfiguration().isSpecificDeviceDescriptors()) {
+                FloodgatePlayer floodgatePlayer = FloodgateAPI.getPlayer(player.getUniqueId());
+                switch (floodgatePlayer.getDeviceOS()) {
+                    case ANDROID:
+                        return plugin.getConfiguration().getPlaceholders().getAndroid().replace("&", "§");
+                    case IOS:
+                        return plugin.getConfiguration().getPlaceholders().getIOS().replace("&", "§");
+                    case OSX:
+                        return plugin.getConfiguration().getPlaceholders().getOSX().replace("&", "§");
+                    case FIREOS:
+                        return plugin.getConfiguration().getPlaceholders().getFireos().replace("&", "§");
+                    case GEARVR:
+                        return plugin.getConfiguration().getPlaceholders().getGearVR().replace("&", "§");
+                    case HOLOLENS:
+                        return plugin.getConfiguration().getPlaceholders().getHololens().replace("&", "§");
+                    case WIN10:
+                        return plugin.getConfiguration().getPlaceholders().getWin10().replace("&", "§");
+                    case WIN32:
+                        return plugin.getConfiguration().getPlaceholders().getWin32().replace("&", "§");
+                    case DEDICATED:
+                        return plugin.getConfiguration().getPlaceholders().getDedicated().replace("&", "§");
+                    case ORBIS:
+                        return plugin.getConfiguration().getPlaceholders().getOrbis().replace("&", "§");
+                    case NX:
+                        return plugin.getConfiguration().getPlaceholders().getNX().replace("&", "§");
+                    case SWITCH:
+                        return plugin.getConfiguration().getPlaceholders().getNintendoSwitch().replace("&", "§");
+                    case XBOX_ONE:
+                        return plugin.getConfiguration().getPlaceholders().getXboxOne().replace("&", "§");
+                    default:
+                        return plugin.getConfiguration().getPlaceholders().getUnknown().replace("&", "§");
+                }
+            }else{
+                return plugin.getConfiguration().getPlaceholders().getGeneric().replace("&", "§");
             }
         } else {
             return plugin.getConfiguration().getPlaceholders().getJava().replace("&", "§");

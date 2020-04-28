@@ -33,6 +33,9 @@ public class FloodgateConfig {
     @JsonProperty(value = "disconnect")
     private DisconnectMessages messages;
 
+    @JsonProperty(value = "specific-device-descriptors")
+    private boolean specificDeviceDescriptors;
+
     @JsonProperty(value = "device-placeholder")
     private DevicePlaceholders placeholders;
 
@@ -55,6 +58,9 @@ public class FloodgateConfig {
     public static class DevicePlaceholders {
         @JsonProperty("java")
         private String java;
+
+        @JsonProperty("generic")
+        private String generic;
 
         @JsonProperty("unknown")
         private String unknown;

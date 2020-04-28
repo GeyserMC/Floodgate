@@ -19,9 +19,13 @@ disconnect:
   # to the server with the correct key but not with the correct data format
   invalid-arguments-length: Expected {0} arguments, got {1}. Is Geyser up-to-date?
 
+# Enables the use of specific device descriptors for PlaceholderAPI
+specific-device-descriptors: true
+
 # Used in PlaceholderAPI supported by the Bukkit plugin (%floodgate_device%)
 device-placeholder:
   java: "&8[&aJava&8]"
+  generic: "&8[&7Bedrock&8]"
   unknown: "&8[&aUnknown&8]"
   android: "&8[&aAndroid&8]"
   ios: "&8[&bi&fOS&8]"
