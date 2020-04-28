@@ -18,3 +18,21 @@ disconnect:
   # The disconnect message Geyser users should get when connecting
   # to the server with the correct key but not with the correct data format
   invalid-arguments-length: Expected {0} arguments, got {1}. Is Geyser up-to-date?
+
+# Used in PlaceholderAPI supported by the Bukkit plugin (%floodgate_device%)
+device-placeholder:
+  java: "&8[&aJava&8]"
+  unknown: "&8[&aUnknown&8]"
+  android: "&8[&aAndroid&8]"
+  ios: "&8[&bi&fOS&8]"
+  osx: "&8[&fOS&bX&8]"
+  fireos: "&8[&6F&fireOS&8]"
+  gearvr: "&8[&7Gear&fVR&8]"
+  hololens: "&8[&7Holo&fLens&8]"
+  win10: "&8[&3Win&f10&8]"
+  win32: "&8[&3Win&f32&8]"
+  dedicated: "&8[&aDED&8]"
+  orbis: "&8[&3ORBIS&8]"
+  nx: "&8[&eNX&8]"
+  switch: "&8[&4Switch&8]"
+  xboxOne: "&8[&2Xbox&fOne&8]"

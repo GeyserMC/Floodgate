@@ -23,12 +23,18 @@ import java.util.logging.Logger;
 public class FloodgateConfig {
     @JsonProperty(value = "key-file-name")
     private String keyFileName;
-    @JsonProperty(value = "disconnect")
-    private DisconnectMessages messages;
+
     @JsonProperty(value = "username-prefix")
     private String usernamePrefix;
+
     @JsonProperty(value = "replace-spaces")
     private boolean replaceSpaces;
+
+    @JsonProperty(value = "disconnect")
+    private DisconnectMessages messages;
+
+    @JsonProperty(value = "device-placeholder")
+    private DevicePlaceholders placeholders;
 
     @JsonProperty
     private boolean debug;
@@ -40,8 +46,57 @@ public class FloodgateConfig {
     public static class DisconnectMessages {
         @JsonProperty("invalid-key")
         private String invalidKey;
+
         @JsonProperty("invalid-arguments-length")
         private String invalidArgumentsLength;
+    }
+
+    @Getter
+    public static class DevicePlaceholders {
+        @JsonProperty("java")
+        private String java;
+
+        @JsonProperty("unknown")
+        private String unknown;
+
+        @JsonProperty("android")
+        private String android;
+
+        @JsonProperty("ios")
+        private String iOS;
+
+        @JsonProperty("osx")
+        private String OSX;
+
+        @JsonProperty("fireos")
+        private String fireos;
+
+        @JsonProperty("gearvr")
+        private String gearVR;
+
+        @JsonProperty("hololens")
+        private String hololens;
+
+        @JsonProperty("win10")
+        private String win10;
+
+        @JsonProperty("win32")
+        private String win32;
+
+        @JsonProperty("dedicated")
+        private String dedicated;
+
+        @JsonProperty("orbis")
+        private String orbis;
+
+        @JsonProperty("nx")
+        private String NX;
+
+        @JsonProperty("switch")
+        private String nintendoSwitch;
+
+        @JsonProperty("xboxOne")
+        private String xboxOne;
     }
 
     public static FloodgateConfig load(Logger logger, Path configPath) {

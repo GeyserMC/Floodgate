@@ -33,6 +33,10 @@ public class BukkitPlugin extends JavaPlugin {
                 getServer().getPluginManager().disablePlugin(this);
             }
         }
+
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new FloodgatePlaceholder(this).register();
+        }
     }
 
     @Override
