@@ -42,8 +42,43 @@ public class FloodgatePlaceholder extends PlaceholderExpansion {
             return "";
         }
 
-        if(identifier.equals("device")){
-            return getPlayerDeviceString(player);
+        switch (identifier) {
+            case "device":
+                return getPlayerDeviceString(player);
+
+            case "locale":
+            case "locale_upper":
+                if (FloodgateAPI.isBedrockPlayer(player.getUniqueId())) {
+                    FloodgatePlayer floodgatePlayer = FloodgateAPI.getPlayer(player.getUniqueId());
+                    boolean upper = identifier.endsWith("_upper");
+                    return plugin.getConfiguration().getPlaceholders().getLocale().getFound().replace("%locale%", upper ? floodgatePlayer.getLanguageCode().toUpperCase() : floodgatePlayer.getLanguageCode().toLowerCase());
+                } else {
+                    return plugin.getConfiguration().getPlaceholders().getLocale().getNone();
+                }
+
+            case "version":
+                if (FloodgateAPI.isBedrockPlayer(player.getUniqueId())) {
+                    FloodgatePlayer floodgatePlayer = FloodgateAPI.getPlayer(player.getUniqueId());
+                    return plugin.getConfiguration().getPlaceholders().getVersion().getFound().replace("%version%", floodgatePlayer.getVersion());
+                } else {
+                    return plugin.getConfiguration().getPlaceholders().getVersion().getNone();
+                }
+
+            case "username":
+                if (FloodgateAPI.isBedrockPlayer(player.getUniqueId())) {
+                    FloodgatePlayer floodgatePlayer = FloodgateAPI.getPlayer(player.getUniqueId());
+                    return plugin.getConfiguration().getPlaceholders().getXboxUsername().getFound().replace("%username%", floodgatePlayer.getUsername());
+                } else {
+                    return plugin.getConfiguration().getPlaceholders().getXboxUsername().getNone();
+                }
+
+            case "xuid":
+                if (FloodgateAPI.isBedrockPlayer(player.getUniqueId())) {
+                    FloodgatePlayer floodgatePlayer = FloodgateAPI.getPlayer(player.getUniqueId());
+                    return plugin.getConfiguration().getPlaceholders().getXboxXuid().getFound().replace("%xuid%", floodgatePlayer.getXuid());
+                } else {
+                    return plugin.getConfiguration().getPlaceholders().getXboxXuid().getNone();
+                }
         }
 
         return null;
@@ -57,43 +92,43 @@ public class FloodgatePlaceholder extends PlaceholderExpansion {
      */
     private String getPlayerDeviceString(Player player) {
         if (FloodgateAPI.isBedrockPlayer(player.getUniqueId())) {
-            if (plugin.getConfiguration().isSpecificDeviceDescriptors()) {
+            if (plugin.getConfiguration().getPlaceholders().isSpecificDeviceDescriptors()) {
                 FloodgatePlayer floodgatePlayer = FloodgateAPI.getPlayer(player.getUniqueId());
                 switch (floodgatePlayer.getDeviceOS()) {
                     case ANDROID:
-                        return plugin.getConfiguration().getPlaceholders().getAndroid().replace("&", "§");
+                        return plugin.getConfiguration().getPlaceholders().getDevice().getAndroid().replace("&", "§");
                     case IOS:
-                        return plugin.getConfiguration().getPlaceholders().getIOS().replace("&", "§");
+                        return plugin.getConfiguration().getPlaceholders().getDevice().getIOS().replace("&", "§");
                     case OSX:
-                        return plugin.getConfiguration().getPlaceholders().getOSX().replace("&", "§");
+                        return plugin.getConfiguration().getPlaceholders().getDevice().getOSX().replace("&", "§");
                     case FIREOS:
-                        return plugin.getConfiguration().getPlaceholders().getFireos().replace("&", "§");
+                        return plugin.getConfiguration().getPlaceholders().getDevice().getFireos().replace("&", "§");
                     case GEARVR:
-                        return plugin.getConfiguration().getPlaceholders().getGearVR().replace("&", "§");
+                        return plugin.getConfiguration().getPlaceholders().getDevice().getGearVR().replace("&", "§");
                     case HOLOLENS:
-                        return plugin.getConfiguration().getPlaceholders().getHololens().replace("&", "§");
+                        return plugin.getConfiguration().getPlaceholders().getDevice().getHololens().replace("&", "§");
                     case WIN10:
-                        return plugin.getConfiguration().getPlaceholders().getWin10().replace("&", "§");
+                        return plugin.getConfiguration().getPlaceholders().getDevice().getWin10().replace("&", "§");
                     case WIN32:
-                        return plugin.getConfiguration().getPlaceholders().getWin32().replace("&", "§");
+                        return plugin.getConfiguration().getPlaceholders().getDevice().getWin32().replace("&", "§");
                     case DEDICATED:
-                        return plugin.getConfiguration().getPlaceholders().getDedicated().replace("&", "§");
+                        return plugin.getConfiguration().getPlaceholders().getDevice().getDedicated().replace("&", "§");
                     case ORBIS:
-                        return plugin.getConfiguration().getPlaceholders().getOrbis().replace("&", "§");
+                        return plugin.getConfiguration().getPlaceholders().getDevice().getOrbis().replace("&", "§");
                     case NX:
-                        return plugin.getConfiguration().getPlaceholders().getNX().replace("&", "§");
+                        return plugin.getConfiguration().getPlaceholders().getDevice().getNX().replace("&", "§");
                     case SWITCH:
-                        return plugin.getConfiguration().getPlaceholders().getNintendoSwitch().replace("&", "§");
+                        return plugin.getConfiguration().getPlaceholders().getDevice().getNintendoSwitch().replace("&", "§");
                     case XBOX_ONE:
-                        return plugin.getConfiguration().getPlaceholders().getXboxOne().replace("&", "§");
+                        return plugin.getConfiguration().getPlaceholders().getDevice().getXboxOne().replace("&", "§");
                     default:
-                        return plugin.getConfiguration().getPlaceholders().getUnknown().replace("&", "§");
+                        return plugin.getConfiguration().getPlaceholders().getDevice().getUnknown().replace("&", "§");
                 }
             }else{
-                return plugin.getConfiguration().getPlaceholders().getGeneric().replace("&", "§");
+                return plugin.getConfiguration().getPlaceholders().getDevice().getGeneric().replace("&", "§");
             }
         } else {
-            return plugin.getConfiguration().getPlaceholders().getJava().replace("&", "§");
+            return plugin.getConfiguration().getPlaceholders().getDevice().getJava().replace("&", "§");
         }
     }
 

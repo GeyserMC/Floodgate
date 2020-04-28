@@ -33,11 +33,9 @@ public class FloodgateConfig {
     @JsonProperty(value = "disconnect")
     private DisconnectMessages messages;
 
-    @JsonProperty(value = "specific-device-descriptors")
-    private boolean specificDeviceDescriptors;
 
-    @JsonProperty(value = "device-placeholder")
-    private DevicePlaceholders placeholders;
+    @JsonProperty(value = "placeholders")
+    private Placeholders placeholders;
 
     @JsonProperty
     private boolean debug;
@@ -52,6 +50,27 @@ public class FloodgateConfig {
 
         @JsonProperty("invalid-arguments-length")
         private String invalidArgumentsLength;
+    }
+
+    @Getter
+    public static class Placeholders {
+        @JsonProperty(value = "specific-device-descriptors")
+        private boolean specificDeviceDescriptors;
+
+        @JsonProperty(value = "device")
+        private DevicePlaceholders device;
+
+        @JsonProperty(value = "locale")
+        private GenericPlaceholders locale;
+
+        @JsonProperty(value = "version")
+        private GenericPlaceholders version;
+
+        @JsonProperty(value = "xbox-username")
+        private GenericPlaceholders xboxUsername;
+
+        @JsonProperty(value = "xbox-xuid")
+        private GenericPlaceholders xboxXuid;
     }
 
     @Getter
@@ -103,6 +122,15 @@ public class FloodgateConfig {
 
         @JsonProperty("xboxOne")
         private String xboxOne;
+    }
+
+    @Getter
+    public static class GenericPlaceholders {
+        @JsonProperty("found")
+        private String found;
+
+        @JsonProperty("none")
+        private String none;
     }
 
     public static FloodgateConfig load(Logger logger, Path configPath) {

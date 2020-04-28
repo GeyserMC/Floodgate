@@ -19,24 +19,47 @@ disconnect:
   # to the server with the correct key but not with the correct data format
   invalid-arguments-length: Expected {0} arguments, got {1}. Is Geyser up-to-date?
 
-# Enables the use of specific device descriptors for PlaceholderAPI
-specific-device-descriptors: true
 
-# Used in PlaceholderAPI supported by the Bukkit plugin (%floodgate_device%)
-device-placeholder:
-  java: "&8[&aJava&8]"
-  generic: "&8[&7Bedrock&8]"
-  unknown: "&8[&aUnknown&8]"
-  android: "&8[&aAndroid&8]"
-  ios: "&8[&bi&fOS&8]"
-  osx: "&8[&fOS&bX&8]"
-  fireos: "&8[&6F&fireOS&8]"
-  gearvr: "&8[&7Gear&fVR&8]"
-  hololens: "&8[&7Holo&fLens&8]"
-  win10: "&8[&3Win&f10&8]"
-  win32: "&8[&3Win&f32&8]"
-  dedicated: "&8[&aDED&8]"
-  orbis: "&8[&3ORBIS&8]"
-  nx: "&8[&eNX&8]"
-  switch: "&8[&4Switch&8]"
-  xboxOne: "&8[&2Xbox&fOne&8]"
+# Used in PlaceholderAPI supported by the Bukkit plugin
+placeholders:
+  # Enables the use of specific device descriptors for PlaceholderAPI
+  specific-device-descriptors: true
+
+  # The device strings for the placeholder
+  device:
+    java: "&8[&aJava&8]"
+    generic: "&8[&7Bedrock&8]"
+    unknown: "&8[&aUnknown&8]"
+    android: "&8[&aAndroid&8]"
+    ios: "&8[&bi&fOS&8]"
+    osx: "&8[&fOS&bX&8]"
+    fireos: "&8[&6F&fireOS&8]"
+    gearvr: "&8[&7Gear&fVR&8]"
+    hololens: "&8[&7Holo&fLens&8]"
+    win10: "&8[&3Win&f10&8]"
+    win32: "&8[&3Win&f32&8]"
+    dedicated: "&8[&aDED&8]"
+    orbis: "&8[&3ORBIS&8]"
+    nx: "&8[&eNX&8]"
+    switch: "&8[&4Switch&8]"
+    xboxOne: "&8[&2Xbox&fOne&8]"
+
+  # The locale format (none for java users)
+  locale:
+    found: "&8[&6%locale%&8]"
+    none: "&8[&6N/A&8]"
+
+  # Bedrock version format (none for java users)
+  version:
+    found: "&8[&6%version%&8]"
+    none: "&8[&6N/A&8]"
+
+  # Xbox username format (none for java users)
+  xbox-username:
+    found: "&8[&6%username%&8]"
+    none: "&8[&6N/A&8]"
+
+  # Xbox xuid format (none for java users)
+  xbox-xuid:
+    found: "&8[&6%xuid%&8]"
+    none: "&8[&6N/A&8]"
