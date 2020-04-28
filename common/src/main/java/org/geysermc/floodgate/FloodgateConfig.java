@@ -51,6 +51,8 @@ public class FloodgateConfig {
     public static class PlayerLinkConfig {
         @JsonProperty("enable")
         private boolean enabled;
+        @JsonProperty("type")
+        private String type;
         @JsonProperty("allow-linking")
         private boolean allowLinking;
         @JsonProperty("link-code-timeout")
