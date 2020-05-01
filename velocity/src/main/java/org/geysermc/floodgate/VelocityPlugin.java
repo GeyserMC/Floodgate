@@ -15,7 +15,10 @@ import com.velocitypowered.api.util.GameProfile;
 import lombok.Getter;
 import net.kyori.text.TextComponent;
 import org.geysermc.floodgate.HandshakeHandler.HandshakeResult;
+import org.geysermc.floodgate.command.LinkAccountCommand;
+import org.geysermc.floodgate.command.UnlinkAccountCommand;
 import org.geysermc.floodgate.injector.VelocityInjector;
+import org.geysermc.floodgate.util.CommandUtil;
 import org.geysermc.floodgate.util.ReflectionUtil;
 
 import java.io.File;
@@ -31,17 +34,20 @@ import static org.geysermc.floodgate.util.ReflectionUtil.getPrefixedClass;
 
 public class VelocityPlugin {
     @Getter private VelocityFloodgateConfig config;
+    @Getter private PlayerLink playerLink;
     private HandshakeHandler handshakeHandler;
 
     private Set<InboundConnection> workingSet;
     private Cache<InboundConnection, FloodgatePlayer> playerCache;
     private Cache<InboundConnection, String> playersToKick;
 
-    private Logger logger;
+    private final ProxyServer server;
+    private final Logger logger;
     private boolean injectSucceed;
 
     @Inject
     public VelocityPlugin(ProxyServer server, Logger logger) {
+        this.server = server;
         // we're too late if we would do this in the init event
         injectSucceed = false;
         try {
@@ -78,7 +84,12 @@ public class VelocityPlugin {
         }
 
         config = FloodgateConfig.load(logger, dataFolder.toPath().resolve("config.yml"), VelocityFloodgateConfig.class);
+        playerLink = PlayerLink.initialize(logger, dataFolder.toPath(), config);
         handshakeHandler = new HandshakeHandler(config.getPrivateKey(), true, config.getUsernamePrefix(), config.isReplaceSpaces());
+
+        CommandUtil commandUtil = new CommandUtil();
+        server.getCommandManager().register(CommandUtil.LINK_ACCOUNT_COMMAND, new LinkAccountCommand(playerLink, commandUtil));
+        server.getCommandManager().register(CommandUtil.UNLINK_ACCOUNT_COMMAND, new UnlinkAccountCommand(playerLink, commandUtil));
     }
 
     @Subscribe
@@ -105,9 +116,9 @@ public class VelocityPlugin {
             }
 
             FloodgatePlayer player = result.getFloodgatePlayer();
-            FloodgateAPI.addEncryptedData(player.getJavaUniqueId(), result.getHandshakeData()[2] + '\0' + result.getHandshakeData()[3]);
+            FloodgateAPI.addEncryptedData(player.getCorrectUniqueId(), result.getHandshakeData()[2] + '\0' + result.getHandshakeData()[3]);
             playerCache.put(event.getConnection(), player);
-            logger.info("Added " + player.getJavaUsername() + " " + player.getJavaUniqueId());
+            logger.info("Added " + player.getCorrectUsername() + " " + player.getCorrectUniqueId());
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -159,7 +170,7 @@ public class VelocityPlugin {
         FloodgatePlayer player = playerCache.getIfPresent(event.getConnection());
         if (player != null) {
             playerCache.invalidate(event.getConnection());
-            event.setGameProfile(new GameProfile(player.getJavaUniqueId(), player.getJavaUsername(), new ArrayList<>()));
+            event.setGameProfile(new GameProfile(player.getCorrectUniqueId(), player.getCorrectUsername(), new ArrayList<>()));
         }
     }
 

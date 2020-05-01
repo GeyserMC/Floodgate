@@ -11,7 +11,10 @@ import net.md_5.bungee.event.EventPriority;
 import net.md_5.bungee.protocol.packet.Handshake;
 import org.geysermc.floodgate.HandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.HandshakeHandler.ResultType;
+import org.geysermc.floodgate.command.LinkAccountCommand;
+import org.geysermc.floodgate.command.UnlinkAccountCommand;
 import org.geysermc.floodgate.util.BedrockData;
+import org.geysermc.floodgate.util.CommandUtil;
 import org.geysermc.floodgate.util.ReflectionUtil;
 
 import java.lang.reflect.Field;
@@ -25,6 +28,7 @@ public class BungeePlugin extends Plugin implements Listener {
     private static Field extraHandshakeData;
 
     @Getter private BungeeFloodgateConfig config;
+    @Getter private PlayerLink playerLink;
     private BungeeDebugger debugger;
     private HandshakeHandler handshakeHandler;
 
@@ -35,6 +39,7 @@ public class BungeePlugin extends Plugin implements Listener {
             getDataFolder().mkdir();
         }
         config = FloodgateConfig.load(getLogger(), getDataFolder().toPath().resolve("config.yml"), BungeeFloodgateConfig.class);
+        playerLink = PlayerLink.initialize(getLogger(), getDataFolder().toPath(), config);
         handshakeHandler = new HandshakeHandler(config.getPrivateKey(), true, config.getUsernamePrefix(), config.isReplaceSpaces());
     }
 
@@ -44,6 +49,10 @@ public class BungeePlugin extends Plugin implements Listener {
         if (config.isDebug()) {
             debugger = new BungeeDebugger();
         }
+
+        CommandUtil commandUtil = new CommandUtil();
+        getProxy().getPluginManager().registerCommand(this, new LinkAccountCommand(playerLink, commandUtil));
+        getProxy().getPluginManager().registerCommand(this, new UnlinkAccountCommand(playerLink, commandUtil));
     }
 
     @Override
@@ -51,6 +60,7 @@ public class BungeePlugin extends Plugin implements Listener {
         if (config.isDebug()) {
             getLogger().warning("Please note that it is not possible to reload this plugin when debug mode is enabled. At least for now");
         }
+        playerLink.stop();
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -94,12 +104,12 @@ public class BungeePlugin extends Plugin implements Listener {
             }
 
             FloodgatePlayer player = result.getFloodgatePlayer();
-            FloodgateAPI.addEncryptedData(player.getJavaUniqueId(), result.getHandshakeData()[2] + '\0' + result.getHandshakeData()[3]);
+            FloodgateAPI.addEncryptedData(player.getCorrectUniqueId(), result.getHandshakeData()[2] + '\0' + result.getHandshakeData()[3]);
 
             event.getConnection().setOnlineMode(false);
-            event.getConnection().setUniqueId(player.getJavaUniqueId());
+            event.getConnection().setUniqueId(player.getCorrectUniqueId());
 
-            ReflectionUtil.setValue(event.getConnection(), "name", player.getJavaUsername());
+            ReflectionUtil.setValue(event.getConnection(), "name", player.getCorrectUsername());
             Object channelWrapper = ReflectionUtil.getValue(event.getConnection(), "ch");
             SocketAddress remoteAddress = ReflectionUtil.getCastedValue(channelWrapper, "remoteAddress", SocketAddress.class);
             if (!(remoteAddress instanceof InetSocketAddress)) {
@@ -121,8 +131,8 @@ public class BungeePlugin extends Plugin implements Listener {
     public void onPlayerDisconnect(PlayerDisconnectEvent event) {
         FloodgatePlayer player = FloodgateAPI.getPlayerByConnection(event.getPlayer().getPendingConnection());
         if (player != null) {
-            FloodgateAPI.players.remove(player.getJavaUniqueId());
-            FloodgateAPI.removeEncryptedData(player.getJavaUniqueId());
+            FloodgateAPI.players.remove(player.getCorrectUniqueId());
+            FloodgateAPI.removeEncryptedData(player.getCorrectUniqueId());
             System.out.println("Removed " + player.getUsername() + " " + event.getPlayer().getUniqueId());
         }
     }
