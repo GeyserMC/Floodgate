@@ -94,8 +94,10 @@ public class FloodgatePlayer {
     }
 
     /**
-     * async alternative to {@link #fetchLinkedPlayer()}
-     * @see #fetchLinkedPlayer() for the sync versionnon
+     * Async alternative to {@link #fetchLinkedPlayer()}.
+     *
+     * @see #fetchLinkedPlayer() for the sync version
+     * @return a completable future of the fetched link player
      */
     public CompletableFuture<LinkedPlayer> fetchLinkedPlayerAsync() {
         return PlayerLink.isEnabledAndAllowed() ?

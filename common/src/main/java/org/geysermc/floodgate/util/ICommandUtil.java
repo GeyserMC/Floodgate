@@ -8,11 +8,19 @@ public interface ICommandUtil<P> {
 
     /**
      * Send the specified player a message
+     *
+     * @param player the player to send the message to
+     * @param message the command message
+     * @param args the arguments
      */
     void sendMessage(P player, CommandMessage message, Object... args);
 
     /**
-     * Same as {@link #sendMessage(P, CommandMessage, Object...)} except it kicks the player.
+     * Same as {@link ICommandUtil#sendMessage(Object, CommandMessage, Object...)} except it kicks the player.
+     *
+     * @param player the player to send the message to
+     * @param message the command message
+     * @param args the arguments
      */
     void kickPlayer(P player, CommandMessage message, Object... args);
 }

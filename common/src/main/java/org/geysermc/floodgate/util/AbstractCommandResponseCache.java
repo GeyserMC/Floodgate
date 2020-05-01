@@ -13,6 +13,8 @@ public abstract class AbstractCommandResponseCache<T> {
 
     /**
      * Transforms a string (raw input) into a format that can be sent to the player
+     * @param message he message to transform
+     * @return the transformed message
      */
     protected abstract T transformMessage(String message);
 
@@ -21,6 +23,9 @@ public abstract class AbstractCommandResponseCache<T> {
      * If cached: return cached message.<br>
      * If not cached: transform it, add the message to cache and return the message.<br>
      * It will only transform the message if the message has one or more arguments
+     * @param message the command message
+     * @param args the arguments
+     * @return the message; caches if not already
      */
     public T getOrAddCachedMessage(CommandMessage message, Object... args) {
         if (args != null && args.length > 0) {
