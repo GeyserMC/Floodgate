@@ -8,12 +8,12 @@ import org.geysermc.floodgate.command.CommandMessage;
 public class CommandUtil extends AbstractCommandResponseCache<BaseComponent[]> implements ICommandUtil<ProxiedPlayer> {
     @Override
     public void sendMessage(ProxiedPlayer player, CommandMessage message, Object... args) {
-        player.sendMessage(getOrAddCachedMessage(message));
+        player.sendMessage(getOrAddCachedMessage(message, args));
     }
 
     @Override
     public void kickPlayer(ProxiedPlayer player, CommandMessage message, Object... args) {
-        player.disconnect(getOrAddCachedMessage(message));
+        player.disconnect(getOrAddCachedMessage(message, args));
     }
 
     @Override
