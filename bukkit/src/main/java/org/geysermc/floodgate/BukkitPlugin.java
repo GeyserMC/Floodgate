@@ -62,6 +62,7 @@ public class BukkitPlugin extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
+        // Move the player out of ready to join
         FloodgatePlayer player = FloodgateAPI.playersForJoin.get(event.getPlayer().getUniqueId());
         if (player != null) {
             FloodgateAPI.players.put(player.getCorrectUniqueId(), player);
@@ -72,7 +73,6 @@ public class BukkitPlugin extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         FloodgatePlayer player = FloodgateAPI.getPlayer(event.getPlayer());
-
         if (player != null) {
             FloodgateAPI.players.remove(player.getCorrectUniqueId());
             FloodgateAPI.playersForJoin.remove(player.getCorrectUniqueId());

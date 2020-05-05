@@ -45,7 +45,10 @@ public class HandshakeHandler {
             }
 
             FloodgatePlayer player = new FloodgatePlayer(bedrockData, usernamePrefix, replaceSpaces);
+
+            // This fixes wrong data with linked accounts when they login from another device
             AbstractFloodgateAPI.playersForJoin.put(player.getCorrectUniqueId(), player);
+
             return new HandshakeResult(ResultType.SUCCESS, data, bedrockData, player);
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
             e.printStackTrace();

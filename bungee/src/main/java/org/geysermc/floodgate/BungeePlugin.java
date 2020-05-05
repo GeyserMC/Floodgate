@@ -65,6 +65,13 @@ public class BungeePlugin extends Plugin implements Listener {
 
     @EventHandler(priority = EventPriority.LOW)
     public void onServerConnect(ServerConnectEvent e) {
+        // Move the player out of ready to join
+        FloodgatePlayer player = FloodgateAPI.playersForJoin.get(e.getPlayer().getUniqueId());
+        if (player != null) {
+            FloodgateAPI.players.put(player.getCorrectUniqueId(), player);
+            FloodgateAPI.playersForJoin.remove(player.getCorrectUniqueId());
+        }
+
         // Passes the information through to the connecting server if enabled
         if (config.isSendFloodgateData() && FloodgateAPI.isBedrockPlayer(e.getPlayer())) {
             Handshake handshake = ReflectionUtil.getCastedValue(e.getPlayer().getPendingConnection(), "handshake", Handshake.class);
@@ -132,6 +139,7 @@ public class BungeePlugin extends Plugin implements Listener {
         FloodgatePlayer player = FloodgateAPI.getPlayerByConnection(event.getPlayer().getPendingConnection());
         if (player != null) {
             FloodgateAPI.players.remove(player.getCorrectUniqueId());
+            FloodgateAPI.playersForJoin.remove(player.getCorrectUniqueId());
             FloodgateAPI.removeEncryptedData(player.getCorrectUniqueId());
             System.out.println("Removed " + player.getUsername() + " " + event.getPlayer().getUniqueId());
         }
