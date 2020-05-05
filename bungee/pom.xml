@@ -62,7 +62,6 @@
                 <configuration>
                     <finalName>${outputName}</finalName>
                     <shadedArtifactAttached>true</shadedArtifactAttached>
-                    <minimizeJar>true</minimizeJar>
                 </configuration>
             </plugin>
         </plugins>
