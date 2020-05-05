@@ -6,6 +6,7 @@ import java.util.UUID;
 
 abstract class AbstractFloodgateAPI {
     static final Map<UUID, FloodgatePlayer> players = new HashMap<>();
+    static final Map<UUID, FloodgatePlayer> playersForJoin = new HashMap<>();
 
     /**
      * Get info about the given Bedrock player

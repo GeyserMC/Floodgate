@@ -1,7 +1,10 @@
 package org.geysermc.floodgate;
 
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.command.LinkAccountCommand;
@@ -12,7 +15,7 @@ import org.geysermc.floodgate.util.ReflectionUtil;
 
 import java.util.logging.Level;
 
-public class BukkitPlugin extends JavaPlugin {
+public class BukkitPlugin extends JavaPlugin implements Listener {
     @Getter private static BukkitPlugin instance;
     @Getter private FloodgateConfig configuration;
     @Getter private PlayerLink playerLink;
@@ -43,6 +46,8 @@ public class BukkitPlugin extends JavaPlugin {
         CommandUtil commandUtil = new CommandUtil();
         getCommand(CommandUtil.LINK_ACCOUNT_COMMAND).setExecutor(new LinkAccountCommand(playerLink, commandUtil));
         getCommand(CommandUtil.UNLINK_ACCOUNT_COMMAND).setExecutor(new UnlinkAccountCommand(playerLink, commandUtil));
+
+        Bukkit.getServer().getPluginManager().registerEvents(this, this);
     }
 
     @Override
@@ -56,10 +61,21 @@ public class BukkitPlugin extends JavaPlugin {
     }
 
     @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        FloodgatePlayer player = FloodgateAPI.playersForJoin.get(event.getPlayer().getUniqueId());
+        if (player != null) {
+            FloodgateAPI.players.put(player.getCorrectUniqueId(), player);
+            FloodgateAPI.playersForJoin.remove(player.getCorrectUniqueId());
+        }
+    }
+
+    @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         FloodgatePlayer player = FloodgateAPI.getPlayer(event.getPlayer());
+
         if (player != null) {
             FloodgateAPI.players.remove(player.getCorrectUniqueId());
+            FloodgateAPI.playersForJoin.remove(player.getCorrectUniqueId());
             System.out.println("Removed " + player.getUsername() + " " + event.getPlayer().getUniqueId());
         }
     }
