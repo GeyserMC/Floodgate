@@ -43,7 +43,7 @@ public class BukkitPlugin extends JavaPlugin implements Listener {
                 getServer().getPluginManager().disablePlugin(this);
             }
         }
-        CommandUtil commandUtil = new CommandUtil();
+        CommandUtil commandUtil = new CommandUtil(this);
         getCommand(CommandUtil.LINK_ACCOUNT_COMMAND).setExecutor(new LinkAccountCommand(playerLink, commandUtil));
         getCommand(CommandUtil.UNLINK_ACCOUNT_COMMAND).setExecutor(new UnlinkAccountCommand(playerLink, commandUtil));
 
