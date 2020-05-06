@@ -47,6 +47,7 @@ public class BukkitPlugin extends JavaPlugin implements Listener {
         getCommand(CommandUtil.LINK_ACCOUNT_COMMAND).setExecutor(new LinkAccountCommand(playerLink, commandUtil));
         getCommand(CommandUtil.UNLINK_ACCOUNT_COMMAND).setExecutor(new UnlinkAccountCommand(playerLink, commandUtil));
 
+        // Register the plugin as an event listener to we get join and leave events
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
     }
 
