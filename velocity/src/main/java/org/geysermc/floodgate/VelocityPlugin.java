@@ -88,8 +88,8 @@ public class VelocityPlugin {
         handshakeHandler = new HandshakeHandler(config.getPrivateKey(), true, config.getUsernamePrefix(), config.isReplaceSpaces());
 
         CommandUtil commandUtil = new CommandUtil();
-        server.getCommandManager().register(CommandUtil.LINK_ACCOUNT_COMMAND, new LinkAccountCommand(playerLink, commandUtil));
-        server.getCommandManager().register(CommandUtil.UNLINK_ACCOUNT_COMMAND, new UnlinkAccountCommand(playerLink, commandUtil));
+        server.getCommandManager().register(CommandUtil.LINK_ACCOUNT_COMMAND, new LinkAccountCommand(playerLink, commandUtil), "floodgate-velocity:" + CommandUtil.LINK_ACCOUNT_COMMAND);
+        server.getCommandManager().register(CommandUtil.UNLINK_ACCOUNT_COMMAND, new UnlinkAccountCommand(playerLink, commandUtil), "floodgate-velocity:" + CommandUtil.UNLINK_ACCOUNT_COMMAND);
     }
 
     @Subscribe

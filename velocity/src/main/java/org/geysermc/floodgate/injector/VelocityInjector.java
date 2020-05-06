@@ -8,6 +8,7 @@ import javassist.Modifier;
 import javassist.bytecode.Descriptor;
 import lombok.Getter;
 import org.geysermc.floodgate.FloodgateAPI;
+import org.geysermc.floodgate.FloodgatePlayer;
 import org.geysermc.floodgate.VelocityPlugin;
 import org.geysermc.floodgate.util.ReflectionUtil;
 
@@ -73,28 +74,35 @@ public class VelocityInjector {
             // This consumer is only called when the server is sending data (outgoing).
             // So when we get a handshake packet it'll be Velocity trying to connect to a server.
             // And that is exactly what we need, to edit the outgoing handshake packet to include Floodgate data
-            if (plugin.getConfig().isSendFloodgateData()) {
-                try {
-                    if (handshakePacket.isInstance(packet)) {
-                        String address = ReflectionUtil.getCastedValue(packet, serverAddress, String.class);
+            try {
+                if (handshakePacket.isInstance(packet)) {
+                    String address = ReflectionUtil.getCastedValue(packet, serverAddress, String.class);
 
-                        Object sessionHandler = ReflectionUtil.getValue(minecraftConnection, sessionHandlerField);
-                        if (loginHandler.isInstance(sessionHandler)) {
-                            Object serverConn = ReflectionUtil.getValue(sessionHandler, serverConnField);
-                            Player connectedPlayer = ReflectionUtil.invokeCasted(serverConn, playerGetMethod, Player.class);
+                    Object sessionHandler = ReflectionUtil.getValue(minecraftConnection, sessionHandlerField);
+                    if (loginHandler.isInstance(sessionHandler)) {
+                        Object serverConn = ReflectionUtil.getValue(sessionHandler, serverConnField);
+                        Player connectedPlayer = ReflectionUtil.invokeCasted(serverConn, playerGetMethod, Player.class);
 
-                            String encryptedData = FloodgateAPI.getEncryptedData(connectedPlayer.getUniqueId());
-                            if (encryptedData == null) return; // we know enough, this is not a Floodgate player
+                        String encryptedData = FloodgateAPI.getEncryptedData(connectedPlayer.getUniqueId());
+                        if (encryptedData == null) return; // we know enough, this is not a Floodgate player
 
+                        // Move the player out of ready to join
+                        FloodgatePlayer player = FloodgateAPI.playersForJoin.get(connectedPlayer.getUniqueId());
+                        if (player != null) {
+                            FloodgateAPI.players.put(player.getCorrectUniqueId(), player);
+                            FloodgateAPI.playersForJoin.remove(player.getCorrectUniqueId());
+                        }
+
+                        if (plugin.getConfig().isSendFloodgateData()) {
                             String[] splitted = address.split("\0");
                             String remaining = address.substring(splitted[0].length());
                             ReflectionUtil.setValue(packet, serverAddress, splitted[0] + '\0' + FLOODGATE_IDENTIFIER + '\0' + encryptedData + remaining);
                             // keep the same system as we have on Bungeecord. Our data is before the Bungee data
                         }
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         };
 
