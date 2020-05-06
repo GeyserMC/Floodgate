@@ -10,6 +10,7 @@ import javax.crypto.NoSuchPaddingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.util.UUID;
 
 import static org.geysermc.floodgate.util.BedrockData.EXPECTED_LENGTH;
 import static org.geysermc.floodgate.util.BedrockData.FLOODGATE_IDENTIFIER;
@@ -45,6 +46,10 @@ public class HandshakeHandler {
             }
 
             FloodgatePlayer player = new FloodgatePlayer(bedrockData, usernamePrefix, replaceSpaces);
+            if (isBungeeData) {
+                String uuid = data[5].replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5");
+                player.setJavaUniqueId(UUID.fromString(uuid));
+            }
 
             // This fixes wrong data with linked accounts when they login from another device
             AbstractFloodgateAPI.playersForJoin.put(player.getCorrectUniqueId(), player);

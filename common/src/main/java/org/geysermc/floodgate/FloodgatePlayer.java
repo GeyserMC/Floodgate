@@ -1,6 +1,7 @@
 package org.geysermc.floodgate;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.DeviceOS;
 
@@ -27,6 +28,7 @@ public class FloodgatePlayer {
      * The Unique Identifier used at the server to identify the bedrock client.<br>
      * Note that this field is only used when the player is not an {@link LinkedPlayer LinkedPlayer}
      */
+    @Setter
     private UUID javaUniqueId;
     /**
      * The Xbox Unique Identifier
