@@ -1,16 +1,14 @@
 package org.geysermc.floodgate.util;
 
+import lombok.AllArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.geysermc.floodgate.command.CommandMessage;
 
+@AllArgsConstructor
 public class CommandUtil extends AbstractCommandResponseCache<String> implements ICommandUtil<Player> {
-    private Plugin plugin;
-
-    public CommandUtil(Plugin plugin) {
-        this.plugin = plugin;
-    }
+    private final Plugin plugin;
 
     @Override
     public void sendMessage(Player player, CommandMessage message, Object... args) {
@@ -20,11 +18,7 @@ public class CommandUtil extends AbstractCommandResponseCache<String> implements
     @Override
     public void kickPlayer(Player player, CommandMessage message, Object... args) {
         // Have to run this in a non async thread so we don't get a `Asynchronous player kick!` error
-        Bukkit.getScheduler().runTask(plugin, new Runnable() {
-            public void run() {
-                player.kickPlayer(format(message, args));
-            }
-        });
+        Bukkit.getScheduler().runTask(plugin, () -> player.kickPlayer(format(message, args)));
     }
 
     @Override

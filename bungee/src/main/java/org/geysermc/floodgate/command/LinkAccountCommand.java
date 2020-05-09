@@ -14,7 +14,7 @@ public class LinkAccountCommand extends Command {
     private final LinkAccountCommandHandler handler;
 
     public LinkAccountCommand(PlayerLink playerLink, CommandUtil responseCache) {
-        super(CommandUtil.LINK_ACCOUNT_COMMAND, null, "floodgate-bungee:" + CommandUtil.LINK_ACCOUNT_COMMAND);
+        super(CommandUtil.LINK_ACCOUNT_COMMAND);
         handler = new LinkAccountCommandHandler(playerLink, responseCache);
     }
 

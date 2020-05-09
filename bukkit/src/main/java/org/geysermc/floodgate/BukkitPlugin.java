@@ -2,9 +2,12 @@ package org.geysermc.floodgate;
 
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.command.LinkAccountCommand;
@@ -61,23 +64,31 @@ public class BukkitPlugin extends JavaPlugin implements Listener {
         playerLink.stop();
     }
 
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        // Move the player out of ready to join
-        FloodgatePlayer player = FloodgateAPI.playersForJoin.get(event.getPlayer().getUniqueId());
-        if (player != null) {
-            FloodgateAPI.players.put(player.getCorrectUniqueId(), player);
-            FloodgateAPI.playersForJoin.remove(player.getCorrectUniqueId());
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onAsyncPreLogin(AsyncPlayerPreLoginEvent event) {
+        if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
+            FloodgateAPI.removePlayer(event.getUniqueId(), true);
         }
     }
 
-    @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event) {
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerLogin(PlayerLoginEvent event) {
+//        System.out.println("Is bedrock? " + FloodgateAPI.isBedrockPlayer(event.getPlayer()));
+        if (event.getResult() != PlayerLoginEvent.Result.ALLOWED) {
+            FloodgateAPI.removePlayer(event.getPlayer().getUniqueId());
+            return;
+        }
+        // if there was another player with the same uuid online,
+        // he has been disconnected by now
         FloodgatePlayer player = FloodgateAPI.getPlayer(event.getPlayer());
-        if (player != null) {
-            FloodgateAPI.players.remove(player.getCorrectUniqueId());
-            FloodgateAPI.playersForJoin.remove(player.getCorrectUniqueId());
-            System.out.println("Removed " + player.getUsername() + " " + event.getPlayer().getUniqueId());
+        if (player != null) player.setLogin(false);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        if (FloodgateAPI.removePlayer(player.getUniqueId())) {
+            System.out.println("Removed Bedrock player who was logged in as " + player.getName() + " " + event.getPlayer().getUniqueId());
         }
     }
 }
