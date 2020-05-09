@@ -14,7 +14,7 @@ public class UnlinkAccountCommand extends Command {
     private final UnlinkAccountCommandHandler handler;
 
     public UnlinkAccountCommand(PlayerLink playerLink, CommandUtil commandUtil) {
-        super(CommandUtil.UNLINK_ACCOUNT_COMMAND, null, "floodgate-bungee:" + CommandUtil.UNLINK_ACCOUNT_COMMAND);
+        super(CommandUtil.UNLINK_ACCOUNT_COMMAND);
         handler = new UnlinkAccountCommandHandler(playerLink, commandUtil);
     }
 

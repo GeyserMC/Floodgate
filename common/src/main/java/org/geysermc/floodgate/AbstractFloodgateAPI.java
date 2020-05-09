@@ -5,8 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 
 abstract class AbstractFloodgateAPI {
-    public static final Map<UUID, FloodgatePlayer> players = new HashMap<>();
-    public static final Map<UUID, FloodgatePlayer> playersForJoin = new HashMap<>();
+    static final Map<UUID, FloodgatePlayer> players = new HashMap<>();
 
     /**
      * Get info about the given Bedrock player
@@ -14,7 +13,43 @@ abstract class AbstractFloodgateAPI {
      * @return FloodgatePlayer if the given uuid is a Bedrock player
      */
     public static FloodgatePlayer getPlayer(UUID uuid) {
-        return players.get(uuid);
+        FloodgatePlayer player = players.get(uuid);
+        if (player != null || isFloodgateId(uuid)) return player;
+        // make it possible to find player by Java id (for example for a linked player)
+        for (FloodgatePlayer player1 : players.values()) {
+            if (player1.getCorrectUniqueId() == uuid) {
+                return player1;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Removes a player (should only be used internally)
+     * @param onlineId The UUID of the online player
+     * @param removeLogin true if it should remove a sessions who is still logging in
+     * @return true if player was a LinkedPlayer
+     */
+    static boolean removePlayer(UUID onlineId, boolean removeLogin) {
+        FloodgatePlayer player = players.remove(onlineId);
+        // LinkedPlayer is never registered under his java id
+        // and a linked player has never a FloodgateId
+        if (player != null || !isFloodgateId(onlineId)) return false;
+
+        for (FloodgatePlayer player1 : players.values()) {
+            if (player1.isLogin() && !removeLogin || !player1.isLogin() && removeLogin) continue;
+            if (!player1.getCorrectUniqueId().equals(onlineId)) continue;
+            players.remove(player1.getJavaUniqueId());
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * {@link #removePlayer(UUID, boolean)} but with removeLogin on false
+     */
+    static boolean removePlayer(UUID onlineId) {
+        return removePlayer(onlineId, false);
     }
 
     /**
@@ -23,7 +58,7 @@ abstract class AbstractFloodgateAPI {
      * @return true if the given <b>online</b> player is a Bedrock player
      */
     public static boolean isBedrockPlayer(UUID uuid) {
-        return players.containsKey(uuid);
+        return getPlayer(uuid) != null;
     }
 
     /**
@@ -31,5 +66,9 @@ abstract class AbstractFloodgateAPI {
      */
     public static UUID createJavaPlayerId(long xuid) {
         return new UUID(0, xuid);
+    }
+
+    public static boolean isFloodgateId(UUID uuid) {
+        return uuid.getMostSignificantBits() == 0;
     }
 }

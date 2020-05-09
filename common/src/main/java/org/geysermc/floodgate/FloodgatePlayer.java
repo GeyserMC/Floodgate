@@ -51,6 +51,12 @@ public class FloodgatePlayer {
      */
     private LinkedPlayer linkedPlayer;
 
+    /**
+     * Returns true if the player is still logging in
+     */
+    @Setter
+    private boolean login = true;
+
     FloodgatePlayer(BedrockData data, String prefix, boolean replaceSpaces) {
         xuid = data.getXuid();
         version = data.getVersion();

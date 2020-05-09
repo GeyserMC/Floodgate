@@ -3,13 +3,16 @@ package org.geysermc.floodgate;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.inject.Inject;
+import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.ConnectionHandshakeEvent;
+import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent.PreLoginComponentResult;
 import com.velocitypowered.api.event.player.GameProfileRequestEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.proxy.InboundConnection;
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.util.GameProfile;
 import lombok.Getter;
@@ -88,11 +91,11 @@ public class VelocityPlugin {
         handshakeHandler = new HandshakeHandler(config.getPrivateKey(), true, config.getUsernamePrefix(), config.isReplaceSpaces());
 
         CommandUtil commandUtil = new CommandUtil();
-        server.getCommandManager().register(CommandUtil.LINK_ACCOUNT_COMMAND, new LinkAccountCommand(playerLink, commandUtil), "floodgate-velocity:" + CommandUtil.LINK_ACCOUNT_COMMAND);
-        server.getCommandManager().register(CommandUtil.UNLINK_ACCOUNT_COMMAND, new UnlinkAccountCommand(playerLink, commandUtil), "floodgate-velocity:" + CommandUtil.UNLINK_ACCOUNT_COMMAND);
+        server.getCommandManager().register(CommandUtil.LINK_ACCOUNT_COMMAND, new LinkAccountCommand(playerLink, commandUtil));
+        server.getCommandManager().register(CommandUtil.UNLINK_ACCOUNT_COMMAND, new UnlinkAccountCommand(playerLink, commandUtil));
     }
 
-    @Subscribe
+    @Subscribe(order = PostOrder.EARLY)
     public void onConnectionHandshake(ConnectionHandshakeEvent event) {
         if (!injectSucceed) return;
         workingSet.add(event.getConnection());
@@ -126,7 +129,7 @@ public class VelocityPlugin {
         }
     }
 
-    @Subscribe
+    @Subscribe(order = PostOrder.EARLY)
     public void onPreLogin(PreLoginEvent event) {
         if (!injectSucceed) return;
 
@@ -163,7 +166,7 @@ public class VelocityPlugin {
         }
     }
 
-    @Subscribe
+    @Subscribe(order = PostOrder.EARLY)
     public void onGameProfileRequest(GameProfileRequestEvent event) {
         if (!injectSucceed) return;
 
@@ -171,6 +174,15 @@ public class VelocityPlugin {
         if (player != null) {
             playerCache.invalidate(event.getConnection());
             event.setGameProfile(new GameProfile(player.getCorrectUniqueId(), player.getCorrectUsername(), new ArrayList<>()));
+        }
+    }
+
+    @Subscribe(order = PostOrder.LAST)
+    public void onDisconnect(DisconnectEvent event) {
+        Player player = event.getPlayer();
+        if (FloodgateAPI.removePlayer(player.getUniqueId(), event.disconnectedDuringLogin())) {
+            FloodgateAPI.removeEncryptedData(event.getPlayer().getUniqueId());
+            logger.info("Removed Bedrock player who was logged in as " + player.getUsername() + " " + player.getUniqueId());
         }
     }
 
