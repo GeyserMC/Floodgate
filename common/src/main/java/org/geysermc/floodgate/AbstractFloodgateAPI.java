@@ -17,7 +17,7 @@ abstract class AbstractFloodgateAPI {
         if (player != null || isFloodgateId(uuid)) return player;
         // make it possible to find player by Java id (for example for a linked player)
         for (FloodgatePlayer player1 : players.values()) {
-            if (player1.getCorrectUniqueId() == uuid) {
+            if (player1.getCorrectUniqueId().equals(uuid)) {
                 return player1;
             }
         }
@@ -34,7 +34,7 @@ abstract class AbstractFloodgateAPI {
         FloodgatePlayer player = players.remove(onlineId);
         // LinkedPlayer is never registered under his java id
         // and a linked player has never a FloodgateId
-        if (player != null || !isFloodgateId(onlineId)) return false;
+        if (player != null || isFloodgateId(onlineId)) return false;
 
         for (FloodgatePlayer player1 : players.values()) {
             if (player1.isLogin() && !removeLogin || !player1.isLogin() && removeLogin) continue;

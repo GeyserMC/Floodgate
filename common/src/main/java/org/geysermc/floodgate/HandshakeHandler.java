@@ -46,13 +46,14 @@ public class HandshakeHandler {
             }
 
             FloodgatePlayer player = new FloodgatePlayer(bedrockData, usernamePrefix, replaceSpaces);
-            AbstractFloodgateAPI.players.put(player.getJavaUniqueId(), player);
 
             // Get the UUID from the bungee instance to fix linked account UUIDs being wrong
             if (isBungeeData) {
                 String uuid = data[5].replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5");
                 player.setJavaUniqueId(UUID.fromString(uuid));
             }
+
+            AbstractFloodgateAPI.players.put(player.getJavaUniqueId(), player);
 
             return new HandshakeResult(ResultType.SUCCESS, data, bedrockData, player);
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
