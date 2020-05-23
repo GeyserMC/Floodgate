@@ -4,6 +4,7 @@ version: ${project.version}
 author: ${project.organization.name}
 website: ${project.url}
 main: org.geysermc.floodgate.BukkitPlugin
+api-version: 1.13
 commands:
   linkaccount:
     description: Link your Java and Bedrock accounts
