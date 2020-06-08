@@ -31,15 +31,30 @@ abstract class AbstractFloodgateAPI {
      * @return true if player was a LinkedPlayer
      */
     static boolean removePlayer(UUID onlineId, boolean removeLogin) {
-        FloodgatePlayer player = players.remove(onlineId);
-        // LinkedPlayer is never registered under his java id
-        // and a linked player has never a FloodgateId
-        if (player != null || isFloodgateId(onlineId)) return false;
+        FloodgatePlayer player = players.get(onlineId);
+        // the player is a non-linked player or a linked player but somehow someone tried to
+        // remove the player by his xuid, we have to find out
+        if (player != null) {
+            // we don't allow them to remove a player by his xuid
+            // because a linked player is never registered by his linked java uuid
+            if (player.getLinkedPlayer() != null) return false;
 
+            // removeLogin logics
+            if (player.isLogin() && !removeLogin || !player.isLogin() && removeLogin) {
+                return false;
+            }
+
+            // passed the test
+            players.remove(onlineId);
+            // was the account linked?
+            return player.getLinkedPlayer() != null;
+        }
+
+        // we still want to be able to remove a linked-player by his linked java uuid
         for (FloodgatePlayer player1 : players.values()) {
             if (player1.isLogin() && !removeLogin || !player1.isLogin() && removeLogin) continue;
             if (!player1.getCorrectUniqueId().equals(onlineId)) continue;
-            players.remove(player1.getJavaUniqueId());
+            players.remove(createJavaPlayerId(Long.parseLong(player1.getXuid())));
             return true;
         }
         return false;
@@ -50,6 +65,11 @@ abstract class AbstractFloodgateAPI {
      */
     static boolean removePlayer(UUID onlineId) {
         return removePlayer(onlineId, false);
+    }
+
+    static boolean removePlayer(FloodgatePlayer player) {
+        boolean removed = players.remove(createJavaPlayerId(Long.parseLong(player.getXuid())), player);
+        return removed && player.getLinkedPlayer() != null;
     }
 
     /**
