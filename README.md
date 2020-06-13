@@ -1,8 +1,5 @@
 # Floodgate
 
-
-# Floodgate
-
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Build Status](https://ci.nukkitx.com/job/GeyserMC/job/Floodgate/job/development/badge/icon)](https://ci.nukkitx.com/job/GeyserMC/job/Floodgate/job/development/)
 [![Discord](https://img.shields.io/discord/613163671870242838.svg?color=%237289da&label=discord)](http://discord.geysermc.org/)
