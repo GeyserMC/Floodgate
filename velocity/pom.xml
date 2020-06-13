@@ -17,6 +17,12 @@
             <id>velocity-repo</id>
             <url>https://repo.velocitypowered.com/snapshots/</url>
         </repository>
+        <!-- Hotfix to support the newest velocity-api, because they depend on the minecraft repo
+         but for whatever reason they don't have it in the velocity-api -->
+        <repository>
+            <id>minecraft-repo</id>
+            <url>https://libraries.minecraft.net/</url>
+        </repository>
         <repository>
             <id>sponge-repo</id>
             <url>https://repo.spongepowered.org/maven/</url>
@@ -73,7 +79,6 @@
                 <configuration>
                     <finalName>${outputName}</finalName>
                     <shadedArtifactAttached>true</shadedArtifactAttached>
-                    <minimizeJar>true</minimizeJar>
                 </configuration>
             </plugin>
         </plugins>

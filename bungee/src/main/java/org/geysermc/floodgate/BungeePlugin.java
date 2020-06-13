@@ -1,6 +1,8 @@
 package org.geysermc.floodgate;
 
 import lombok.Getter;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.event.ServerConnectEvent;
@@ -127,13 +129,34 @@ public class BungeePlugin extends Plugin implements Listener {
         });
     }
 
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPreLoginMonitor(PreLoginEvent event) {
+        if (event.isCancelled()) {
+            FloodgateAPI.removePlayer(event.getConnection().getUniqueId(), true);
+        }
+    }
+
     @EventHandler
+    public void onLogin(LoginEvent event) {
+        // if there was another player with the same uuid / name online,
+        // he has been disconnected by now
+        FloodgatePlayer player = FloodgateAPI.getPlayerByConnection(event.getConnection());
+        if (player != null) player.setLogin(false);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onLoginMonitor(LoginEvent event) {
+        if (event.isCancelled()) {
+            FloodgateAPI.removePlayer(event.getConnection().getUniqueId());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerDisconnect(PlayerDisconnectEvent event) {
-        FloodgatePlayer player = FloodgateAPI.getPlayerByConnection(event.getPlayer().getPendingConnection());
-        if (player != null) {
-            FloodgateAPI.players.remove(player.getCorrectUniqueId());
-            FloodgateAPI.removeEncryptedData(player.getCorrectUniqueId());
-            System.out.println("Removed " + player.getUsername() + " " + event.getPlayer().getUniqueId());
+        ProxiedPlayer player = event.getPlayer();
+        if (FloodgateAPI.removePlayer(player.getUniqueId())) {
+            FloodgateAPI.removeEncryptedData(player.getUniqueId());
+            System.out.println("Removed Bedrock player who was logged in as " + player.getName() + " " + player.getUniqueId());
         }
     }
 
