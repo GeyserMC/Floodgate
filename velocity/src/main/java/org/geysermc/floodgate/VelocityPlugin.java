@@ -15,6 +15,8 @@ import com.velocitypowered.api.proxy.InboundConnection;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.util.GameProfile;
+import io.netty.channel.Channel;
+import io.netty.util.AttributeKey;
 import lombok.Getter;
 import net.kyori.text.TextComponent;
 import org.geysermc.floodgate.HandshakeHandler.HandshakeResult;
@@ -30,10 +32,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.geysermc.floodgate.util.ReflectionUtil.getField;
-import static org.geysermc.floodgate.util.ReflectionUtil.getPrefixedClass;
+import static org.geysermc.floodgate.util.ReflectionUtil.*;
 
 public class VelocityPlugin {
     @Getter private VelocityFloodgateConfig config;
@@ -156,7 +158,18 @@ public class VelocityPlugin {
         if (player != null) {
             System.out.println(event.getUsername());
             event.setResult(PreLoginComponentResult.forceOfflineMode());
-            return;
+
+            // we can't rely on Velocity when it comes to kicking the old players, so with this system we only
+            // have to check if the connection (which is already closed at that time) has a FloodgatePlayer as attribute
+            try {
+                Object mcConnection = initialMinecraftConnectionField.get(event.getConnection());
+                Channel channel = (Channel) channelField.get(mcConnection);
+                channel.attr(playerAttribute).set(player);
+                return;
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Failed to add FloodgatePlayer to player", e);
+                playersToKick.put(event.getConnection(), "Failed to add FloodgatePlayer to player");
+            }
         }
 
         String message = playersToKick.getIfPresent(event.getConnection());
@@ -180,14 +193,28 @@ public class VelocityPlugin {
     @Subscribe(order = PostOrder.LAST)
     public void onDisconnect(DisconnectEvent event) {
         Player player = event.getPlayer();
-        if (FloodgateAPI.removePlayer(player.getUniqueId(), event.disconnectedDuringLogin())) {
-            FloodgateAPI.removeEncryptedData(event.getPlayer().getUniqueId());
-            logger.info("Removed Bedrock player who was logged in as " + player.getUsername() + " " + player.getUniqueId());
+
+        try {
+            Object minecraftConnection = minecraftConnectionField.get(player);
+            Channel channel = (Channel) channelField.get(minecraftConnection);
+            FloodgatePlayer fPlayer = channel.attr(playerAttribute).get();
+            if (fPlayer != null) {
+                FloodgateAPI.removePlayer(fPlayer);
+                FloodgateAPI.removeEncryptedData(event.getPlayer().getUniqueId());
+                logger.info("Removed Bedrock player who was logged in as " + player.getUsername() + " " + player.getUniqueId());
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Failed to remove the player", e);
         }
     }
 
     private Field handshakeField;
     private Field handshakeAddressField;
+
+    private final AttributeKey<FloodgatePlayer> playerAttribute = AttributeKey.newInstance("floodgate-player");
+    private Field initialMinecraftConnectionField;
+    private Field minecraftConnectionField;
+    private Field channelField;
 
     public void initReflection() {
         ReflectionUtil.setPrefix("com.velocitypowered.proxy");
@@ -196,5 +223,11 @@ public class VelocityPlugin {
 
         handshakeField = getField(IIC, "handshake");
         handshakeAddressField = getField(HandshakePacket, "serverAddress");
+
+        Class<?> minecraftConnection = getPrefixedClass("connection.MinecraftConnection");
+        initialMinecraftConnectionField = getFieldOfType(IIC, minecraftConnection, true);
+        Class<?> connectedPlayer = getPrefixedClass("connection.client.ConnectedPlayer");
+        minecraftConnectionField = getFieldOfType(connectedPlayer, minecraftConnection, true);
+        channelField = getFieldOfType(minecraftConnection, Channel.class, true);
     }
 }

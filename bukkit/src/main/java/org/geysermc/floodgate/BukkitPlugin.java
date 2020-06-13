@@ -73,13 +73,12 @@ public class BukkitPlugin extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerLogin(PlayerLoginEvent event) {
-//        System.out.println("Is bedrock? " + FloodgateAPI.isBedrockPlayer(event.getPlayer()));
         if (event.getResult() != PlayerLoginEvent.Result.ALLOWED) {
             FloodgateAPI.removePlayer(event.getPlayer().getUniqueId());
             return;
         }
         // if there was another player with the same uuid online,
-        // he has been disconnected by now
+        // he would've been disconnected by now
         FloodgatePlayer player = FloodgateAPI.getPlayer(event.getPlayer());
         if (player != null) player.setLogin(false);
     }
