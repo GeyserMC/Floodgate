@@ -7,7 +7,10 @@ import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.HandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.injector.BukkitInjector;
 import org.geysermc.floodgate.util.BedrockData;
+import org.geysermc.floodgate.util.ProtocolSupportUtil;
 import org.geysermc.floodgate.util.ReflectionUtil;
+import protocolsupport.protocol.ConnectionImpl;
+import protocolsupport.protocol.packet.handler.AbstractLoginListener;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -94,7 +97,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                 }
                 plugin.getLogger().info("Added " + fPlayer.getCorrectUsername() + " " + fPlayer.getCorrectUniqueId());
             } else if (isLogin) {
-                if (!bungee) {
+                if (!bungee && !ProtocolSupportUtil.isProtocolSupport) {
                     // we have to fake the offline player cycle
                     Object loginListener = packetListenerField.get(networkManager);
 
@@ -106,6 +109,14 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
                     fireEventsMethod.invoke(loginHandlerConstructor.newInstance(loginListener)); // new LoginHandler().fireEvents();
                     setValue(loginListener, protocolStateField, readyToAcceptState); // LoginLister#protocolState = READY_TO_ACCEPT
                     // The tick of LoginListener will do the rest
+                } else if (ProtocolSupportUtil.isProtocolSupport && !bungee) { // Has to be managed separately or else we get kicked
+                    ConnectionImpl connection = ConnectionImpl.getFromChannel(ctx.channel());
+                    // Set correct UUID and name on PS's end
+                    connection.getLoginProfile().setName(fPlayer.getCorrectUsername());
+                    connection.getLoginProfile().setOriginalName(fPlayer.getCorrectUsername());
+                    connection.getLoginProfile().setUUID(fPlayer.getCorrectUniqueId());
+                    connection.getLoginProfile().setOriginalUUID(fPlayer.getCorrectUniqueId());
+                    ((AbstractLoginListener) connection.getNetworkManagerWrapper().getPacketListener()).handleLoginStart(fPlayer.getCorrectUsername());
                 }
             }
         } finally {
