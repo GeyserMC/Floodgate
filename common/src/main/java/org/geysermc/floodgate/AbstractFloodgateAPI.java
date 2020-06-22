@@ -24,6 +24,15 @@ abstract class AbstractFloodgateAPI {
         return null;
     }
 
+    
+    /**
+     * Gets the Bedrock player count
+     * @return int as amount of Bedrock players.
+     */
+    public int getPlayerCount() {
+        return players.size();
+    }
+
     /**
      * Removes a player (should only be used internally)
      * @param onlineId The UUID of the online player
