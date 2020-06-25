@@ -20,8 +20,8 @@
 
     <properties>
         <geyser-version>1.0-SNAPSHOT</geyser-version>
-        <bukkit-version>1.8.8-R0.1-SNAPSHOT</bukkit-version>
-        <bungee-version>1.15-SNAPSHOT</bungee-version>
+        <bukkit-version>1.15.2-R0.1-SNAPSHOT</bukkit-version>
+        <bungee-version>1.16-R0.2-SNAPSHOT</bungee-version>
         <velocity-version>1.1.0-SNAPSHOT</velocity-version>
 
         <outputName>${project.name}</outputName>
