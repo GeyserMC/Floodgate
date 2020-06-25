@@ -12,7 +12,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BukkitInjector {
+public class SpigotInjector {
     private static Object serverConnection;
     private static List<ChannelFuture> injectedClients = new ArrayList<>();
 

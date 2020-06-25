@@ -5,7 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.HandshakeHandler.HandshakeResult;
-import org.geysermc.floodgate.injector.BukkitInjector;
+import org.geysermc.floodgate.injector.SpigotInjector;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.ReflectionUtil;
 
@@ -20,7 +20,7 @@ import static org.geysermc.floodgate.util.ReflectionUtil.*;
 
 @RequiredArgsConstructor
 public class PacketHandler extends SimpleChannelInboundHandler<Object> {
-    private static BukkitPlugin plugin = BukkitPlugin.getInstance();
+    private static SpigotPlugin plugin = SpigotPlugin.getInstance();
     private static HandshakeHandler handshakeHandler;
 
     private static Class<?> networkManagerClass;
@@ -115,7 +115,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
 
             if (isHandhake && bungee || isLogin && !bungee || fPlayer == null) {
                 // remove the injection of the client because we're finished
-                BukkitInjector.removeInjectedClient(future, ctx.channel());
+                SpigotInjector.removeInjectedClient(future, ctx.channel());
             }
         }
     }

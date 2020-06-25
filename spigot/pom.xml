@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>floodgate-bukkit</artifactId>
+    <artifactId>floodgate-spigot</artifactId>
 
     <repositories>
         <repository>
@@ -22,7 +22,7 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>${bukkit-version}</version>
+            <version>1.15.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

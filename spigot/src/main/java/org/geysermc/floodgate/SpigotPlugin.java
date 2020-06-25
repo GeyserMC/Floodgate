@@ -12,14 +12,14 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.command.LinkAccountCommand;
 import org.geysermc.floodgate.command.UnlinkAccountCommand;
-import org.geysermc.floodgate.injector.BukkitInjector;
+import org.geysermc.floodgate.injector.SpigotInjector;
 import org.geysermc.floodgate.util.CommandUtil;
 import org.geysermc.floodgate.util.ReflectionUtil;
 
 import java.util.logging.Level;
 
-public class BukkitPlugin extends JavaPlugin implements Listener {
-    @Getter private static BukkitPlugin instance;
+public class SpigotPlugin extends JavaPlugin implements Listener {
+    @Getter private static SpigotPlugin instance;
     @Getter private FloodgateConfig configuration;
     @Getter private PlayerLink playerLink;
 
@@ -38,11 +38,11 @@ public class BukkitPlugin extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         try {
-            if (!BukkitInjector.inject()) getLogger().severe("Failed to inject the packet listener!");
+            if (!SpigotInjector.inject()) getLogger().severe("Failed to inject the packet listener!");
         } catch (Exception e) {
             getLogger().log(Level.SEVERE, "Failed to inject the packet listener!", e);
         } finally {
-            if (!BukkitInjector.isInjected()) {
+            if (!SpigotInjector.isInjected()) {
                 getServer().getPluginManager().disablePlugin(this);
             }
         }
@@ -57,7 +57,7 @@ public class BukkitPlugin extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         try {
-            if (!BukkitInjector.removeInjection()) getLogger().severe("Failed to remove the injection!");
+            if (!SpigotInjector.removeInjection()) getLogger().severe("Failed to remove the injection!");
         } catch (Exception e) {
             getLogger().log(Level.SEVERE, "Failed to remove the injection!", e);
         }

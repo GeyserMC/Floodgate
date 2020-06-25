@@ -27,12 +27,12 @@ jobs:
         with:
           name: Floodgate Bungee
           path: bungee/target/floodgate-bungee.jar
-      - name: Archive artifacts (Floodgate Bukkit)
+      - name: Archive artifacts (Floodgate Spigot)
         uses: actions/upload-artifact@v1
         if: success()
         with:
-          name: Floodgate Bukkit
-          path: bukkit/target/floodgate-bukkit.jar
+          name: Floodgate Spigot
+          path: spigot/target/floodgate-spigot.jar
       - name: Archive artifacts (Floodgate Velocity)
         uses: actions/upload-artifact@v1
         if: success()

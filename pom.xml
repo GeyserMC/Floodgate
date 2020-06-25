@@ -10,7 +10,7 @@
     <modules>
         <module>bungee</module>
         <module>common</module>
-        <module>bukkit</module>
+        <module>spigot</module>
         <module>velocity</module>
     </modules>
     <packaging>pom</packaging>
@@ -20,8 +20,8 @@
 
     <properties>
         <geyser-version>1.0-SNAPSHOT</geyser-version>
-        <bukkit-version>1.15.2-R0.1-SNAPSHOT</bukkit-version>
         <bungee-version>1.16-R0.2-SNAPSHOT</bungee-version>
+        <spigot-version>1.15.2-R0.1-SNAPSHOT</spigot-version>
         <velocity-version>1.1.0-SNAPSHOT</velocity-version>
 
         <outputName>${project.name}</outputName>
