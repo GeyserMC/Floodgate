@@ -23,7 +23,6 @@ abstract class AbstractFloodgateAPI {
         }
         return null;
     }
-
     
     /**
      * Gets the Bedrock player count
@@ -32,7 +31,15 @@ abstract class AbstractFloodgateAPI {
     public int getPlayerCount() {
         return players.size();
     }
-
+    
+    /**
+     * Gets all bedrock players.
+     * @return Map<UUID, FloodgatePlayer> as all Bedrock players.
+     */
+    public Map<UUID, FloodgatePlayer> getPlayers() {
+        return players;
+    }
+    
     /**
      * Removes a player (should only be used internally)
      * @param onlineId The UUID of the online player
