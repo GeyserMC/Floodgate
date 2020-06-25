@@ -8,8 +8,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/cache@v1
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -22,19 +22,19 @@ jobs:
       - name: Build with Maven
         run: mvn -B package
       - name: Archive artifacts (Floodgate Bungee)
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         if: success()
         with:
           name: Floodgate Bungee
           path: bungee/target/floodgate-bungee.jar
       - name: Archive artifacts (Floodgate Bukkit)
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         if: success()
         with:
           name: Floodgate Bukkit
           path: bukkit/target/floodgate-bukkit.jar
       - name: Archive artifacts (Floodgate Velocity)
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         if: success()
         with:
           name: Floodgate Velocity
