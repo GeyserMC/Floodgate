@@ -54,7 +54,7 @@ abstract class AbstractFloodgateAPI {
         for (FloodgatePlayer player1 : players.values()) {
             if (player1.isLogin() && !removeLogin || !player1.isLogin() && removeLogin) continue;
             if (!player1.getCorrectUniqueId().equals(onlineId)) continue;
-            players.remove(createJavaPlayerId(Long.parseLong(player1.getXuid())));
+            players.remove(player1.getXuid());
             return true;
         }
         return false;
@@ -68,7 +68,7 @@ abstract class AbstractFloodgateAPI {
     }
 
     static boolean removePlayer(FloodgatePlayer player) {
-        boolean removed = players.remove(createJavaPlayerId(Long.parseLong(player.getXuid())), player);
+        boolean removed = players.remove(player.getXuid(), player);
         return removed && player.getLinkedPlayer() != null;
     }
 
@@ -81,14 +81,9 @@ abstract class AbstractFloodgateAPI {
         return getPlayer(uuid) != null;
     }
 
-    /**
-     * Create a valid Java player uuid of a xuid
-     */
-    public static UUID createJavaPlayerId(long xuid) {
-        return new UUID(0, xuid);
-    }
-
     public static boolean isFloodgateId(UUID uuid) {
-        return uuid.getMostSignificantBits() == 0;
+        // Bedrock UUIDs, used by Geyser as XUID are version 3
+        // Java UUIDs are version 4
+        return uuid.version() == 3;
     }
 }

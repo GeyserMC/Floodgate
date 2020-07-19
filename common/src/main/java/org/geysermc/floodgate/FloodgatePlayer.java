@@ -68,7 +68,7 @@ public class FloodgatePlayer {
         deviceOS = DeviceOS.getById(data.getDeviceId());
         languageCode = data.getLanguageCode();
         inputMode = data.getInputMode();
-        javaUniqueId = AbstractFloodgateAPI.createJavaPlayerId(Long.parseLong(data.getXuid()));
+        javaUniqueId = UUID.fromString(data.getXuid());
         // every implementation (Bukkit, Bungee and Velocity) all run this async,
         // so we can block this thread
         if (PlayerLink.isEnabledAndAllowed()) {
