@@ -14,6 +14,7 @@ import org.geysermc.floodgate.command.LinkAccountCommand;
 import org.geysermc.floodgate.command.UnlinkAccountCommand;
 import org.geysermc.floodgate.injector.BukkitInjector;
 import org.geysermc.floodgate.util.CommandUtil;
+import org.geysermc.floodgate.util.ProtocolSupportUtil;
 import org.geysermc.floodgate.util.ReflectionUtil;
 
 import java.util.logging.Level;
@@ -52,6 +53,9 @@ public class BukkitPlugin extends JavaPlugin implements Listener {
 
         // Register the plugin as an event listener to we get join and leave events
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
+
+        // Check for ProtocolSupport
+        ProtocolSupportUtil.checkForProtocolSupport(this);
     }
 
     @Override
