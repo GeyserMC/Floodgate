@@ -1,168 +1,65 @@
+/*
+ * Copyright (c) 2019-2020 GeyserMC. http://geysermc.org
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in
+ *  all copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  THE SOFTWARE.
+ *
+ *  @author GeyserMC
+ *  @link https://github.com/GeyserMC/Floodgate
+ *
+ */
+
 package org.geysermc.floodgate;
 
-import lombok.Getter;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.event.LoginEvent;
-import net.md_5.bungee.api.event.PlayerDisconnectEvent;
-import net.md_5.bungee.api.event.PreLoginEvent;
-import net.md_5.bungee.api.event.ServerConnectEvent;
-import net.md_5.bungee.api.plugin.Listener;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import net.md_5.bungee.api.plugin.Plugin;
-import net.md_5.bungee.event.EventHandler;
-import net.md_5.bungee.event.EventPriority;
-import net.md_5.bungee.protocol.packet.Handshake;
-import org.geysermc.floodgate.HandshakeHandler.HandshakeResult;
-import org.geysermc.floodgate.HandshakeHandler.ResultType;
-import org.geysermc.floodgate.command.LinkAccountCommand;
-import org.geysermc.floodgate.command.UnlinkAccountCommand;
-import org.geysermc.floodgate.util.BedrockData;
-import org.geysermc.floodgate.util.CommandUtil;
+import org.geysermc.floodgate.module.*;
 import org.geysermc.floodgate.util.ReflectionUtil;
 
-import java.lang.reflect.Field;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-
-import static org.geysermc.floodgate.util.BedrockData.FLOODGATE_IDENTIFIER;
-
-public class BungeePlugin extends Plugin implements Listener {
-    @Getter private static BungeePlugin instance;
-    private static Field extraHandshakeData;
-
-    @Getter private BungeeFloodgateConfig config;
-    @Getter private PlayerLink playerLink;
-    private BungeeDebugger debugger;
-    private HandshakeHandler handshakeHandler;
+public final class BungeePlugin extends Plugin {
+    private FloodgatePlatform platform;
 
     @Override
     public void onLoad() {
-        instance = this;
-        if (!getDataFolder().exists()) {
-            getDataFolder().mkdir();
-        }
-        config = FloodgateConfig.load(getLogger(), getDataFolder().toPath().resolve("config.yml"), BungeeFloodgateConfig.class);
-        playerLink = PlayerLink.initialize(getLogger(), getDataFolder().toPath(), config);
-        handshakeHandler = new HandshakeHandler(config.getPrivateKey(), true, config.getUsernamePrefix(), config.isReplaceSpaces());
+        ReflectionUtil.setPrefix("net.md_5.bungee");
+
+        long ctm = System.currentTimeMillis();
+        Injector injector = Guice.createInjector(
+                new CommonModule(getDataFolder().toPath()),
+                new BungeePlatformModule(this)
+        );
+
+        long endCtm = System.currentTimeMillis();
+        getLogger().info("Took " + (endCtm - ctm) + "ms to boot Floodgate");
+
+        // Bungeecord doesn't have a build-in function to disable plugins,
+        // so there is no need to have a custom Platform class like Spigot
+        platform = injector.getInstance(FloodgatePlatform.class);
     }
 
     @Override
     public void onEnable() {
-        getProxy().getPluginManager().registerListener(this, this);
-        if (config.isDebug()) {
-            debugger = new BungeeDebugger();
-        }
-
-        CommandUtil commandUtil = new CommandUtil();
-        getProxy().getPluginManager().registerCommand(this, new LinkAccountCommand(playerLink, commandUtil));
-        getProxy().getPluginManager().registerCommand(this, new UnlinkAccountCommand(playerLink, commandUtil));
+        platform.enable(new CommandModule(), new BungeeListenerModule(), new BungeeAddonModule());
     }
 
     @Override
     public void onDisable() {
-        if (config.isDebug()) {
-            getLogger().warning("Please note that it is not possible to reload this plugin when debug mode is enabled. At least for now");
-        }
-        playerLink.stop();
-    }
-
-    @EventHandler(priority = EventPriority.LOW)
-    public void onServerConnect(ServerConnectEvent e) {
-        // Passes the information through to the connecting server if enabled
-        if (config.isSendFloodgateData() && FloodgateAPI.isBedrockPlayer(e.getPlayer())) {
-            Handshake handshake = ReflectionUtil.getCastedValue(e.getPlayer().getPendingConnection(), "handshake", Handshake.class);
-            handshake.setHost(
-                    handshake.getHost().split("\0")[0] + '\0' + // Ensures that only the hostname remains!
-                            FLOODGATE_IDENTIFIER + '\0' + FloodgateAPI.getEncryptedData(e.getPlayer().getUniqueId())
-            );
-            // Bungeecord will add his data after our data
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOW)
-    public void onPreLogin(PreLoginEvent event) {
-        event.registerIntent(this);
-        getProxy().getScheduler().runAsync(this, () -> {
-            String extraData = ReflectionUtil.getCastedValue(event.getConnection(), extraHandshakeData, String.class);
-
-            HandshakeResult result = handshakeHandler.handle(extraData);
-            switch (result.getResultType()) {
-                case SUCCESS:
-                    break;
-                case EXCEPTION:
-                    event.setCancelReason(config.getMessages().getInvalidKey());
-                    break;
-                case INVALID_DATA_LENGTH:
-                    event.setCancelReason(String.format(
-                            config.getMessages().getInvalidArgumentsLength(),
-                            BedrockData.EXPECTED_LENGTH, result.getBedrockData().getDataLength()
-                    ));
-                    break;
-            }
-
-            if (result.getResultType() != ResultType.SUCCESS) {
-                // only continue when SUCCESS
-                event.completeIntent(this);
-                return;
-            }
-
-            FloodgatePlayer player = result.getFloodgatePlayer();
-            FloodgateAPI.addEncryptedData(player.getCorrectUniqueId(), result.getHandshakeData()[2] + '\0' + result.getHandshakeData()[3]);
-
-            event.getConnection().setOnlineMode(false);
-            event.getConnection().setUniqueId(player.getCorrectUniqueId());
-
-            ReflectionUtil.setValue(event.getConnection(), "name", player.getCorrectUsername());
-            Object channelWrapper = ReflectionUtil.getValue(event.getConnection(), "ch");
-            SocketAddress remoteAddress = ReflectionUtil.getCastedValue(channelWrapper, "remoteAddress", SocketAddress.class);
-            if (!(remoteAddress instanceof InetSocketAddress)) {
-                getLogger().info(
-                        "Player " + player.getUsername() + " doesn't use an InetSocketAddress. " +
-                        "It uses " + remoteAddress.getClass().getSimpleName() + ". Ignoring the player, I guess."
-                );
-            } else {
-                ReflectionUtil.setValue(
-                        channelWrapper, "remoteAddress",
-                        new InetSocketAddress(result.getBedrockData().getIp(), ((InetSocketAddress) remoteAddress).getPort())
-                );
-            }
-            event.completeIntent(this);
-        });
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPreLoginMonitor(PreLoginEvent event) {
-        if (event.isCancelled()) {
-            FloodgateAPI.removePlayer(event.getConnection().getUniqueId(), true);
-        }
-    }
-
-    @EventHandler
-    public void onLogin(LoginEvent event) {
-        // if there was another player with the same uuid / name online,
-        // he has been disconnected by now
-        FloodgatePlayer player = FloodgateAPI.getPlayerByConnection(event.getConnection());
-        if (player != null) player.setLogin(false);
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onLoginMonitor(LoginEvent event) {
-        if (event.isCancelled()) {
-            FloodgateAPI.removePlayer(event.getConnection().getUniqueId());
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerDisconnect(PlayerDisconnectEvent event) {
-        ProxiedPlayer player = event.getPlayer();
-        if (FloodgateAPI.removePlayer(player.getUniqueId())) {
-            FloodgateAPI.removeEncryptedData(player.getUniqueId());
-            System.out.println("Removed Bedrock player who was logged in as " + player.getName() + " " + player.getUniqueId());
-        }
-    }
-
-    static {
-        ReflectionUtil.setPrefix("net.md_5.bungee");
-        Class<?> initial_handler = ReflectionUtil.getPrefixedClass("connection.InitialHandler");
-        extraHandshakeData = ReflectionUtil.getField(initial_handler, "extraDataInHandshake");
+        platform.disable();
     }
 }

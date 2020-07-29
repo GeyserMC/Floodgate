@@ -4,19 +4,21 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.geysermc</groupId>
-    <artifactId>floodgate-parent</artifactId>
+    <groupId>org.geysermc.floodgate</groupId>
+    <artifactId>parent</artifactId>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>bungee</module>
+        <module>api</module>
         <module>common</module>
-        <module>bukkit</module>
+        <module>spigot</module>
+        <module>bungee</module>
         <module>velocity</module>
+        <module>database</module>
     </modules>
     <packaging>pom</packaging>
     <name>floodgate</name>
     <description>Allows Bedrock players to join Java edition servers while keeping online mode</description>
-    <url>https://github.com/GeyserMC/Floodgate/</url>
+    <url>https://github.com/GeyserMC/Floodgate</url>
 
     <properties>
         <geyser-version>1.0-SNAPSHOT</geyser-version>
@@ -24,7 +26,7 @@
         <bungee-version>1.15-SNAPSHOT</bungee-version>
         <velocity-version>1.1.0-SNAPSHOT</velocity-version>
 
-        <outputName>${project.name}</outputName>
+        <outputName>floodgate-${project.name}</outputName>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>

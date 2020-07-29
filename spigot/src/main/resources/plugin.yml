@@ -1,0 +1,10 @@
+name: ${outputName}
+description: ${project.description}
+version: ${project.version}
+author: ${project.organization.name}
+website: ${project.url}
+main: org.geysermc.floodgate.SpigotPlugin
+api-version: 1.13
+commands: #todo maybe add the commands directly to the commandmap?
+  linkaccount:
+  unlinkaccount:

@@ -17,16 +17,13 @@ disconnect:
   invalid-key: Please connect through the official Geyser
   # The disconnect message Geyser users should get when connecting
   # to the server with the correct key but not with the correct data format
-  invalid-arguments-length: Expected {0} arguments, got {1}. Is Geyser up-to-date?
+  invalid-arguments-length: Expected {} arguments, got {}. Is Geyser up-to-date?
 
 # Configuration for player linking
 player-link:
   # Whether to enable the linking system. Turning this off will prevent
   # players from using the linking feature even if they are already linked.
   enable: false
-  # The type of storage system you want to use
-  # Currently implemented: SQLite
-  type: sqlite
   # Whether to allow the use of /linkaccount and /unlinkaccount
   # You can also use allow specific people to use the commands using the
   # permissions floodgate.linkaccount and floodgate.unlinkaccount.
@@ -34,3 +31,13 @@ player-link:
   allow-linking: true
   # The amount of time until a link code expires in seconds
   link-code-timeout: 300
+  # The database type you want to use.
+  # The option is only used when auto-download is enabled or when
+  # there are more then one database implementations found in the config directory
+  type: sqlite
+  # Automatically download the database type you want to use
+  # This doesn't include updating automatically (I don't expect the database implementations to be updated frequently)
+  auto-download: true
+
+# Do not change this
+config-version: 1
