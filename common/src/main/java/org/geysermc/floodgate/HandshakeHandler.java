@@ -17,10 +17,10 @@ import static org.geysermc.floodgate.util.BedrockData.EXPECTED_LENGTH;
 import static org.geysermc.floodgate.util.BedrockData.FLOODGATE_IDENTIFIER;
 
 public class HandshakeHandler {
-    private final PrivateKey privateKey;
-    private final boolean bungee;
-    private final String usernamePrefix;
-    private final boolean replaceSpaces;
+    private PrivateKey privateKey;
+    private boolean bungee;
+    private String usernamePrefix;
+    private boolean replaceSpaces;
 
     public HandshakeHandler(@NonNull PrivateKey privateKey, boolean bungee, String usernamePrefix, boolean replaceSpaces) {
         this.privateKey = privateKey;
@@ -83,7 +83,7 @@ public class HandshakeHandler {
         INVALID_DATA_LENGTH,
         SUCCESS;
 
-        @Getter private final HandshakeResult cachedResult;
+        @Getter private HandshakeResult cachedResult;
 
         ResultType() {
             cachedResult = new HandshakeResult(this, null, null, null);
