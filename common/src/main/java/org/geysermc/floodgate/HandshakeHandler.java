@@ -17,28 +17,21 @@ import static org.geysermc.floodgate.util.BedrockData.EXPECTED_LENGTH;
 import static org.geysermc.floodgate.util.BedrockData.FLOODGATE_IDENTIFIER;
 
 public class HandshakeHandler {
-    private PrivateKey privateKey;
-    private boolean bungee;
-    private String usernamePrefix;
-    private boolean replaceSpaces;
-    private boolean useOfflineUUIDS;
+    private final PrivateKey privateKey;
+    private final boolean bungee;
+    private final String usernamePrefix;
+    private final boolean replaceSpaces;
+    private final boolean useOfflineUUIDS;
 
-    public HandshakeHandler(@NonNull PrivateKey privateKey, boolean bungee, String usernamePrefix, boolean replaceSpaces) {
+    public HandshakeHandler(@NonNull final PrivateKey privateKey, final boolean bungee, final String usernamePrefix, final boolean replaceSpaces, final boolean useOfflineUUIDS) {
         this.privateKey = privateKey;
         this.bungee = bungee;
         this.usernamePrefix = usernamePrefix;
         this.replaceSpaces = replaceSpaces;
+        this.useOfflineUUIDS = useOfflineUUIDS;
     }
 
-    public HandshakeHandler(final FloodgateConfig config, final boolean bungee) {
-        this.privateKey = config.getPrivateKey();
-        this.usernamePrefix = config.getUsernamePrefix();
-        this.replaceSpaces = config.isReplaceSpaces();
-        this.useOfflineUUIDS = config.isForceOfflineUUIDS();
-        this.bungee = bungee;
-    }
-
-    public HandshakeResult handle(@NonNull String handshakeData) {
+    public HandshakeResult handle(@NonNull final String handshakeData) {
         try {
             String[] data = handshakeData.split("\0");
             boolean isBungeeData = data.length == 6 || data.length == 7;

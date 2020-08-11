@@ -90,7 +90,7 @@ public class VelocityPlugin {
 
         config = FloodgateConfig.load(logger, dataFolder.toPath().resolve("config.yml"), VelocityFloodgateConfig.class);
         playerLink = PlayerLink.initialize(logger, dataFolder.toPath(), config);
-        handshakeHandler = new HandshakeHandler(config.getPrivateKey(), true, config.getUsernamePrefix(), config.isReplaceSpaces());
+        handshakeHandler = new HandshakeHandler(config.getPrivateKey(), true, config.getUsernamePrefix(), config.isReplaceSpaces(), config.isForceOfflineUUIDS());
 
         CommandUtil commandUtil = new CommandUtil();
         server.getCommandManager().register(CommandUtil.LINK_ACCOUNT_COMMAND, new LinkAccountCommand(playerLink, commandUtil));
