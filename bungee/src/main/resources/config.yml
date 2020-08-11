@@ -39,4 +39,7 @@ player-link:
   allow-linking: true
   # The amount of time until a link code expires in seconds
   link-code-timeout: 300
+
+# Force offline uuid checks
+always-force-offline-uuids: true
   
