@@ -7,6 +7,7 @@ import org.geysermc.floodgate.util.EncryptionUtil;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -16,10 +17,10 @@ import static org.geysermc.floodgate.util.BedrockData.EXPECTED_LENGTH;
 import static org.geysermc.floodgate.util.BedrockData.FLOODGATE_IDENTIFIER;
 
 public class HandshakeHandler {
-    private PrivateKey privateKey;
-    private boolean bungee;
-    private String usernamePrefix;
-    private boolean replaceSpaces;
+    private final PrivateKey privateKey;
+    private final boolean bungee;
+    private final String usernamePrefix;
+    private final boolean replaceSpaces;
 
     public HandshakeHandler(@NonNull PrivateKey privateKey, boolean bungee, String usernamePrefix, boolean replaceSpaces) {
         this.privateKey = privateKey;
@@ -46,7 +47,12 @@ public class HandshakeHandler {
             }
 
             FloodgatePlayer player = new FloodgatePlayer(bedrockData, usernamePrefix, replaceSpaces);
-            // javaUniqueId will always be (at this point) the xuid but converted into an uuid form
+
+            // This will always set the UUID to a Offline Java UUID!
+            UUID offline_uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + player.getCorrectUsername()).getBytes(StandardCharsets.UTF_8));
+            player.setJavaUniqueId(offline_uuid);
+
+            // javaUniqueId will always be (unless force offline uuid is enabled) the xuid but converted into an uuid form
             AbstractFloodgateAPI.players.put(player.getJavaUniqueId(), player);
 
             // Get the UUID from the bungee instance to fix linked account UUIDs being wrong
@@ -77,7 +83,7 @@ public class HandshakeHandler {
         INVALID_DATA_LENGTH,
         SUCCESS;
 
-        @Getter private HandshakeResult cachedResult;
+        @Getter private final HandshakeResult cachedResult;
 
         ResultType() {
             cachedResult = new HandshakeResult(this, null, null, null);
