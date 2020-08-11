@@ -40,6 +40,6 @@ player-link:
   # The amount of time until a link code expires in seconds
   link-code-timeout: 300
 
-# Force offline uuid checks
-always-force-offline-uuids: true
+# This option will always force offline UUIDs for Geyser users and always display a username option on login (similar to Online auth mode).
+always-force-offline-uuids: false
   
