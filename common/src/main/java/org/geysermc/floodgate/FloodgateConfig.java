@@ -33,6 +33,9 @@ public class FloodgateConfig {
     @JsonProperty(value = "player-link")
     private PlayerLinkConfig playerLink;
 
+    @JsonProperty(value = "always-force-offline-uuids")
+    private boolean forceOfflineUUIDS;
+
     @JsonProperty
     private boolean debug;
 

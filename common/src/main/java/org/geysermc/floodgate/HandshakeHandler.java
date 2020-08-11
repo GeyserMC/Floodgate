@@ -21,12 +21,21 @@ public class HandshakeHandler {
     private boolean bungee;
     private String usernamePrefix;
     private boolean replaceSpaces;
+    private boolean useOfflineUUIDS;
 
     public HandshakeHandler(@NonNull PrivateKey privateKey, boolean bungee, String usernamePrefix, boolean replaceSpaces) {
         this.privateKey = privateKey;
         this.bungee = bungee;
         this.usernamePrefix = usernamePrefix;
         this.replaceSpaces = replaceSpaces;
+    }
+
+    public HandshakeHandler(final FloodgateConfig config, final boolean bungee) {
+        this.privateKey = config.getPrivateKey();
+        this.usernamePrefix = config.getUsernamePrefix();
+        this.replaceSpaces = config.isReplaceSpaces();
+        this.useOfflineUUIDS = config.isForceOfflineUUIDS();
+        this.bungee = bungee;
     }
 
     public HandshakeResult handle(@NonNull String handshakeData) {
@@ -48,9 +57,11 @@ public class HandshakeHandler {
 
             FloodgatePlayer player = new FloodgatePlayer(bedrockData, usernamePrefix, replaceSpaces);
 
-            // This will always set the UUID to a Offline Java UUID!
-            UUID offline_uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + player.getCorrectUsername()).getBytes(StandardCharsets.UTF_8));
-            player.setJavaUniqueId(offline_uuid);
+            if (useOfflineUUIDS) {
+                // This will always set the UUID to a Offline Java UUID!
+                UUID offline_uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + player.getCorrectUsername()).getBytes(StandardCharsets.UTF_8));
+                player.setJavaUniqueId(offline_uuid);
+            }
 
             // javaUniqueId will always be (unless force offline uuid is enabled) the xuid but converted into an uuid form
             AbstractFloodgateAPI.players.put(player.getJavaUniqueId(), player);
