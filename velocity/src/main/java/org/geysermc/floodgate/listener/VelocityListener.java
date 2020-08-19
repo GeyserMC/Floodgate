@@ -31,6 +31,7 @@ import com.google.common.cache.CacheBuilder;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
+import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.player.GameProfileRequestEvent;
 import com.velocitypowered.api.proxy.InboundConnection;
@@ -39,6 +40,7 @@ import com.velocitypowered.api.util.GameProfile;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import net.kyori.adventure.text.TextComponent;
+import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
@@ -115,6 +117,15 @@ public final class VelocityListener {
             playerCache.invalidate(event.getConnection());
             event.setGameProfile(new GameProfile(
                     player.getCorrectUniqueId(), player.getCorrectUsername(), new ArrayList<>()));
+        }
+    }
+
+    @Subscribe
+    public void onLogin(LoginEvent event) {
+        FloodgatePlayer player =
+                FloodgateApi.getInstance().getPlayer(event.getPlayer().getUniqueId());
+        if (player != null) {
+            languageManager.loadFloodgateLocale(player.getLanguageCode());
         }
     }
 
