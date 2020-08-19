@@ -90,15 +90,16 @@ public final class UnlinkAccountCommand implements Command {
     }
 
     public enum Message implements CommandMessage {
-        NOT_LINKED("&cYour account isn't linked"),
-        UNLINK_SUCCESS("&cUnlink successful! Rejoin to return to your Bedrock account"),
-        UNLINK_ERROR("&cAn error occurred while unlinking player! " + CommonCommandMessage.CHECK_CONSOLE),
-        LINKING_NOT_ENABLED("&cLinking is not enabled on this server");
+        NOT_LINKED("floodgate.command.unlink_account.not_linked"),
+        UNLINK_SUCCESS("floodgate.command.unlink_account.unlink_success"),
+        // TODO also used to have CHECK_CONSOLE
+        UNLINK_ERROR("floodgate.command.unlink_account.error"),
+        LINKING_NOT_ENABLED("floodgate.command.unlink_account.disabled");
 
         @Getter private final String message;
 
         Message(String message) {
-            this.message = message.replace('&', COLOR_CHAR);
+            this.message = message;
         }
     }
 }

@@ -38,17 +38,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
-
+/**
+ * Manages translations for strings in Floodgate
+ */
 public class LanguageManager {
+    private final Map<String, Properties> LOCALE_MAPPINGS = new HashMap<>();
+
+    private final FloodgateLogger logger;
 
     /**
      * The locale used in console and as a fallback
      */
     private String defaultLocale;
-
-    private final Map<String, Properties> LOCALE_MAPPINGS = new HashMap<>();
-
-    private final FloodgateLogger logger;
 
     public LanguageManager(FloodgateLogger logger) {
         this.logger = logger;
@@ -62,14 +63,16 @@ public class LanguageManager {
     public void initialize(FloodgateConfig config) {
         loadFloodgateLocale("en_US"); // Fallback
 
-        if (config.getDefaultLocale() != null && isValidLanguage(formatLocale(config.getDefaultLocale()))) {
+        if (config.getDefaultLocale() != null &&
+                isValidLanguage(formatLocale(config.getDefaultLocale()))) {
             loadFloodgateLocale(formatLocale(config.getDefaultLocale()));
             defaultLocale = formatLocale(config.getDefaultLocale());
         } else {
-            String systemLocale = formatLocale(Locale.getDefault().getLanguage() + "_" + Locale.getDefault().getCountry());
+            String systemLocale = formatLocale(Locale.getDefault().getLanguage() + "_" +
+                    Locale.getDefault().getCountry());
             if (isValidLanguage(systemLocale)) {
                 loadFloodgateLocale(systemLocale);
-                defaultLocale = formatLocale(systemLocale);
+                defaultLocale = systemLocale;
             } else {
                 defaultLocale = "en_US";
             }
@@ -77,7 +80,7 @@ public class LanguageManager {
     }
 
     /**
-     * Loads a Geyser locale from resources, if the file doesn't exist it just logs a warning
+     * Loads a Floodgate locale from resources; if the file doesn't exist it just logs a warning
      *
      * @param locale Locale to load
      */

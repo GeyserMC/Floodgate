@@ -30,7 +30,9 @@ import com.velocitypowered.api.proxy.Player;
 import lombok.RequiredArgsConstructor;
 import net.kyori.text.TextComponent;
 import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
+import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.platform.command.CommandMessage;
 import org.geysermc.floodgate.platform.command.util.CommandResponseCache;
 import org.geysermc.floodgate.platform.command.util.CommandUtil;
@@ -38,10 +40,21 @@ import org.geysermc.floodgate.platform.command.util.CommandUtil;
 @RequiredArgsConstructor
 public final class VelocityCommandUtil extends CommandResponseCache<TextComponent> implements CommandUtil {
     private final FloodgateLogger logger;
+    private final LanguageManager manager;
 
     @Override
     public void sendMessage(Object player, CommandMessage message, Object... args) {
-        cast(player).sendMessage(getOrAddCachedMessage(message, args));
+        Player velocityPlayer = cast(player);
+        FloodgatePlayer floodgatePlayer =
+                FloodgateApi.getInstance().getPlayer(velocityPlayer.getUniqueId());
+        if (floodgatePlayer != null) {
+            velocityPlayer.sendMessage(
+                    transformMessage(manager.getPlayerLocaleString(message.getMessage(),
+                    floodgatePlayer.getLanguageCode(), args)));
+        } else {
+            velocityPlayer.sendMessage(
+                    transformMessage(manager.getLocaleStringLog(message.getMessage(), args)));
+        }
     }
 
     @Override

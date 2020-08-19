@@ -30,7 +30,9 @@ import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.platform.command.CommandMessage;
 import org.geysermc.floodgate.platform.command.util.CommandResponseCache;
 import org.geysermc.floodgate.platform.command.util.CommandUtil;
@@ -39,10 +41,19 @@ import org.geysermc.floodgate.platform.command.util.CommandUtil;
 public final class SpigotCommandUtil extends CommandResponseCache<String> implements CommandUtil {
     private final JavaPlugin plugin;
     private final FloodgateLogger logger;
+    private final LanguageManager manager;
 
     @Override
     public void sendMessage(Object player, CommandMessage message, Object... args) {
-        cast(player).sendMessage(format(message, args));
+        Player bukkitPlayer = cast(player);
+        FloodgatePlayer floodgatePlayer =
+                FloodgateApi.getInstance().getPlayer(bukkitPlayer.getUniqueId());
+        if (floodgatePlayer != null) {
+            bukkitPlayer.sendMessage(manager.getPlayerLocaleString(message.getMessage(),
+                    floodgatePlayer.getLanguageCode(), args));
+        } else {
+            bukkitPlayer.sendMessage(manager.getLocaleStringLog(message.getMessage(), args));
+        }
     }
 
     @Override
