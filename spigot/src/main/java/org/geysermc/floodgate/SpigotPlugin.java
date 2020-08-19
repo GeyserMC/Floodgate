@@ -46,10 +46,11 @@ public final class SpigotPlugin extends JavaPlugin {
                 new SpigotPlatformModule(this)
         );
 
-        long endCtm = System.currentTimeMillis();
-        getLogger().info("Took " + (endCtm - ctm) + "ms to boot Floodgate");
-
         platform = injector.getInstance(SpigotPlatform.class);
+
+        long endCtm = System.currentTimeMillis();
+        getLogger().info(platform.getLanguageManager().getLocaleStringLog("floodgate.core.finish",
+                endCtm - ctm));
     }
 
     @Override

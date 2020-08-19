@@ -42,6 +42,7 @@ import org.geysermc.floodgate.config.loader.ConfigLoader;
 import org.geysermc.floodgate.link.PlayerLinkLoader;
 import org.geysermc.floodgate.module.ConfigLoadedModule;
 import org.geysermc.floodgate.module.PostInitializeModule;
+import org.geysermc.floodgate.util.LanguageManager;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -57,6 +58,9 @@ public class FloodgatePlatform {
     @Getter(AccessLevel.PROTECTED)
     private final FloodgateLogger logger;
 
+    @Getter(AccessLevel.PROTECTED)
+    private final LanguageManager languageManager;
+
     private final Injector guice;
 
     @Inject private PlatformInjector injector;
@@ -65,9 +69,10 @@ public class FloodgatePlatform {
     public FloodgatePlatform(@Named("dataDirectory") Path dataDirectory, FloodgateApi api,
                              ConfigLoader configLoader, PlayerLinkLoader playerLinkLoader,
                              HandshakeHandler handshakeHandler, FloodgateLogger logger,
-                             Injector injector) {
+                             LanguageManager languageManager, Injector injector) {
         this.api = api;
         this.logger = logger;
+        this.languageManager = languageManager;
 
         if (!Files.isDirectory(dataDirectory)) {
             try {
@@ -79,12 +84,14 @@ public class FloodgatePlatform {
         }
 
         config = configLoader.load();
+        this.languageManager.initialize(config);
 
         // make the config available for other classes
         guice = injector.createChildInjector(new ConfigLoadedModule(config, api));
 
         guice.injectMembers(playerLinkLoader);
         guice.injectMembers(handshakeHandler);
+        guice.injectMembers(languageManager);
 
         PlayerLink link = playerLinkLoader.load();
 

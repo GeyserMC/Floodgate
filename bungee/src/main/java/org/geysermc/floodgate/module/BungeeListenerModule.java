@@ -38,6 +38,7 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.listener.BungeeListener;
 import org.geysermc.floodgate.register.ListenerRegister;
+import org.geysermc.floodgate.util.LanguageManager;
 
 public final class BungeeListenerModule extends AbstractModule {
     @Override
@@ -49,7 +50,7 @@ public final class BungeeListenerModule extends AbstractModule {
     @ProvidesIntoSet
     public Listener bungeeListener(Plugin plugin, ProxyFloodgateConfig config,
                                    ProxyFloodgateApi api, HandshakeHandler handshakeHandler,
-                                   FloodgateLogger logger) {
-        return new BungeeListener(plugin, config, api, handshakeHandler, logger);
+                                   FloodgateLogger logger, LanguageManager languageManager) {
+        return new BungeeListener(plugin, config, api, handshakeHandler, logger, languageManager);
     }
 }

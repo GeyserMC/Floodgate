@@ -11,6 +11,9 @@ username-prefix: "*"
 # Should spaces be replaced with '_' in bedrock usernames?
 replace-spaces: true
 
+# The default locale for Floodgate. By default, Floodgate uses the system locale
+# default-locale: en_US
+
 disconnect:
   # The disconnect message Geyser users should get when connecting
   # to the server with an invalid key

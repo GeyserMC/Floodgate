@@ -36,6 +36,7 @@ import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.loader.ConfigLoader;
 import org.geysermc.floodgate.link.PlayerLinkLoader;
+import org.geysermc.floodgate.util.LanguageManager;
 
 import java.nio.file.Path;
 
@@ -46,9 +47,9 @@ public final class SpigotPlatform extends FloodgatePlatform {
     public SpigotPlatform(@Named("dataDirectory") Path dataDirectory, FloodgateApi api,
                           ConfigLoader configLoader, PlayerLinkLoader playerLinkLoader,
                           HandshakeHandler handshakeHandler, FloodgateLogger logger,
-                          Injector injector) {
+                          LanguageManager languageManager, Injector injector) {
         super(dataDirectory, api, configLoader, playerLinkLoader,
-                handshakeHandler, logger, injector);
+                handshakeHandler, logger, languageManager, injector);
     }
 
     @Override

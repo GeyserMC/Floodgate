@@ -46,6 +46,9 @@ public class FloodgateConfig {
     @JsonProperty(value = "replace-spaces")
     private boolean replaceSpaces;
 
+    @JsonProperty(value = "default-locale")
+    private String defaultLocale;
+
     @JsonProperty(value = "disconnect")
     private DisconnectMessages messages;
 

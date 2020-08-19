@@ -38,6 +38,7 @@ import org.geysermc.floodgate.FloodgatePlayerImpl;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.util.LanguageManager;
 
 import java.util.UUID;
 
@@ -45,6 +46,7 @@ import java.util.UUID;
 public final class SpigotListener implements Listener {
     private final SimpleFloodgateApi api;
     private final FloodgateLogger logger;
+    private final LanguageManager languageManager;
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onAsyncPreLogin(AsyncPlayerPreLoginEvent event) {
@@ -66,8 +68,8 @@ public final class SpigotListener implements Listener {
         FloodgatePlayer player = api.getPlayer(uniqueId);
         if (player != null) {
             player.as(FloodgatePlayerImpl.class).setLogin(false);
-            logger.info("Floodgate player who is logged in as {} {} joined",
-                    player.getCorrectUsername(), player.getCorrectUniqueId());
+            logger.info(languageManager.getLocaleStringLog("floodgate.ingame.login_name",
+                    player.getCorrectUsername(), player.getCorrectUniqueId()));
         }
     }
 
@@ -75,9 +77,8 @@ public final class SpigotListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         if (api.removePlayer(player.getUniqueId()) != null) {
-            logger.info(
-                    "Floodgate player who was logged in as {} {} disconnected",
-                    player.getName(), player.getUniqueId()
+            logger.info(languageManager.getLocaleStringLog(
+                    "floodgate.ingame.disconnect_name", player.getName())
             );
         }
     }

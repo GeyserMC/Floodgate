@@ -50,10 +50,11 @@ public final class VelocityPlugin {
                 new VelocityPlatformModule()
         );
 
-        long endCtm = System.currentTimeMillis();
-        logger.info("Took " + (endCtm - ctm) + "ms to boot Floodgate");
-
         platform = injector.getInstance(FloodgatePlatform.class);
+
+        long endCtm = System.currentTimeMillis();
+        logger.info(platform.getLanguageManager().getLocaleStringLog("floodgate.core.finish",
+                endCtm - ctm));
     }
 
     @Subscribe

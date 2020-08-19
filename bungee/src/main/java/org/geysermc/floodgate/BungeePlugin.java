@@ -45,12 +45,13 @@ public final class BungeePlugin extends Plugin {
                 new BungeePlatformModule(this)
         );
 
-        long endCtm = System.currentTimeMillis();
-        getLogger().info("Took " + (endCtm - ctm) + "ms to boot Floodgate");
-
         // Bungeecord doesn't have a build-in function to disable plugins,
         // so there is no need to have a custom Platform class like Spigot
         platform = injector.getInstance(FloodgatePlatform.class);
+
+        long endCtm = System.currentTimeMillis();
+        getLogger().info(platform.getLanguageManager().getLocaleStringLog("floodgate.core.finish",
+                endCtm - ctm));
     }
 
     @Override

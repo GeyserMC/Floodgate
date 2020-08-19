@@ -16,6 +16,7 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.handler.BungeeDataHandler;
+import org.geysermc.floodgate.util.LanguageManager;
 
 import java.util.UUID;
 
@@ -23,12 +24,15 @@ public final class BungeeListener implements Listener {
     private final BungeeDataHandler dataHandler;
     private final ProxyFloodgateApi api;
     private final FloodgateLogger logger;
+    private final LanguageManager languageManager;
 
     public BungeeListener(Plugin plugin, ProxyFloodgateConfig config, ProxyFloodgateApi api,
-                          HandshakeHandler handshakeHandler, FloodgateLogger logger) {
+                          HandshakeHandler handshakeHandler, FloodgateLogger logger,
+                          LanguageManager languageManager) {
         this.dataHandler = new BungeeDataHandler(plugin, config, api, handshakeHandler, logger);
         this.api = api;
         this.logger = logger;
+        this.languageManager = languageManager;
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -57,8 +61,8 @@ public final class BungeeListener implements Listener {
         logger.info("Login" + (player != null) + " " + uniqueId);
         if (player != null) {
             player.as(FloodgatePlayerImpl.class).setLogin(false);
-            logger.info("Floodgate player who is logged in as {} {} joined",
-                    player.getCorrectUsername(), player.getCorrectUniqueId());
+            logger.info(languageManager.getLocaleStringLog("floodgate.ingame.login_name",
+                    player.getCorrectUsername(), player.getCorrectUniqueId()));
         }
     }
 
@@ -76,9 +80,8 @@ public final class BungeeListener implements Listener {
         FloodgatePlayer fPlayer;
         if ((fPlayer = api.removePlayer(player.getUniqueId())) != null) {
             api.removeEncryptedData(player.getUniqueId());
-            logger.info(
-                    "Floodgate player who was logged in as {} {} disconnected",
-                    player.getName(), player.getUniqueId()
+            logger.info(languageManager.getLocaleStringLog(
+                    "floodgate.ingame.disconnect_name", player.getName())
             );
         }
         logger.info("Disconnected " + fPlayer);

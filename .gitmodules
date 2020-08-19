@@ -1,0 +1,3 @@
+[submodule "common/src/main/resources/languages"]
+	path = common/src/main/resources/languages
+	url = https://github.com/GeyserMC/languages

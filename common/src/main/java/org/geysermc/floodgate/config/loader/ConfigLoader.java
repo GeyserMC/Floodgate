@@ -36,6 +36,8 @@ import org.geysermc.floodgate.config.updater.ConfigUpdater;
 import org.geysermc.floodgate.util.EncryptionUtil;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -74,7 +76,13 @@ public class ConfigLoader {
         boolean newConfig = !Files.exists(configPath);
         try {
             if (newConfig) {
-                Files.copy(defaultConfigPath, configPath);
+                InputStream newConfigFile =
+                        ConfigLoader.class.getClassLoader().getResourceAsStream(defaultConfigName);
+                if (newConfigFile == null) {
+                    throw new RuntimeException("Failed to get the default config file!");
+                }
+
+                Files.copy(newConfigFile, configPath);
 
                 KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
                 generator.initialize(2048);

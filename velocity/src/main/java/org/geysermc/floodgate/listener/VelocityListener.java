@@ -42,6 +42,7 @@ import net.kyori.adventure.text.TextComponent;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.util.LanguageManager;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -58,17 +59,19 @@ public final class VelocityListener {
     private final AttributeKey<FloodgatePlayer> playerAttribute;
     private final AttributeKey<String> kickMessageAttribute;
     private final FloodgateLogger logger;
+    private final LanguageManager languageManager;
 
     private final Cache<InboundConnection, FloodgatePlayer> playerCache;
 
     public VelocityListener(ProxyFloodgateApi api,
                             AttributeKey<FloodgatePlayer> playerAttribute,
                             AttributeKey<String> kickMessageAttribute,
-                            FloodgateLogger logger) {
+                            FloodgateLogger logger, LanguageManager languageManager) {
         this.api = api;
         this.playerAttribute = playerAttribute;
         this.kickMessageAttribute = kickMessageAttribute;
         this.logger = logger;
+        this.languageManager = languageManager;
 
         this.playerCache = CacheBuilder.newBuilder()
                 .maximumSize(500)
@@ -125,8 +128,9 @@ public final class VelocityListener {
 
             if (fPlayer != null && api.removePlayer(fPlayer)) {
                 api.removeEncryptedData(event.getPlayer().getUniqueId());
-                logger.info("Removed Bedrock player who was logged in as {} {} ",
-                        player.getUsername(), player.getUniqueId());
+                logger.info(languageManager.getLocaleStringLog(
+                        "floodgate.ingame.disconnect_name", player.getUsername())
+                );
             }
         } catch (Exception exception) {
             logger.error("Failed to remove the player", exception);
