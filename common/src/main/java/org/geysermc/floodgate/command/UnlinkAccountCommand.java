@@ -94,7 +94,7 @@ public final class UnlinkAccountCommand implements Command {
         UNLINK_SUCCESS("floodgate.command.unlink_account.unlink_success"),
         // TODO also used to have CHECK_CONSOLE
         UNLINK_ERROR("floodgate.command.unlink_account.error"),
-        LINKING_NOT_ENABLED("floodgate.command.unlink_account.disabled");
+        LINKING_NOT_ENABLED("floodgate.commands.linking_disabled");
 
         @Getter private final String message;
 

@@ -156,7 +156,7 @@ public final class LinkAccountCommand implements Command {
         LINK_REQUEST_ERROR("floodgate.command.link_request.error"),
         INVALID_CODE("floodgate.command.link_account.invalid_code"),
         NO_LINK_REQUESTED("floodgate.command.link_account.no_link_requested"),
-        LINK_REQUEST_DISABLED("floodgate.command.link_request.disabled");
+        LINK_REQUEST_DISABLED("floodgate.commands.linking_disabled");
 
         @Getter private final String message;
 
