@@ -40,6 +40,7 @@ import javax.crypto.NoSuchPaddingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.util.Arrays;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.geysermc.floodgate.util.BedrockData.EXPECTED_LENGTH;
@@ -65,7 +66,9 @@ public final class HandshakeHandler {
 
     public HandshakeResult handle(@NonNull String handshakeData) {
         try {
+            System.out.println(handshakeData);
             String[] data = handshakeData.split("\0");
+            System.out.println(Arrays.toString(data));
             boolean isBungeeData = data.length == 6 || data.length == 7;
 
             if (proxy && isBungeeData || !isBungeeData && data.length != 4
@@ -74,7 +77,7 @@ public final class HandshakeHandler {
             }
 
             BedrockData bedrockData = EncryptionUtil.decryptBedrockData(
-                    privateKey, data[2] + '\0' + data[3]
+                    privateKey, data[2] + '\0' + data[3], null
             );
 
             if (bedrockData.getDataLength() != EXPECTED_LENGTH) {

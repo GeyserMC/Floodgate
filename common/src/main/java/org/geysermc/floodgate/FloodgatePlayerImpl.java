@@ -53,6 +53,7 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
     private final InputMode inputMode;
     private final String ip;
     private final LinkedPlayer linkedPlayer;
+    private final RawSkin rawSkin;
 
     /**
      * Returns true if the player is still logging in
@@ -80,6 +81,7 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
         uiProfile = UiProfile.getById(data.getUiProfile());
         inputMode = InputMode.getById(data.getInputMode());
         ip = data.getIp();
+        rawSkin = data.getSkin();
 
         // we'll use the LinkedPlayer provided by Bungee or Velocity (if they included one)
         if (data.hasPlayerLink()) {
@@ -138,6 +140,6 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
 
     public BedrockData toBedrockData() {
         return new BedrockData(version, username, xuid, deviceOs.ordinal(), languageCode,
-                uiProfile.ordinal(), inputMode.ordinal(), ip, linkedPlayer);
+                uiProfile.ordinal(), inputMode.ordinal(), ip, linkedPlayer, rawSkin);
     }
 }
