@@ -42,7 +42,7 @@ public class BungeePlugin extends Plugin implements Listener {
         }
         config = FloodgateConfig.load(getLogger(), getDataFolder().toPath().resolve("config.yml"), BungeeFloodgateConfig.class);
         playerLink = PlayerLink.initialize(getLogger(), getDataFolder().toPath(), config);
-        handshakeHandler = new HandshakeHandler(config.getPrivateKey(), true, config.getUsernamePrefix(), config.isReplaceSpaces());
+        handshakeHandler = new HandshakeHandler(config.getPrivateKey(), true, config.getUsernamePrefix(), config.getUsernameSuffix(), config.isReplaceSpaces());
     }
 
     @Override

@@ -19,12 +19,14 @@ public class HandshakeHandler {
     private PrivateKey privateKey;
     private boolean bungee;
     private String usernamePrefix;
+    private String usernameSuffix;
     private boolean replaceSpaces;
 
-    public HandshakeHandler(@NonNull PrivateKey privateKey, boolean bungee, String usernamePrefix, boolean replaceSpaces) {
+    public HandshakeHandler(@NonNull PrivateKey privateKey, boolean bungee, String usernamePrefix, String usernameSuffix, boolean replaceSpaces) {
         this.privateKey = privateKey;
         this.bungee = bungee;
         this.usernamePrefix = usernamePrefix;
+        this.usernameSuffix = usernameSuffix;
         this.replaceSpaces = replaceSpaces;
     }
 
@@ -45,7 +47,7 @@ public class HandshakeHandler {
                 return ResultType.INVALID_DATA_LENGTH.getCachedResult();
             }
 
-            FloodgatePlayer player = new FloodgatePlayer(bedrockData, usernamePrefix, replaceSpaces);
+            FloodgatePlayer player = new FloodgatePlayer(bedrockData, usernamePrefix, usernameSuffix, replaceSpaces);
             // javaUniqueId will always be (at this point) the xuid but converted into an uuid form
             AbstractFloodgateAPI.players.put(player.getJavaUniqueId(), player);
 

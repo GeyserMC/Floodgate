@@ -27,6 +27,8 @@ public class FloodgateConfig {
     private DisconnectMessages messages;
     @JsonProperty(value = "username-prefix")
     private String usernamePrefix;
+    @JsonProperty(value = "username-suffix")
+    private String usernameSuffix;
     @JsonProperty(value = "replace-spaces")
     private boolean replaceSpaces;
 

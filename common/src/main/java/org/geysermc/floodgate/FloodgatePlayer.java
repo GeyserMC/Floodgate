@@ -57,11 +57,11 @@ public class FloodgatePlayer {
     @Setter
     private boolean login = true;
 
-    FloodgatePlayer(BedrockData data, String prefix, boolean replaceSpaces) {
+    FloodgatePlayer(BedrockData data, String prefix, String suffix, boolean replaceSpaces) {
         xuid = data.getXuid();
         version = data.getVersion();
         username = data.getUsername();
-        javaUsername = prefix + data.getUsername().substring(0, Math.min(data.getUsername().length(), 16 - prefix.length()));
+        javaUsername = prefix + data.getUsername().substring(0, Math.min(data.getUsername().length(), 16 - (prefix.length() + suffix.length()))) + suffix;
         if (replaceSpaces) {
             javaUsername = javaUsername.replaceAll(" ", "_");
         }

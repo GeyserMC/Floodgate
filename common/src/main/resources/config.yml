@@ -7,6 +7,8 @@ key-file-name: key.pem
 # However, certain conflicts can cause issues with some plugins so this prefix is configurable using the property below
 # It is recommended to use a prefix that does not contain alphanumerical to avoid the possibility of duplicate usernames.
 username-prefix: "*"
+#And here is the username suffix
+username-suffix: ""
 
 # Should spaces be replaced with '_' in bedrock usernames?
 replace-spaces: true
