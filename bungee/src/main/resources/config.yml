@@ -30,8 +30,18 @@ player-link:
   # players from using the linking feature even if they are already linked.
   enable: false
   # The type of storage system you want to use
-  # Currently implemented: SQLite
+  # Currently implemented: SQLite, MySQL
   type: sqlite
+  # Path to the database
+  # For SQLite, path to the local file (by default linked-players.db)
+  # For MySQL, put the remote link in the form: 127.0.0.1:3306/database
+  # Where 127.0.0.1 is the database address, 3306 is the port and "database" is the
+  # name of the database
+  path: linked-players.db
+  # Only for MySQL
+  user: user
+  # Only for MySQL
+  password: password
   # Whether to allow the use of /linkaccount and /unlinkaccount
   # You can also use allow specific people to use the commands using the
   # permissions floodgate.linkaccount and floodgate.unlinkaccount.

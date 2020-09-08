@@ -11,23 +11,26 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.logging.Level;
 
-public class SQLitePlayerLink extends PlayerLink {
+public class MySQLPlayerLink extends PlayerLink {
     @Getter private Connection connection;
 
     @Override
     public void load(Path dataFolder) {
-        Path databasePath = dataFolder.resolve(getPath());
         getLogger().info("Loading Floodgate linked player database...");
         try {
-            Class.forName("org.sqlite.JDBC");
+            // Normally optional since Java 1.6
+            Class.forName("com.mysql.jdbc.Driver");
 
             // create a database connection
-            connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath.toString());
+            connection = DriverManager.getConnection("jdbc:mysql://" + getPath(), 
+                getSqlUser(), getSqlPassword());
             Statement statement = connection.createStatement();
             statement.setQueryTimeout(30);  // set timeout to 30 sec.
-            statement.executeUpdate("create table if not exists LinkedPlayers (bedrockId string, javaUniqueId string, javaUsername string)");
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS LinkedPlayers (bedrockId varchar(36), javaUniqueId varchar(36), javaUsername varchar(16));");
+            statement.executeUpdate("ALTER TABLE LinkedPlayers ADD PRIMARY KEY(bedrockId);");
+            statement.executeUpdate("ALTER TABLE `LinkedPlayers` ADD UNIQUE(`javaUniqueId`);");
         } catch (ClassNotFoundException e) {
-            getLogger().severe("The required class to load the SQLite database wasn't found");
+            getLogger().severe("The required class to load the MySQL database wasn't found");
         } catch (SQLException e) {
             getLogger().log(Level.SEVERE, "Error while loading database", e);
         }
@@ -73,7 +76,7 @@ public class SQLitePlayerLink extends PlayerLink {
     public CompletableFuture<Void> linkPlayer(UUID bedrockId, UUID uuid, String username) {
         return CompletableFuture.runAsync(() -> {
             try {
-                PreparedStatement query = connection.prepareStatement("insert into LinkedPlayers values(?, ?, ?)");
+                PreparedStatement query = connection.prepareStatement("INSERT INTO LinkedPlayers values(?, ?, ?)");
                 query.setString(1, bedrockId.toString());
                 query.setString(2, uuid.toString());
                 query.setString(3, username);

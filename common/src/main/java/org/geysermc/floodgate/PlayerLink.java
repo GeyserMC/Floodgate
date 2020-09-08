@@ -11,12 +11,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
+import org.geysermc.floodgate.link.MySQLPlayerLink;
 
 public abstract class PlayerLink {
     @Getter private static PlayerLink instance;
     @Getter private static boolean enabled;
     @Getter private static long verifyLinkTimeout;
     @Getter private static boolean allowLinking;
+    @Getter private static String path;
+    @Getter private static String sqlUser;
+    @Getter private static String sqlPassword;
 
     @Getter private final ExecutorService executorService = Executors.newFixedThreadPool(11);
     @Getter private Logger logger;
@@ -43,6 +47,10 @@ public abstract class PlayerLink {
             PlayerLink.enabled = linkConfig.isEnabled();
             PlayerLink.verifyLinkTimeout = linkConfig.getLinkCodeTimeout();
             PlayerLink.allowLinking = linkConfig.isAllowLinking();
+            PlayerLink.path = linkConfig.getPath();
+            PlayerLink.sqlUser = linkConfig.getUser();
+            PlayerLink.sqlPassword = linkConfig.getPassword();
+            
             instance.logger = logger;
             instance.load(dataFolder);
             return instance;
@@ -69,7 +77,8 @@ public abstract class PlayerLink {
     @AllArgsConstructor
     @Getter
     public enum ImplementationType {
-        SQLITE(SQLitePlayerLink::new);
+        SQLITE(SQLitePlayerLink::new),
+        MYSQL(MySQLPlayerLink::new);
 
         private Supplier<? extends PlayerLink> instanceSupplier;
 

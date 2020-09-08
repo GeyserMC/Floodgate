@@ -53,6 +53,12 @@ public class FloodgateConfig {
         private boolean enabled;
         @JsonProperty("type")
         private String type;
+        @JsonProperty("path")
+        private String path;
+        @JsonProperty("user")
+        private String user;
+        @JsonProperty("password")
+        private String password;
         @JsonProperty("allow-linking")
         private boolean allowLinking;
         @JsonProperty("link-code-timeout")
