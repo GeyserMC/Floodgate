@@ -63,25 +63,23 @@ public final class VelocityDataAddon implements InjectorAddon {
     @Named("kickMessageAttribute")
     private AttributeKey<String> kickMessageAttribute;
 
-    private final Map<EventLoop, FloodgatePlayer> playerMap = new HashMap<>();
-
     @Override
     public void onInject(Channel channel, boolean proxyToServer) {
         if (proxyToServer) {
             channel.pipeline().addAfter(
                     packetEncoder, "floodgate_data_handler",
-                    new VelocityServerDataHandler(config, api, playerMap)
+                    new VelocityServerDataHandler(config, api)
             );
-        } else {
-            // The handler is already added so we should add our handler before it
-            channel.pipeline().addBefore(
-                    packetHandler, "floodgate_data_handler",
-                    new VelocityProxyDataHandler(
-                            config, api, handshakeHandler, playerAttribute,
-                            kickMessageAttribute, playerMap, logger
-                    )
-            );
+            return;
         }
+        // The handler is already added so we should add our handler before it
+        channel.pipeline().addBefore(
+                packetHandler, "floodgate_data_handler",
+                new VelocityProxyDataHandler(
+                        config, api, handshakeHandler, playerAttribute,
+                        kickMessageAttribute, logger
+                )
+        );
     }
 
     @Override

@@ -32,12 +32,11 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public final class PostInitializeModule extends AbstractModule {
-    private final Module[] postCreateModules;
+    private final Module[] postInitializeModules;
 
     @Override
     protected void configure() {
-        //todo move this to FloodgatePlatform itself
-        for (Module module : postCreateModules) {
+        for (Module module : postInitializeModules) {
             install(module);
         }
     }

@@ -30,14 +30,18 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.ProvidesIntoSet;
+import io.netty.util.AttributeKey;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.geysermc.floodgate.HandshakeHandler;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.listener.BungeeListener;
 import org.geysermc.floodgate.register.ListenerRegister;
+
+import javax.inject.Named;
 
 public final class BungeeListenerModule extends AbstractModule {
     @Override
@@ -49,7 +53,8 @@ public final class BungeeListenerModule extends AbstractModule {
     @ProvidesIntoSet
     public Listener bungeeListener(Plugin plugin, ProxyFloodgateConfig config,
                                    ProxyFloodgateApi api, HandshakeHandler handshakeHandler,
+                                   @Named("playerAttribute") AttributeKey<FloodgatePlayer> playerAttribute,
                                    FloodgateLogger logger) {
-        return new BungeeListener(plugin, config, api, handshakeHandler, logger);
+        return new BungeeListener(plugin, config, api, handshakeHandler, playerAttribute, logger);
     }
 }

@@ -42,7 +42,8 @@ public interface FloodgatePlayer {
 
     /**
      * Returns the real username of the Bedrock client.
-     * No prefix nor shortened nor replaced spaces.
+     * This username doesn't have a prefix, spaces aren't replaced and the username hasn't been
+     * shortened.
      */
     String getUsername();
 
@@ -52,7 +53,7 @@ public interface FloodgatePlayer {
     String getXuid();
 
     /**
-     * Returns the Operation System of the Bedrock client
+     * Returns the Operating System of the Bedrock client
      */
     DeviceOs getDeviceOs();
 

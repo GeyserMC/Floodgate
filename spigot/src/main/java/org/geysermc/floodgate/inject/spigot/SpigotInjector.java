@@ -30,7 +30,7 @@ import io.netty.channel.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
-import org.geysermc.floodgate.util.ReflectionUtil;
+import org.geysermc.floodgate.util.ReflectionUtils;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -128,11 +128,11 @@ public final class SpigotInjector extends CommonPlatformInjector {
         // and change the list back to the original
         Object serverConnection = getServerConnection();
         if (serverConnection != null) {
-            Field field = ReflectionUtil.getField(serverConnection.getClass(), injectedFieldName);
-            List<?> list = (List<?>) ReflectionUtil.getValue(serverConnection, field);
+            Field field = ReflectionUtils.getField(serverConnection.getClass(), injectedFieldName);
+            List<?> list = (List<?>) ReflectionUtils.getValue(serverConnection, field);
             if (list instanceof CustomList) {
                 CustomList customList = (CustomList) list;
-                ReflectionUtil.setValue(serverConnection, field, customList.getOriginalList());
+                ReflectionUtils.setValue(serverConnection, field, customList.getOriginalList());
                 customList.clear();
                 customList.addAll(list);
             }
@@ -145,10 +145,10 @@ public final class SpigotInjector extends CommonPlatformInjector {
 
     public Object getServerConnection() throws IllegalAccessException, InvocationTargetException {
         if (serverConnection != null) return serverConnection;
-        Class<?> minecraftServer = ReflectionUtil.getPrefixedClass("MinecraftServer");
+        Class<?> minecraftServer = ReflectionUtils.getPrefixedClass("MinecraftServer");
         assert minecraftServer != null;
 
-        Object minecraftServerInstance = ReflectionUtil.invokeStatic(minecraftServer, "getServer");
+        Object minecraftServerInstance = ReflectionUtils.invokeStatic(minecraftServer, "getServer");
         for (Method m : minecraftServer.getDeclaredMethods()) {
             if (m.getReturnType().getSimpleName().equals("ServerConnection")) {
                 if (m.getParameterTypes().length == 0) {

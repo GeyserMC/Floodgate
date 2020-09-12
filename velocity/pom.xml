@@ -12,6 +12,10 @@
 
     <artifactId>velocity</artifactId>
 
+    <properties>
+        <log4j.version>2.11.2</log4j.version>
+    </properties>
+
     <repositories>
         <repository>
             <id>velocity-repo</id>
@@ -33,7 +37,13 @@
         <dependency>
             <groupId>com.velocitypowered</groupId>
             <artifactId>velocity-api</artifactId>
-            <version>${velocity-version}</version>
+            <version>${velocity.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

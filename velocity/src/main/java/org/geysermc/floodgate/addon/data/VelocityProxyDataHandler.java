@@ -27,9 +27,9 @@
 package org.geysermc.floodgate.addon.data;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.EventLoop;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
+import io.netty.util.ReferenceCountUtil;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.HandshakeHandler;
 import org.geysermc.floodgate.HandshakeHandler.HandshakeResult;
@@ -39,10 +39,9 @@ import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 
 import java.lang.reflect.Field;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.geysermc.floodgate.util.ReflectionUtil.*;
+import static org.geysermc.floodgate.util.ReflectionUtils.*;
 
 @RequiredArgsConstructor
 public final class VelocityProxyDataHandler extends SimpleChannelInboundHandler<Object> {
@@ -56,20 +55,24 @@ public final class VelocityProxyDataHandler extends SimpleChannelInboundHandler<
 
     private final AttributeKey<FloodgatePlayer> playerAttribute;
     private final AttributeKey<String> kickMessageAttribute;
-    private final Map<EventLoop, FloodgatePlayer> playerMap;
 
     private final FloodgateLogger logger;
 
+    private boolean done;
+
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
+        ReferenceCountUtil.retain(msg);
         // we're only interested in the Handshake packet
-        if (!HANDSHAKE_PACKET.isInstance(msg)) {
+        if (done || !HANDSHAKE_PACKET.isInstance(msg)) {
             ctx.fireChannelRead(msg);
+            done = true;
             return;
         }
 
         handleClientToProxy(ctx, msg);
         ctx.fireChannelRead(msg);
+        done = true;
     }
 
     private void handleClientToProxy(ChannelHandlerContext ctx, Object packet) {
@@ -95,10 +98,8 @@ public final class VelocityProxyDataHandler extends SimpleChannelInboundHandler<
         // system we only have to check if the connection (which is already closed at that time)
         // has the FloodgatePlayer attribute
         ctx.channel().attr(playerAttribute).set(player);
-        playerMap.put(ctx.channel().eventLoop(), player);
 
-        api.addEncryptedData(player.getCorrectUniqueId(),
-                result.getHandshakeData()[2] + '\0' + result.getHandshakeData()[3]);
+        api.addEncryptedData(player.getCorrectUniqueId(), result.getHandshakeData()[1]);
         logger.info("Floodgate player who is logged in as {} {} joined",
                 player.getCorrectUsername(), player.getCorrectUniqueId());
     }

@@ -38,18 +38,32 @@ public final class AddonManagerHandler extends MessageToByteEncoder<ByteBuf> {
     private final CommonPlatformInjector injector;
     private final Channel channel;
 
+    private boolean loggedIn;
+    private boolean removed;
+
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) {
-        injector.removeAddonsCall(channel);
+        // without this check, addons will be removed twice
+        if (!removed) {
+            removed = true;
+            injector.removeAddonsCall(channel);
+        }
     }
 
     @Override
     protected void encode(ChannelHandlerContext ctx, ByteBuf msg, ByteBuf out) {
+        if (loggedIn) {
+            out.writeBytes(msg);
+            return;
+        }
+
         int index = msg.readerIndex();
         // LoginSuccess packet = 2
         if (readVarInt(msg) == 2) {
+            loggedIn = true;
             injector.loginSuccessCall(channel);
         }
+
         msg.readerIndex(index);
         out.writeBytes(msg);
     }

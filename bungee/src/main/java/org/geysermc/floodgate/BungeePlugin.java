@@ -30,14 +30,14 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.geysermc.floodgate.module.*;
-import org.geysermc.floodgate.util.ReflectionUtil;
+import org.geysermc.floodgate.util.ReflectionUtils;
 
 public final class BungeePlugin extends Plugin {
     private FloodgatePlatform platform;
 
     @Override
     public void onLoad() {
-        ReflectionUtil.setPrefix("net.md_5.bungee");
+        ReflectionUtils.setPrefix("net.md_5.bungee");
 
         long ctm = System.currentTimeMillis();
         Injector injector = Guice.createInjector(
@@ -45,12 +45,12 @@ public final class BungeePlugin extends Plugin {
                 new BungeePlatformModule(this)
         );
 
-        long endCtm = System.currentTimeMillis();
-        getLogger().info("Took " + (endCtm - ctm) + "ms to boot Floodgate");
-
         // Bungeecord doesn't have a build-in function to disable plugins,
         // so there is no need to have a custom Platform class like Spigot
         platform = injector.getInstance(FloodgatePlatform.class);
+
+        long endCtm = System.currentTimeMillis();
+        getLogger().info("Took " + (endCtm - ctm) + "ms to boot Floodgate");
     }
 
     @Override

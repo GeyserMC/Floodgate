@@ -27,23 +27,15 @@
 package org.geysermc.floodgate.inject.bungee;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
-import lombok.AllArgsConstructor;
+import javassist.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.md_5.bungee.protocol.MinecraftEncoder;
-import net.md_5.bungee.protocol.Varint21LengthFieldPrepender;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
-import org.geysermc.floodgate.util.ReflectionUtil;
+import org.geysermc.floodgate.util.ReflectionUtils;
 
 import javax.naming.OperationNotSupportedException;
-import java.lang.reflect.Field;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.nio.channels.ServerSocketChannel;
+import java.util.function.Consumer;
 
 @RequiredArgsConstructor
 public final class BungeeInjector extends CommonPlatformInjector {
@@ -53,14 +45,45 @@ public final class BungeeInjector extends CommonPlatformInjector {
 
     @Override
     public boolean inject() {
-        Class<?> pipelineUtils = ReflectionUtil.getPrefixedClass("netty.PipelineUtils");
-        Field framePrepender = ReflectionUtil.getField(pipelineUtils, "framePrepender");
-        Object customPrepender = new CustomVarint21LengthFieldPrepender(this, logger);
+        try {
+            // short version: needed a reliable way to access the encoder and decoder before the
+            // handshake packet.
 
-        ReflectionUtil.setFinalValue(null, framePrepender, customPrepender);
+            ClassPool classPool = ClassPool.getDefault();
 
-        injected = true;
-        return true;
+            CtClass handlerBossClass = classPool.get("net.md_5.bungee.netty.HandlerBoss");
+
+            // create a new field that we can access
+            CtField channelConsumerField = new CtField(
+                    classPool.get("java.util.function.Consumer"), "channelConsumer", handlerBossClass
+            );
+            channelConsumerField.setModifiers(Modifier.PUBLIC | Modifier.STATIC);
+            handlerBossClass.addField(channelConsumerField);
+
+            // edit a method to call the new field when we need it
+            CtMethod channelActiveMethod = handlerBossClass.getMethod(
+                    "channelActive", "(Lio/netty/channel/ChannelHandlerContext;)V");
+            channelActiveMethod.insertBefore("" +
+                    "{if (handler != null) {channelConsumer.accept(ctx.channel());}}");
+
+            Class<?> clazz = handlerBossClass.toClass();
+
+            Consumer<Channel> channelConsumer = channel ->
+                    injectClient(channel, channel.parent() != null);
+
+            // set the field we just made
+            ReflectionUtils.setValue(
+                    null,
+                    ReflectionUtils.getField(clazz, "channelConsumer"),
+                    channelConsumer
+            );
+
+            injected = true;
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
@@ -70,74 +93,9 @@ public final class BungeeInjector extends CommonPlatformInjector {
                 "Floodgate cannot remove the Bungee injection at the moment");
     }
 
-    public void injectClient(Channel channel) {
-        boolean clientToProxy = channel.parent() instanceof ServerSocketChannel;
+    public void injectClient(Channel channel, boolean clientToProxy) {
         logger.info("Client to proxy? " + clientToProxy);
-
-        channel.pipeline().addLast(new ChannelInitializer<Channel>() {
-            @Override
-            protected void initChannel(Channel channel) {
-                injectAddonsCall(channel, !clientToProxy);
-                addInjectedClient(channel);
-            }
-        });
-    }
-
-    @AllArgsConstructor
-    @ChannelHandler.Sharable
-    private static class CustomVarint21LengthFieldPrepender extends Varint21LengthFieldPrepender {
-        private final BungeeInjector injector;
-        private final FloodgateLogger logger;
-
-        @Override
-        public void handlerAdded(ChannelHandlerContext ctx) {
-            // we're getting called before the encoder and decoder are added,
-            // so we have to wait a little, so we have a nice while loop here :D
-            //todo look if we can make this nicer
-            ctx.executor().execute(() -> {
-                logger.debug("Channel: {} {} {}",
-                        ctx.channel().isActive(),
-                        ctx.channel().isOpen(),
-                        ctx.channel().isRegistered()
-                );
-
-                long ctm = System.currentTimeMillis();
-                while (ctx.channel().isOpen()) {
-                    logger.debug("Trying to find decoder for {} {}",
-                            getHostString(ctx, true),
-                            getParentName(ctx, true)
-                    );
-
-                    if (ctx.channel().pipeline().get(MinecraftEncoder.class) != null) {
-                        logger.debug("Found decoder for {}",
-                                getHostString(ctx, true)
-                        );
-
-                        injector.injectClient(ctx.channel());
-                        break;
-                    }
-
-                    if (System.currentTimeMillis() - ctm > 3000) {
-                        logger.error("Failed to find decoder for client after 3 seconds!");
-                    }
-                }
-            });
-        }
-    }
-
-    public static String getHostString(ChannelHandlerContext ctx, boolean alwaysString) {
-        SocketAddress address = ctx.channel().remoteAddress();
-        if (address != null) {
-            return ((InetSocketAddress) address).getHostString();
-        }
-        return alwaysString ? "null" : null;
-    }
-
-    public static String getParentName(ChannelHandlerContext ctx, boolean alwaysString) {
-        Channel parent = ctx.channel().parent();
-        if (parent != null) {
-            return parent.getClass().getSimpleName();
-        }
-        return alwaysString ? "null" : null;
+        injectAddonsCall(channel, !clientToProxy);
+        addInjectedClient(channel);
     }
 }

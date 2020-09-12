@@ -1,5 +1,6 @@
 package org.geysermc.floodgate.listener;
 
+import io.netty.util.AttributeKey;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
@@ -24,21 +25,24 @@ public final class BungeeListener implements Listener {
     private final ProxyFloodgateApi api;
     private final FloodgateLogger logger;
 
-    public BungeeListener(Plugin plugin, ProxyFloodgateConfig config, ProxyFloodgateApi api,
-                          HandshakeHandler handshakeHandler, FloodgateLogger logger) {
-        this.dataHandler = new BungeeDataHandler(plugin, config, api, handshakeHandler, logger);
+    public BungeeListener(Plugin plugin, ProxyFloodgateConfig config,
+                          ProxyFloodgateApi api, HandshakeHandler handshakeHandler,
+                          AttributeKey<FloodgatePlayer> playerAttribute, FloodgateLogger logger) {
+        this.dataHandler = new BungeeDataHandler(
+                plugin, config, api, handshakeHandler, playerAttribute, logger
+        );
         this.api = api;
         this.logger = logger;
     }
 
     @EventHandler(priority = EventPriority.LOW)
     public void onServerConnect(ServerConnectEvent event) {
-        dataHandler.handle(event);
+        dataHandler.handleServerConnect(event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.LOW)
     public void onPreLogin(PreLoginEvent event) {
-        dataHandler.handle(event);
+        dataHandler.handlePreLogin(event);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -54,7 +58,6 @@ public final class BungeeListener implements Listener {
         // he has been disconnected by now
         UUID uniqueId = event.getConnection().getUniqueId();
         FloodgatePlayer player = api.getPlayer(uniqueId);
-        logger.info("Login" + (player != null) + " " + uniqueId);
         if (player != null) {
             player.as(FloodgatePlayerImpl.class).setLogin(false);
             logger.info("Floodgate player who is logged in as {} {} joined",
@@ -64,7 +67,6 @@ public final class BungeeListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onLoginMonitor(LoginEvent event) {
-        logger.info("LoginMonitor" + event.isCancelled());
         if (event.isCancelled()) {
             api.removePlayer(event.getConnection().getUniqueId());
         }
@@ -73,14 +75,12 @@ public final class BungeeListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerDisconnect(PlayerDisconnectEvent event) {
         ProxiedPlayer player = event.getPlayer();
-        FloodgatePlayer fPlayer;
-        if ((fPlayer = api.removePlayer(player.getUniqueId())) != null) {
+        if (api.removePlayer(player.getUniqueId()) != null) {
             api.removeEncryptedData(player.getUniqueId());
             logger.info(
                     "Floodgate player who was logged in as {} {} disconnected",
                     player.getName(), player.getUniqueId()
             );
         }
-        logger.info("Disconnected " + fPlayer);
     }
 }

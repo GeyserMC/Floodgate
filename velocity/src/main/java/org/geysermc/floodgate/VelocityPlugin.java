@@ -32,7 +32,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import org.geysermc.floodgate.module.*;
-import org.geysermc.floodgate.util.ReflectionUtil;
+import org.geysermc.floodgate.util.ReflectionUtils;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
@@ -42,7 +42,7 @@ public final class VelocityPlugin {
 
     @Inject
     public VelocityPlugin(@DataDirectory Path dataDirectory, Injector guice, Logger logger) {
-        ReflectionUtil.setPrefix("com.velocitypowered.proxy");
+        ReflectionUtils.setPrefix("com.velocitypowered.proxy");
 
         long ctm = System.currentTimeMillis();
         Injector injector = guice.createChildInjector(
@@ -50,10 +50,10 @@ public final class VelocityPlugin {
                 new VelocityPlatformModule()
         );
 
+        platform = injector.getInstance(FloodgatePlatform.class);
+
         long endCtm = System.currentTimeMillis();
         logger.info("Took " + (endCtm - ctm) + "ms to boot Floodgate");
-
-        platform = injector.getInstance(FloodgatePlatform.class);
     }
 
     @Subscribe

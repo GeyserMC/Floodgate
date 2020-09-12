@@ -30,7 +30,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.module.*;
-import org.geysermc.floodgate.util.ReflectionUtil;
+import org.geysermc.floodgate.util.ReflectionUtils;
 
 public final class SpigotPlugin extends JavaPlugin {
     private SpigotPlatform platform;
@@ -38,7 +38,7 @@ public final class SpigotPlugin extends JavaPlugin {
     @Override
     public void onLoad() {
         String minecraftVersion = getServer().getClass().getPackage().getName().split("\\.")[3];
-        ReflectionUtil.setPrefix("net.minecraft.server." + minecraftVersion);
+        ReflectionUtils.setPrefix("net.minecraft.server." + minecraftVersion);
 
         long ctm = System.currentTimeMillis();
         Injector injector = Guice.createInjector(
@@ -46,10 +46,10 @@ public final class SpigotPlugin extends JavaPlugin {
                 new SpigotPlatformModule(this)
         );
 
+        platform = injector.getInstance(SpigotPlatform.class);
+
         long endCtm = System.currentTimeMillis();
         getLogger().info("Took " + (endCtm - ctm) + "ms to boot Floodgate");
-
-        platform = injector.getInstance(SpigotPlatform.class);
     }
 
     @Override

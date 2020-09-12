@@ -39,7 +39,9 @@ import java.util.concurrent.CompletionException;
 
 public class SqliteDatabase extends CommonPlayerLink {
     private Connection connection;
-    @Inject @Named("dataDirectory")
+
+    @Inject
+    @Named("dataDirectory")
     private Path dataDirectory;
 
     @Override
@@ -51,7 +53,7 @@ public class SqliteDatabase extends CommonPlayerLink {
             Statement statement = connection.createStatement();
             statement.setQueryTimeout(30);  // set timeout to 30 sec.
             statement.executeUpdate("create table if not exists LinkedPlayers (bedrockId string, javaUniqueId string, javaUsername string)");
-        } catch (ClassNotFoundException ignored) {
+        } catch (ClassNotFoundException exception) {
             getLogger().error("The required class to load the SQLite database wasn't found");
         } catch (SQLException exception) {
             getLogger().error("Error while loading database", exception);

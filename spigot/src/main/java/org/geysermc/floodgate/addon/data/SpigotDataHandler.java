@@ -28,6 +28,7 @@ package org.geysermc.floodgate.addon.data;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.util.AttributeKey;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.HandshakeHandler;
 import org.geysermc.floodgate.HandshakeHandler.HandshakeResult;
@@ -35,7 +36,7 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.util.BedrockData;
-import org.geysermc.floodgate.util.ReflectionUtil;
+import org.geysermc.floodgate.util.ReflectionUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -45,7 +46,7 @@ import java.net.SocketAddress;
 import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.geysermc.floodgate.util.ReflectionUtil.*;
+import static org.geysermc.floodgate.util.ReflectionUtils.*;
 
 @RequiredArgsConstructor
 public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object> {
@@ -70,8 +71,9 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
     private static final Object READY_TO_ACCEPT_PROTOCOL_STATE;
 
     /* per player stuff */
-    private final HandshakeHandler handshakeHandler;
     private final FloodgateConfig config;
+    private final HandshakeHandler handshakeHandler;
+    private final AttributeKey<FloodgatePlayer> playerAttribute;
     private final FloodgateLogger logger;
 
     private Object networkManager;
@@ -110,15 +112,17 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
                         return;
                 }
 
+                ctx.channel().attr(playerAttribute).set(result.getFloodgatePlayer());
+
                 fPlayer = result.getFloodgatePlayer();
                 BedrockData bedrockData = result.getBedrockData();
                 String[] data = result.getHandshakeData();
 
-                if (bungee = (data.length == 6 || data.length == 7)) {
+                if (bungee = result.isBungeeData()) {
                     setValue(packet, HANDSHAKE_HOST, data[0] + '\0' +
-                            bedrockData.getIp() + '\0' + fPlayer.getCorrectUniqueId() +
-                            (data.length == 7 ? '\0' + data[6] : "")
-                    );
+                            bedrockData.getIp() + '\0' +
+                            fPlayer.getCorrectUniqueId() +
+                            (data.length == 5 ? '\0' + data[4] : ""));
                 } else {
                     // Use a spoofedUUID for initUUID (just like Bungeecord)
                     setValue(networkManager, "spoofedUUID", fPlayer.getCorrectUniqueId());
@@ -157,7 +161,9 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
         } finally {
             // don't let the packet through if the packet is the login packet
             // because we want to skip the login cycle
-            if (!isLogin) ctx.fireChannelRead(packet);
+            if (!isLogin) {
+                ctx.fireChannelRead(packet);
+            }
 
             if (isHandshake && bungee || isLogin && !bungee || fPlayer == null) {
                 // we're done, we'll just wait for the loginSuccessCall
@@ -181,13 +187,13 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
 
         HANDSHAKE_PACKET = getPrefixedClass("PacketHandshakingInSetProtocol");
         checkNotNull(HANDSHAKE_PACKET, "PacketHandshakingInSetProtocol cannot be null");
-        HANDSHAKE_HOST = getFieldOfType(HANDSHAKE_PACKET, String.class, true);
+        HANDSHAKE_HOST = getFieldOfType(HANDSHAKE_PACKET, String.class);
         checkNotNull(HANDSHAKE_HOST, "Host field from handshake packet cannot be null");
 
         LOGIN_START_PACKET = getPrefixedClass("PacketLoginInStart");
         checkNotNull(LOGIN_START_PACKET, "PacketLoginInStart cannot be null");
 
-        GAME_PROFILE = ReflectionUtil.getClass("com.mojang.authlib.GameProfile");
+        GAME_PROFILE = ReflectionUtils.getClass("com.mojang.authlib.GameProfile");
         checkNotNull(GAME_PROFILE, "GameProfile class cannot be null");
 
         Constructor<?> gameProfileConstructor = null;
@@ -201,7 +207,7 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
 
         LOGIN_LISTENER = getPrefixedClass("LoginListener");
         checkNotNull(LOGIN_LISTENER, "LoginListener cannot be null");
-        LOGIN_PROFILE = getFieldOfType(LOGIN_LISTENER, GAME_PROFILE, true);
+        LOGIN_PROFILE = getFieldOfType(LOGIN_LISTENER, GAME_PROFILE);
         checkNotNull(LOGIN_PROFILE, "Profile from LoginListener cannot be null");
         INIT_UUID = getMethod(LOGIN_LISTENER, "initUUID");
         checkNotNull(INIT_UUID, "initUUID from LoginListener cannot be null");
@@ -227,7 +233,7 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
                 "Ready to accept state from Protocol state cannot be null");
 
         Class<?> packetListenerClass = getPrefixedClass("PacketListener");
-        PACKET_LISTENER = getFieldOfType(networkManager, packetListenerClass, true);
+        PACKET_LISTENER = getFieldOfType(networkManager, packetListenerClass);
         checkNotNull(PACKET_LISTENER, "PacketListener cannot be null");
 
         LOGIN_HANDLER = getPrefixedClass("LoginListener$LoginHandler");

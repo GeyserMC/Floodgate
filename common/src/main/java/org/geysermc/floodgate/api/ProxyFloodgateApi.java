@@ -26,24 +26,20 @@
 
 package org.geysermc.floodgate.api;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import lombok.RequiredArgsConstructor;
+import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.util.BedrockData;
-import org.geysermc.floodgate.util.EncryptionUtil;
 
-import java.security.PrivateKey;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 public final class ProxyFloodgateApi extends SimpleFloodgateApi {
     private final Map<UUID, String> encryptedData = new HashMap<>();
-    private PrivateKey key;
-
-    @Inject
-    public void init(@Named("floodgateKey") PrivateKey key) {
-        this.key = key;
-    }
+    private final FloodgateCipher cipher;
 
     public String getEncryptedData(UUID uuid) {
         return encryptedData.get(uuid);
@@ -58,16 +54,15 @@ public final class ProxyFloodgateApi extends SimpleFloodgateApi {
     }
 
     public void updateEncryptedData(UUID uuid, BedrockData bedrockData) {
-        //todo move away from public/private key system
         try {
-            String data = EncryptionUtil.encryptBedrockData(key, bedrockData);
-            addEncryptedData(uuid, data);
+            byte[] encryptedData = cipher.encryptFromString(bedrockData.toString());
+            encryptedData = Base64.getEncoder().encode(encryptedData);
+            //todo maybe bake Base64 support into it?
+
+            addEncryptedData(uuid, new String(encryptedData, StandardCharsets.UTF_8));
         } catch (Exception exception) {
-//            throw new IllegalStateException("We failed to update the BedrockData, " +
-//                    "but we can't continue without the updated version!", exception);
-            System.out.println("We failed to update the BedrockData, " +
-                    "but we can't continue without the updated version!");
-            exception.printStackTrace();
+            throw new IllegalStateException("We failed to update the BedrockData, " +
+                    "but we can't continue without the updated version!", exception);
         }
     }
 }

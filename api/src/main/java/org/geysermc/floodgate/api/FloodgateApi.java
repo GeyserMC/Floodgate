@@ -75,7 +75,6 @@ public interface FloodgateApi {
 
     /**
      * Returns the Floodgate API instance.
-     * This method is equal to running {@link InstanceHolder#getInstance()}
      */
     static FloodgateApi getInstance() {
         return InstanceHolder.getInstance();

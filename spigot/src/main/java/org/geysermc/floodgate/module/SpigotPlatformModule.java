@@ -41,7 +41,7 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.inject.spigot.SpigotInjector;
 import org.geysermc.floodgate.listener.SpigotListenerRegistration;
-import org.geysermc.floodgate.logger.JavaDefaultFloodgateLogger;
+import org.geysermc.floodgate.logger.JavaUtilFloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandRegistration;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 import org.geysermc.floodgate.platform.command.util.CommandUtil;
@@ -73,7 +73,7 @@ public final class SpigotPlatformModule extends AbstractModule {
     @Provides
     @Singleton
     public FloodgateLogger floodgateLogger() {
-        return new JavaDefaultFloodgateLogger(plugin.getLogger());
+        return new JavaUtilFloodgateLogger(plugin.getLogger());
     }
 
     /*

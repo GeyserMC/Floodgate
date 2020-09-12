@@ -53,7 +53,6 @@ public final class DebugAddon implements InjectorAddon {
 
     @Override
     public void onInject(Channel channel, boolean proxyToServer) {
-        //todo enable debug mode in our logger
         channel.pipeline().addBefore(
                 packetEncoder, "floodgate_debug_out",
                 new ChannelOutDebugHandler(implementationName, !proxyToServer, logger)
@@ -76,7 +75,6 @@ public final class DebugAddon implements InjectorAddon {
 
     @Override
     public boolean shouldInject() {
-        logger.info("Is debug? " + config.isDebug());
         return config.isDebug();
     }
 }

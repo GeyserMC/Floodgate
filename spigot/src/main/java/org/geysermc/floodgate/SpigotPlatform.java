@@ -33,6 +33,7 @@ import com.google.inject.name.Named;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.loader.ConfigLoader;
 import org.geysermc.floodgate.link.PlayerLinkLoader;
@@ -46,14 +47,14 @@ public final class SpigotPlatform extends FloodgatePlatform {
     public SpigotPlatform(@Named("dataDirectory") Path dataDirectory, FloodgateApi api,
                           ConfigLoader configLoader, PlayerLinkLoader playerLinkLoader,
                           HandshakeHandler handshakeHandler, FloodgateLogger logger,
-                          Injector injector) {
+                          PlatformInjector platformInjector, Injector injector) {
         super(dataDirectory, api, configLoader, playerLinkLoader,
-                handshakeHandler, logger, injector);
+                handshakeHandler, logger, platformInjector, injector);
     }
 
     @Override
-    public boolean enable(Module... postCreateModules) {
-        boolean success = super.enable(postCreateModules);
+    public boolean enable(Module... postInitializeModules) {
+        boolean success = super.enable(postInitializeModules);
         if (!success) {
             Bukkit.getPluginManager().disablePlugin(plugin);
         }

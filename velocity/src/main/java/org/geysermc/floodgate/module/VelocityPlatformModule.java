@@ -41,10 +41,11 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.command.VelocityCommandRegistration;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
+import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.inject.velocity.VelocityInjector;
 import org.geysermc.floodgate.listener.VelocityListenerRegistration;
-import org.geysermc.floodgate.logger.Slf4jLogger;
+import org.geysermc.floodgate.logger.Slf4jFloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandRegistration;
 import org.geysermc.floodgate.platform.command.util.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
@@ -67,14 +68,14 @@ public final class VelocityPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public ProxyFloodgateApi proxyFloodgateApi() {
-        return new ProxyFloodgateApi();
+    public ProxyFloodgateApi proxyFloodgateApi(FloodgateCipher cipher) {
+        return new ProxyFloodgateApi(cipher);
     }
 
     @Provides
     @Singleton
     public FloodgateLogger floodgateLogger(Logger logger) {
-        return new Slf4jLogger(logger);
+        return new Slf4jFloodgateLogger(logger);
     }
 
     /*

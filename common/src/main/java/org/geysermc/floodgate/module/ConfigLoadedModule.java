@@ -29,25 +29,18 @@ package org.geysermc.floodgate.module;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
-
-import java.security.PrivateKey;
 
 @RequiredArgsConstructor
 public final class ConfigLoadedModule extends AbstractModule {
     private final FloodgateConfig config;
-    private final FloodgateApi api;
 
     @Override
     protected void configure() {
         if (config instanceof ProxyFloodgateConfig) {
             bind(ProxyFloodgateConfig.class).toInstance((ProxyFloodgateConfig) config);
-            // The ProxyFloodgateApi needs the floodgateKey
-            requestInjection(api);
         }
     }
 
@@ -55,12 +48,5 @@ public final class ConfigLoadedModule extends AbstractModule {
     @Singleton
     public FloodgateConfig floodgateConfig() {
         return config;
-    }
-
-    @Provides
-    @Singleton
-    @Named("floodgateKey")
-    public PrivateKey floodgateKey() {
-        return config.getPrivateKey();
     }
 }

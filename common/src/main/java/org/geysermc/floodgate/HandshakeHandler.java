@@ -31,24 +31,18 @@ import lombok.*;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.util.BedrockData;
-import org.geysermc.floodgate.util.EncryptionUtil;
+import org.geysermc.floodgate.util.InvalidHeaderException;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
+import java.util.Base64;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.geysermc.floodgate.util.BedrockData.EXPECTED_LENGTH;
-import static org.geysermc.floodgate.util.BedrockData.FLOODGATE_IDENTIFIER;
 
 @RequiredArgsConstructor
 public final class HandshakeHandler {
     private final SimpleFloodgateApi api;
-    private PrivateKey privateKey;
+    private final FloodgateCipher cipher;
     private boolean proxy;
 
     private String usernamePrefix;
@@ -56,8 +50,6 @@ public final class HandshakeHandler {
 
     @Inject
     public void init(FloodgateConfig config) {
-        this.privateKey = config.getPrivateKey();
-        checkNotNull(privateKey, "Floodgate key cannot be null");
         this.proxy = config.isProxy();
         this.usernamePrefix = config.getUsernamePrefix();
         this.replaceSpaces = config.isReplaceSpaces();
@@ -66,16 +58,19 @@ public final class HandshakeHandler {
     public HandshakeResult handle(@NonNull String handshakeData) {
         try {
             String[] data = handshakeData.split("\0");
-            boolean isBungeeData = data.length == 6 || data.length == 7;
 
-            if (proxy && isBungeeData || !isBungeeData && data.length != 4
-                    || !data[1].equals(FLOODGATE_IDENTIFIER)) {
+            boolean isBungeeData = data.length == 5;
+            // this can be Bungee data (without skin) or Floodgate data
+            if (data.length == 4) {
+                isBungeeData = FloodgateCipher.hasHeader(data[3]);
+            }
+
+            if (proxy && isBungeeData || !isBungeeData && data.length != 2) {
                 return ResultType.NOT_FLOODGATE_DATA.getCachedResult();
             }
 
-            BedrockData bedrockData = EncryptionUtil.decryptBedrockData(
-                    privateKey, data[2] + '\0' + data[3]
-            );
+            String decrypted = cipher.decryptToString(Base64.getDecoder().decode(data[1]));
+            BedrockData bedrockData = BedrockData.fromString(decrypted);
 
             if (bedrockData.getDataLength() != EXPECTED_LENGTH) {
                 return ResultType.INVALID_DATA_LENGTH.getCachedResult();
@@ -86,9 +81,11 @@ public final class HandshakeHandler {
             api.addPlayer(player.getJavaUniqueId(), player);
 
             return new HandshakeResult(ResultType.SUCCESS, data, bedrockData, player);
-        } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException |
-                IllegalBlockSizeException | BadPaddingException exception) {
+        } catch (InvalidHeaderException headerException) {
+            return ResultType.NOT_FLOODGATE_DATA.getCachedResult();
+        } catch (Exception exception) {
             exception.printStackTrace();
+            System.out.println(handshakeData);
             return ResultType.EXCEPTION.getCachedResult();
         }
     }
@@ -100,6 +97,10 @@ public final class HandshakeHandler {
         private final String[] handshakeData;
         private final BedrockData bedrockData;
         private final FloodgatePlayer floodgatePlayer;
+
+        public boolean isBungeeData() {
+            return handshakeData.length == 4 || handshakeData.length == 5;
+        }
     }
 
     public enum ResultType {

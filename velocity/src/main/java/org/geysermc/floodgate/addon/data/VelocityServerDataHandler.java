@@ -26,8 +26,8 @@
 
 package org.geysermc.floodgate.addon.data;
 
+import com.velocitypowered.api.proxy.Player;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.EventLoop;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.util.ReferenceCountUtil;
 import lombok.RequiredArgsConstructor;
@@ -36,39 +36,49 @@ import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.geysermc.floodgate.util.BedrockData.FLOODGATE_IDENTIFIER;
-import static org.geysermc.floodgate.util.ReflectionUtil.*;
+import static org.geysermc.floodgate.util.ReflectionUtils.*;
 
 @RequiredArgsConstructor
 public class VelocityServerDataHandler extends MessageToMessageEncoder<Object> {
     private static final Class<?> HANDSHAKE_PACKET;
-    private static final Field HANDSHAKE_SERVER_ADDRESS;
+    private static final Field HANDSHAKE_ADDRESS;
+    private static final Method GET_ASSOCIATION;
+    private static final Method GET_PLAYER;
 
     private final ProxyFloodgateConfig config;
     private final ProxyFloodgateApi api;
 
-    private final Map<EventLoop, FloodgatePlayer> playerMap;
+    private boolean done;
 
     @Override
     protected void encode(ChannelHandlerContext ctx, Object packet, List<Object> out) {
         ReferenceCountUtil.retain(packet);
-        if (!HANDSHAKE_PACKET.isInstance(packet) || !config.isSendFloodgateData()) {
-            System.out.println(HANDSHAKE_PACKET.isInstance(packet)+" "+config.isSendFloodgateData());
+        if (done) {
             out.add(packet);
             return;
         }
 
-        String address = getCastedValue(packet, HANDSHAKE_SERVER_ADDRESS);
+        if (!HANDSHAKE_PACKET.isInstance(packet) || !config.isSendFloodgateData()) {
+            System.out.println(HANDSHAKE_PACKET.isInstance(packet)+" "+config.isSendFloodgateData());
+            done = true;
+            out.add(packet);
+            return;
+        }
 
-        // works because the EventLoop is shared between the Player and the ServerConnection
-        // todo check if it actually works (by using multiple accounts and log if the map
-        //  overrides older ones)
-        FloodgatePlayer player = playerMap.get(ctx.channel().eventLoop());
+        String address = getCastedValue(packet, HANDSHAKE_ADDRESS);
+
+        // get the FloodgatePlayer from the ConnectedPlayer
+        Object minecraftConnection = ctx.pipeline().get("handler");
+        Object association = invoke(minecraftConnection, GET_ASSOCIATION);
+        Player velocityPlayer = castedInvoke(association, GET_PLAYER);
+
+        //noinspection ConstantConditions
+        FloodgatePlayer player = api.getPlayer(velocityPlayer.getUniqueId());
 
         // player is not a Floodgate player
         if (player == null) {
@@ -81,12 +91,13 @@ public class VelocityServerDataHandler extends MessageToMessageEncoder<Object> {
         checkArgument(encryptedData != null, "Encrypted data cannot be null");
 
         // use the same system that we use on bungee, our data goes before all the other data
-        String[] split = address.split("\0");
-        String remaining = address.substring(split[0].length());
+        int addressFinished = address.indexOf("\0");
+        String originalAddress = address.substring(0, addressFinished);
+        String remaining = address.substring(addressFinished);
 
-        setValue(packet, HANDSHAKE_SERVER_ADDRESS,
-                split[0] + '\0' + FLOODGATE_IDENTIFIER + '\0' + encryptedData + remaining);
-        System.out.println("done");
+        setValue(packet, HANDSHAKE_ADDRESS, originalAddress + '\0' + encryptedData + remaining);
+
+        done = true;
         out.add(packet);
     }
 
@@ -94,7 +105,17 @@ public class VelocityServerDataHandler extends MessageToMessageEncoder<Object> {
         HANDSHAKE_PACKET = getPrefixedClass("protocol.packet.Handshake");
         checkNotNull(HANDSHAKE_PACKET, "Handshake packet class cannot be null");
 
-        HANDSHAKE_SERVER_ADDRESS = getField(HANDSHAKE_PACKET, "serverAddress");
-        checkNotNull(HANDSHAKE_SERVER_ADDRESS, "Address field of the Handshake packet cannot be null");
+        HANDSHAKE_ADDRESS = getField(HANDSHAKE_PACKET, "serverAddress");
+        checkNotNull(HANDSHAKE_ADDRESS, "Address field of the Handshake packet cannot be null");
+
+        Class<?> minecraftConnection = getPrefixedClass("connection.MinecraftConnection");
+
+        GET_ASSOCIATION = getMethod(minecraftConnection, "getAssociation");
+        checkNotNull(GET_ASSOCIATION, "getAssociation in MinecraftConnection cannot be null");
+
+        Class<?> serverConnection = getPrefixedClass("connection.backend.VelocityServerConnection");
+
+        GET_PLAYER = getMethod(serverConnection, "getPlayer");
+        checkNotNull(GET_PLAYER, "getPlayer in VelocityServerConnection cannot be null");
     }
 }

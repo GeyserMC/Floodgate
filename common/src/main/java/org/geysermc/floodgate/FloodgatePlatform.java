@@ -50,11 +50,9 @@ import java.util.UUID;
 public class FloodgatePlatform {
     private static final UUID KEY = UUID.randomUUID();
 
-    @Getter(AccessLevel.PROTECTED)
     private final FloodgateConfig config;
     private final FloodgateApi api;
 
-    @Getter(AccessLevel.PROTECTED)
     private final FloodgateLogger logger;
 
     private final Injector guice;
@@ -65,7 +63,7 @@ public class FloodgatePlatform {
     public FloodgatePlatform(@Named("dataDirectory") Path dataDirectory, FloodgateApi api,
                              ConfigLoader configLoader, PlayerLinkLoader playerLinkLoader,
                              HandshakeHandler handshakeHandler, FloodgateLogger logger,
-                             Injector injector) {
+                             PlatformInjector platformInjector, Injector injector) {
         this.api = api;
         this.logger = logger;
 
@@ -79,35 +77,38 @@ public class FloodgatePlatform {
         }
 
         config = configLoader.load();
+        if (config.isDebug()) {
+            logger.enableDebug();
+        }
 
         // make the config available for other classes
-        guice = injector.createChildInjector(new ConfigLoadedModule(config, api));
+        guice = injector.createChildInjector(new ConfigLoadedModule(config));
 
         guice.injectMembers(playerLinkLoader);
         guice.injectMembers(handshakeHandler);
 
         PlayerLink link = playerLinkLoader.load();
 
-        InstanceHolder.setInstance(api, link, KEY);
+        InstanceHolder.setInstance(api, link, platformInjector, KEY);
     }
 
-    public boolean enable(Module... postCreateModules) {
+    public boolean enable(Module... postInitializeModules) {
         if (injector == null) {
-            getLogger().error("Failed to find the platform injector!");
+            logger.error("Failed to find the platform injector!");
             return false;
         }
 
         try {
             if (!injector.inject()) {
-                getLogger().error("Failed to inject the packet listener!");
+                logger.error("Failed to inject the packet listener!");
                 return false;
             }
         } catch (Exception exception) {
-            getLogger().error("Failed to inject the packet listener!", exception);
+            logger.error("Failed to inject the packet listener!", exception);
             return false;
         }
 
-        guice.createChildInjector(new PostInitializeModule(postCreateModules));
+        guice.createChildInjector(new PostInitializeModule(postInitializeModules));
         return true;
     }
 
@@ -115,10 +116,10 @@ public class FloodgatePlatform {
         if (injector != null) {
             try {
                 if (!injector.removeInjection()) {
-                    getLogger().error("Failed to remove the injection!");
+                    logger.error("Failed to remove the injection!");
                 }
             } catch (Exception exception) {
-                getLogger().error("Failed to remove the injection!", exception);
+                logger.error("Failed to remove the injection!", exception);
             }
         }
 

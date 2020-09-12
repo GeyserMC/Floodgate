@@ -26,18 +26,17 @@
 
 package org.geysermc.floodgate.logger;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.geysermc.floodgate.util.MessageFormatter.format;
 
-@AllArgsConstructor
-@NoArgsConstructor
-public final class Slf4jLogger implements FloodgateLogger {
-    private Logger logger = LoggerFactory.getLogger(LOGGER_NAME);
+@RequiredArgsConstructor
+public final class Slf4jFloodgateLogger implements FloodgateLogger {
+    private final Logger logger;
 
     @Override
     public void error(String message, Object... args) {
@@ -67,5 +66,19 @@ public final class Slf4jLogger implements FloodgateLogger {
     @Override
     public void trace(String message, Object... args) {
         logger.trace(message, args);
+    }
+
+    @Override
+    public void enableDebug() {
+        if (!logger.isDebugEnabled()) {
+            Configurator.setLevel(logger.getName(), Level.DEBUG);
+        }
+    }
+
+    @Override
+    public void disableDebug() {
+        if (logger.isDebugEnabled()) {
+            Configurator.setLevel(logger.getName(), Level.INFO);
+        }
     }
 }

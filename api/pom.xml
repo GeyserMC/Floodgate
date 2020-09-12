@@ -38,7 +38,7 @@
         <dependency>
             <groupId>org.geysermc</groupId>
             <artifactId>common</artifactId>
-            <version>${geyser-version}</version>
+            <version>${geyser.version}</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>

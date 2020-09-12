@@ -36,7 +36,7 @@ import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import javax.naming.OperationNotSupportedException;
 import java.lang.reflect.Method;
 
-import static org.geysermc.floodgate.util.ReflectionUtil.*;
+import static org.geysermc.floodgate.util.ReflectionUtils.*;
 
 @RequiredArgsConstructor
 public final class VelocityInjector extends CommonPlatformInjector {
@@ -79,7 +79,7 @@ public final class VelocityInjector extends CommonPlatformInjector {
     @RequiredArgsConstructor
     @SuppressWarnings("rawtypes")
     private static final class VelocityChannelInitializer extends ChannelInitializer<Channel> {
-        private static Method initChannel;
+        private static final Method initChannel;
 
         private final VelocityInjector injector;
         private final ChannelInitializer original;

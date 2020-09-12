@@ -47,7 +47,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-import static org.geysermc.floodgate.util.ReflectionUtil.*;
+import static org.geysermc.floodgate.util.ReflectionUtils.*;
 
 public final class VelocityListener {
     private static final Field INITIAL_MINECRAFT_CONNECTION;
@@ -85,10 +85,6 @@ public final class VelocityListener {
             Channel channel = getCastedValue(mcConnection, CHANNEL);
 
             player = channel.attr(playerAttribute).get();
-            if (player != null) {
-                event.setResult(PreLoginEvent.PreLoginComponentResult.forceOfflineMode());
-            }
-
             kickMessage = channel.attr(kickMessageAttribute).get();
         } catch (Exception exception) {
             logger.error("Failed get the FloodgatePlayer from the player's channel", exception);
@@ -101,6 +97,7 @@ public final class VelocityListener {
         }
 
         if (player != null) {
+            event.setResult(PreLoginEvent.PreLoginComponentResult.forceOfflineMode());
             playerCache.put(event.getConnection(), player);
         }
     }
@@ -125,7 +122,7 @@ public final class VelocityListener {
 
             if (fPlayer != null && api.removePlayer(fPlayer)) {
                 api.removeEncryptedData(event.getPlayer().getUniqueId());
-                logger.info("Removed Bedrock player who was logged in as {} {} ",
+                logger.info("Floodgate player who was logged in as {} {} disconnected",
                         player.getUsername(), player.getUniqueId());
             }
         } catch (Exception exception) {
@@ -137,9 +134,9 @@ public final class VelocityListener {
         Class<?> initialConnection = getPrefixedClass("connection.client.InitialInboundConnection");
 
         Class<?> minecraftConnection = getPrefixedClass("connection.MinecraftConnection");
-        INITIAL_MINECRAFT_CONNECTION = getFieldOfType(initialConnection, minecraftConnection, true);
+        INITIAL_MINECRAFT_CONNECTION = getFieldOfType(initialConnection, minecraftConnection);
         Class<?> connectedPlayer = getPrefixedClass("connection.client.ConnectedPlayer");
-        MINECRAFT_CONNECTION = getFieldOfType(connectedPlayer, minecraftConnection, true);
-        CHANNEL = getFieldOfType(minecraftConnection, Channel.class, true);
+        MINECRAFT_CONNECTION = getFieldOfType(connectedPlayer, minecraftConnection);
+        CHANNEL = getFieldOfType(minecraftConnection, Channel.class);
     }
 }

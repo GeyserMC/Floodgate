@@ -77,4 +77,16 @@ public interface FloodgateLogger {
      * @param args    the arguments to fill the missing spots in the message
      */
     void trace(String message, Object... args);
+
+    /**
+     * Enables debug mode for the Floodgate logger.
+     */
+    void enableDebug();
+
+    /**
+     * Disables debug mode for the Floodgate logger.
+     * Debug messages can still be sent after running this method,
+     * but they will be hidden from the console.
+     */
+    void disableDebug();
 }

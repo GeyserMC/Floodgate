@@ -42,6 +42,10 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.loader.ConfigLoader;
 import org.geysermc.floodgate.config.updater.ConfigFileUpdater;
 import org.geysermc.floodgate.config.updater.ConfigUpdater;
+import org.geysermc.floodgate.crypto.AesCipher;
+import org.geysermc.floodgate.crypto.AesKeyProducer;
+import org.geysermc.floodgate.crypto.FloodgateCipher;
+import org.geysermc.floodgate.crypto.KeyProducer;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.link.PlayerLinkLoader;
 
@@ -59,9 +63,14 @@ public final class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
-    @Named("playerAttribute")
-    public AttributeKey<FloodgatePlayer> playerAttribute() {
-        return AttributeKey.newInstance("floodgate-player");
+    public KeyProducer keyProducer() {
+        return new AesKeyProducer();
+    }
+
+    @Provides
+    @Singleton
+    public FloodgateCipher cipher() {
+        return new AesCipher();
     }
 
     @Provides
@@ -74,8 +83,11 @@ public final class CommonModule extends AbstractModule {
     @Provides
     @Singleton
     public ConfigLoader configLoader(@Named("configClass") Class<? extends FloodgateConfig> configClass,
-                                     ConfigUpdater configUpdater, FloodgateLogger logger) {
-        return new ConfigLoader(dataDirectory, configClass, configUpdater, logger);
+                                     ConfigUpdater configUpdater, KeyProducer producer,
+                                     FloodgateCipher cipher, FloodgateLogger logger) {
+        return new ConfigLoader(
+                dataDirectory, configClass, configUpdater, producer, cipher, logger
+        );
     }
 
     @Provides
@@ -93,7 +105,14 @@ public final class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public HandshakeHandler handshakeHandler(SimpleFloodgateApi api) {
-        return new HandshakeHandler(api);
+    public HandshakeHandler handshakeHandler(SimpleFloodgateApi api, FloodgateCipher cipher) {
+        return new HandshakeHandler(api, cipher);
+    }
+
+    @Provides
+    @Singleton
+    @Named("playerAttribute")
+    public AttributeKey<FloodgatePlayer> playerAttribute() {
+        return AttributeKey.newInstance("floodgate-player");
     }
 }

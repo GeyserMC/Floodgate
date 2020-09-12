@@ -87,12 +87,12 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
             return;
         }
 
-        // every implementation (Bukkit, Bungee and Velocity) run this constructor async, so we
-        // should be fine doing this synchronised.
+        // every implementation (Bukkit, Bungee and Velocity) run this constructor async,
+        // so we should be fine doing this synchronised.
         linkedPlayer = fetchLinkedPlayer(api.getPlayerLink());
 
+        // oh oh, now our encrypted data is incorrect. We have to update it...
         if (linkedPlayer != null && api instanceof ProxyFloodgateApi) {
-            // oh oh, now our encrypted data is incorrect. Updating...
             InstanceHolder.castApi(ProxyFloodgateApi.class)
                     .updateEncryptedData(getCorrectUniqueId(), toBedrockData());
         }
@@ -114,7 +114,10 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
      * @see #fetchLinkedPlayerAsync(PlayerLink) for the asynchronously alternative
      */
     public LinkedPlayer fetchLinkedPlayer(PlayerLink link) {
-        if (!link.isEnabledAndAllowed()) return null;
+        if (!link.isEnabledAndAllowed()) {
+            return null;
+        }
+
         try {
             return link.getLinkedPlayer(javaUniqueId).get();
         } catch (InterruptedException | ExecutionException exception) {

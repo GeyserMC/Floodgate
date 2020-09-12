@@ -22,7 +22,7 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>${bukkit-version}</version>
+            <version>${bukkit.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

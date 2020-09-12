@@ -78,6 +78,12 @@ public class ConfigUpdater {
             if (version == 1) {
                 return;
             }
+        } else {
+            logger.warn("You're using a pre-rewrite config file, please note that Floodgate will " +
+                    "throw an exception if you didn't already update your Floodgate key" +
+                    "(across all your servers, including Geyser)." +
+                    "We'll still try to update the config," +
+                    "but please regenerate the keys if it failed before asking for support.");
         }
 
         try {

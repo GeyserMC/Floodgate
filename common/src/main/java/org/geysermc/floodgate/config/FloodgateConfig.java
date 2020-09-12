@@ -30,7 +30,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 
-import java.security.PrivateKey;
+import java.security.Key;
 
 /**
  * The global Floodgate configuration file used in every platform.
@@ -59,7 +59,7 @@ public class FloodgateConfig {
     private boolean configVersion;
 
     @JsonIgnore
-    private PrivateKey privateKey = null;
+    private Key key = null;
 
     @Getter
     public static class DisconnectMessages {
@@ -83,9 +83,9 @@ public class FloodgateConfig {
         private boolean autoDownload;
     }
 
-    public void setPrivateKey(PrivateKey privateKey) {
-        if (this.privateKey == null) {
-            this.privateKey = privateKey;
+    public void setKey(Key key) {
+        if (this.key == null) {
+            this.key = key;
         }
     }
 

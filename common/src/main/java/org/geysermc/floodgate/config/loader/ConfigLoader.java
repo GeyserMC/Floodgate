@@ -33,23 +33,23 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.config.updater.ConfigUpdater;
-import org.geysermc.floodgate.util.EncryptionUtil;
+import org.geysermc.floodgate.crypto.FloodgateCipher;
+import org.geysermc.floodgate.crypto.KeyProducer;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.spec.InvalidKeySpecException;
+import java.security.Key;
 
 @RequiredArgsConstructor
 public class ConfigLoader {
     private final Path dataFolder;
     private final Class<? extends FloodgateConfig> configClass;
     private final ConfigUpdater updater;
+
+    private final KeyProducer keyProducer;
+    private final FloodgateCipher cipher;
 
     private final FloodgateLogger logger;
 
@@ -76,21 +76,19 @@ public class ConfigLoader {
             if (newConfig) {
                 Files.copy(defaultConfigPath, configPath);
 
-                KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-                generator.initialize(2048);
-                KeyPair pair = generator.generateKeyPair();
+                Key key = keyProducer.produce();
+                cipher.init(key);
 
                 String test = "abcdefghijklmnopqrstuvwxyz0123456789";
-
-                String encrypted = EncryptionUtil.encrypt(pair.getPublic(), test);
-                String decrypted = new String(EncryptionUtil.decrypt(pair.getPrivate(), encrypted));
+                byte[] encrypted = cipher.encryptFromString(test);
+                String decrypted = cipher.decryptToString(encrypted);
 
                 if (!test.equals(decrypted)) {
                     logger.error("Whoops, we tested the generated Floodgate keys but " +
                             "the decrypted test message doesn't match the original.\n" +
                             "Original message: " + test + "." +
                             "Decrypted message: " + decrypted + ".\n" +
-                            "The encrypted message itself: " + encrypted
+                            "The encrypted message itself: " + new String(encrypted)
                     );
                     throw new RuntimeException(
                             "Tested the generated public and private key but, " +
@@ -98,8 +96,7 @@ public class ConfigLoader {
                     );
                 }
 
-                Files.write(dataFolder.resolve("public-key.pem"), pair.getPublic().getEncoded());
-                Files.write(dataFolder.resolve("key.pem"), pair.getPrivate().getEncoded());
+                Files.write(dataFolder.resolve("key.pem"), key.getEncoded());
             }
         } catch (Exception exception) {
             logger.error("Error while creating config", exception);
@@ -126,12 +123,12 @@ public class ConfigLoader {
         }
 
         try {
-            PrivateKey key = EncryptionUtil.getKeyFromFile(
-                    dataFolder.resolve(configInstance.getKeyFileName()), PrivateKey.class);
-            configInstance.setPrivateKey(key);
-        } catch (IOException | InvalidKeySpecException | NoSuchAlgorithmException exception) {
-            logger.error("Error while reading private key", exception);
-            throw new RuntimeException("Failed to read the private key!");
+            Key key = keyProducer.produceFrom(dataFolder.resolve(configInstance.getKeyFileName()));
+            cipher.init(key);
+            configInstance.setKey(key);
+        } catch (IOException exception) {
+            logger.error("Error while reading the key", exception);
+            throw new RuntimeException("Failed to read the key!");
         }
 
         return configInstance;
