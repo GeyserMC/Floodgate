@@ -50,7 +50,10 @@ public final class BungeePlugin extends Plugin {
         platform = injector.getInstance(FloodgatePlatform.class);
 
         long endCtm = System.currentTimeMillis();
-        getLogger().info("Took " + (endCtm - ctm) + "ms to boot Floodgate");
+        getLogger().info(platform.getLanguageManager().getLocaleStringLog(
+                "floodgate.core.finish",
+                endCtm - ctm
+        ));
     }
 
     @Override

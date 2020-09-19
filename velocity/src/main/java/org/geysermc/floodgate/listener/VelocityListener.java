@@ -31,6 +31,7 @@ import com.google.common.cache.CacheBuilder;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
+import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.player.GameProfileRequestEvent;
 import com.velocitypowered.api.proxy.InboundConnection;
@@ -42,6 +43,7 @@ import net.kyori.adventure.text.TextComponent;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.util.LanguageManager;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -58,17 +60,19 @@ public final class VelocityListener {
     private final AttributeKey<FloodgatePlayer> playerAttribute;
     private final AttributeKey<String> kickMessageAttribute;
     private final FloodgateLogger logger;
+    private final LanguageManager languageManager;
 
     private final Cache<InboundConnection, FloodgatePlayer> playerCache;
 
     public VelocityListener(ProxyFloodgateApi api,
                             AttributeKey<FloodgatePlayer> playerAttribute,
                             AttributeKey<String> kickMessageAttribute,
-                            FloodgateLogger logger) {
+                            FloodgateLogger logger, LanguageManager languageManager) {
         this.api = api;
         this.playerAttribute = playerAttribute;
         this.kickMessageAttribute = kickMessageAttribute;
         this.logger = logger;
+        this.languageManager = languageManager;
 
         this.playerCache = CacheBuilder.newBuilder()
                 .maximumSize(500)
@@ -112,6 +116,14 @@ public final class VelocityListener {
         }
     }
 
+    @Subscribe
+    public void onLogin(LoginEvent event) {
+        FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
+        if (player != null) {
+            languageManager.loadFloodgateLocale(player.getLanguageCode());
+        }
+    }
+
     @Subscribe(order = PostOrder.LAST)
     public void onDisconnect(DisconnectEvent event) {
         Player player = event.getPlayer();
@@ -122,8 +134,9 @@ public final class VelocityListener {
 
             if (fPlayer != null && api.removePlayer(fPlayer)) {
                 api.removeEncryptedData(event.getPlayer().getUniqueId());
-                logger.info("Floodgate player who was logged in as {} {} disconnected",
-                        player.getUsername(), player.getUniqueId());
+                logger.info(languageManager.getLocaleStringLog(
+                        "floodgate.ingame.disconnect_name", player.getUsername()
+                ));
             }
         } catch (Exception exception) {
             logger.error("Failed to remove the player", exception);

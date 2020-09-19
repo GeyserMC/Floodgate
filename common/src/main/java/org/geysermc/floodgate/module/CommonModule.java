@@ -45,6 +45,7 @@ import org.geysermc.floodgate.config.updater.ConfigUpdater;
 import org.geysermc.floodgate.crypto.*;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.link.PlayerLinkLoader;
+import org.geysermc.floodgate.util.LanguageManager;
 
 import java.nio.file.Path;
 
@@ -92,6 +93,12 @@ public final class CommonModule extends AbstractModule {
     public ConfigUpdater configUpdater(ConfigFileUpdater configFileUpdater,
                                        FloodgateLogger logger) {
         return new ConfigUpdater(dataDirectory, configFileUpdater, logger);
+    }
+
+    @Provides
+    @Singleton
+    public LanguageManager languageLoader(FloodgateLogger logger) {
+        return new LanguageManager(logger);
     }
 
     @Provides

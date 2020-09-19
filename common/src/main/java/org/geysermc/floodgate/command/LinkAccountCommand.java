@@ -146,26 +146,22 @@ public final class LinkAccountCommand implements Command {
     }
 
     public enum Message implements CommandMessage {
-        ALREADY_LINKED("&cYour account is already linked!\n" +
-                "&cIf you want to link to a different account, run &6/unlinkaccount&c and try it again."
-        ),
-        JAVA_USAGE("&cUsage: /linkaccount <gamertag>"),
-        LINK_REQUEST_CREATED("&aLog in as {} on Bedrock and run &6/linkaccount {} {}\n" +
-                "&cWarning: Any progress on your Bedrock account will not be carried over! Save any items in your inventory first.\n" +
-                "&cIf you change your mind you can run &6/unlinkaccount&c to get your progess back."
-        ),
-        BEDROCK_USAGE("&cStart the process from Java! Usage: /linkaccount <gamertag>"),
-        LINK_REQUEST_EXPIRED("&cThe code you entered is expired! Run &6/linkaccount&c again on your Java account"),
-        LINK_REQUEST_COMPLETED("You are successfully linked to {}!\nIf you want to undo this run /unlinkaccount"),
-        LINK_REQUEST_ERROR("&cAn error occurred while linking. " + CommonCommandMessage.CHECK_CONSOLE),
-        INVALID_CODE("&cInvalid code! Please check your code or run the &6/linkaccount&c command again on your Java account."),
-        NO_LINK_REQUESTED("&cThis player has not requested an account link! Please log in on Java and request one with &6/linkaccount"),
-        LINK_REQUEST_DISABLED("&cLinking is not enabled on this server.");
+        ALREADY_LINKED("floodgate.command.link_account.already_linked"),
+        JAVA_USAGE("floodgate.command.link_account.java_usage"),
+        LINK_REQUEST_CREATED("floodgate.command.link_account.link_request_created"),
+        BEDROCK_USAGE("floodgate.command.link_account.bedrock_usage"),
+        LINK_REQUEST_EXPIRED("floodgate.command.link_account.link_request_expired"),
+        LINK_REQUEST_COMPLETED("floodgate.command.link_account.link_request_completed"),
+        // TODO this also used to have another message
+        LINK_REQUEST_ERROR("floodgate.command.link_request.error"),
+        INVALID_CODE("floodgate.command.link_account.invalid_code"),
+        NO_LINK_REQUESTED("floodgate.command.link_account.no_link_requested"),
+        LINK_REQUEST_DISABLED("floodgate.commands.linking_disabled");
 
         @Getter private final String message;
 
         Message(String message) {
-            this.message = message.replace('&', COLOR_CHAR);
+            this.message = message;
         }
     }
 }

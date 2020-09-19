@@ -49,6 +49,7 @@ import org.geysermc.floodgate.logger.Slf4jFloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandRegistration;
 import org.geysermc.floodgate.platform.command.util.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
+import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.VelocityCommandUtil;
 import org.slf4j.Logger;
 
@@ -91,8 +92,9 @@ public final class VelocityPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public VelocityCommandUtil commandUtil(FloodgateLogger logger) {
-        return new VelocityCommandUtil(logger);
+    public VelocityCommandUtil commandUtil(FloodgateLogger logger,
+                                           LanguageManager languageManager) {
+        return new VelocityCommandUtil(logger, languageManager);
     }
 
     @Provides

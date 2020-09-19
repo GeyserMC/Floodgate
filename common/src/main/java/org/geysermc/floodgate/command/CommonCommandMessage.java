@@ -33,14 +33,15 @@ import org.geysermc.floodgate.platform.command.CommandMessage;
  * Messages (or part of messages) that are used in two or more commands and thus are 'commonly used'
  */
 public enum CommonCommandMessage implements CommandMessage {
-    NOT_A_PLAYER("Please head over to your Minecraft Account and link from there."),
-    CHECK_CONSOLE("Please check the console for more info!"),
-    IS_LINKED_ERROR("&cError while checking if the given player is linked. " + CHECK_CONSOLE);
+    NOT_A_PLAYER("floodgate.commands.not_a_player"),
+    CHECK_CONSOLE("floodgate.commands.check_console"),
+    // TODO used to also have console check
+    IS_LINKED_ERROR("floodgate.commands.is_linked_error");
 
     @Getter private final String message;
 
     CommonCommandMessage(String message) {
-        this.message = message.replace('&', COLOR_CHAR);
+        this.message = message;
     }
 
     @Override

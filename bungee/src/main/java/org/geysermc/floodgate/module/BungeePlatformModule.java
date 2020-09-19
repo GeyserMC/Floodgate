@@ -49,6 +49,7 @@ import org.geysermc.floodgate.platform.command.CommandRegistration;
 import org.geysermc.floodgate.platform.command.util.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 import org.geysermc.floodgate.util.BungeeCommandUtil;
+import org.geysermc.floodgate.util.LanguageManager;
 
 @RequiredArgsConstructor
 public final class BungeePlatformModule extends AbstractModule {
@@ -96,8 +97,8 @@ public final class BungeePlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public CommandUtil commandUtil(FloodgateLogger logger) {
-        return new BungeeCommandUtil(logger);
+    public CommandUtil commandUtil(FloodgateLogger logger, LanguageManager languageManager) {
+        return new BungeeCommandUtil(logger, languageManager);
     }
 
     @Provides

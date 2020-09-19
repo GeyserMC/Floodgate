@@ -35,6 +35,7 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.listener.VelocityListener;
 import org.geysermc.floodgate.register.ListenerRegister;
+import org.geysermc.floodgate.util.LanguageManager;
 
 public final class VelocityListenerModule extends AbstractModule {
     @Override
@@ -45,8 +46,9 @@ public final class VelocityListenerModule extends AbstractModule {
     @Singleton
     @ProvidesIntoSet
     public Object velocityListener(ProxyFloodgateApi api, FloodgateLogger logger,
+                                   LanguageManager languageManager,
                                    @Named("playerAttribute") AttributeKey<FloodgatePlayer> playerAttr,
                                    @Named("kickMessageAttribute") AttributeKey<String> kickMessageAttr) {
-        return new VelocityListener(api, playerAttr, kickMessageAttr, logger);
+        return new VelocityListener(api, playerAttr, kickMessageAttr, logger, languageManager);
     }
 }

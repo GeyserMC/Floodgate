@@ -1,9 +1,6 @@
 package org.geysermc.floodgate.api.player;
 
-import org.geysermc.floodgate.util.DeviceOs;
-import org.geysermc.floodgate.util.InputMode;
-import org.geysermc.floodgate.util.LinkedPlayer;
-import org.geysermc.floodgate.util.UiProfile;
+import org.geysermc.floodgate.util.*;
 
 import java.util.UUID;
 
@@ -76,6 +73,11 @@ public interface FloodgatePlayer {
      * Returns the LinkedPlayer object if the player is linked to a Java account.
      */
     LinkedPlayer getLinkedPlayer();
+
+    /**
+     * Returns the raw skin of the Bedrock player
+     */
+    RawSkin getRawSkin();
 
     /**
      * Casts the FloodgatePlayer instance to a class that extends FloodgatePlayer.

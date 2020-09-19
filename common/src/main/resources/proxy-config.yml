@@ -11,6 +11,9 @@ username-prefix: "*"
 # Should spaces be replaced with '_' in bedrock usernames?
 replace-spaces: true
 
+# The default locale for Floodgate. By default, Floodgate uses the system locale
+# default-locale: en_US
+
 # Should the proxy send the bedrock player data to the servers it is connecting to?
 # This requires Floodgate to be installed on the servers.
 # You'll get kicked if you don't use the plugin. The default value is false because of it

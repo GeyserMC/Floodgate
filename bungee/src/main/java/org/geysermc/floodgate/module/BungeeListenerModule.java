@@ -40,6 +40,7 @@ import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.listener.BungeeListener;
 import org.geysermc.floodgate.register.ListenerRegister;
+import org.geysermc.floodgate.util.LanguageManager;
 
 import javax.inject.Named;
 
@@ -54,7 +55,9 @@ public final class BungeeListenerModule extends AbstractModule {
     public Listener bungeeListener(Plugin plugin, ProxyFloodgateConfig config,
                                    ProxyFloodgateApi api, HandshakeHandler handshakeHandler,
                                    @Named("playerAttribute") AttributeKey<FloodgatePlayer> playerAttribute,
-                                   FloodgateLogger logger) {
-        return new BungeeListener(plugin, config, api, handshakeHandler, playerAttribute, logger);
+                                   FloodgateLogger logger, LanguageManager languageManager) {
+        return new BungeeListener(
+                plugin, config, api, handshakeHandler, playerAttribute, logger, languageManager
+        );
     }
 }

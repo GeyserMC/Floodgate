@@ -35,6 +35,7 @@ import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.listener.SpigotListener;
 import org.geysermc.floodgate.register.ListenerRegister;
+import org.geysermc.floodgate.util.LanguageManager;
 
 public final class SpigotListenerModule extends AbstractModule {
     @Override
@@ -44,7 +45,8 @@ public final class SpigotListenerModule extends AbstractModule {
 
     @Singleton
     @ProvidesIntoSet
-    public Listener spigotListener(SimpleFloodgateApi api, FloodgateLogger logger) {
-        return new SpigotListener(api, logger);
+    public Listener spigotListener(SimpleFloodgateApi api, FloodgateLogger logger,
+                                   LanguageManager languageManager) {
+        return new SpigotListener(api, logger, languageManager);
     }
 }

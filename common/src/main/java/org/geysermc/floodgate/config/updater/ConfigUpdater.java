@@ -45,6 +45,8 @@ public class ConfigUpdater {
     private final ConfigFileUpdater fileUpdater;
     private final FloodgateLogger logger;
 
+    private static final int CONFIG_VERSION = 1;
+
     public void update(Path defaultConfigLocation) {
         Path configLocation = dataFolder.resolve("config.yml");
 
@@ -70,12 +72,12 @@ public class ConfigUpdater {
 
             int version = (int) versionElement;
             checkArgument(
-                    version == 1,
-                    "Config is newer then possible on this version! Expected 1, got " + version
+                    version == CONFIG_VERSION,
+                    "Config is newer then possible on this version! Expected " + CONFIG_VERSION + ", got " + version
             );
 
             // config is already up-to-date
-            if (version == 1) {
+            if (version == CONFIG_VERSION) {
                 return;
             }
         } else {
