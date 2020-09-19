@@ -26,16 +26,17 @@
 
 package org.geysermc.floodgate;
 
+import com.google.common.base.Charsets;
 import com.google.inject.Inject;
 import lombok.*;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.crypto.AesCipher;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.util.BedrockData;
-import org.geysermc.floodgate.util.InvalidHeaderException;
-
-import java.util.Base64;
+import org.geysermc.floodgate.util.InvalidFormatException;
+import org.geysermc.floodgate.util.RawSkin;
 
 import static org.geysermc.floodgate.util.BedrockData.EXPECTED_LENGTH;
 
@@ -57,35 +58,67 @@ public final class HandshakeHandler {
 
     public HandshakeResult handle(@NonNull String handshakeData) {
         try {
-            String[] data = handshakeData.split("\0");
+            String[] dataArray = handshakeData.split("\0");
 
-            boolean isBungeeData = data.length == 5;
+            boolean isBungeeData = dataArray.length == 5;
             // this can be Bungee data (without skin) or Floodgate data
-            if (data.length == 4) {
-                isBungeeData = FloodgateCipher.hasHeader(data[3]);
+            if (dataArray.length == 4) {
+                isBungeeData = FloodgateCipher.hasHeader(dataArray[3]);
             }
 
-            if (proxy && isBungeeData || !isBungeeData && data.length != 2) {
+            if (proxy && isBungeeData || !isBungeeData && dataArray.length != 2) {
                 return ResultType.NOT_FLOODGATE_DATA.getCachedResult();
             }
 
-            String decrypted = cipher.decryptToString(Base64.getDecoder().decode(data[1]));
+            // calculate the expected Base64 encoded IV length.
+            int expectedIvLength = 4 * ((AesCipher.IV_LENGTH + 2) / 3);
+            int lastSplitIndex = dataArray[1].lastIndexOf(0x21);
+
+            byte[] floodgateData;
+            byte[] rawSkinData = null;
+
+            // if it has a RawSkin
+            if (lastSplitIndex - expectedIvLength != 0) {
+                floodgateData = dataArray[1].substring(0, lastSplitIndex).getBytes(Charsets.UTF_8);
+                rawSkinData = dataArray[1].substring(lastSplitIndex + 1).getBytes(Charsets.UTF_8);
+            } else {
+                floodgateData = dataArray[1].getBytes(Charsets.UTF_8);
+            }
+
+            // actual decryption
+            String decrypted = cipher.decryptToString(floodgateData);
             BedrockData bedrockData = BedrockData.fromString(decrypted);
 
             if (bedrockData.getDataLength() != EXPECTED_LENGTH) {
                 return ResultType.INVALID_DATA_LENGTH.getCachedResult();
             }
 
+            RawSkin rawSkin = null;
+            // only decompile the skin after knowing that the floodgateData is legit
+            // note that we don't store a hash or anything in the BedrockData,
+            // so a mitm can change skins
+            if (rawSkinData != null) {
+                rawSkin = RawSkin.decode(rawSkinData);
+            }
+
+            System.out.println(rawSkin);
+
             FloodgatePlayer player =
-                    new FloodgatePlayerImpl(bedrockData, usernamePrefix, replaceSpaces);
+                    new FloodgatePlayerImpl(bedrockData, rawSkin, usernamePrefix, replaceSpaces);
             api.addPlayer(player.getJavaUniqueId(), player);
 
-            return new HandshakeResult(ResultType.SUCCESS, data, bedrockData, player);
-        } catch (InvalidHeaderException headerException) {
-            return ResultType.NOT_FLOODGATE_DATA.getCachedResult();
+            return new HandshakeResult(ResultType.SUCCESS, dataArray, bedrockData, player);
+        } catch (InvalidFormatException formatException) {
+            // only header exceptions should return 'not floodgate data',
+            // all the other format exceptions are because of invalid/tempered Floodgate data
+            if (formatException.isHeader()) {
+                return ResultType.NOT_FLOODGATE_DATA.getCachedResult();
+            }
+
+            formatException.printStackTrace();
+            return ResultType.EXCEPTION.getCachedResult();
         } catch (Exception exception) {
             exception.printStackTrace();
-            System.out.println(handshakeData);
             return ResultType.EXCEPTION.getCachedResult();
         }
     }

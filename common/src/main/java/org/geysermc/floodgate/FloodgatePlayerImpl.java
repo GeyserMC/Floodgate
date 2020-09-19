@@ -60,7 +60,7 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
     @Setter
     private boolean login = true;
 
-    FloodgatePlayerImpl(BedrockData data, String prefix, boolean replaceSpaces) {
+    FloodgatePlayerImpl(BedrockData data, RawSkin skin, String prefix, boolean replaceSpaces) {
         FloodgateApi api = FloodgateApi.getInstance();
         version = data.getVersion();
         username = data.getUsername();

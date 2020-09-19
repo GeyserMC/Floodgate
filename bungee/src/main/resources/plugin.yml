@@ -1,4 +1,4 @@
-name: ${outputName}
+name: ${project.parent.version}
 description: ${project.description}
 version: ${project.version}
 author: ${project.organization.name}

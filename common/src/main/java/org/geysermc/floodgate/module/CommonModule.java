@@ -42,10 +42,7 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.loader.ConfigLoader;
 import org.geysermc.floodgate.config.updater.ConfigFileUpdater;
 import org.geysermc.floodgate.config.updater.ConfigUpdater;
-import org.geysermc.floodgate.crypto.AesCipher;
-import org.geysermc.floodgate.crypto.AesKeyProducer;
-import org.geysermc.floodgate.crypto.FloodgateCipher;
-import org.geysermc.floodgate.crypto.KeyProducer;
+import org.geysermc.floodgate.crypto.*;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.link.PlayerLinkLoader;
 
@@ -70,7 +67,7 @@ public final class CommonModule extends AbstractModule {
     @Provides
     @Singleton
     public FloodgateCipher cipher() {
-        return new AesCipher();
+        return new AesCipher(new Base64Topping());
     }
 
     @Provides
