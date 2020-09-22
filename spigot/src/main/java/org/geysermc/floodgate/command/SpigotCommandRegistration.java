@@ -31,45 +31,51 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.platform.command.Command;
 import org.geysermc.floodgate.platform.command.CommandRegistration;
-
-import java.util.UUID;
+import org.geysermc.floodgate.platform.command.CommandUtil;
+import org.geysermc.floodgate.util.LanguageManager;
 
 @RequiredArgsConstructor
 public final class SpigotCommandRegistration implements CommandRegistration {
     private final JavaPlugin plugin;
-    private final FloodgateLogger logger;
+    private final CommandUtil commandUtil;
+    private final LanguageManager languageManager;
 
     @Override
     public void register(Command command) {
-        try {
-            plugin.getCommand(command.getName())
-                    .setExecutor(new SpigotCommandWrapper(command));
-        } catch (ClassCastException e) {
-            logger.error("Failed to cast plugin object to JavaPlugin", e);
-        }
+        String defaultLocale = languageManager.getDefaultLocale();
+
+        plugin.getCommand(command.getName()).setExecutor(
+                new SpigotCommandWrapper(commandUtil, command, defaultLocale)
+        );
     }
 
     @RequiredArgsConstructor
     protected static class SpigotCommandWrapper implements CommandExecutor {
+        private final CommandUtil commandUtil;
         private final Command command;
+        private final String defaultLocale;
 
         @Override
-        public boolean onCommand(CommandSender source, org.bukkit.command.Command cmd, String label, String[] args) {
+        public boolean onCommand(CommandSender source, org.bukkit.command.Command cmd,
+                                 String label, String[] args) {
             if (!(source instanceof Player)) {
                 if (command.isRequirePlayer()) {
-                    source.sendMessage(CommonCommandMessage.NOT_A_PLAYER.getMessage());
+                    commandUtil.sendMessage(
+                            source, defaultLocale,
+                            CommonCommandMessage.NOT_A_PLAYER
+                    );
                     return true;
                 }
-                command.execute(source, args);
+                command.execute(source, defaultLocale, args);
                 return true;
             }
 
-            UUID uuid = ((Player) source).getUniqueId();
-            String username = source.getName();
-            command.execute(source, uuid, username, args);
+            Player player = (Player) source;
+            String locale = player.spigot().getLocale();
+
+            command.execute(source, player.getUniqueId(), source.getName(), locale, args);
             return true;
         }
     }

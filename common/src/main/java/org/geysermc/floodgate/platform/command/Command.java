@@ -26,8 +26,6 @@
 
 package org.geysermc.floodgate.platform.command;
 
-import org.geysermc.floodgate.platform.command.util.CommandUtil;
-
 import java.util.UUID;
 
 /**
@@ -39,12 +37,13 @@ public interface Command {
      * or when the source is a player.
      *
      * @param player   the player instance (used for example in combination with
-     *                 {@link CommandUtil#kickPlayer(Object, CommandMessage, Object...)}
+     *                 {@link CommandUtil#kickPlayer(Object, String, CommandMessage, Object...)}
      * @param uuid     the uuid of the player
      * @param username the username of the player
+     * @param locale   the locale of the player
      * @param args     the arguments of the command
      */
-    default void execute(Object player, UUID uuid, String username, String... args) {
+    default void execute(Object player, UUID uuid, String username, String locale, String... args) {
     }
 
     /**
@@ -52,9 +51,10 @@ public interface Command {
      *
      * @param source the CommandSource (Velocity) or CommandExecutor (Bungee and Bukkit) that
      *               executed this command
+     * @param locale the system locale
      * @param args   the arguments of the command
      */
-    default void execute(Object source, String... args) {
+    default void execute(Object source, String locale, String... args) {
         if (isRequirePlayer()) {
             throw new RuntimeException(
                     "Cannot execute this command since it requires a player"

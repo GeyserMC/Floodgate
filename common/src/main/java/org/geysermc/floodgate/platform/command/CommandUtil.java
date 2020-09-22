@@ -24,9 +24,7 @@
  *
  */
 
-package org.geysermc.floodgate.platform.command.util;
-
-import org.geysermc.floodgate.platform.command.CommandMessage;
+package org.geysermc.floodgate.platform.command;
 
 /**
  * An interface used across all Floodgate platforms to simple stuff in commands like kicking
@@ -38,16 +36,19 @@ public interface CommandUtil {
      *
      * @param player  the player to send the message to
      * @param message the command message
+     * @param locale  the locale of the player
      * @param args    the arguments
      */
-    void sendMessage(Object player, CommandMessage message, Object... args);
+    void sendMessage(Object player, String locale, CommandMessage message, Object... args);
 
     /**
-     * Same as {@link CommandUtil#sendMessage(Object, CommandMessage, Object...)} except it kicks the player.
+     * Same as {@link CommandUtil#sendMessage(Object, String, CommandMessage, Object...)} except it
+     * kicks the player.
      *
      * @param player  the player to send the message to
      * @param message the command message
+     * @param locale  the locale of the player
      * @param args    the arguments
      */
-    void kickPlayer(Object player, CommandMessage message, Object... args);
+    void kickPlayer(Object player, String locale, CommandMessage message, Object... args);
 }

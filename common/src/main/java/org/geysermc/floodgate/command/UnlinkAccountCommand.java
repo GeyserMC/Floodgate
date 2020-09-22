@@ -33,7 +33,7 @@ import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.platform.command.Command;
 import org.geysermc.floodgate.platform.command.CommandMessage;
-import org.geysermc.floodgate.platform.command.util.CommandUtil;
+import org.geysermc.floodgate.platform.command.CommandUtil;
 
 import java.util.UUID;
 
@@ -43,28 +43,29 @@ public final class UnlinkAccountCommand implements Command {
     @Inject private CommandUtil commandUtil;
 
     @Override
-    public void execute(Object player, UUID uuid, String username, String... args) {
+    public void execute(Object player, UUID uuid, String username, String locale, String... args) {
         PlayerLink link = api.getPlayerLink();
         if (!link.isEnabledAndAllowed()) {
-            sendMessage(player, Message.LINKING_NOT_ENABLED);
+            sendMessage(player, locale, Message.LINKING_NOT_ENABLED);
             return;
         }
 
         link.isLinkedPlayer(uuid).whenComplete((linked, throwable) -> {
             if (throwable != null) {
-                sendMessage(player, CommonCommandMessage.IS_LINKED_ERROR);
+                sendMessage(player, locale, CommonCommandMessage.IS_LINKED_ERROR);
                 return;
             }
 
             if (!linked) {
-                sendMessage(player, Message.NOT_LINKED);
+                sendMessage(player, locale, Message.NOT_LINKED);
                 return;
             }
 
             link.unlinkPlayer(uuid).whenComplete((aVoid, throwable1) ->
-                    sendMessage(player, throwable1 == null ?
-                            Message.UNLINK_SUCCESS :
-                            Message.UNLINK_ERROR
+                    sendMessage(player, locale,
+                            throwable1 == null ?
+                                    Message.UNLINK_SUCCESS :
+                                    Message.UNLINK_ERROR
                     )
             );
         });
@@ -85,8 +86,8 @@ public final class UnlinkAccountCommand implements Command {
         return true;
     }
 
-    private void sendMessage(Object player, CommandMessage message, Object... args) {
-        commandUtil.sendMessage(player, message, args);
+    private void sendMessage(Object player, String locale, CommandMessage message, Object... args) {
+        commandUtil.sendMessage(player, locale, message, args);
     }
 
     public enum Message implements CommandMessage {
@@ -96,7 +97,8 @@ public final class UnlinkAccountCommand implements Command {
         UNLINK_ERROR("floodgate.command.unlink_account.error"),
         LINKING_NOT_ENABLED("floodgate.commands.linking_disabled");
 
-        @Getter private final String message;
+        @Getter
+        private final String message;
 
         Message(String message) {
             this.message = message;

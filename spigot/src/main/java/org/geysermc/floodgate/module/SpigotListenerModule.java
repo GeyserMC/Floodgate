@@ -31,11 +31,8 @@ import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.ProvidesIntoSet;
 import org.bukkit.event.Listener;
-import org.geysermc.floodgate.api.SimpleFloodgateApi;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.listener.SpigotListener;
 import org.geysermc.floodgate.register.ListenerRegister;
-import org.geysermc.floodgate.util.LanguageManager;
 
 public final class SpigotListenerModule extends AbstractModule {
     @Override
@@ -45,8 +42,7 @@ public final class SpigotListenerModule extends AbstractModule {
 
     @Singleton
     @ProvidesIntoSet
-    public Listener spigotListener(SimpleFloodgateApi api, FloodgateLogger logger,
-                                   LanguageManager languageManager) {
-        return new SpigotListener(api, logger, languageManager);
+    public Listener spigotListener() {
+        return new SpigotListener();
     }
 }

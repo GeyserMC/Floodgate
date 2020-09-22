@@ -26,6 +26,8 @@
 
 package org.geysermc.floodgate.handler;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -56,12 +58,19 @@ public final class BungeeDataHandler {
     private static final Field PLAYER_REMOTE_ADDRESS;
     private static final Field CACHED_HANDSHAKE_PACKET;
 
-    private final Plugin plugin;
-    private final ProxyFloodgateConfig config;
-    private final ProxyFloodgateApi api;
-    private final HandshakeHandler handler;
-    private final AttributeKey<FloodgatePlayer> playerAttribute;
-    private final FloodgateLogger logger;
+    @Inject
+    private Plugin plugin;
+    @Inject
+    private ProxyFloodgateConfig config;
+    @Inject
+    private ProxyFloodgateApi api;
+    @Inject
+    private HandshakeHandler handler;
+    @Inject
+    @Named("playerAttribute")
+    private AttributeKey<FloodgatePlayer> playerAttribute;
+    @Inject
+    private FloodgateLogger logger;
 
     public BungeeDataHandler(Plugin plugin, ProxyFloodgateConfig config,
                              ProxyFloodgateApi api, HandshakeHandler handshakeHandler,

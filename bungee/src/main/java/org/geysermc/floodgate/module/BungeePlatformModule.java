@@ -46,7 +46,7 @@ import org.geysermc.floodgate.inject.bungee.BungeeInjector;
 import org.geysermc.floodgate.listener.BungeeListenerRegistration;
 import org.geysermc.floodgate.logger.JavaUtilFloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandRegistration;
-import org.geysermc.floodgate.platform.command.util.CommandUtil;
+import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 import org.geysermc.floodgate.util.BungeeCommandUtil;
 import org.geysermc.floodgate.util.LanguageManager;
@@ -91,8 +91,9 @@ public final class BungeePlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public CommandRegistration commandRegistration() {
-        return new BungeeCommandRegistration(plugin);
+    public CommandRegistration commandRegistration(CommandUtil commandUtil,
+                                                   LanguageManager languageManager) {
+        return new BungeeCommandRegistration(plugin, commandUtil, languageManager);
     }
 
     @Provides

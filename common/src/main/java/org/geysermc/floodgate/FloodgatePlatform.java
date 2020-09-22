@@ -61,7 +61,8 @@ public class FloodgatePlatform {
 
     private final Injector guice;
 
-    @Inject private PlatformInjector injector;
+    @Inject
+    private PlatformInjector injector;
 
     @Inject
     public FloodgatePlatform(@Named("dataDirectory") Path dataDirectory, FloodgateApi api,
@@ -90,9 +91,9 @@ public class FloodgatePlatform {
         // make the config available for other classes
         guice = injector.createChildInjector(new ConfigLoadedModule(config));
 
+        guice.injectMembers(languageManager);
         guice.injectMembers(playerLinkLoader);
         guice.injectMembers(handshakeHandler);
-        guice.injectMembers(languageManager);
 
         PlayerLink link = playerLinkLoader.load();
 

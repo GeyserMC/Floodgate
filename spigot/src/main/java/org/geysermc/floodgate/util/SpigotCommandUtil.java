@@ -30,43 +30,34 @@ import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.platform.command.CommandMessage;
-import org.geysermc.floodgate.platform.command.util.CommandResponseCache;
-import org.geysermc.floodgate.platform.command.util.CommandUtil;
+import org.geysermc.floodgate.platform.command.CommandUtil;
 
 @RequiredArgsConstructor
-public final class SpigotCommandUtil extends CommandResponseCache<String> implements CommandUtil {
+public final class SpigotCommandUtil implements CommandUtil {
     private final JavaPlugin plugin;
+
     private final FloodgateLogger logger;
     private final LanguageManager manager;
 
     @Override
-    public void sendMessage(Object player, CommandMessage message, Object... args) {
-        Player bukkitPlayer = cast(player);
-        FloodgatePlayer floodgatePlayer =
-                FloodgateApi.getInstance().getPlayer(bukkitPlayer.getUniqueId());
-        if (floodgatePlayer != null) {
-            bukkitPlayer.sendMessage(manager.getPlayerLocaleString(message.getMessage(),
-                    floodgatePlayer.getLanguageCode(), args));
-        } else {
-            bukkitPlayer.sendMessage(manager.getLocaleStringLog(message.getMessage(), args));
-        }
+    public void sendMessage(Object player, String locale, CommandMessage message, Object... args) {
+        cast(player).sendMessage(translateAndTransform(locale, message, args));
     }
 
     @Override
-    public void kickPlayer(Object player, CommandMessage message, Object... args) {
+    public void kickPlayer(Object player, String locale, CommandMessage message, Object... args) {
         // Have to run this in the main thread so we don't get a `Asynchronous player kick!` error
         Bukkit.getScheduler().runTask(plugin,
-                () -> cast(player).kickPlayer(format(message, args)));
+                () -> cast(player).kickPlayer(translateAndTransform(locale, message, args)));
     }
 
-    @Override
-    protected String transformMessage(String message) {
+    public String translateAndTransform(String locale, CommandMessage message, Object... args) {
         // unlike others, Bukkit doesn't have to transform a message into another class.
-        return message;
+        return manager.getString(
+                message.getMessage(), locale, args
+        );
     }
 
     protected Player cast(Object instance) {

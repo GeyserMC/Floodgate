@@ -28,6 +28,8 @@ package org.geysermc.floodgate.listener;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
@@ -56,29 +58,23 @@ public final class VelocityListener {
     private static final Field MINECRAFT_CONNECTION;
     private static final Field CHANNEL;
 
-    private final ProxyFloodgateApi api;
-    private final AttributeKey<FloodgatePlayer> playerAttribute;
-    private final AttributeKey<String> kickMessageAttribute;
-    private final FloodgateLogger logger;
-    private final LanguageManager languageManager;
+    @Inject private ProxyFloodgateApi api;
+    @Inject private LanguageManager languageManager;
+    @Inject private FloodgateLogger logger;
 
-    private final Cache<InboundConnection, FloodgatePlayer> playerCache;
+    @Inject
+    @Named("playerAttribute")
+    private AttributeKey<FloodgatePlayer> playerAttribute;
 
-    public VelocityListener(ProxyFloodgateApi api,
-                            AttributeKey<FloodgatePlayer> playerAttribute,
-                            AttributeKey<String> kickMessageAttribute,
-                            FloodgateLogger logger, LanguageManager languageManager) {
-        this.api = api;
-        this.playerAttribute = playerAttribute;
-        this.kickMessageAttribute = kickMessageAttribute;
-        this.logger = logger;
-        this.languageManager = languageManager;
+    @Inject
+    @Named("kickMessageAttribute")
+    private AttributeKey<String> kickMessageAttribute;
 
-        this.playerCache = CacheBuilder.newBuilder()
-                .maximumSize(500)
-                .expireAfterAccess(20, TimeUnit.SECONDS)
-                .build();
-    }
+    private final Cache<InboundConnection, FloodgatePlayer> playerCache =
+            CacheBuilder.newBuilder()
+                    .maximumSize(500)
+                    .expireAfterAccess(20, TimeUnit.SECONDS)
+                    .build();
 
     @Subscribe(order = PostOrder.EARLY)
     public void onPreLogin(PreLoginEvent event) {
@@ -120,7 +116,7 @@ public final class VelocityListener {
     public void onLogin(LoginEvent event) {
         FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
         if (player != null) {
-            languageManager.loadFloodgateLocale(player.getLanguageCode());
+            languageManager.loadLocale(player.getLanguageCode());
         }
     }
 
@@ -134,7 +130,7 @@ public final class VelocityListener {
 
             if (fPlayer != null && api.removePlayer(fPlayer)) {
                 api.removeEncryptedData(event.getPlayer().getUniqueId());
-                logger.info(languageManager.getLocaleStringLog(
+                logger.info(languageManager.getLogString(
                         "floodgate.ingame.disconnect_name", player.getUsername()
                 ));
             }

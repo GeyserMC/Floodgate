@@ -81,7 +81,7 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
         uiProfile = UiProfile.getById(data.getUiProfile());
         inputMode = InputMode.getById(data.getInputMode());
         ip = data.getIp();
-        rawSkin = data.getSkin();
+        rawSkin = skin;
 
         // we'll use the LinkedPlayer provided by Bungee or Velocity (if they included one)
         if (data.hasPlayerLink()) {
@@ -142,7 +142,9 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
     }
 
     public BedrockData toBedrockData() {
-        return new BedrockData(version, username, xuid, deviceOs.ordinal(), languageCode,
-                uiProfile.ordinal(), inputMode.ordinal(), ip, linkedPlayer, rawSkin);
+        return new BedrockData(
+                version, username, xuid, deviceOs.ordinal(), languageCode,
+                uiProfile.ordinal(), inputMode.ordinal(), ip, linkedPlayer
+        );
     }
 }

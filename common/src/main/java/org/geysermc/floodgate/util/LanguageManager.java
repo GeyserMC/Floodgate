@@ -26,6 +26,9 @@
 
 package org.geysermc.floodgate.util;
 
+import com.google.inject.Inject;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 
@@ -41,6 +44,7 @@ import java.util.Properties;
 /**
  * Manages translations for strings in Floodgate
  */
+@RequiredArgsConstructor
 public class LanguageManager {
     private final Map<String, Properties> LOCALE_MAPPINGS = new HashMap<>();
 
@@ -49,34 +53,37 @@ public class LanguageManager {
     /**
      * The locale used in console and as a fallback
      */
+    @Getter
     private String defaultLocale;
-
-    public LanguageManager(FloodgateLogger logger) {
-        this.logger = logger;
-    }
 
     /**
      * Loads the log's locale file once Floodgate loads the config
      *
      * @param config the Floodgate config
      */
-    public void initialize(FloodgateConfig config) {
-        loadFloodgateLocale("en_US"); // Fallback
+    @Inject
+    public void init(FloodgateConfig config) {
+        loadLocale("en_US"); // Fallback
 
-        if (config.getDefaultLocale() != null &&
-                isValidLanguage(formatLocale(config.getDefaultLocale()))) {
-            loadFloodgateLocale(formatLocale(config.getDefaultLocale()));
-            defaultLocale = formatLocale(config.getDefaultLocale());
-        } else {
-            String systemLocale = formatLocale(Locale.getDefault().getLanguage() + "_" +
-                    Locale.getDefault().getCountry());
-            if (isValidLanguage(systemLocale)) {
-                loadFloodgateLocale(systemLocale);
-                defaultLocale = systemLocale;
-            } else {
-                defaultLocale = "en_US";
-            }
+        defaultLocale = formatLocale(config.getDefaultLocale());
+
+        if (isValidLanguage(defaultLocale)) {
+            loadLocale(defaultLocale);
+            return;
         }
+
+        String systemLocale = formatLocale(
+                Locale.getDefault().getLanguage() + "_" +
+                Locale.getDefault().getCountry()
+        );
+
+        if (isValidLanguage(systemLocale)) {
+            loadLocale(systemLocale);
+            defaultLocale = systemLocale;
+            return;
+        }
+
+        defaultLocale = "en_US";
     }
 
     /**
@@ -84,8 +91,13 @@ public class LanguageManager {
      *
      * @param locale Locale to load
      */
-    public void loadFloodgateLocale(String locale) {
+    public void loadLocale(String locale) {
         locale = formatLocale(locale);
+
+        // just return if the locale has been loaded already
+        if (LOCALE_MAPPINGS.containsKey(locale)) {
+            return;
+        }
 
         InputStream localeStream = LanguageManager.class.getClassLoader().getResourceAsStream(
                 "languages/texts/" + locale + ".properties");
@@ -113,8 +125,8 @@ public class LanguageManager {
      * @param values Values to put into the string
      * @return Translated string or the original message if it was not found in the given locale
      */
-    public String getLocaleStringLog(String key, Object... values) {
-        return getPlayerLocaleString(key, defaultLocale, values);
+    public String getLogString(String key, Object... values) {
+        return getString(key, defaultLocale, values);
     }
 
     /**
@@ -125,7 +137,7 @@ public class LanguageManager {
      * @param values Values to put into the string
      * @return Translated string or the original message if it was not found in the given locale
      */
-    public String getPlayerLocaleString(String key, String locale, Object... values) {
+    public String getString(String key, String locale, Object... values) {
         locale = formatLocale(locale);
 
         Properties properties = LOCALE_MAPPINGS.get(locale);
@@ -172,15 +184,14 @@ public class LanguageManager {
      * @return true if the given locale is supported by Floodgate
      */
     private boolean isValidLanguage(String locale) {
-        boolean result = true;
-        if (LanguageManager.class.getResource("/languages/texts/" + locale + ".properties") == null) {
-            result = false;
-            logger.warn(locale + " is not a supported Floodgate language.");
-        } else {
-            if (!LOCALE_MAPPINGS.containsKey(locale)) {
-                loadFloodgateLocale(locale);
-            }
+        if (locale == null) {
+            return false;
         }
-        return result;
+
+        if (LanguageManager.class.getResource("/languages/texts/" + locale + ".properties") == null) {
+            logger.warn(locale + " is not a supported Floodgate language.");
+            return false;
+        }
+        return true;
     }
 }

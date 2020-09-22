@@ -26,16 +26,12 @@
 
 package org.geysermc.floodgate.module;
 
-import com.google.inject.*;
+import com.google.inject.AbstractModule;
+import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.ProvidesIntoSet;
-import com.google.inject.name.Named;
-import io.netty.util.AttributeKey;
-import org.geysermc.floodgate.api.ProxyFloodgateApi;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.listener.VelocityListener;
 import org.geysermc.floodgate.register.ListenerRegister;
-import org.geysermc.floodgate.util.LanguageManager;
 
 public final class VelocityListenerModule extends AbstractModule {
     @Override
@@ -45,10 +41,7 @@ public final class VelocityListenerModule extends AbstractModule {
 
     @Singleton
     @ProvidesIntoSet
-    public Object velocityListener(ProxyFloodgateApi api, FloodgateLogger logger,
-                                   LanguageManager languageManager,
-                                   @Named("playerAttribute") AttributeKey<FloodgatePlayer> playerAttr,
-                                   @Named("kickMessageAttribute") AttributeKey<String> kickMessageAttr) {
-        return new VelocityListener(api, playerAttr, kickMessageAttr, logger, languageManager);
+    public Object velocityListener() {
+        return new VelocityListener();
     }
 }

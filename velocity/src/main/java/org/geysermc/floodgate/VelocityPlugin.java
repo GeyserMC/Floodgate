@@ -53,7 +53,7 @@ public final class VelocityPlugin {
         platform = injector.getInstance(FloodgatePlatform.class);
 
         long endCtm = System.currentTimeMillis();
-        logger.info(platform.getLanguageManager().getLocaleStringLog(
+        logger.info(platform.getLanguageManager().getLogString(
                 "floodgate.core.finish",
                 endCtm - ctm
         ));

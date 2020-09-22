@@ -136,16 +136,22 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
                 }
             } else if (isLogin) {
                 if (!bungee) {
-                    // we have to fake the offline player cycle
+                    // we have to fake the offline player (login) cycle
                     Object loginListener = PACKET_LISTENER.get(networkManager);
 
-                    // Set the player his GameProfile
+                    // check if the server is actually in the Login state
+                    if (!LOGIN_LISTENER.isInstance(loginListener)) {
+                        // player is not in the login state, abort
+                        return;
+                    }
+
+                    // set the player his GameProfile, we can't change the username without this
                     Object gameProfile = GAME_PROFILE_CONSTRUCTOR.newInstance(
                             fPlayer.getCorrectUniqueId(), fPlayer.getCorrectUsername()
                     );
                     setValue(loginListener, LOGIN_PROFILE, gameProfile);
 
-                    // Just like on Spigot:
+                    // just like on Spigot:
 
                     // LoginListener#initUUID
                     // new LoginHandler().fireEvents();

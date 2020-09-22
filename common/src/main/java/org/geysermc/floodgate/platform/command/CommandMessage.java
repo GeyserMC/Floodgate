@@ -26,30 +26,13 @@
 
 package org.geysermc.floodgate.platform.command;
 
-import org.geysermc.floodgate.platform.command.util.CommandResponseCache;
-import org.geysermc.floodgate.util.MessageFormatter;
-
 /**
  * CommandMessage is the interface of a message that can be send to a command source after
- * executing a command. Those messages are generally implemented using enums, so that they are
- * only created once and can be used over and over again. This in combination with
- * {@link CommandResponseCache message caching} should make this system quite fast.
+ * executing a command. Messages are generally implemented using enums.
  */
 public interface CommandMessage {
-    char COLOR_CHAR = '\u00A7';
-
     /**
      * Returns the message attached to the enum identifier
      */
     String getMessage();
-
-    /**
-     * This method will format a message by putting the arguments on the missing spots.
-     *
-     * @param args the arguments to fill in at the missing spots
-     * @return the formatted message
-     */
-    default String format(Object... args) {
-        return MessageFormatter.format(getMessage(), args);
-    }
 }

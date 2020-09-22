@@ -28,43 +28,31 @@ package org.geysermc.floodgate.util;
 
 import com.velocitypowered.api.proxy.Player;
 import lombok.RequiredArgsConstructor;
-import net.kyori.text.TextComponent;
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
-import org.geysermc.floodgate.api.FloodgateApi;
+import net.kyori.adventure.text.TextComponent;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.platform.command.CommandMessage;
-import org.geysermc.floodgate.platform.command.util.CommandResponseCache;
-import org.geysermc.floodgate.platform.command.util.CommandUtil;
+import org.geysermc.floodgate.platform.command.CommandUtil;
 
 @RequiredArgsConstructor
-public final class VelocityCommandUtil extends CommandResponseCache<TextComponent> implements CommandUtil {
+public final class VelocityCommandUtil implements CommandUtil {
     private final FloodgateLogger logger;
     private final LanguageManager manager;
 
     @Override
-    public void sendMessage(Object player, CommandMessage message, Object... args) {
-        Player velocityPlayer = cast(player);
-        FloodgatePlayer floodgatePlayer =
-                FloodgateApi.getInstance().getPlayer(velocityPlayer.getUniqueId());
-        if (floodgatePlayer != null) {
-            velocityPlayer.sendMessage(
-                    transformMessage(manager.getPlayerLocaleString(message.getMessage(),
-                    floodgatePlayer.getLanguageCode(), args)));
-        } else {
-            velocityPlayer.sendMessage(
-                    transformMessage(manager.getLocaleStringLog(message.getMessage(), args)));
-        }
+    public void sendMessage(Object player, String locale, CommandMessage message, Object... args) {
+        cast(player).sendMessage(translateAndTransform(locale, message, args));
     }
 
     @Override
-    public void kickPlayer(Object player, CommandMessage message, Object... args) {
-        cast(player).disconnect(getOrAddCachedMessage(message, args));
+    public void kickPlayer(Object player, String locale, CommandMessage message, Object... args) {
+        cast(player).disconnect(translateAndTransform(locale, message, args));
     }
 
-    @Override
-    protected TextComponent transformMessage(String message) {
-        return LegacyComponentSerializer.legacy().deserialize(message);
+    public TextComponent translateAndTransform(String locale, CommandMessage message,
+                                               Object... args) {
+        return TextComponent.of(manager.getString(
+                message.getMessage(), locale, args
+        ));
     }
 
     protected Player cast(Object instance) {

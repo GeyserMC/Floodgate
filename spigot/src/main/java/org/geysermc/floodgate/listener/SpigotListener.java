@@ -26,7 +26,7 @@
 
 package org.geysermc.floodgate.listener;
 
-import lombok.RequiredArgsConstructor;
+import com.google.inject.Inject;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -42,11 +42,10 @@ import org.geysermc.floodgate.util.LanguageManager;
 
 import java.util.UUID;
 
-@RequiredArgsConstructor
 public final class SpigotListener implements Listener {
-    private final SimpleFloodgateApi api;
-    private final FloodgateLogger logger;
-    private final LanguageManager languageManager;
+    @Inject private SimpleFloodgateApi api;
+    @Inject private FloodgateLogger logger;
+    @Inject private LanguageManager languageManager;
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onAsyncPreLogin(AsyncPlayerPreLoginEvent event) {
@@ -68,9 +67,9 @@ public final class SpigotListener implements Listener {
         FloodgatePlayer player = api.getPlayer(uniqueId);
         if (player != null) {
             player.as(FloodgatePlayerImpl.class).setLogin(false);
-            logger.info(languageManager.getLocaleStringLog("floodgate.ingame.login_name",
+            logger.info(languageManager.getLogString("floodgate.ingame.login_name",
                     player.getCorrectUsername(), player.getCorrectUniqueId()));
-            languageManager.loadFloodgateLocale(player.getLanguageCode());
+            languageManager.loadLocale(player.getLanguageCode());
         }
     }
 
@@ -78,7 +77,7 @@ public final class SpigotListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         if (api.removePlayer(player.getUniqueId()) != null) {
-            logger.info(languageManager.getLocaleStringLog(
+            logger.info(languageManager.getLogString(
                     "floodgate.ingame.disconnect_name", player.getName())
             );
         }

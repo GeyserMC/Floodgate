@@ -30,41 +30,30 @@ import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.platform.command.CommandMessage;
-import org.geysermc.floodgate.platform.command.util.CommandResponseCache;
-import org.geysermc.floodgate.platform.command.util.CommandUtil;
+import org.geysermc.floodgate.platform.command.CommandUtil;
 
 @RequiredArgsConstructor
-public final class BungeeCommandUtil extends CommandResponseCache<BaseComponent[]> implements CommandUtil {
+public final class BungeeCommandUtil implements CommandUtil {
     private final FloodgateLogger logger;
     private final LanguageManager manager;
 
     @Override
-    public void sendMessage(Object player, CommandMessage message, Object... args) {
-        ProxiedPlayer proxiedPlayer = cast(player);
-        FloodgatePlayer floodgatePlayer =
-                FloodgateApi.getInstance().getPlayer(proxiedPlayer.getUniqueId());
-        if (floodgatePlayer != null) {
-            proxiedPlayer.sendMessage(transformMessage(
-                    manager.getPlayerLocaleString(message.getMessage(),
-                            floodgatePlayer.getLanguageCode(), args)));
-        } else {
-            proxiedPlayer.sendMessage(transformMessage(
-                    manager.getLocaleStringLog(message.getMessage(), args)));
-        }
+    public void sendMessage(Object player, String locale, CommandMessage message, Object... args) {
+        cast(player).sendMessage(translateAndTransform(locale, message, args));
     }
 
     @Override
-    public void kickPlayer(Object player, CommandMessage message, Object... args) {
-        cast(player).disconnect(getOrAddCachedMessage(message, args));
+    public void kickPlayer(Object player, String locale, CommandMessage message, Object... args) {
+        cast(player).disconnect(translateAndTransform(locale, message, args));
     }
 
-    @Override
-    protected BaseComponent[] transformMessage(String message) {
-        return TextComponent.fromLegacyText(message);
+    public BaseComponent[] translateAndTransform(String locale, CommandMessage message,
+                                                 Object... args) {
+        return TextComponent.fromLegacyText(manager.getString(
+                message.getMessage(), locale, args
+        ));
     }
 
     protected ProxiedPlayer cast(Object player) {

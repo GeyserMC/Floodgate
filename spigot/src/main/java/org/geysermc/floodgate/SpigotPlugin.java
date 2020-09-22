@@ -49,7 +49,7 @@ public final class SpigotPlugin extends JavaPlugin {
         platform = injector.getInstance(SpigotPlatform.class);
 
         long endCtm = System.currentTimeMillis();
-        getLogger().info(platform.getLanguageManager().getLocaleStringLog(
+        getLogger().info(platform.getLanguageManager().getLogString(
                 "floodgate.core.finish",
                 endCtm - ctm
         ));

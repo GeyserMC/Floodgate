@@ -44,7 +44,7 @@ import org.geysermc.floodgate.listener.SpigotListenerRegistration;
 import org.geysermc.floodgate.logger.JavaUtilFloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandRegistration;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
-import org.geysermc.floodgate.platform.command.util.CommandUtil;
+import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.SpigotCommandUtil;
 
@@ -83,8 +83,9 @@ public final class SpigotPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public CommandRegistration commandRegistration(FloodgateLogger logger) {
-        return new SpigotCommandRegistration(plugin, logger);
+    public CommandRegistration commandRegistration(CommandUtil commandUtil,
+                                                   LanguageManager languageManager) {
+        return new SpigotCommandRegistration(plugin, commandUtil, languageManager);
     }
 
     @Provides

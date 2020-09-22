@@ -47,7 +47,7 @@ import org.geysermc.floodgate.inject.velocity.VelocityInjector;
 import org.geysermc.floodgate.listener.VelocityListenerRegistration;
 import org.geysermc.floodgate.logger.Slf4jFloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandRegistration;
-import org.geysermc.floodgate.platform.command.util.CommandUtil;
+import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.VelocityCommandUtil;
@@ -86,8 +86,9 @@ public final class VelocityPlatformModule extends AbstractModule {
     @Provides
     @Singleton
     public CommandRegistration commandRegistration(CommandManager commandManager,
-                                                   VelocityCommandUtil commandUtil) {
-        return new VelocityCommandRegistration(commandManager, commandUtil);
+                                                   VelocityCommandUtil commandUtil,
+                                                   LanguageManager languageManager) {
+        return new VelocityCommandRegistration(commandManager, commandUtil, languageManager);
     }
 
     @Provides

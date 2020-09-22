@@ -35,7 +35,7 @@ import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.link.LinkRequestImpl;
 import org.geysermc.floodgate.platform.command.Command;
 import org.geysermc.floodgate.platform.command.CommandMessage;
-import org.geysermc.floodgate.platform.command.util.CommandUtil;
+import org.geysermc.floodgate.platform.command.CommandUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,28 +50,28 @@ public final class LinkAccountCommand implements Command {
     @Inject private CommandUtil commandUtil;
 
     @Override
-    public void execute(Object player, UUID uuid, String username, String[] args) {
+    public void execute(Object player, UUID uuid, String username, String locale, String[] args) {
         PlayerLink link = api.getPlayerLink();
         if (!link.isEnabledAndAllowed()) {
-            sendMessage(player, Message.LINK_REQUEST_DISABLED);
+            sendMessage(player, locale, Message.LINK_REQUEST_DISABLED);
             return;
         }
 
         link.isLinkedPlayer(uuid).whenComplete((linked, throwable) -> {
             if (throwable != null) {
-                sendMessage(player, CommonCommandMessage.IS_LINKED_ERROR);
+                sendMessage(player, locale, CommonCommandMessage.IS_LINKED_ERROR);
                 return;
             }
 
             if (linked) {
-                sendMessage(player, Message.ALREADY_LINKED);
+                sendMessage(player, locale, Message.ALREADY_LINKED);
                 return;
             }
 
             // when the player is a Java player
             if (!api.isBedrockPlayer(uuid)) {
                 if (args.length != 1) {
-                    sendMessage(player, Message.JAVA_USAGE);
+                    sendMessage(player, locale, Message.JAVA_USAGE);
                     return;
                 }
 
@@ -82,14 +82,17 @@ public final class LinkAccountCommand implements Command {
                         new LinkRequestImpl(username, uuid, code, bedrockUsername);
 
                 activeLinkRequests.put(username, linkRequest);
-                sendMessage(player, Message.LINK_REQUEST_CREATED, bedrockUsername, username, code);
+                sendMessage(
+                        player, locale, Message.LINK_REQUEST_CREATED,
+                        bedrockUsername, username, code
+                );
                 return;
             }
 
             // when the player is a Bedrock player
 
             if (args.length != 2) {
-                sendMessage(player, Message.BEDROCK_USAGE);
+                sendMessage(player, locale, Message.BEDROCK_USAGE);
                 return;
             }
 
@@ -97,30 +100,31 @@ public final class LinkAccountCommand implements Command {
             String code = args[1];
             LinkRequest request = activeLinkRequests.getOrDefault(javaUsername, null);
             if (request == null || !request.isRequestedPlayer(api.getPlayer(uuid))) {
-                sendMessage(player, Message.NO_LINK_REQUESTED);
+                sendMessage(player, locale, Message.NO_LINK_REQUESTED);
                 return;
             }
 
             if (!request.getLinkCode().equals(code)) {
-                sendMessage(player, Message.INVALID_CODE);
+                sendMessage(player, locale, Message.INVALID_CODE);
                 return;
             }
 
             // Delete the request, whether it has expired or is successful
             activeLinkRequests.remove(javaUsername);
             if (request.isExpired(link.getVerifyLinkTimeout())) {
-                sendMessage(player, Message.LINK_REQUEST_EXPIRED);
+                sendMessage(player, locale, Message.LINK_REQUEST_EXPIRED);
                 return;
             }
 
             link.linkPlayer(uuid, request.getJavaUniqueId(), request.getJavaUsername())
                     .whenComplete((aVoid, error) -> {
                         if (error != null) {
-                            sendMessage(player, Message.LINK_REQUEST_ERROR);
+                            sendMessage(player, locale, Message.LINK_REQUEST_ERROR);
                             return;
                         }
                         commandUtil.kickPlayer(
-                                player, Message.LINK_REQUEST_COMPLETED, request.getJavaUsername()
+                                player, locale, Message.LINK_REQUEST_COMPLETED,
+                                request.getJavaUsername()
                         );
                     });
         });
@@ -141,8 +145,8 @@ public final class LinkAccountCommand implements Command {
         return true;
     }
 
-    private void sendMessage(Object player, CommandMessage message, Object... args) {
-        commandUtil.sendMessage(player, message, args);
+    private void sendMessage(Object player, String locale, CommandMessage message, Object... args) {
+        commandUtil.sendMessage(player, locale, message, args);
     }
 
     public enum Message implements CommandMessage {
@@ -158,7 +162,8 @@ public final class LinkAccountCommand implements Command {
         NO_LINK_REQUESTED("floodgate.command.link_account.no_link_requested"),
         LINK_REQUEST_DISABLED("floodgate.commands.linking_disabled");
 
-        @Getter private final String message;
+        @Getter
+        private final String message;
 
         Message(String message) {
             this.message = message;
