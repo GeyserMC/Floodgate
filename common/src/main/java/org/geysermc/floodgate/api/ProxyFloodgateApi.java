@@ -25,15 +25,13 @@
 
 package org.geysermc.floodgate.api;
 
-import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.crypto.FloodgateCipher;
-import org.geysermc.floodgate.util.BedrockData;
-
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.geysermc.floodgate.crypto.FloodgateCipher;
+import org.geysermc.floodgate.util.BedrockData;
 
 @RequiredArgsConstructor
 public final class ProxyFloodgateApi extends SimpleFloodgateApi {
@@ -55,9 +53,6 @@ public final class ProxyFloodgateApi extends SimpleFloodgateApi {
     public void updateEncryptedData(UUID uuid, BedrockData bedrockData) {
         try {
             byte[] encryptedData = cipher.encryptFromString(bedrockData.toString());
-            encryptedData = Base64.getEncoder().encode(encryptedData);
-            //todo maybe bake Base64 support into it?
-
             addEncryptedData(uuid, new String(encryptedData, StandardCharsets.UTF_8));
         } catch (Exception exception) {
             throw new IllegalStateException("We failed to update the BedrockData, " +

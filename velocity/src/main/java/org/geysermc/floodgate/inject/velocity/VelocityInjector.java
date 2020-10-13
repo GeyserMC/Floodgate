@@ -25,26 +25,31 @@
 
 package org.geysermc.floodgate.inject.velocity;
 
+import static org.geysermc.floodgate.util.ReflectionUtils.castedInvoke;
+import static org.geysermc.floodgate.util.ReflectionUtils.getMethod;
+import static org.geysermc.floodgate.util.ReflectionUtils.getValue;
+import static org.geysermc.floodgate.util.ReflectionUtils.invoke;
+
 import com.velocitypowered.api.proxy.ProxyServer;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
+import java.lang.reflect.Method;
+import javax.naming.OperationNotSupportedException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 
-import javax.naming.OperationNotSupportedException;
-import java.lang.reflect.Method;
-
-import static org.geysermc.floodgate.util.ReflectionUtils.*;
-
 @RequiredArgsConstructor
 public final class VelocityInjector extends CommonPlatformInjector {
     private final ProxyServer server;
+
     @Getter private boolean injected = false;
 
     @SuppressWarnings("rawtypes")
     public boolean inject() {
-        if (isInjected()) return true;
+        if (isInjected()) {
+            return true;
+        }
 
         Object connectionManager = getValue(server, "cm");
 
@@ -55,16 +60,16 @@ public final class VelocityInjector extends CommonPlatformInjector {
 
         Method serverSetter = getMethod(serverInitializerHolder, "set", ChannelInitializer.class);
         invoke(serverInitializerHolder, serverSetter,
-                new VelocityChannelInitializer(this, serverInitializer, false));
+               new VelocityChannelInitializer(this, serverInitializer, false));
 
         // Proxy <-> Server
 
-        Object backendInitializerHolder = getValue(connectionManager,"backendChannelInitializer");
+        Object backendInitializerHolder = getValue(connectionManager, "backendChannelInitializer");
         ChannelInitializer backendInitializer = castedInvoke(backendInitializerHolder, "get");
 
         Method backendSetter = getMethod(backendInitializerHolder, "set", ChannelInitializer.class);
         invoke(backendInitializerHolder, backendSetter,
-                new VelocityChannelInitializer(this, backendInitializer, true));
+               new VelocityChannelInitializer(this, backendInitializer, true));
         return injected = true;
     }
 
@@ -80,6 +85,10 @@ public final class VelocityInjector extends CommonPlatformInjector {
     private static final class VelocityChannelInitializer extends ChannelInitializer<Channel> {
         private static final Method initChannel;
 
+        static {
+            initChannel = getMethod(ChannelInitializer.class, "initChannel", Channel.class);
+        }
+
         private final VelocityInjector injector;
         private final ChannelInitializer original;
         private final boolean proxyToServer;
@@ -90,10 +99,6 @@ public final class VelocityInjector extends CommonPlatformInjector {
 
             injector.injectAddonsCall(channel, proxyToServer);
             injector.addInjectedClient(channel);
-        }
-
-        static {
-            initChannel = getMethod(ChannelInitializer.class, "initChannel", Channel.class);
         }
     }
 }

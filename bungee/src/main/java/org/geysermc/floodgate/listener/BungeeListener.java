@@ -27,6 +27,7 @@ package org.geysermc.floodgate.listener;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import java.util.UUID;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
@@ -41,8 +42,6 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.handler.BungeeDataHandler;
 import org.geysermc.floodgate.util.LanguageManager;
-
-import java.util.UUID;
 
 public final class BungeeListener implements Listener {
     private BungeeDataHandler dataHandler;
@@ -80,8 +79,10 @@ public final class BungeeListener implements Listener {
         FloodgatePlayer player = api.getPlayer(uniqueId);
         if (player != null) {
             player.as(FloodgatePlayerImpl.class).setLogin(false);
-            logger.info(languageManager.getLogString("floodgate.ingame.login_name",
-                    player.getCorrectUsername(), player.getCorrectUniqueId()));
+            logger.translatedInfo(
+                    "floodgate.ingame.login_name",
+                    player.getCorrectUsername(), uniqueId
+            );
             languageManager.loadLocale(player.getLanguageCode());
         }
     }
@@ -98,9 +99,7 @@ public final class BungeeListener implements Listener {
         ProxiedPlayer player = event.getPlayer();
         if (api.removePlayer(player.getUniqueId()) != null) {
             api.removeEncryptedData(player.getUniqueId());
-            logger.info(languageManager.getLogString(
-                    "floodgate.ingame.disconnect_name", player.getName())
-            );
+            logger.translatedInfo("floodgate.ingame.disconnect_name", player.getName());
         }
     }
 }

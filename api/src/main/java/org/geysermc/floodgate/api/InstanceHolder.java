@@ -25,11 +25,10 @@
 
 package org.geysermc.floodgate.api;
 
+import java.util.UUID;
 import lombok.Getter;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.link.PlayerLink;
-
-import java.util.UUID;
 
 public final class InstanceHolder {
     @Getter private static FloodgateApi instance;

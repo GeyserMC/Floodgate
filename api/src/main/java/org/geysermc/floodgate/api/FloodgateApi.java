@@ -25,12 +25,18 @@
 
 package org.geysermc.floodgate.api;
 
+import java.util.UUID;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
-import java.util.UUID;
-
 public interface FloodgateApi {
+    /**
+     * Returns the Floodgate API instance.
+     */
+    static FloodgateApi getInstance() {
+        return InstanceHolder.getInstance();
+    }
+
     /**
      * Method to determine if the given <b>online</b> player is a bedrock player
      *
@@ -56,9 +62,9 @@ public interface FloodgateApi {
     UUID createJavaPlayerId(long xuid);
 
     /**
-     * Checks if the uuid of the player has the {@link #createJavaPlayerId(long)} format.
-     * This method can't validate a linked player uuid, since that doesn't equal the format.
-     * Use {@link #isBedrockPlayer(UUID)} if you want to include linked accounts.
+     * Checks if the uuid of the player has the {@link #createJavaPlayerId(long)} format. This
+     * method can't validate a linked player uuid, since that doesn't equal the format. Use {@link
+     * #isBedrockPlayer(UUID)} if you want to include linked accounts.
      *
      * @param uuid the uuid to check
      * @return true if the given uuid has the correct format.
@@ -70,12 +76,5 @@ public interface FloodgateApi {
      */
     default PlayerLink getPlayerLink() {
         return InstanceHolder.getPlayerLink();
-    }
-
-    /**
-     * Returns the Floodgate API instance.
-     */
-    static FloodgateApi getInstance() {
-        return InstanceHolder.getInstance();
     }
 }

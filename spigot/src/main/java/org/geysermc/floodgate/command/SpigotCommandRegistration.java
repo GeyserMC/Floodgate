@@ -45,9 +45,8 @@ public final class SpigotCommandRegistration implements CommandRegistration {
     public void register(Command command) {
         String defaultLocale = languageManager.getDefaultLocale();
 
-        plugin.getCommand(command.getName()).setExecutor(
-                new SpigotCommandWrapper(commandUtil, command, defaultLocale)
-        );
+        plugin.getCommand(command.getName())
+                .setExecutor(new SpigotCommandWrapper(commandUtil, command, defaultLocale));
     }
 
     @RequiredArgsConstructor

@@ -35,18 +35,21 @@ public final class ChannelOutDebugHandler extends MessageToByteEncoder<ByteBuf> 
     private final String direction;
     private final FloodgateLogger logger;
 
-    public ChannelOutDebugHandler(String implementationType, boolean player,
+    public ChannelOutDebugHandler(String implementationType, boolean toServer,
                                   FloodgateLogger logger) {
-        this.direction = implementationType + (player ? " -> Player" : " -> Server");
+        this.direction = implementationType + (toServer ? " -> Server" : " -> Player");
         this.logger = logger;
     }
 
     @Override
     protected void encode(ChannelHandlerContext ctx, ByteBuf msg, ByteBuf out) {
         int index = msg.readerIndex();
+
         logger.info("{}:\n{}", direction, ByteBufUtil.prettyHexDump(msg));
 
+        // reset index
         msg.readerIndex(index);
+
         out.writeBytes(msg);
     }
 }

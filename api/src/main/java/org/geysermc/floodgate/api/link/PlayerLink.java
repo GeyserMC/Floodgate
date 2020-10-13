@@ -25,22 +25,20 @@
 
 package org.geysermc.floodgate.api.link;
 
-import org.geysermc.floodgate.util.LinkedPlayer;
-
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import org.geysermc.floodgate.util.LinkedPlayer;
 
 /**
- * The base class of the PlayerLink database implementation.
- * The implementation is responsible for making a connection with the database
- * and keeping that connection alive so that Floodgate (or a third party plugin)
- * can check for example if a given player is linked.
+ * The base class of the PlayerLink database implementation. The implementation is responsible for
+ * making a connection with the database and keeping that connection alive so that Floodgate (or a
+ * third party plugin) can check for example if a given player is linked.
  */
 public interface PlayerLink {
     /**
-     * Called by Floodgate after the initialization of the class.
-     * In this method the implementation should start the connection with the database and
-     * create the collections if they don't exist already.
+     * Called by Floodgate after the initialization of the class. In this method the implementation
+     * should start the connection with the database and create the collections if they don't exist
+     * already.
      */
     void load();
 
@@ -48,8 +46,8 @@ public interface PlayerLink {
      * Get a linked player by the bedrock uuid
      *
      * @param bedrockId the uuid of the bedrock player
-     * @return a completable future with the {@link LinkedPlayer}.
-     * The future will have a null value if that Bedrock player isn't linked
+     * @return a completable future with the {@link LinkedPlayer}. The future will have a null value
+     * if that Bedrock player isn't linked
      */
     CompletableFuture<LinkedPlayer> getLinkedPlayer(UUID bedrockId);
 
@@ -80,10 +78,9 @@ public interface PlayerLink {
     CompletableFuture<Void> unlinkPlayer(UUID javaId);
 
     /**
-     * Return if account linking is enabled.
-     * The difference between enabled and allowed is that 'enabled' still allows already linked
-     * people to join with their linked account while 'allow linking' allows people to link
-     * accounts using the commands.
+     * Return if account linking is enabled. The difference between enabled and allowed is that
+     * 'enabled' still allows already linked people to join with their linked account while 'allow
+     * linking' allows people to link accounts using the commands.
      */
     boolean isEnabled();
 
@@ -93,10 +90,9 @@ public interface PlayerLink {
     long getVerifyLinkTimeout();
 
     /**
-     * Return if account linking is allowed.
-     * The difference between enabled and allowed is that 'enabled' still allows already linked
-     * people to join with their linked account while 'allow linking' allows people to link
-     * accounts using the commands.
+     * Return if account linking is allowed. The difference between enabled and allowed is that
+     * 'enabled' still allows already linked people to join with their linked account while 'allow
+     * linking' allows people to link accounts using the commands.
      */
     boolean isAllowLinking();
 

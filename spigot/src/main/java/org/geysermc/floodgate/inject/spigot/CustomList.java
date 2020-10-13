@@ -25,13 +25,12 @@
 
 package org.geysermc.floodgate.inject.spigot;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
 @SuppressWarnings({"unchecked", "rawtypes"})
@@ -79,8 +78,18 @@ public abstract class CustomList implements List {
     }
 
     @Override
+    public synchronized void add(int index, Object element) {
+        originalList.add(index, element);
+    }
+
+    @Override
     public synchronized boolean remove(Object o) {
         return originalList.remove(o);
+    }
+
+    @Override
+    public synchronized Object remove(int index) {
+        return originalList.remove(index);
     }
 
     @Override
@@ -131,16 +140,6 @@ public abstract class CustomList implements List {
     @Override
     public synchronized Object set(int index, Object element) {
         return originalList.set(index, element);
-    }
-
-    @Override
-    public synchronized void add(int index, Object element) {
-        originalList.add(index, element);
-    }
-
-    @Override
-    public synchronized Object remove(int index) {
-        return originalList.remove(index);
     }
 
     @Override

@@ -25,33 +25,55 @@
 
 package org.geysermc.floodgate.addon.data;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.geysermc.floodgate.util.ReflectionUtils.castedInvoke;
+import static org.geysermc.floodgate.util.ReflectionUtils.getCastedValue;
+import static org.geysermc.floodgate.util.ReflectionUtils.getField;
+import static org.geysermc.floodgate.util.ReflectionUtils.getMethod;
+import static org.geysermc.floodgate.util.ReflectionUtils.getPrefixedClass;
+import static org.geysermc.floodgate.util.ReflectionUtils.invoke;
+import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
+
 import com.velocitypowered.api.proxy.Player;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.util.ReferenceCountUtil;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.List;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.geysermc.floodgate.util.ReflectionUtils.*;
-
 @RequiredArgsConstructor
-public class VelocityServerDataHandler extends MessageToMessageEncoder<Object> {
+public final class VelocityServerDataHandler extends MessageToMessageEncoder<Object> {
     private static final Class<?> HANDSHAKE_PACKET;
     private static final Field HANDSHAKE_ADDRESS;
     private static final Method GET_ASSOCIATION;
     private static final Method GET_PLAYER;
 
+    static {
+        HANDSHAKE_PACKET = getPrefixedClass("protocol.packet.Handshake");
+        checkNotNull(HANDSHAKE_PACKET, "Handshake packet class cannot be null");
+
+        HANDSHAKE_ADDRESS = getField(HANDSHAKE_PACKET, "serverAddress");
+        checkNotNull(HANDSHAKE_ADDRESS, "Address field of the Handshake packet cannot be null");
+
+        Class<?> minecraftConnection = getPrefixedClass("connection.MinecraftConnection");
+
+        GET_ASSOCIATION = getMethod(minecraftConnection, "getAssociation");
+        checkNotNull(GET_ASSOCIATION, "getAssociation in MinecraftConnection cannot be null");
+
+        Class<?> serverConnection = getPrefixedClass("connection.backend.VelocityServerConnection");
+
+        GET_PLAYER = getMethod(serverConnection, "getPlayer");
+        checkNotNull(GET_PLAYER, "getPlayer in VelocityServerConnection cannot be null");
+    }
+
     private final ProxyFloodgateConfig config;
     private final ProxyFloodgateApi api;
-
     private boolean done;
 
     @Override
@@ -63,7 +85,8 @@ public class VelocityServerDataHandler extends MessageToMessageEncoder<Object> {
         }
 
         if (!HANDSHAKE_PACKET.isInstance(packet) || !config.isSendFloodgateData()) {
-            System.out.println(HANDSHAKE_PACKET.isInstance(packet)+" "+config.isSendFloodgateData());
+            System.out.println(
+                    HANDSHAKE_PACKET.isInstance(packet) + " " + config.isSendFloodgateData());
             done = true;
             out.add(packet);
             return;
@@ -98,23 +121,5 @@ public class VelocityServerDataHandler extends MessageToMessageEncoder<Object> {
 
         done = true;
         out.add(packet);
-    }
-
-    static {
-        HANDSHAKE_PACKET = getPrefixedClass("protocol.packet.Handshake");
-        checkNotNull(HANDSHAKE_PACKET, "Handshake packet class cannot be null");
-
-        HANDSHAKE_ADDRESS = getField(HANDSHAKE_PACKET, "serverAddress");
-        checkNotNull(HANDSHAKE_ADDRESS, "Address field of the Handshake packet cannot be null");
-
-        Class<?> minecraftConnection = getPrefixedClass("connection.MinecraftConnection");
-
-        GET_ASSOCIATION = getMethod(minecraftConnection, "getAssociation");
-        checkNotNull(GET_ASSOCIATION, "getAssociation in MinecraftConnection cannot be null");
-
-        Class<?> serverConnection = getPrefixedClass("connection.backend.VelocityServerConnection");
-
-        GET_PLAYER = getMethod(serverConnection, "getPlayer");
-        checkNotNull(GET_PLAYER, "getPlayer in VelocityServerConnection cannot be null");
     }
 }

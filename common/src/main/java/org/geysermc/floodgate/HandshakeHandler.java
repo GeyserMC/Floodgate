@@ -25,9 +25,15 @@
 
 package org.geysermc.floodgate;
 
+import static org.geysermc.floodgate.util.BedrockData.EXPECTED_LENGTH;
+
 import com.google.common.base.Charsets;
 import com.google.inject.Inject;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
@@ -36,8 +42,6 @@ import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.InvalidFormatException;
 import org.geysermc.floodgate.util.RawSkin;
-
-import static org.geysermc.floodgate.util.BedrockData.EXPECTED_LENGTH;
 
 @RequiredArgsConstructor
 public final class HandshakeHandler {
@@ -122,19 +126,6 @@ public final class HandshakeHandler {
         }
     }
 
-    @AllArgsConstructor(access = AccessLevel.PROTECTED)
-    @Getter
-    public static class HandshakeResult {
-        private final ResultType resultType;
-        private final String[] handshakeData;
-        private final BedrockData bedrockData;
-        private final FloodgatePlayer floodgatePlayer;
-
-        public boolean isBungeeData() {
-            return handshakeData.length == 4 || handshakeData.length == 5;
-        }
-    }
-
     public enum ResultType {
         EXCEPTION,
         NOT_FLOODGATE_DATA,
@@ -146,6 +137,19 @@ public final class HandshakeHandler {
 
         ResultType() {
             cachedResult = new HandshakeResult(this, null, null, null);
+        }
+    }
+
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @Getter
+    public static class HandshakeResult {
+        private final ResultType resultType;
+        private final String[] handshakeData;
+        private final BedrockData bedrockData;
+        private final FloodgatePlayer floodgatePlayer;
+
+        public boolean isBungeeData() {
+            return handshakeData.length == 4 || handshakeData.length == 5;
         }
     }
 }

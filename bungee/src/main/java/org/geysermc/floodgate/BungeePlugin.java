@@ -28,7 +28,12 @@ package org.geysermc.floodgate;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import net.md_5.bungee.api.plugin.Plugin;
-import org.geysermc.floodgate.module.*;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.module.BungeeAddonModule;
+import org.geysermc.floodgate.module.BungeeListenerModule;
+import org.geysermc.floodgate.module.BungeePlatformModule;
+import org.geysermc.floodgate.module.CommandModule;
+import org.geysermc.floodgate.module.CommonModule;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
 public final class BungeePlugin extends Plugin {
@@ -49,10 +54,8 @@ public final class BungeePlugin extends Plugin {
         platform = injector.getInstance(FloodgatePlatform.class);
 
         long endCtm = System.currentTimeMillis();
-        getLogger().info(platform.getLanguageManager().getLogString(
-                "floodgate.core.finish",
-                endCtm - ctm
-        ));
+        injector.getInstance(FloodgateLogger.class)
+                .translatedInfo("floodgate.core.finish", endCtm - ctm);
     }
 
     @Override

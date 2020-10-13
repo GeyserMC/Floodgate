@@ -26,8 +26,8 @@
 package org.geysermc.floodgate.platform.command;
 
 /**
- * An interface used across all Floodgate platforms to simple stuff in commands like kicking
- * players and sending player messages independent of the Floodgate platform implementation.
+ * An interface used across all Floodgate platforms to simple stuff in commands like kicking players
+ * and sending player messages independent of the Floodgate platform implementation.
  */
 public interface CommandUtil {
     /**

@@ -26,31 +26,21 @@
 package org.geysermc.floodgate;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Module;
-import com.google.inject.name.Named;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.config.loader.ConfigLoader;
-import org.geysermc.floodgate.link.PlayerLinkLoader;
 import org.geysermc.floodgate.util.LanguageManager;
-
-import java.nio.file.Path;
 
 public final class SpigotPlatform extends FloodgatePlatform {
     @Inject private JavaPlugin plugin;
 
     @Inject
-    public SpigotPlatform(@Named("dataDirectory") Path dataDirectory, FloodgateApi api,
-                          ConfigLoader configLoader, PlayerLinkLoader playerLinkLoader,
-                          HandshakeHandler handshakeHandler, FloodgateLogger logger,
-                          PlatformInjector platformInjector, LanguageManager languageManager,
-                          Injector injector) {
-        super(dataDirectory, api, configLoader, playerLinkLoader, handshakeHandler,
-                logger, platformInjector, languageManager, injector);
+    public SpigotPlatform(FloodgateApi api, LanguageManager languageManager,
+                          PlatformInjector platformInjector, FloodgateLogger logger) {
+        super(api, languageManager, platformInjector, logger);
     }
 
     @Override

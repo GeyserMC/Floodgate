@@ -25,17 +25,18 @@
 
 package org.geysermc.floodgate.logger;
 
-import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import static org.geysermc.floodgate.util.MessageFormatter.format;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static org.geysermc.floodgate.util.MessageFormatter.format;
+import lombok.RequiredArgsConstructor;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.util.LanguageManager;
 
 @RequiredArgsConstructor
 public final class JavaUtilFloodgateLogger implements FloodgateLogger {
     private final Logger logger;
+    private final LanguageManager languageManager;
     private Level originLevel = null;
 
     @Override
@@ -56,6 +57,11 @@ public final class JavaUtilFloodgateLogger implements FloodgateLogger {
     @Override
     public void info(String message, Object... args) {
         logger.info(format(message, args));
+    }
+
+    @Override
+    public void translatedInfo(String message, Object... args) {
+        logger.info(languageManager.getLogString(message, args));
     }
 
     @Override

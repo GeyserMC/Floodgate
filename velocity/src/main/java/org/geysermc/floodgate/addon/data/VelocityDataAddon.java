@@ -28,7 +28,6 @@ package org.geysermc.floodgate.addon.data;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import io.netty.channel.Channel;
-import io.netty.channel.EventLoop;
 import io.netty.util.AttributeKey;
 import org.geysermc.floodgate.HandshakeHandler;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
@@ -36,9 +35,6 @@ import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public final class VelocityDataAddon implements InjectorAddon {
     @Inject private HandshakeHandler handshakeHandler;
@@ -63,8 +59,8 @@ public final class VelocityDataAddon implements InjectorAddon {
     private AttributeKey<String> kickMessageAttribute;
 
     @Override
-    public void onInject(Channel channel, boolean proxyToServer) {
-        if (proxyToServer) {
+    public void onInject(Channel channel, boolean toServer) {
+        if (toServer) {
             channel.pipeline().addAfter(
                     packetEncoder, "floodgate_data_handler",
                     new VelocityServerDataHandler(config, api)

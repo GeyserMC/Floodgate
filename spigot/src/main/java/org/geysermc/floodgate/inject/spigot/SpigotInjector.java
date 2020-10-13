@@ -25,22 +25,32 @@
 
 package org.geysermc.floodgate.inject.spigot;
 
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelInitializer;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
-import java.lang.reflect.*;
-import java.util.*;
-
 @RequiredArgsConstructor
 public final class SpigotInjector extends CommonPlatformInjector {
-    private Object serverConnection;
     private final Set<Channel> injectedClients = new HashSet<>();
 
-    @Getter private boolean injected = false;
+    private Object serverConnection;
     private String injectedFieldName;
+
+    @Getter private boolean injected = false;
 
     @Override
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
@@ -50,11 +60,11 @@ public final class SpigotInjector extends CommonPlatformInjector {
         }
 
         if (getServerConnection() != null) {
-            for (Field f : serverConnection.getClass().getDeclaredFields()) {
-                if (f.getType() == List.class) {
-                    f.setAccessible(true);
+            for (Field field : serverConnection.getClass().getDeclaredFields()) {
+                if (field.getType() == List.class) {
+                    field.setAccessible(true);
 
-                    ParameterizedType parameterType = ((ParameterizedType) f.getGenericType());
+                    ParameterizedType parameterType = ((ParameterizedType) field.getGenericType());
                     Type listType = parameterType.getActualTypeArguments()[0];
 
                     // the list we search has ChannelFuture as type
@@ -62,30 +72,30 @@ public final class SpigotInjector extends CommonPlatformInjector {
                         continue;
                     }
 
-                    injectedFieldName = f.getName();
-                    List<?> newList = new CustomList((List<?>) f.get(serverConnection)) {
+                    injectedFieldName = field.getName();
+                    List<?> newList = new CustomList((List<?>) field.get(serverConnection)) {
                         @Override
-                        public void onAdd(Object o) {
+                        public void onAdd(Object object) {
                             try {
-                                injectClient((ChannelFuture) o);
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                                injectClient((ChannelFuture) object);
+                            } catch (Exception exception) {
+                                exception.printStackTrace();
                             }
                         }
                     };
 
                     // inject existing
                     synchronized (newList) {
-                        for (Object o : newList) {
+                        for (Object object : newList) {
                             try {
-                                injectClient((ChannelFuture) o);
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                                injectClient((ChannelFuture) object);
+                            } catch (Exception exception) {
+                                exception.printStackTrace();
                             }
                         }
                     }
 
-                    f.set(serverConnection, newList);
+                    field.set(serverConnection, newList);
                     injected = true;
                     return true;
                 }
@@ -129,6 +139,7 @@ public final class SpigotInjector extends CommonPlatformInjector {
         if (serverConnection != null) {
             Field field = ReflectionUtils.getField(serverConnection.getClass(), injectedFieldName);
             List<?> list = (List<?>) ReflectionUtils.getValue(serverConnection, field);
+
             if (list instanceof CustomList) {
                 CustomList customList = (CustomList) list;
                 ReflectionUtils.setValue(serverConnection, field, customList.getOriginalList());
@@ -143,15 +154,17 @@ public final class SpigotInjector extends CommonPlatformInjector {
     }
 
     public Object getServerConnection() throws IllegalAccessException, InvocationTargetException {
-        if (serverConnection != null) return serverConnection;
+        if (serverConnection != null) {
+            return serverConnection;
+        }
         Class<?> minecraftServer = ReflectionUtils.getPrefixedClass("MinecraftServer");
         assert minecraftServer != null;
 
         Object minecraftServerInstance = ReflectionUtils.invokeStatic(minecraftServer, "getServer");
-        for (Method m : minecraftServer.getDeclaredMethods()) {
-            if (m.getReturnType().getSimpleName().equals("ServerConnection")) {
-                if (m.getParameterTypes().length == 0) {
-                    serverConnection = m.invoke(minecraftServerInstance);
+        for (Method method : minecraftServer.getDeclaredMethods()) {
+            if (method.getReturnType().getSimpleName().equals("ServerConnection")) {
+                if (method.getParameterTypes().length == 0) {
+                    serverConnection = method.invoke(minecraftServerInstance);
                 }
             }
         }

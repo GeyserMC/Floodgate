@@ -30,6 +30,7 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import io.netty.util.AttributeKey;
+import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.HandshakeHandler;
 import org.geysermc.floodgate.api.FloodgateApi;
@@ -41,12 +42,14 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.loader.ConfigLoader;
 import org.geysermc.floodgate.config.updater.ConfigFileUpdater;
 import org.geysermc.floodgate.config.updater.ConfigUpdater;
-import org.geysermc.floodgate.crypto.*;
+import org.geysermc.floodgate.crypto.AesCipher;
+import org.geysermc.floodgate.crypto.AesKeyProducer;
+import org.geysermc.floodgate.crypto.Base64Topping;
+import org.geysermc.floodgate.crypto.FloodgateCipher;
+import org.geysermc.floodgate.crypto.KeyProducer;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.link.PlayerLinkLoader;
 import org.geysermc.floodgate.util.LanguageManager;
-
-import java.nio.file.Path;
 
 @RequiredArgsConstructor
 public final class CommonModule extends AbstractModule {
@@ -79,9 +82,11 @@ public final class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public ConfigLoader configLoader(@Named("configClass") Class<? extends FloodgateConfig> configClass,
-                                     ConfigUpdater configUpdater, KeyProducer producer,
-                                     FloodgateCipher cipher, FloodgateLogger logger) {
+    public ConfigLoader configLoader(
+            @Named("configClass") Class<? extends FloodgateConfig> configClass,
+            ConfigUpdater configUpdater, KeyProducer producer,
+            FloodgateCipher cipher, FloodgateLogger logger) {
+
         return new ConfigLoader(
                 dataDirectory, configClass, configUpdater, producer, cipher, logger
         );

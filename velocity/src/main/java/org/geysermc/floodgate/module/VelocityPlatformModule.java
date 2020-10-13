@@ -74,8 +74,8 @@ public final class VelocityPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public FloodgateLogger floodgateLogger(Logger logger) {
-        return new Slf4jFloodgateLogger(logger);
+    public FloodgateLogger floodgateLogger(Logger logger, LanguageManager languageManager) {
+        return new Slf4jFloodgateLogger(logger, languageManager);
     }
 
     /*

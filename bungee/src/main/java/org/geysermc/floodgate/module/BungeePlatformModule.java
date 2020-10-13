@@ -80,8 +80,8 @@ public final class BungeePlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public FloodgateLogger floodgateLogger() {
-        return new JavaUtilFloodgateLogger(plugin.getLogger());
+    public FloodgateLogger floodgateLogger(LanguageManager languageManager) {
+        return new JavaUtilFloodgateLogger(plugin.getLogger(), languageManager);
     }
 
     /*

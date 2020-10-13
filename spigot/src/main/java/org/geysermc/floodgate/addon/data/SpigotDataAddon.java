@@ -40,14 +40,16 @@ public final class SpigotDataAddon implements InjectorAddon {
     @Inject private FloodgateConfig config;
     @Inject private FloodgateLogger logger;
 
-    @Inject @Named("playerAttribute")
+    @Inject
+    @Named("playerAttribute")
     private AttributeKey<FloodgatePlayer> playerAttribute;
 
-    @Inject @Named("packetHandler")
+    @Inject
+    @Named("packetHandler")
     private String packetHandlerName;
 
     @Override
-    public void onInject(Channel channel, boolean proxyToServer) {
+    public void onInject(Channel channel, boolean toServer) {
         channel.pipeline().addBefore(
                 packetHandlerName, "floodgate_data_handler",
                 new SpigotDataHandler(config, handshakeHandler, playerAttribute, logger)

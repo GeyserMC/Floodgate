@@ -26,13 +26,12 @@
 package org.geysermc.floodgate.inject;
 
 import io.netty.channel.Channel;
-import org.geysermc.floodgate.api.inject.InjectorAddon;
-import org.geysermc.floodgate.api.inject.PlatformInjector;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.geysermc.floodgate.api.inject.InjectorAddon;
+import org.geysermc.floodgate.api.inject.PlatformInjector;
 
 public abstract class CommonPlatformInjector implements PlatformInjector {
     private final Set<Channel> injectedClients = new HashSet<>();
@@ -58,13 +57,12 @@ public abstract class CommonPlatformInjector implements PlatformInjector {
     }
 
     /**
-     * Method to loop through all the addons and call
-     * {@link InjectorAddon#onInject(Channel, boolean)} if
-     * {@link InjectorAddon#shouldInject()}.
+     * Method to loop through all the addons and call {@link InjectorAddon#onInject(Channel,
+     * boolean)} if {@link InjectorAddon#shouldInject()}.
      *
      * @param channel       the channel to inject
-     * @param proxyToServer true if the proxy is connecting to a server or false when the player
-     *                      is connecting to the proxy or false when the platform isn't a proxy
+     * @param proxyToServer true if the proxy is connecting to a server or false when the player is
+     *                      connecting to the proxy or false when the platform isn't a proxy
      */
     public void injectAddonsCall(Channel channel, boolean proxyToServer) {
         for (InjectorAddon addon : addons.values()) {
@@ -75,8 +73,7 @@ public abstract class CommonPlatformInjector implements PlatformInjector {
     }
 
     /**
-     * Method to loop through all the addons and call
-     * {@link InjectorAddon#onLoginDone(Channel)} if
+     * Method to loop through all the addons and call {@link InjectorAddon#onLoginDone(Channel)} if
      * {@link InjectorAddon#shouldInject()}.
      *
      * @param channel the channel that was injected
@@ -90,9 +87,8 @@ public abstract class CommonPlatformInjector implements PlatformInjector {
     }
 
     /**
-     * Method to loop through all the addons and call
-     * {@link InjectorAddon#onRemoveInject(Channel)} if
-     * {@link InjectorAddon#shouldInject()}.
+     * Method to loop through all the addons and call {@link InjectorAddon#onRemoveInject(Channel)}
+     * if {@link InjectorAddon#shouldInject()}.
      *
      * @param channel the channel that was injected
      */

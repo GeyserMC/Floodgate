@@ -29,8 +29,9 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.name.Named;
-import lombok.AccessLevel;
-import lombok.Getter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.UUID;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.InstanceHolder;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
@@ -43,35 +44,30 @@ import org.geysermc.floodgate.module.ConfigLoadedModule;
 import org.geysermc.floodgate.module.PostInitializeModule;
 import org.geysermc.floodgate.util.LanguageManager;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.UUID;
-
 public class FloodgatePlatform {
     private static final UUID KEY = UUID.randomUUID();
-
-    private final FloodgateConfig config;
     private final FloodgateApi api;
+    private final LanguageManager languageManager;
+    private final PlatformInjector injector;
 
     private final FloodgateLogger logger;
 
-    @Getter(AccessLevel.PROTECTED)
-    private final LanguageManager languageManager;
-
-    private final Injector guice;
+    private FloodgateConfig config;
+    private Injector guice;
 
     @Inject
-    private PlatformInjector injector;
-
-    @Inject
-    public FloodgatePlatform(@Named("dataDirectory") Path dataDirectory, FloodgateApi api,
-                             ConfigLoader configLoader, PlayerLinkLoader playerLinkLoader,
-                             HandshakeHandler handshakeHandler, FloodgateLogger logger,
-                             PlatformInjector platformInjector, LanguageManager languageManager,
-                             Injector injector) {
+    public FloodgatePlatform(FloodgateApi api, LanguageManager languageManager,
+                             PlatformInjector platformInjector, FloodgateLogger logger) {
         this.api = api;
-        this.logger = logger;
         this.languageManager = languageManager;
+        this.injector = platformInjector;
+        this.logger = logger;
+    }
+
+    @Inject
+    public void init(@Named("dataDirectory") Path dataDirectory, ConfigLoader configLoader,
+                     PlayerLinkLoader playerLinkLoader, HandshakeHandler handshakeHandler,
+                     Injector injector) {
 
         if (!Files.isDirectory(dataDirectory)) {
             try {
@@ -96,7 +92,7 @@ public class FloodgatePlatform {
 
         PlayerLink link = playerLinkLoader.load();
 
-        InstanceHolder.setInstance(api, link, platformInjector, KEY);
+        InstanceHolder.setInstance(api, link, this.injector, KEY);
     }
 
     public boolean enable(Module... postInitializeModules) {

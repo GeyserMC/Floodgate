@@ -1,12 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <groupId>org.geysermc.floodgate</groupId>
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <artifactId>parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.10</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+    <description>Allows Bedrock players to join Java edition servers while keeping the server in online mode</description>
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>nukkitx-releases</name>
+            <url>https://repo.nukkitx.com/maven-releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>nukkitx-snapshots</name>
+            <url>https://repo.nukkitx.com/maven-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+    <groupId>org.geysermc.floodgate</groupId>
+    <modelVersion>4.0.0</modelVersion>
     <modules>
         <module>api</module>
         <module>common</module>
@@ -15,10 +35,13 @@
         <module>velocity</module>
         <module>database</module>
     </modules>
-    <packaging>pom</packaging>
     <name>floodgate</name>
-    <description>Allows Bedrock players to join Java edition servers while keeping online mode</description>
-    <url>https://github.com/GeyserMC/Floodgate</url>
+    <organization>
+        <name>GeyserMC</name>
+        <url>https://geysermc.org/</url>
+    </organization>
+
+    <packaging>pom</packaging>
 
     <properties>
         <geyser.version>1.1.0</geyser.version>
@@ -33,36 +56,13 @@
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
-    <organization>
-        <name>GeyserMC</name>
-        <url>https://geysermc.org/</url>
-    </organization>
-
     <scm>
         <connection>scm:git:https://github.com/GeyserMC/Floodgate.git</connection>
         <developerConnection>scm:git:git@github.com:GeyserMC/Floodgate.git</developerConnection>
         <url>https://github.com/GeyserMC/Floodgate/</url>
     </scm>
 
-    <distributionManagement>
-        <repository>
-            <id>releases</id>
-            <name>nukkitx-releases</name>
-            <url>https://repo.nukkitx.com/maven-releases</url>
-        </repository>
-        <snapshotRepository>
-            <id>snapshots</id>
-            <name>nukkitx-snapshots</name>
-            <url>https://repo.nukkitx.com/maven-snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
+    <url>https://github.com/GeyserMC/Floodgate</url>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.10</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+    <version>1.0-SNAPSHOT</version>
 </project>

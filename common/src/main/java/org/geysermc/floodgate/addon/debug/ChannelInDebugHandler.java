@@ -35,17 +35,21 @@ public final class ChannelInDebugHandler extends SimpleChannelInboundHandler<Byt
     private final String message;
     private final FloodgateLogger logger;
 
-    public ChannelInDebugHandler(FloodgateLogger logger, String implementationType,
-                                 boolean player) {
+    public ChannelInDebugHandler(String implementationType, boolean toServer,
+                                 FloodgateLogger logger) {
+        this.message = (toServer ? "Server ->" : "Player ->") + ' ' + implementationType;
         this.logger = logger;
-        this.message = (player ? "Player ->" : "Server ->") + ' ' + implementationType;
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {
         int index = msg.readerIndex();
+
         logger.info("{}:\n{}", message, ByteBufUtil.prettyHexDump(msg));
+
+        // reset index
         msg.readerIndex(index);
+
         ctx.fireChannelRead(msg.retain());
     }
 }

@@ -25,10 +25,16 @@
 
 package org.geysermc.floodgate.addon.data;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.geysermc.floodgate.util.ReflectionUtils.getCastedValue;
+import static org.geysermc.floodgate.util.ReflectionUtils.getField;
+import static org.geysermc.floodgate.util.ReflectionUtils.getPrefixedClass;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
 import io.netty.util.ReferenceCountUtil;
+import java.lang.reflect.Field;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.HandshakeHandler;
 import org.geysermc.floodgate.HandshakeHandler.HandshakeResult;
@@ -37,26 +43,32 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 
-import java.lang.reflect.Field;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.geysermc.floodgate.util.ReflectionUtils.*;
-
 @RequiredArgsConstructor
 public final class VelocityProxyDataHandler extends SimpleChannelInboundHandler<Object> {
     private static final Field HANDSHAKE;
     private static final Class<?> HANDSHAKE_PACKET;
     private static final Field HANDSHAKE_SERVER_ADDRESS;
 
+    static {
+        Class<?> iic = getPrefixedClass("connection.client.InitialInboundConnection");
+        checkNotNull(iic, "InitialInboundConnection class cannot be null");
+
+        HANDSHAKE = getField(iic, "handshake");
+        checkNotNull(HANDSHAKE, "Handshake field cannot be null");
+
+        HANDSHAKE_PACKET = getPrefixedClass("protocol.packet.Handshake");
+        checkNotNull(HANDSHAKE_PACKET, "Handshake packet class cannot be null");
+
+        HANDSHAKE_SERVER_ADDRESS = getField(HANDSHAKE_PACKET, "serverAddress");
+        checkNotNull(HANDSHAKE_SERVER_ADDRESS, "Address in the Handshake packet cannot be null");
+    }
+
     private final ProxyFloodgateConfig config;
     private final ProxyFloodgateApi api;
     private final HandshakeHandler handshakeHandler;
-
     private final AttributeKey<FloodgatePlayer> playerAttribute;
     private final AttributeKey<String> kickMessageAttribute;
-
     private final FloodgateLogger logger;
-
     private boolean done;
 
     @Override
@@ -101,20 +113,5 @@ public final class VelocityProxyDataHandler extends SimpleChannelInboundHandler<
         api.addEncryptedData(player.getCorrectUniqueId(), result.getHandshakeData()[1]);
         logger.info("Floodgate player who is logged in as {} {} joined",
                 player.getCorrectUsername(), player.getCorrectUniqueId());
-    }
-
-    static {
-        Class<?> initialInboundConnection =
-                getPrefixedClass("connection.client.InitialInboundConnection");
-        checkNotNull(initialInboundConnection, "InitialInboundConnection class cannot be null");
-
-        HANDSHAKE = getField(initialInboundConnection, "handshake");
-        checkNotNull(HANDSHAKE, "Handshake field cannot be null");
-
-        HANDSHAKE_PACKET = getPrefixedClass("protocol.packet.Handshake");
-        checkNotNull(HANDSHAKE_PACKET, "Handshake packet class cannot be null");
-
-        HANDSHAKE_SERVER_ADDRESS = getField(HANDSHAKE_PACKET, "serverAddress");
-        checkNotNull(HANDSHAKE_SERVER_ADDRESS, "Address field of the Handshake packet cannot be null");
     }
 }

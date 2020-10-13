@@ -31,7 +31,9 @@ public final class MessageFormatter {
 
     public static String format(String message, Object... arguments) {
         // simple variant of slf4j's parameters.
-        if (arguments == null || arguments.length == 0) return message;
+        if (arguments == null || arguments.length == 0) {
+            return message;
+        }
 
         String[] args = new String[arguments.length];
         for (int i = 0; i < arguments.length; i++) {
@@ -49,30 +51,36 @@ public final class MessageFormatter {
             if (currentIndex == -1) {
                 // no parameter places left in message,
                 // we'll ignore the remaining parameters and return the message
-                if (previousIndex == -1) return message;
-                else {
+                if (previousIndex == -1) {
+                    return message;
+                } else {
                     stringBuilder.append(message.substring(previousIndex));
                     return stringBuilder.toString();
                 }
             }
 
-            if (previousIndex == -1) stringBuilder.append(message, 0, currentIndex);
-            else stringBuilder.append(message, previousIndex, currentIndex);
+            if (previousIndex == -1) {
+                stringBuilder.append(message, 0, currentIndex);
+            } else {
+                stringBuilder.append(message, previousIndex, currentIndex);
+            }
             stringBuilder.append(argument);
 
             // we finished this argument, so we're past the current delimiter
             previousIndex = currentIndex + DELIM_LENGTH;
         }
 
-        if (previousIndex != message.length())
+        if (previousIndex != message.length()) {
             stringBuilder.append(message, previousIndex, message.length());
+        }
         return stringBuilder.toString();
     }
 
     public static int getArgsContentLength(String... args) {
         int length = 0;
-        for (String arg : args)
+        for (String arg : args) {
             length += arg.length();
+        }
         return length;
     }
 }

@@ -27,14 +27,12 @@ package org.geysermc.floodgate.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.security.Key;
 import lombok.Getter;
 
-import java.security.Key;
-
 /**
- * The global Floodgate configuration file used in every platform.
- * Some platforms have their own addition to the global configuration like
- * {@link ProxyFloodgateConfig} for the proxies.
+ * The global Floodgate configuration file used in every platform. Some platforms have their own
+ * addition to the global configuration like {@link ProxyFloodgateConfig} for the proxies.
  */
 @Getter
 public class FloodgateConfig {
@@ -63,6 +61,16 @@ public class FloodgateConfig {
     @JsonIgnore
     private Key key = null;
 
+    public void setKey(Key key) {
+        if (this.key == null) {
+            this.key = key;
+        }
+    }
+
+    public boolean isProxy() {
+        return this instanceof ProxyFloodgateConfig;
+    }
+
     @Getter
     public static class DisconnectMessages {
         @JsonProperty("invalid-key")
@@ -83,15 +91,5 @@ public class FloodgateConfig {
         private String type;
         @JsonProperty("auto-download")
         private boolean autoDownload;
-    }
-
-    public void setKey(Key key) {
-        if (this.key == null) {
-            this.key = key;
-        }
-    }
-
-    public boolean isProxy() {
-        return this instanceof ProxyFloodgateConfig;
     }
 }

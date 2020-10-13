@@ -26,21 +26,23 @@
 package org.geysermc.floodgate.inject.bungee;
 
 import io.netty.channel.Channel;
-import javassist.*;
+import java.util.function.Consumer;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtField;
+import javassist.CtMethod;
+import javassist.Modifier;
+import javax.naming.OperationNotSupportedException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
-import javax.naming.OperationNotSupportedException;
-import java.util.function.Consumer;
-
 @RequiredArgsConstructor
 public final class BungeeInjector extends CommonPlatformInjector {
     private final FloodgateLogger logger;
-    @Getter
-    private boolean injected;
+    @Getter private boolean injected;
 
     @Override
     public boolean inject() {
@@ -54,7 +56,8 @@ public final class BungeeInjector extends CommonPlatformInjector {
 
             // create a new field that we can access
             CtField channelConsumerField = new CtField(
-                    classPool.get("java.util.function.Consumer"), "channelConsumer", handlerBossClass
+                    classPool.get("java.util.function.Consumer"), "channelConsumer",
+                    handlerBossClass
             );
             channelConsumerField.setModifiers(Modifier.PUBLIC | Modifier.STATIC);
             handlerBossClass.addField(channelConsumerField);
@@ -62,7 +65,7 @@ public final class BungeeInjector extends CommonPlatformInjector {
             // edit a method to call the new field when we need it
             CtMethod channelActiveMethod = handlerBossClass.getMethod(
                     "channelActive", "(Lio/netty/channel/ChannelHandlerContext;)V");
-            channelActiveMethod.insertBefore("" +
+            channelActiveMethod.insertBefore(
                     "{if (handler != null) {channelConsumer.accept(ctx.channel());}}");
 
             Class<?> clazz = handlerBossClass.toClass();

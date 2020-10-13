@@ -36,7 +36,7 @@ public final class AddonManagerAddon implements InjectorAddon {
     @Inject private CommonPlatformInjector injector;
 
     @Override
-    public void onInject(Channel channel, boolean proxyToServer) {
+    public void onInject(Channel channel, boolean toServer) {
         channel.pipeline().addLast("floodgate_addon", new AddonManagerHandler(injector, channel));
     }
 

@@ -26,10 +26,9 @@
 package org.geysermc.floodgate.platform.command;
 
 /**
- * This class is responsible for registering commands to the command register of the platform
- * that is currently in use. So that the commands only have to be written once
- * (in the common module) and can be used across all platforms without the need of adding platform
- * specific commands.
+ * This class is responsible for registering commands to the command register of the platform that
+ * is currently in use. So that the commands only have to be written once (in the common module) and
+ * can be used across all platforms without the need of adding platform specific commands.
  */
 public interface CommandRegistration {
     /**

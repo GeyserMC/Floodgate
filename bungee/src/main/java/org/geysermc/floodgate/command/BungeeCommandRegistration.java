@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.command;
 
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
@@ -34,8 +35,6 @@ import org.geysermc.floodgate.platform.command.Command;
 import org.geysermc.floodgate.platform.command.CommandRegistration;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.util.LanguageManager;
-
-import java.util.Locale;
 
 @RequiredArgsConstructor
 public final class BungeeCommandRegistration implements CommandRegistration {

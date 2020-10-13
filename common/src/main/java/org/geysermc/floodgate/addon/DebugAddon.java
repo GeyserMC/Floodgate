@@ -28,6 +28,7 @@ package org.geysermc.floodgate.addon;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelPipeline;
 import org.geysermc.floodgate.addon.debug.ChannelInDebugHandler;
 import org.geysermc.floodgate.addon.debug.ChannelOutDebugHandler;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
@@ -51,13 +52,13 @@ public final class DebugAddon implements InjectorAddon {
     private String packetDecoder;
 
     @Override
-    public void onInject(Channel channel, boolean proxyToServer) {
+    public void onInject(Channel channel, boolean toServer) {
         channel.pipeline().addBefore(
                 packetEncoder, "floodgate_debug_out",
-                new ChannelOutDebugHandler(implementationName, !proxyToServer, logger)
+                new ChannelOutDebugHandler(implementationName, toServer, logger)
         ).addBefore(
                 packetDecoder, "floodgate_debug_in",
-                new ChannelInDebugHandler(logger, implementationName, !proxyToServer)
+                new ChannelInDebugHandler(implementationName, toServer, logger)
         );
     }
 
@@ -68,8 +69,10 @@ public final class DebugAddon implements InjectorAddon {
 
     @Override
     public void onRemoveInject(Channel channel) {
-        channel.pipeline().remove("floodgate_debug_out");
-        channel.pipeline().remove("floodgate_debug_in");
+        ChannelPipeline pipeline = channel.pipeline();
+
+        pipeline.remove("floodgate_debug_out");
+        pipeline.remove("floodgate_debug_in");
     }
 
     @Override

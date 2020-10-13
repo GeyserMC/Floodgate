@@ -25,30 +25,69 @@
 
 package org.geysermc.floodgate.util;
 
-import com.google.common.base.Preconditions;
-import lombok.Setter;
-
-import javax.annotation.Nullable;
-import java.lang.reflect.*;
-
 import static org.geysermc.floodgate.util.MessageFormatter.format;
+
+import com.google.common.base.Preconditions;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import javax.annotation.Nullable;
+import lombok.Setter;
 
 public final class ReflectionUtils {
     private static final Field MODIFIERS_FIELD;
 
     /**
      * The package name that is shared between all the {@link #getPrefixedClass(String)} calls so
-     * that the className will be a lot shorter.
-     * Example net.minecraft.server.v1_8R3.PacketHandshakingInSetProtocol will become
-     * PacketHandshakingInSetProtocol if the prefix is set to net.minecraft.server.v1_8R3
+     * that the className will be a lot shorter. Example net.minecraft.server.v1_8R3.PacketHandshakingInSetProtocol
+     * will become PacketHandshakingInSetProtocol if the prefix is set to
+     * net.minecraft.server.v1_8R3
      */
-    @Setter
-    private static String prefix = null;
+    @Setter private static String prefix = null;
+
+    static {
+        Field modifiersField = null;
+        try {
+            modifiersField = Field.class.getDeclaredField("modifiers");
+        } catch (NoSuchFieldException ignored) {
+            // Java 12 compatibility, thanks to https://github.com/powermock/powermock/pull/1010
+            try {
+                Method declaredFields = getMethod(Class.class, "getDeclaredFields0", boolean.class);
+                if (declaredFields == null) {
+                    throw new NoSuchMethodException();
+                }
+
+                Field[] fields = castedInvoke(Field.class, declaredFields, false);
+                if (fields == null) {
+                    throw new Exception();
+                }
+
+                for (Field field : fields) {
+                    if ("modifiers".equals(field.getName())) {
+                        modifiersField = field;
+                        break;
+                    }
+                }
+            } catch (Exception exception) {
+                throw new RuntimeException(format(
+                        "Cannot find the modifiers field :/\nJava version: {}\nVendor: {} ({})",
+                        System.getProperty("java.version"),
+                        System.getProperty("java.vendor"),
+                        System.getProperty("java.vendor.url")
+                ));
+            }
+        }
+
+        Preconditions.checkNotNull(modifiersField, "Modifiers field cannot be null!");
+        MODIFIERS_FIELD = modifiersField;
+    }
 
     /**
-     * Get a class that is prefixed with the prefix provided in {@link #setPrefix(String)}.
-     * Calling this method is equal to calling {@link #getClass(String)}
-     * with <i>prefix</i>.<i>classname</i> as class name.
+     * Get a class that is prefixed with the prefix provided in {@link #setPrefix(String)}. Calling
+     * this method is equal to calling {@link #getClass(String)} with <i>prefix</i>.<i>classname</i>
+     * as class name.
      *
      * @param className the prefix class to find
      * @return the class if found, otherwise null
@@ -59,11 +98,10 @@ public final class ReflectionUtils {
     }
 
     /**
-     * Get the class from a class name.
-     * Calling this method is equal to calling {@link Class#forName(String)} where String is the
-     * class name.<br>
-     * This method will return null when the class isn't found instead of throwing the exception,
-     * but the exception will be printed to the console.
+     * Get the class from a class name. Calling this method is equal to calling {@link
+     * Class#forName(String)} where String is the class name.<br> This method will return null when
+     * the class isn't found instead of throwing the exception, but the exception will be printed to
+     * the console.
      *
      * @param className the name of the class to find
      * @return the class or null if the class wasn't found.
@@ -79,12 +117,11 @@ public final class ReflectionUtils {
     }
 
     /**
-     * Get a field of a class.
-     * Calling this method is equal to calling {@link Class#getField(String)} where String is the
-     * fieldName when isPublic is true and calling this method is equal to calling
-     * {@link Class#getDeclaredField(String)} where String is the fieldName when isPublic is
-     * false.<br>
-     * Please note that this method will return null instead of throwing the exception.
+     * Get a field of a class. Calling this method is equal to calling {@link
+     * Class#getField(String)} where String is the fieldName when isPublic is true and calling this
+     * method is equal to calling {@link Class#getDeclaredField(String)} where String is the
+     * fieldName when isPublic is false.<br> Please note that this method will return null instead
+     * of throwing the exception.
      *
      * @param clazz     the class name to get the field from
      * @param fieldName the name of the field
@@ -104,9 +141,8 @@ public final class ReflectionUtils {
     }
 
     /**
-     * Get a field from a class, it doesn't matter if the field is public or not.
-     * This method will first try to get a declared field and if that failed it'll try to get a
-     * public field.
+     * Get a field from a class, it doesn't matter if the field is public or not. This method will
+     * first try to get a declared field and if that failed it'll try to get a public field.
      *
      * @param clazz     the class to get the field from
      * @param fieldName the name of the field
@@ -134,15 +170,17 @@ public final class ReflectionUtils {
         Field[] fields = declared ? clazz.getDeclaredFields() : clazz.getFields();
         for (Field field : fields) {
             makeAccessible(field);
-            if (field.getType() == fieldType) return field;
+            if (field.getType() == fieldType) {
+                return field;
+            }
         }
         return null;
     }
 
     /**
-     * Get a declared field from a class without having to provide a field name.<br>
-     * Calling this method is equal to calling {@link #getFieldOfType(Class, Class, boolean)}
-     * with declared = true.
+     * Get a declared field from a class without having to provide a field name.<br> Calling this
+     * method is equal to calling {@link #getFieldOfType(Class, Class, boolean)} with declared =
+     * true.
      *
      * @param clazz     the class to search the field from
      * @param fieldType the type of the declared field
@@ -154,10 +192,9 @@ public final class ReflectionUtils {
     }
 
     /**
-     * Get the value of a field.
-     * This method first makes the field accessible and then gets the value.<br>
-     * This method will return null instead of throwing an exception,
-     * but it'll log the stacktrace to the console.
+     * Get the value of a field. This method first makes the field accessible and then gets the
+     * value.<br> This method will return null instead of throwing an exception, but it'll log the
+     * stacktrace to the console.
      *
      * @param instance the instance to get the value from
      * @param field    the field to get the value from
@@ -201,8 +238,7 @@ public final class ReflectionUtils {
     }
 
     /**
-     * Set the value of a field.
-     * This method make the field accessible and then sets the value.<br>
+     * Set the value of a field. This method make the field accessible and then sets the value.<br>
      * This method doesn't throw an exception when failed, but it'll log the error to the console.
      *
      * @param instance the instance to set the value to
@@ -219,8 +255,8 @@ public final class ReflectionUtils {
     }
 
     /**
-     * Set the value of a field.
-     * This method finds the field, and then calls {@link #setValue(Object, Field, Object)}.
+     * Set the value of a field. This method finds the field, and then calls {@link
+     * #setValue(Object, Field, Object)}.
      *
      * @param instance  the instance to set the value to
      * @param fieldName the field to set the value to
@@ -236,10 +272,9 @@ public final class ReflectionUtils {
     }
 
     /**
-     * Set the value of a <b>final</b> field.
-     * This method first makes the field accessible, then removes the final modifier and then
-     * sets the value.<br>
-     * This method will not throw exceptions when failed, but it'll log the error to the console.
+     * Set the value of a <b>final</b> field. This method first makes the field accessible, then
+     * removes the final modifier and then sets the value.<br> This method will not throw exceptions
+     * when failed, but it'll log the error to the console.
      *
      * @param instance the instance to set the value to
      * @param field    the field to set the value to
@@ -264,11 +299,10 @@ public final class ReflectionUtils {
     }
 
     /**
-     * Get a method from a class, it doesn't matter if the field is public or not.
-     * This method will first try to get a declared field and if that failed it'll try to get a
-     * public field.<br>
-     * Instead of throwing an exception when the method wasn't found, it will return null, but
-     * the exception will be printed in the console.
+     * Get a method from a class, it doesn't matter if the field is public or not. This method will
+     * first try to get a declared field and if that failed it'll try to get a public field.<br>
+     * Instead of throwing an exception when the method wasn't found, it will return null, but the
+     * exception will be printed in the console.
      *
      * @param clazz     the class to get the method from
      * @param method    the name of the method to find
@@ -290,9 +324,8 @@ public final class ReflectionUtils {
     }
 
     /**
-     * Get a method from a class, it doesn't matter if the method is public or not.
-     * This method will first try to get a declared method and if that fails it'll try to get a
-     * public method.
+     * Get a method from a class, it doesn't matter if the method is public or not. This method will
+     * first try to get a declared method and if that fails it'll try to get a public method.
      *
      * @param clazz      the class to get the method from
      * @param methodName the name of the method to find
@@ -309,9 +342,8 @@ public final class ReflectionUtils {
     }
 
     /**
-     * Get a method from a class, it doesn't matter if the method is public or not.
-     * This method will first try to get a declared method and if that fails it'll try to get a
-     * public method.
+     * Get a method from a class, it doesn't matter if the method is public or not. This method will
+     * first try to get a declared method and if that fails it'll try to get a public method.
      *
      * @param instance   the class to get the method from
      * @param methodName the name of the method to find
@@ -401,42 +433,5 @@ public final class ReflectionUtils {
             accessibleObject.setAccessible(true);
         }
         return accessibleObject;
-    }
-
-    static {
-        Field modifiersField = null;
-        try {
-            modifiersField = Field.class.getDeclaredField("modifiers");
-        } catch (NoSuchFieldException ignored) {
-            // Java 12 compatibility, thanks to https://github.com/powermock/powermock/pull/1010
-            try {
-                Method declaredFields = getMethod(Class.class, "getDeclaredFields0", boolean.class);
-                if (declaredFields == null) {
-                    throw new NoSuchMethodException();
-                }
-
-                Field[] fields = castedInvoke(Field.class, declaredFields, false);
-                if (fields == null) {
-                    throw new Exception();
-                }
-
-                for (Field field : fields) {
-                    if ("modifiers".equals(field.getName())) {
-                        modifiersField = field;
-                        break;
-                    }
-                }
-            } catch (Exception exception) {
-                throw new RuntimeException(format("Cannot find the modifiers field :/\n" +
-                                "Java version: {}\nVendor: {} ({})",
-                        System.getProperty("java.version"),
-                        System.getProperty("java.vendor"),
-                        System.getProperty("java.vendor.url")
-                ));
-            }
-        }
-
-        Preconditions.checkNotNull(modifiersField, "Modifiers field cannot be null!");
-        MODIFIERS_FIELD = modifiersField;
     }
 }

@@ -27,6 +27,12 @@ package org.geysermc.floodgate.config.loader;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.Key;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
@@ -35,16 +41,8 @@ import org.geysermc.floodgate.config.updater.ConfigUpdater;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.crypto.KeyProducer;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.Key;
-
 @RequiredArgsConstructor
-public class ConfigLoader {
+public final class ConfigLoader {
     private final Path dataFolder;
     private final Class<? extends FloodgateConfig> configClass;
     private final ConfigUpdater updater;
@@ -116,14 +114,16 @@ public class ConfigLoader {
                 updater.update(defaultConfigPath);
             }
 
-            configInstance = (T) new ObjectMapper(new YAMLFactory())
-                    .readValue(Files.readAllBytes(configPath), configClass);
-        } catch (ClassCastException exception) {
-            logger.error("Provided class {} cannot be cast to the required return type",
-                    configClass.getName());
+            FloodgateConfig config =
+                    new ObjectMapper(new YAMLFactory())
+                            .readValue(Files.readAllBytes(configPath), configClass);
 
-            throw new RuntimeException("Failed to load cast the config! " +
-                    "Try to contact the platform developer");
+            try {
+                configInstance = (T) config;
+            } catch (ClassCastException exception) {
+                logger.error("Failed to cast config file to required class.", exception);
+                throw new RuntimeException(exception);
+            }
         } catch (Exception exception) {
             logger.error("Error while loading config", exception);
             throw new RuntimeException("Failed to load the config! Try to delete the config file");

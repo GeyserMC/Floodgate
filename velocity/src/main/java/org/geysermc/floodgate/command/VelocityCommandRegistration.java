@@ -28,14 +28,13 @@ package org.geysermc.floodgate.command;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.platform.command.Command;
 import org.geysermc.floodgate.platform.command.CommandRegistration;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.util.LanguageManager;
-
-import java.util.Locale;
 
 @RequiredArgsConstructor
 public final class VelocityCommandRegistration implements CommandRegistration {

@@ -61,6 +61,8 @@ public interface FloodgateLogger {
      */
     void info(String message, Object... args);
 
+    void translatedInfo(String message, Object... args);
+
     /**
      * Logs a debug message to the console, with 0 or more arguments.
      *
@@ -83,9 +85,8 @@ public interface FloodgateLogger {
     void enableDebug();
 
     /**
-     * Disables debug mode for the Floodgate logger.
-     * Debug messages can still be sent after running this method,
-     * but they will be hidden from the console.
+     * Disables debug mode for the Floodgate logger. Debug messages can still be sent after running
+     * this method, but they will be hidden from the console.
      */
     void disableDebug();
 }

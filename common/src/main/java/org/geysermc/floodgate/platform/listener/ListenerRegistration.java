@@ -26,9 +26,9 @@
 package org.geysermc.floodgate.platform.listener;
 
 /**
- * This class is responsible for registering listeners to the listener manager of the platform
- * that is currently in use. Unfortunately due to the major differences between the platforms
- * (when it comes to listeners) every Floodgate platform has to implement their own listeners.
+ * This class is responsible for registering listeners to the listener manager of the platform that
+ * is currently in use. Unfortunately due to the major differences between the platforms (when it
+ * comes to listeners) every Floodgate platform has to implement their own listeners.
  *
  * @param <T> the platform-specific listener class
  */

@@ -25,15 +25,13 @@
 
 package org.geysermc.floodgate.link;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
-import org.geysermc.floodgate.api.link.PlayerLink;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.config.FloodgateConfig;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -43,16 +41,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.geysermc.floodgate.api.link.PlayerLink;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.config.FloodgateConfig;
 
-import static java.util.Objects.requireNonNull;
-
-public class PlayerLinkLoader {
-    @Named("dataDirectory")
-    @Inject private Path dataDirectory;
+public final class PlayerLinkLoader {
     @Inject private Injector injector;
     @Inject private FloodgateConfig config;
-
     @Inject private FloodgateLogger logger;
+
+    @Inject
+    @Named("dataDirectory")
+    private Path dataDirectory;
 
     public PlayerLink load() {
         FloodgateConfig.PlayerLinkConfig linkConfig = config.getPlayerLink();

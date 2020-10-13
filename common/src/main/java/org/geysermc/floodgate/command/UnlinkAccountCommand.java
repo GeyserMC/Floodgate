@@ -26,6 +26,7 @@
 package org.geysermc.floodgate.command;
 
 import com.google.inject.Inject;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.geysermc.floodgate.api.FloodgateApi;
@@ -33,8 +34,6 @@ import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.platform.command.Command;
 import org.geysermc.floodgate.platform.command.CommandMessage;
 import org.geysermc.floodgate.platform.command.CommandUtil;
-
-import java.util.UUID;
 
 @NoArgsConstructor
 public final class UnlinkAccountCommand implements Command {
@@ -49,25 +48,28 @@ public final class UnlinkAccountCommand implements Command {
             return;
         }
 
-        link.isLinkedPlayer(uuid).whenComplete((linked, throwable) -> {
-            if (throwable != null) {
-                sendMessage(player, locale, CommonCommandMessage.IS_LINKED_ERROR);
-                return;
-            }
+        link.isLinkedPlayer(uuid)
+                .whenComplete((linked, error) -> {
+                    if (error != null) {
+                        sendMessage(player, locale, CommonCommandMessage.IS_LINKED_ERROR);
+                        return;
+                    }
 
-            if (!linked) {
-                sendMessage(player, locale, Message.NOT_LINKED);
-                return;
-            }
+                    if (!linked) {
+                        sendMessage(player, locale, Message.NOT_LINKED);
+                        return;
+                    }
 
-            link.unlinkPlayer(uuid).whenComplete((aVoid, throwable1) ->
-                    sendMessage(player, locale,
-                            throwable1 == null ?
-                                    Message.UNLINK_SUCCESS :
-                                    Message.UNLINK_ERROR
-                    )
-            );
-        });
+                    link.unlinkPlayer(uuid)
+                            .whenComplete((unused, error1) -> {
+                                if (error1 != null) {
+                                    sendMessage(player, locale, Message.UNLINK_ERROR);
+                                    return;
+                                }
+
+                                sendMessage(player, locale, Message.UNLINK_SUCCESS);
+                            });
+                });
     }
 
     @Override
@@ -96,8 +98,7 @@ public final class UnlinkAccountCommand implements Command {
         UNLINK_ERROR("floodgate.command.unlink_account.error"),
         LINKING_NOT_ENABLED("floodgate.commands.linking_disabled");
 
-        @Getter
-        private final String message;
+        @Getter private final String message;
 
         Message(String message) {
             this.message = message;

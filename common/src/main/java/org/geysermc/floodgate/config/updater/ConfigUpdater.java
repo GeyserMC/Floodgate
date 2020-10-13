@@ -25,9 +25,8 @@
 
 package org.geysermc.floodgate.config.updater;
 
-import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.yaml.snakeyaml.Yaml;
+import static com.google.common.base.Preconditions.checkArgument;
+import static org.geysermc.floodgate.util.MessageFormatter.format;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -35,16 +34,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.google.common.base.Preconditions.checkArgument;
+import lombok.RequiredArgsConstructor;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.yaml.snakeyaml.Yaml;
 
 @RequiredArgsConstructor
-public class ConfigUpdater {
+public final class ConfigUpdater {
+    private static final int CONFIG_VERSION = 1;
     private final Path dataFolder;
     private final ConfigFileUpdater fileUpdater;
     private final FloodgateLogger logger;
-
-    private static final int CONFIG_VERSION = 1;
 
     public void update(Path defaultConfigLocation) {
         Path configLocation = dataFolder.resolve("config.yml");
@@ -72,8 +71,8 @@ public class ConfigUpdater {
             int version = (int) versionElement;
             checkArgument(
                     version == CONFIG_VERSION,
-                    "Config is newer then possible on this version! Expected " + CONFIG_VERSION + ", got " + version
-            );
+                    format("Config is newer then possible on this version! Expected {}, got {}",
+                            CONFIG_VERSION, version));
 
             // config is already up-to-date
             if (version == CONFIG_VERSION) {

@@ -29,30 +29,27 @@ import io.netty.channel.Channel;
 
 public interface InjectorAddon {
     /**
-     * Called when injecting a specific channel
-     * (every client that is connected to the server has his own channel).
-     * Internally used for the Floodgate debugger and data handler but can also be used for
-     * third party things.
+     * Called when injecting a specific channel (every client that is connected to the server has
+     * his own channel). Internally used for the Floodgate debugger and data handler but can also be
+     * used for third party things.
      *
-     * @param channel the channel that the injector is injecting
-     * @param proxyToServer if the the connection is between the proxy and a server
+     * @param channel  the channel that the injector is injecting
+     * @param toServer if the the connection is between a proxy and a server
      */
-    void onInject(Channel channel, boolean proxyToServer);
+    void onInject(Channel channel, boolean toServer);
 
     /**
-     * Called when the player successfully logged in.
-     * That is the moment that most of the addons can deregister.
-     * Note that it is entirely optional to remove the addon from the channel,
-     * the injector won't force the addon to remove.
+     * Called when the player successfully logged in. That is the moment that most of the addons can
+     * deregister. Note that it is entirely optional to remove the addon from the channel, the
+     * injector won't force the addon to remove.
      *
      * @param channel the channel that the injector injected
      */
     void onLoginDone(Channel channel);
 
     /**
-     * Called when Floodgate is removing the injection from the server.
-     * The addon should remove his traces otherwise it is likely that an error will popup after
-     * the server is injected again.
+     * Called when Floodgate is removing the injection from the server. The addon should remove his
+     * traces otherwise it is likely that an error will popup after the server is injected again.
      *
      * @param channel the channel that the injector injected
      */

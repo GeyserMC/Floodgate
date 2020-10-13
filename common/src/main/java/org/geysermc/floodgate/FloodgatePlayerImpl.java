@@ -25,6 +25,9 @@
 
 package org.geysermc.floodgate;
 
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import lombok.Getter;
 import lombok.Setter;
 import org.geysermc.floodgate.api.FloodgateApi;
@@ -32,11 +35,12 @@ import org.geysermc.floodgate.api.InstanceHolder;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.util.*;
-
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import org.geysermc.floodgate.util.BedrockData;
+import org.geysermc.floodgate.util.DeviceOs;
+import org.geysermc.floodgate.util.InputMode;
+import org.geysermc.floodgate.util.LinkedPlayer;
+import org.geysermc.floodgate.util.RawSkin;
+import org.geysermc.floodgate.util.UiProfile;
 
 @Getter
 public final class FloodgatePlayerImpl implements FloodgatePlayer {
@@ -57,8 +61,7 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
     /**
      * Returns true if the player is still logging in
      */
-    @Setter
-    private boolean login = true;
+    @Setter private boolean login = true;
 
     FloodgatePlayerImpl(BedrockData data, RawSkin skin, String prefix, boolean replaceSpaces) {
         FloodgateApi api = FloodgateApi.getInstance();
@@ -130,8 +133,8 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
     /**
      * Fetch and return the LinkedPlayer object associated to the player if the player is linked.
      *
-     * @return a future holding the LinkedPlayer or null if the player isn't linked or when
-     * linking isn't enabled
+     * @return a future holding the LinkedPlayer or null if the player isn't linked or when linking
+     * isn't enabled
      * @see #fetchLinkedPlayer(PlayerLink) for the sync version
      */
     public CompletableFuture<LinkedPlayer> fetchLinkedPlayerAsync(PlayerLink link) {

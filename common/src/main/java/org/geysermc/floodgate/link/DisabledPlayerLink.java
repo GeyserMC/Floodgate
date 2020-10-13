@@ -25,17 +25,16 @@
 
 package org.geysermc.floodgate.link;
 
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.util.LinkedPlayer;
 
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-
 /**
- * Simple class used when PlayerLinking is disabled.
- * This class has been made because Floodgate doesn't have a default PlayerLink implementation
- * anymore and {@link FloodgateApi#getPlayerLink()} returning null} is also not an option.
+ * Simple class used when PlayerLinking is disabled. This class has been made because Floodgate
+ * doesn't have a default PlayerLink implementation anymore and {@link FloodgateApi#getPlayerLink()}
+ * returning null} is also not an option.
  */
 final class DisabledPlayerLink implements PlayerLink {
     @Override

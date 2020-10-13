@@ -25,6 +25,11 @@
 
 package org.geysermc.floodgate.listener;
 
+import static org.geysermc.floodgate.util.ReflectionUtils.getCastedValue;
+import static org.geysermc.floodgate.util.ReflectionUtils.getFieldOfType;
+import static org.geysermc.floodgate.util.ReflectionUtils.getPrefixedClass;
+import static org.geysermc.floodgate.util.ReflectionUtils.getValue;
+
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.inject.Inject;
@@ -40,22 +45,35 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.util.GameProfile;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 import net.kyori.adventure.text.TextComponent;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.util.LanguageManager;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
-
-import static org.geysermc.floodgate.util.ReflectionUtils.*;
-
 public final class VelocityListener {
     private static final Field INITIAL_MINECRAFT_CONNECTION;
     private static final Field MINECRAFT_CONNECTION;
     private static final Field CHANNEL;
+
+    static {
+        Class<?> initialConnection = getPrefixedClass("connection.client.InitialInboundConnection");
+
+        Class<?> minecraftConnection = getPrefixedClass("connection.MinecraftConnection");
+        INITIAL_MINECRAFT_CONNECTION = getFieldOfType(initialConnection, minecraftConnection);
+        Class<?> connectedPlayer = getPrefixedClass("connection.client.ConnectedPlayer");
+        MINECRAFT_CONNECTION = getFieldOfType(connectedPlayer, minecraftConnection);
+        CHANNEL = getFieldOfType(minecraftConnection, Channel.class);
+    }
+
+    private final Cache<InboundConnection, FloodgatePlayer> playerCache =
+            CacheBuilder.newBuilder()
+                    .maximumSize(500)
+                    .expireAfterAccess(20, TimeUnit.SECONDS)
+                    .build();
 
     @Inject private ProxyFloodgateApi api;
     @Inject private LanguageManager languageManager;
@@ -68,12 +86,6 @@ public final class VelocityListener {
     @Inject
     @Named("kickMessageAttribute")
     private AttributeKey<String> kickMessageAttribute;
-
-    private final Cache<InboundConnection, FloodgatePlayer> playerCache =
-            CacheBuilder.newBuilder()
-                    .maximumSize(500)
-                    .expireAfterAccess(20, TimeUnit.SECONDS)
-                    .build();
 
     @Subscribe(order = PostOrder.EARLY)
     public void onPreLogin(PreLoginEvent event) {
@@ -91,7 +103,9 @@ public final class VelocityListener {
         }
 
         if (kickMessage != null) {
-            event.setResult(PreLoginEvent.PreLoginComponentResult.denied(TextComponent.of(kickMessage)));
+            event.setResult(
+                    PreLoginEvent.PreLoginComponentResult.denied(TextComponent.of(kickMessage))
+            );
             return;
         }
 
@@ -111,11 +125,13 @@ public final class VelocityListener {
         }
     }
 
-    @Subscribe
+    @Subscribe(order = PostOrder.LAST)
     public void onLogin(LoginEvent event) {
-        FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
-        if (player != null) {
-            languageManager.loadLocale(player.getLanguageCode());
+        if (event.getResult().isAllowed()) {
+            FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
+            if (player != null) {
+                languageManager.loadLocale(player.getLanguageCode());
+            }
         }
     }
 
@@ -129,22 +145,10 @@ public final class VelocityListener {
 
             if (fPlayer != null && api.removePlayer(fPlayer)) {
                 api.removeEncryptedData(event.getPlayer().getUniqueId());
-                logger.info(languageManager.getLogString(
-                        "floodgate.ingame.disconnect_name", player.getUsername()
-                ));
+                logger.translatedInfo("floodgate.ingame.disconnect_name", player.getUsername());
             }
         } catch (Exception exception) {
             logger.error("Failed to remove the player", exception);
         }
-    }
-
-    static {
-        Class<?> initialConnection = getPrefixedClass("connection.client.InitialInboundConnection");
-
-        Class<?> minecraftConnection = getPrefixedClass("connection.MinecraftConnection");
-        INITIAL_MINECRAFT_CONNECTION = getFieldOfType(initialConnection, minecraftConnection);
-        Class<?> connectedPlayer = getPrefixedClass("connection.client.ConnectedPlayer");
-        MINECRAFT_CONNECTION = getFieldOfType(connectedPlayer, minecraftConnection);
-        CHANNEL = getFieldOfType(minecraftConnection, Channel.class);
     }
 }

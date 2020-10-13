@@ -25,9 +25,23 @@
 
 package org.geysermc.floodgate.addon.data;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.geysermc.floodgate.util.ReflectionUtils.getCastedValue;
+import static org.geysermc.floodgate.util.ReflectionUtils.getFieldOfType;
+import static org.geysermc.floodgate.util.ReflectionUtils.getMethod;
+import static org.geysermc.floodgate.util.ReflectionUtils.getPrefixedClass;
+import static org.geysermc.floodgate.util.ReflectionUtils.makeAccessible;
+import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.HandshakeHandler;
 import org.geysermc.floodgate.HandshakeHandler.HandshakeResult;
@@ -36,16 +50,6 @@ import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.ReflectionUtils;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.UUID;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.geysermc.floodgate.util.ReflectionUtils.*;
 
 @RequiredArgsConstructor
 public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object> {
@@ -69,16 +73,89 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
     private static final Field PROTOCOL_STATE;
     private static final Object READY_TO_ACCEPT_PROTOCOL_STATE;
 
+    static {
+        Class<?> networkManager = getPrefixedClass("NetworkManager");
+        checkNotNull(networkManager, "NetworkManager class cannot be null");
+
+        SOCKET_ADDRESS = getFieldOfType(networkManager, SocketAddress.class, false);
+        checkNotNull(SOCKET_ADDRESS, "SocketAddress field cannot be null");
+
+        HANDSHAKE_PACKET = getPrefixedClass("PacketHandshakingInSetProtocol");
+        checkNotNull(HANDSHAKE_PACKET, "PacketHandshakingInSetProtocol cannot be null");
+        HANDSHAKE_HOST = getFieldOfType(HANDSHAKE_PACKET, String.class);
+        checkNotNull(HANDSHAKE_HOST, "Host field from handshake packet cannot be null");
+
+        LOGIN_START_PACKET = getPrefixedClass("PacketLoginInStart");
+        checkNotNull(LOGIN_START_PACKET, "PacketLoginInStart cannot be null");
+
+        GAME_PROFILE = ReflectionUtils.getClass("com.mojang.authlib.GameProfile");
+        checkNotNull(GAME_PROFILE, "GameProfile class cannot be null");
+
+        Constructor<?> gameProfileConstructor = null;
+        try {
+            gameProfileConstructor = GAME_PROFILE.getConstructor(UUID.class, String.class);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        GAME_PROFILE_CONSTRUCTOR = gameProfileConstructor;
+        checkNotNull(GAME_PROFILE_CONSTRUCTOR, "GameProfileConstructor cannot be null");
+
+        LOGIN_LISTENER = getPrefixedClass("LoginListener");
+        checkNotNull(LOGIN_LISTENER, "LoginListener cannot be null");
+        LOGIN_PROFILE = getFieldOfType(LOGIN_LISTENER, GAME_PROFILE);
+        checkNotNull(LOGIN_PROFILE, "Profile from LoginListener cannot be null");
+        INIT_UUID = getMethod(LOGIN_LISTENER, "initUUID");
+        checkNotNull(INIT_UUID, "initUUID from LoginListener cannot be null");
+
+        Field protocolStateField = null;
+        for (Field field : LOGIN_LISTENER.getDeclaredFields()) {
+            if (field.getType().isEnum()) {
+                protocolStateField = field;
+            }
+        }
+        PROTOCOL_STATE = protocolStateField;
+        checkNotNull(PROTOCOL_STATE, "Protocol state field from LoginListener cannot be null");
+
+        Enum<?>[] protocolStates = (Enum<?>[]) PROTOCOL_STATE.getType().getEnumConstants();
+        Object readyToAcceptState = null;
+        for (Enum<?> protocolState : protocolStates) {
+            if (protocolState.name().equals("READY_TO_ACCEPT")) {
+                readyToAcceptState = protocolState;
+            }
+        }
+        READY_TO_ACCEPT_PROTOCOL_STATE = readyToAcceptState;
+        checkNotNull(READY_TO_ACCEPT_PROTOCOL_STATE,
+                "Ready to accept state from Protocol state cannot be null");
+
+        Class<?> packetListenerClass = getPrefixedClass("PacketListener");
+        PACKET_LISTENER = getFieldOfType(networkManager, packetListenerClass);
+        checkNotNull(PACKET_LISTENER, "PacketListener cannot be null");
+
+        LOGIN_HANDLER = getPrefixedClass("LoginListener$LoginHandler");
+        checkNotNull(LOGIN_HANDLER, "LoginHandler cannot be null");
+
+        Constructor<?> loginHandlerConstructor = null;
+        try {
+            loginHandlerConstructor = makeAccessible(
+                    LOGIN_HANDLER.getDeclaredConstructor(LOGIN_LISTENER));
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        LOGIN_HANDLER_CONSTRUCTOR = loginHandlerConstructor;
+        checkNotNull(LOGIN_HANDLER_CONSTRUCTOR, "LoginHandler constructor cannot be null");
+
+        FIRE_LOGIN_EVENTS = getMethod(LOGIN_HANDLER, "fireEvents");
+        checkNotNull(FIRE_LOGIN_EVENTS, "fireEvents from LoginHandler cannot be null");
+    }
+
     /* per player stuff */
     private final FloodgateConfig config;
     private final HandshakeHandler handshakeHandler;
     private final AttributeKey<FloodgatePlayer> playerAttribute;
     private final FloodgateLogger logger;
-
     private Object networkManager;
     private FloodgatePlayer fPlayer;
     private boolean bungee;
-
     private boolean done;
 
     @Override
@@ -103,8 +180,10 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
                         break;
                     case INVALID_DATA_LENGTH:
                         int dataLength = result.getBedrockData().getDataLength();
-                        logger.info(config.getMessages().getInvalidArgumentsLength(),
-                                BedrockData.EXPECTED_LENGTH, dataLength);
+                        logger.info(
+                                config.getMessages().getInvalidArgumentsLength(),
+                                BedrockData.EXPECTED_LENGTH, dataLength
+                        );
                         ctx.close();
                         return;
                     default: // only continue when SUCCESS
@@ -181,79 +260,5 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         super.exceptionCaught(ctx, cause);
         cause.printStackTrace();
-    }
-
-    static {
-        Class<?> networkManager = getPrefixedClass("NetworkManager");
-        checkNotNull(networkManager, "NetworkManager class cannot be null");
-
-        SOCKET_ADDRESS = getFieldOfType(networkManager, SocketAddress.class, false);
-        checkNotNull(SOCKET_ADDRESS, "SocketAddress field cannot be null");
-
-        HANDSHAKE_PACKET = getPrefixedClass("PacketHandshakingInSetProtocol");
-        checkNotNull(HANDSHAKE_PACKET, "PacketHandshakingInSetProtocol cannot be null");
-        HANDSHAKE_HOST = getFieldOfType(HANDSHAKE_PACKET, String.class);
-        checkNotNull(HANDSHAKE_HOST, "Host field from handshake packet cannot be null");
-
-        LOGIN_START_PACKET = getPrefixedClass("PacketLoginInStart");
-        checkNotNull(LOGIN_START_PACKET, "PacketLoginInStart cannot be null");
-
-        GAME_PROFILE = ReflectionUtils.getClass("com.mojang.authlib.GameProfile");
-        checkNotNull(GAME_PROFILE, "GameProfile class cannot be null");
-
-        Constructor<?> gameProfileConstructor = null;
-        try {
-            gameProfileConstructor = GAME_PROFILE.getConstructor(UUID.class, String.class);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-        GAME_PROFILE_CONSTRUCTOR = gameProfileConstructor;
-        checkNotNull(GAME_PROFILE_CONSTRUCTOR, "GameProfileConstructor cannot be null");
-
-        LOGIN_LISTENER = getPrefixedClass("LoginListener");
-        checkNotNull(LOGIN_LISTENER, "LoginListener cannot be null");
-        LOGIN_PROFILE = getFieldOfType(LOGIN_LISTENER, GAME_PROFILE);
-        checkNotNull(LOGIN_PROFILE, "Profile from LoginListener cannot be null");
-        INIT_UUID = getMethod(LOGIN_LISTENER, "initUUID");
-        checkNotNull(INIT_UUID, "initUUID from LoginListener cannot be null");
-
-        Field protocolStateField = null;
-        for (Field field : LOGIN_LISTENER.getDeclaredFields()) {
-            if (field.getType().isEnum()) {
-                protocolStateField = field;
-            }
-        }
-        PROTOCOL_STATE = protocolStateField;
-        checkNotNull(PROTOCOL_STATE, "Protocol state field from LoginListener cannot be null");
-
-        Enum<?>[] protocolStates = (Enum<?>[]) PROTOCOL_STATE.getType().getEnumConstants();
-        Object readyToAcceptState = null;
-        for (Enum<?> protocolState : protocolStates) {
-            if (protocolState.name().equals("READY_TO_ACCEPT")) {
-                readyToAcceptState = protocolState;
-            }
-        }
-        READY_TO_ACCEPT_PROTOCOL_STATE = readyToAcceptState;
-        checkNotNull(READY_TO_ACCEPT_PROTOCOL_STATE,
-                "Ready to accept state from Protocol state cannot be null");
-
-        Class<?> packetListenerClass = getPrefixedClass("PacketListener");
-        PACKET_LISTENER = getFieldOfType(networkManager, packetListenerClass);
-        checkNotNull(PACKET_LISTENER, "PacketListener cannot be null");
-
-        LOGIN_HANDLER = getPrefixedClass("LoginListener$LoginHandler");
-        checkNotNull(LOGIN_HANDLER, "LoginHandler cannot be null");
-
-        Constructor<?> loginHandlerConstructor = null;
-        try {
-            loginHandlerConstructor = makeAccessible(LOGIN_HANDLER.getDeclaredConstructor(LOGIN_LISTENER));
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-        LOGIN_HANDLER_CONSTRUCTOR = loginHandlerConstructor;
-        checkNotNull(LOGIN_HANDLER_CONSTRUCTOR, "LoginHandler constructor cannot be null");
-
-        FIRE_LOGIN_EVENTS = getMethod(LOGIN_HANDLER, "fireEvents");
-        checkNotNull(FIRE_LOGIN_EVENTS, "fireEvents from LoginHandler cannot be null");
     }
 }

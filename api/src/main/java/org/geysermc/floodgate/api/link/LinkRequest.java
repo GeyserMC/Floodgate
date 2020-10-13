@@ -25,9 +25,8 @@
 
 package org.geysermc.floodgate.api.link;
 
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
-
 import java.util.UUID;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
 public interface LinkRequest {
     /**
@@ -64,10 +63,10 @@ public interface LinkRequest {
     boolean isExpired(long linkTimeout);
 
     /**
-     * Checks if the given FloodgatePlayer is the player requested in this LinkRequest.
-     * This method will check both the real bedrock username
-     * {@link FloodgatePlayer#getUsername()} and the edited username
-     * {@link FloodgatePlayer#getJavaUsername()} and returns true if one of the two matches.
+     * Checks if the given FloodgatePlayer is the player requested in this LinkRequest. This method
+     * will check both the real bedrock username {@link FloodgatePlayer#getUsername()} and the
+     * edited username {@link FloodgatePlayer#getJavaUsername()} and returns true if one of the two
+     * matches.
      *
      * @param player the player to check
      * @return true if the given player is the player requested

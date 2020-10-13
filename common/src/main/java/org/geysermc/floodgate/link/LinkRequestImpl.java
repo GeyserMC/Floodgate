@@ -25,11 +25,10 @@
 
 package org.geysermc.floodgate.link;
 
-import lombok.Getter;
-import org.geysermc.floodgate.api.link.LinkRequest;
-
 import java.time.Instant;
 import java.util.UUID;
+import lombok.Getter;
+import org.geysermc.floodgate.api.link.LinkRequest;
 
 @Getter
 public final class LinkRequestImpl implements LinkRequest {

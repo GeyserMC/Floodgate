@@ -25,14 +25,13 @@
 
 package org.geysermc.floodgate.api;
 
-import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.FloodgatePlayerImpl;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
-
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import javax.annotation.Nullable;
+import lombok.RequiredArgsConstructor;
+import org.geysermc.floodgate.FloodgatePlayerImpl;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
 @RequiredArgsConstructor
 public class SimpleFloodgateApi implements FloodgateApi {
@@ -84,29 +83,34 @@ public class SimpleFloodgateApi implements FloodgateApi {
      */
     @Nullable
     public FloodgatePlayer removePlayer(UUID onlineId, boolean removeLogin) {
-        FloodgatePlayer player = players.get(onlineId);
+        FloodgatePlayer selfPlayer = players.get(onlineId);
         // the player is a non-linked player or a linked player but somehow someone tried to
         // remove the player by his xuid, we have to find out
-        if (player != null) {
+        if (selfPlayer != null) {
             // we don't allow them to remove a player by his xuid
             // because a linked player is never registered by his linked java uuid
-            if (player.getLinkedPlayer() != null) return null;
+            if (selfPlayer.getLinkedPlayer() != null) {
+                return null;
+            }
 
             // removeLogin logic
-            if (!shouldRemove(player, removeLogin)) return null;
+            if (!shouldRemove(selfPlayer, removeLogin)) {
+                return null;
+            }
 
             // passed the test
             players.remove(onlineId);
             // was the account linked?
-            return player;
+            return selfPlayer;
         }
 
         // we still want to be able to remove a linked-player by his linked java uuid
-        for (FloodgatePlayer player1 : players.values()) {
-            if (!shouldRemove(player1, removeLogin)) continue;
-            if (!player1.getCorrectUniqueId().equals(onlineId)) continue;
-            players.remove(player1.getJavaUniqueId());
-            return player1;
+        for (FloodgatePlayer player : players.values()) {
+            if (shouldRemove(player, removeLogin) && player.getCorrectUniqueId().equals(onlineId)) {
+                continue;
+            }
+            players.remove(player.getJavaUniqueId());
+            return player;
         }
 
         return null;
@@ -125,8 +129,8 @@ public class SimpleFloodgateApi implements FloodgateApi {
     }
 
     /**
-     * Equivalent of {@link #removePlayer(UUID, boolean)} except that it removes a
-     * FloodgatePlayer instance directly.
+     * Equivalent of {@link #removePlayer(UUID, boolean)} except that it removes a FloodgatePlayer
+     * instance directly.
      */
     public boolean removePlayer(FloodgatePlayer player) {
         boolean removed = players.remove(player.getJavaUniqueId(), player);

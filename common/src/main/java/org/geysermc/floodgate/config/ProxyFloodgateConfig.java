@@ -32,6 +32,7 @@ import lombok.Getter;
  * The Floodgate configuration used by proxy platforms, currently Velocity and Bungeecord.
  */
 public final class ProxyFloodgateConfig extends FloodgateConfig {
+    @Getter
     @JsonProperty(value = "send-floodgate-data")
-    @Getter private boolean sendFloodgateData;
+    private boolean sendFloodgateData;
 }

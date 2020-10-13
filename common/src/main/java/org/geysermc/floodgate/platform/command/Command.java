@@ -32,11 +32,11 @@ import java.util.UUID;
  */
 public interface Command {
     /**
-     * Should be implemented when {@link #isRequirePlayer()} is true
-     * or when the source is a player.
+     * Should be implemented when {@link #isRequirePlayer()} is true or when the source is a
+     * player.
      *
-     * @param player   the player instance (used for example in combination with
-     *                 {@link CommandUtil#kickPlayer(Object, String, CommandMessage, Object...)}
+     * @param player   the player instance (used for example in combination with {@link
+     *                 CommandUtil#kickPlayer(Object, String, CommandMessage, Object...)}
      * @param uuid     the uuid of the player
      * @param username the username of the player
      * @param locale   the locale of the player
@@ -69,16 +69,16 @@ public interface Command {
     String getName();
 
     /**
-     * The permission that is required to execute the specific command.
-     * Should return null when there is no permission required.
+     * The permission that is required to execute the specific command. Should return null when
+     * there is no permission required.
      *
      * @return the permission required to execute the command
      */
     String getPermission();
 
     /**
-     * If the Command requires a Player to execute this command
-     * or if it doesn't matter if (for example) the console executes the command.
+     * If the Command requires a Player to execute this command or if it doesn't matter if (for
+     * example) the console executes the command.
      *
      * @return true if this command can only be executed by a player
      */
