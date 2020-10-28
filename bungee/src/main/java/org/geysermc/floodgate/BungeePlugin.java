@@ -80,6 +80,7 @@ public class BungeePlugin extends Plugin implements Listener {
 
     @EventHandler(priority = EventPriority.LOW)
     public void onPreLogin(PreLoginEvent event) {
+		if(event.isCancelled())return;
         event.registerIntent(this);
         getProxy().getScheduler().runAsync(this, () -> {
             String extraData = ReflectionUtil.getCastedValue(event.getConnection(), extraHandshakeData, String.class);
@@ -171,9 +172,9 @@ public class BungeePlugin extends Plugin implements Listener {
             ReflectionUtil.setPrefix("site.www.jhdev.net.antibot.bungee");
             Class<?> initial_handler = ReflectionUtil.getPrefixedClass("connection.HandlerLogin");
             extraHandshakeData = ReflectionUtil.getField(initial_handler, "extraDataInHandshake");
-
+            System.out.println("Geyser hooked to JH_AntiBot");
         } catch( ClassNotFoundException e ) {
-
+            e.printStackTrace();
             ReflectionUtil.setPrefix("net.md_5.bungee");
             Class<?> initial_handler = ReflectionUtil.getPrefixedClass("connection.InitialHandler");
             extraHandshakeData = ReflectionUtil.getField(initial_handler, "extraDataInHandshake");
