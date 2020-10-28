@@ -161,8 +161,23 @@ public class BungeePlugin extends Plugin implements Listener {
     }
 
     static {
-        ReflectionUtil.setPrefix("net.md_5.bungee");
-        Class<?> initial_handler = ReflectionUtil.getPrefixedClass("connection.InitialHandler");
-        extraHandshakeData = ReflectionUtil.getField(initial_handler, "extraDataInHandshake");
+        try {
+            // Fix for JH_AntiBot v4 & v5
+
+            // Checking whether the antibot class exists
+            Class.forName("site.www.jhdev.net.antibot.bungee.connection.HandlerLogin");
+
+            // Updating geyser's reflection
+            ReflectionUtil.setPrefix("site.www.jhdev.net.antibot.bungee");
+            Class<?> initial_handler = ReflectionUtil.getPrefixedClass("connection.HandlerLogin");
+            extraHandshakeData = ReflectionUtil.getField(initial_handler, "extraDataInHandshake");
+
+        } catch( ClassNotFoundException e ) {
+
+            ReflectionUtil.setPrefix("net.md_5.bungee");
+            Class<?> initial_handler = ReflectionUtil.getPrefixedClass("connection.InitialHandler");
+            extraHandshakeData = ReflectionUtil.getField(initial_handler, "extraDataInHandshake");
+
+        }
     }
 }
