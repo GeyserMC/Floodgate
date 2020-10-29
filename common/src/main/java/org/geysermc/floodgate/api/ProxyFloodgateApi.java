@@ -29,14 +29,18 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
+import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
 import org.geysermc.floodgate.util.BedrockData;
 
-@RequiredArgsConstructor
 public final class ProxyFloodgateApi extends SimpleFloodgateApi {
     private final Map<UUID, String> encryptedData = new HashMap<>();
     private final FloodgateCipher cipher;
+
+    public ProxyFloodgateApi(PluginMessageHandler pluginMessageHandler, FloodgateCipher cipher) {
+        super(pluginMessageHandler);
+        this.cipher = cipher;
+    }
 
     public String getEncryptedData(UUID uuid) {
         return encryptedData.get(uuid);
