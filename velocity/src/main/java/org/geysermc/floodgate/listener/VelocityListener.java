@@ -48,7 +48,7 @@ import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
@@ -104,7 +104,7 @@ public final class VelocityListener {
 
         if (kickMessage != null) {
             event.setResult(
-                    PreLoginEvent.PreLoginComponentResult.denied(TextComponent.of(kickMessage))
+                    PreLoginEvent.PreLoginComponentResult.denied(Component.text(kickMessage))
             );
             return;
         }

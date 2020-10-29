@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.util;
 
+import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -47,12 +48,16 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 public final class LanguageManager {
     private final Map<String, Properties> LOCALE_MAPPINGS = new HashMap<>();
 
-    private final FloodgateLogger logger;
-
     /**
      * The locale used in console and as a fallback
      */
     @Getter private String defaultLocale;
+
+    @Inject private FloodgateLogger logger;
+
+    public boolean isLoaded() {
+        return logger != null && defaultLocale != null;
+    }
 
     /**
      * Cleans up and formats a locale string
@@ -76,13 +81,17 @@ public final class LanguageManager {
      */
     @Inject
     public void init(FloodgateConfig config) {
-        loadLocale("en_US"); // Fallback
+        if (!loadLocale("en_US")) {// Fallback
+            logger.error("Failed to load the fallback language. This will likely cause errors!");
+        }
 
         defaultLocale = formatLocale(config.getDefaultLocale());
 
         if (isValidLanguage(defaultLocale)) {
-            loadLocale(defaultLocale);
-            return;
+            if (loadLocale(defaultLocale)) {
+                return;
+            }
+            logger.warn("Language provided in the config wasn't found. Will use system locale.");
         }
 
         String systemLocale = formatLocale(
@@ -90,9 +99,11 @@ public final class LanguageManager {
         );
 
         if (isValidLanguage(systemLocale)) {
-            loadLocale(systemLocale);
-            defaultLocale = systemLocale;
-            return;
+            if (loadLocale(systemLocale)) {
+                defaultLocale = systemLocale;
+                return;
+            }
+            logger.warn("Language file for system locale wasn't found. Falling back to en_US");
         }
 
         defaultLocale = "en_US";
@@ -102,19 +113,20 @@ public final class LanguageManager {
      * Loads a Floodgate locale from resources; if the file doesn't exist it just logs a warning
      *
      * @param locale locale to load
+     * @return true if the locale has been found
      */
-    public void loadLocale(String locale) {
+    public boolean loadLocale(String locale) {
         locale = formatLocale(locale);
 
         // just return if the locale has been loaded already
         if (LOCALE_MAPPINGS.containsKey(locale)) {
-            return;
+            return true;
         }
 
         InputStream localeStream = LanguageManager.class.getClassLoader().getResourceAsStream(
                 "languages/texts/" + locale + ".properties");
 
-        // Load the locale
+        // load the locale
         if (localeStream != null) {
             Properties localeProp = new Properties();
             try {
@@ -123,11 +135,13 @@ public final class LanguageManager {
                 throw new AssertionError("Failed to load Floodgate locale", e);
             }
 
-            // Insert the locale into the mappings
+            // insert the locale into the mappings
             LOCALE_MAPPINGS.put(locale, localeProp);
-        } else {
-            logger.warn("Missing locale file: " + locale);
+            return true;
         }
+
+        logger.warn("Missing locale file: " + locale);
+        return false;
     }
 
     /**
@@ -135,7 +149,7 @@ public final class LanguageManager {
      *
      * @param key    language string to translate
      * @param values values to put into the string
-     * @return translated string or the original message if it was not found in the given locale
+     * @return translated string or "key arg1, arg2 (etc.)" if it was not found in the given locale
      */
     public String getLogString(String key, Object... values) {
         return getString(key, defaultLocale, values);
@@ -147,31 +161,33 @@ public final class LanguageManager {
      * @param key    language string to translate
      * @param locale locale to translate to
      * @param values values to put into the string
-     * @return translated string or the original message if it was not found in the given locale
+     * @return translated string or "key arg1, arg2 (etc.)" if it was not found in the given locale
      */
     public String getString(String key, String locale, Object... values) {
-        locale = formatLocale(locale);
+        // we can skip everything if the LanguageManager isn't loaded yet
+        if (!isLoaded()) {
+            return formatNotFound(key, values);
+        }
 
         Properties properties = LOCALE_MAPPINGS.get(locale);
-        String formatString = properties.getProperty(key);
+        String formatString = null;
 
-        // Try and get the key from the default locale
+        if (properties != null) {
+            formatString = properties.getProperty(key);
+        }
+
+        // try and get the key from the default locale
         if (formatString == null) {
             properties = LOCALE_MAPPINGS.get(defaultLocale);
             formatString = properties.getProperty(key);
         }
 
-        // Try and get the key from en_US (this should only ever happen in development)
+        // key wasn't found
         if (formatString == null) {
-            properties = LOCALE_MAPPINGS.get("en_US");
-            formatString = properties.getProperty(key);
+            return formatNotFound(key, values);
         }
 
-        // Final fallback
-        if (formatString == null) {
-            formatString = key;
-        }
-
+        //todo don't use color codes in the strings
         return MessageFormat.format(formatString.replace("'", "''").replace("&", "\u00a7"), values);
     }
 
@@ -194,5 +210,9 @@ public final class LanguageManager {
             return false;
         }
         return true;
+    }
+
+    private String formatNotFound(String key, Object... args) {
+        return key + " " + Joiner.on(", ").join(args);
     }
 }

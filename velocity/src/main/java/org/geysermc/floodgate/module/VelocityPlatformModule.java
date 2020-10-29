@@ -44,10 +44,12 @@ import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.inject.velocity.VelocityInjector;
 import org.geysermc.floodgate.listener.VelocityListenerRegistration;
+import org.geysermc.floodgate.listener.VelocityPluginMessageListener;
 import org.geysermc.floodgate.logger.Slf4jFloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandRegistration;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
+import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.VelocityCommandUtil;
 import org.slf4j.Logger;
@@ -68,8 +70,9 @@ public final class VelocityPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public ProxyFloodgateApi proxyFloodgateApi(FloodgateCipher cipher) {
-        return new ProxyFloodgateApi(cipher);
+    public ProxyFloodgateApi proxyFloodgateApi(PluginMessageHandler pluginMessageHandler,
+                                               FloodgateCipher cipher) {
+        return new ProxyFloodgateApi(pluginMessageHandler, cipher);
     }
 
     @Provides
@@ -102,6 +105,12 @@ public final class VelocityPlatformModule extends AbstractModule {
     public ListenerRegistration<Object> listenerRegistration(EventManager eventManager,
                                                              VelocityPlugin plugin) {
         return new VelocityListenerRegistration(eventManager, plugin);
+    }
+
+    @Provides
+    @Singleton
+    public PluginMessageHandler pluginMessageHandler() {
+        return new VelocityPluginMessageListener();
     }
 
     /*

@@ -27,7 +27,7 @@ package org.geysermc.floodgate.util;
 
 import com.velocitypowered.api.proxy.Player;
 import lombok.RequiredArgsConstructor;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandMessage;
 import org.geysermc.floodgate.platform.command.CommandUtil;
@@ -47,9 +47,9 @@ public final class VelocityCommandUtil implements CommandUtil {
         cast(player).disconnect(translateAndTransform(locale, message, args));
     }
 
-    public TextComponent translateAndTransform(String locale, CommandMessage message,
-                                               Object... args) {
-        return TextComponent.of(manager.getString(message.getMessage(), locale, args));
+    public Component translateAndTransform(String locale, CommandMessage message,
+                                           Object... args) {
+        return Component.text(manager.getString(message.getMessage(), locale, args));
     }
 
     protected Player cast(Object instance) {

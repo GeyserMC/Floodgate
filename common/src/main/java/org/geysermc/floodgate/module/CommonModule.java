@@ -101,8 +101,8 @@ public final class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public LanguageManager languageLoader(FloodgateLogger logger) {
-        return new LanguageManager(logger);
+    public LanguageManager languageLoader() {
+        return new LanguageManager();
     }
 
     @Provides
@@ -122,5 +122,19 @@ public final class CommonModule extends AbstractModule {
     @Named("playerAttribute")
     public AttributeKey<FloodgatePlayer> playerAttribute() {
         return AttributeKey.newInstance("floodgate-player");
+    }
+
+    @Provides
+    @Singleton
+    @Named("formChannel")
+    public String formChannel() {
+        return "floodgate:form";
+    }
+
+    @Provides
+    @Singleton
+    @Named("skinChannel")
+    public String skinChannel() {
+        return "floodgate:skin";
     }
 }

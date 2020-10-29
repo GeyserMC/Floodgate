@@ -26,6 +26,7 @@
 package org.geysermc.floodgate.api;
 
 import java.util.UUID;
+import org.geysermc.common.form.Form;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
@@ -70,6 +71,8 @@ public interface FloodgateApi {
      * @return true if the given uuid has the correct format.
      */
     boolean isFloodgateId(UUID uuid);
+
+    boolean sendForm(UUID uuid, Form form);
 
     /**
      * Returns the instance that manages all the linking.

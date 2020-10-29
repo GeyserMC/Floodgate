@@ -31,6 +31,8 @@ import java.util.UUID;
  * The base class for every Floodgate command.
  */
 public interface Command {
+//    <T> LiteralCommandNode<T> commandNode(T source, CommandUtil commandUtil);
+
     /**
      * Should be implemented when {@link #isRequirePlayer()} is true or when the source is a
      * player.
@@ -67,6 +69,12 @@ public interface Command {
      * @return the name of the command that should be registered
      */
     String getName();
+
+    /**
+     * Description of the command. Used as description in commands like /help (Spigot) and when you
+     * run the command without any arguments
+     */
+    String getDescription();
 
     /**
      * The permission that is required to execute the specific command. Should return null when

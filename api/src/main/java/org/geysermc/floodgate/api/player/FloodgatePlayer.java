@@ -26,6 +26,8 @@
 package org.geysermc.floodgate.api.player;
 
 import java.util.UUID;
+import org.geysermc.common.form.Form;
+import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.util.DeviceOs;
 import org.geysermc.floodgate.util.InputMode;
 import org.geysermc.floodgate.util.LinkedPlayer;
@@ -103,6 +105,10 @@ public interface FloodgatePlayer {
      * Returns the raw skin of the Bedrock player
      */
     RawSkin getRawSkin();
+
+    default boolean sendForm(Form form) {
+        return FloodgateApi.getInstance().sendForm(getCorrectUniqueId(), form);
+    }
 
     /**
      * Casts the FloodgatePlayer instance to a class that extends FloodgatePlayer.

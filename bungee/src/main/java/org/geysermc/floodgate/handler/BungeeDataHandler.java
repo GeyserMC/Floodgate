@@ -35,6 +35,7 @@ import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -102,10 +103,10 @@ public final class BungeeDataHandler {
                     event.setCancelReason(config.getMessages().getInvalidKey());
                     break;
                 case INVALID_DATA_LENGTH:
-                    event.setCancelReason(String.format(
+                    event.setCancelReason(TextComponent.fromLegacyText(String.format(
                             config.getMessages().getInvalidArgumentsLength(),
                             BedrockData.EXPECTED_LENGTH, result.getBedrockData().getDataLength()
-                    ));
+                    )));
                     break;
             }
 
@@ -131,9 +132,6 @@ public final class BungeeDataHandler {
             SocketAddress remoteAddress =
                     ReflectionUtils.getCastedValue(channelWrapper, PLAYER_REMOTE_ADDRESS);
 
-            Channel channel = ReflectionUtils.getCastedValue(channelWrapper, PLAYER_CHANNEL);
-            channel.attr(playerAttribute).set(player);
-
             if (!(remoteAddress instanceof InetSocketAddress)) {
                 logger.info("Player {} doesn't use an InetSocketAddress, it uses {}. " +
                                 "Ignoring the player, I guess.",
@@ -146,6 +144,11 @@ public final class BungeeDataHandler {
                         new InetSocketAddress(result.getBedrockData().getIp(), port)
                 );
             }
+
+            Channel channel = ReflectionUtils.getCastedValue(channelWrapper, PLAYER_CHANNEL);
+
+            channel.attr(playerAttribute).set(player);
+
             event.completeIntent(plugin);
         });
     }

@@ -42,8 +42,10 @@ import org.geysermc.floodgate.inject.spigot.SpigotInjector;
 import org.geysermc.floodgate.listener.SpigotListenerRegistration;
 import org.geysermc.floodgate.logger.JavaUtilFloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandRegistration;
-import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 import org.geysermc.floodgate.platform.command.CommandUtil;
+import org.geysermc.floodgate.platform.listener.ListenerRegistration;
+import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
+import org.geysermc.floodgate.pluginmessage.BukkitPluginMessageHandler;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.SpigotCommandUtil;
 
@@ -66,8 +68,8 @@ public final class SpigotPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public SimpleFloodgateApi floodgateApi() {
-        return new SimpleFloodgateApi();
+    public SimpleFloodgateApi floodgateApi(PluginMessageHandler pluginMessageHandler) {
+        return new SimpleFloodgateApi(pluginMessageHandler);
     }
 
     @Provides
@@ -82,9 +84,8 @@ public final class SpigotPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public CommandRegistration commandRegistration(CommandUtil commandUtil,
-                                                   LanguageManager languageManager) {
-        return new SpigotCommandRegistration(plugin, commandUtil, languageManager);
+    public CommandRegistration commandRegistration(CommandUtil commandUtil) {
+        return new SpigotCommandRegistration(plugin, commandUtil);
     }
 
     @Provides
@@ -97,6 +98,13 @@ public final class SpigotPlatformModule extends AbstractModule {
     @Singleton
     public ListenerRegistration<Listener> listenerRegistration() {
         return new SpigotListenerRegistration(plugin);
+    }
+
+    @Provides
+    @Singleton
+    public PluginMessageHandler pluginMessageHandler(@Named("formChannel") String formChannel,
+                                                     @Named("skinChannel") String skinChannel) {
+        return new BukkitPluginMessageHandler(plugin, formChannel, skinChannel);
     }
 
     /*

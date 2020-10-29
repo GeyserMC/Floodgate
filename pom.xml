@@ -47,7 +47,7 @@
         <geyser.version>1.1.0</geyser.version>
         <spigot.version>1.8.8-R0.1-SNAPSHOT</spigot.version>
         <bungee.version>1.15-SNAPSHOT</bungee.version>
-        <velocity.version>1.1.0-SNAPSHOT</velocity.version>
+        <velocity.version>1.1.0</velocity.version>
 
         <outputName>floodgate-${project.name}</outputName>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

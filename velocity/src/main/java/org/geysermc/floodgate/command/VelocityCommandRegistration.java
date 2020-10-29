@@ -25,12 +25,14 @@
 
 package org.geysermc.floodgate.command;
 
+import static org.geysermc.floodgate.command.CommonCommandMessage.NOT_A_PLAYER;
+
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandSource;
+import com.velocitypowered.api.command.RawCommand;
 import com.velocitypowered.api.proxy.Player;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.platform.command.Command;
 import org.geysermc.floodgate.platform.command.CommandRegistration;
 import org.geysermc.floodgate.platform.command.CommandUtil;
@@ -48,26 +50,26 @@ public final class VelocityCommandRegistration implements CommandRegistration {
 
         commandManager.register(command.getName(),
                 new VelocityCommandWrapper(commandUtil, command, defaultLocale));
+
+//        BrigadierCommand cmd = new BrigadierCommand();
     }
 
     @RequiredArgsConstructor
-    protected static final class VelocityCommandWrapper
-            implements com.velocitypowered.api.command.Command {
+    protected static final class VelocityCommandWrapper implements RawCommand {
         private final CommandUtil commandUtil;
         private final Command command;
         private final String defaultLocale;
 
         @Override
-        public void execute(CommandSource source, @NonNull String[] args) {
+        public void execute(Invocation invocation) {
+            CommandSource source = invocation.source();
+
             if (!(source instanceof Player)) {
                 if (command.isRequirePlayer()) {
-                    commandUtil.sendMessage(
-                            source, defaultLocale,
-                            CommonCommandMessage.NOT_A_PLAYER
-                    );
+                    commandUtil.sendMessage(source, defaultLocale, NOT_A_PLAYER);
                     return;
                 }
-                command.execute(source, defaultLocale, args);
+                command.execute(source, defaultLocale, invocation.arguments().split(" "));
                 return;
             }
 
@@ -75,7 +77,10 @@ public final class VelocityCommandRegistration implements CommandRegistration {
             Locale locale = player.getPlayerSettings().getLocale();
             String localeString = locale.getLanguage() + "_" + locale.getCountry();
 
-            command.execute(source, player.getUniqueId(), player.getUsername(), localeString, args);
+            command.execute(
+                    source, player.getUniqueId(), player.getUsername(),
+                    localeString, invocation.arguments().split(" ")
+            );
         }
     }
 }

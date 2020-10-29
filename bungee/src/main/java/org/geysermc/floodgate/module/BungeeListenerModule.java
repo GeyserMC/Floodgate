@@ -31,6 +31,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.ProvidesIntoSet;
 import net.md_5.bungee.api.plugin.Listener;
 import org.geysermc.floodgate.listener.BungeeListener;
+import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
 import org.geysermc.floodgate.register.ListenerRegister;
 
 public final class BungeeListenerModule extends AbstractModule {
@@ -43,5 +44,11 @@ public final class BungeeListenerModule extends AbstractModule {
     @ProvidesIntoSet
     public Listener bungeeListener() {
         return new BungeeListener();
+    }
+
+    @Singleton
+    @ProvidesIntoSet
+    public Listener pluginMessageListener(PluginMessageHandler handler) {
+        return (Listener) handler; // Plugin message handler is also the listener
     }
 }

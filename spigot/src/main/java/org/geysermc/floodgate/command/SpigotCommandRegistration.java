@@ -25,56 +25,74 @@
 
 package org.geysermc.floodgate.command;
 
-import lombok.RequiredArgsConstructor;
-import org.bukkit.command.CommandExecutor;
+import java.util.Collections;
+import org.bukkit.Bukkit;
+import org.bukkit.command.CommandException;
+import org.bukkit.command.CommandMap;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.platform.command.Command;
 import org.geysermc.floodgate.platform.command.CommandRegistration;
 import org.geysermc.floodgate.platform.command.CommandUtil;
-import org.geysermc.floodgate.util.LanguageManager;
+import org.geysermc.floodgate.util.ReflectionUtils;
 
-@RequiredArgsConstructor
 public final class SpigotCommandRegistration implements CommandRegistration {
     private final JavaPlugin plugin;
     private final CommandUtil commandUtil;
-    private final LanguageManager languageManager;
+    private final CommandMap commandMap;
+
+    public SpigotCommandRegistration(JavaPlugin plugin, CommandUtil commandUtil) {
+        this.plugin = plugin;
+        this.commandUtil = commandUtil;
+        this.commandMap = ReflectionUtils.getCastedValue(Bukkit.getPluginManager(), "commandMap");
+    }
 
     @Override
     public void register(Command command) {
-        String defaultLocale = languageManager.getDefaultLocale();
-
-        plugin.getCommand(command.getName())
-                .setExecutor(new SpigotCommandWrapper(commandUtil, command, defaultLocale));
+        commandMap.register("floodgate", new SpigotCommand(plugin, commandUtil, command));
     }
 
-    @RequiredArgsConstructor
-    protected static class SpigotCommandWrapper implements CommandExecutor {
+    protected static class SpigotCommand extends org.bukkit.command.Command {
+        private final JavaPlugin plugin;
         private final CommandUtil commandUtil;
         private final Command command;
-        private final String defaultLocale;
+
+        protected SpigotCommand(JavaPlugin plugin, CommandUtil commandUtil, Command command) {
+            super(command.getName(), command.getDescription(), "", Collections.emptyList());
+            this.plugin = plugin;
+            this.commandUtil = commandUtil;
+            this.command = command;
+        }
 
         @Override
-        public boolean onCommand(CommandSender source, org.bukkit.command.Command cmd,
-                                 String label, String[] args) {
-            if (!(source instanceof Player)) {
-                if (command.isRequirePlayer()) {
-                    commandUtil.sendMessage(
-                            source, defaultLocale,
-                            CommonCommandMessage.NOT_A_PLAYER
-                    );
-                    return true;
-                }
-                command.execute(source, defaultLocale, args);
+        public boolean execute(CommandSender sender, String commandLabel, String[] args) {
+            if (!plugin.isEnabled()) {
+                throw new CommandException("Cannot execute command '" + commandLabel +
+                        "' while the plugin is disabled");
+            }
+            if (!sender.hasPermission(command.getPermission())) {
+                commandUtil.sendMessage(sender, null, CommonCommandMessage.NO_PERMISSION);
                 return true;
             }
+            executeCommand(sender, args);
+            return true;
+        }
 
-            Player player = (Player) source;
+        public void executeCommand(CommandSender sender, String[] args) {
+            if (!(sender instanceof Player)) {
+                if (command.isRequirePlayer()) {
+                    commandUtil.sendMessage(sender, null, CommonCommandMessage.NOT_A_PLAYER);
+                    return;
+                }
+                command.execute(sender, null, args);
+                return;
+            }
+
+            Player player = (Player) sender;
             String locale = player.spigot().getLocale();
 
-            command.execute(source, player.getUniqueId(), source.getName(), locale, args);
-            return true;
+            command.execute(sender, player.getUniqueId(), sender.getName(), locale, args);
         }
     }
 }

@@ -30,12 +30,15 @@ import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
+import org.geysermc.common.form.Form;
 import org.geysermc.floodgate.FloodgatePlayerImpl;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
 
 @RequiredArgsConstructor
 public class SimpleFloodgateApi implements FloodgateApi {
     private final Map<UUID, FloodgatePlayer> players = new HashMap<>();
+    private final PluginMessageHandler pluginMessageHandler;
 
     @Override
     public boolean isBedrockPlayer(UUID uuid) {
@@ -68,6 +71,13 @@ public class SimpleFloodgateApi implements FloodgateApi {
     @Override
     public boolean isFloodgateId(UUID uuid) {
         return uuid.getMostSignificantBits() == 0;
+    }
+
+    @Override
+    public boolean sendForm(UUID uuid, Form form) {
+        // the most easy way is to add the sendForm method to something that has to be implemented
+        // to every platform anyway, not the most elegant solution though.
+        return pluginMessageHandler.sendForm(uuid, form);
     }
 
     public FloodgatePlayer addPlayer(UUID uuid, FloodgatePlayer player) {

@@ -53,6 +53,17 @@
             <artifactId>jackson-dataformat-yaml</artifactId>
             <version>2.9.9</version>
         </dependency>
+        <dependency>
+            <groupId>com.nukkitx.fastutil</groupId>
+            <artifactId>fastutil-short-object-maps</artifactId>
+            <version>8.3.1</version>
+            <scope>compile</scope>
+        </dependency>
+<!--        <dependency> todo -->
+<!--            <groupId>com.mojang</groupId>-->
+<!--            <artifactId>brigadier</artifactId>-->
+<!--            <version>1.0.17</version>-->
+<!--        </dependency>-->
     </dependencies>
 
     <modelVersion>4.0.0</modelVersion>
@@ -83,6 +94,11 @@
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
+        </repository>
+        <repository>
+            <id>minecraft-libraries</id>
+            <name>Minecraft Libraries</name>
+            <url>https://libraries.minecraft.net</url>
         </repository>
     </repositories>
 </project>

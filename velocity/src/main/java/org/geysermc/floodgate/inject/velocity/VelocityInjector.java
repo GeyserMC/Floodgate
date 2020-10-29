@@ -60,7 +60,7 @@ public final class VelocityInjector extends CommonPlatformInjector {
 
         Method serverSetter = getMethod(serverInitializerHolder, "set", ChannelInitializer.class);
         invoke(serverInitializerHolder, serverSetter,
-               new VelocityChannelInitializer(this, serverInitializer, false));
+                new VelocityChannelInitializer(this, serverInitializer, false));
 
         // Proxy <-> Server
 
@@ -69,7 +69,7 @@ public final class VelocityInjector extends CommonPlatformInjector {
 
         Method backendSetter = getMethod(backendInitializerHolder, "set", ChannelInitializer.class);
         invoke(backendInitializerHolder, backendSetter,
-               new VelocityChannelInitializer(this, backendInitializer, true));
+                new VelocityChannelInitializer(this, backendInitializer, true));
         return injected = true;
     }
 

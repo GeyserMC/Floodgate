@@ -78,6 +78,11 @@ public final class UnlinkAccountCommand implements Command {
     }
 
     @Override
+    public String getDescription() {
+        return "Unlink your Java account from your Bedrock account";
+    }
+
+    @Override
     public String getPermission() {
         return "floodgate.unlinkaccount";
     }

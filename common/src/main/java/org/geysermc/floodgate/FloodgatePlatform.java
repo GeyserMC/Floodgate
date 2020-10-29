@@ -111,7 +111,7 @@ public class FloodgatePlatform {
             return false;
         }
 
-        guice.createChildInjector(new PostInitializeModule(postInitializeModules));
+        this.guice = guice.createChildInjector(new PostInitializeModule(postInitializeModules));
         return true;
     }
 

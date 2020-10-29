@@ -33,6 +33,7 @@ import org.geysermc.floodgate.platform.command.CommandMessage;
  */
 public enum CommonCommandMessage implements CommandMessage {
     NOT_A_PLAYER("floodgate.commands.not_a_player"),
+    NO_PERMISSION("floodgate.commands.no_permission"),
     CHECK_CONSOLE("floodgate.commands.check_console"),
     // TODO used to also have console check
     IS_LINKED_ERROR("floodgate.commands.is_linked_error");

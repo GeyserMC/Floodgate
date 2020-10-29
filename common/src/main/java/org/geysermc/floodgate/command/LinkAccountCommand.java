@@ -47,6 +47,17 @@ public final class LinkAccountCommand implements Command {
     @Inject private FloodgateApi api;
     @Inject private CommandUtil commandUtil;
 
+//    @Override todo impl this
+//    public <T> LiteralCommandNode<T> commandNode(T source, CommandUtil commandUtil) {
+//        return literal(getName())
+//                .then(
+//                        argument("gamertag", word())
+//                                .executes(cmd -> {
+//                                    return 0;
+//                                })
+//                ).build();
+//    }
+
     @Override
     public void execute(Object player, UUID uuid, String username, String locale, String[] args) {
         PlayerLink link = api.getPlayerLink();
@@ -132,6 +143,11 @@ public final class LinkAccountCommand implements Command {
     @Override
     public String getName() {
         return "linkaccount";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Link your Java account with your Bedrock account";
     }
 
     @Override

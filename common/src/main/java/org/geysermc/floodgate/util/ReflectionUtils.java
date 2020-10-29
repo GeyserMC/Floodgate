@@ -212,6 +212,18 @@ public final class ReflectionUtils {
     }
 
     /**
+     * Get the value of the given field by finding the field and then get the value of it.
+     *
+     * @param instance  the instance of the object
+     * @param fieldName the name of the field to get the value from
+     * @return the value of the field when succeeded, otheriwse null
+     */
+    @Nullable
+    public static Object getValue(Object instance, String fieldName) {
+        return getValue(instance, getField(instance.getClass(), fieldName));
+    }
+
+    /**
      * Get the value of a field and cast it to <T>.
      *
      * @param instance the instance to get the value from
@@ -226,15 +238,17 @@ public final class ReflectionUtils {
     }
 
     /**
-     * Get the value of the given field by finding the field and then get the value of it.
+     * Get the value of a field and cast it to <T>.
      *
-     * @param instance  the instance of the object
-     * @param fieldName the name of the field to get the value from
-     * @return the value of the field when succeeded, otheriwse null
+     * @param instance  the instance to get the value from
+     * @param fieldName the field to get the value from
+     * @param <T>       the type to cast the value to
+     * @return the casted value when succeeded, otherwise null
      */
+    @SuppressWarnings("unchecked")
     @Nullable
-    public static Object getValue(Object instance, String fieldName) {
-        return getValue(instance, getField(instance.getClass(), fieldName));
+    public static <T> T getCastedValue(Object instance, String fieldName) {
+        return (T) getValue(instance, getField(instance.getClass(), fieldName));
     }
 
     /**

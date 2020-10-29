@@ -47,6 +47,8 @@ import org.geysermc.floodgate.logger.JavaUtilFloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandRegistration;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
+import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
+import org.geysermc.floodgate.pluginmessage.BungeePluginMessageHandler;
 import org.geysermc.floodgate.util.BungeeCommandUtil;
 import org.geysermc.floodgate.util.LanguageManager;
 
@@ -74,8 +76,9 @@ public final class BungeePlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public ProxyFloodgateApi proxyFloodgateApi(FloodgateCipher cipher) {
-        return new ProxyFloodgateApi(cipher);
+    public ProxyFloodgateApi proxyFloodgateApi(PluginMessageHandler pluginMessageHandler,
+                                               FloodgateCipher cipher) {
+        return new ProxyFloodgateApi(pluginMessageHandler, cipher);
     }
 
     @Provides
@@ -105,6 +108,12 @@ public final class BungeePlatformModule extends AbstractModule {
     @Singleton
     public ListenerRegistration<Listener> listenerRegistration() {
         return new BungeeListenerRegistration(plugin);
+    }
+
+    @Provides
+    @Singleton
+    public PluginMessageHandler pluginMessageHandler() {
+        return new BungeePluginMessageHandler();
     }
 
     /*
