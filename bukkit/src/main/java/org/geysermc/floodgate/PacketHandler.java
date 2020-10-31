@@ -143,6 +143,7 @@ public class PacketHandler extends SimpleChannelInboundHandler<Object> {
         networkManagerClass = getPrefixedClass("NetworkManager");
         loginStartPacketClass = getPrefixedClass("PacketLoginInStart");
 
+
         gameProfileClass = ReflectionUtil.getClass("com.mojang.authlib.GameProfile");
         assert gameProfileClass != null;
         try {
