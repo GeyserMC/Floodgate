@@ -19,7 +19,7 @@
     <url>https://github.com/GeyserMC/Floodgate/</url>
 
     <properties>
-        <geyser-version>1.0-SNAPSHOT</geyser-version>
+        <geyser-version>1.1.0</geyser-version>
         <bukkit-version>1.8.8-R0.1-SNAPSHOT</bukkit-version>
         <bungee-version>1.15-SNAPSHOT</bungee-version>
         <velocity-version>1.1.0-SNAPSHOT</velocity-version>
