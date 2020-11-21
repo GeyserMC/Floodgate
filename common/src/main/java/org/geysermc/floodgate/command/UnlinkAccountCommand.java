@@ -25,6 +25,8 @@
 
 package org.geysermc.floodgate.command;
 
+import static org.geysermc.floodgate.command.CommonCommandMessage.CHECK_CONSOLE;
+
 import com.google.inject.Inject;
 import java.util.UUID;
 import lombok.Getter;
@@ -96,17 +98,19 @@ public final class UnlinkAccountCommand implements Command {
         commandUtil.sendMessage(player, locale, message, args);
     }
 
+    @Getter
     public enum Message implements CommandMessage {
         NOT_LINKED("floodgate.command.unlink_account.not_linked"),
         UNLINK_SUCCESS("floodgate.command.unlink_account.unlink_success"),
-        // TODO also used to have CHECK_CONSOLE
-        UNLINK_ERROR("floodgate.command.unlink_account.error"),
+        UNLINK_ERROR("floodgate.command.unlink_account.error " + CHECK_CONSOLE),
         LINKING_NOT_ENABLED("floodgate.commands.linking_disabled");
 
-        @Getter private final String message;
+        private final String rawMessage;
+        private final String[] translateParts;
 
-        Message(String message) {
-            this.message = message;
+        Message(String rawMessage) {
+            this.rawMessage = rawMessage;
+            this.translateParts = rawMessage.split(" ");
         }
     }
 }

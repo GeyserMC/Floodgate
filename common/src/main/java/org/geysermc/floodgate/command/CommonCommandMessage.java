@@ -29,23 +29,26 @@ import lombok.Getter;
 import org.geysermc.floodgate.platform.command.CommandMessage;
 
 /**
- * Messages (or part of messages) that are used in two or more commands and thus are 'commonly used'
+ * Messages (or part of messages) that are used in two or more commands and thus are 'commonly
+ * used'
  */
+@Getter
 public enum CommonCommandMessage implements CommandMessage {
     NOT_A_PLAYER("floodgate.commands.not_a_player"),
     NO_PERMISSION("floodgate.commands.no_permission"),
     CHECK_CONSOLE("floodgate.commands.check_console"),
-    // TODO used to also have console check
     IS_LINKED_ERROR("floodgate.commands.is_linked_error");
 
-    @Getter private final String message;
+    private final String rawMessage;
+    private final String[] translateParts;
 
-    CommonCommandMessage(String message) {
-        this.message = message;
+    CommonCommandMessage(String rawMessage) {
+        this.rawMessage = rawMessage;
+        this.translateParts = rawMessage.split(" ");
     }
 
     @Override
     public String toString() {
-        return getMessage();
+        return getRawMessage();
     }
 }

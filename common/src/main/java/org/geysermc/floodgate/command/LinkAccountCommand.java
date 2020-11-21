@@ -25,6 +25,8 @@
 
 package org.geysermc.floodgate.command;
 
+import static org.geysermc.floodgate.command.CommonCommandMessage.CHECK_CONSOLE;
+
 import com.google.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,7 +64,7 @@ public final class LinkAccountCommand implements Command {
     public void execute(Object player, UUID uuid, String username, String locale, String[] args) {
         PlayerLink link = api.getPlayerLink();
         if (!link.isEnabledAndAllowed()) {
-            sendMessage(player, locale, Message.LINK_REQUEST_DISABLED);
+            sendMessage(player, locale, Message.LINK_REQUEST_ERROR);
             return;
         }
 
@@ -164,6 +166,7 @@ public final class LinkAccountCommand implements Command {
         commandUtil.sendMessage(player, locale, message, args);
     }
 
+    @Getter
     public enum Message implements CommandMessage {
         ALREADY_LINKED("floodgate.command.link_account.already_linked"),
         JAVA_USAGE("floodgate.command.link_account.java_usage"),
@@ -171,16 +174,17 @@ public final class LinkAccountCommand implements Command {
         BEDROCK_USAGE("floodgate.command.link_account.bedrock_usage"),
         LINK_REQUEST_EXPIRED("floodgate.command.link_account.link_request_expired"),
         LINK_REQUEST_COMPLETED("floodgate.command.link_account.link_request_completed"),
-        // TODO this also used to have another message
-        LINK_REQUEST_ERROR("floodgate.command.link_request.error"),
+        LINK_REQUEST_ERROR("floodgate.command.link_request.error " + CHECK_CONSOLE),
         INVALID_CODE("floodgate.command.link_account.invalid_code"),
         NO_LINK_REQUESTED("floodgate.command.link_account.no_link_requested"),
         LINK_REQUEST_DISABLED("floodgate.commands.linking_disabled");
 
-        @Getter private final String message;
+        private final String rawMessage;
+        private final String[] translateParts;
 
-        Message(String message) {
-            this.message = message;
+        Message(String rawMessage) {
+            this.rawMessage = rawMessage;
+            this.translateParts = rawMessage.split(" ");
         }
     }
 }

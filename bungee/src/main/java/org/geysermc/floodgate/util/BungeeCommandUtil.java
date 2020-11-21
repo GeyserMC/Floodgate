@@ -50,9 +50,7 @@ public final class BungeeCommandUtil implements CommandUtil {
 
     public BaseComponent[] translateAndTransform(String locale, CommandMessage message,
                                                  Object... args) {
-        return TextComponent.fromLegacyText(manager.getString(
-                message.getMessage(), locale, args
-        ));
+        return TextComponent.fromLegacyText(message.translateMessage(manager, locale, args));
     }
 
     protected ProxiedPlayer cast(Object player) {

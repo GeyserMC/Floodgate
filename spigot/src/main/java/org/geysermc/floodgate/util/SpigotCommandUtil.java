@@ -54,9 +54,7 @@ public final class SpigotCommandUtil implements CommandUtil {
 
     public String translateAndTransform(String locale, CommandMessage message, Object... args) {
         // unlike others, Bukkit doesn't have to transform a message into another class.
-        return manager.getString(
-                message.getMessage(), locale, args
-        );
+        return message.translateMessage(manager, locale, args);
     }
 
     protected Player cast(Object instance) {

@@ -49,7 +49,7 @@ public final class VelocityCommandUtil implements CommandUtil {
 
     public Component translateAndTransform(String locale, CommandMessage message,
                                            Object... args) {
-        return Component.text(manager.getString(message.getMessage(), locale, args));
+        return Component.text(message.translateMessage(manager, locale, args));
     }
 
     protected Player cast(Object instance) {
