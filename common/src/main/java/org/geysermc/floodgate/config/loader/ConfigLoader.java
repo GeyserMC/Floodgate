@@ -105,7 +105,8 @@ public final class ConfigLoader {
         }
 
         Path keyPath = dataFolder.resolve(configInstance.getKeyFileName());
-        if (!Files.exists(keyPath)) { // don't assume that the key always exists with the existence of a config
+        // don't assume that the key always exists with the existence of a config
+        if (!Files.exists(keyPath)) {
             try {
                 Key key = keyProducer.produce();
                 cipher.init(key);

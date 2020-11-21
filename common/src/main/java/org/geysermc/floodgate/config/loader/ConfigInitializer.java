@@ -50,21 +50,33 @@ public class ConfigInitializer {
             @Override
             protected Map<String, Property> getPropertiesMap(Class<?> type, BeanAccess bAccess) {
                 Map<String, Property> properties = new LinkedHashMap<>();
+                getPropertiesFromClass(type, FloodgateConfig.class, properties);
+                return properties;
+            }
+
+            private void getPropertiesFromClass(Class<?> type, Class<?> stopAfter,
+                                                Map<String, Property> propertyMap) {
                 Class<?> current = type;
-                // make ProxyFloodgateConfig work
-                // iterate through all fields of this specific class
-                while (type.isAssignableFrom(current)) {
+                while (!Object.class.equals(current)) {
                     for (Field field : current.getDeclaredFields()) {
                         int modifiers = field.getModifiers();
                         if (!Modifier.isStatic(modifiers) && !Modifier.isTransient(modifiers)) {
                             String correctName = getCorrectName(field.getName());
                             // children should override parents
-                            properties.putIfAbsent(correctName, new FieldProperty(field));
+                            propertyMap.putIfAbsent(correctName, new FieldProperty(field));
+                        }
+
+                        if (field.getClass().getSuperclass().equals(current)) {
+                            getPropertiesFromClass(field.getClass(), field.getClass(), propertyMap);
                         }
                     }
-                    current = current.getSuperclass();
+
+                    if (current.equals(stopAfter)) {
+                        return;
+                    }
+
+                    current = type.getSuperclass();
                 }
-                return properties;
             }
 
             private String getCorrectName(String name) {

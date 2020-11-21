@@ -67,8 +67,8 @@ public class SpigotSkinHandler extends SkinHandler {
 
         PropertyMap properties = profile.getProperties();
 
-        Collection<Property> oldTexture = properties.get("textures");
-        properties.remove("textures", oldTexture);
+        //todo check if removing all texture properties breaks some stuff
+        properties.removeAll("textures");
         Property property = new Property(
                 "textures",
                 response.get("value").getAsString(),
