@@ -30,6 +30,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -66,7 +67,8 @@ public class SpigotSkinHandler extends SkinHandler {
 
         PropertyMap properties = profile.getProperties();
 
-        properties.remove("textures", properties.get("textures").iterator().next());
+        Collection<Property> oldTexture = properties.get("textures");
+        properties.remove("textures", oldTexture);
         Property property = new Property(
                 "textures",
                 response.get("value").getAsString(),

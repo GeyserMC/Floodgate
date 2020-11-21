@@ -69,8 +69,8 @@ public final class ConfigLoader {
         }
 
         boolean newConfig = !Files.exists(configPath);
-        try {
-            if (newConfig) {
+        if (newConfig) {
+            try {
                 InputStream newConfigFile =
                         ConfigLoader.class.getClassLoader().getResourceAsStream(defaultConfigName);
                 if (newConfigFile == null) {
@@ -78,31 +78,9 @@ public final class ConfigLoader {
                 }
 
                 Files.copy(newConfigFile, configPath);
-
-                Key key = keyProducer.produce();
-                cipher.init(key);
-
-                String test = "abcdefghijklmnopqrstuvwxyz0123456789";
-                byte[] encrypted = cipher.encryptFromString(test);
-                String decrypted = cipher.decryptToString(encrypted);
-
-                if (!test.equals(decrypted)) {
-                    logger.error("Whoops, we tested the generated Floodgate keys but " +
-                            "the decrypted test message doesn't match the original.\n" +
-                            "Original message: " + test + "." +
-                            "Decrypted message: " + decrypted + ".\n" +
-                            "The encrypted message itself: " + new String(encrypted)
-                    );
-                    throw new RuntimeException(
-                            "Tested the generated public and private key but, " +
-                                    "the decrypted message doesn't match the original!"
-                    );
-                }
-
-                Files.write(dataFolder.resolve("key.pem"), key.getEncoded());
+            } catch (Exception exception) {
+                logger.error("Error while creating config", exception);
             }
-        } catch (Exception exception) {
-            logger.error("Error while creating config", exception);
         }
 
         T configInstance;
@@ -126,8 +104,37 @@ public final class ConfigLoader {
             throw new RuntimeException("Failed to load the config! Try to delete the config file");
         }
 
+        Path keyPath = dataFolder.resolve(configInstance.getKeyFileName());
+        if (!Files.exists(keyPath)) { // don't assume that the key always exists with the existence of a config
+            try {
+                Key key = keyProducer.produce();
+                cipher.init(key);
+
+                String test = "abcdefghijklmnopqrstuvwxyz0123456789";
+                byte[] encrypted = cipher.encryptFromString(test);
+                String decrypted = cipher.decryptToString(encrypted);
+
+                if (!test.equals(decrypted)) {
+                    logger.error("Whoops, we tested the generated Floodgate keys but " +
+                            "the decrypted test message doesn't match the original.\n" +
+                            "Original message: " + test + "." +
+                            "Decrypted message: " + decrypted + ".\n" +
+                            "The encrypted message itself: " + new String(encrypted)
+                    );
+                    throw new RuntimeException(
+                            "Tested the generated public and private key but, " +
+                                    "the decrypted message doesn't match the original!"
+                    );
+                }
+
+                Files.write(keyPath, key.getEncoded());
+            } catch (Exception exception) {
+                logger.error("Error while creating key", exception);
+            }
+        }
+
         try {
-            Key key = keyProducer.produceFrom(dataFolder.resolve(configInstance.getKeyFileName()));
+            Key key = keyProducer.produceFrom(keyPath);
             cipher.init(key);
             configInstance.setKey(key);
         } catch (IOException exception) {

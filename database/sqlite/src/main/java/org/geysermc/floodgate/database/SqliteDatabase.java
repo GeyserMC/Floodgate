@@ -90,7 +90,7 @@ public class SqliteDatabase extends CommonPlayerLink {
 
                 String javaUsername = result.getString("javaUsername");
                 UUID javaUniqueId = UUID.fromString(result.getString("javaUniqueId"));
-                return new LinkedPlayer(javaUsername, javaUniqueId, bedrockId);
+                return LinkedPlayer.of(javaUsername, javaUniqueId, bedrockId);
             } catch (SQLException | NullPointerException exception) {
                 getLogger().error("Error while getting LinkedPlayer", exception);
                 throw new CompletionException("Error while getting LinkedPlayer", exception);

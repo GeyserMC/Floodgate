@@ -52,7 +52,8 @@ public class ConfigInitializer {
                 Map<String, Property> properties = new LinkedHashMap<>();
                 Class<?> current = type;
                 // make ProxyFloodgateConfig work
-                while (FloodgateConfig.class.isAssignableFrom(current)) {
+                // iterate through all fields of this specific class
+                while (type.isAssignableFrom(current)) {
                     for (Field field : current.getDeclaredFields()) {
                         int modifiers = field.getModifiers();
                         if (!Modifier.isStatic(modifiers) && !Modifier.isTransient(modifiers)) {
