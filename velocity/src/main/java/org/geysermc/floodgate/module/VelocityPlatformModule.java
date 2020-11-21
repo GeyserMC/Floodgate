@@ -44,7 +44,7 @@ import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.inject.velocity.VelocityInjector;
 import org.geysermc.floodgate.listener.VelocityListenerRegistration;
-import org.geysermc.floodgate.listener.VelocityPluginMessageListener;
+import org.geysermc.floodgate.listener.VelocityPluginMessageHandler;
 import org.geysermc.floodgate.logger.Slf4jFloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandRegistration;
 import org.geysermc.floodgate.platform.command.CommandUtil;
@@ -110,7 +110,7 @@ public final class VelocityPlatformModule extends AbstractModule {
     @Provides
     @Singleton
     public PluginMessageHandler pluginMessageHandler() {
-        return new VelocityPluginMessageListener();
+        return new VelocityPluginMessageHandler();
     }
 
     /*

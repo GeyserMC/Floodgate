@@ -45,8 +45,7 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
 import org.geysermc.floodgate.util.RawSkin;
 
-//todo naming of this class is different between platforms
-public class VelocityPluginMessageListener extends PluginMessageHandler {
+public class VelocityPluginMessageHandler extends PluginMessageHandler {
     private ProxyServer proxy;
     private FloodgateLogger logger;
     private ChannelIdentifier formChannel;
