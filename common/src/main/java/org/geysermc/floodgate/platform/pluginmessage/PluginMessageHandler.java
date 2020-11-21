@@ -31,6 +31,7 @@ import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.geysermc.common.form.Form;
+import org.geysermc.floodgate.util.RawSkin;
 
 public abstract class PluginMessageHandler {
     protected final Short2ObjectMap<Form> storedForms = new Short2ObjectOpenHashMap<>();
@@ -38,6 +39,10 @@ public abstract class PluginMessageHandler {
     protected boolean proxy = false;
 
     public abstract boolean sendForm(UUID player, Form form);
+
+    public abstract boolean sendSkinRequest(UUID player, RawSkin skin);
+
+    public abstract void sendSkinResponse(UUID player, String response);
 
     protected byte[] createFormData(Form form) {
         short formId = getNextFormId();

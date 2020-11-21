@@ -94,10 +94,10 @@ public final class VelocityProxyDataHandler extends SimpleChannelInboundHandler<
             case SUCCESS:
                 break;
             case EXCEPTION:
-                ctx.channel().attr(kickMessageAttribute).set(config.getMessages().getInvalidKey());
+                ctx.channel().attr(kickMessageAttribute).set(config.getDisconnect().getInvalidKey());
             case INVALID_DATA_LENGTH:
                 ctx.channel().attr(kickMessageAttribute)
-                        .set(config.getMessages().getInvalidArgumentsLength());
+                        .set(config.getDisconnect().getInvalidArgumentsLength());
                 return;
             default:
                 return;

@@ -32,6 +32,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -57,8 +58,7 @@ public final class ConfigUpdater {
         }
 
         Map<String, Object> config = new Yaml().load(configReader);
-        // currently unused, but can be used when a config name has been changed
-        Map<String, String> renames = new HashMap<>(0);
+        Map<String, String> renames = new HashMap<>();
 
         Object versionElement = config.get("config-version");
         // not a pre-rewrite config
@@ -84,6 +84,8 @@ public final class ConfigUpdater {
                     "(across all your servers, including Geyser)." +
                     "We'll still try to update the config," +
                     "but please regenerate the keys if it failed before asking for support.");
+            renames.put("enabled", "enable"); //todo make dump system and add a boolean 'found-legacy-key' or something like that
+            renames.put("allowed", "allow-linking");
         }
 
         try {

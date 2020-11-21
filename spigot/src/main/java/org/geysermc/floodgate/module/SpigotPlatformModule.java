@@ -45,7 +45,9 @@ import org.geysermc.floodgate.platform.command.CommandRegistration;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
-import org.geysermc.floodgate.pluginmessage.BukkitPluginMessageHandler;
+import org.geysermc.floodgate.pluginmessage.SpigotPluginMessageHandler;
+import org.geysermc.floodgate.pluginmessage.SpigotSkinHandler;
+import org.geysermc.floodgate.skin.SkinHandler;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.SpigotCommandUtil;
 
@@ -104,7 +106,14 @@ public final class SpigotPlatformModule extends AbstractModule {
     @Singleton
     public PluginMessageHandler pluginMessageHandler(@Named("formChannel") String formChannel,
                                                      @Named("skinChannel") String skinChannel) {
-        return new BukkitPluginMessageHandler(plugin, formChannel, skinChannel);
+        return new SpigotPluginMessageHandler(plugin, formChannel, skinChannel);
+    }
+
+    @Provides
+    @Singleton
+    public SkinHandler skinHandler(PluginMessageHandler messageHandler,
+                                   FloodgateLogger logger) {
+        return new SpigotSkinHandler(messageHandler, logger);
     }
 
     /*

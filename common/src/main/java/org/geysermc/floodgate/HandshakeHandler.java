@@ -107,7 +107,7 @@ public final class HandshakeHandler {
             System.out.println(rawSkin);
 
             FloodgatePlayer player =
-                    new FloodgatePlayerImpl(bedrockData, rawSkin, usernamePrefix, replaceSpaces);
+                    FloodgatePlayerImpl.from(bedrockData, rawSkin, usernamePrefix, replaceSpaces);
             api.addPlayer(player.getJavaUniqueId(), player);
 
             return new HandshakeResult(ResultType.SUCCESS, dataArray, bedrockData, player);

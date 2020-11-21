@@ -43,6 +43,7 @@ import net.kyori.adventure.text.Component;
 import org.geysermc.common.form.Form;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
+import org.geysermc.floodgate.util.RawSkin;
 
 //todo naming of this class is different between platforms
 public class VelocityPluginMessageListener extends PluginMessageHandler {
@@ -109,5 +110,15 @@ public class VelocityPluginMessageListener extends PluginMessageHandler {
         return proxy.getPlayer(uuid)
                 .map(value -> value.sendPluginMessage(formChannel, createFormData(form)))
                 .orElse(false);
+    }
+
+    @Override
+    public boolean sendSkinRequest(UUID player, RawSkin skin) {
+        return false; //todo
+    }
+
+    @Override
+    public void sendSkinResponse(UUID player, String response) {
+
     }
 }

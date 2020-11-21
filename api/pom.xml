@@ -37,11 +37,6 @@
             <version>4.1.49.Final</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <version>3.0.2</version>
-        </dependency>
     </dependencies>
 
     <modelVersion>4.0.0</modelVersion>

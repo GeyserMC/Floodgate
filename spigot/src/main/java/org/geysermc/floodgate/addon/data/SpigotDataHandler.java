@@ -181,7 +181,7 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
                     case INVALID_DATA_LENGTH:
                         int dataLength = result.getBedrockData().getDataLength();
                         logger.info(
-                                config.getMessages().getInvalidArgumentsLength(),
+                                config.getDisconnect().getInvalidArgumentsLength(),
                                 BedrockData.EXPECTED_LENGTH, dataLength
                         );
                         ctx.close();

@@ -50,7 +50,7 @@ public abstract class CommonPlayerLink implements PlayerLink {
     private void init(FloodgateConfig config) {
         FloodgateConfig.PlayerLinkConfig linkConfig = config.getPlayerLink();
         enabled = linkConfig.isEnabled();
-        allowLinking = linkConfig.isAllowLinking();
+        allowLinking = linkConfig.isAllowed();
         verifyLinkTimeout = linkConfig.getLinkCodeTimeout();
     }
 

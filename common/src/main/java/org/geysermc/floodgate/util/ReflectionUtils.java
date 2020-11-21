@@ -34,6 +34,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import javax.annotation.Nullable;
+import lombok.Getter;
 import lombok.Setter;
 
 public final class ReflectionUtils {
@@ -45,7 +46,9 @@ public final class ReflectionUtils {
      * will become PacketHandshakingInSetProtocol if the prefix is set to
      * net.minecraft.server.v1_8R3
      */
-    @Setter private static String prefix = null;
+    @Getter
+    @Setter
+    private static String prefix = null;
 
     static {
         Field modifiersField = null;
@@ -386,6 +389,14 @@ public final class ReflectionUtils {
             exception.printStackTrace();
             return null;
         }
+    }
+
+    @Nullable
+    public static <T> T cast(Object instance, Class<T> castTo) {
+        if (castTo == null) {
+            throw new IllegalArgumentException("Cannot cast instance to null");
+        }
+        return castTo.cast(instance);
     }
 
     /**

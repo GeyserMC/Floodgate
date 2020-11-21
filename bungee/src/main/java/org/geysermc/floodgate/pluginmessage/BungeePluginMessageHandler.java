@@ -42,6 +42,7 @@ import net.md_5.bungee.event.EventHandler;
 import org.geysermc.common.form.Form;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
+import org.geysermc.floodgate.util.RawSkin;
 
 public class BungeePluginMessageHandler extends PluginMessageHandler implements Listener {
     private ProxyServer proxy;
@@ -106,5 +107,15 @@ public class BungeePluginMessageHandler extends PluginMessageHandler implements 
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean sendSkinRequest(UUID player, RawSkin skin) {
+        return false; //todo
+    }
+
+    @Override
+    public void sendSkinResponse(UUID player, String response) {
+
     }
 }

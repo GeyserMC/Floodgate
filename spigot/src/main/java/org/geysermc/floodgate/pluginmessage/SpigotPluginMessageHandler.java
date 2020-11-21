@@ -25,23 +25,22 @@
 
 package org.geysermc.floodgate.pluginmessage;
 
-import java.util.Set;
 import java.util.UUID;
+import org.apache.commons.codec.Charsets;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.Messenger;
 import org.geysermc.common.form.Form;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
-import org.geysermc.floodgate.util.ReflectionUtils;
+import org.geysermc.floodgate.util.RawSkin;
 
-public class BukkitPluginMessageHandler extends PluginMessageHandler {
+public class SpigotPluginMessageHandler extends PluginMessageHandler {
     private final JavaPlugin plugin;
     private final String formChannel;
     private final String skinChannel;
 
-    public BukkitPluginMessageHandler(JavaPlugin plugin, String formChannel, String skinChannel) {
+    public SpigotPluginMessageHandler(JavaPlugin plugin, String formChannel, String skinChannel) {
         this.plugin = plugin;
         this.formChannel = formChannel;
         this.skinChannel = skinChannel;
@@ -69,17 +68,35 @@ public class BukkitPluginMessageHandler extends PluginMessageHandler {
     @Override
     public boolean sendForm(UUID playerId, Form form) {
         try {
-            Player player = Bukkit.getPlayer(playerId);
-            //todo improve
-            Set<String> channels = ReflectionUtils.getCastedValue(player, "channels");
-            if (channels != null) {
-                channels.add("floodgate:form");
-            }
-            player.sendPluginMessage(plugin, formChannel, createFormData(form));
+            byte[] formData = createFormData(form);
+            Bukkit.getPlayer(playerId).sendPluginMessage(plugin, formChannel, formData);
         } catch (Exception exception) {
             exception.printStackTrace();
             return false;
         }
         return true;
+    }
+
+    @Override
+    public boolean sendSkinRequest(UUID playerId, RawSkin skin) {
+        try {
+            byte[] skinData = skin.toString().getBytes(Charsets.UTF_8);
+            Bukkit.getPlayer(playerId).sendPluginMessage(plugin, skinChannel, skinData);
+            //todo use json or something to split request and response
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void sendSkinResponse(UUID playerId, String response) {
+        try {
+            byte[] responseData = response.getBytes(Charsets.UTF_8);
+            Bukkit.getPlayer(playerId).sendPluginMessage(plugin, skinChannel, responseData);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
     }
 }

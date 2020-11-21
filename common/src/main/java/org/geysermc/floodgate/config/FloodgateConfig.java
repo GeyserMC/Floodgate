@@ -25,8 +25,6 @@
 
 package org.geysermc.floodgate.config;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.security.Key;
 import lombok.Getter;
 
@@ -36,29 +34,19 @@ import lombok.Getter;
  */
 @Getter
 public class FloodgateConfig {
-    @JsonProperty(value = "key-file-name")
     private String keyFileName;
-    @JsonProperty(value = "username-prefix")
     private String usernamePrefix;
-    @JsonProperty(value = "replace-spaces")
     private boolean replaceSpaces;
+    private boolean applySkinDirectly; //todo
 
-    @JsonProperty(value = "default-locale")
     private String defaultLocale;
 
-    @JsonProperty(value = "disconnect")
-    private DisconnectMessages messages;
-
-    @JsonProperty(value = "player-link")
+    private DisconnectMessages disconnect;
     private PlayerLinkConfig playerLink;
 
-    @JsonProperty
     private boolean debug;
+    private int configVersion;
 
-    @JsonProperty("config-version")
-    private boolean configVersion;
-
-    @JsonIgnore
     private Key key = null;
 
     public void setKey(Key key) {
@@ -73,23 +61,16 @@ public class FloodgateConfig {
 
     @Getter
     public static class DisconnectMessages {
-        @JsonProperty("invalid-key")
         private String invalidKey;
-        @JsonProperty("invalid-arguments-length")
         private String invalidArgumentsLength;
     }
 
     @Getter
     public static class PlayerLinkConfig {
-        @JsonProperty("enable")
         private boolean enabled;
-        @JsonProperty("allow-linking")
-        private boolean allowLinking;
-        @JsonProperty("link-code-timeout")
+        private boolean allowed;
         private long linkCodeTimeout;
-        @JsonProperty("type")
         private String type;
-        @JsonProperty("auto-download")
         private boolean autoDownload;
     }
 }

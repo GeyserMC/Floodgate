@@ -25,8 +25,6 @@
 
 package org.geysermc.floodgate.config.loader;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -114,9 +112,8 @@ public final class ConfigLoader {
                 updater.update(defaultConfigPath);
             }
 
-            FloodgateConfig config =
-                    new ObjectMapper(new YAMLFactory())
-                            .readValue(Files.readAllBytes(configPath), configClass);
+            FloodgateConfig config = ConfigInitializer.initializeFrom(
+                    Files.newInputStream(configPath), configClass);
 
             try {
                 configInstance = (T) config;

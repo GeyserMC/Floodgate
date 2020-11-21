@@ -100,11 +100,11 @@ public final class BungeeDataHandler {
             HandshakeResult result = handler.handle(extraData);
             switch (result.getResultType()) {
                 case EXCEPTION:
-                    event.setCancelReason(config.getMessages().getInvalidKey());
+                    event.setCancelReason(config.getDisconnect().getInvalidKey());
                     break;
                 case INVALID_DATA_LENGTH:
                     event.setCancelReason(TextComponent.fromLegacyText(String.format(
-                            config.getMessages().getInvalidArgumentsLength(),
+                            config.getDisconnect().getInvalidArgumentsLength(),
                             BedrockData.EXPECTED_LENGTH, result.getBedrockData().getDataLength()
                     )));
                     break;

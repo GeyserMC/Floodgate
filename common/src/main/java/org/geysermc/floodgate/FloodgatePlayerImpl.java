@@ -28,7 +28,9 @@ package org.geysermc.floodgate;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.InstanceHolder;
@@ -43,6 +45,7 @@ import org.geysermc.floodgate.util.RawSkin;
 import org.geysermc.floodgate.util.UiProfile;
 
 @Getter
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class FloodgatePlayerImpl implements FloodgatePlayer {
     private final String version;
     private final String username;
@@ -55,6 +58,7 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
     private final UiProfile uiProfile;
     private final InputMode inputMode;
     private final String ip;
+    private final boolean fromProxy; //todo remove hasBungeeData
     private final LinkedPlayer linkedPlayer;
     private final RawSkin rawSkin;
 
@@ -63,43 +67,45 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
      */
     @Setter private boolean login = true;
 
-    FloodgatePlayerImpl(BedrockData data, RawSkin skin, String prefix, boolean replaceSpaces) {
+    protected static FloodgatePlayerImpl from(BedrockData data, RawSkin skin,
+                                              String prefix, boolean replaceSpaces) {
         FloodgateApi api = FloodgateApi.getInstance();
-        version = data.getVersion();
-        username = data.getUsername();
 
         int usernameLength = Math.min(data.getUsername().length(), 16 - prefix.length());
-        String editedUsername = prefix + data.getUsername().substring(0, usernameLength);
-
+        String javaUsername = prefix + data.getUsername().substring(0, usernameLength);
         if (replaceSpaces) {
-            editedUsername = editedUsername.replaceAll(" ", "_");
+            javaUsername = javaUsername.replaceAll(" ", "_");
         }
-        javaUsername = editedUsername;
-        javaUniqueId = api.createJavaPlayerId(Long.parseLong(data.getXuid()));
 
-        xuid = data.getXuid();
-        deviceOs = DeviceOs.getById(data.getDeviceOs());
-        languageCode = data.getLanguageCode();
-        uiProfile = UiProfile.getById(data.getUiProfile());
-        inputMode = InputMode.getById(data.getInputMode());
-        ip = data.getIp();
-        rawSkin = skin;
+        UUID javaUniqueId = api.createJavaPlayerId(Long.parseLong(data.getXuid()));
+
+        DeviceOs deviceOs = DeviceOs.getById(data.getDeviceOs());
+        UiProfile uiProfile = UiProfile.getById(data.getUiProfile());
+        InputMode inputMode = InputMode.getById(data.getInputMode());
+
+        LinkedPlayer linkedPlayer;
 
         // we'll use the LinkedPlayer provided by Bungee or Velocity (if they included one)
         if (data.hasPlayerLink()) {
             linkedPlayer = data.getLinkedPlayer();
-            return;
+        } else {
+            // every implementation (Bukkit, Bungee and Velocity) run this constructor async,
+            // so we should be fine doing this synchronised.
+            linkedPlayer = fetchLinkedPlayer(api.getPlayerLink(), javaUniqueId);
         }
 
-        // every implementation (Bukkit, Bungee and Velocity) run this constructor async,
-        // so we should be fine doing this synchronised.
-        linkedPlayer = fetchLinkedPlayer(api.getPlayerLink());
+        FloodgatePlayerImpl player = new FloodgatePlayerImpl(
+                data.getVersion(), data.getUsername(), javaUsername, javaUniqueId, data.getXuid(),
+                deviceOs, data.getLanguageCode(), uiProfile, inputMode, data.getIp(),
+                data.isFromProxy(), linkedPlayer, skin);
 
-        // oh oh, now our encrypted data is incorrect. We have to update it...
+        // oh oh, after fetching the linkedPlayer our encrypted data is incorrect.
+        // We have to update it...
         if (linkedPlayer != null && api instanceof ProxyFloodgateApi) {
             InstanceHolder.castApi(ProxyFloodgateApi.class)
-                    .updateEncryptedData(getCorrectUniqueId(), toBedrockData());
+                    .updateEncryptedData(player.getCorrectUniqueId(), player.toBedrockData());
         }
+        return player;
     }
 
     public UUID getCorrectUniqueId() {
@@ -115,9 +121,9 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
      * Please note that this method loads the LinkedPlayer synchronously.
      *
      * @return LinkedPlayer or null if the player isn't linked or linking isn't enabled
-     * @see #fetchLinkedPlayerAsync(PlayerLink) for the asynchronously alternative
+     * @see #fetchLinkedPlayerAsync(PlayerLink, UUID) for the asynchronously alternative
      */
-    public LinkedPlayer fetchLinkedPlayer(PlayerLink link) {
+    public static LinkedPlayer fetchLinkedPlayer(PlayerLink link, UUID javaUniqueId) {
         if (!link.isEnabledAndAllowed()) {
             return null;
         }
@@ -135,18 +141,18 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
      *
      * @return a future holding the LinkedPlayer or null if the player isn't linked or when linking
      * isn't enabled
-     * @see #fetchLinkedPlayer(PlayerLink) for the sync version
+     * @see #fetchLinkedPlayer(PlayerLink, UUID) for the sync version
      */
-    public CompletableFuture<LinkedPlayer> fetchLinkedPlayerAsync(PlayerLink link) {
+    public static CompletableFuture<LinkedPlayer> fetchLinkedPlayerAsync(PlayerLink link,
+                                                                         UUID javaUniqueId) {
         return link.isEnabledAndAllowed() ?
                 link.getLinkedPlayer(javaUniqueId) :
                 CompletableFuture.completedFuture(null);
     }
 
     public BedrockData toBedrockData() {
-        return new BedrockData(
+        return BedrockData.of(
                 version, username, xuid, deviceOs.ordinal(), languageCode,
-                uiProfile.ordinal(), inputMode.ordinal(), ip, linkedPlayer
-        );
+                uiProfile.ordinal(), inputMode.ordinal(), ip, linkedPlayer, fromProxy);
     }
 }
