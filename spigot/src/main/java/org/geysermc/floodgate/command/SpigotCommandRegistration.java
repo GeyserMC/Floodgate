@@ -90,7 +90,13 @@ public final class SpigotCommandRegistration implements CommandRegistration {
             }
 
             Player player = (Player) sender;
-            String locale = player.spigot().getLocale();
+            String locale;
+            try {
+                locale = player.getLocale();
+            } catch (Exception exception) {
+                // server is older then 1.12.0
+                locale = player.spigot().getLocale();
+            }
 
             command.execute(sender, player.getUniqueId(), sender.getName(), locale, args);
         }
