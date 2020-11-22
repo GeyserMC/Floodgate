@@ -121,7 +121,7 @@ public final class CommonModule extends AbstractModule {
     @Singleton
     @Named("playerAttribute")
     public AttributeKey<FloodgatePlayer> playerAttribute() {
-        return AttributeKey.newInstance("floodgate-player");
+        return AttributeKey.valueOf("floodgate-player");
     }
 
     @Provides

@@ -151,6 +151,6 @@ public final class VelocityPlatformModule extends AbstractModule {
     @Singleton
     @Named("kickMessageAttribute")
     public AttributeKey<String> kickMessageAttribute() {
-        return AttributeKey.newInstance("floodgate-kick-message");
+        return AttributeKey.valueOf("floodgate-kick-message");
     }
 }
