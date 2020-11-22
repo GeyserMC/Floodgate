@@ -42,6 +42,7 @@ import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import org.geysermc.common.form.Form;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
 import org.geysermc.floodgate.util.RawSkin;
 
@@ -50,11 +51,14 @@ public class VelocityPluginMessageHandler extends PluginMessageHandler {
     private FloodgateLogger logger;
     private ChannelIdentifier formChannel;
 
+    public VelocityPluginMessageHandler(FloodgateConfigHolder configHolder) {
+        super(configHolder);
+    }
+
     @Inject // called because this is a listener as well
     public void init(ProxyServer proxy, FloodgateLogger logger,
                      @Named("formChannel") String formChannelName,
                      @Named("skinChannel") String skinChannelName) {
-        super.proxy = true;
         this.proxy = proxy;
         this.logger = logger;
 
