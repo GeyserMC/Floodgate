@@ -38,17 +38,15 @@ import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.config.loader.ConfigLoader;
 import org.geysermc.floodgate.link.PlayerLinkLoader;
 import org.geysermc.floodgate.module.ConfigLoadedModule;
 import org.geysermc.floodgate.module.PostInitializeModule;
-import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
-import org.geysermc.floodgate.util.LanguageManager;
 
 public class FloodgatePlatform {
     private static final UUID KEY = UUID.randomUUID();
     private final FloodgateApi api;
-    private final LanguageManager languageManager;
     private final PlatformInjector injector;
 
     private final FloodgateLogger logger;
@@ -57,18 +55,17 @@ public class FloodgatePlatform {
     private Injector guice;
 
     @Inject
-    public FloodgatePlatform(FloodgateApi api, LanguageManager languageManager,
-                             PlatformInjector platformInjector, FloodgateLogger logger) {
+    public FloodgatePlatform(FloodgateApi api, PlatformInjector platformInjector,
+                             FloodgateLogger logger) {
         this.api = api;
-        this.languageManager = languageManager;
         this.injector = platformInjector;
         this.logger = logger;
     }
 
     @Inject
     public void init(@Named("dataDirectory") Path dataDirectory, ConfigLoader configLoader,
-                     PlayerLinkLoader playerLinkLoader, HandshakeHandler handshakeHandler,
-                     Injector injector, PluginMessageHandler pluginMessageHandler) {
+                     PlayerLinkLoader playerLinkLoader, FloodgateConfigHolder configHolder,
+                     Injector injector) {
 
         if (!Files.isDirectory(dataDirectory)) {
             try {
@@ -84,15 +81,11 @@ public class FloodgatePlatform {
             logger.enableDebug();
         }
 
-        // make the config available for other classes
-        guice = injector.createChildInjector(new ConfigLoadedModule(config));
-
-        guice.injectMembers(languageManager);
-        guice.injectMembers(playerLinkLoader);
-        guice.injectMembers(handshakeHandler);
-        guice.injectMembers(pluginMessageHandler);
-
+        configHolder.set(config);
         PlayerLink link = playerLinkLoader.load();
+
+        // make the config available for other classes (who are injected later on)
+        guice = injector.createChildInjector(new ConfigLoadedModule(config));
 
         InstanceHolder.setInstance(api, link, this.injector, KEY);
     }

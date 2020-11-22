@@ -64,7 +64,7 @@ public final class LinkAccountCommand implements Command {
     public void execute(Object player, UUID uuid, String username, String locale, String[] args) {
         PlayerLink link = api.getPlayerLink();
         if (!link.isEnabledAndAllowed()) {
-            sendMessage(player, locale, Message.LINK_REQUEST_ERROR);
+            sendMessage(player, locale, Message.LINK_REQUEST_DISABLED);
             return;
         }
 

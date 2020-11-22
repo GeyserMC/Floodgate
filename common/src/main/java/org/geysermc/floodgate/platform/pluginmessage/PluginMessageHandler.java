@@ -31,12 +31,17 @@ import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.geysermc.common.form.Form;
+import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.util.RawSkin;
 
 public abstract class PluginMessageHandler {
     protected final Short2ObjectMap<Form> storedForms = new Short2ObjectOpenHashMap<>();
     private final AtomicInteger nextFormId = new AtomicInteger(0);
-    protected boolean proxy = false;
+    private final FloodgateConfigHolder configHolder;
+
+    protected PluginMessageHandler(FloodgateConfigHolder configHolder) {
+        this.configHolder = configHolder;
+    }
 
     public abstract boolean sendForm(UUID player, Form form);
 
@@ -46,7 +51,7 @@ public abstract class PluginMessageHandler {
 
     protected byte[] createFormData(Form form) {
         short formId = getNextFormId();
-        if (proxy) {
+        if (configHolder.isProxy()) {
             formId |= 0x8000;
         }
         storedForms.put(formId, form);

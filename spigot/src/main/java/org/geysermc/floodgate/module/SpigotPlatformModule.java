@@ -37,6 +37,7 @@ import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.command.SpigotCommandRegistration;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.inject.spigot.SpigotInjector;
 import org.geysermc.floodgate.listener.SpigotListenerRegistration;
@@ -104,16 +105,17 @@ public final class SpigotPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public PluginMessageHandler pluginMessageHandler(@Named("formChannel") String formChannel,
+    public PluginMessageHandler pluginMessageHandler(FloodgateConfigHolder configHolder,
+                                                     @Named("formChannel") String formChannel,
                                                      @Named("skinChannel") String skinChannel) {
-        return new SpigotPluginMessageHandler(plugin, formChannel, skinChannel);
+        return new SpigotPluginMessageHandler(configHolder, plugin, formChannel, skinChannel);
     }
 
     @Provides
     @Singleton
-    public SkinHandler skinHandler(PluginMessageHandler messageHandler,
-                                   FloodgateLogger logger) {
-        return new SpigotSkinHandler(messageHandler, logger);
+    public SkinHandler skinHandler(PluginMessageHandler messageHandler, FloodgateLogger logger,
+                                   FloodgateConfigHolder configHolder) {
+        return new SpigotSkinHandler(messageHandler, logger, plugin, configHolder);
     }
 
     /*

@@ -26,6 +26,7 @@
 package org.geysermc.floodgate.module;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -39,6 +40,7 @@ import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.config.loader.ConfigLoader;
 import org.geysermc.floodgate.config.updater.ConfigFileUpdater;
 import org.geysermc.floodgate.config.updater.ConfigUpdater;
@@ -82,6 +84,12 @@ public final class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
+    public FloodgateConfigHolder configHolder() {
+        return new FloodgateConfigHolder();
+    }
+
+    @Provides
+    @Singleton
     public ConfigLoader configLoader(
             @Named("configClass") Class<? extends FloodgateConfig> configClass,
             ConfigUpdater configUpdater, KeyProducer producer,
@@ -101,20 +109,25 @@ public final class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public LanguageManager languageLoader() {
-        return new LanguageManager();
+    public LanguageManager languageLoader(FloodgateConfigHolder configHolder,
+                                          FloodgateLogger logger) {
+        return new LanguageManager(configHolder, logger);
     }
 
     @Provides
     @Singleton
-    public PlayerLinkLoader playerLinkLoader() {
-        return new PlayerLinkLoader();
+    public PlayerLinkLoader playerLinkLoader(Injector injector,
+                                             FloodgateConfigHolder configHolder,
+                                             FloodgateLogger logger,
+                                             @Named("dataDirectory") Path dataDirectory) {
+        return new PlayerLinkLoader(injector, configHolder, logger, dataDirectory);
     }
 
     @Provides
     @Singleton
-    public HandshakeHandler handshakeHandler(SimpleFloodgateApi api, FloodgateCipher cipher) {
-        return new HandshakeHandler(api, cipher);
+    public HandshakeHandler handshakeHandler(SimpleFloodgateApi api, FloodgateCipher cipher,
+                                             FloodgateConfigHolder configHolder) {
+        return new HandshakeHandler(api, cipher, configHolder);
     }
 
     @Provides

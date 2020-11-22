@@ -38,6 +38,7 @@ import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.command.BungeeCommandRegistration;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
@@ -112,8 +113,8 @@ public final class BungeePlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public PluginMessageHandler pluginMessageHandler() {
-        return new BungeePluginMessageHandler();
+    public PluginMessageHandler pluginMessageHandler(FloodgateConfigHolder configHolder) {
+        return new BungeePluginMessageHandler(configHolder);
     }
 
     /*

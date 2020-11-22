@@ -26,7 +26,6 @@
 package org.geysermc.floodgate.pluginmessage;
 
 import com.google.gson.JsonObject;
-import com.google.inject.Inject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
@@ -36,7 +35,7 @@ import org.bukkit.entity.Player;
 import org.geysermc.floodgate.SpigotPlugin;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
 import org.geysermc.floodgate.skin.SkinHandler;
 import org.geysermc.floodgate.skin.SkinUploader.UploadResult;
@@ -52,17 +51,14 @@ public class SpigotSkinHandler extends SkinHandler {
         GET_PROFILE_METHOD = ReflectionUtils.getMethod(craftPlayerClass, "getProfile");
     }
 
-    private SpigotPlugin plugin;
-    private FloodgateConfig config;
+    private final SpigotPlugin plugin;
+    private final FloodgateConfigHolder configHolder;
 
-    public SpigotSkinHandler(PluginMessageHandler messageHandler, FloodgateLogger logger) {
+    public SpigotSkinHandler(PluginMessageHandler messageHandler, FloodgateLogger logger,
+                             SpigotPlugin plugin, FloodgateConfigHolder configHolder) {
         super(messageHandler, logger);
-    }
-
-    @Inject
-    public void init(SpigotPlugin plugin, FloodgateConfig config) {
         this.plugin = plugin;
-        this.config = config;
+        this.configHolder = configHolder;
     }
 
     @Override
@@ -86,7 +82,7 @@ public class SpigotSkinHandler extends SkinHandler {
                 response.get("signature").getAsString());
         properties.put("textures", property);
 
-        if (config.isApplySkinDirectly()) {
+        if (configHolder.get().isApplySkinDirectly()) {
             plugin.getServer().getScheduler().runTask(plugin, () -> {
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     if (p != player) {

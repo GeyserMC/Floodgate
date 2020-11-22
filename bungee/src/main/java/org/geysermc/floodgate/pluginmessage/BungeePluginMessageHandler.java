@@ -41,19 +41,23 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.event.EventHandler;
 import org.geysermc.common.form.Form;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
 import org.geysermc.floodgate.util.RawSkin;
 
-public class BungeePluginMessageHandler extends PluginMessageHandler implements Listener {
+public final class BungeePluginMessageHandler extends PluginMessageHandler implements Listener {
     private ProxyServer proxy;
     private FloodgateLogger logger;
     private String formChannel;
+
+    public BungeePluginMessageHandler(FloodgateConfigHolder configHolder) {
+        super(configHolder);
+    }
 
     @Inject // called because this is a listener as well
     public void init(Plugin plugin, FloodgateLogger logger,
                      @Named("formChannel") String formChannel,
                      @Named("skinChannel") String skinChannel) {
-        super.proxy = true;
         this.proxy = plugin.getProxy();
         this.logger = logger;
         this.formChannel = formChannel;

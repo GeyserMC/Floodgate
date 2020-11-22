@@ -41,20 +41,25 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.config.FloodgateConfigHolder;
 
+@RequiredArgsConstructor
 public final class PlayerLinkLoader {
-    @Inject private Injector injector;
-    @Inject private FloodgateConfig config;
-    @Inject private FloodgateLogger logger;
-
-    @Inject
-    @Named("dataDirectory")
-    private Path dataDirectory;
+    private final Injector injector;
+    private final FloodgateConfigHolder configHolder;
+    private final FloodgateLogger logger;
+    private final Path dataDirectory;
 
     public PlayerLink load() {
+        FloodgateConfig config = configHolder.get();
+        if (config == null) {
+            throw new IllegalStateException("Config cannot be null!");
+        }
+
         FloodgateConfig.PlayerLinkConfig linkConfig = config.getPlayerLink();
         if (!linkConfig.isEnabled()) {
             return new DisabledPlayerLink();

@@ -37,6 +37,8 @@ import org.geysermc.floodgate.api.InstanceHolder;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.DeviceOs;
 import org.geysermc.floodgate.util.InputMode;
@@ -68,12 +70,14 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
     @Setter private boolean login = true;
 
     protected static FloodgatePlayerImpl from(BedrockData data, RawSkin skin,
-                                              String prefix, boolean replaceSpaces) {
+                                              FloodgateConfigHolder configHolder) {
         FloodgateApi api = FloodgateApi.getInstance();
+        FloodgateConfig config = configHolder.get();
 
+        String prefix = config.getUsernamePrefix();
         int usernameLength = Math.min(data.getUsername().length(), 16 - prefix.length());
         String javaUsername = prefix + data.getUsername().substring(0, usernameLength);
-        if (replaceSpaces) {
+        if (config.isReplaceSpaces()) {
             javaUsername = javaUsername.replaceAll(" ", "_");
         }
 

@@ -23,31 +23,33 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate;
+package org.geysermc.floodgate.config;
 
-import com.google.inject.Inject;
-import com.google.inject.Module;
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.api.inject.PlatformInjector;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
+public class FloodgateConfigHolder {
+    private FloodgateConfig config;
 
-public final class SpigotPlatform extends FloodgatePlatform {
-    @Inject private JavaPlugin plugin;
-
-    @Inject
-    public SpigotPlatform(FloodgateApi api, PlatformInjector platformInjector,
-                          FloodgateLogger logger) {
-        super(api, platformInjector, logger);
+    public boolean has() {
+        return config != null;
     }
 
-    @Override
-    public boolean enable(Module... postInitializeModules) {
-        boolean success = super.enable(postInitializeModules);
-        if (!success) {
-            Bukkit.getPluginManager().disablePlugin(plugin);
-        }
-        return success;
+    public boolean isProxy() {
+        return config instanceof ProxyFloodgateConfig;
+    }
+
+    public FloodgateConfig get() {
+        return config;
+    }
+
+    public ProxyFloodgateConfig getAsProxy() {
+        return getAs();
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends FloodgateConfig> T getAs() {
+        return (T) config;
+    }
+
+    public void set(FloodgateConfig config) {
+        this.config = config;
     }
 }

@@ -28,7 +28,6 @@ package org.geysermc.floodgate;
 import static org.geysermc.floodgate.util.BedrockData.EXPECTED_LENGTH;
 
 import com.google.common.base.Charsets;
-import com.google.inject.Inject;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,7 +35,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.crypto.AesCipher;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.util.BedrockData;
@@ -47,17 +46,7 @@ import org.geysermc.floodgate.util.RawSkin;
 public final class HandshakeHandler {
     private final SimpleFloodgateApi api;
     private final FloodgateCipher cipher;
-    private boolean proxy;
-
-    private String usernamePrefix;
-    private boolean replaceSpaces;
-
-    @Inject
-    public void init(FloodgateConfig config) {
-        this.proxy = config.isProxy();
-        this.usernamePrefix = config.getUsernamePrefix();
-        this.replaceSpaces = config.isReplaceSpaces();
-    }
+    private final FloodgateConfigHolder configHolder;
 
     public HandshakeResult handle(@NonNull String handshakeData) {
         try {
@@ -69,6 +58,8 @@ public final class HandshakeHandler {
                 isBungeeData = FloodgateCipher.hasHeader(dataArray[3]);
             }
 
+            boolean proxy = configHolder.get().isProxy();
+            //todo remove this check
             if (proxy && isBungeeData || !isBungeeData && dataArray.length != 2) {
                 return ResultType.NOT_FLOODGATE_DATA.getCachedResult();
             }
@@ -106,8 +97,7 @@ public final class HandshakeHandler {
 
             System.out.println(rawSkin);
 
-            FloodgatePlayer player =
-                    FloodgatePlayerImpl.from(bedrockData, rawSkin, usernamePrefix, replaceSpaces);
+            FloodgatePlayer player = FloodgatePlayerImpl.from(bedrockData, rawSkin, configHolder);
             api.addPlayer(player.getJavaUniqueId(), player);
 
             return new HandshakeResult(ResultType.SUCCESS, dataArray, bedrockData, player);

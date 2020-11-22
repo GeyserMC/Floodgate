@@ -47,7 +47,6 @@ public final class SpigotListener implements Listener {
     @Inject private LanguageManager languageManager;
     @Inject private FloodgateLogger logger;
 
-
     @EventHandler(priority = EventPriority.MONITOR)
     public void onAsyncPreLogin(AsyncPlayerPreLoginEvent event) {
         if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {

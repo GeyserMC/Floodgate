@@ -32,6 +32,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.Messenger;
 import org.geysermc.common.form.Form;
 import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
 import org.geysermc.floodgate.util.RawSkin;
 
@@ -40,7 +41,9 @@ public class SpigotPluginMessageHandler extends PluginMessageHandler {
     private final String formChannel;
     private final String skinChannel;
 
-    public SpigotPluginMessageHandler(JavaPlugin plugin, String formChannel, String skinChannel) {
+    public SpigotPluginMessageHandler(FloodgateConfigHolder configHolder, JavaPlugin plugin,
+                                      String formChannel, String skinChannel) {
+        super(configHolder);
         this.plugin = plugin;
         this.formChannel = formChannel;
         this.skinChannel = skinChannel;
