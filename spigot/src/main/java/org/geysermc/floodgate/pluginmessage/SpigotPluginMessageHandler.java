@@ -25,8 +25,8 @@
 
 package org.geysermc.floodgate.pluginmessage;
 
+import com.google.common.base.Charsets;
 import java.util.UUID;
-import org.apache.commons.codec.Charsets;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.Messenger;

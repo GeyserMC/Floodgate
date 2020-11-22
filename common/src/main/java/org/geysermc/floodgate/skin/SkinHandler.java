@@ -66,6 +66,7 @@ public abstract class SkinHandler {
                     logger.info(uploadResult.getResponse().toString());
                     messageHandler.sendSkinResponse(
                             player.getJavaUniqueId(), uploadResult.getResponse().toString());
+                    applySkin(player, uploadResult);
                 });
     }
 
