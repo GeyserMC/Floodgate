@@ -33,7 +33,6 @@ import java.util.concurrent.Executors;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.geysermc.floodgate.util.FloodgateHttpException;
 import org.geysermc.floodgate.util.HttpUtils;
 import org.geysermc.floodgate.util.HttpUtils.HttpPostResponse;
 import org.geysermc.floodgate.util.RawSkin;
@@ -73,7 +72,7 @@ public final class SkinUploader {
                 uploadSkinInner(rawSkin, times);
             }
             return result;
-        } catch (FloodgateHttpException exception) {
+        } catch (RuntimeException exception) {
             return UploadResult.exception(exception);
         }
     }

@@ -30,7 +30,6 @@ import com.google.gson.JsonObject;
 import java.awt.image.BufferedImage;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -48,73 +47,52 @@ public class HttpUtils {
     private static final String BOUNDARY = "******";
     private static final String END = "\r\n";
 
-    public static HttpPostResponse post(String urlString, BufferedImage... images)
-            throws FloodgateHttpException {
-
+    public static HttpPostResponse post(String urlString, BufferedImage... images) {
         HttpURLConnection connection;
 
         try {
             URL url = new URL(urlString);
             connection = (HttpURLConnection) url.openConnection();
-        } catch (Exception e) {
-            throw new FloodgateHttpException("Failed to create connection", e);
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to create connection", exception);
         }
 
-        OutputStream outputStream = null;
-        DataOutputStream dataOutputStream = null;
+        DataOutputStream outputStream = null;
 
         try {
-            connection.setDoInput(true);
             connection.setDoOutput(true);
             connection.setUseCaches(false);
+            connection.setRequestProperty("User-Agent", USER_AGENT);
             connection.setRequestProperty(
                     "Content-Type",
                     "multipart/form-data;boundary=" + BOUNDARY
             );
 
-            outputStream = connection.getOutputStream();
-            dataOutputStream = new DataOutputStream(outputStream);
-            writeDataFor(dataOutputStream, images);
-        } catch (Exception e) {
-            try {
-                outputStream.close();
-                dataOutputStream.close();
-            } catch (Exception ignored) {
-            }
-            throw new FloodgateHttpException("Failed to create request", e);
-        }
-
-        int responseCode = -1;
-        try {
-            responseCode = connection.getResponseCode();
-        } catch (Exception ignored) {
-        }
-
-        InputStream inputStream = null;
-        InputStreamReader inputStreamReader = null;
-
-        try {
-            inputStream = connection.getInputStream();
-            inputStreamReader = new InputStreamReader(inputStream);
-
-            JsonObject response = GSON.fromJson(inputStreamReader, JsonObject.class);
-
-            inputStreamReader.close();
-            inputStream.close();
-
-            dataOutputStream.close();
-            outputStream.close();
-
-            return new HttpPostResponse(responseCode, response);
-        } catch (Exception e) {
-            throw new FloodgateHttpException("Failed to read response", e, responseCode);
+            outputStream = new DataOutputStream(connection.getOutputStream());
+            writeDataFor(outputStream, images);
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to create request", exception);
         } finally {
             try {
                 outputStream.close();
-                dataOutputStream.close();
+            } catch (Exception ignored) {
+            }
+        }
 
+        InputStreamReader inputStream = null;
+
+        try {
+            inputStream = new InputStreamReader(connection.getInputStream());
+            int responseCode = connection.getResponseCode();
+
+            JsonObject response = GSON.fromJson(inputStream, JsonObject.class);
+
+            return new HttpPostResponse(responseCode, response);
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to read response", exception);
+        } finally {
+            try {
                 inputStream.close();
-                inputStreamReader.close();
             } catch (Exception ignored) {
             }
         }
@@ -132,9 +110,8 @@ public class HttpUtils {
                 outputStream.writeBytes(END);
             }
             outputStream.writeBytes(CONNECTION_STRING + BOUNDARY + CONNECTION_STRING + END);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+        } catch (Exception exception) {
+            throw new RuntimeException(exception);
         }
     }
 
