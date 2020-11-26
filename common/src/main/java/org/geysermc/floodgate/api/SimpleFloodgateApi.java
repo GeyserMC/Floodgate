@@ -31,6 +31,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.common.form.Form;
+import org.geysermc.common.form.FormBuilder;
 import org.geysermc.floodgate.FloodgatePlayerImpl;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
@@ -74,10 +75,13 @@ public class SimpleFloodgateApi implements FloodgateApi {
     }
 
     @Override
-    public boolean sendForm(UUID uuid, Form form) {
-        // the most easy way is to add the sendForm method to something that has to be implemented
-        // to every platform anyway, not the most elegant solution though.
+    public boolean sendForm(UUID uuid, Form<?> form) {
         return pluginMessageHandler.sendForm(uuid, form);
+    }
+
+    @Override
+    public boolean sendForm(UUID uuid, FormBuilder<?, ?> formBuilder) {
+        return sendForm(uuid, formBuilder.build());
     }
 
     public FloodgatePlayer addPlayer(UUID uuid, FloodgatePlayer player) {

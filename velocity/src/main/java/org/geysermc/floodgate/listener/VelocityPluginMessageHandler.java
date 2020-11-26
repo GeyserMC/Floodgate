@@ -109,7 +109,7 @@ public class VelocityPluginMessageHandler extends PluginMessageHandler {
     }
 
     @Override
-    public boolean sendForm(UUID uuid, Form form) {
+    public boolean sendForm(UUID uuid, Form<?> form) {
         return proxy.getPlayer(uuid)
                 .map(value -> value.sendPluginMessage(formChannel, createFormData(form)))
                 .orElse(false);

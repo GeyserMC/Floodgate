@@ -69,7 +69,7 @@ public class SpigotPluginMessageHandler extends PluginMessageHandler {
     }
 
     @Override
-    public boolean sendForm(UUID playerId, Form form) {
+    public boolean sendForm(UUID playerId, Form<?> form) {
         try {
             byte[] formData = createFormData(form);
             Bukkit.getPlayer(playerId).sendPluginMessage(plugin, formChannel, formData);

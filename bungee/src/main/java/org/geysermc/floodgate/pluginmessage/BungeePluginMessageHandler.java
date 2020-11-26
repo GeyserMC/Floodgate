@@ -104,7 +104,7 @@ public final class BungeePluginMessageHandler extends PluginMessageHandler imple
     }
 
     @Override
-    public boolean sendForm(UUID uuid, Form form) {
+    public boolean sendForm(UUID uuid, Form<?> form) {
         ProxiedPlayer player = proxy.getPlayer(uuid);
         if (player != null) {
             player.sendData(formChannel, createFormData(form));

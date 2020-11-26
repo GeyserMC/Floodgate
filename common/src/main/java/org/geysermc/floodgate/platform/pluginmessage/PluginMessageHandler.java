@@ -35,7 +35,7 @@ import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.util.RawSkin;
 
 public abstract class PluginMessageHandler {
-    protected final Short2ObjectMap<Form> storedForms = new Short2ObjectOpenHashMap<>();
+    protected final Short2ObjectMap<Form<?>> storedForms = new Short2ObjectOpenHashMap<>();
     private final AtomicInteger nextFormId = new AtomicInteger(0);
     private final FloodgateConfigHolder configHolder;
 
@@ -43,13 +43,13 @@ public abstract class PluginMessageHandler {
         this.configHolder = configHolder;
     }
 
-    public abstract boolean sendForm(UUID player, Form form);
+    public abstract boolean sendForm(UUID player, Form<?> form);
 
     public abstract boolean sendSkinRequest(UUID player, RawSkin skin);
 
     public abstract void sendSkinResponse(UUID player, String response);
 
-    protected byte[] createFormData(Form form) {
+    protected byte[] createFormData(Form<?> form) {
         short formId = getNextFormId();
         if (configHolder.isProxy()) {
             formId |= 0x8000;
@@ -67,7 +67,7 @@ public abstract class PluginMessageHandler {
     }
 
     protected boolean callResponseConsumer(byte[] data) {
-        Form storedForm = storedForms.remove(getFormId(data));
+        Form<?> storedForm = storedForms.remove(getFormId(data));
         if (storedForm != null) {
             storedForm.getResponseHandler().accept(
                     new String(data, 2, data.length - 2, Charsets.UTF_8));
