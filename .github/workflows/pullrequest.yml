@@ -31,8 +31,8 @@ jobs:
         uses: actions/upload-artifact@v1
         if: success()
         with:
-          name: Floodgate Bukkit
-          path: bukkit/target/floodgate-bukkit.jar
+          name: Floodgate Spigot
+          path: bukkit/target/floodgate-spigot.jar
       - name: Archive artifacts (Floodgate Velocity)
         uses: actions/upload-artifact@v1
         if: success()
