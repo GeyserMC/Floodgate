@@ -51,6 +51,7 @@ import org.geysermc.floodgate.pluginmessage.SpigotSkinHandler;
 import org.geysermc.floodgate.skin.SkinHandler;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.SpigotCommandUtil;
+import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
 
 @RequiredArgsConstructor
 public final class SpigotPlatformModule extends AbstractModule {
@@ -87,8 +88,10 @@ public final class SpigotPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public CommandRegistration commandRegistration(CommandUtil commandUtil) {
-        return new SpigotCommandRegistration(plugin, commandUtil);
+    public CommandRegistration commandRegistration(
+            SpigotVersionSpecificMethods versionSpecificMethods,
+            CommandUtil commandUtil) {
+        return new SpigotCommandRegistration(versionSpecificMethods, plugin, commandUtil);
     }
 
     @Provides
@@ -114,8 +117,11 @@ public final class SpigotPlatformModule extends AbstractModule {
     @Provides
     @Singleton
     public SkinHandler skinHandler(PluginMessageHandler messageHandler, FloodgateLogger logger,
+                                   SpigotVersionSpecificMethods versionSpecificMethods,
                                    FloodgateConfigHolder configHolder) {
-        return new SpigotSkinHandler(messageHandler, logger, plugin, configHolder);
+        return new SpigotSkinHandler(
+                messageHandler, logger, versionSpecificMethods, plugin, configHolder
+        );
     }
 
     /*

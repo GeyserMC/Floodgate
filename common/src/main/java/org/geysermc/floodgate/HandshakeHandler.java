@@ -52,31 +52,31 @@ public final class HandshakeHandler {
         try {
             String[] dataArray = handshakeData.split("\0");
 
-            boolean isBungeeData = dataArray.length == 5;
-            // this can be Bungee data (without skin) or Floodgate data
-            if (dataArray.length == 4) {
-                isBungeeData = FloodgateCipher.hasHeader(dataArray[3]);
+            String data = null;
+            for (String value : dataArray) {
+                if (FloodgateCipher.hasHeader(value)) {
+                    data = value;
+                    break;
+                }
             }
 
-            boolean proxy = configHolder.get().isProxy();
-            //todo remove this check
-            if (proxy && isBungeeData || !isBungeeData && dataArray.length != 2) {
+            if (data == null) {
                 return ResultType.NOT_FLOODGATE_DATA.getCachedResult();
             }
 
             // calculate the expected Base64 encoded IV length.
             int expectedIvLength = 4 * ((AesCipher.IV_LENGTH + 2) / 3);
-            int lastSplitIndex = dataArray[1].lastIndexOf(0x21);
+            int lastSplitIndex = data.lastIndexOf(0x21);
 
             byte[] floodgateData;
             byte[] rawSkinData = null;
 
             // if it has a RawSkin
             if (lastSplitIndex - expectedIvLength != 0) {
-                floodgateData = dataArray[1].substring(0, lastSplitIndex).getBytes(Charsets.UTF_8);
-                rawSkinData = dataArray[1].substring(lastSplitIndex + 1).getBytes(Charsets.UTF_8);
+                floodgateData = data.substring(0, lastSplitIndex).getBytes(Charsets.UTF_8);
+                rawSkinData = data.substring(lastSplitIndex + 1).getBytes(Charsets.UTF_8);
             } else {
-                floodgateData = dataArray[1].getBytes(Charsets.UTF_8);
+                floodgateData = data.getBytes(Charsets.UTF_8);
             }
 
             // actual decryption
@@ -137,9 +137,5 @@ public final class HandshakeHandler {
         private final String[] handshakeData;
         private final BedrockData bedrockData;
         private final FloodgatePlayer floodgatePlayer;
-
-        public boolean isBungeeData() {
-            return handshakeData.length == 4 || handshakeData.length == 5;
-        }
     }
 }

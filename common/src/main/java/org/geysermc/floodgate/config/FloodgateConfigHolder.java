@@ -51,5 +51,7 @@ public class FloodgateConfigHolder {
 
     public void set(FloodgateConfig config) {
         this.config = config;
+        // for Geyser dump
+        org.geysermc.floodgate.util.FloodgateConfigHolder.setConfig(config);
     }
 }

@@ -40,6 +40,7 @@ import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
 import org.geysermc.floodgate.skin.SkinHandler;
 import org.geysermc.floodgate.skin.SkinUploader.UploadResult;
 import org.geysermc.floodgate.util.ReflectionUtils;
+import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
 
 public class SpigotSkinHandler extends SkinHandler {
     private static final Method GET_PROFILE_METHOD;
@@ -51,12 +52,15 @@ public class SpigotSkinHandler extends SkinHandler {
         GET_PROFILE_METHOD = ReflectionUtils.getMethod(craftPlayerClass, "getProfile");
     }
 
+    private final SpigotVersionSpecificMethods versionSpecificMethods;
     private final SpigotPlugin plugin;
     private final FloodgateConfigHolder configHolder;
 
     public SpigotSkinHandler(PluginMessageHandler messageHandler, FloodgateLogger logger,
+                             SpigotVersionSpecificMethods versionSpecificMethods,
                              SpigotPlugin plugin, FloodgateConfigHolder configHolder) {
         super(messageHandler, logger);
+        this.versionSpecificMethods = versionSpecificMethods;
         this.plugin = plugin;
         this.configHolder = configHolder;
     }
@@ -86,8 +90,8 @@ public class SpigotSkinHandler extends SkinHandler {
             plugin.getServer().getScheduler().runTask(plugin, () -> {
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     if (p != player) {
-                        p.hidePlayer(plugin, player);
-                        p.showPlayer(plugin, player);
+                        versionSpecificMethods.hidePlayer(p, player);
+                        versionSpecificMethods.showPlayer(p, player);
                     }
                 }
             });

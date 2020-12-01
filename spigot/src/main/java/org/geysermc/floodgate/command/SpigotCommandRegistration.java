@@ -36,13 +36,17 @@ import org.geysermc.floodgate.platform.command.Command;
 import org.geysermc.floodgate.platform.command.CommandRegistration;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.util.ReflectionUtils;
+import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
 
 public final class SpigotCommandRegistration implements CommandRegistration {
+    private final SpigotVersionSpecificMethods versionSpecificMethods;
     private final JavaPlugin plugin;
     private final CommandUtil commandUtil;
     private final CommandMap commandMap;
 
-    public SpigotCommandRegistration(JavaPlugin plugin, CommandUtil commandUtil) {
+    public SpigotCommandRegistration(SpigotVersionSpecificMethods versionSpecificMethods,
+                                     JavaPlugin plugin, CommandUtil commandUtil) {
+        this.versionSpecificMethods = versionSpecificMethods;
         this.plugin = plugin;
         this.commandUtil = commandUtil;
         this.commandMap = ReflectionUtils.getCastedValue(Bukkit.getPluginManager(), "commandMap");
@@ -50,16 +54,21 @@ public final class SpigotCommandRegistration implements CommandRegistration {
 
     @Override
     public void register(Command command) {
-        commandMap.register("floodgate", new SpigotCommand(plugin, commandUtil, command));
+        SpigotCommand spigotCommand =
+                new SpigotCommand(versionSpecificMethods, plugin, commandUtil, command);
+        commandMap.register("floodgate", spigotCommand);
     }
 
     protected static class SpigotCommand extends org.bukkit.command.Command {
+        private final SpigotVersionSpecificMethods versionSpecificMethods;
         private final JavaPlugin plugin;
         private final CommandUtil commandUtil;
         private final Command command;
 
-        protected SpigotCommand(JavaPlugin plugin, CommandUtil commandUtil, Command command) {
+        protected SpigotCommand(SpigotVersionSpecificMethods versionSpecificMethods,
+                                JavaPlugin plugin, CommandUtil commandUtil, Command command) {
             super(command.getName(), command.getDescription(), "", Collections.emptyList());
+            this.versionSpecificMethods = versionSpecificMethods;
             this.plugin = plugin;
             this.commandUtil = commandUtil;
             this.command = command;
@@ -90,13 +99,7 @@ public final class SpigotCommandRegistration implements CommandRegistration {
             }
 
             Player player = (Player) sender;
-            String locale;
-            try {
-                locale = player.getLocale();
-            } catch (Exception exception) {
-                // server is older then 1.12.0
-                locale = player.spigot().getLocale();
-            }
+            String locale = versionSpecificMethods.getLocale(player);
 
             command.execute(sender, player.getUniqueId(), sender.getName(), locale, args);
         }
