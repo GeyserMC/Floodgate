@@ -40,7 +40,7 @@ import com.velocitypowered.api.proxy.messages.ChannelMessageSource;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
-import org.geysermc.common.form.Form;
+import org.geysermc.cumulus.Form;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
@@ -109,7 +109,7 @@ public class VelocityPluginMessageHandler extends PluginMessageHandler {
     }
 
     @Override
-    public boolean sendForm(UUID uuid, Form<?> form) {
+    public boolean sendForm(UUID uuid, Form form) {
         return proxy.getPlayer(uuid)
                 .map(value -> value.sendPluginMessage(formChannel, createFormData(form)))
                 .orElse(false);

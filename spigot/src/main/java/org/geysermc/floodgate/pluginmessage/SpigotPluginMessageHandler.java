@@ -30,7 +30,7 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.Messenger;
-import org.geysermc.common.form.Form;
+import org.geysermc.cumulus.Form;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
@@ -69,7 +69,7 @@ public class SpigotPluginMessageHandler extends PluginMessageHandler {
     }
 
     @Override
-    public boolean sendForm(UUID playerId, Form<?> form) {
+    public boolean sendForm(UUID playerId, Form form) {
         try {
             byte[] formData = createFormData(form);
             Bukkit.getPlayer(playerId).sendPluginMessage(plugin, formChannel, formData);

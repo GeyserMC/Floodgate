@@ -30,8 +30,8 @@ import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
-import org.geysermc.common.form.Form;
-import org.geysermc.common.form.FormBuilder;
+import org.geysermc.cumulus.Form;
+import org.geysermc.cumulus.util.FormBuilder;
 import org.geysermc.floodgate.FloodgatePlayerImpl;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
@@ -75,7 +75,7 @@ public class SimpleFloodgateApi implements FloodgateApi {
     }
 
     @Override
-    public boolean sendForm(UUID uuid, Form<?> form) {
+    public boolean sendForm(UUID uuid, Form form) {
         return pluginMessageHandler.sendForm(uuid, form);
     }
 

@@ -26,8 +26,8 @@
 package org.geysermc.floodgate.api.player;
 
 import java.util.UUID;
-import org.geysermc.common.form.Form;
-import org.geysermc.common.form.FormBuilder;
+import org.geysermc.cumulus.Form;
+import org.geysermc.cumulus.util.FormBuilder;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.util.DeviceOs;
 import org.geysermc.floodgate.util.InputMode;
@@ -107,7 +107,7 @@ public interface FloodgatePlayer {
      */
     RawSkin getRawSkin();
 
-    default boolean sendForm(Form<?> form) {
+    default boolean sendForm(Form form) {
         return FloodgateApi.getInstance().sendForm(getCorrectUniqueId(), form);
     }
 
