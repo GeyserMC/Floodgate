@@ -34,6 +34,7 @@ import org.geysermc.floodgate.addon.debug.ChannelOutDebugHandler;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.util.Utils;
 
 public final class DebugAddon implements InjectorAddon {
     @Inject private FloodgateConfig config;
@@ -71,8 +72,8 @@ public final class DebugAddon implements InjectorAddon {
     public void onRemoveInject(Channel channel) {
         ChannelPipeline pipeline = channel.pipeline();
 
-        pipeline.remove("floodgate_debug_out");
-        pipeline.remove("floodgate_debug_in");
+        Utils.removeHandler(pipeline, "floodgate_debug_out");
+        Utils.removeHandler(pipeline, "floodgate_debug_in");
     }
 
     @Override

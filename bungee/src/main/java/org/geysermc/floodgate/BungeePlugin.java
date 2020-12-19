@@ -33,7 +33,7 @@ import org.geysermc.floodgate.module.BungeeAddonModule;
 import org.geysermc.floodgate.module.BungeeListenerModule;
 import org.geysermc.floodgate.module.BungeePlatformModule;
 import org.geysermc.floodgate.module.CommandModule;
-import org.geysermc.floodgate.module.CommonModule;
+import org.geysermc.floodgate.module.ProxyCommonModule;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
 public final class BungeePlugin extends Plugin {
@@ -45,7 +45,7 @@ public final class BungeePlugin extends Plugin {
 
         long ctm = System.currentTimeMillis();
         Injector injector = Guice.createInjector(
-                new CommonModule(getDataFolder().toPath()),
+                new ProxyCommonModule(getDataFolder().toPath()),
                 new BungeePlatformModule(this)
         );
 

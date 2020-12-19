@@ -33,14 +33,9 @@ import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.geysermc.floodgate.BungeePlugin;
-import org.geysermc.floodgate.api.ProxyFloodgateApi;
-import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.command.BungeeCommandRegistration;
-import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
-import org.geysermc.floodgate.config.ProxyFloodgateConfig;
-import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.inject.bungee.BungeeInjector;
 import org.geysermc.floodgate.listener.BungeeListenerRegistration;
@@ -50,6 +45,9 @@ import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
 import org.geysermc.floodgate.pluginmessage.BungeePluginMessageHandler;
+import org.geysermc.floodgate.pluginmessage.BungeeSkinApplier;
+import org.geysermc.floodgate.skin.SkinApplier;
+import org.geysermc.floodgate.skin.SkinHandler;
 import org.geysermc.floodgate.util.BungeeCommandUtil;
 import org.geysermc.floodgate.util.LanguageManager;
 
@@ -57,29 +55,10 @@ import org.geysermc.floodgate.util.LanguageManager;
 public final class BungeePlatformModule extends AbstractModule {
     private final BungeePlugin plugin;
 
-    @Override
-    protected void configure() {
-        bind(SimpleFloodgateApi.class).to(ProxyFloodgateApi.class);
-    }
-
     @Provides
     @Singleton
     public Plugin bungeePlugin() {
         return plugin;
-    }
-
-    @Provides
-    @Singleton
-    @Named("configClass")
-    public Class<? extends FloodgateConfig> floodgateConfigClass() {
-        return ProxyFloodgateConfig.class;
-    }
-
-    @Provides
-    @Singleton
-    public ProxyFloodgateApi proxyFloodgateApi(PluginMessageHandler pluginMessageHandler,
-                                               FloodgateCipher cipher) {
-        return new ProxyFloodgateApi(pluginMessageHandler, cipher);
     }
 
     @Provides
@@ -115,6 +94,18 @@ public final class BungeePlatformModule extends AbstractModule {
     @Singleton
     public PluginMessageHandler pluginMessageHandler(FloodgateConfigHolder configHolder) {
         return new BungeePluginMessageHandler(configHolder);
+    }
+
+    @Provides
+    @Singleton
+    public SkinApplier skinApplier(FloodgateLogger logger) {
+        return new BungeeSkinApplier(logger);
+    }
+
+    @Provides
+    @Singleton
+    public SkinHandler skinHandler(SkinApplier skinApplier, FloodgateLogger logger) {
+        return new SkinHandler(skinApplier, logger);
     }
 
     /*

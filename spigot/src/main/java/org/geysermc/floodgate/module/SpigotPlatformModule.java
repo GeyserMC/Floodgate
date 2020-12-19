@@ -33,10 +33,9 @@ import lombok.RequiredArgsConstructor;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.SpigotPlugin;
-import org.geysermc.floodgate.api.SimpleFloodgateApi;
+import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.command.SpigotCommandRegistration;
-import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.inject.spigot.SpigotInjector;
@@ -47,8 +46,10 @@ import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
 import org.geysermc.floodgate.pluginmessage.SpigotPluginMessageHandler;
-import org.geysermc.floodgate.pluginmessage.SpigotSkinHandler;
-import org.geysermc.floodgate.skin.SkinHandler;
+import org.geysermc.floodgate.pluginmessage.SpigotPluginMessageRegister;
+import org.geysermc.floodgate.pluginmessage.SpigotSkinApplier;
+import org.geysermc.floodgate.skin.ServerSkinHandler;
+import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.SpigotCommandUtil;
 import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
@@ -57,23 +58,15 @@ import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
 public final class SpigotPlatformModule extends AbstractModule {
     private final SpigotPlugin plugin;
 
+    @Override
+    protected void configure() {
+        bind(PluginMessageHandler.class).to(SpigotPluginMessageHandler.class);
+    }
+
     @Provides
     @Singleton
     public JavaPlugin javaPlugin() {
         return plugin;
-    }
-
-    @Provides
-    @Singleton
-    @Named("configClass")
-    public Class<? extends FloodgateConfig> floodgateConfigClass() {
-        return FloodgateConfig.class;
-    }
-
-    @Provides
-    @Singleton
-    public SimpleFloodgateApi floodgateApi(PluginMessageHandler pluginMessageHandler) {
-        return new SimpleFloodgateApi(pluginMessageHandler);
     }
 
     @Provides
@@ -90,7 +83,8 @@ public final class SpigotPlatformModule extends AbstractModule {
     @Singleton
     public CommandRegistration commandRegistration(
             SpigotVersionSpecificMethods versionSpecificMethods,
-            CommandUtil commandUtil) {
+            CommandUtil commandUtil
+    ) {
         return new SpigotCommandRegistration(versionSpecificMethods, plugin, commandUtil);
     }
 
@@ -104,24 +98,6 @@ public final class SpigotPlatformModule extends AbstractModule {
     @Singleton
     public ListenerRegistration<Listener> listenerRegistration() {
         return new SpigotListenerRegistration(plugin);
-    }
-
-    @Provides
-    @Singleton
-    public PluginMessageHandler pluginMessageHandler(FloodgateConfigHolder configHolder,
-                                                     @Named("formChannel") String formChannel,
-                                                     @Named("skinChannel") String skinChannel) {
-        return new SpigotPluginMessageHandler(configHolder, plugin, formChannel, skinChannel);
-    }
-
-    @Provides
-    @Singleton
-    public SkinHandler skinHandler(PluginMessageHandler messageHandler, FloodgateLogger logger,
-                                   SpigotVersionSpecificMethods versionSpecificMethods,
-                                   FloodgateConfigHolder configHolder) {
-        return new SpigotSkinHandler(
-                messageHandler, logger, versionSpecificMethods, plugin, configHolder
-        );
     }
 
     /*
@@ -156,5 +132,48 @@ public final class SpigotPlatformModule extends AbstractModule {
     @Named("implementationName")
     public String implementationName() {
         return "Spigot";
+    }
+
+    /*
+    Others
+     */
+
+    @Provides
+    @Singleton
+    public SpigotPluginMessageHandler pluginMessageHandler(
+            FloodgateConfigHolder configHolder,
+            @Named("formChannel") String formChannel,
+            @Named("skinChannel") String skinChannel
+    ) {
+        return new SpigotPluginMessageHandler(configHolder, plugin, formChannel, skinChannel);
+    }
+
+    @Provides
+    @Singleton
+    public SpigotPluginMessageRegister pluginMessageRegister(
+            FloodgateApi api,
+            @Named("formChannel") String formChannel,
+            @Named("skinChannel") String skinChannel,
+            SpigotPluginMessageHandler pluginMessageHandler,
+            ServerSkinHandler skinHandler,
+            FloodgateLogger logger
+    ) {
+        return new SpigotPluginMessageRegister(plugin, api, formChannel, skinChannel,
+                pluginMessageHandler, skinHandler, logger);
+    }
+
+    @Provides
+    @Singleton
+    public SkinApplier skinApplier(
+            SpigotVersionSpecificMethods versionSpecificMethods,
+            FloodgateConfigHolder configHolder
+    ) {
+        return new SpigotSkinApplier(versionSpecificMethods, plugin, configHolder);
+    }
+
+    @Provides
+    @Singleton
+    public SpigotVersionSpecificMethods versionSpecificMethods() {
+        return new SpigotVersionSpecificMethods(plugin);
     }
 }

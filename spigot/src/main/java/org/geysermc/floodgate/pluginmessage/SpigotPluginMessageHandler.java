@@ -25,47 +25,28 @@
 
 package org.geysermc.floodgate.pluginmessage;
 
-import com.google.common.base.Charsets;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.plugin.messaging.Messenger;
 import org.geysermc.cumulus.Form;
-import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
-import org.geysermc.floodgate.util.RawSkin;
 
 public class SpigotPluginMessageHandler extends PluginMessageHandler {
     private final JavaPlugin plugin;
     private final String formChannel;
     private final String skinChannel;
 
-    public SpigotPluginMessageHandler(FloodgateConfigHolder configHolder, JavaPlugin plugin,
-                                      String formChannel, String skinChannel) {
+    public SpigotPluginMessageHandler(
+            FloodgateConfigHolder configHolder,
+            JavaPlugin plugin,
+            String formChannel,
+            String skinChannel
+    ) {
         super(configHolder);
         this.plugin = plugin;
         this.formChannel = formChannel;
         this.skinChannel = skinChannel;
-
-        Messenger messenger = plugin.getServer().getMessenger();
-
-        // form
-        messenger.registerIncomingPluginChannel(
-                plugin, formChannel,
-                (channel, player, message) -> callResponseConsumer(message));
-        messenger.registerOutgoingPluginChannel(plugin, formChannel);
-
-        // skin
-        messenger.registerIncomingPluginChannel(
-                plugin, skinChannel,
-                (channel, player, message) -> {
-                    String origin =
-                            FloodgateApi.getInstance().getPlayer(player.getUniqueId()) != null
-                                    ? "Geyser" : "player";
-                    System.out.println("Got skin from " + origin + "!");
-                }
-        );
     }
 
     @Override
@@ -81,22 +62,9 @@ public class SpigotPluginMessageHandler extends PluginMessageHandler {
     }
 
     @Override
-    public boolean sendSkinRequest(UUID playerId, RawSkin skin) {
+    public void sendSkinResponse(UUID playerId, boolean failed, String response) {
         try {
-            byte[] skinData = skin.toString().getBytes(Charsets.UTF_8);
-            Bukkit.getPlayer(playerId).sendPluginMessage(plugin, skinChannel, skinData);
-            //todo use json or something to split request and response
-        } catch (Exception exception) {
-            exception.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public void sendSkinResponse(UUID playerId, String response) {
-        try {
-            byte[] responseData = response.getBytes(Charsets.UTF_8);
+            byte[] responseData = createSkinResponseData(failed, response);
             Bukkit.getPlayer(playerId).sendPluginMessage(plugin, skinChannel, responseData);
         } catch (Exception exception) {
             exception.printStackTrace();

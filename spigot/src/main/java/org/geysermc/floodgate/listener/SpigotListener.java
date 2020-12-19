@@ -38,12 +38,12 @@ import org.geysermc.floodgate.FloodgatePlayerImpl;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.skin.SkinHandler;
+import org.geysermc.floodgate.skin.ServerSkinHandler;
 import org.geysermc.floodgate.util.LanguageManager;
 
 public final class SpigotListener implements Listener {
     @Inject private SimpleFloodgateApi api;
-    @Inject private SkinHandler skinHandler;
+    @Inject private ServerSkinHandler skinHandler;
     @Inject private LanguageManager languageManager;
     @Inject private FloodgateLogger logger;
 

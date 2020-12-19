@@ -33,6 +33,7 @@ import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.event.ServerConnectEvent;
+import net.md_5.bungee.api.event.ServerConnectedEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
@@ -40,7 +41,10 @@ import org.geysermc.floodgate.FloodgatePlayerImpl;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.handler.BungeeDataHandler;
+import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
+import org.geysermc.floodgate.skin.SkinHandler;
 import org.geysermc.floodgate.util.LanguageManager;
 
 public final class BungeeListener implements Listener {
@@ -48,6 +52,10 @@ public final class BungeeListener implements Listener {
     @Inject private ProxyFloodgateApi api;
     @Inject private LanguageManager languageManager;
     @Inject private FloodgateLogger logger;
+
+    @Inject private ProxyFloodgateConfig config;
+    @Inject private PluginMessageHandler pluginMessageHandler;
+    @Inject private SkinHandler skinHandler;
 
     @Inject
     public void init(Injector injector) {
@@ -57,6 +65,24 @@ public final class BungeeListener implements Listener {
     @EventHandler(priority = EventPriority.LOW)
     public void onServerConnect(ServerConnectEvent event) {
         dataHandler.handleServerConnect(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onServerConnected(ServerConnectedEvent event) {
+        ProxiedPlayer player = event.getPlayer();
+        FloodgatePlayer floodgatePlayer = api.getPlayer(player.getUniqueId());
+        if (floodgatePlayer == null) {
+            return;
+        }
+
+        // send skin request to server if data forwarding allows that
+        if (config.isSendFloodgateData()) {
+            pluginMessageHandler.sendSkinRequest(player.getUniqueId(),
+                    floodgatePlayer.getRawSkin());
+        } else {
+            //todo also a Proxy SkinHandler to keep stuff clean?
+            skinHandler.handleSkinUploadFor(floodgatePlayer, null);
+        }
     }
 
     @EventHandler(priority = EventPriority.LOW)

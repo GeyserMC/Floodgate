@@ -25,6 +25,8 @@
 
 package org.geysermc.floodgate;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -37,6 +39,7 @@ import org.geysermc.floodgate.api.InstanceHolder;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.util.BedrockData;
@@ -48,11 +51,11 @@ import org.geysermc.floodgate.util.UiProfile;
 
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@SuppressWarnings("unchecked")
 public final class FloodgatePlayerImpl implements FloodgatePlayer {
     private final String version;
     private final String username;
     private final String javaUsername;
-    //todo maybe add a map for platform specific things
     private final UUID javaUniqueId;
     private final String xuid;
     private final DeviceOs deviceOs;
@@ -60,10 +63,13 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
     private final UiProfile uiProfile;
     private final InputMode inputMode;
     private final String ip;
-    private final boolean fromProxy; //todo remove hasBungeeData
+    private final boolean fromProxy;
     private final LinkedPlayer linkedPlayer;
     private final RawSkin rawSkin;
-
+    @Getter(AccessLevel.PRIVATE)
+    public Map<PropertyKey, Object> propertyKeyToValue;
+    @Getter(AccessLevel.PRIVATE)
+    private Map<String, PropertyKey> stringToPropertyKey;
     /**
      * Returns true if the player is still logging in
      */
@@ -87,6 +93,12 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
         UiProfile uiProfile = UiProfile.getById(data.getUiProfile());
         InputMode inputMode = InputMode.getById(data.getInputMode());
 
+        // RawSkin must be removed from the encrypted data
+        if (api instanceof ProxyFloodgateApi) {
+            InstanceHolder.castApi(ProxyFloodgateApi.class)
+                    .updateEncryptedData(javaUniqueId, data);
+        }
+
         LinkedPlayer linkedPlayer;
 
         // we'll use the LinkedPlayer provided by Bungee or Velocity (if they included one)
@@ -103,21 +115,13 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
                 deviceOs, data.getLanguageCode(), uiProfile, inputMode, data.getIp(),
                 data.isFromProxy(), linkedPlayer, skin);
 
-        // oh oh, after fetching the linkedPlayer our encrypted data is incorrect.
+        // encrypted data has been changed after fetching the linkedPlayer
         // We have to update it...
         if (linkedPlayer != null && api instanceof ProxyFloodgateApi) {
             InstanceHolder.castApi(ProxyFloodgateApi.class)
                     .updateEncryptedData(player.getCorrectUniqueId(), player.toBedrockData());
         }
         return player;
-    }
-
-    public UUID getCorrectUniqueId() {
-        return linkedPlayer != null ? linkedPlayer.getJavaUniqueId() : javaUniqueId;
-    }
-
-    public String getCorrectUsername() {
-        return linkedPlayer != null ? linkedPlayer.getJavaUsername() : javaUsername;
     }
 
     /**
@@ -154,9 +158,108 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
                 CompletableFuture.completedFuture(null);
     }
 
+    public UUID getCorrectUniqueId() {
+        return linkedPlayer != null ? linkedPlayer.getJavaUniqueId() : javaUniqueId;
+    }
+
+    public String getCorrectUsername() {
+        return linkedPlayer != null ? linkedPlayer.getJavaUsername() : javaUsername;
+    }
+
     public BedrockData toBedrockData() {
         return BedrockData.of(
                 version, username, xuid, deviceOs.ordinal(), languageCode,
                 uiProfile.ordinal(), inputMode.ordinal(), ip, linkedPlayer, fromProxy);
+    }
+
+    public <T> T getProperty(PropertyKey key) {
+        if (propertyKeyToValue == null) {
+            return null;
+        }
+        return (T) propertyKeyToValue.get(key);
+    }
+
+    public <T> T getProperty(String key) {
+        if (stringToPropertyKey == null) {
+            return null;
+        }
+        return getProperty(stringToPropertyKey.get(key));
+    }
+
+    public <T> T removeProperty(String key) {
+        if (stringToPropertyKey == null) {
+            return null;
+        }
+
+        PropertyKey propertyKey = stringToPropertyKey.get(key);
+
+        if (propertyKey == null || !propertyKey.isRemoveable()) {
+            return null;
+        }
+
+        return (T) propertyKeyToValue.remove(propertyKey);
+    }
+
+    public <T> T removeProperty(PropertyKey key) {
+        if (stringToPropertyKey == null) {
+            return null;
+        }
+
+        PropertyKey propertyKey = stringToPropertyKey.get(key.getKey());
+
+        if (propertyKey == null || !propertyKey.equals(key) || !propertyKey.isRemoveable()) {
+            return null;
+        }
+
+        return (T) propertyKeyToValue.remove(key);
+    }
+
+    public <T> T addProperty(PropertyKey key, Object value) {
+        if (stringToPropertyKey == null) {
+            stringToPropertyKey = new HashMap<>();
+            propertyKeyToValue = new HashMap<>();
+
+            stringToPropertyKey.put(key.getKey(), key);
+            propertyKeyToValue.put(key, value);
+            return null;
+        }
+
+        PropertyKey propertyKey = stringToPropertyKey.get(key.getKey());
+
+        if (propertyKey != null && propertyKey.equals(key) && key.isChangeable()) {
+            stringToPropertyKey.put(key.getKey(), key);
+            return (T) propertyKeyToValue.put(key, value);
+        }
+
+        return (T) stringToPropertyKey.computeIfAbsent(key.getKey(), (keyString) -> {
+            propertyKeyToValue.put(key, value);
+            return key;
+        });
+    }
+
+    public <T> T addProperty(String key, Object value) {
+        PropertyKey propertyKey = new PropertyKey(key, true, true);
+
+        if (stringToPropertyKey == null) {
+            stringToPropertyKey = new HashMap<>();
+            propertyKeyToValue = new HashMap<>();
+
+            stringToPropertyKey.put(key, propertyKey);
+            propertyKeyToValue.put(propertyKey, value);
+            return null;
+        }
+
+        PropertyKey currentPropertyKey = stringToPropertyKey.get(key);
+
+        // key is always changeable if it passes this if statement
+        if (currentPropertyKey != null && currentPropertyKey.equals(propertyKey)) {
+            stringToPropertyKey.put(key, propertyKey);
+            return (T) propertyKeyToValue.put(propertyKey, value);
+        }
+
+        return (T) stringToPropertyKey.computeIfAbsent(key, (keyString) -> {
+            propertyKeyToValue.put(propertyKey, value);
+            return propertyKey;
+        });
     }
 }

@@ -29,9 +29,10 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.inject.Inject;
+import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
-import com.google.inject.name.Named;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -124,8 +125,17 @@ public final class PlayerLinkLoader {
             return null;
         }
 
+        // allow the FloodgateConfig to be used directly instead of the FloodgateConfigHolder
+        Injector child = injector.createChildInjector(new AbstractModule() {
+            @Provides
+            @Singleton
+            public FloodgateConfig floodgateConfig() {
+                return config;
+            }
+        });
+
         try {
-            PlayerLink instance = injector.getInstance(mainClass);
+            PlayerLink instance = child.getInstance(mainClass);
             instance.load();
             return instance;
         } catch (Exception exception) {

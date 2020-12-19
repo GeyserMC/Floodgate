@@ -25,10 +25,12 @@
 
 package org.geysermc.floodgate.pluginmessage;
 
-import static org.geysermc.floodgate.util.MessageFormatter.format;
-
+import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.UUID;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -40,15 +42,22 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.event.EventHandler;
 import org.geysermc.cumulus.Form;
+import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
+import org.geysermc.floodgate.skin.SkinApplier;
+import org.geysermc.floodgate.skin.SkinUploader.UploadResult;
 import org.geysermc.floodgate.util.RawSkin;
 
 public final class BungeePluginMessageHandler extends PluginMessageHandler implements Listener {
     private ProxyServer proxy;
     private FloodgateLogger logger;
     private String formChannel;
+    private String skinChannel;
+    private FloodgateApi api;
+    private SkinApplier skinApplier;
 
     public BungeePluginMessageHandler(FloodgateConfigHolder configHolder) {
         super(configHolder);
@@ -57,10 +66,14 @@ public final class BungeePluginMessageHandler extends PluginMessageHandler imple
     @Inject // called because this is a listener as well
     public void init(Plugin plugin, FloodgateLogger logger,
                      @Named("formChannel") String formChannel,
-                     @Named("skinChannel") String skinChannel) {
+                     @Named("skinChannel") String skinChannel,
+                     FloodgateApi api, SkinApplier skinApplier) {
         this.proxy = plugin.getProxy();
         this.logger = logger;
         this.formChannel = formChannel;
+        this.skinChannel = skinChannel;
+        this.api = api;
+        this.skinApplier = skinApplier;
 
         proxy.registerChannel(formChannel);
         proxy.registerChannel(skinChannel);
@@ -69,6 +82,7 @@ public final class BungeePluginMessageHandler extends PluginMessageHandler imple
     @EventHandler
     public void onPluginMessage(PluginMessageEvent event) {
         Connection source = event.getSender();
+
         if (event.getTag().equals(formChannel)) {
             if (source instanceof Server) {
                 // send it to the client
@@ -79,8 +93,7 @@ public final class BungeePluginMessageHandler extends PluginMessageHandler imple
             if (source instanceof ProxiedPlayer) {
                 byte[] data = event.getData();
                 if (data.length < 2) {
-                    logger.error("Invalid form response! Closing connection");
-                    source.disconnect(new TextComponent("Invalid form response!"));
+                    logKick(source, "Invalid form response!");
                     return;
                 }
 
@@ -95,12 +108,73 @@ public final class BungeePluginMessageHandler extends PluginMessageHandler imple
                 event.setCancelled(true);
 
                 if (!callResponseConsumer(data)) {
-                    logger.error(format(
-                            "Couldn't find stored form with id {} for player {}",
-                            formId, ((ProxiedPlayer) source).getName()));
+                    logger.error("Couldn't find stored form with id {} for player {}",
+                            formId, ((ProxiedPlayer) source).getName());
                 }
             }
+            return;
         }
+
+        if (event.getTag().equals(skinChannel)) {
+            byte[] data = event.getData();
+
+            if (data.length < 1) {
+                logKick(source, "Got invalid Skin request/response.");
+                return;
+            }
+
+            boolean request = data[0] == 1;
+
+            if (!request && data.length < 2) {
+                logKick(source, "Got invalid Skin response.");
+                return;
+            }
+
+            if (source instanceof Server) {
+                if (request) {
+                    logKick(source, "Got Skin request from Server?");
+                    return;
+                }
+
+                UUID playerUniqueId = ((ProxiedPlayer) event.getReceiver()).getUniqueId();
+                FloodgatePlayer floodgatePlayer = api.getPlayer(playerUniqueId);
+
+                if (floodgatePlayer == null) {
+                    logKick(source, "Server issued Skin request for non-Floodgate player.");
+                    return;
+                }
+
+                // 1 = failed, 0 = successful.
+
+                // we'll try it again on the next server if it failed
+                if (data[1] != 0) {
+                    return;
+                }
+
+                JsonObject response;
+                try {
+                    Reader reader = new InputStreamReader(
+                            new ByteArrayInputStream(event.getData()));
+                    response = GSON.fromJson(reader, JsonObject.class);
+                } catch (Throwable throwable) {
+                    logger.error("Failed to read Skin response", throwable);
+                    return;
+                }
+
+                skinApplier.applySkin(floodgatePlayer, UploadResult.success(response));
+                return;
+            }
+
+            // Players (Geyser) can't send requests nor responses
+            if (source instanceof ProxiedPlayer) {
+                logKick(source, "Got Skin " + (request ? "request" : "response") + " from Player?");
+            }
+        }
+    }
+
+    private void logKick(Connection source, String reason) {
+        logger.error(reason + " Closing connection");
+        source.disconnect(new TextComponent(reason));
     }
 
     @Override
@@ -114,12 +188,12 @@ public final class BungeePluginMessageHandler extends PluginMessageHandler imple
     }
 
     @Override
-    public boolean sendSkinRequest(UUID player, RawSkin skin) {
-        return false; //todo
-    }
-
-    @Override
-    public void sendSkinResponse(UUID player, String response) {
-
+    public boolean sendSkinRequest(UUID uuid, RawSkin skin) {
+        ProxiedPlayer player = proxy.getPlayer(uuid);
+        if (player != null) {
+            player.sendData(skinChannel, createSkinRequestData(skin.encode()));
+            return true;
+        }
+        return false;
     }
 }

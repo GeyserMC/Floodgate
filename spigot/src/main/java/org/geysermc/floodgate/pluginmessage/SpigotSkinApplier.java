@@ -33,16 +33,14 @@ import java.lang.reflect.Method;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.geysermc.floodgate.SpigotPlugin;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
-import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
-import org.geysermc.floodgate.skin.SkinHandler;
+import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinUploader.UploadResult;
 import org.geysermc.floodgate.util.ReflectionUtils;
 import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
 
-public class SpigotSkinHandler extends SkinHandler {
+public final class SpigotSkinApplier implements SkinApplier {
     private static final Method GET_PROFILE_METHOD;
 
     static {
@@ -56,17 +54,18 @@ public class SpigotSkinHandler extends SkinHandler {
     private final SpigotPlugin plugin;
     private final FloodgateConfigHolder configHolder;
 
-    public SpigotSkinHandler(PluginMessageHandler messageHandler, FloodgateLogger logger,
-                             SpigotVersionSpecificMethods versionSpecificMethods,
-                             SpigotPlugin plugin, FloodgateConfigHolder configHolder) {
-        super(messageHandler, logger);
+    public SpigotSkinApplier(
+            SpigotVersionSpecificMethods versionSpecificMethods,
+            SpigotPlugin plugin,
+            FloodgateConfigHolder configHolder
+    ) {
         this.versionSpecificMethods = versionSpecificMethods;
         this.plugin = plugin;
         this.configHolder = configHolder;
     }
 
     @Override
-    protected void applySkin(FloodgatePlayer floodgatePlayer, UploadResult result) {
+    public void applySkin(FloodgatePlayer floodgatePlayer, UploadResult result) {
         Player player = Bukkit.getPlayer(floodgatePlayer.getCorrectUniqueId());
         GameProfile profile = ReflectionUtils.castedInvoke(player, GET_PROFILE_METHOD);
 
@@ -89,7 +88,7 @@ public class SpigotSkinHandler extends SkinHandler {
         if (configHolder.get().isApplySkinDirectly()) {
             plugin.getServer().getScheduler().runTask(plugin, () -> {
                 for (Player p : Bukkit.getOnlinePlayers()) {
-                    if (p != player) {
+                    if (p != player && p.canSee(player)) {
                         versionSpecificMethods.hidePlayer(p, player);
                         versionSpecificMethods.showPlayer(p, player);
                     }

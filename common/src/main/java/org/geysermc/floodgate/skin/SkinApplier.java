@@ -23,29 +23,11 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.module;
+package org.geysermc.floodgate.skin;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.config.ProxyFloodgateConfig;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.skin.SkinUploader.UploadResult;
 
-@RequiredArgsConstructor
-public final class ConfigLoadedModule extends AbstractModule {
-    private final FloodgateConfig config;
-
-    @Override
-    protected void configure() {
-        if (config instanceof ProxyFloodgateConfig) {
-            bind(ProxyFloodgateConfig.class).toInstance((ProxyFloodgateConfig) config);
-        }
-    }
-
-    @Provides
-    @Singleton
-    public FloodgateConfig floodgateConfig() {
-        return config;
-    }
+public interface SkinApplier {
+    void applySkin(FloodgatePlayer floodgatePlayer, UploadResult result);
 }

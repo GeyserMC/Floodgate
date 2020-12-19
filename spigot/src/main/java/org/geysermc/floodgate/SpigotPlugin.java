@@ -30,7 +30,7 @@ import com.google.inject.Injector;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.module.CommandModule;
-import org.geysermc.floodgate.module.CommonModule;
+import org.geysermc.floodgate.module.ServerCommonModule;
 import org.geysermc.floodgate.module.SpigotAddonModule;
 import org.geysermc.floodgate.module.SpigotListenerModule;
 import org.geysermc.floodgate.module.SpigotPlatformModule;
@@ -46,7 +46,7 @@ public final class SpigotPlugin extends JavaPlugin {
 
         long ctm = System.currentTimeMillis();
         Injector injector = Guice.createInjector(
-                new CommonModule(getDataFolder().toPath()),
+                new ServerCommonModule(getDataFolder().toPath()),
                 new SpigotPlatformModule(this)
         );
 

@@ -33,7 +33,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import java.nio.file.Path;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.module.CommandModule;
-import org.geysermc.floodgate.module.CommonModule;
+import org.geysermc.floodgate.module.ProxyCommonModule;
 import org.geysermc.floodgate.module.VelocityAddonModule;
 import org.geysermc.floodgate.module.VelocityListenerModule;
 import org.geysermc.floodgate.module.VelocityPlatformModule;
@@ -48,7 +48,7 @@ public final class VelocityPlugin {
 
         long ctm = System.currentTimeMillis();
         Injector injector = guice.createChildInjector(
-                new CommonModule(dataDirectory),
+                new ProxyCommonModule(dataDirectory),
                 new VelocityPlatformModule()
         );
 

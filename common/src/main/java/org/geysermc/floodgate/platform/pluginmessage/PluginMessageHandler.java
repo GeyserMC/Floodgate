@@ -26,8 +26,10 @@
 package org.geysermc.floodgate.platform.pluginmessage;
 
 import com.google.common.base.Charsets;
+import com.google.gson.Gson;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.geysermc.cumulus.Form;
@@ -35,6 +37,7 @@ import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.util.RawSkin;
 
 public abstract class PluginMessageHandler {
+    protected static final Gson GSON = new Gson();
     protected final Short2ObjectMap<Form> storedForms = new Short2ObjectOpenHashMap<>();
     private final AtomicInteger nextFormId = new AtomicInteger(0);
     private final FloodgateConfigHolder configHolder;
@@ -45,9 +48,13 @@ public abstract class PluginMessageHandler {
 
     public abstract boolean sendForm(UUID player, Form form);
 
-    public abstract boolean sendSkinRequest(UUID player, RawSkin skin);
+    public boolean sendSkinRequest(UUID player, RawSkin skin) {
+        return false; // Non-proxy implementations don't send requests
+    }
 
-    public abstract void sendSkinResponse(UUID player, String response);
+    public void sendSkinResponse(UUID player, boolean failed, String response) {
+        return; // Proxy implementations don't send responses
+    }
 
     protected byte[] createFormData(Form form) {
         short formId = getNextFormId();
@@ -66,11 +73,40 @@ public abstract class PluginMessageHandler {
         return data;
     }
 
-    protected boolean callResponseConsumer(byte[] data) {
+    protected byte[] createSkinRequestData(byte[] data) {
+        // data format:
+        // 0 = is request
+        // remaining = request data
+
+        byte[] output = new byte[data.length + 1];
+
+        output[0] = 1;
+        System.arraycopy(data, 0, output, 1, data.length);
+
+        return output;
+    }
+
+    protected byte[] createSkinResponseData(boolean failed, String data) {
+        // data format:
+        // 0 = is request
+        // 1 = has failed
+        // remaining = response data
+
+        byte[] rawData = data.getBytes(StandardCharsets.UTF_8);
+        byte[] output = new byte[rawData.length + 2];
+
+        output[0] = 0;
+        output[1] = (byte) (failed ? 1 : 0);
+        System.arraycopy(rawData, 0, output, 2, rawData.length);
+
+        return output;
+    }
+
+    public boolean callResponseConsumer(byte[] data) {
         Form storedForm = storedForms.remove(getFormId(data));
         if (storedForm != null) {
-            storedForm.getResponseHandler().accept(
-                    new String(data, 2, data.length - 2, Charsets.UTF_8));
+            String responseData = new String(data, 2, data.length -2, Charsets.UTF_8);
+            storedForm.getResponseHandler().accept(responseData);
             return true;
         }
         return false;

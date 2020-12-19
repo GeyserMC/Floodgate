@@ -23,35 +23,25 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.addon;
+package org.geysermc.floodgate.util;
 
-import com.google.inject.Inject;
-import io.netty.channel.Channel;
-import org.geysermc.floodgate.addon.addonmanager.AddonManagerHandler;
-import org.geysermc.floodgate.api.inject.InjectorAddon;
-import org.geysermc.floodgate.inject.CommonPlatformInjector;
-import org.geysermc.floodgate.util.Utils;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelPipeline;
 
-public final class AddonManagerAddon implements InjectorAddon {
-    @Inject private CommonPlatformInjector injector;
-
-    @Override
-    public void onInject(Channel channel, boolean toServer) {
-        channel.pipeline().addLast("floodgate_addon", new AddonManagerHandler(injector, channel));
-    }
-
-    @Override
-    public void onLoginDone(Channel channel) {
-        // AddonManagerHandler is also responsible for removing the addons when the channel closes
-    }
-
-    @Override
-    public void onRemoveInject(Channel channel) {
-        Utils.removeHandler(channel.pipeline(), "floodgate_addon");
-    }
-
-    @Override
-    public boolean shouldInject() {
-        return true;
+public class Utils {
+    /**
+     * This method is used in Addons.<br> Most addons can be removed once the player associated to
+     * the channel has been logged in, but they should also be removed once the inject is removed.
+     * Because of how Netty works it will throw an exception and we don't want that. This method
+     * removes those handlers safely.
+     *
+     * @param pipeline the pipeline
+     * @param handler  the name of the handler to remove
+     */
+    public static void removeHandler(ChannelPipeline pipeline, String handler) {
+        ChannelHandler channelHandler = pipeline.get(handler);
+        if (channelHandler != null) {
+            pipeline.remove(channelHandler);
+        }
     }
 }

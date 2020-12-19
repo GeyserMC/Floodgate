@@ -35,6 +35,7 @@ import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
+import org.geysermc.floodgate.util.Utils;
 
 public final class VelocityDataAddon implements InjectorAddon {
     @Inject private HandshakeHandler handshakeHandler;
@@ -84,7 +85,7 @@ public final class VelocityDataAddon implements InjectorAddon {
 
     @Override
     public void onRemoveInject(Channel channel) {
-        channel.pipeline().remove("floodgate_data_handler");
+        Utils.removeHandler(channel.pipeline(), "floodgate_data_handler");
     }
 
     @Override

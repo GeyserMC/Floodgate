@@ -98,6 +98,11 @@ public interface FloodgatePlayer {
     InputMode getInputMode();
 
     /**
+     * Returns if the Floodgate player is connected through a proxy
+     */
+    boolean isFromProxy();
+
+    /**
      * Returns the LinkedPlayer object if the player is linked to a Java account.
      */
     LinkedPlayer getLinkedPlayer();
@@ -114,6 +119,18 @@ public interface FloodgatePlayer {
     default boolean sendForm(FormBuilder<?, ?> formBuilder) {
         return sendForm(formBuilder.build());
     }
+
+    <T> T getProperty(PropertyKey key);
+
+    <T> T getProperty(String key);
+
+    <T> T removeProperty(PropertyKey key);
+
+    <T> T removeProperty(String key);
+
+    <T> T addProperty(PropertyKey key, Object value);
+
+    <T> T addProperty(String key, Object value);
 
     /**
      * Casts the FloodgatePlayer instance to a class that extends FloodgatePlayer.

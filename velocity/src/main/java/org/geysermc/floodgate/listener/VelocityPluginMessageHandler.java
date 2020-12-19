@@ -25,8 +25,6 @@
 
 package org.geysermc.floodgate.listener;
 
-import static org.geysermc.floodgate.util.MessageFormatter.format;
-
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.velocitypowered.api.event.Subscribe;
@@ -98,9 +96,8 @@ public class VelocityPluginMessageHandler extends PluginMessageHandler {
                 event.setResult(ForwardResult.handled());
 
                 if (!callResponseConsumer(data)) {
-                    logger.error(format(
-                            "Couldn't find stored form with id {} for player {}",
-                            formId, ((Player) source).getUsername()));
+                    logger.error("Couldn't find stored form with id {} for player {}",
+                            formId, ((Player) source).getUsername());
                 }
             }
         }
@@ -118,10 +115,5 @@ public class VelocityPluginMessageHandler extends PluginMessageHandler {
     @Override
     public boolean sendSkinRequest(UUID player, RawSkin skin) {
         return false; //todo
-    }
-
-    @Override
-    public void sendSkinResponse(UUID player, String response) {
-
     }
 }

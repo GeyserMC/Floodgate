@@ -48,6 +48,7 @@ import org.geysermc.floodgate.HandshakeHandler;
 import org.geysermc.floodgate.HandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.ReflectionUtils;
@@ -180,7 +181,7 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
                 networkManager = ctx.channel().pipeline().get("packet_handler");
 
                 String handshakeValue = getCastedValue(packet, HANDSHAKE_HOST);
-                HandshakeResult result = handshakeHandler.handle(handshakeValue);
+                HandshakeResult result = handshakeHandler.handle(ctx.channel(), handshakeValue);
                 switch (result.getResultType()) {
                     case SUCCESS:
                         break;
@@ -204,6 +205,8 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
                 String[] data = result.getHandshakeData();
                 bungeeData = isBungeeData();
 
+                InetSocketAddress correctAddress = fPlayer.getProperty(PropertyKey.SOCKET_ADDRESS);
+
                 if (bungeeData) {
                     setValue(packet, HANDSHAKE_HOST, data[0] + '\0' +
                             bedrockData.getIp() + '\0' +
@@ -213,12 +216,7 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
                     // Use a spoofedUUID for initUUID (just like Bungeecord)
                     setValue(networkManager, "spoofedUUID", fPlayer.getCorrectUniqueId());
                     // Use the player his IP for stuff instead of Geyser his IP
-                    SocketAddress newAddress = new InetSocketAddress(
-                            bedrockData.getIp(),
-                            ((InetSocketAddress) ctx.channel().remoteAddress()).getPort()
-                    );
-
-                    setValue(networkManager, SOCKET_ADDRESS, newAddress);
+                    setValue(networkManager, SOCKET_ADDRESS, correctAddress);
                 }
             } else if (isLogin) {
                 if (!bungeeData) {

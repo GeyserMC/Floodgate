@@ -23,36 +23,37 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate;
+package org.geysermc.floodgate.skin;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.pluginmessage.SpigotPluginMessageRegister;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
+import org.geysermc.floodgate.util.RawSkin;
 
-public final class SpigotPlatform extends FloodgatePlatform {
-    @Inject private JavaPlugin plugin;
-    @Inject private Injector guice;
+public final class ServerSkinHandler extends SkinHandler {
+    private final PluginMessageHandler pluginMessageHandler;
 
-    @Inject
-    public SpigotPlatform(FloodgateApi api, PlatformInjector platformInjector,
-                          FloodgateLogger logger, Injector injector) {
-        super(api, platformInjector, logger, injector);
+    public ServerSkinHandler(SkinApplier skinApplier,
+                             FloodgateLogger logger,
+                             PluginMessageHandler pluginMessageHandler) {
+        super(skinApplier, logger);
+        this.pluginMessageHandler = pluginMessageHandler;
     }
 
-    @Override
-    public boolean enable(Module... postInitializeModules) {
-        boolean success = super.enable(postInitializeModules);
-        if (!success) {
-            Bukkit.getPluginManager().disablePlugin(plugin);
-            return false;
-        }
-        guice.getInstance(SpigotPluginMessageRegister.class).register();
-        return true;
+    public void handleSkinUploadFor(FloodgatePlayer player) {
+        handleSkinUploadFor(player, player.getRawSkin());
+    }
+
+    public void handleSkinUploadFor(FloodgatePlayer player, RawSkin rawSkin) {
+        handleSkinUploadFor(player, rawSkin,
+                (failed, response) -> {
+                    if (player.isFromProxy()) {
+                        pluginMessageHandler.sendSkinResponse(
+                                player.getCorrectUniqueId(),
+                                failed,
+                                response
+                        );
+                    }
+                });
     }
 }

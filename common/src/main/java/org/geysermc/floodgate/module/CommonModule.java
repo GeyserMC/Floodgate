@@ -54,7 +54,7 @@ import org.geysermc.floodgate.link.PlayerLinkLoader;
 import org.geysermc.floodgate.util.LanguageManager;
 
 @RequiredArgsConstructor
-public final class CommonModule extends AbstractModule {
+public class CommonModule extends AbstractModule {
     private final Path dataDirectory;
 
     @Override

@@ -45,6 +45,7 @@
 
     <properties>
         <geyser.version>1.2.0-SNAPSHOT</geyser.version>
+        <cumulus.version>1.0-SNAPSHOT</cumulus.version>
         <spigot.version>1.13-R0.1-SNAPSHOT</spigot.version>
         <bungee.version>1.15-SNAPSHOT</bungee.version>
         <velocity.version>1.1.0</velocity.version>

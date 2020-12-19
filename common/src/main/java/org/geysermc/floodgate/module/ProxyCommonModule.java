@@ -23,52 +23,50 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.addon.data;
+package org.geysermc.floodgate.module;
 
-import com.google.inject.Inject;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import io.netty.channel.Channel;
-import io.netty.util.AttributeKey;
-import org.geysermc.floodgate.HandshakeHandler;
-import org.geysermc.floodgate.api.inject.InjectorAddon;
+import java.nio.file.Path;
+import org.geysermc.floodgate.api.ProxyFloodgateApi;
+import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.util.Utils;
+import org.geysermc.floodgate.config.ProxyFloodgateConfig;
+import org.geysermc.floodgate.crypto.FloodgateCipher;
+import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
+import org.geysermc.floodgate.skin.SkinApplier;
+import org.geysermc.floodgate.skin.SkinHandler;
 
-public final class SpigotDataAddon implements InjectorAddon {
-    @Inject private HandshakeHandler handshakeHandler;
-    @Inject private FloodgateConfig config;
-    @Inject private FloodgateLogger logger;
-
-    @Inject
-    @Named("playerAttribute")
-    private AttributeKey<FloodgatePlayer> playerAttribute;
-
-    @Inject
-    @Named("packetHandler")
-    private String packetHandlerName;
-
-    @Override
-    public void onInject(Channel channel, boolean toServer) {
-        channel.pipeline().addBefore(
-                packetHandlerName, "floodgate_data_handler",
-                new SpigotDataHandler(config, handshakeHandler, playerAttribute, logger)
-        );
+public final class ProxyCommonModule extends CommonModule {
+    public ProxyCommonModule(Path dataDirectory) {
+        super(dataDirectory);
     }
 
     @Override
-    public void onLoginDone(Channel channel) {
-        onRemoveInject(channel);
+    protected void configure() {
+        super.configure();
+        bind(SimpleFloodgateApi.class).to(ProxyFloodgateApi.class);
     }
 
-    @Override
-    public void onRemoveInject(Channel channel) {
-        Utils.removeHandler(channel.pipeline(), "floodgate_data_handler");
+    @Provides
+    @Singleton
+    @Named("configClass")
+    public Class<? extends FloodgateConfig> floodgateConfigClass() {
+        return ProxyFloodgateConfig.class;
     }
 
-    @Override
-    public boolean shouldInject() {
-        return true;
+    @Provides
+    @Singleton
+    public ProxyFloodgateApi proxyFloodgateApi(PluginMessageHandler pluginMessageHandler,
+                                               FloodgateCipher cipher) {
+        return new ProxyFloodgateApi(pluginMessageHandler, cipher);
+    }
+
+    @Provides
+    @Singleton
+    public SkinHandler skinHandler(SkinApplier skinApplier, FloodgateLogger logger) {
+        return new SkinHandler(skinApplier, logger);
     }
 }

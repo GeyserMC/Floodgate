@@ -89,7 +89,7 @@ public final class VelocityProxyDataHandler extends SimpleChannelInboundHandler<
     private void handleClientToProxy(ChannelHandlerContext ctx, Object packet) {
         String address = getCastedValue(packet, HANDSHAKE_SERVER_ADDRESS);
 
-        HandshakeResult result = handshakeHandler.handle(address);
+        HandshakeResult result = handshakeHandler.handle(ctx.channel(), address);
         switch (result.getResultType()) {
             case SUCCESS:
                 break;

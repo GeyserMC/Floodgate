@@ -28,6 +28,8 @@ package org.geysermc.floodgate;
 import static org.geysermc.floodgate.util.BedrockData.EXPECTED_LENGTH;
 
 import com.google.common.base.Charsets;
+import io.netty.channel.Channel;
+import java.net.InetSocketAddress;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -35,6 +37,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.crypto.AesCipher;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
@@ -48,7 +51,7 @@ public final class HandshakeHandler {
     private final FloodgateCipher cipher;
     private final FloodgateConfigHolder configHolder;
 
-    public HandshakeResult handle(@NonNull String handshakeData) {
+    public HandshakeResult handle(Channel channel, @NonNull String handshakeData) {
         try {
             String[] dataArray = handshakeData.split("\0");
 
@@ -95,10 +98,12 @@ public final class HandshakeHandler {
                 rawSkin = RawSkin.decode(rawSkinData);
             }
 
-            System.out.println(rawSkin);
-
             FloodgatePlayer player = FloodgatePlayerImpl.from(bedrockData, rawSkin, configHolder);
             api.addPlayer(player.getJavaUniqueId(), player);
+
+            int port = ((InetSocketAddress) channel.remoteAddress()).getPort();
+            InetSocketAddress socketAddress = new InetSocketAddress(bedrockData.getIp(), port);
+            player.addProperty(PropertyKey.SOCKET_ADDRESS, socketAddress);
 
             return new HandshakeResult(ResultType.SUCCESS, dataArray, bedrockData, player);
         } catch (InvalidFormatException formatException) {

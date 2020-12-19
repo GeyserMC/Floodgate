@@ -30,6 +30,7 @@ import java.awt.image.BufferedImage;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import javax.annotation.Nonnull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -44,7 +45,7 @@ public final class SkinUploader {
     private final Executor requestExecutor = Executors.newSingleThreadExecutor();
     private long nextResult = 0;
 
-    public CompletableFuture<UploadResult> uploadSkin(RawSkin rawSkin) {
+    public CompletableFuture<UploadResult> uploadSkin(@Nonnull RawSkin rawSkin) {
         return CompletableFuture.supplyAsync(() -> uploadSkinInner(rawSkin, 0), requestExecutor);
     }
 
@@ -148,6 +149,10 @@ public final class SkinUploader {
             response.addProperty("signature", textureData.get("signature").getAsString());
 
             return new UploadResult(httpCode, null, false, model, skinUrl, capeUrl, response);
+        }
+
+        public static UploadResult success(JsonObject response) {
+            return new UploadResult(200, null, false, null, null, null, response);
         }
     }
 }

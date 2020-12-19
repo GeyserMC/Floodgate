@@ -45,6 +45,7 @@ import org.geysermc.floodgate.HandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.ReflectionUtils;
@@ -97,7 +98,12 @@ public final class BungeeDataHandler {
                     event.getConnection(), EXTRA_HANDSHAKE_DATA
             );
 
-            HandshakeResult result = handler.handle(extraData);
+            Object channelWrapper =
+                    ReflectionUtils.getValue(event.getConnection(), PLAYER_CHANNEL_WRAPPER);
+
+            Channel channel = ReflectionUtils.getCastedValue(channelWrapper, PLAYER_CHANNEL);
+
+            HandshakeResult result = handler.handle(channel, extraData);
             switch (result.getResultType()) {
                 case EXCEPTION:
                     event.setCancelReason(config.getDisconnect().getInvalidKey());
@@ -117,7 +123,13 @@ public final class BungeeDataHandler {
             }
 
             FloodgatePlayer player = result.getFloodgatePlayer();
-            api.addEncryptedData(player.getCorrectUniqueId(), result.getHandshakeData()[1]);
+
+            String encryptedData = result.getHandshakeData()[1];
+            // remove skin from encrypted data if it has a skin
+            if (encryptedData.indexOf(0x21) != -1) {
+                encryptedData = encryptedData.substring(0, encryptedData.indexOf(0x21) - 1);
+            }
+            api.addEncryptedData(player.getCorrectUniqueId(), encryptedData);
 
             event.getConnection().setOnlineMode(false);
             event.getConnection().setUniqueId(player.getCorrectUniqueId());
@@ -125,9 +137,6 @@ public final class BungeeDataHandler {
             ReflectionUtils.setValue(
                     event.getConnection(), PLAYER_NAME, player.getCorrectUsername()
             );
-
-            Object channelWrapper =
-                    ReflectionUtils.getValue(event.getConnection(), PLAYER_CHANNEL_WRAPPER);
 
             SocketAddress remoteAddress =
                     ReflectionUtils.getCastedValue(channelWrapper, PLAYER_REMOTE_ADDRESS);
@@ -137,15 +146,15 @@ public final class BungeeDataHandler {
                                 "Ignoring the player, I guess.",
                         player.getUsername(), remoteAddress.getClass().getSimpleName()
                 );
-            } else {
-                int port = ((InetSocketAddress) remoteAddress).getPort();
-                ReflectionUtils.setValue(
-                        channelWrapper, PLAYER_REMOTE_ADDRESS,
-                        new InetSocketAddress(result.getBedrockData().getIp(), port)
-                );
+                event.setCancelled(true);
+                event.setCancelReason(
+                        new TextComponent("remoteAddress is not an InetSocketAddress!"));
+                event.completeIntent(plugin);
+                return;
             }
 
-            Channel channel = ReflectionUtils.getCastedValue(channelWrapper, PLAYER_CHANNEL);
+            InetSocketAddress correctAddress = player.getProperty(PropertyKey.SOCKET_ADDRESS);
+            ReflectionUtils.setValue(channelWrapper, PLAYER_REMOTE_ADDRESS, correctAddress);
 
             channel.attr(playerAttribute).set(player);
 
