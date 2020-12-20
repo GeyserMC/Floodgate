@@ -98,6 +98,8 @@ public class SpigotPluginMessageRegister {
                     skinHandler.handleSkinUploadFor(floodgatePlayer, rawSkin);
                 }
         );
+        
+        messenger.registerOutgoingPluginChannel(plugin, skinChannel);
     }
 
     private void logKick(Player player, String reason) {

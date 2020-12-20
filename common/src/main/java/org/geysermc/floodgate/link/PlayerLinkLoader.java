@@ -29,9 +29,8 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,21 +41,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
+import javax.inject.Named;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
 
-@RequiredArgsConstructor
+@Singleton
 public final class PlayerLinkLoader {
-    private final Injector injector;
-    private final FloodgateConfigHolder configHolder;
-    private final FloodgateLogger logger;
-    private final Path dataDirectory;
+    @Inject private Injector injector;
+    @Inject private FloodgateConfig config;
+    @Inject private FloodgateLogger logger;
+
+    @Inject
+    @Named("dataDirectory")
+    private Path dataDirectory;
 
     public PlayerLink load() {
-        FloodgateConfig config = configHolder.get();
         if (config == null) {
             throw new IllegalStateException("Config cannot be null!");
         }
@@ -125,17 +125,8 @@ public final class PlayerLinkLoader {
             return null;
         }
 
-        // allow the FloodgateConfig to be used directly instead of the FloodgateConfigHolder
-        Injector child = injector.createChildInjector(new AbstractModule() {
-            @Provides
-            @Singleton
-            public FloodgateConfig floodgateConfig() {
-                return config;
-            }
-        });
-
         try {
-            PlayerLink instance = child.getInstance(mainClass);
+            PlayerLink instance = injector.getInstance(mainClass);
             instance.load();
             return instance;
         } catch (Exception exception) {

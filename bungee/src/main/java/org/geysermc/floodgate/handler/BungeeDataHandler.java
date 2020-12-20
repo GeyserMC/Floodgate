@@ -124,13 +124,6 @@ public final class BungeeDataHandler {
 
             FloodgatePlayer player = result.getFloodgatePlayer();
 
-            String encryptedData = result.getHandshakeData()[1];
-            // remove skin from encrypted data if it has a skin
-            if (encryptedData.indexOf(0x21) != -1) {
-                encryptedData = encryptedData.substring(0, encryptedData.indexOf(0x21) - 1);
-            }
-            api.addEncryptedData(player.getCorrectUniqueId(), encryptedData);
-
             event.getConnection().setOnlineMode(false);
             event.getConnection().setUniqueId(player.getCorrectUniqueId());
 

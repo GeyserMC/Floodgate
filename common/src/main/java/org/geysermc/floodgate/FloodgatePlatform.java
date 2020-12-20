@@ -41,6 +41,7 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.config.loader.ConfigLoader;
 import org.geysermc.floodgate.link.PlayerLinkLoader;
+import org.geysermc.floodgate.module.ConfigLoadedModule;
 import org.geysermc.floodgate.module.PostInitializeModule;
 
 public class FloodgatePlatform {
@@ -64,7 +65,7 @@ public class FloodgatePlatform {
 
     @Inject
     public void init(@Named("dataDirectory") Path dataDirectory, ConfigLoader configLoader,
-                     PlayerLinkLoader playerLinkLoader, FloodgateConfigHolder configHolder) {
+                     FloodgateConfigHolder configHolder) {
 
         if (!Files.isDirectory(dataDirectory)) {
             try {
@@ -81,7 +82,8 @@ public class FloodgatePlatform {
         }
 
         configHolder.set(config);
-        PlayerLink link = playerLinkLoader.load();
+        guice = guice.createChildInjector(new ConfigLoadedModule(config));
+        PlayerLink link = guice.getInstance(PlayerLinkLoader.class).load();
 
         InstanceHolder.setInstance(api, link, this.injector, KEY);
     }

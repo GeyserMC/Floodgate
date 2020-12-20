@@ -64,12 +64,15 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
     private final InputMode inputMode;
     private final String ip;
     private final boolean fromProxy;
+    private final boolean proxy; // if current platform is a proxy
     private final LinkedPlayer linkedPlayer;
     private final RawSkin rawSkin;
+
     @Getter(AccessLevel.PRIVATE)
     public Map<PropertyKey, Object> propertyKeyToValue;
     @Getter(AccessLevel.PRIVATE)
     private Map<String, PropertyKey> stringToPropertyKey;
+
     /**
      * Returns true if the player is still logging in
      */
@@ -93,12 +96,6 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
         UiProfile uiProfile = UiProfile.getById(data.getUiProfile());
         InputMode inputMode = InputMode.getById(data.getInputMode());
 
-        // RawSkin must be removed from the encrypted data
-        if (api instanceof ProxyFloodgateApi) {
-            InstanceHolder.castApi(ProxyFloodgateApi.class)
-                    .updateEncryptedData(javaUniqueId, data);
-        }
-
         LinkedPlayer linkedPlayer;
 
         // we'll use the LinkedPlayer provided by Bungee or Velocity (if they included one)
@@ -113,11 +110,11 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
         FloodgatePlayerImpl player = new FloodgatePlayerImpl(
                 data.getVersion(), data.getUsername(), javaUsername, javaUniqueId, data.getXuid(),
                 deviceOs, data.getLanguageCode(), uiProfile, inputMode, data.getIp(),
-                data.isFromProxy(), linkedPlayer, skin);
+                data.isFromProxy(), api instanceof ProxyFloodgateApi, linkedPlayer, skin);
 
-        // encrypted data has been changed after fetching the linkedPlayer
-        // We have to update it...
-        if (linkedPlayer != null && api instanceof ProxyFloodgateApi) {
+        // RawSkin should be removed, fromProxy should be changed
+        // and encrypted data can be changed after fetching the linkedPlayer
+        if (api instanceof ProxyFloodgateApi) {
             InstanceHolder.castApi(ProxyFloodgateApi.class)
                     .updateEncryptedData(player.getCorrectUniqueId(), player.toBedrockData());
         }
@@ -169,7 +166,7 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
     public BedrockData toBedrockData() {
         return BedrockData.of(
                 version, username, xuid, deviceOs.ordinal(), languageCode,
-                uiProfile.ordinal(), inputMode.ordinal(), ip, linkedPlayer, fromProxy);
+                uiProfile.ordinal(), inputMode.ordinal(), ip, linkedPlayer, proxy);
     }
 
     public <T> T getProperty(PropertyKey key) {

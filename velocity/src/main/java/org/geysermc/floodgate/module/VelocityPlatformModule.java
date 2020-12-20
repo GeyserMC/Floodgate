@@ -35,12 +35,9 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import io.netty.util.AttributeKey;
 import org.geysermc.floodgate.VelocityPlugin;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
-import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.command.VelocityCommandRegistration;
-import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
-import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.inject.velocity.VelocityInjector;
@@ -58,15 +55,7 @@ import org.slf4j.Logger;
 public final class VelocityPlatformModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(SimpleFloodgateApi.class).to(ProxyFloodgateApi.class);
         bind(CommandUtil.class).to(VelocityCommandUtil.class);
-    }
-
-    @Provides
-    @Singleton
-    @Named("configClass")
-    public Class<? extends FloodgateConfig> floodgateConfigClass() {
-        return ProxyFloodgateConfig.class;
     }
 
     @Provides

@@ -47,13 +47,17 @@ import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
 import org.geysermc.floodgate.pluginmessage.BungeePluginMessageHandler;
 import org.geysermc.floodgate.pluginmessage.BungeeSkinApplier;
 import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.skin.SkinHandler;
 import org.geysermc.floodgate.util.BungeeCommandUtil;
 import org.geysermc.floodgate.util.LanguageManager;
 
 @RequiredArgsConstructor
 public final class BungeePlatformModule extends AbstractModule {
     private final BungeePlugin plugin;
+
+    @Override
+    protected void configure() {
+        bind(PluginMessageHandler.class).to(BungeePluginMessageHandler.class);
+    }
 
     @Provides
     @Singleton
@@ -92,7 +96,7 @@ public final class BungeePlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public PluginMessageHandler pluginMessageHandler(FloodgateConfigHolder configHolder) {
+    public BungeePluginMessageHandler pluginMessageHandler(FloodgateConfigHolder configHolder) {
         return new BungeePluginMessageHandler(configHolder);
     }
 
@@ -100,12 +104,6 @@ public final class BungeePlatformModule extends AbstractModule {
     @Singleton
     public SkinApplier skinApplier(FloodgateLogger logger) {
         return new BungeeSkinApplier(logger);
-    }
-
-    @Provides
-    @Singleton
-    public SkinHandler skinHandler(SkinApplier skinApplier, FloodgateLogger logger) {
-        return new SkinHandler(skinApplier, logger);
     }
 
     /*

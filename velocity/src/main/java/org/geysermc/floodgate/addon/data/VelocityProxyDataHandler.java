@@ -110,7 +110,6 @@ public final class VelocityProxyDataHandler extends SimpleChannelInboundHandler<
         // has the FloodgatePlayer attribute
         ctx.channel().attr(playerAttribute).set(player);
 
-        api.addEncryptedData(player.getCorrectUniqueId(), result.getHandshakeData()[1]);
         logger.info("Floodgate player who is logged in as {} {} joined",
                 player.getCorrectUsername(), player.getCorrectUniqueId());
     }

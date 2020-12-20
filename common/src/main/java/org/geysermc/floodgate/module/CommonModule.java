@@ -26,7 +26,6 @@
 package org.geysermc.floodgate.module;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -50,7 +49,6 @@ import org.geysermc.floodgate.crypto.Base64Topping;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.crypto.KeyProducer;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
-import org.geysermc.floodgate.link.PlayerLinkLoader;
 import org.geysermc.floodgate.util.LanguageManager;
 
 @RequiredArgsConstructor
@@ -112,15 +110,6 @@ public class CommonModule extends AbstractModule {
     public LanguageManager languageLoader(FloodgateConfigHolder configHolder,
                                           FloodgateLogger logger) {
         return new LanguageManager(configHolder, logger);
-    }
-
-    @Provides
-    @Singleton
-    public PlayerLinkLoader playerLinkLoader(Injector injector,
-                                             FloodgateConfigHolder configHolder,
-                                             FloodgateLogger logger,
-                                             @Named("dataDirectory") Path dataDirectory) {
-        return new PlayerLinkLoader(injector, configHolder, logger, dataDirectory);
     }
 
     @Provides

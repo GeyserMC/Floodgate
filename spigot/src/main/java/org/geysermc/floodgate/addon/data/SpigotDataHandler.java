@@ -197,6 +197,7 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
                         return;
                 }
 
+                // todo move this to HandshakeHandler?
                 ctx.channel().attr(playerAttribute).set(result.getFloodgatePlayer());
 
                 fPlayer = result.getFloodgatePlayer();

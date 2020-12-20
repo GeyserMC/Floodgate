@@ -45,6 +45,10 @@ public final class ServerSkinHandler extends SkinHandler {
     }
 
     public void handleSkinUploadFor(FloodgatePlayer player, RawSkin rawSkin) {
+        if (player == null || rawSkin == null) {
+            return;
+        }
+
         handleSkinUploadFor(player, rawSkin,
                 (failed, response) -> {
                     if (player.isFromProxy()) {
