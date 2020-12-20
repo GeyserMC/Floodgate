@@ -54,6 +54,7 @@ public final class SpigotVersionSpecificMethods {
         return player.spigot().getLocale();
     }
 
+    @SuppressWarnings("deprecation")
     public void hidePlayer(Player hideFor, Player playerToHide) {
         if (NEW_VISIBILITY) {
             hideFor.hidePlayer(plugin, playerToHide);
@@ -62,11 +63,12 @@ public final class SpigotVersionSpecificMethods {
         hideFor.hidePlayer(playerToHide);
     }
 
+    @SuppressWarnings("deprecation")
     public void showPlayer(Player showFor, Player playerToShow) {
         if (NEW_VISIBILITY) {
-            showFor.hidePlayer(plugin, playerToShow);
+            showFor.showPlayer(plugin, playerToShow);
             return;
         }
-        showFor.hidePlayer(playerToShow);
+        showFor.showPlayer(playerToShow);
     }
 }

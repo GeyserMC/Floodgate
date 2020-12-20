@@ -86,6 +86,7 @@ public final class SpigotSkinApplier implements SkinApplier {
         properties.put("textures", property);
 
         if (configHolder.get().isApplySkinDirectly()) {
+            // By running as a task, we don't run into async issues
             plugin.getServer().getScheduler().runTask(plugin, () -> {
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     if (p != player && p.canSee(player)) {
