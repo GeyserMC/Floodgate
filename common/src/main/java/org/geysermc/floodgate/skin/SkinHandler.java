@@ -77,7 +77,6 @@ public class SkinHandler {
                     }
 
                     logger.info("Skin upload successful for " + player.getCorrectUsername());
-                    logger.info(uploadResult.getResponse().toString());
 
                     if (consumer != null) {
                         consumer.accept(false, uploadResult.getResponse().toString());

@@ -46,6 +46,7 @@ import org.geysermc.cumulus.Form;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
 import org.geysermc.floodgate.skin.SkinApplier;
@@ -152,6 +153,11 @@ public final class BungeePluginMessageHandler extends PluginMessageHandler imple
                     return;
                 }
 
+                // we only have to continue if the player doesn't already have a skin uploaded
+                if (floodgatePlayer.hasProperty(PropertyKey.SKIN_UPLOADED)) {
+                    return;
+                }
+
                 byte[] responseData = new byte[data.length - 2];
                 System.arraycopy(data, 2, responseData, 0, responseData.length);
 
@@ -164,6 +170,7 @@ public final class BungeePluginMessageHandler extends PluginMessageHandler imple
                     return;
                 }
 
+                floodgatePlayer.addProperty(PropertyKey.SKIN_UPLOADED, response);
                 skinApplier.applySkin(floodgatePlayer, UploadResult.success(response));
                 return;
             }

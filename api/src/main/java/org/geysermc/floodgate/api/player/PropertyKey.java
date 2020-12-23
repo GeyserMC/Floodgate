@@ -43,12 +43,12 @@ public class PropertyKey {
 
     private final String key;
     private final boolean changeable;
-    private final boolean removeable;
+    private final boolean removable;
 
-    public PropertyKey(String key, boolean changeable, boolean removeable) {
+    public PropertyKey(String key, boolean changeable, boolean removable) {
         this.key = key;
         this.changeable = changeable;
-        this.removeable = removeable;
+        this.removable = removable;
     }
 
     @Override
@@ -63,32 +63,36 @@ public class PropertyKey {
         return false;
     }
 
-    public AllowedResult isAddAllowed(Object obj) {
+    public Result isAddAllowed(Object obj) { //todo use for add and remove
         if (obj instanceof PropertyKey) {
             PropertyKey propertyKey = (PropertyKey) obj;
 
             if (key.equals(propertyKey.key)) {
                 if ((propertyKey.changeable == changeable || propertyKey.changeable) &&
-                        (propertyKey.removeable == removeable || propertyKey.removeable)) {
-                    return AllowedResult.CORRECT;
+                        (propertyKey.removable == removable || propertyKey.removable)) {
+                    return Result.ALLOWED;
                 }
-                return AllowedResult.INVALID_TAGS;
+                return Result.INVALID_TAGS;
             }
-            return AllowedResult.NOT_EQUALS;
+            return Result.NOT_EQUALS;
         }
 
         if (obj instanceof String) {
-            if (changeable) {
-                return AllowedResult.CORRECT;
+            if (key.equals(obj)) {
+                if (changeable) {
+                    return Result.ALLOWED;
+                }
+                return Result.NOT_ALLOWED;
             }
-            return AllowedResult.INVALID_TAGS;
+            return Result.INVALID_TAGS;
         }
-        return AllowedResult.NOT_EQUALS;
+        return Result.NOT_EQUALS;
     }
 
-    public enum AllowedResult {
+    public enum Result {
         NOT_EQUALS,
         INVALID_TAGS,
-        CORRECT
+        NOT_ALLOWED,
+        ALLOWED
     }
 }

@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.listener;
 
+import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.velocitypowered.api.event.Subscribe;
@@ -36,34 +37,49 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.ChannelMessageSource;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import org.geysermc.cumulus.Form;
+import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
+import org.geysermc.floodgate.skin.SkinApplier;
+import org.geysermc.floodgate.skin.SkinUploader.UploadResult;
 import org.geysermc.floodgate.util.RawSkin;
 
 public class VelocityPluginMessageHandler extends PluginMessageHandler {
     private ProxyServer proxy;
-    private FloodgateLogger logger;
+    private FloodgateApi api;
+    private SkinApplier skinApplier;
     private ChannelIdentifier formChannel;
+    private ChannelIdentifier skinChannel;
+    private FloodgateLogger logger;
 
     public VelocityPluginMessageHandler(FloodgateConfigHolder configHolder) {
         super(configHolder);
     }
 
     @Inject // called because this is a listener as well
-    public void init(ProxyServer proxy, FloodgateLogger logger,
+    public void init(ProxyServer proxy, FloodgateApi api, SkinApplier skinApplier,
                      @Named("formChannel") String formChannelName,
-                     @Named("skinChannel") String skinChannelName) {
+                     @Named("skinChannel") String skinChannelName,
+                     FloodgateLogger logger) {
         this.proxy = proxy;
+        this.api = api;
+        this.skinApplier = skinApplier;
         this.logger = logger;
 
         formChannel = MinecraftChannelIdentifier.from(formChannelName);
+        skinChannel = MinecraftChannelIdentifier.from(skinChannelName);
 
         proxy.getChannelRegistrar().register(formChannel);
-        proxy.getChannelRegistrar().register(MinecraftChannelIdentifier.from(skinChannelName));
+        proxy.getChannelRegistrar().register(skinChannel);
     }
 
     @Subscribe
@@ -80,8 +96,7 @@ public class VelocityPluginMessageHandler extends PluginMessageHandler {
             if (source instanceof Player) {
                 byte[] data = event.getData();
                 if (data.length < 2) {
-                    logger.error("Invalid form response! Closing connection");
-                    ((Player) source).disconnect(Component.text("Invalid form response!"));
+                    logKick(source, "Invalid form response!");
                     return;
                 }
 
@@ -102,7 +117,74 @@ public class VelocityPluginMessageHandler extends PluginMessageHandler {
             }
         }
 
-        // proxies don't have to receive anything from the skins channel, they only have to send
+        if (event.getIdentifier().equals(skinChannel)) {
+            byte[] data = event.getData();
+
+            if (data.length < 1) {
+                logKick(source, "Got invalid Skin request/response.");
+                return;
+            }
+
+            boolean request = data[0] == 1;
+
+            if (!request && data.length < 2) {
+                logKick(source, "Got invalid Skin response.");
+                return;
+            }
+
+            if (source instanceof ServerConnection) {
+                if (request) {
+                    logKick(source, "Got Skin request from Server?");
+                    return;
+                }
+
+                UUID playerUniqueId = ((Player) event.getTarget()).getUniqueId();
+                FloodgatePlayer floodgatePlayer = api.getPlayer(playerUniqueId);
+
+                if (floodgatePlayer == null) {
+                    logKick(source, "Server issued Skin request for non-Floodgate player.");
+                    return;
+                }
+
+                // 1 = failed, 0 = successful.
+
+                // we'll try it again on the next server if it failed
+                if (data[1] != 0) {
+                    return;
+                }
+
+                // we only have to continue if the player doesn't already have a skin uploaded
+                if (floodgatePlayer.hasProperty(PropertyKey.SKIN_UPLOADED)) {
+                    return;
+                }
+
+                byte[] responseData = new byte[data.length - 2];
+                System.arraycopy(data, 2, responseData, 0, responseData.length);
+
+                JsonObject response;
+                try {
+                    Reader reader = new InputStreamReader(new ByteArrayInputStream(responseData));
+                    response = GSON.fromJson(reader, JsonObject.class);
+                } catch (Throwable throwable) {
+                    logger.error("Failed to read Skin response", throwable);
+                    return;
+                }
+
+                floodgatePlayer.addProperty(PropertyKey.SKIN_UPLOADED, response);
+                skinApplier.applySkin(floodgatePlayer, UploadResult.success(response));
+                return;
+            }
+
+            // Players (Geyser) can't send requests nor responses
+            if (source instanceof Player) {
+                logKick(source, "Got Skin " + (request ? "request" : "response") + " from Player?");
+            }
+        }
+    }
+
+    private void logKick(ChannelMessageSource source, String reason) {
+        logger.error(reason + " Closing connection");
+        ((Player) source).disconnect(Component.text(reason));
     }
 
     @Override
@@ -113,7 +195,11 @@ public class VelocityPluginMessageHandler extends PluginMessageHandler {
     }
 
     @Override
-    public boolean sendSkinRequest(UUID player, RawSkin skin) {
-        return false; //todo
+    public boolean sendSkinRequest(UUID uuid, RawSkin skin) {
+        return proxy.getPlayer(uuid)
+                .flatMap(Player::getCurrentServer)
+                .map(server -> server.sendPluginMessage(skinChannel,
+                        createSkinRequestData(skin.encode())))
+                .orElse(false);
     }
 }

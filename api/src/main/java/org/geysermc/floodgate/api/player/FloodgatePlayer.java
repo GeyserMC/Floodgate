@@ -120,6 +120,10 @@ public interface FloodgatePlayer {
         return sendForm(formBuilder.build());
     }
 
+    boolean hasProperty(PropertyKey key);
+
+    boolean hasProperty(String key);
+
     <T> T getProperty(PropertyKey key);
 
     <T> T getProperty(String key);

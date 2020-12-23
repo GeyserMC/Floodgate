@@ -40,6 +40,7 @@ import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.player.GameProfileRequestEvent;
+import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.proxy.InboundConnection;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.util.GameProfile;
@@ -52,6 +53,10 @@ import net.kyori.adventure.text.Component;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.api.player.PropertyKey;
+import org.geysermc.floodgate.config.ProxyFloodgateConfig;
+import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
+import org.geysermc.floodgate.skin.SkinHandler;
 import org.geysermc.floodgate.util.LanguageManager;
 
 public final class VelocityListener {
@@ -78,6 +83,10 @@ public final class VelocityListener {
     @Inject private ProxyFloodgateApi api;
     @Inject private LanguageManager languageManager;
     @Inject private FloodgateLogger logger;
+
+    @Inject private ProxyFloodgateConfig config;
+    @Inject private PluginMessageHandler pluginMessageHandler;
+    @Inject private SkinHandler skinHandler;
 
     @Inject
     @Named("playerAttribute")
@@ -132,6 +141,27 @@ public final class VelocityListener {
             if (player != null) {
                 languageManager.loadLocale(player.getLanguageCode());
             }
+        }
+    }
+
+    @Subscribe
+    public void onServerPostConnect(ServerPostConnectEvent event) {
+        FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
+        if (player == null) {
+            return;
+        }
+
+        // only ask for skin upload if it hasn't been uploaded already
+        if (player.hasProperty(PropertyKey.SKIN_UPLOADED)) {
+            return;
+        }
+
+        // send skin request to server if data forwarding allows that
+        if (config.isSendFloodgateData()) {
+            pluginMessageHandler.sendSkinRequest(player.getCorrectUniqueId(), player.getRawSkin());
+        } else {
+            //todo also a Proxy SkinHandler to keep stuff clean?
+            skinHandler.handleSkinUploadFor(player, null);
         }
     }
 

@@ -34,11 +34,9 @@ import com.velocitypowered.api.event.EventManager;
 import com.velocitypowered.api.proxy.ProxyServer;
 import io.netty.util.AttributeKey;
 import org.geysermc.floodgate.VelocityPlugin;
-import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.command.VelocityCommandRegistration;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
-import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.inject.velocity.VelocityInjector;
 import org.geysermc.floodgate.listener.VelocityListenerRegistration;
@@ -48,21 +46,16 @@ import org.geysermc.floodgate.platform.command.CommandRegistration;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
+import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.VelocityCommandUtil;
+import org.geysermc.floodgate.util.VelocitySkinApplier;
 import org.slf4j.Logger;
 
 public final class VelocityPlatformModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(CommandUtil.class).to(VelocityCommandUtil.class);
-    }
-
-    @Provides
-    @Singleton
-    public ProxyFloodgateApi proxyFloodgateApi(PluginMessageHandler pluginMessageHandler,
-                                               FloodgateCipher cipher) {
-        return new ProxyFloodgateApi(pluginMessageHandler, cipher);
     }
 
     @Provides
@@ -101,6 +94,12 @@ public final class VelocityPlatformModule extends AbstractModule {
     @Singleton
     public PluginMessageHandler pluginMessageHandler(FloodgateConfigHolder configHolder) {
         return new VelocityPluginMessageHandler(configHolder);
+    }
+
+    @Provides
+    @Singleton
+    public SkinApplier skinApplier(ProxyServer server) {
+        return new VelocitySkinApplier(server);
     }
 
     /*

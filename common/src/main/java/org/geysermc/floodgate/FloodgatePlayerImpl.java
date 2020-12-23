@@ -40,6 +40,7 @@ import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.player.PropertyKey;
+import org.geysermc.floodgate.api.player.PropertyKey.Result;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.util.BedrockData;
@@ -169,6 +170,23 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
                 uiProfile.ordinal(), inputMode.ordinal(), ip, linkedPlayer, proxy);
     }
 
+    @Override
+    public boolean hasProperty(PropertyKey key) {
+        if (propertyKeyToValue == null) {
+            return false;
+        }
+        return propertyKeyToValue.get(key) != null;
+    }
+
+    @Override
+    public boolean hasProperty(String key) {
+        if (stringToPropertyKey == null) {
+            return false;
+        }
+        return hasProperty(stringToPropertyKey.get(key));
+    }
+
+    @Override
     public <T> T getProperty(PropertyKey key) {
         if (propertyKeyToValue == null) {
             return null;
@@ -176,6 +194,7 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
         return (T) propertyKeyToValue.get(key);
     }
 
+    @Override
     public <T> T getProperty(String key) {
         if (stringToPropertyKey == null) {
             return null;
@@ -183,6 +202,7 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
         return getProperty(stringToPropertyKey.get(key));
     }
 
+    @Override
     public <T> T removeProperty(String key) {
         if (stringToPropertyKey == null) {
             return null;
@@ -190,13 +210,14 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
 
         PropertyKey propertyKey = stringToPropertyKey.get(key);
 
-        if (propertyKey == null || !propertyKey.isRemoveable()) {
+        if (propertyKey == null || !propertyKey.isRemovable()) {
             return null;
         }
 
         return (T) propertyKeyToValue.remove(propertyKey);
     }
 
+    @Override
     public <T> T removeProperty(PropertyKey key) {
         if (stringToPropertyKey == null) {
             return null;
@@ -204,13 +225,16 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
 
         PropertyKey propertyKey = stringToPropertyKey.get(key.getKey());
 
-        if (propertyKey == null || !propertyKey.equals(key) || !propertyKey.isRemoveable()) {
+        if (propertyKey == null || !propertyKey.equals(key) || !propertyKey.isRemovable()) {
             return null;
         }
+
+        stringToPropertyKey.remove(key.getKey());
 
         return (T) propertyKeyToValue.remove(key);
     }
 
+    @Override
     public <T> T addProperty(PropertyKey key, Object value) {
         if (stringToPropertyKey == null) {
             stringToPropertyKey = new HashMap<>();
@@ -223,7 +247,7 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
 
         PropertyKey propertyKey = stringToPropertyKey.get(key.getKey());
 
-        if (propertyKey != null && propertyKey.equals(key) && key.isChangeable()) {
+        if (propertyKey != null && propertyKey.isAddAllowed(key) == Result.ALLOWED) {
             stringToPropertyKey.put(key.getKey(), key);
             return (T) propertyKeyToValue.put(key, value);
         }
@@ -234,6 +258,7 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
         });
     }
 
+    @Override
     public <T> T addProperty(String key, Object value) {
         PropertyKey propertyKey = new PropertyKey(key, true, true);
 
@@ -249,7 +274,7 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
         PropertyKey currentPropertyKey = stringToPropertyKey.get(key);
 
         // key is always changeable if it passes this if statement
-        if (currentPropertyKey != null && currentPropertyKey.equals(propertyKey)) {
+        if (currentPropertyKey != null && currentPropertyKey.isAddAllowed(key) == Result.ALLOWED) {
             stringToPropertyKey.put(key, propertyKey);
             return (T) propertyKeyToValue.put(propertyKey, value);
         }

@@ -41,6 +41,7 @@ import org.geysermc.floodgate.FloodgatePlayerImpl;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.handler.BungeeDataHandler;
 import org.geysermc.floodgate.pluginmessage.BungeePluginMessageHandler;
@@ -71,6 +72,11 @@ public final class BungeeListener implements Listener {
     public void onServerConnected(ServerConnectedEvent event) {
         FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
         if (player == null) {
+            return;
+        }
+
+        // only ask for skin upload if it hasn't been uploaded already
+        if (player.hasProperty(PropertyKey.SKIN_UPLOADED)) {
             return;
         }
 
