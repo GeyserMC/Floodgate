@@ -1,69 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <artifactId>parent</artifactId>
-    
-    <dependencies>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.10</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
-    <description>Allows Bedrock players to join Java edition servers while keeping the server in online mode</description>
-    <distributionManagement>
-        <repository>
-            <id>releases</id>
-            <name>nukkitx-releases</name>
-            <url>https://repo.nukkitx.com/maven-releases</url>
-        </repository>
-        <snapshotRepository>
-            <id>snapshots</id>
-            <name>nukkitx-snapshots</name>
-            <url>https://repo.nukkitx.com/maven-snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
-    <groupId>org.geysermc.floodgate</groupId>
-    <modelVersion>4.0.0</modelVersion>
-    <modules>
-        <module>api</module>
-        <module>common</module>
-        <module>spigot</module>
-        <module>bungee</module>
-        <module>velocity</module>
-        <module>database</module>
-    </modules>
-    <name>floodgate</name>
-    <organization>
-        <name>GeyserMC</name>
-        <url>https://geysermc.org/</url>
-    </organization>
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <packaging>pom</packaging>
+  <groupId>org.geysermc.floodgate</groupId>
+  <artifactId>parent</artifactId>
+  <version>2.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
-    <properties>
-        <geyser.version>1.2.0-SNAPSHOT</geyser.version>
-        <cumulus.version>1.0-SNAPSHOT</cumulus.version>
-        <spigot.version>1.13-R0.1-SNAPSHOT</spigot.version>
-        <bungee.version>1.15-SNAPSHOT</bungee.version>
-        <velocity.version>1.1.0</velocity.version>
+  <name>floodgate</name>
+  <description>Allows Bedrock players to join Java edition servers while keeping the server in online mode</description>
+  <url>https://github.com/GeyserMC/Floodgate</url>
+  <inceptionYear>2020</inceptionYear>
+  <organization>
+    <name>GeyserMC</name>
+    <url>https://geysermc.org/</url>
+  </organization>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://opensource.org/licenses/MIT</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
 
-        <outputName>floodgate-${project.name}</outputName>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
+  <modules>
+    <module>api</module>
+    <module>common</module>
+    <module>spigot</module>
+    <module>bungee</module>
+    <module>velocity</module>
+    <module>database</module>
+  </modules>
 
-    <scm>
-        <connection>scm:git:https://github.com/GeyserMC/Floodgate.git</connection>
-        <developerConnection>scm:git:git@github.com:GeyserMC/Floodgate.git</developerConnection>
-        <url>https://github.com/GeyserMC/Floodgate/</url>
-    </scm>
+  <scm>
+    <connection>scm:git:https://github.com/GeyserMC/Floodgate.git</connection>
+    <developerConnection>scm:git:git@github.com:GeyserMC/Floodgate.git</developerConnection>
+    <url>https://github.com/GeyserMC/Floodgate/</url>
+  </scm>
+  <issueManagement>
+    <system>GitHub Issues</system>
+    <url>https://github.com/GeyserMC/Cumulus/issues</url>
+  </issueManagement>
+  <distributionManagement>
+    <repository>
+      <id>releases</id>
+      <name>opencollab-releases</name>
+      <url>https://repo.opencollab.dev/maven-releases</url>
+    </repository>
+    <snapshotRepository>
+      <id>snapshots</id>
+      <name>opencollab-snapshots</name>
+      <url>https://repo.opencollab.dev/maven-snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 
-    <url>https://github.com/GeyserMC/Floodgate</url>
+  <properties>
+    <geyser.version>1.2.0-SNAPSHOT</geyser.version>
+    <cumulus.version>1.0-SNAPSHOT</cumulus.version>
+    <spigot.version>1.13-R0.1-SNAPSHOT</spigot.version>
+    <bungee.version>1.15-SNAPSHOT</bungee.version>
+    <velocity.version>1.1.0</velocity.version>
 
-    <version>1.0-SNAPSHOT</version>
+    <outputName>floodgate-${project.name}</outputName>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.10</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <repositories>
+
+  </repositories>
 </project>
