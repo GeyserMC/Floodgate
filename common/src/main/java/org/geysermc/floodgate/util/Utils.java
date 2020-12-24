@@ -27,6 +27,16 @@ package org.geysermc.floodgate.util;
 
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Utils {
     /**
@@ -43,5 +53,25 @@ public class Utils {
         if (channelHandler != null) {
             pipeline.remove(channelHandler);
         }
+    }
+
+    public static List<String> readAllLines(String resourcePath) throws IOException {
+        InputStream stream = Utils.class.getClassLoader().getResourceAsStream(resourcePath);
+        try (BufferedReader reader = newBufferedReader(stream, StandardCharsets.UTF_8)) {
+            List<String> result = new ArrayList<>();
+            for (;;) {
+                String line = reader.readLine();
+                if (line == null)
+                    break;
+                result.add(line);
+            }
+            return result;
+        }
+    }
+
+    public static BufferedReader newBufferedReader(InputStream inputStream, Charset charset) {
+        CharsetDecoder decoder = charset.newDecoder();
+        Reader reader = new InputStreamReader(inputStream, decoder);
+        return new BufferedReader(reader);
     }
 }

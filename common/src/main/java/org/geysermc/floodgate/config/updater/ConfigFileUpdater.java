@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.config.updater;
 
+import com.google.common.base.Ascii;
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -33,9 +34,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.config.loader.DefaultConfigHandler;
 
 public final class ConfigFileUpdater {
     @Inject private FloodgateLogger logger;
+    @Inject private DefaultConfigHandler defaultConfigHandler;
 
     /**
      * Simple config file updater. Please note that all the keys should be unique and that this
@@ -49,28 +52,64 @@ public final class ConfigFileUpdater {
      * @throws IOException if an I/O error occurs
      */
     public void update(Path configLocation, Map<String, Object> currentVersion,
-                       Map<String, String> renames, Path defaultConfigLocation) throws IOException {
+                       Map<String, String> renames, String defaultConfigLocation)
+            throws IOException {
         List<String> notFound = new ArrayList<>();
-        List<String> newConfig = Files.readAllLines(defaultConfigLocation);
+        List<String> newConfig = defaultConfigHandler.loadDefaultConfig(defaultConfigLocation);
+
+        String spaces = "";
+        Map<String, Object> map = null;
 
         String line;
         for (int i = 0; i < newConfig.size(); i++) {
             line = newConfig.get(i);
-            // we don't have to check comments
-            if (line.startsWith("#")) {
+            // we don't have to check comments or empty lines
+            if (line.length() == 0 || line.startsWith("#")) {
                 continue;
+            }
+
+            StringBuilder currentSpaces = new StringBuilder();
+            while (line.charAt(currentSpaces.length()) == Ascii.SPACE) {
+                currentSpaces.append(Ascii.SPACE);
+            }
+
+            // end of subcategory
+            if (spaces.length() > 0 && currentSpaces.length() < spaces.length()) {
+                // we can assume this since we don't allow subcategories of subcategories
+                spaces = "";
+                map = null;
             }
 
             int splitIndex = line.indexOf(':');
             // if the line has a 'key: value' structure
             if (splitIndex != -1) {
-                String nameUntrimmed = line.substring(0, splitIndex);
-                String name = nameUntrimmed.trim();
+
+                // start of a subcategory
+                if (line.length() == splitIndex + 1) {
+                    if (currentSpaces.length() > 0) {
+                        throw new IllegalStateException(
+                                "Config too complex! I can't understand subcategories of a subcategory");
+                    }
+
+                    spaces = "  ";
+                    //todo allow rename of subcategory?
+                    System.out.println("subcategory: " + line.substring(0, splitIndex));
+                    map = (Map<String, Object>) currentVersion.get(line.substring(0, splitIndex));
+                    map.entrySet().forEach(System.out::println);
+                    continue;
+                }
+
+                String name = line.substring(spaces.length(), splitIndex);
+                String oldName = renames.getOrDefault(name, name);
+
                 Object value;
+                if (map != null) {
+                    value = map.get(oldName);
+                } else {
+                    value = currentVersion.get(spaces + oldName);
+                }
 
-                logger.info(name);
-                value = currentVersion.get(renames.getOrDefault(name, name));
-
+                // use default value if the key doesn't exist in the current version
                 if (value == null) {
                     notFound.add(name);
                     continue;
@@ -81,10 +120,11 @@ public final class ConfigFileUpdater {
                     if (!v.startsWith("\"") || !v.endsWith("\"")) {
                         value = "\"" + value + "\"";
                     }
+                    //todo this doesn't update {0} {1} to {} {} e.g.
                 }
 
-                logger.debug(nameUntrimmed + " has been changed to " + value);
-                newConfig.set(i, nameUntrimmed + ": " + value);
+                logger.debug(name + " has been changed to " + value);
+                newConfig.set(i, spaces + name + ": " + value);
             }
         }
 
@@ -106,12 +146,12 @@ public final class ConfigFileUpdater {
                     messageBuilder.append(", ");
                 }
 
-                messageBuilder.append(value);
-
                 String renamed = renames.get(value);
                 if (renamed != null) {
-                    messageBuilder.append(" to ").append(renamed);
+                    messageBuilder.append(renamed).append(" to ");
                 }
+
+                messageBuilder.append(value);
 
                 first = false;
             }

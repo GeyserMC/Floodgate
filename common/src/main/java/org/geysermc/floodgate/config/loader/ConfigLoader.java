@@ -26,10 +26,8 @@
 package org.geysermc.floodgate.config.loader;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.Key;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -43,6 +41,7 @@ import org.geysermc.floodgate.crypto.KeyProducer;
 public final class ConfigLoader {
     private final Path dataFolder;
     private final Class<? extends FloodgateConfig> configClass;
+    private final DefaultConfigHandler configCreator;
     private final ConfigUpdater updater;
 
     private final KeyProducer keyProducer;
@@ -60,24 +59,10 @@ public final class ConfigLoader {
             defaultConfigName = "proxy-" + defaultConfigName;
         }
 
-        Path defaultConfigPath;
-        try {
-            defaultConfigPath = Paths.get("./" + defaultConfigName);
-        } catch (RuntimeException exception) {
-            logger.error("Failed to get the default config location", exception);
-            throw new RuntimeException("Failed to get the default config location");
-        }
-
         boolean newConfig = !Files.exists(configPath);
         if (newConfig) {
             try {
-                InputStream newConfigFile =
-                        ConfigLoader.class.getClassLoader().getResourceAsStream(defaultConfigName);
-                if (newConfigFile == null) {
-                    throw new RuntimeException("Failed to get the default config file!");
-                }
-
-                Files.copy(newConfigFile, configPath);
+                configCreator.createDefaultConfig(defaultConfigName, configPath);
             } catch (Exception exception) {
                 logger.error("Error while creating config", exception);
             }
@@ -87,7 +72,7 @@ public final class ConfigLoader {
         try {
             // check and update if the config is outdated
             if (!newConfig) {
-                updater.update(defaultConfigPath);
+                updater.update(defaultConfigName);
             }
 
             FloodgateConfig config = ConfigInitializer.initializeFrom(

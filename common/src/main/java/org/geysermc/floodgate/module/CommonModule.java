@@ -41,6 +41,7 @@ import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.config.loader.ConfigLoader;
+import org.geysermc.floodgate.config.loader.DefaultConfigHandler;
 import org.geysermc.floodgate.config.updater.ConfigFileUpdater;
 import org.geysermc.floodgate.config.updater.ConfigUpdater;
 import org.geysermc.floodgate.crypto.AesCipher;
@@ -90,12 +91,19 @@ public class CommonModule extends AbstractModule {
     @Singleton
     public ConfigLoader configLoader(
             @Named("configClass") Class<? extends FloodgateConfig> configClass,
-            ConfigUpdater configUpdater, KeyProducer producer,
-            FloodgateCipher cipher, FloodgateLogger logger) {
+            DefaultConfigHandler defaultConfigHandler, ConfigUpdater configUpdater,
+            KeyProducer producer, FloodgateCipher cipher, FloodgateLogger logger) {
 
         return new ConfigLoader(
-                dataDirectory, configClass, configUpdater, producer, cipher, logger
+                dataDirectory, configClass, defaultConfigHandler,
+                configUpdater, producer, cipher, logger
         );
+    }
+
+    @Provides
+    @Singleton
+    public DefaultConfigHandler defaultConfigCreator() {
+        return new DefaultConfigHandler();
     }
 
     @Provides

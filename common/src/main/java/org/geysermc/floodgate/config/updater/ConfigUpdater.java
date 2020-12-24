@@ -32,7 +32,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +45,7 @@ public final class ConfigUpdater {
     private final ConfigFileUpdater fileUpdater;
     private final FloodgateLogger logger;
 
-    public void update(Path defaultConfigLocation) {
+    public void update(String defaultConfigLocation) {
         Path configLocation = dataFolder.resolve("config.yml");
 
         BufferedReader configReader;
@@ -58,6 +57,10 @@ public final class ConfigUpdater {
         }
 
         Map<String, Object> config = new Yaml().load(configReader);
+
+        config.forEach((key, value) -> System.out.println(key + ":" + value + " (" + value.getClass().getName() + ")"));
+
+        // new name -> old name
         Map<String, String> renames = new HashMap<>();
 
         Object versionElement = config.get("config-version");
@@ -81,7 +84,7 @@ public final class ConfigUpdater {
         } else {
             logger.warn("You're using a pre-rewrite config file, please note that Floodgate will " +
                     "throw an exception if you didn't already update your Floodgate key" +
-                    "(across all your servers, including Geyser)." +
+                    "(across all your servers, including Geyser). " +
                     "We'll still try to update the config," +
                     "but please regenerate the keys if it failed before asking for support.");
             renames.put("enabled", "enable"); //todo make dump system and add a boolean 'found-legacy-key' or something like that
