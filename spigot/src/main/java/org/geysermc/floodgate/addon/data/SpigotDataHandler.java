@@ -36,7 +36,6 @@ import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.util.AttributeKey;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -158,7 +157,6 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
     /* per player stuff */
     private final FloodgateConfig config;
     private final HandshakeHandler handshakeHandler;
-    private final AttributeKey<FloodgatePlayer> playerAttribute;
     private final FloodgateLogger logger;
     private Object networkManager;
     private FloodgatePlayer fPlayer;
@@ -196,9 +194,6 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
                     default: // only continue when SUCCESS
                         return;
                 }
-
-                // todo move this to HandshakeHandler?
-                ctx.channel().attr(playerAttribute).set(result.getFloodgatePlayer());
 
                 fPlayer = result.getFloodgatePlayer();
                 BedrockData bedrockData = result.getBedrockData();

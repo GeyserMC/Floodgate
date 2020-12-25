@@ -108,8 +108,8 @@ public final class VelocityPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public CommonPlatformInjector platformInjector(ProxyServer server) {
-        return new VelocityInjector(server);
+    public CommonPlatformInjector platformInjector(ProxyServer server, FloodgateLogger logger) {
+        return new VelocityInjector(server, logger);
     }
 
     @Provides

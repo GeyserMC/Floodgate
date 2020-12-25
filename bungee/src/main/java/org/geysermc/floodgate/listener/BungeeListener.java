@@ -84,7 +84,6 @@ public final class BungeeListener implements Listener {
         if (config.isSendFloodgateData()) {
             pluginMessageHandler.sendSkinRequest(event.getServer(), player.getRawSkin());
         } else {
-            //todo also a Proxy SkinHandler to keep stuff clean?
             skinHandler.handleSkinUploadFor(player, null);
         }
     }

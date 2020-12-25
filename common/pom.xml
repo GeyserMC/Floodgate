@@ -45,11 +45,6 @@
       <artifactId>cumulus</artifactId>
       <version>${cumulus.version}</version>
     </dependency>
-    <!--    <dependency> todo -->
-    <!--      <groupId>com.mojang</groupId>-->
-    <!--      <artifactId>brigadier</artifactId>-->
-    <!--      <version>1.0.17</version>-->
-    <!--    </dependency>-->
     <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>

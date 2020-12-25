@@ -160,7 +160,6 @@ public final class VelocityListener {
         if (config.isSendFloodgateData()) {
             pluginMessageHandler.sendSkinRequest(player.getCorrectUniqueId(), player.getRawSkin());
         } else {
-            //todo also a Proxy SkinHandler to keep stuff clean?
             skinHandler.handleSkinUploadFor(player, null);
         }
     }

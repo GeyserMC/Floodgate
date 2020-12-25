@@ -123,8 +123,9 @@ public class CommonModule extends AbstractModule {
     @Provides
     @Singleton
     public HandshakeHandler handshakeHandler(SimpleFloodgateApi api, FloodgateCipher cipher,
-                                             FloodgateConfigHolder configHolder) {
-        return new HandshakeHandler(api, cipher, configHolder);
+                                             FloodgateConfigHolder configHolder,
+                                             AttributeKey<FloodgatePlayer> playerAttribute) {
+        return new HandshakeHandler(api, cipher, configHolder, playerAttribute);
     }
 
     @Provides

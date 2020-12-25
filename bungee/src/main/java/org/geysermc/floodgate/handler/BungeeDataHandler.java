@@ -149,8 +149,6 @@ public final class BungeeDataHandler {
             InetSocketAddress correctAddress = player.getProperty(PropertyKey.SOCKET_ADDRESS);
             ReflectionUtils.setValue(channelWrapper, PLAYER_REMOTE_ADDRESS, correctAddress);
 
-            channel.attr(playerAttribute).set(player);
-
             event.completeIntent(plugin);
         });
     }

@@ -32,7 +32,6 @@ import javassist.CtClass;
 import javassist.CtField;
 import javassist.CtMethod;
 import javassist.Modifier;
-import javax.naming.OperationNotSupportedException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -89,10 +88,9 @@ public final class BungeeInjector extends CommonPlatformInjector {
     }
 
     @Override
-    public boolean removeInjection() throws Exception {
-        //todo implement injection removal support
-        throw new OperationNotSupportedException(
-                "Floodgate cannot remove the Bungee injection at the moment");
+    public boolean removeInjection() {
+        logger.error("Floodgate cannot remove itself from Bungee without a reboot");
+        return false;
     }
 
     public void injectClient(Channel channel, boolean clientToProxy) {

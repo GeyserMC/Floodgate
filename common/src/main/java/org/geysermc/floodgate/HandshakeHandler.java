@@ -29,6 +29,7 @@ import static org.geysermc.floodgate.util.BedrockData.EXPECTED_LENGTH;
 
 import com.google.common.base.Charsets;
 import io.netty.channel.Channel;
+import io.netty.util.AttributeKey;
 import java.net.InetSocketAddress;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -51,6 +52,7 @@ public final class HandshakeHandler {
     private final SimpleFloodgateApi api;
     private final FloodgateCipher cipher;
     private final FloodgateConfigHolder configHolder;
+    private final AttributeKey<FloodgatePlayer> playerAttribute;
 
     public HandshakeResult handle(Channel channel, @NonNull String handshakeData) {
         try {
@@ -102,6 +104,8 @@ public final class HandshakeHandler {
 
             FloodgatePlayer player = FloodgatePlayerImpl.from(bedrockData, rawSkin, configHolder);
             api.addPlayer(player.getJavaUniqueId(), player);
+
+            channel.attr(playerAttribute).set(player);
 
             int port = ((InetSocketAddress) channel.remoteAddress()).getPort();
             InetSocketAddress socketAddress = new InetSocketAddress(bedrockData.getIp(), port);

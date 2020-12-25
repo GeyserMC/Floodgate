@@ -34,14 +34,15 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import java.lang.reflect.Method;
-import javax.naming.OperationNotSupportedException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 
 @RequiredArgsConstructor
 public final class VelocityInjector extends CommonPlatformInjector {
     private final ProxyServer server;
+    private final FloodgateLogger logger;
 
     @Getter private boolean injected = false;
 
@@ -74,10 +75,9 @@ public final class VelocityInjector extends CommonPlatformInjector {
     }
 
     @Override
-    public boolean removeInjection() throws Exception {
-        //todo implement injection removal support
-        throw new OperationNotSupportedException(
-                "Floodgate cannot remove the Velocity injection at the moment");
+    public boolean removeInjection() {
+        logger.error("Floodgate cannot remove itself from Bungee without a reboot");
+        return false;
     }
 
     @RequiredArgsConstructor

@@ -105,11 +105,6 @@ public final class VelocityProxyDataHandler extends SimpleChannelInboundHandler<
 
         FloodgatePlayer player = result.getFloodgatePlayer();
 
-        // we can't rely on Velocity when it comes to kicking the old players, so with this
-        // system we only have to check if the connection (which is already closed at that time)
-        // has the FloodgatePlayer attribute
-        ctx.channel().attr(playerAttribute).set(player);
-
         logger.info("Floodgate player who is logged in as {} {} joined",
                 player.getCorrectUsername(), player.getCorrectUniqueId());
     }
