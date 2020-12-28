@@ -27,75 +27,66 @@ package org.geysermc.floodgate.command;
 
 import static org.geysermc.floodgate.command.CommonCommandMessage.CHECK_CONSOLE;
 
+import cloud.commandframework.Command;
+import cloud.commandframework.CommandManager;
+import cloud.commandframework.Description;
+import cloud.commandframework.context.CommandContext;
 import com.google.inject.Inject;
-import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.link.PlayerLink;
-import org.geysermc.floodgate.platform.command.Command;
 import org.geysermc.floodgate.platform.command.CommandMessage;
-import org.geysermc.floodgate.platform.command.CommandUtil;
+import org.geysermc.floodgate.platform.command.FloodgateCommand;
+import org.geysermc.floodgate.player.UserAudience;
+import org.geysermc.floodgate.player.UserAudience.PlayerAudience;
 
 @NoArgsConstructor
-public final class UnlinkAccountCommand implements Command {
+public final class UnlinkAccountCommand implements FloodgateCommand {
     @Inject private FloodgateApi api;
-    @Inject private CommandUtil commandUtil;
 
     @Override
-    public void execute(Object player, UUID uuid, String username, String locale, String... args) {
+    public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
+        return commandManager.commandBuilder("unlinkaccount",
+                Description.of("Unlink your Java account from your Bedrock account"))
+                .senderType(PlayerAudience.class)
+                .permission("floodgate.command.unlinkaccount")
+                .handler(this::execute)
+                .build();
+    }
+
+    @Override
+    public void execute(CommandContext<UserAudience> context) {
+        UserAudience sender = context.getSender();
+
         PlayerLink link = api.getPlayerLink();
         if (!link.isEnabledAndAllowed()) {
-            sendMessage(player, locale, Message.LINKING_NOT_ENABLED);
+            sender.sendMessage(Message.LINKING_NOT_ENABLED);
             return;
         }
 
-        link.isLinkedPlayer(uuid)
+        link.isLinkedPlayer(sender.uuid())
                 .whenComplete((linked, error) -> {
                     if (error != null) {
-                        sendMessage(player, locale, CommonCommandMessage.IS_LINKED_ERROR);
+                        sender.sendMessage(CommonCommandMessage.IS_LINKED_ERROR);
                         return;
                     }
 
                     if (!linked) {
-                        sendMessage(player, locale, Message.NOT_LINKED);
+                        sender.sendMessage(Message.NOT_LINKED);
                         return;
                     }
 
-                    link.unlinkPlayer(uuid)
+                    link.unlinkPlayer(sender.uuid())
                             .whenComplete((unused, error1) -> {
                                 if (error1 != null) {
-                                    sendMessage(player, locale, Message.UNLINK_ERROR);
+                                    sender.sendMessage(Message.UNLINK_ERROR);
                                     return;
                                 }
 
-                                sendMessage(player, locale, Message.UNLINK_SUCCESS);
+                                sender.sendMessage(Message.UNLINK_SUCCESS);
                             });
                 });
-    }
-
-    @Override
-    public String getName() {
-        return "unlinkaccount";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Unlink your Java account from your Bedrock account";
-    }
-
-    @Override
-    public String getPermission() {
-        return "floodgate.unlinkaccount";
-    }
-
-    @Override
-    public boolean isRequirePlayer() {
-        return true;
-    }
-
-    private void sendMessage(Object player, String locale, CommandMessage message, Object... args) {
-        commandUtil.sendMessage(player, locale, message, args);
     }
 
     @Getter

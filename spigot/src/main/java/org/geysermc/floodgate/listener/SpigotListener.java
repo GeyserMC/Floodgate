@@ -34,12 +34,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.geysermc.floodgate.FloodgatePlayerImpl;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.player.FloodgatePlayerImpl;
 import org.geysermc.floodgate.skin.ServerSkinHandler;
 import org.geysermc.floodgate.util.LanguageManager;
+import org.geysermc.floodgate.util.SpigotCommandUtil;
 
 public final class SpigotListener implements Listener {
     @Inject private SimpleFloodgateApi api;
@@ -79,6 +80,9 @@ public final class SpigotListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
+
+        SpigotCommandUtil.AUDIENCE_CACHE.remove(player.getUniqueId()); //todo
+
         if (api.removePlayer(player.getUniqueId()) != null) {
             logger.translatedInfo("floodgate.ingame.disconnect_name", player.getName());
         }

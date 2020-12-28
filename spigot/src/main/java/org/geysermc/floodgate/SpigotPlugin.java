@@ -29,9 +29,9 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.module.CommandModule;
 import org.geysermc.floodgate.module.ServerCommonModule;
 import org.geysermc.floodgate.module.SpigotAddonModule;
+import org.geysermc.floodgate.module.SpigotCommandModule;
 import org.geysermc.floodgate.module.SpigotListenerModule;
 import org.geysermc.floodgate.module.SpigotPlatformModule;
 import org.geysermc.floodgate.util.ReflectionUtils;
@@ -59,7 +59,11 @@ public final class SpigotPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        platform.enable(new CommandModule(), new SpigotListenerModule(), new SpigotAddonModule());
+        platform.enable(
+                new SpigotCommandModule(this),
+                new SpigotListenerModule(),
+                new SpigotAddonModule()
+        );
     }
 
     @Override

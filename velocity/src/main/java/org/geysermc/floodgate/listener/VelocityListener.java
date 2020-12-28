@@ -58,6 +58,7 @@ import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
 import org.geysermc.floodgate.skin.SkinHandler;
 import org.geysermc.floodgate.util.LanguageManager;
+import org.geysermc.floodgate.util.VelocityCommandUtil;
 
 public final class VelocityListener {
     private static final Field INITIAL_MINECRAFT_CONNECTION;
@@ -167,6 +168,9 @@ public final class VelocityListener {
     @Subscribe(order = PostOrder.LAST)
     public void onDisconnect(DisconnectEvent event) {
         Player player = event.getPlayer();
+
+        VelocityCommandUtil.AUDIENCE_CACHE.remove(player.getUniqueId()); //todo
+
         try {
             Object minecraftConnection = getValue(player, MINECRAFT_CONNECTION);
             Channel channel = getCastedValue(minecraftConnection, CHANNEL);

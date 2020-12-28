@@ -23,18 +23,27 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.platform.command;
+package org.geysermc.floodgate.player;
+
+import cloud.commandframework.execution.preprocessor.CommandPreprocessingContext;
+import cloud.commandframework.execution.preprocessor.CommandPreprocessor;
+import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.floodgate.platform.command.CommandUtil;
 
 /**
- * This class is responsible for registering commands to the command register of the platform that
- * is currently in use. So that the commands only have to be written once (in the common module) and
- * can be used across all platforms without the need of adding platform specific commands.
+ * Command preprocessor which decorated incoming {@link cloud.commandframework.context.CommandContext}
+ * with Floodgate specific objects
+ *
+ * @param <C> Command sender type
+ * @since 2.0
  */
-public interface CommandRegistration {
-    /**
-     * This method will register the specified command.
-     *
-     * @param command the command to register
-     */
-    void register(Command command);
+@RequiredArgsConstructor
+public final class FloodgateCommandPreprocessor<C> implements CommandPreprocessor<C> {
+    private final CommandUtil commandUtil;
+
+    @Override
+    public void accept(@NonNull CommandPreprocessingContext<C> context) {
+        context.getCommandContext().store("CommandUtil", commandUtil);
+    }
 }

@@ -23,31 +23,23 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.module;
+package org.geysermc.floodgate.platform.command;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
-import com.google.inject.multibindings.ProvidesIntoSet;
-import org.geysermc.floodgate.command.LinkAccountCommand;
-import org.geysermc.floodgate.command.UnlinkAccountCommand;
-import org.geysermc.floodgate.platform.command.FloodgateCommand;
-import org.geysermc.floodgate.register.CommandRegister;
+import cloud.commandframework.Command;
+import cloud.commandframework.CommandManager;
+import cloud.commandframework.context.CommandContext;
+import org.geysermc.floodgate.player.UserAudience;
 
-public class CommandModule extends AbstractModule {
-    @Override
-    protected void configure() {
-        bind(CommandRegister.class).asEagerSingleton();
-    }
+/**
+ * The base class for every Floodgate command.
+ */
+public interface FloodgateCommand {
+    Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager);
 
-    @Singleton
-    @ProvidesIntoSet
-    public FloodgateCommand linkAccountCommand() {
-        return new LinkAccountCommand();
-    }
-
-    @Singleton
-    @ProvidesIntoSet
-    public FloodgateCommand unlinkAccountCommand() {
-        return new UnlinkAccountCommand();
-    }
+    /**
+     * Called when the command created in {@link #buildCommand(CommandManager)} is executed.
+     *
+     * @param context the context of the executed command
+     */
+    void execute(CommandContext<UserAudience> context);
 }

@@ -46,6 +46,11 @@
       <artifactId>common</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>cloud.commandframework</groupId>
+      <artifactId>cloud-velocity</artifactId>
+      <version>${cloud.version}</version>
+    </dependency>
     <!-- the following common dependencies are already present on the platform -->
     <dependency>
       <groupId>com.google.code.gson</groupId>

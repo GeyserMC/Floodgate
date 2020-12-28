@@ -23,31 +23,23 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.module;
+package org.geysermc.floodgate.player;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
-import com.google.inject.multibindings.ProvidesIntoSet;
-import org.geysermc.floodgate.command.LinkAccountCommand;
-import org.geysermc.floodgate.command.UnlinkAccountCommand;
-import org.geysermc.floodgate.platform.command.FloodgateCommand;
-import org.geysermc.floodgate.register.CommandRegister;
+import java.util.UUID;
+import net.kyori.adventure.audience.Audience;
+import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.geysermc.floodgate.player.UserAudience.ConsoleAudience;
 
-public class CommandModule extends AbstractModule {
-    @Override
-    protected void configure() {
-        bind(CommandRegister.class).asEagerSingleton();
-    }
+public interface ServerAudience extends Audience {
+    @NonNull Iterable<? extends UserAudience> onlineAudiences();
 
-    @Singleton
-    @ProvidesIntoSet
-    public FloodgateCommand linkAccountCommand() {
-        return new LinkAccountCommand();
-    }
+    @NonNull ConsoleAudience consoleAudience();
 
-    @Singleton
-    @ProvidesIntoSet
-    public FloodgateCommand unlinkAccountCommand() {
-        return new UnlinkAccountCommand();
-    }
+    @NonNegative int onlineCount();
+
+    @Nullable UserAudience audienceOf(final @NonNull UUID uuid);
+
+    @Nullable UserAudience audienceOf(final @NonNull String username);
 }

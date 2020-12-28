@@ -25,29 +25,34 @@
 
 package org.geysermc.floodgate.module;
 
-import com.google.inject.AbstractModule;
+import cloud.commandframework.CommandManager;
+import cloud.commandframework.bukkit.BukkitCommandManager;
+import cloud.commandframework.execution.CommandExecutionCoordinator;
+import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import com.google.inject.multibindings.ProvidesIntoSet;
-import org.geysermc.floodgate.command.LinkAccountCommand;
-import org.geysermc.floodgate.command.UnlinkAccountCommand;
-import org.geysermc.floodgate.platform.command.FloodgateCommand;
-import org.geysermc.floodgate.register.CommandRegister;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import org.bukkit.command.CommandSender;
+import org.geysermc.floodgate.SpigotPlugin;
+import org.geysermc.floodgate.platform.command.CommandUtil;
+import org.geysermc.floodgate.player.FloodgateCommandPreprocessor;
+import org.geysermc.floodgate.player.UserAudience;
 
-public class CommandModule extends AbstractModule {
-    @Override
-    protected void configure() {
-        bind(CommandRegister.class).asEagerSingleton();
-    }
+@RequiredArgsConstructor
+public final class SpigotCommandModule extends CommandModule {
+    private final SpigotPlugin plugin;
 
+    @Provides
     @Singleton
-    @ProvidesIntoSet
-    public FloodgateCommand linkAccountCommand() {
-        return new LinkAccountCommand();
-    }
-
-    @Singleton
-    @ProvidesIntoSet
-    public FloodgateCommand unlinkAccountCommand() {
-        return new UnlinkAccountCommand();
+    @SneakyThrows
+    public CommandManager<UserAudience> commandManager(CommandUtil commandUtil) {
+        CommandManager<UserAudience> commandManager = new BukkitCommandManager<>(
+                plugin,
+                CommandExecutionCoordinator.simpleCoordinator(),
+                commandUtil::getAudience,
+                audience -> (CommandSender) audience.source()
+        );
+        commandManager.registerCommandPreProcessor(new FloodgateCommandPreprocessor<>(commandUtil));
+        return commandManager;
     }
 }

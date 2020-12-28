@@ -49,7 +49,7 @@ public final class VelocityPlugin {
         long ctm = System.currentTimeMillis();
         Injector injector = guice.createChildInjector(
                 new ProxyCommonModule(dataDirectory),
-                new VelocityPlatformModule()
+                new VelocityPlatformModule(guice)
         );
 
         platform = injector.getInstance(FloodgatePlatform.class);

@@ -25,11 +25,30 @@
 
 package org.geysermc.floodgate.platform.command;
 
+import java.util.Collection;
+import java.util.UUID;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.geysermc.floodgate.player.UserAudience;
+import org.geysermc.floodgate.player.UserAudienceArgument.PlayerType;
+
 /**
  * An interface used across all Floodgate platforms to simple stuff in commands like kicking players
  * and sending player messages independent of the Floodgate platform implementation.
  */
 public interface CommandUtil {
+    @NonNull UserAudience getAudience(final @NonNull Object source);
+
+    @Nullable UserAudience getAudienceByUuid(final @NonNull UUID uuid);
+
+    @NonNull UserAudience getOfflineAudienceByUuid(final @NonNull UUID uuid);
+
+    @Nullable UserAudience getAudienceByUsername(final @NonNull String username);
+
+    @NonNull UserAudience getOfflineAudienceByUsername(final @NonNull String username);
+
+    @NonNull Collection<String> getOnlineUsernames(final @NonNull PlayerType limitTo);
+
     /**
      * Send a message to the specified player, no matter what platform Floodgate is running on.
      *

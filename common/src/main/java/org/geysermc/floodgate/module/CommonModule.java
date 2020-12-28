@@ -32,7 +32,6 @@ import com.google.inject.name.Named;
 import io.netty.util.AttributeKey;
 import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.HandshakeHandler;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
@@ -50,6 +49,7 @@ import org.geysermc.floodgate.crypto.Base64Topping;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.crypto.KeyProducer;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
+import org.geysermc.floodgate.player.HandshakeHandler;
 import org.geysermc.floodgate.util.LanguageManager;
 
 @RequiredArgsConstructor
@@ -122,9 +122,12 @@ public class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public HandshakeHandler handshakeHandler(SimpleFloodgateApi api, FloodgateCipher cipher,
-                                             FloodgateConfigHolder configHolder,
-                                             AttributeKey<FloodgatePlayer> playerAttribute) {
+    public HandshakeHandler handshakeHandler(
+            SimpleFloodgateApi api,
+            FloodgateCipher cipher,
+            FloodgateConfigHolder configHolder,
+            @Named("playerAttribute") AttributeKey<FloodgatePlayer> playerAttribute
+    ) {
         return new HandshakeHandler(api, cipher, configHolder, playerAttribute);
     }
 

@@ -37,6 +37,7 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class Utils {
     /**
@@ -73,5 +74,9 @@ public class Utils {
         CharsetDecoder decoder = charset.newDecoder();
         Reader reader = new InputStreamReader(inputStream, decoder);
         return new BufferedReader(reader);
+    }
+
+    public static String getLocale(Locale locale) {
+        return locale.getLanguage() + "_" + locale.getCountry();
     }
 }

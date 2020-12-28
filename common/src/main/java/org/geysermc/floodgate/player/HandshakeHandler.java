@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate;
+package org.geysermc.floodgate.player;
 
 import static org.geysermc.floodgate.util.BedrockData.EXPECTED_LENGTH;
 

@@ -35,6 +35,16 @@
       <artifactId>common</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>cloud.commandframework</groupId>
+      <artifactId>cloud-bungee</artifactId>
+      <version>${cloud.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.kyori</groupId>
+      <artifactId>adventure-text-serializer-gson</artifactId>
+      <version>${adventure.version}</version>
+    </dependency>
     <!-- the following common dependencies are already present on the platform -->
     <dependency>
       <groupId>com.google.code.gson</groupId>

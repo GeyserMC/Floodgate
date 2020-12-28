@@ -37,15 +37,16 @@ import net.md_5.bungee.api.event.ServerConnectedEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
-import org.geysermc.floodgate.FloodgatePlayerImpl;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.handler.BungeeDataHandler;
+import org.geysermc.floodgate.player.FloodgatePlayerImpl;
 import org.geysermc.floodgate.pluginmessage.BungeePluginMessageHandler;
 import org.geysermc.floodgate.skin.SkinHandler;
+import org.geysermc.floodgate.util.BungeeCommandUtil;
 import org.geysermc.floodgate.util.LanguageManager;
 
 public final class BungeeListener implements Listener {
@@ -126,6 +127,9 @@ public final class BungeeListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerDisconnect(PlayerDisconnectEvent event) {
         ProxiedPlayer player = event.getPlayer();
+
+        BungeeCommandUtil.AUDIENCE_CACHE.remove(player.getUniqueId()); //todo
+
         if (api.removePlayer(player.getUniqueId()) != null) {
             api.removeEncryptedData(player.getUniqueId());
             logger.translatedInfo("floodgate.ingame.disconnect_name", player.getName());

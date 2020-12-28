@@ -25,23 +25,34 @@
 
 package org.geysermc.floodgate.register;
 
+import cloud.commandframework.CommandManager;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import java.util.Set;
-import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.platform.command.Command;
-import org.geysermc.floodgate.platform.command.CommandRegistration;
+import org.geysermc.floodgate.platform.command.FloodgateCommand;
+import org.geysermc.floodgate.player.UserAudience;
 
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
+/**
+ * This class is responsible for registering commands to the command register of the platform that
+ * is currently in use. So that the commands only have to be written once (in the common module) and
+ * can be used across all platforms without the need of adding platform specific commands.
+ */
 public final class CommandRegister {
-    private final CommandRegistration registration;
+    private final CommandManager<UserAudience> commandManager;
     private final Injector guice;
 
     @Inject
-    public void registerCommands(Set<Command> foundCommands) {
-        for (Command command : foundCommands) {
+    public CommandRegister(Injector guice) {
+        this.commandManager = guice.getInstance(new Key<CommandManager<UserAudience>>() {});
+        this.guice = guice;
+    }
+
+    @Inject
+    public void registerCommands(Set<FloodgateCommand> foundCommands) {
+        for (FloodgateCommand command : foundCommands) {
             guice.injectMembers(command);
-            registration.register(command);
+            commandManager.command(command.buildCommand(commandManager));
         }
     }
 }

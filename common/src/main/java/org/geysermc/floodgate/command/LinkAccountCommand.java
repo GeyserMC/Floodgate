@@ -27,132 +27,131 @@ package org.geysermc.floodgate.command;
 
 import static org.geysermc.floodgate.command.CommonCommandMessage.CHECK_CONSOLE;
 
+import cloud.commandframework.Command;
+import cloud.commandframework.CommandManager;
+import cloud.commandframework.Description;
+import cloud.commandframework.arguments.standard.StringArgument;
+import cloud.commandframework.context.CommandContext;
 import com.google.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.link.LinkRequest;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.link.LinkRequestImpl;
-import org.geysermc.floodgate.platform.command.Command;
 import org.geysermc.floodgate.platform.command.CommandMessage;
-import org.geysermc.floodgate.platform.command.CommandUtil;
+import org.geysermc.floodgate.platform.command.FloodgateCommand;
+import org.geysermc.floodgate.player.UserAudience;
+import org.geysermc.floodgate.player.UserAudience.PlayerAudience;
+import org.geysermc.floodgate.player.UserAudienceArgument;
 
 @NoArgsConstructor
-public final class LinkAccountCommand implements Command {
+public final class LinkAccountCommand implements FloodgateCommand {
     private final Map<String, LinkRequest> activeLinkRequests = new HashMap<>();
 
     @Inject private FloodgateApi api;
-    @Inject private CommandUtil commandUtil;
 
     @Override
-    public void execute(Object player, UUID uuid, String username, String locale, String[] args) {
+    public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
+        return commandManager.commandBuilder("linkaccount",
+                Description.of("Link your Java account with your Bedrock account"))
+                .senderType(PlayerAudience.class)
+                .permission("floodgate.command.linkaccount")
+                .argument(UserAudienceArgument.of("player", true))
+                .argument(StringArgument.optional("code"))
+                .handler(this::execute)
+                .build();
+    }
+
+    @Override
+    public void execute(CommandContext<UserAudience> context) {
+        UserAudience sender = context.getSender();
+
         PlayerLink link = api.getPlayerLink();
         if (!link.isEnabledAndAllowed()) {
-            sendMessage(player, locale, Message.LINK_REQUEST_DISABLED);
+            sender.sendMessage(Message.LINK_REQUEST_DISABLED);
             return;
         }
 
-        link.isLinkedPlayer(uuid)
+        link.isLinkedPlayer(sender.uuid())
                 .whenComplete((linked, throwable) -> {
                     if (throwable != null) {
-                        sendMessage(player, locale, CommonCommandMessage.IS_LINKED_ERROR);
+                        sender.sendMessage(CommonCommandMessage.IS_LINKED_ERROR);
                         return;
                     }
 
                     if (linked) {
-                        sendMessage(player, locale, Message.ALREADY_LINKED);
+                        sender.sendMessage(Message.ALREADY_LINKED);
                         return;
                     }
 
                     // when the player is a Java player
-                    if (!api.isBedrockPlayer(uuid)) {
-                        if (args.length != 1) {
-                            sendMessage(player, locale, Message.JAVA_USAGE);
+                    if (!api.isBedrockPlayer(sender.uuid())) {
+                        if (context.contains("code")) {
+                            sender.sendMessage(Message.JAVA_USAGE);
                             return;
                         }
 
                         String code = String.format("%04d", new Random().nextInt(10000));
-                        String bedrockUsername = args[0];
+                        UserAudience targetUser = context.get("player");
+                        String targetName = targetUser.username();
 
-                        LinkRequest linkRequest =
-                                new LinkRequestImpl(username, uuid, code, bedrockUsername);
+                        LinkRequest linkRequest = new LinkRequestImpl(
+                                sender.username(), sender.uuid(), code, targetName);
 
-                        activeLinkRequests.put(username, linkRequest);
-                        sendMessage(
-                                player, locale, Message.LINK_REQUEST_CREATED,
-                                bedrockUsername, username, code
-                        );
+                        activeLinkRequests.put(sender.username(), linkRequest);
+                        sender.sendMessage(
+                                Message.LINK_REQUEST_CREATED,
+                                targetName, sender.username(), code);
                         return;
                     }
 
                     // when the player is a Bedrock player
 
-                    if (args.length != 2) {
-                        sendMessage(player, locale, Message.BEDROCK_USAGE);
+                    if (!context.contains("code")) {
+                        sender.sendMessage(Message.BEDROCK_USAGE);
                         return;
                     }
 
-                    String javaUsername = args[0];
-                    String code = args[1];
-                    LinkRequest request = activeLinkRequests.getOrDefault(javaUsername, null);
-                    if (request == null || !request.isRequestedPlayer(api.getPlayer(uuid))) {
-                        sendMessage(player, locale, Message.NO_LINK_REQUESTED);
+                    UserAudience targetUser = context.get("player");
+                    String targetName = targetUser.username();
+                    String code = context.get("code");
+
+                    LinkRequest request = activeLinkRequests.getOrDefault(targetName, null);
+                    if (request == null ||
+                            !request.isRequestedPlayer(api.getPlayer(sender.uuid()))) {
+                        sender.sendMessage(Message.NO_LINK_REQUESTED);
                         return;
                     }
 
                     if (!request.getLinkCode().equals(code)) {
-                        sendMessage(player, locale, Message.INVALID_CODE);
+                        sender.sendMessage(Message.INVALID_CODE);
                         return;
                     }
 
                     // Delete the request, whether it has expired or is successful
-                    activeLinkRequests.remove(javaUsername);
+                    activeLinkRequests.remove(targetName);
                     if (request.isExpired(link.getVerifyLinkTimeout())) {
-                        sendMessage(player, locale, Message.LINK_REQUEST_EXPIRED);
+                        sender.sendMessage(Message.LINK_REQUEST_EXPIRED);
                         return;
                     }
 
-                    link.linkPlayer(uuid, request.getJavaUniqueId(), request.getJavaUsername())
+                    link.linkPlayer(sender.uuid(), request.getJavaUniqueId(),
+                            request.getJavaUsername())
                             .whenComplete((unused, error) -> {
                                 if (error != null) {
-                                    sendMessage(player, locale, Message.LINK_REQUEST_ERROR);
+                                    sender.sendMessage(Message.LINK_REQUEST_ERROR);
                                     return;
                                 }
-                                commandUtil.kickPlayer(
-                                        player, locale, Message.LINK_REQUEST_COMPLETED,
+                                sender.disconnect(
+                                        Message.LINK_REQUEST_COMPLETED,
                                         request.getJavaUsername()
                                 );
                             });
                 });
-    }
-
-    @Override
-    public String getName() {
-        return "linkaccount";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Link your Java account with your Bedrock account";
-    }
-
-    @Override
-    public String getPermission() {
-        return "floodgate.linkaccount";
-    }
-
-    @Override
-    public boolean isRequirePlayer() {
-        return true;
-    }
-
-    private void sendMessage(Object player, String locale, CommandMessage message, Object... args) {
-        commandUtil.sendMessage(player, locale, message, args);
     }
 
     @Getter

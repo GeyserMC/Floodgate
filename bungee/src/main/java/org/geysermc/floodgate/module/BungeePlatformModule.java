@@ -25,25 +25,30 @@
 
 package org.geysermc.floodgate.module;
 
+import cloud.commandframework.CommandManager;
+import cloud.commandframework.bungee.BungeeCommandManager;
+import cloud.commandframework.execution.CommandExecutionCoordinator;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import lombok.RequiredArgsConstructor;
+import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.geysermc.floodgate.BungeePlugin;
+import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.command.BungeeCommandRegistration;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.inject.bungee.BungeeInjector;
 import org.geysermc.floodgate.listener.BungeeListenerRegistration;
 import org.geysermc.floodgate.logger.JavaUtilFloodgateLogger;
-import org.geysermc.floodgate.platform.command.CommandRegistration;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
+import org.geysermc.floodgate.player.FloodgateCommandPreprocessor;
+import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.pluginmessage.BungeePluginMessageHandler;
 import org.geysermc.floodgate.pluginmessage.BungeeSkinApplier;
 import org.geysermc.floodgate.skin.SkinApplier;
@@ -77,15 +82,22 @@ public final class BungeePlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public CommandRegistration commandRegistration(CommandUtil commandUtil,
-                                                   LanguageManager languageManager) {
-        return new BungeeCommandRegistration(plugin, commandUtil, languageManager);
+    public CommandManager<UserAudience> commandManager(CommandUtil commandUtil) {
+        CommandManager<UserAudience> commandManager = new BungeeCommandManager<>(
+                plugin,
+                CommandExecutionCoordinator.simpleCoordinator(),
+                commandUtil::getAudience,
+                audience -> (CommandSender) audience.source()
+        );
+        commandManager.registerCommandPreProcessor(new FloodgateCommandPreprocessor<>(commandUtil));
+        return commandManager;
     }
 
     @Provides
     @Singleton
-    public CommandUtil commandUtil(FloodgateLogger logger, LanguageManager languageManager) {
-        return new BungeeCommandUtil(logger, languageManager);
+    public CommandUtil commandUtil(FloodgateApi api, FloodgateLogger logger,
+                                   LanguageManager languageManager) {
+        return new BungeeCommandUtil(plugin.getProxy(), api, logger, languageManager);
     }
 
     @Provides

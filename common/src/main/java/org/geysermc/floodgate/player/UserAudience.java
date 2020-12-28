@@ -23,31 +23,49 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.module;
+package org.geysermc.floodgate.player;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
-import com.google.inject.multibindings.ProvidesIntoSet;
-import org.geysermc.floodgate.command.LinkAccountCommand;
-import org.geysermc.floodgate.command.UnlinkAccountCommand;
-import org.geysermc.floodgate.platform.command.FloodgateCommand;
-import org.geysermc.floodgate.register.CommandRegister;
+import java.util.UUID;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.identity.Identified;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.floodgate.platform.command.CommandMessage;
 
-public class CommandModule extends AbstractModule {
+public interface UserAudience extends Identified, Identity, Audience {
     @Override
-    protected void configure() {
-        bind(CommandRegister.class).asEagerSingleton();
+    @NonNull UUID uuid();
+
+    @NonNull String username();
+
+    @NonNull String locale();
+
+    @NonNull Object source();
+
+    boolean hasPermission(@NonNull final String permission);
+
+    void sendMessage(final @NonNull Identity source,
+                     final @NonNull Component message,
+                     final @NonNull MessageType type);
+
+    void sendMessage(CommandMessage message, Object... args);
+
+    void disconnect(@NonNull final Component reason);
+
+    void disconnect(CommandMessage message, Object... args);
+
+    @Override
+    default @NonNull Identity identity() {
+        return this;
     }
 
-    @Singleton
-    @ProvidesIntoSet
-    public FloodgateCommand linkAccountCommand() {
-        return new LinkAccountCommand();
+    interface PlayerAudience extends UserAudience {
+        boolean online();
     }
 
-    @Singleton
-    @ProvidesIntoSet
-    public FloodgateCommand unlinkAccountCommand() {
-        return new UnlinkAccountCommand();
+    interface ConsoleAudience extends UserAudience {
+
     }
 }

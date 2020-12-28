@@ -29,12 +29,12 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
-import org.geysermc.floodgate.HandshakeHandler;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
+import org.geysermc.floodgate.player.HandshakeHandler;
 import org.geysermc.floodgate.util.Utils;
 
 public final class VelocityDataAddon implements InjectorAddon {

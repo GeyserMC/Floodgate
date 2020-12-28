@@ -32,9 +32,9 @@ import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.cumulus.Form;
 import org.geysermc.cumulus.util.FormBuilder;
-import org.geysermc.floodgate.FloodgatePlayerImpl;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
+import org.geysermc.floodgate.player.FloodgatePlayerImpl;
 
 @RequiredArgsConstructor
 public class SimpleFloodgateApi implements FloodgateApi {

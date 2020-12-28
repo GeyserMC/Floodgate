@@ -97,9 +97,7 @@ public final class LanguageManager {
             logger.warn("Language provided in the config wasn't found. Will use system locale.");
         }
 
-        String systemLocale = formatLocale(
-                Locale.getDefault().getLanguage() + "_" + Locale.getDefault().getCountry()
-        );
+        String systemLocale = formatLocale(Utils.getLocale(Locale.getDefault()));
 
         if (isValidLanguage(systemLocale)) {
             if (loadLocale(systemLocale)) {

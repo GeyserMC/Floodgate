@@ -35,13 +35,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.SpigotPlugin;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.command.SpigotCommandRegistration;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.inject.spigot.SpigotInjector;
 import org.geysermc.floodgate.listener.SpigotListenerRegistration;
 import org.geysermc.floodgate.logger.JavaUtilFloodgateLogger;
-import org.geysermc.floodgate.platform.command.CommandRegistration;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
@@ -81,17 +79,16 @@ public final class SpigotPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public CommandRegistration commandRegistration(
+    public CommandUtil commandUtil(
+            FloodgateApi api,
             SpigotVersionSpecificMethods versionSpecificMethods,
-            CommandUtil commandUtil
+            FloodgateLogger logger,
+            LanguageManager languageManager
     ) {
-        return new SpigotCommandRegistration(versionSpecificMethods, plugin, commandUtil);
-    }
-
-    @Provides
-    @Singleton
-    public CommandUtil commandUtil(FloodgateLogger logger, LanguageManager languageManager) {
-        return new SpigotCommandUtil(plugin, logger, languageManager);
+        return new SpigotCommandUtil(
+                plugin.getServer(), api, versionSpecificMethods,
+                plugin, logger, languageManager
+        );
     }
 
     @Provides
