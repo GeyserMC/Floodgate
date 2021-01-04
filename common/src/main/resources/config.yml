@@ -30,21 +30,27 @@ disconnect:
 player-link:
   # Whether to enable the linking system. Turning this off will prevent
   # players from using the linking feature even if they are already linked.
-  enabled: false
-  # Whether to allow the use of /linkaccount and /unlinkaccount
-  # You can also use allow specific people to use the commands using the
-  # permissions floodgate.linkaccount and floodgate.unlinkaccount.
-  # This is only for linking, already connected people will stay connected
-  allowed: true
-  # The amount of time until a link code expires in seconds
-  link-code-timeout: 300
-  # The database type you want to use.
-  # The option is only used when auto-download is enabled or when
-  # there are more then one database implementations found in the config directory
-  type: sqlite
-  # Automatically download the database type you want to use
-  # Note that this doesn't include auto-update (database implementations don't have to be updated frequently)
-  auto-download: true
+  enabled: true
+  # Whether to use global linking. Global linking is that Floodgate uses a central server to link
+  # accounts so that players only have to sign in once and they'll be linked on all servers that
+  # enabled player linking and global linking
+  use-global-linking: true
+
+  # Uncomment the following lines when you want to use account linking, but you don't want to
+  # use the global auth servers. You should normally only disable global linking when
+  # your internet access is limited.
+
+#  # Whether to allow the use of /linkaccount and /unlinkaccount
+#  # You can also use allow specific people to use the commands using the
+#  # permissions floodgate.command.linkaccount and floodgate.command.unlinkaccount.
+#  # This is only for linking, already connected people will stay connected
+#  allowed: true
+#  # The amount of time until a link code expires in seconds
+#  link-code-timeout: 300
+#  # The database type you want to use.
+#  # The option is only used when there is more then one database implementations found
+#  # in the configuration directory
+#  type: sqlite
 
 # Do not change this
 config-version: 1

@@ -94,6 +94,7 @@ public class ConfigInitializer {
                 return propertyBuilder.toString();
             }
         });
+        constructor.getPropertyUtils().setSkipMissingProperties(true);
         YAML = new Yaml(constructor);
     }
 

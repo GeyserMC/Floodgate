@@ -35,7 +35,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.geysermc.floodgate.util.HttpUtils;
-import org.geysermc.floodgate.util.HttpUtils.HttpPostResponse;
+import org.geysermc.floodgate.util.HttpUtils.HttpResponse;
 import org.geysermc.floodgate.util.RawSkin;
 
 public final class SkinUploader {
@@ -82,7 +82,7 @@ public final class SkinUploader {
         return "?visibility=1&model=" + model.name;
     }
 
-    private UploadResult parseAndHandleResponse(HttpPostResponse response) {
+    private UploadResult parseAndHandleResponse(HttpResponse response) {
         int httpCode = response.getHttpCode();
         JsonObject jsonResponse = response.getResponse();
 

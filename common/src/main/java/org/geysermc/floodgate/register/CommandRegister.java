@@ -30,6 +30,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import java.util.Set;
+import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.player.UserAudience;
 
@@ -40,11 +41,13 @@ import org.geysermc.floodgate.player.UserAudience;
  */
 public final class CommandRegister {
     private final CommandManager<UserAudience> commandManager;
+    private final FloodgateConfig config;
     private final Injector guice;
 
     @Inject
     public CommandRegister(Injector guice) {
         this.commandManager = guice.getInstance(new Key<CommandManager<UserAudience>>() {});
+        this.config = guice.getInstance(FloodgateConfig.class);
         this.guice = guice;
     }
 
@@ -52,7 +55,9 @@ public final class CommandRegister {
     public void registerCommands(Set<FloodgateCommand> foundCommands) {
         for (FloodgateCommand command : foundCommands) {
             guice.injectMembers(command);
-            commandManager.command(command.buildCommand(commandManager));
+            if (command.shouldRegister(config)) {
+                commandManager.command(command.buildCommand(commandManager));
+            }
         }
     }
 }

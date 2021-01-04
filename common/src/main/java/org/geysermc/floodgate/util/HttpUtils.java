@@ -30,6 +30,7 @@ import com.google.gson.JsonObject;
 import java.awt.image.BufferedImage;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -47,7 +48,29 @@ public class HttpUtils {
     private static final String BOUNDARY = "******";
     private static final String END = "\r\n";
 
-    public static HttpPostResponse post(String urlString, BufferedImage... images) {
+    public static HttpResponse get(String urlString) {
+        HttpURLConnection connection;
+
+        try {
+            URL url = new URL(urlString);
+            connection = (HttpURLConnection) url.openConnection();
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to create connection", exception);
+        }
+
+        try {
+            connection.setRequestMethod("GET");
+            connection.setUseCaches(false);
+            connection.setRequestProperty("User-Agent", USER_AGENT);
+            connection.setRequestProperty("ContentType", "application/json");
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to create request", exception);
+        }
+
+        return readResponse(connection);
+    }
+
+    public static HttpResponse post(String urlString, BufferedImage... images) {
         HttpURLConnection connection;
 
         try {
@@ -60,6 +83,7 @@ public class HttpUtils {
         DataOutputStream outputStream = null;
 
         try {
+            connection.setRequestMethod("POST");
             connection.setDoOutput(true);
             connection.setUseCaches(false);
             connection.setRequestProperty("User-Agent", USER_AGENT);
@@ -79,20 +103,34 @@ public class HttpUtils {
             }
         }
 
-        InputStreamReader inputStream = null;
+        return readResponse(connection);
+    }
+
+    private static HttpResponse readResponse(HttpURLConnection connection) {
+        InputStream stream = null;
+        try {
+            stream = connection.getInputStream();
+        } catch (Exception exception) {
+            try {
+                stream = connection.getErrorStream();
+            } catch (Exception exception1) {
+                throw new RuntimeException("Both the input and the error stream failed?!");
+            }
+        }
+
+        InputStreamReader streamReader = new InputStreamReader(stream);
 
         try {
-            inputStream = new InputStreamReader(connection.getInputStream());
             int responseCode = connection.getResponseCode();
 
-            JsonObject response = GSON.fromJson(inputStream, JsonObject.class);
+            JsonObject response = GSON.fromJson(streamReader, JsonObject.class);
 
-            return new HttpPostResponse(responseCode, response);
+            return new HttpResponse(responseCode, response);
         } catch (Exception exception) {
             throw new RuntimeException("Failed to read response", exception);
         } finally {
             try {
-                inputStream.close();
+                streamReader.close();
             } catch (Exception ignored) {
             }
         }
@@ -125,7 +163,7 @@ public class HttpUtils {
 
     @Getter
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
-    public static final class HttpPostResponse {
+    public static final class HttpResponse {
         private final int httpCode;
         private final JsonObject response;
     }

@@ -36,6 +36,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.link.PlayerLink;
+import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.platform.command.CommandMessage;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.player.UserAudience;
@@ -87,6 +88,11 @@ public final class UnlinkAccountCommand implements FloodgateCommand {
                                 sender.sendMessage(Message.UNLINK_SUCCESS);
                             });
                 });
+    }
+
+    @Override
+    public boolean shouldRegister(FloodgateConfig config) {
+        return !config.getPlayerLink().isUseGlobalLinking();
     }
 
     @Getter

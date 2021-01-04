@@ -68,9 +68,9 @@ public class FloodgateConfig {
     @Getter
     public static class PlayerLinkConfig {
         private boolean enabled;
-        private boolean allowed;
-        private long linkCodeTimeout;
-        private String type;
-        private boolean autoDownload;
+        private boolean useGlobalLinking;
+        private boolean allowed = false;
+        private long linkCodeTimeout = 0;
+        private String type = "global";
     }
 }

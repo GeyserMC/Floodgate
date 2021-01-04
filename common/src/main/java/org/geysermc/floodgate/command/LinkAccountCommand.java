@@ -41,6 +41,7 @@ import lombok.NoArgsConstructor;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.link.LinkRequest;
 import org.geysermc.floodgate.api.link.PlayerLink;
+import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.link.LinkRequestImpl;
 import org.geysermc.floodgate.platform.command.CommandMessage;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
@@ -152,6 +153,11 @@ public final class LinkAccountCommand implements FloodgateCommand {
                                 );
                             });
                 });
+    }
+
+    @Override
+    public boolean shouldRegister(FloodgateConfig config) {
+        return !config.getPlayerLink().isUseGlobalLinking();
     }
 
     @Getter

@@ -66,6 +66,11 @@ public final class PlayerLinkLoader {
             return new DisabledPlayerLink();
         }
 
+        // we use our own internal PlayerLinking when global linking is enabled
+        if (linkConfig.isUseGlobalLinking()) {
+            return injector.getInstance(GlobalPlayerLinking.class);
+        }
+
         List<Path> files;
         try {
             files = Files.list(dataDirectory)

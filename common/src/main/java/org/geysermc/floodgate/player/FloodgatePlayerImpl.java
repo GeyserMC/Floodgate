@@ -130,7 +130,7 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
      * @see #fetchLinkedPlayerAsync(PlayerLink, UUID) for the asynchronously alternative
      */
     public static LinkedPlayer fetchLinkedPlayer(PlayerLink link, UUID javaUniqueId) {
-        if (!link.isEnabledAndAllowed()) {
+        if (!link.isEnabled()) {
             return null;
         }
 
@@ -151,7 +151,7 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
      */
     public static CompletableFuture<LinkedPlayer> fetchLinkedPlayerAsync(PlayerLink link,
                                                                          UUID javaUniqueId) {
-        return link.isEnabledAndAllowed() ?
+        return link.isEnabled() ?
                 link.getLinkedPlayer(javaUniqueId) :
                 CompletableFuture.completedFuture(null);
     }
