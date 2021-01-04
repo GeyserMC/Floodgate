@@ -33,16 +33,13 @@ import cloud.commandframework.Description;
 import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.context.CommandContext;
 import com.google.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.api.link.LinkRequest;
+import org.geysermc.floodgate.api.link.LinkRequestResult;
 import org.geysermc.floodgate.api.link.PlayerLink;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.link.LinkRequestImpl;
 import org.geysermc.floodgate.platform.command.CommandMessage;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.player.UserAudience;
@@ -51,9 +48,8 @@ import org.geysermc.floodgate.player.UserAudienceArgument;
 
 @NoArgsConstructor
 public final class LinkAccountCommand implements FloodgateCommand {
-    private final Map<String, LinkRequest> activeLinkRequests = new HashMap<>();
-
     @Inject private FloodgateApi api;
+    @Inject private FloodgateLogger logger;
 
     @Override
     public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
@@ -77,81 +73,68 @@ public final class LinkAccountCommand implements FloodgateCommand {
             return;
         }
 
-        link.isLinkedPlayer(sender.uuid())
-                .whenComplete((linked, throwable) -> {
-                    if (throwable != null) {
-                        sender.sendMessage(CommonCommandMessage.IS_LINKED_ERROR);
-                        return;
-                    }
+        // when the player is a Bedrock player
+        if (api.isBedrockPlayer(sender.uuid())) {
+            if (!context.contains("code")) {
+                sender.sendMessage(Message.BEDROCK_USAGE);
+                return;
+            }
 
-                    if (linked) {
-                        sender.sendMessage(Message.ALREADY_LINKED);
-                        return;
-                    }
+            UserAudience targetUser = context.get("player");
+            String targetName = targetUser.username();
+            String code = context.get("code");
 
-                    // when the player is a Java player
-                    if (!api.isBedrockPlayer(sender.uuid())) {
-                        if (context.contains("code")) {
-                            sender.sendMessage(Message.JAVA_USAGE);
+            link.verifyLinkRequest(sender.uuid(), targetName, sender.username(), code)
+                    .whenComplete((result, throwable) -> {
+                        if (throwable != null || result == LinkRequestResult.UNKNOWN_ERROR) {
+                            sender.sendMessage(Message.LINK_REQUEST_ERROR);
                             return;
                         }
 
-                        String code = String.format("%04d", new Random().nextInt(10000));
-                        UserAudience targetUser = context.get("player");
-                        String targetName = targetUser.username();
+                        switch (result) {
+                            case ALREADY_LINKED:
+                                sender.sendMessage(Message.ALREADY_LINKED);
+                                break;
+                            case NO_LINK_REQUESTED:
+                                sender.sendMessage(Message.NO_LINK_REQUESTED);
+                                break;
+                            case INVALID_CODE:
+                                sender.sendMessage(Message.INVALID_CODE);
+                                break;
+                            case REQUEST_EXPIRED:
+                                sender.sendMessage(Message.LINK_REQUEST_EXPIRED);
+                                break;
+                            case LINK_COMPLETED:
+                                sender.disconnect(Message.LINK_REQUEST_COMPLETED, targetName);
+                                break;
+                        }
+                    });
+            return;
+        }
 
-                        LinkRequest linkRequest = new LinkRequestImpl(
-                                sender.username(), sender.uuid(), code, targetName);
+        if (context.contains("code")) {
+            sender.sendMessage(Message.JAVA_USAGE);
+            return;
+        }
 
-                        activeLinkRequests.put(sender.username(), linkRequest);
-                        sender.sendMessage(
-                                Message.LINK_REQUEST_CREATED,
-                                targetName, sender.username(), code);
+        UserAudience targetUser = context.get("player");
+        String targetName = targetUser.username();
+
+        link.createLinkRequest(sender.uuid(), sender.username(), targetName)
+                .whenComplete((result, throwable) -> {
+                    if (throwable != null || result == LinkRequestResult.UNKNOWN_ERROR) {
+                        sender.sendMessage(Message.LINK_REQUEST_ERROR);
                         return;
                     }
 
-                    // when the player is a Bedrock player
-
-                    if (!context.contains("code")) {
-                        sender.sendMessage(Message.BEDROCK_USAGE);
+                    if (!(result instanceof String)) {
+                        logger.error("Expected string code, got {}", result);
+                        sender.sendMessage(Message.LINK_REQUEST_ERROR);
                         return;
                     }
 
-                    UserAudience targetUser = context.get("player");
-                    String targetName = targetUser.username();
-                    String code = context.get("code");
-
-                    LinkRequest request = activeLinkRequests.getOrDefault(targetName, null);
-                    if (request == null ||
-                            !request.isRequestedPlayer(api.getPlayer(sender.uuid()))) {
-                        sender.sendMessage(Message.NO_LINK_REQUESTED);
-                        return;
-                    }
-
-                    if (!request.getLinkCode().equals(code)) {
-                        sender.sendMessage(Message.INVALID_CODE);
-                        return;
-                    }
-
-                    // Delete the request, whether it has expired or is successful
-                    activeLinkRequests.remove(targetName);
-                    if (request.isExpired(link.getVerifyLinkTimeout())) {
-                        sender.sendMessage(Message.LINK_REQUEST_EXPIRED);
-                        return;
-                    }
-
-                    link.linkPlayer(sender.uuid(), request.getJavaUniqueId(),
-                            request.getJavaUsername())
-                            .whenComplete((unused, error) -> {
-                                if (error != null) {
-                                    sender.sendMessage(Message.LINK_REQUEST_ERROR);
-                                    return;
-                                }
-                                sender.disconnect(
-                                        Message.LINK_REQUEST_COMPLETED,
-                                        request.getJavaUsername()
-                                );
-                            });
+                    sender.sendMessage(Message.LINK_REQUEST_CREATED,
+                            targetName, sender.username(), result);
                 });
     }
 

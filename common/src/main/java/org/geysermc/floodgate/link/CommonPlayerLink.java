@@ -26,10 +26,14 @@
 package org.geysermc.floodgate.link;
 
 import com.google.inject.Inject;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.floodgate.api.link.LinkRequest;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
@@ -47,11 +51,23 @@ public abstract class CommonPlayerLink implements PlayerLink {
     private FloodgateLogger logger;
 
     @Inject
+    @Getter(AccessLevel.PROTECTED)
+    private FloodgateApi api;
+
+    @Inject
     private void init(FloodgateConfig config) {
         FloodgateConfig.PlayerLinkConfig linkConfig = config.getPlayerLink();
         enabled = linkConfig.isEnabled();
         allowLinking = linkConfig.isAllowed();
         verifyLinkTimeout = linkConfig.getLinkCodeTimeout();
+    }
+
+    public String createCode() {
+        return String.format("%04d", new Random().nextInt(10000));
+    }
+
+    public boolean isRequestedPlayer(LinkRequest request, UUID bedrockId) {
+        return request.isRequestedPlayer(api.getPlayer(bedrockId));
     }
 
     @Override

@@ -34,13 +34,19 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import org.geysermc.floodgate.api.link.LinkRequest;
+import org.geysermc.floodgate.api.link.LinkRequestResult;
 import org.geysermc.floodgate.link.CommonPlayerLink;
+import org.geysermc.floodgate.link.LinkRequestImpl;
 import org.geysermc.floodgate.util.LinkedPlayer;
 
 public class SqliteDatabase extends CommonPlayerLink {
+    private final Map<String, LinkRequest> activeLinkRequests = new HashMap<>();
     private Connection connection;
 
     @Inject
@@ -99,14 +105,14 @@ public class SqliteDatabase extends CommonPlayerLink {
     }
 
     @Override
-    public CompletableFuture<Boolean> isLinkedPlayer(UUID bedrockId) {
+    public CompletableFuture<Boolean> isLinkedPlayer(UUID playerId) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 PreparedStatement query = connection.prepareStatement(
                         "select javaUniqueId from LinkedPlayers where bedrockId = ? or javaUniqueId = ?"
                 );
-                query.setString(1, bedrockId.toString());
-                query.setString(2, bedrockId.toString());
+                query.setString(1, playerId.toString());
+                query.setString(2, playerId.toString());
                 ResultSet result = query.executeQuery();
                 return result.next();
             } catch (SQLException | NullPointerException exception) {
@@ -120,20 +126,24 @@ public class SqliteDatabase extends CommonPlayerLink {
 
     @Override
     public CompletableFuture<Void> linkPlayer(UUID bedrockId, UUID javaId, String username) {
-        return CompletableFuture.runAsync(() -> {
-            try {
-                PreparedStatement query = connection.prepareStatement(
-                        "insert into LinkedPlayers values(?, ?, ?)"
-                );
-                query.setString(1, bedrockId.toString());
-                query.setString(2, javaId.toString());
-                query.setString(3, username);
-                query.executeUpdate();
-            } catch (SQLException | NullPointerException exception) {
-                getLogger().error("Error while linking player", exception);
-                throw new CompletionException("Error while linking player", exception);
-            }
-        }, getExecutorService());
+        return CompletableFuture.runAsync(
+                () -> linkPlayer0(bedrockId, javaId, username),
+                getExecutorService());
+    }
+
+    private void linkPlayer0(UUID bedrockId, UUID javaId, String username) {
+        try {
+            PreparedStatement query = connection.prepareStatement(
+                    "insert into LinkedPlayers values(?, ?, ?)"
+            );
+            query.setString(1, bedrockId.toString());
+            query.setString(2, javaId.toString());
+            query.setString(3, username);
+            query.executeUpdate();
+        } catch (SQLException | NullPointerException exception) {
+            getLogger().error("Error while linking player", exception);
+            throw new CompletionException("Error while linking player", exception);
+        }
     }
 
     @Override
@@ -150,6 +160,52 @@ public class SqliteDatabase extends CommonPlayerLink {
                 getLogger().error("Error while unlinking player", exception);
                 throw new CompletionException("Error while unlinking player", exception);
             }
+        }, getExecutorService());
+    }
+
+    @Override
+    public CompletableFuture<String> createLinkRequest(
+            UUID javaId,
+            String javaUsername,
+            String bedrockUsername
+    ) {
+        return CompletableFuture.supplyAsync(() -> {
+            LinkRequest request =
+                    new LinkRequestImpl(javaUsername, javaId, createCode(), bedrockUsername);
+
+            activeLinkRequests.put(javaUsername, request);
+
+            return request.getLinkCode();
+        }, getExecutorService());
+    }
+
+    @Override
+    public CompletableFuture<LinkRequestResult> verifyLinkRequest(
+            UUID bedrockId,
+            String javaUsername,
+            String bedrockUsername,
+            String code
+    ) {
+        return CompletableFuture.supplyAsync(() -> {
+            LinkRequest request = activeLinkRequests.get(javaUsername);
+
+            if (request == null || !isRequestedPlayer(request, bedrockId)) {
+                return LinkRequestResult.NO_LINK_REQUESTED;
+            }
+
+            if (!request.getLinkCode().equals(code)) {
+                return LinkRequestResult.INVALID_CODE;
+            }
+
+            // link request can be removed. Doesn't matter if the request is expired or not
+            activeLinkRequests.remove(javaUsername);
+
+            if (request.isExpired(getVerifyLinkTimeout())) {
+                return LinkRequestResult.REQUEST_EXPIRED;
+            }
+
+            linkPlayer0(bedrockId, request.getJavaUniqueId(), javaUsername);
+            return LinkRequestResult.LINK_COMPLETED;
         }, getExecutorService());
     }
 }

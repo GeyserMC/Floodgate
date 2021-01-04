@@ -30,6 +30,7 @@ import com.google.inject.Inject;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.floodgate.api.link.LinkRequestResult;
 import org.geysermc.floodgate.util.HttpUtils;
 import org.geysermc.floodgate.util.HttpUtils.HttpResponse;
 import org.geysermc.floodgate.util.LinkedPlayer;
@@ -100,6 +101,8 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
     // player linking and unlinking now goes through the global player linking server.
     // so individual servers can't register nor unlink players.
 
+    //todo probably return a failed future instead of returning null?
+
     @Override
     public CompletableFuture<Void> linkPlayer(UUID bedrockId, UUID javaId, String username) {
         return null;
@@ -107,6 +110,25 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
 
     @Override
     public CompletableFuture<Void> unlinkPlayer(UUID javaId) {
+        return null;
+    }
+
+    @Override
+    public CompletableFuture<?> createLinkRequest(
+            UUID javaId,
+            String javaUsername,
+            String bedrockUsername
+    ) {
+        return null;
+    }
+
+    @Override
+    public CompletableFuture<LinkRequestResult> verifyLinkRequest(
+            UUID bedrockId,
+            String javaUsername,
+            String bedrockUsername,
+            String code
+    ) {
         return null;
     }
 }

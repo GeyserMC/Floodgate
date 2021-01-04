@@ -58,8 +58,6 @@ public final class ConfigUpdater {
 
         Map<String, Object> config = new Yaml().load(configReader);
 
-        config.forEach((key, value) -> System.out.println(key + ":" + value + " (" + value.getClass().getName() + ")"));
-
         // new name -> old name
         Map<String, String> renames = new HashMap<>();
 

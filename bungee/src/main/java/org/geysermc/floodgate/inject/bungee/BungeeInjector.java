@@ -94,7 +94,6 @@ public final class BungeeInjector extends CommonPlatformInjector {
     }
 
     public void injectClient(Channel channel, boolean clientToProxy) {
-        logger.info("Client to proxy? " + clientToProxy);
         injectAddonsCall(channel, !clientToProxy);
         addInjectedClient(channel);
     }

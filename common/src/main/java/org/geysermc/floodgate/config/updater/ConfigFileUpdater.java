@@ -93,7 +93,6 @@ public final class ConfigFileUpdater {
 
                     spaces = "  ";
                     //todo allow rename of subcategory?
-                    System.out.println("subcategory: " + line.substring(0, splitIndex));
                     map = (Map<String, Object>) currentVersion.get(line.substring(0, splitIndex));
                     map.entrySet().forEach(System.out::println);
                     continue;

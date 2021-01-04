@@ -54,10 +54,10 @@ public interface PlayerLink {
     /**
      * Tells if the given player is a linked player
      *
-     * @param bedrockId the bedrock uuid of the linked player
+     * @param playerId the uuid of the player to check, can be both a Java or a Bedrock uuid
      * @return true if the player is a linked player
      */
-    CompletableFuture<Boolean> isLinkedPlayer(UUID bedrockId);
+    CompletableFuture<Boolean> isLinkedPlayer(UUID playerId);
 
     /**
      * Links a Java account to a Bedrock account.
@@ -76,6 +76,37 @@ public interface PlayerLink {
      * @return a future holding void on success or completed exceptionally when failed
      */
     CompletableFuture<Void> unlinkPlayer(UUID javaId);
+
+    /**
+     * Creates a link request for the given Java player.
+     *
+     * @param javaId          the uuid of the Java player
+     * @param javaUsername    the username of the Java player
+     * @param bedrockUsername the username of the Bedrock player receiving the link request
+     * @return a future holding the result of the link request which will be a {@link
+     * LinkRequestResult} on failure and the link code (string) on success
+     */
+    CompletableFuture<?> createLinkRequest(
+            UUID javaId,
+            String javaUsername,
+            String bedrockUsername
+    );
+
+    /**
+     * Verifies a link request for the given Bedrock player.
+     *
+     * @param bedrockId       the uuid of the Bedrock player
+     * @param javaUsername    the username of the Java players who requested the link
+     * @param bedrockUsername the username of the Bedrock player
+     * @param code            the code created in {@link #createLinkRequest(UUID, String, String)}
+     * @return a future holding the result of the link verification
+     */
+    CompletableFuture<LinkRequestResult> verifyLinkRequest(
+            UUID bedrockId,
+            String javaUsername,
+            String bedrockUsername,
+            String code
+    );
 
     /**
      * Return if account linking is enabled. The difference between enabled and allowed is that
