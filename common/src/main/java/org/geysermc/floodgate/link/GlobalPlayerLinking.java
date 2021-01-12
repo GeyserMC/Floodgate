@@ -26,52 +26,50 @@
 package org.geysermc.floodgate.link;
 
 import com.google.gson.JsonObject;
-import com.google.inject.Inject;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.link.LinkRequestResult;
 import org.geysermc.floodgate.util.HttpUtils;
 import org.geysermc.floodgate.util.HttpUtils.HttpResponse;
 import org.geysermc.floodgate.util.LinkedPlayer;
+import org.geysermc.floodgate.util.Utils;
 
 public class GlobalPlayerLinking extends CommonPlayerLink {
     private static final String GET_BEDROCK_LINK = "http://localhost:4000/api/link/bedrock?xuid=";
 
-    @Inject private FloodgateApi api;
-
     @Override
-    public void load() {}
+    public void load() {
+    }
 
     @Override
     public CompletableFuture<LinkedPlayer> getLinkedPlayer(UUID bedrockId) {
         return CompletableFuture.supplyAsync(
-            () -> {
-                HttpResponse response =
-                    HttpUtils.get(GET_BEDROCK_LINK + bedrockId.getLeastSignificantBits());
+                () -> {
+                    HttpResponse response =
+                            HttpUtils.get(GET_BEDROCK_LINK + bedrockId.getLeastSignificantBits());
 
-                // both on code != 200 and fails with 200 'success' will be false
-                if (!response.getResponse().get("success").getAsBoolean()) {
-                    getLogger().error(
-                        "Failed to request link for {}: {}",
-                        bedrockId.getLeastSignificantBits(),
-                        response.getResponse().get("message").getAsString());
-                    return null;
-                }
+                    // both on code != 200 and fails with 200 'success' will be false
+                    if (!response.getResponse().get("success").getAsBoolean()) {
+                        getLogger().error(
+                                "Failed to request link for {}: {}",
+                                bedrockId.getLeastSignificantBits(),
+                                response.getResponse().get("message").getAsString());
+                        return null;
+                    }
 
-                JsonObject data = response.getResponse().getAsJsonObject("data");
+                    JsonObject data = response.getResponse().getAsJsonObject("data");
 
-                // no link if data is empty
-                if (data.size() == 0) {
-                    return null;
-                }
+                    // no link if data is empty
+                    if (data.size() == 0) {
+                        return null;
+                    }
 
-                return LinkedPlayer.of(
-                    data.get("javaName").getAsString(),
-                    UUID.fromString(data.get("javaId").getAsString()),
-                    api.createJavaPlayerId(data.get("bedrockId").getAsLong()));
-            },
-            getExecutorService());
+                    return LinkedPlayer.of(
+                            data.get("javaName").getAsString(),
+                            UUID.fromString(data.get("javaId").getAsString()),
+                            Utils.getJavaUuid(data.get("bedrockId").getAsLong()));
+                },
+                getExecutorService());
     }
 
     @Override
@@ -117,8 +115,7 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
     public CompletableFuture<?> createLinkRequest(
             UUID javaId,
             String javaUsername,
-            String bedrockUsername
-    ) {
+            String bedrockUsername) {
         return null;
     }
 
@@ -127,8 +124,7 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
             UUID bedrockId,
             String javaUsername,
             String bedrockUsername,
-            String code
-    ) {
+            String code) {
         return null;
     }
 }

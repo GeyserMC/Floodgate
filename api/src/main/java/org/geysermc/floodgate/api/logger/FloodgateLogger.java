@@ -89,4 +89,9 @@ public interface FloodgateLogger {
      * this method, but they will be hidden from the console.
      */
     void disableDebug();
+
+    /**
+     * Returns if debugging is enabled
+     */
+    boolean isDebug();
 }

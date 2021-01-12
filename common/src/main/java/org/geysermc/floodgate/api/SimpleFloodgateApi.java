@@ -35,6 +35,7 @@ import org.geysermc.cumulus.util.FormBuilder;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
 import org.geysermc.floodgate.player.FloodgatePlayerImpl;
+import org.geysermc.floodgate.util.Utils;
 
 @RequiredArgsConstructor
 public class SimpleFloodgateApi implements FloodgateApi {
@@ -66,7 +67,7 @@ public class SimpleFloodgateApi implements FloodgateApi {
 
     @Override
     public UUID createJavaPlayerId(long xuid) {
-        return new UUID(0, xuid);
+        return Utils.getJavaUuid(xuid);
     }
 
     @Override

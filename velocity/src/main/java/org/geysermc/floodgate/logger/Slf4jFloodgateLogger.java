@@ -87,4 +87,9 @@ public final class Slf4jFloodgateLogger implements FloodgateLogger {
             Configurator.setLevel(logger.getName(), Level.INFO);
         }
     }
+
+    @Override
+    public boolean isDebug() {
+        return logger.isDebugEnabled();
+    }
 }

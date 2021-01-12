@@ -73,7 +73,7 @@ public interface PlatformInjector {
      *
      * @param addon the class of the addon to remove from the addon list
      * @param <T>   the addon type
-     * @return the instance that was present when removing
+     * @return the removed addon instance
      */
     <T extends InjectorAddon> T removeAddon(Class<T> addon);
 }

@@ -37,6 +37,7 @@ import lombok.Setter;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.InstanceHolder;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
+import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.player.PropertyKey;
@@ -49,6 +50,7 @@ import org.geysermc.floodgate.util.InputMode;
 import org.geysermc.floodgate.util.LinkedPlayer;
 import org.geysermc.floodgate.util.RawSkin;
 import org.geysermc.floodgate.util.UiProfile;
+import org.geysermc.floodgate.util.Utils;
 
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -79,8 +81,11 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
      */
     @Setter private boolean login = true;
 
-    protected static FloodgatePlayerImpl from(BedrockData data, RawSkin skin,
-                                              FloodgateConfigHolder configHolder) {
+    protected static FloodgatePlayerImpl from(
+            BedrockData data,
+            HandshakeData handshakeData,
+            FloodgateConfigHolder configHolder) {
+
         FloodgateApi api = FloodgateApi.getInstance();
         FloodgateConfig config = configHolder.get();
 
@@ -91,22 +96,14 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
             javaUsername = javaUsername.replaceAll(" ", "_");
         }
 
-        UUID javaUniqueId = api.createJavaPlayerId(Long.parseLong(data.getXuid()));
+        UUID javaUniqueId = Utils.getJavaUuid(data.getXuid());
 
         DeviceOs deviceOs = DeviceOs.getById(data.getDeviceOs());
         UiProfile uiProfile = UiProfile.getById(data.getUiProfile());
         InputMode inputMode = InputMode.getById(data.getInputMode());
 
-        LinkedPlayer linkedPlayer;
-
-        // we'll use the LinkedPlayer provided by Bungee or Velocity (if they included one)
-        if (data.hasPlayerLink()) {
-            linkedPlayer = data.getLinkedPlayer();
-        } else {
-            // every implementation (Bukkit, Bungee and Velocity) run this constructor async,
-            // so we should be fine doing this synchronised.
-            linkedPlayer = fetchLinkedPlayer(api.getPlayerLink(), javaUniqueId);
-        }
+        LinkedPlayer linkedPlayer = handshakeData.getLinkedPlayer();
+        RawSkin skin = handshakeData.getRawSkin();
 
         FloodgatePlayerImpl player = new FloodgatePlayerImpl(
                 data.getVersion(), data.getUsername(), javaUsername, javaUniqueId, data.getXuid(),
@@ -149,8 +146,9 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
      * isn't enabled
      * @see #fetchLinkedPlayer(PlayerLink, UUID) for the sync version
      */
-    public static CompletableFuture<LinkedPlayer> fetchLinkedPlayerAsync(PlayerLink link,
-                                                                         UUID javaUniqueId) {
+    public static CompletableFuture<LinkedPlayer> fetchLinkedPlayerAsync(
+            PlayerLink link,
+            UUID javaUniqueId) {
         return link.isEnabled() ?
                 link.getLinkedPlayer(javaUniqueId) :
                 CompletableFuture.completedFuture(null);

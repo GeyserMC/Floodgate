@@ -86,4 +86,9 @@ public final class JavaUtilFloodgateLogger implements FloodgateLogger {
             logger.setLevel(originLevel);
         }
     }
+
+    @Override
+    public boolean isDebug() {
+        return logger.getLevel() == Level.ALL;
+    }
 }

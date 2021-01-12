@@ -29,18 +29,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.geysermc.floodgate.player.HandshakeHandler.ResultType;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import io.netty.channel.Channel;
-import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.protocol.packet.Handshake;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
+import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.player.PropertyKey;
@@ -81,10 +81,6 @@ public final class BungeeDataHandler {
         checkNotNull(CACHED_HANDSHAKE_PACKET, "Cached handshake packet field cannot be null");
     }
 
-    @Inject
-    @Named("playerAttribute")
-    private AttributeKey<FloodgatePlayer> playerAttribute;
-
     @Inject private Plugin plugin;
     @Inject private ProxyFloodgateConfig config;
     @Inject private ProxyFloodgateApi api;
@@ -94,16 +90,22 @@ public final class BungeeDataHandler {
     public void handlePreLogin(PreLoginEvent event) {
         event.registerIntent(plugin);
         plugin.getProxy().getScheduler().runAsync(plugin, () -> {
-            String extraData = ReflectionUtils.getCastedValue(
-                    event.getConnection(), EXTRA_HANDSHAKE_DATA
-            );
+            PendingConnection connection = event.getConnection();
 
-            Object channelWrapper =
-                    ReflectionUtils.getValue(event.getConnection(), PLAYER_CHANNEL_WRAPPER);
+            String extraData = ReflectionUtils.getCastedValue(connection, EXTRA_HANDSHAKE_DATA);
 
+            Object channelWrapper = ReflectionUtils.getValue(connection, PLAYER_CHANNEL_WRAPPER);
             Channel channel = ReflectionUtils.getCastedValue(channelWrapper, PLAYER_CHANNEL);
 
             HandshakeResult result = handler.handle(channel, extraData);
+            HandshakeData handshakeData = result.getHandshakeData();
+
+            if (handshakeData.getDisconnectReason() != null) {
+                //noinspection ConstantConditions
+                channel.close(); // todo disconnect with message
+                return;
+            }
+
             switch (result.getResultType()) {
                 case EXCEPTION:
                     event.setCancelReason(config.getDisconnect().getInvalidKey());
@@ -124,12 +126,10 @@ public final class BungeeDataHandler {
 
             FloodgatePlayer player = result.getFloodgatePlayer();
 
-            event.getConnection().setOnlineMode(false);
-            event.getConnection().setUniqueId(player.getCorrectUniqueId());
+            connection.setOnlineMode(false);
+            connection.setUniqueId(player.getCorrectUniqueId());
 
-            ReflectionUtils.setValue(
-                    event.getConnection(), PLAYER_NAME, player.getCorrectUsername()
-            );
+            ReflectionUtils.setValue(connection, PLAYER_NAME, player.getCorrectUsername());
 
             SocketAddress remoteAddress =
                     ReflectionUtils.getCastedValue(channelWrapper, PLAYER_REMOTE_ADDRESS);

@@ -34,6 +34,7 @@ import java.nio.file.Path;
 import java.util.UUID;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.InstanceHolder;
+import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -64,8 +65,12 @@ public class FloodgatePlatform {
     }
 
     @Inject
-    public void init(@Named("dataDirectory") Path dataDirectory, ConfigLoader configLoader,
-                     FloodgateConfigHolder configHolder) {
+    public void init(
+            @Named("dataDirectory") Path dataDirectory,
+            ConfigLoader configLoader,
+            FloodgateConfigHolder configHolder,
+            HandshakeHandlers handshakeHandlers
+    ) {
 
         if (!Files.isDirectory(dataDirectory)) {
             try {
@@ -85,7 +90,7 @@ public class FloodgatePlatform {
         guice = guice.createChildInjector(new ConfigLoadedModule(config));
         PlayerLink link = guice.getInstance(PlayerLinkLoader.class).load();
 
-        InstanceHolder.setInstance(api, link, this.injector, KEY);
+        InstanceHolder.setInstance(api, link, this.injector, handshakeHandlers, KEY);
     }
 
     public boolean enable(Module... postInitializeModules) {

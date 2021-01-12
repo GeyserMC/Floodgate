@@ -27,6 +27,7 @@ package org.geysermc.floodgate.api;
 
 import java.util.UUID;
 import lombok.Getter;
+import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.link.PlayerLink;
 
@@ -34,10 +35,16 @@ public final class InstanceHolder {
     @Getter private static FloodgateApi instance;
     @Getter private static PlayerLink playerLink;
     @Getter private static PlatformInjector injector;
+    @Getter private static HandshakeHandlers handshakeHandlers;
     private static UUID key;
 
-    public static boolean setInstance(FloodgateApi floodgateApi, PlayerLink link,
-                                      PlatformInjector platformInjector, UUID key) {
+    public static boolean setInstance(
+            FloodgateApi floodgateApi,
+            PlayerLink link,
+            PlatformInjector platformInjector,
+            HandshakeHandlers handshakeHandlers,
+            UUID key
+    ) {
         if (instance == null) {
             InstanceHolder.key = key;
         } else if (!InstanceHolder.key.equals(key)) {
@@ -46,6 +53,7 @@ public final class InstanceHolder {
         instance = floodgateApi;
         playerLink = link;
         injector = platformInjector;
+        InstanceHolder.handshakeHandlers = handshakeHandlers;
         return true;
     }
 
