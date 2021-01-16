@@ -26,25 +26,63 @@
 package org.geysermc.floodgate.addon.data;
 
 import io.netty.channel.Channel;
-import lombok.AllArgsConstructor;
+import java.util.UUID;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
+import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.LinkedPlayer;
 import org.geysermc.floodgate.util.RawSkin;
+import org.geysermc.floodgate.util.Utils;
 
 @Getter
-@RequiredArgsConstructor
-@AllArgsConstructor
 public class HandshakeDataImpl implements HandshakeData {
     private final Channel channel;
     private final boolean floodgatePlayer;
     private final BedrockData bedrockData;
+    private final String javaUsername;
+    private final UUID javaUniqueId;
 
     @Setter private LinkedPlayer linkedPlayer;
     @Setter private RawSkin rawSkin;
     @Setter private String hostname;
     @Setter private String disconnectReason;
+
+    public HandshakeDataImpl(
+            Channel channel,
+            boolean floodgatePlayer,
+            BedrockData bedrockData,
+            FloodgateConfig config,
+            LinkedPlayer linkedPlayer,
+            RawSkin rawSkin,
+            String hostname) {
+
+        this.channel = channel;
+        this.floodgatePlayer = floodgatePlayer;
+        this.bedrockData = bedrockData;
+        this.linkedPlayer = linkedPlayer;
+        this.rawSkin = rawSkin;
+        this.hostname = hostname;
+
+        String prefix = config.getUsernamePrefix();
+        int usernameLength = Math.min(bedrockData.getUsername().length(), 16 - prefix.length());
+        String javaUsername = prefix + bedrockData.getUsername().substring(0, usernameLength);
+        if (config.isReplaceSpaces()) {
+            javaUsername = javaUsername.replaceAll(" ", "_");
+        }
+        this.javaUsername = javaUsername;
+
+        this.javaUniqueId = Utils.getJavaUuid(bedrockData.getXuid());
+    }
+
+    @Override
+    public String getCorrectUsername() {
+        return linkedPlayer != null ? linkedPlayer.getJavaUsername() : javaUsername;
+    }
+
+    @Override
+    public UUID getCorrectUniqueId() {
+        return linkedPlayer != null ? linkedPlayer.getJavaUniqueId() : javaUniqueId;
+    }
 }

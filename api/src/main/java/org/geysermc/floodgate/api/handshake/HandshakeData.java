@@ -26,6 +26,7 @@
 package org.geysermc.floodgate.api.handshake;
 
 import io.netty.channel.Channel;
+import java.util.UUID;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.LinkedPlayer;
 import org.geysermc.floodgate.util.RawSkin;
@@ -53,6 +54,14 @@ public interface HandshakeData {
      * player.
      */
     BedrockData getBedrockData();
+
+    String getJavaUsername();
+
+    String getCorrectUsername();
+
+    UUID getJavaUniqueId();
+
+    UUID getCorrectUniqueId();
 
     /**
      * Returns the linked account associated with the client or null if the player isn't linked or

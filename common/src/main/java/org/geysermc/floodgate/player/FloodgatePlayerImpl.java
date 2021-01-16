@@ -42,8 +42,6 @@ import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.api.player.PropertyKey.Result;
-import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.DeviceOs;
 import org.geysermc.floodgate.util.InputMode;
@@ -83,18 +81,9 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
 
     protected static FloodgatePlayerImpl from(
             BedrockData data,
-            HandshakeData handshakeData,
-            FloodgateConfigHolder configHolder) {
+            HandshakeData handshakeData) {
 
         FloodgateApi api = FloodgateApi.getInstance();
-        FloodgateConfig config = configHolder.get();
-
-        String prefix = config.getUsernamePrefix();
-        int usernameLength = Math.min(data.getUsername().length(), 16 - prefix.length());
-        String javaUsername = prefix + data.getUsername().substring(0, usernameLength);
-        if (config.isReplaceSpaces()) {
-            javaUsername = javaUsername.replaceAll(" ", "_");
-        }
 
         UUID javaUniqueId = Utils.getJavaUuid(data.getXuid());
 
@@ -106,9 +95,10 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
         RawSkin skin = handshakeData.getRawSkin();
 
         FloodgatePlayerImpl player = new FloodgatePlayerImpl(
-                data.getVersion(), data.getUsername(), javaUsername, javaUniqueId, data.getXuid(),
-                deviceOs, data.getLanguageCode(), uiProfile, inputMode, data.getIp(),
-                data.isFromProxy(), api instanceof ProxyFloodgateApi, linkedPlayer, skin);
+                data.getVersion(), data.getUsername(), handshakeData.getJavaUsername(),
+                javaUniqueId, data.getXuid(), deviceOs, data.getLanguageCode(), uiProfile,
+                inputMode, data.getIp(), data.isFromProxy(), api instanceof ProxyFloodgateApi,
+                linkedPlayer, skin);
 
         // RawSkin should be removed, fromProxy should be changed
         // and encrypted data can be changed after fetching the linkedPlayer

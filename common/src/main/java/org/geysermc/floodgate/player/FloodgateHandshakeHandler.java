@@ -131,8 +131,9 @@ public final class FloodgateHandshakeHandler {
                 linkedPlayer = fetchLinkedPlayer(Utils.getJavaUuid(bedrockData.getXuid()));
             }
 
-            HandshakeData handshakeData = new HandshakeDataImpl(channel, true, bedrockData.clone(),
-                    linkedPlayer != null ? linkedPlayer.clone() : null, rawSkin, hostname, null);
+            HandshakeData handshakeData = new HandshakeDataImpl(
+                    channel, true, bedrockData.clone(), configHolder.get(),
+                    linkedPlayer != null ? linkedPlayer.clone() : null, rawSkin, hostname);
             handshakeHandlers.callHandshakeHandlers(handshakeData);
 
             UUID javaUuid = Utils.getJavaUuid(bedrockData.getXuid());
@@ -141,7 +142,7 @@ public final class FloodgateHandshakeHandler {
             ));
 
             FloodgatePlayer player =
-                    FloodgatePlayerImpl.from(bedrockData, handshakeData, configHolder);
+                    FloodgatePlayerImpl.from(bedrockData, handshakeData);
 
             api.addPlayer(player.getJavaUniqueId(), player);
 
@@ -184,7 +185,7 @@ public final class FloodgateHandshakeHandler {
             String hostname) {
 
         HandshakeData handshakeData = new HandshakeDataImpl(channel, bedrockData != null,
-                bedrockData, null, null, hostname, null);
+                bedrockData, configHolder.get(), null, null, hostname);
         handshakeHandlers.callHandshakeHandlers(handshakeData);
 
         if (bedrockData != null) {

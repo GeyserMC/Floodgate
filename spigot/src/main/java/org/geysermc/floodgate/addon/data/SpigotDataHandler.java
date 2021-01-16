@@ -27,7 +27,6 @@ package org.geysermc.floodgate.addon.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.geysermc.floodgate.util.ReflectionUtils.getCastedValue;
-import static org.geysermc.floodgate.util.ReflectionUtils.getField;
 import static org.geysermc.floodgate.util.ReflectionUtils.getFieldOfType;
 import static org.geysermc.floodgate.util.ReflectionUtils.getMethod;
 import static org.geysermc.floodgate.util.ReflectionUtils.getPrefixedClass;
@@ -52,10 +51,10 @@ import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.ReflectionUtils;
+import org.geysermc.floodgate.util.SpigotUtils;
 
 @RequiredArgsConstructor
 public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object> {
-    private static final Field IS_BUNGEE_DATA;
     private static final Field SOCKET_ADDRESS;
     private static final Class<?> HANDSHAKE_PACKET;
     private static final Field HANDSHAKE_HOST;
@@ -77,10 +76,6 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
     private static final Object READY_TO_ACCEPT_PROTOCOL_STATE;
 
     static {
-        Class<?> spigotConfig = ReflectionUtils.getClass("org.spigotmc.SpigotConfig");
-        IS_BUNGEE_DATA = getField(spigotConfig, "bungee");
-        checkNotNull(IS_BUNGEE_DATA, "bungee field cannot be null. Are you using CraftBukkit?");
-
         Class<?> networkManager = getPrefixedClass("NetworkManager");
         checkNotNull(networkManager, "NetworkManager class cannot be null");
 
@@ -204,7 +199,7 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
                 }
 
                 player = result.getFloodgatePlayer();
-                bungeeData = isBungeeData();
+                bungeeData = SpigotUtils.isBungeeData();
 
                 setValue(packet, HANDSHAKE_HOST, handshakeData.getHostname());
 
@@ -264,10 +259,5 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         super.exceptionCaught(ctx, cause);
         cause.printStackTrace();
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    private boolean isBungeeData() {
-        return ReflectionUtils.getCastedValue(null, IS_BUNGEE_DATA);
     }
 }
