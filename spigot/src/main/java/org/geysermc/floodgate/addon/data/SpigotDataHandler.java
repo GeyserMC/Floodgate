@@ -48,8 +48,8 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.player.HandshakeHandler;
-import org.geysermc.floodgate.player.HandshakeHandler.HandshakeResult;
+import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
+import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
@@ -157,7 +157,7 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
 
     /* per player stuff */
     private final FloodgateConfig config;
-    private final HandshakeHandler handshakeHandler;
+    private final FloodgateHandshakeHandler handshakeHandler;
     private final FloodgateLogger logger;
     private Object networkManager;
     private FloodgatePlayer player;

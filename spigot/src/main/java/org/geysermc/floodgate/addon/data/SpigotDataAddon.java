@@ -31,11 +31,11 @@ import io.netty.channel.Channel;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.player.HandshakeHandler;
+import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.util.Utils;
 
 public final class SpigotDataAddon implements InjectorAddon {
-    @Inject private HandshakeHandler handshakeHandler;
+    @Inject private FloodgateHandshakeHandler handshakeHandler;
     @Inject private FloodgateConfig config;
     @Inject private FloodgateLogger logger;
 

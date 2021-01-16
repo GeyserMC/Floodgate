@@ -42,8 +42,8 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
-import org.geysermc.floodgate.player.HandshakeHandler;
-import org.geysermc.floodgate.player.HandshakeHandler.HandshakeResult;
+import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
+import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
 
 @RequiredArgsConstructor
 public final class VelocityProxyDataHandler extends SimpleChannelInboundHandler<Object> {
@@ -70,7 +70,7 @@ public final class VelocityProxyDataHandler extends SimpleChannelInboundHandler<
     }
 
     private final ProxyFloodgateConfig config;
-    private final HandshakeHandler handshakeHandler;
+    private final FloodgateHandshakeHandler handshakeHandler;
     private final AttributeKey<String> kickMessageAttribute;
     private final FloodgateLogger logger;
     private boolean done;

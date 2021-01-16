@@ -26,7 +26,7 @@
 package org.geysermc.floodgate.handler;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.geysermc.floodgate.player.HandshakeHandler.ResultType;
+import static org.geysermc.floodgate.player.FloodgateHandshakeHandler.ResultType;
 
 import com.google.inject.Inject;
 import io.netty.channel.Channel;
@@ -45,8 +45,8 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
-import org.geysermc.floodgate.player.HandshakeHandler;
-import org.geysermc.floodgate.player.HandshakeHandler.HandshakeResult;
+import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
+import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
@@ -84,7 +84,7 @@ public final class BungeeDataHandler {
     @Inject private Plugin plugin;
     @Inject private ProxyFloodgateConfig config;
     @Inject private ProxyFloodgateApi api;
-    @Inject private HandshakeHandler handler;
+    @Inject private FloodgateHandshakeHandler handler;
     @Inject private FloodgateLogger logger;
 
     public void handlePreLogin(PreLoginEvent event) {

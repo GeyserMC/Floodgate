@@ -56,7 +56,7 @@ import org.geysermc.floodgate.util.RawSkin;
 import org.geysermc.floodgate.util.Utils;
 
 @RequiredArgsConstructor
-public final class HandshakeHandler {
+public final class FloodgateHandshakeHandler {
     private final HandshakeHandlersImpl handshakeHandlers;
     private final SimpleFloodgateApi api;
     private final FloodgateCipher cipher;

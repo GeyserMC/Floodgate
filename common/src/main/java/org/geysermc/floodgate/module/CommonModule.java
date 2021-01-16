@@ -51,7 +51,7 @@ import org.geysermc.floodgate.crypto.Base64Topping;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.crypto.KeyProducer;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
-import org.geysermc.floodgate.player.HandshakeHandler;
+import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.util.LanguageManager;
 
 @RequiredArgsConstructor
@@ -131,7 +131,7 @@ public class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public HandshakeHandler handshakeHandler(
+    public FloodgateHandshakeHandler handshakeHandler(
             HandshakeHandlersImpl handshakeHandlers,
             SimpleFloodgateApi api,
             FloodgateCipher cipher,
@@ -139,7 +139,7 @@ public class CommonModule extends AbstractModule {
             @Named("playerAttribute") AttributeKey<FloodgatePlayer> playerAttribute,
             FloodgateLogger logger
     ) {
-        return new HandshakeHandler(
+        return new FloodgateHandshakeHandler(
                 handshakeHandlers,
                 api,
                 cipher,
