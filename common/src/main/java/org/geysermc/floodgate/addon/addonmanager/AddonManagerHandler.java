@@ -31,6 +31,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
+import org.geysermc.floodgate.util.Constants;
 
 @RequiredArgsConstructor
 public final class AddonManagerHandler extends MessageToByteEncoder<ByteBuf> {
@@ -57,8 +58,7 @@ public final class AddonManagerHandler extends MessageToByteEncoder<ByteBuf> {
         }
 
         int index = msg.readerIndex();
-        // LoginSuccess packet = 2
-        if (readVarInt(msg) == 2) {
+        if (readVarInt(msg) == Constants.LOGIN_SUCCESS_PACKET_ID) {
             loggedIn = true;
             injector.loginSuccessCall(channel);
         }

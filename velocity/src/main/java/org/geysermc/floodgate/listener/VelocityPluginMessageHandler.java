@@ -25,7 +25,9 @@
 
 package org.geysermc.floodgate.listener;
 
+import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.velocitypowered.api.event.Subscribe;
@@ -165,7 +167,7 @@ public class VelocityPluginMessageHandler extends PluginMessageHandler {
                 try {
                     Reader reader = new InputStreamReader(new ByteArrayInputStream(responseData));
                     response = GSON.fromJson(reader, JsonObject.class);
-                } catch (Throwable throwable) {
+                } catch (JsonIOException | JsonSyntaxException throwable) {
                     logger.error("Failed to read Skin response", throwable);
                     return;
                 }

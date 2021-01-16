@@ -51,7 +51,7 @@ public interface CommandMessage {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < translateParts.length; i++) {
             builder.append(manager.getString(translateParts[i], locale, args));
-            if (++i != translateParts.length) {
+            if (translateParts.length != i + 1) {
                 builder.append(" ");
             }
         }

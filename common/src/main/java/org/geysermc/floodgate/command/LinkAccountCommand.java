@@ -35,6 +35,7 @@ import cloud.commandframework.context.CommandContext;
 import com.google.inject.Inject;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.kyori.adventure.text.Component;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.link.LinkRequestResult;
 import org.geysermc.floodgate.api.link.PlayerLink;
@@ -74,7 +75,7 @@ public final class LinkAccountCommand implements FloodgateCommand {
         }
 
         // when the player is a Bedrock player
-        if (api.isBedrockPlayer(sender.uuid())) {
+        if (api.isFloodgatePlayer(sender.uuid())) {
             if (!context.contains("code")) {
                 sender.sendMessage(Message.BEDROCK_USAGE);
                 return;
@@ -106,6 +107,9 @@ public final class LinkAccountCommand implements FloodgateCommand {
                                 break;
                             case LINK_COMPLETED:
                                 sender.disconnect(Message.LINK_REQUEST_COMPLETED, targetName);
+                                break;
+                            default:
+                                sender.disconnect(Component.text("Invalid account linking result"));
                                 break;
                         }
                     });

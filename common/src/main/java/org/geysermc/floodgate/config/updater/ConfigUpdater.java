@@ -48,15 +48,14 @@ public final class ConfigUpdater {
     public void update(String defaultConfigLocation) {
         Path configLocation = dataFolder.resolve("config.yml");
 
-        BufferedReader configReader;
-        try {
-            configReader = Files.newBufferedReader(configLocation);
+        Map<String, Object> config;
+
+        try (BufferedReader configReader = Files.newBufferedReader(configLocation)) {
+            config = new Yaml().load(configReader);
         } catch (IOException exception) {
             logger.error("Error while opening the config file", exception);
-            throw new RuntimeException("Failed to update config");
+            throw new RuntimeException("Failed to update config", exception);
         }
-
-        Map<String, Object> config = new Yaml().load(configReader);
 
         // new name -> old name
         Map<String, String> renames = new HashMap<>();
@@ -93,7 +92,7 @@ public final class ConfigUpdater {
             fileUpdater.update(configLocation, config, renames, defaultConfigLocation);
         } catch (IOException exception) {
             logger.error("Error while updating the config file", exception);
-            throw new RuntimeException("Failed to update config");
+            throw new RuntimeException("Failed to update config", exception);
         }
     }
 }

@@ -57,8 +57,7 @@ public final class SpigotSkinApplier implements SkinApplier {
     public SpigotSkinApplier(
             SpigotVersionSpecificMethods versionSpecificMethods,
             SpigotPlugin plugin,
-            FloodgateConfigHolder configHolder
-    ) {
+            FloodgateConfigHolder configHolder) {
         this.versionSpecificMethods = versionSpecificMethods;
         this.plugin = plugin;
         this.configHolder = configHolder;
@@ -89,7 +88,7 @@ public final class SpigotSkinApplier implements SkinApplier {
             // By running as a task, we don't run into async issues
             plugin.getServer().getScheduler().runTask(plugin, () -> {
                 for (Player p : Bukkit.getOnlinePlayers()) {
-                    if (p != player && p.canSee(player)) {
+                    if (!p.equals(player) && p.canSee(player)) {
                         versionSpecificMethods.hidePlayer(p, player);
                         versionSpecificMethods.showPlayer(p, player);
                     }

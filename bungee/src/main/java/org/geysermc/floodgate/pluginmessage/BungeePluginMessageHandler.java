@@ -25,7 +25,9 @@
 
 package org.geysermc.floodgate.pluginmessage;
 
+import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.io.ByteArrayInputStream;
@@ -165,7 +167,7 @@ public final class BungeePluginMessageHandler extends PluginMessageHandler imple
                 try {
                     Reader reader = new InputStreamReader(new ByteArrayInputStream(responseData));
                     response = GSON.fromJson(reader, JsonObject.class);
-                } catch (Throwable throwable) {
+                } catch (JsonIOException | JsonSyntaxException throwable) {
                     logger.error("Failed to read Skin response", throwable);
                     return;
                 }

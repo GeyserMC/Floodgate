@@ -126,7 +126,7 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
         Enum<?>[] protocolStates = (Enum<?>[]) PROTOCOL_STATE.getType().getEnumConstants();
         Object readyToAcceptState = null;
         for (Enum<?> protocolState : protocolStates) {
-            if (protocolState.name().equals("READY_TO_ACCEPT")) {
+            if ("READY_TO_ACCEPT".equals(protocolState.name())) {
                 readyToAcceptState = protocolState;
             }
         }

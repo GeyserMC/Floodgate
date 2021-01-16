@@ -43,8 +43,8 @@ public class ConfigInitializer {
     private static final Yaml YAML;
 
     static {
-        Constructor constructor = new CustomClassLoaderConstructor(
-                ConfigInitializer.class.getClassLoader());
+        Constructor constructor =
+                new CustomClassLoaderConstructor(ConfigInitializer.class.getClassLoader());
 
         constructor.setPropertyUtils(new PropertyUtils() {
             @Override
@@ -54,8 +54,11 @@ public class ConfigInitializer {
                 return properties;
             }
 
-            private void getPropertiesFromClass(Class<?> type, Class<?> stopAfter,
-                                                Map<String, Property> propertyMap) {
+            private void getPropertiesFromClass(
+                    Class<?> type,
+                    Class<?> stopAfter,
+                    Map<String, Property> propertyMap) {
+
                 Class<?> current = type;
                 while (!Object.class.equals(current)) {
                     for (Field field : current.getDeclaredFields()) {
@@ -98,8 +101,9 @@ public class ConfigInitializer {
         YAML = new Yaml(constructor);
     }
 
-    public static <T extends FloodgateConfig> T initializeFrom(InputStream dataStream,
-                                                               Class<T> configClass) {
+    public static <T extends FloodgateConfig> T initializeFrom(
+            InputStream dataStream,
+            Class<T> configClass) {
         return YAML.loadAs(dataStream, configClass);
     }
 }

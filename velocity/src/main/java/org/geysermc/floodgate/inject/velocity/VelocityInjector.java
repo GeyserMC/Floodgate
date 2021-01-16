@@ -44,8 +44,9 @@ public final class VelocityInjector extends CommonPlatformInjector {
     private final ProxyServer server;
     private final FloodgateLogger logger;
 
-    @Getter private boolean injected = false;
+    @Getter private boolean injected;
 
+    @Override
     @SuppressWarnings("rawtypes")
     public boolean inject() {
         if (isInjected()) {

@@ -106,16 +106,19 @@ public final class BungeeDataHandler {
                 return;
             }
 
-            switch (result.getResultType()) {
-                case EXCEPTION:
-                    event.setCancelReason(config.getDisconnect().getInvalidKey());
-                    break;
-                case INVALID_DATA_LENGTH:
-                    event.setCancelReason(TextComponent.fromLegacyText(String.format(
-                            config.getDisconnect().getInvalidArgumentsLength(),
-                            BedrockData.EXPECTED_LENGTH, result.getBedrockData().getDataLength()
-                    )));
-                    break;
+            if (result.getResultType() == ResultType.EXCEPTION) {
+                event.setCancelReason(config.getDisconnect().getInvalidKey());
+                event.completeIntent(plugin);
+                return;
+            }
+
+            if (result.getResultType() == ResultType.INVALID_DATA_LENGTH) {
+                event.setCancelReason(TextComponent.fromLegacyText(String.format(
+                        config.getDisconnect().getInvalidArgumentsLength(),
+                        BedrockData.EXPECTED_LENGTH, result.getBedrockData().getDataLength()
+                )));
+                event.completeIntent(plugin);
+                return;
             }
 
             // only continue when SUCCESS
@@ -155,7 +158,7 @@ public final class BungeeDataHandler {
 
     public void handleServerConnect(ProxiedPlayer player) {
         // Passes the information through to the connecting server if enabled
-        if (config.isSendFloodgateData() && api.isBedrockPlayer(player.getUniqueId())) {
+        if (config.isSendFloodgateData() && api.isFloodgatePlayer(player.getUniqueId())) {
             Handshake handshake = ReflectionUtils.getCastedValue(
                     player.getPendingConnection(), CACHED_HANDSHAKE_PACKET
             );

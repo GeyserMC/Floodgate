@@ -47,7 +47,7 @@ public class FloodgateConfig {
     private boolean debug;
     private int configVersion;
 
-    private Key key = null;
+    private Key key;
 
     public void setKey(Key key) {
         if (this.key == null) {

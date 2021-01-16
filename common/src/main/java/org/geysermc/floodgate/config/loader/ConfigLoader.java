@@ -86,7 +86,8 @@ public final class ConfigLoader {
             }
         } catch (Exception exception) {
             logger.error("Error while loading config", exception);
-            throw new RuntimeException("Failed to load the config! Try to delete the config file");
+            throw new RuntimeException(
+                    "Failed to load the config! Try to delete the config file", exception);
         }
 
         Path keyPath = dataFolder.resolve(configInstance.getKeyFileName());
@@ -125,7 +126,7 @@ public final class ConfigLoader {
             configInstance.setKey(key);
         } catch (IOException exception) {
             logger.error("Error while reading the key", exception);
-            throw new RuntimeException("Failed to read the key!");
+            throw new RuntimeException("Failed to read the key!", exception);
         }
 
         return configInstance;

@@ -42,6 +42,8 @@ final class DisabledPlayerLink implements PlayerLink {
     public void load() {
     }
 
+    //todo don't return null
+
     @Override
     public CompletableFuture<LinkedPlayer> getLinkedPlayer(UUID bedrockId) {
         return null;

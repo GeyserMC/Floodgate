@@ -48,7 +48,7 @@ public final class ReflectionUtils {
      */
     @Getter
     @Setter
-    private static String prefix = null;
+    private static String prefix;
 
     static {
         Field modifiersField = null;
@@ -59,12 +59,12 @@ public final class ReflectionUtils {
             try {
                 Method declaredFields = getMethod(Class.class, "getDeclaredFields0", boolean.class);
                 if (declaredFields == null) {
-                    throw new NoSuchMethodException();
+                    throw new NoSuchMethodException("Cannot find method getDeclaredFields0");
                 }
 
                 Field[] fields = castedInvoke(Field.class, declaredFields, false);
                 if (fields == null) {
-                    throw new Exception();
+                    throw new RuntimeException("The Field class cannot have null fields");
                 }
 
                 for (Field field : fields) {
@@ -79,7 +79,7 @@ public final class ReflectionUtils {
                         System.getProperty("java.version"),
                         System.getProperty("java.vendor"),
                         System.getProperty("java.vendor.url")
-                ));
+                ), exception);
             }
         }
 
@@ -382,6 +382,9 @@ public final class ReflectionUtils {
      */
     @Nullable
     public static Object invoke(Object instance, Method method, Object... arguments) {
+        if (method == null) {
+            return null;
+        }
         makeAccessible(method);
         try {
             return method.invoke(instance, arguments);
@@ -410,11 +413,7 @@ public final class ReflectionUtils {
     @SuppressWarnings("unchecked")
     @Nullable
     public static <T> T castedInvoke(Object instance, Method method, Object... arguments) {
-        try {
-            return (T) invoke(instance, method, arguments);
-        } catch (NullPointerException exception) {
-            return null;
-        }
+        return (T) invoke(instance, method, arguments);
     }
 
     /**
@@ -438,12 +437,7 @@ public final class ReflectionUtils {
      */
     @Nullable
     public static Object invokeStatic(Class<?> clazz, String method) {
-        try {
-            return invoke(null, getMethod(clazz, method));
-        } catch (NullPointerException exception) {
-            exception.printStackTrace();
-            return null;
-        }
+        return invoke(null, getMethod(clazz, method));
     }
 
     /**

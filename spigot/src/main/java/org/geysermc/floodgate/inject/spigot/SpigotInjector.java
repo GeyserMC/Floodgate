@@ -50,7 +50,7 @@ public final class SpigotInjector extends CommonPlatformInjector {
     private Object serverConnection;
     private String injectedFieldName;
 
-    @Getter private boolean injected = false;
+    @Getter private boolean injected;
 
     @Override
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
@@ -148,7 +148,6 @@ public final class SpigotInjector extends CommonPlatformInjector {
             }
         }
 
-        injectedFieldName = null;
         injected = false;
         return true;
     }
@@ -162,7 +161,7 @@ public final class SpigotInjector extends CommonPlatformInjector {
 
         Object minecraftServerInstance = ReflectionUtils.invokeStatic(minecraftServer, "getServer");
         for (Method method : minecraftServer.getDeclaredMethods()) {
-            if (method.getReturnType().getSimpleName().equals("ServerConnection")) {
+            if ("ServerConnection".equals(method.getReturnType().getSimpleName())) {
                 if (method.getParameterTypes().length == 0) {
                     serverConnection = method.invoke(minecraftServerInstance);
                 }

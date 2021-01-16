@@ -46,6 +46,7 @@ public interface UserAudience extends Identified, Identity, Audience {
 
     boolean hasPermission(@NonNull final String permission);
 
+    @Override
     void sendMessage(final @NonNull Identity source,
                      final @NonNull Component message,
                      final @NonNull MessageType type);

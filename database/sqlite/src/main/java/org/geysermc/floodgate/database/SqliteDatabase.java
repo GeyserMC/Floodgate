@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.api.link.LinkRequest;
 import org.geysermc.floodgate.api.link.LinkRequestResult;
 import org.geysermc.floodgate.link.CommonPlayerLink;
@@ -59,11 +60,12 @@ public class SqliteDatabase extends CommonPlayerLink {
         try {
             Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath.toString());
-            Statement statement = connection.createStatement();
-            statement.setQueryTimeout(30);  // set timeout to 30 sec.
-            statement.executeUpdate(
-                    "create table if not exists LinkedPlayers (bedrockId string, javaUniqueId string, javaUsername string)"
-            );
+            try (Statement statement = connection.createStatement()) {
+                statement.setQueryTimeout(30);  // set timeout to 30 sec.
+                statement.executeUpdate(
+                        "create table if not exists LinkedPlayers (bedrockId string, javaUniqueId string, javaUsername string)"
+                );
+            }
         } catch (ClassNotFoundException exception) {
             getLogger().error("The required class to load the SQLite database wasn't found");
         } catch (SQLException exception) {
@@ -82,12 +84,12 @@ public class SqliteDatabase extends CommonPlayerLink {
     }
 
     @Override
-    public CompletableFuture<LinkedPlayer> getLinkedPlayer(UUID bedrockId) {
+    @NonNull
+    public CompletableFuture<LinkedPlayer> getLinkedPlayer(@NonNull UUID bedrockId) {
         return CompletableFuture.supplyAsync(() -> {
-            try {
-                PreparedStatement query = connection.prepareStatement(
-                        "select * from LinkedPlayers where bedrockId = ?"
-                );
+            try (PreparedStatement query = connection.prepareStatement(
+                    "select * from LinkedPlayers where bedrockId = ?")) {
+
                 query.setString(1, bedrockId.toString());
                 ResultSet result = query.executeQuery();
                 if (!result.next()) {
@@ -97,7 +99,7 @@ public class SqliteDatabase extends CommonPlayerLink {
                 String javaUsername = result.getString("javaUsername");
                 UUID javaUniqueId = UUID.fromString(result.getString("javaUniqueId"));
                 return LinkedPlayer.of(javaUsername, javaUniqueId, bedrockId);
-            } catch (SQLException | NullPointerException exception) {
+            } catch (SQLException exception) {
                 getLogger().error("Error while getting LinkedPlayer", exception);
                 throw new CompletionException("Error while getting LinkedPlayer", exception);
             }
@@ -105,17 +107,17 @@ public class SqliteDatabase extends CommonPlayerLink {
     }
 
     @Override
-    public CompletableFuture<Boolean> isLinkedPlayer(UUID playerId) {
+    @NonNull
+    public CompletableFuture<Boolean> isLinkedPlayer(@NonNull UUID playerId) {
         return CompletableFuture.supplyAsync(() -> {
-            try {
-                PreparedStatement query = connection.prepareStatement(
-                        "select javaUniqueId from LinkedPlayers where bedrockId = ? or javaUniqueId = ?"
-                );
+            try (PreparedStatement query = connection.prepareStatement(
+                    "select javaUniqueId from LinkedPlayers where bedrockId = ? or javaUniqueId = ?")) {
+
                 query.setString(1, playerId.toString());
                 query.setString(2, playerId.toString());
                 ResultSet result = query.executeQuery();
                 return result.next();
-            } catch (SQLException | NullPointerException exception) {
+            } catch (SQLException exception) {
                 getLogger().error("Error while checking if player is a LinkedPlayer", exception);
                 throw new CompletionException(
                         "Error while checking if player is a LinkedPlayer", exception
@@ -125,38 +127,41 @@ public class SqliteDatabase extends CommonPlayerLink {
     }
 
     @Override
-    public CompletableFuture<Void> linkPlayer(UUID bedrockId, UUID javaId, String username) {
+    @NonNull
+    public CompletableFuture<Void> linkPlayer(
+            @NonNull UUID bedrockId,
+            @NonNull UUID javaId,
+            @NonNull String username) {
         return CompletableFuture.runAsync(
                 () -> linkPlayer0(bedrockId, javaId, username),
                 getExecutorService());
     }
 
     private void linkPlayer0(UUID bedrockId, UUID javaId, String username) {
-        try {
-            PreparedStatement query = connection.prepareStatement(
-                    "insert into LinkedPlayers values(?, ?, ?)"
-            );
+        try (PreparedStatement query =
+                     connection.prepareStatement("insert into LinkedPlayers values(?, ?, ?)")) {
+
             query.setString(1, bedrockId.toString());
             query.setString(2, javaId.toString());
             query.setString(3, username);
             query.executeUpdate();
-        } catch (SQLException | NullPointerException exception) {
+        } catch (SQLException exception) {
             getLogger().error("Error while linking player", exception);
             throw new CompletionException("Error while linking player", exception);
         }
     }
 
     @Override
-    public CompletableFuture<Void> unlinkPlayer(UUID javaId) {
+    @NonNull
+    public CompletableFuture<Void> unlinkPlayer(@NonNull UUID javaId) {
         return CompletableFuture.runAsync(() -> {
-            try {
-                PreparedStatement query = connection.prepareStatement(
-                        "delete from LinkedPlayers where javaUniqueId = ? or bedrockId = ?"
-                );
+            try (PreparedStatement query = connection.prepareStatement(
+                    "delete from LinkedPlayers where javaUniqueId = ? or bedrockId = ?")) {
+
                 query.setString(1, javaId.toString());
                 query.setString(2, javaId.toString());
                 query.executeUpdate();
-            } catch (SQLException | NullPointerException exception) {
+            } catch (SQLException exception) {
                 getLogger().error("Error while unlinking player", exception);
                 throw new CompletionException("Error while unlinking player", exception);
             }
@@ -164,10 +169,11 @@ public class SqliteDatabase extends CommonPlayerLink {
     }
 
     @Override
+    @NonNull
     public CompletableFuture<String> createLinkRequest(
-            UUID javaId,
-            String javaUsername,
-            String bedrockUsername
+            @NonNull UUID javaId,
+            @NonNull String javaUsername,
+            @NonNull String bedrockUsername
     ) {
         return CompletableFuture.supplyAsync(() -> {
             LinkRequest request =
@@ -180,11 +186,12 @@ public class SqliteDatabase extends CommonPlayerLink {
     }
 
     @Override
+    @NonNull
     public CompletableFuture<LinkRequestResult> verifyLinkRequest(
-            UUID bedrockId,
-            String javaUsername,
-            String bedrockUsername,
-            String code
+            @NonNull UUID bedrockId,
+            @NonNull String javaUsername,
+            @NonNull String bedrockUsername,
+            @NonNull String code
     ) {
         return CompletableFuture.supplyAsync(() -> {
             LinkRequest request = activeLinkRequests.get(javaUsername);

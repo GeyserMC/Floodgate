@@ -60,6 +60,7 @@ public final class SpigotCommandUtil implements CommandUtil {
     private final FloodgateLogger logger;
     private final LanguageManager manager;
 
+    @Override
     public @NonNull UserAudience getAudience(final @NonNull Object sourceObj) {
         if (!(sourceObj instanceof CommandSender)) {
             throw new IllegalArgumentException("Source has to be a CommandSender!");
@@ -116,14 +117,14 @@ public final class SpigotCommandUtil implements CommandUtil {
                 break;
             case ONLY_JAVA:
                 for (Player player : players) {
-                    if (!api.isBedrockPlayer(player.getUniqueId())) {
+                    if (!api.isFloodgatePlayer(player.getUniqueId())) {
                         usernames.add(player.getName());
                     }
                 }
                 break;
             case ONLY_BEDROCK:
                 for (Player player : players) {
-                    if (api.isBedrockPlayer(player.getUniqueId())) {
+                    if (api.isFloodgatePlayer(player.getUniqueId())) {
                         usernames.add(player.getName());
                     }
                 }

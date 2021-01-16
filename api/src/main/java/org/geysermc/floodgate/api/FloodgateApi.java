@@ -36,7 +36,7 @@ public interface FloodgateApi {
      * Returns the Floodgate API instance.
      */
     static FloodgateApi getInstance() {
-        return InstanceHolder.getInstance();
+        return InstanceHolder.getApi();
     }
 
     /**
@@ -45,7 +45,7 @@ public interface FloodgateApi {
      * @param uuid The uuid of the <b>online</b> player
      * @return true if the given <b>online</b> player is a Bedrock player
      */
-    boolean isBedrockPlayer(UUID uuid);
+    boolean isFloodgatePlayer(UUID uuid);
 
     /**
      * Get info about the given Bedrock player
@@ -66,7 +66,7 @@ public interface FloodgateApi {
     /**
      * Checks if the uuid of the player has the {@link #createJavaPlayerId(long)} format. This
      * method can't validate a linked player uuid, since that doesn't equal the format. Use {@link
-     * #isBedrockPlayer(UUID)} if you want to include linked accounts.
+     * #isFloodgatePlayer(UUID)} if you want to include linked accounts.
      *
      * @param uuid the uuid to check
      * @return true if the given uuid has the correct format.

@@ -31,6 +31,7 @@ import cloud.commandframework.arguments.parser.ArgumentParser;
 import cloud.commandframework.context.CommandContext;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Queue;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -154,13 +155,18 @@ public final class UserAudienceArgument extends CommandArgument<UserAudience, Us
                 final @NonNull CommandContext<UserAudience> commandContext,
                 final @NonNull String input
         ) {
-            CommandUtil commandUtil = commandContext.get("CommandUtil");
+            final CommandUtil commandUtil = commandContext.get("CommandUtil");
+            final String trimmedInput = input.trim();
 
-            final String lowercaseInput = input.toLowerCase().trim();
+            if (trimmedInput.isEmpty()) {
+                return ImmutableList.copyOf(commandUtil.getOnlineUsernames(limitTo));
+            }
+
+            final String lowercaseInput = input.toLowerCase(Locale.ROOT);
             final ImmutableList.Builder<String> builder = ImmutableList.builder();
 
             for (final String player : commandUtil.getOnlineUsernames(limitTo)) {
-                if (lowercaseInput.isEmpty() || player.toLowerCase().startsWith(lowercaseInput)) {
+                if (player.toLowerCase(Locale.ROOT).startsWith(lowercaseInput)) {
                     builder.add(player);
                 }
             }
@@ -182,7 +188,7 @@ public final class UserAudienceArgument extends CommandArgument<UserAudience, Us
         }
 
         @Override
-        public synchronized @NonNull Throwable fillInStackTrace() {
+        public @NonNull Throwable fillInStackTrace() {
             return this;
         }
     }

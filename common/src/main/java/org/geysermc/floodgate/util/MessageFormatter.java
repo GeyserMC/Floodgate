@@ -42,9 +42,8 @@ public final class MessageFormatter {
 
         int previousIndex = -1;
         int currentIndex;
-        StringBuilder stringBuilder = new StringBuilder(
-                message.length() + getArgsContentLength(args)
-        );
+        StringBuilder stringBuilder =
+                new StringBuilder(message.length() + getArgsContentLength(args));
 
         for (String argument : args) {
             currentIndex = message.indexOf(DELIM_STR, previousIndex);

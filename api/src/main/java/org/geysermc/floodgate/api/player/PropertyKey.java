@@ -51,18 +51,6 @@ public class PropertyKey {
         this.removable = removable;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof PropertyKey) {
-            return key.equals(((PropertyKey) obj).key);
-        }
-
-        if (obj instanceof String) {
-            return key.equals(obj);
-        }
-        return false;
-    }
-
     public Result isAddAllowed(Object obj) { //todo use for add and remove
         if (obj instanceof PropertyKey) {
             PropertyKey propertyKey = (PropertyKey) obj;

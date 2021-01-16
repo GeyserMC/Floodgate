@@ -27,6 +27,7 @@ package org.geysermc.floodgate.api.link;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.util.LinkedPlayer;
 
 /**
@@ -49,7 +50,8 @@ public interface PlayerLink {
      * @return a completable future with the {@link LinkedPlayer}. The future will have a null value
      * if that Bedrock player isn't linked
      */
-    CompletableFuture<LinkedPlayer> getLinkedPlayer(UUID bedrockId);
+    @NonNull
+    CompletableFuture<LinkedPlayer> getLinkedPlayer(@NonNull UUID bedrockId);
 
     /**
      * Tells if the given player is a linked player
@@ -57,7 +59,8 @@ public interface PlayerLink {
      * @param playerId the uuid of the player to check, can be both a Java or a Bedrock uuid
      * @return true if the player is a linked player
      */
-    CompletableFuture<Boolean> isLinkedPlayer(UUID playerId);
+    @NonNull
+    CompletableFuture<Boolean> isLinkedPlayer(@NonNull UUID playerId);
 
     /**
      * Links a Java account to a Bedrock account.
@@ -67,7 +70,11 @@ public interface PlayerLink {
      * @param username  the username of the Java player
      * @return a future holding void on success or completed exceptionally when failed
      */
-    CompletableFuture<Void> linkPlayer(UUID bedrockId, UUID javaId, String username);
+    @NonNull
+    CompletableFuture<Void> linkPlayer(
+            @NonNull UUID bedrockId,
+            @NonNull UUID javaId,
+            @NonNull String username);
 
     /**
      * Unlinks a Java account from a Bedrock account.
@@ -75,7 +82,8 @@ public interface PlayerLink {
      * @param javaId the uuid of the Java player
      * @return a future holding void on success or completed exceptionally when failed
      */
-    CompletableFuture<Void> unlinkPlayer(UUID javaId);
+    @NonNull
+    CompletableFuture<Void> unlinkPlayer(@NonNull UUID javaId);
 
     /**
      * Creates a link request for the given Java player.
@@ -86,10 +94,11 @@ public interface PlayerLink {
      * @return a future holding the result of the link request which will be a {@link
      * LinkRequestResult} on failure and the link code (string) on success
      */
+    @NonNull
     CompletableFuture<?> createLinkRequest(
-            UUID javaId,
-            String javaUsername,
-            String bedrockUsername
+            @NonNull UUID javaId,
+            @NonNull String javaUsername,
+            @NonNull String bedrockUsername
     );
 
     /**
@@ -101,11 +110,12 @@ public interface PlayerLink {
      * @param code            the code created in {@link #createLinkRequest(UUID, String, String)}
      * @return a future holding the result of the link verification
      */
+    @NonNull
     CompletableFuture<LinkRequestResult> verifyLinkRequest(
-            UUID bedrockId,
-            String javaUsername,
-            String bedrockUsername,
-            String code
+            @NonNull UUID bedrockId,
+            @NonNull String javaUsername,
+            @NonNull String bedrockUsername,
+            @NonNull String code
     );
 
     /**

@@ -43,7 +43,7 @@ public class SimpleFloodgateApi implements FloodgateApi {
     private final PluginMessageHandler pluginMessageHandler;
 
     @Override
-    public boolean isBedrockPlayer(UUID uuid) {
+    public boolean isFloodgatePlayer(UUID uuid) {
         return getPlayer(uuid) != null;
     }
 

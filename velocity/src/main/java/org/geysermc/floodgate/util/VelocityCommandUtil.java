@@ -115,14 +115,14 @@ public final class VelocityCommandUtil implements CommandUtil {
                 break;
             case ONLY_JAVA:
                 for (Player player : players) {
-                    if (!api.isBedrockPlayer(player.getUniqueId())) {
+                    if (!api.isFloodgatePlayer(player.getUniqueId())) {
                         usernames.add(player.getUsername());
                     }
                 }
                 break;
             case ONLY_BEDROCK:
                 for (Player player : players) {
-                    if (api.isBedrockPlayer(player.getUniqueId())) {
+                    if (api.isFloodgatePlayer(player.getUniqueId())) {
                         usernames.add(player.getUsername());
                     }
                 }

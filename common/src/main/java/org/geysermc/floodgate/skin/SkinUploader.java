@@ -27,6 +27,7 @@ package org.geysermc.floodgate.skin;
 
 import com.google.gson.JsonObject;
 import java.awt.image.BufferedImage;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -43,7 +44,7 @@ public final class SkinUploader {
     private static final int MAX_TRIES = 3;
 
     private final Executor requestExecutor = Executors.newSingleThreadExecutor();
-    private long nextResult = 0;
+    private long nextResult;
 
     public CompletableFuture<UploadResult> uploadSkin(@Nonnull RawSkin rawSkin) {
         return CompletableFuture.supplyAsync(() -> uploadSkinInner(rawSkin, 0), requestExecutor);
@@ -65,12 +66,11 @@ public final class SkinUploader {
 
         try {
             UploadResult result = parseAndHandleResponse(HttpUtils.post(url, image));
-            if (result.httpCode == 429) {
-                times += 1;
-                if (times >= MAX_TRIES) {
+            if (result.getHttpCode() == 429) {
+                if (times + 1 >= MAX_TRIES) {
                     return result;
                 }
-                uploadSkinInner(rawSkin, times);
+                uploadSkinInner(rawSkin, times + 1);
             }
             return result;
         } catch (RuntimeException exception) {
@@ -79,7 +79,7 @@ public final class SkinUploader {
     }
 
     private String getUploadUrlParameters(SkinModel model) {
-        return "?visibility=1&model=" + model.name;
+        return "?visibility=1&model=" + model.getName();
     }
 
     private UploadResult parseAndHandleResponse(HttpResponse response) {
@@ -103,14 +103,15 @@ public final class SkinUploader {
         STEVE, ALEX;
 
         public static final SkinModel[] VALUES = values();
-        private final String name = name().toLowerCase();
+
+        @Getter private final String name = name().toLowerCase(Locale.ROOT);
 
         public static SkinModel getByOrdinal(int ordinal) {
             return VALUES.length > ordinal ? VALUES[ordinal] : STEVE;
         }
 
         public static SkinModel getByName(String name) {
-            return name == null || !name.equalsIgnoreCase("alex") ? STEVE : ALEX;
+            return "alex".equalsIgnoreCase(name) ? ALEX : STEVE;
         }
     }
 

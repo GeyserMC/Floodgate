@@ -99,7 +99,7 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
     // player linking and unlinking now goes through the global player linking server.
     // so individual servers can't register nor unlink players.
 
-    //todo probably return a failed future instead of returning null?
+    //todo don't return null
 
     @Override
     public CompletableFuture<Void> linkPlayer(UUID bedrockId, UUID javaId, String username) {

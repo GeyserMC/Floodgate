@@ -110,7 +110,7 @@ public final class VelocityServerDataHandler extends MessageToMessageEncoder<Obj
         checkArgument(encryptedData != null, "Encrypted data cannot be null");
 
         // use the same system that we use on bungee, our data goes before all the other data
-        int addressFinished = address.indexOf("\0");
+        int addressFinished = address.indexOf('\0');
         String originalAddress = address.substring(0, addressFinished);
         String remaining = address.substring(addressFinished);
 

@@ -154,10 +154,12 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
                 CompletableFuture.completedFuture(null);
     }
 
+    @Override
     public UUID getCorrectUniqueId() {
         return linkedPlayer != null ? linkedPlayer.getJavaUniqueId() : javaUniqueId;
     }
 
+    @Override
     public String getCorrectUsername() {
         return linkedPlayer != null ? linkedPlayer.getJavaUsername() : javaUsername;
     }

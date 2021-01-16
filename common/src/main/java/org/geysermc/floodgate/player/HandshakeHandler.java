@@ -64,33 +64,33 @@ public final class HandshakeHandler {
     private final AttributeKey<FloodgatePlayer> playerAttribute;
     private final FloodgateLogger logger;
 
-    public HandshakeResult handle(Channel channel, @NonNull String hostname) {
+    public HandshakeResult handle(Channel channel, @NonNull String originalHostname) {
+        String[] split = originalHostname.split("\0");
+        String data = null;
+
+        StringBuilder hostnameBuilder = new StringBuilder();
+        for (String value : split) {
+            if (data == null && FloodgateCipher.hasHeader(value)) {
+                data = value;
+                continue;
+            }
+            hostnameBuilder.append(value);
+        }
+        // hostname now doesn't have Floodgate data anymore if it had
+        String hostname = hostnameBuilder.toString();
+
+        if (data == null) {
+            return callHandlerAndReturnResult(
+                    ResultType.NOT_FLOODGATE_DATA,
+                    channel, null, hostname);
+        }
+
+        // header + base64 iv - 0x21 - encrypted data - 0x21 - RawSkin
+        int expectedHeaderLength = FloodgateCipher.HEADER_LENGTH +
+                Base64Utils.getEncodedLength(AesCipher.IV_LENGTH);
+        int lastSplitIndex = data.lastIndexOf(0x21);
+
         try {
-            String[] split = hostname.split("\0");
-            String data = null;
-
-            StringBuilder hostnameBuilder = new StringBuilder();
-            for (String value : split) {
-                if (data == null && FloodgateCipher.hasHeader(value)) {
-                    data = value;
-                    continue;
-                }
-                hostnameBuilder.append(value);
-            }
-            // hostname now doesn't have Floodgate data anymore if it had
-            hostname = hostnameBuilder.toString();
-
-            if (data == null) {
-                return callHandlerAndReturnResult(
-                        ResultType.NOT_FLOODGATE_DATA,
-                        channel, null, hostname);
-            }
-
-            // header + base64 iv - 0x21 - encrypted data - 0x21 - RawSkin
-            int expectedHeaderLength = FloodgateCipher.HEADER_LENGTH +
-                    Base64Utils.getEncodedLength(AesCipher.IV_LENGTH);
-            int lastSplitIndex = data.lastIndexOf(0x21);
-
             byte[] floodgateData;
             byte[] rawSkinData = null;
 
@@ -181,8 +181,8 @@ public final class HandshakeHandler {
             ResultType resultType,
             Channel channel,
             BedrockData bedrockData,
-            String hostname
-    ) {
+            String hostname) {
+
         HandshakeData handshakeData = new HandshakeDataImpl(channel, bedrockData != null,
                 bedrockData, null, null, hostname, null);
         handshakeHandlers.callHandshakeHandlers(handshakeData);

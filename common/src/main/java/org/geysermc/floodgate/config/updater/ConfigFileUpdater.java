@@ -51,9 +51,13 @@ public final class ConfigFileUpdater {
      * @param defaultConfigLocation the location of the default Floodgate config
      * @throws IOException if an I/O error occurs
      */
-    public void update(Path configLocation, Map<String, Object> currentVersion,
-                       Map<String, String> renames, String defaultConfigLocation)
+    public void update(
+            Path configLocation,
+            Map<String, Object> currentVersion,
+            Map<String, String> renames,
+            String defaultConfigLocation)
             throws IOException {
+
         List<String> notFound = new ArrayList<>();
         List<String> newConfig = defaultConfigHandler.loadDefaultConfig(defaultConfigLocation);
 
@@ -64,7 +68,7 @@ public final class ConfigFileUpdater {
         for (int i = 0; i < newConfig.size(); i++) {
             line = newConfig.get(i);
             // we don't have to check comments or empty lines
-            if (line.length() == 0 || line.startsWith("#")) {
+            if (line.isEmpty() || line.charAt(0) == '#') {
                 continue;
             }
 
@@ -74,7 +78,7 @@ public final class ConfigFileUpdater {
             }
 
             // end of subcategory
-            if (spaces.length() > 0 && currentSpaces.length() < spaces.length()) {
+            if (!spaces.isEmpty() && currentSpaces.length() < spaces.length()) {
                 // we can assume this since we don't allow subcategories of subcategories
                 spaces = "";
                 map = null;
@@ -134,7 +138,7 @@ public final class ConfigFileUpdater {
         logger.info("Successfully updated the config file! " +
                 "Your old config has been moved to config-old.yml");
 
-        if (notFound.size() > 0) {
+        if (!notFound.isEmpty()) {
             StringBuilder messageBuilder = new StringBuilder(
                     "Please note that the following keys we not found in the old config and " +
                             "are now using the default Floodgate config value. Missing/new keys: ");

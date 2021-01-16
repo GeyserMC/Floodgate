@@ -29,6 +29,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.name.Named;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
@@ -56,8 +57,12 @@ public class FloodgatePlatform {
     private Injector guice;
 
     @Inject
-    public FloodgatePlatform(FloodgateApi api, PlatformInjector platformInjector,
-                             FloodgateLogger logger, Injector guice) {
+    public FloodgatePlatform(
+            FloodgateApi api,
+            PlatformInjector platformInjector,
+            FloodgateLogger logger,
+            Injector guice) {
+
         this.api = api;
         this.injector = platformInjector;
         this.logger = logger;
@@ -69,15 +74,14 @@ public class FloodgatePlatform {
             @Named("dataDirectory") Path dataDirectory,
             ConfigLoader configLoader,
             FloodgateConfigHolder configHolder,
-            HandshakeHandlers handshakeHandlers
-    ) {
+            HandshakeHandlers handshakeHandlers) {
 
         if (!Files.isDirectory(dataDirectory)) {
             try {
                 Files.createDirectory(dataDirectory);
-            } catch (Exception exception) {
+            } catch (IOException exception) {
                 logger.error("Failed to create the data folder", exception);
-                throw new RuntimeException("Failed to create the data folder");
+                throw new RuntimeException("Failed to create the data folder", exception);
             }
         }
 
@@ -90,7 +94,7 @@ public class FloodgatePlatform {
         guice = guice.createChildInjector(new ConfigLoadedModule(config));
         PlayerLink link = guice.getInstance(PlayerLinkLoader.class).load();
 
-        InstanceHolder.setInstance(api, link, this.injector, handshakeHandlers, KEY);
+        InstanceHolder.set(api, link, this.injector, handshakeHandlers, KEY);
     }
 
     public boolean enable(Module... postInitializeModules) {

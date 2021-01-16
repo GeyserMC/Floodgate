@@ -37,7 +37,7 @@ import org.geysermc.floodgate.util.LanguageManager;
 public final class JavaUtilFloodgateLogger implements FloodgateLogger {
     private final Logger logger;
     private final LanguageManager languageManager;
-    private Level originLevel = null;
+    private Level originLevel;
 
     @Override
     public void error(String message, Object... args) {

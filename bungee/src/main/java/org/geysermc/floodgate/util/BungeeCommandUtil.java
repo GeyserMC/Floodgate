@@ -116,14 +116,14 @@ public final class BungeeCommandUtil implements CommandUtil {
                 break;
             case ONLY_JAVA:
                 for (ProxiedPlayer player : players) {
-                    if (!api.isBedrockPlayer(player.getUniqueId())) {
+                    if (!api.isFloodgatePlayer(player.getUniqueId())) {
                         usernames.add(player.getName());
                     }
                 }
                 break;
             case ONLY_BEDROCK:
                 for (ProxiedPlayer player : players) {
-                    if (api.isBedrockPlayer(player.getUniqueId())) {
+                    if (api.isFloodgatePlayer(player.getUniqueId())) {
                         usernames.add(player.getName());
                     }
                 }

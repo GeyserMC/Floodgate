@@ -28,6 +28,7 @@ package org.geysermc.floodgate.util;
 import com.google.common.base.Joiner;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
@@ -63,8 +64,8 @@ public final class LanguageManager {
      */
     private static String formatLocale(String locale) {
         try {
-            String[] parts = locale.toLowerCase().split("_");
-            return parts[0] + "_" + parts[1].toUpperCase();
+            String[] parts = locale.toLowerCase(Locale.ROOT).split("_");
+            return parts[0] + "_" + parts[1].toUpperCase(Locale.ROOT);
         } catch (Exception e) {
             return locale;
         }
@@ -117,31 +118,32 @@ public final class LanguageManager {
      * @return true if the locale has been found
      */
     public boolean loadLocale(String locale) {
-        locale = formatLocale(locale);
+        String formatLocale = formatLocale(locale);
 
         // just return if the locale has been loaded already
-        if (localeMappings.containsKey(locale)) {
+        if (localeMappings.containsKey(formatLocale)) {
             return true;
         }
 
         InputStream localeStream = LanguageManager.class.getClassLoader().getResourceAsStream(
-                "languages/texts/" + locale + ".properties");
+                "languages/texts/" + formatLocale + ".properties");
 
         // load the locale
         if (localeStream != null) {
             Properties localeProp = new Properties();
-            try {
-                localeProp.load(new InputStreamReader(localeStream, StandardCharsets.UTF_8));
+
+            try (Reader reader = new InputStreamReader(localeStream, StandardCharsets.UTF_8)) {
+                localeProp.load(reader);
             } catch (Exception e) {
                 throw new AssertionError("Failed to load Floodgate locale", e);
             }
 
             // insert the locale into the mappings
-            localeMappings.put(locale, localeProp);
+            localeMappings.put(formatLocale, localeProp);
             return true;
         }
 
-        logger.warn("Missing locale file: " + locale);
+        logger.warn("Missing locale file: " + formatLocale);
         return false;
     }
 

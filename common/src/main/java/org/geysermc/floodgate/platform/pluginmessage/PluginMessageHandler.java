@@ -53,7 +53,7 @@ public abstract class PluginMessageHandler {
     }
 
     public void sendSkinResponse(UUID player, boolean failed, String response) {
-        return; // Proxy implementations don't send responses
+        // Proxy implementations don't send responses
     }
 
     protected byte[] createFormData(Form form) {
