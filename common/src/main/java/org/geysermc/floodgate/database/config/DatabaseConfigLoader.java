@@ -99,18 +99,17 @@ public class DatabaseConfigLoader {
         }
 
         // load default config resource
-        InputStream configStream = classLoader.getResourceAsStream(configFile);
-        if (configStream == null) {
-            return null;
-        }
+        try (InputStream configStream = classLoader.getResourceAsStream(configFile)) {
+            if (configStream == null) {
+                return null;
+            }
 
-        // copy resource and load config
-        try {
+            // copy resource and load config
             if (!configStream.markSupported()) {
                 Files.copy(configStream, configPath);
-                configStream.close();
-                configStream = classLoader.getResourceAsStream(configFile);
-                return yaml.loadAs(configStream, configType);
+                try (InputStream configStream1 = classLoader.getResourceAsStream(configFile)) {
+                    return yaml.loadAs(configStream1, configType);
+                }
             }
 
             configStream.mark(Integer.MAX_VALUE);
@@ -119,7 +118,7 @@ public class DatabaseConfigLoader {
             return yaml.loadAs(configStream, configType);
         } catch (IOException exception) {
             exception.printStackTrace();
-            return null;
         }
+        return null;
     }
 }
