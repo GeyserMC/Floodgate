@@ -45,6 +45,7 @@ import org.geysermc.floodgate.config.loader.ConfigLoader;
 import org.geysermc.floodgate.link.PlayerLinkLoader;
 import org.geysermc.floodgate.module.ConfigLoadedModule;
 import org.geysermc.floodgate.module.PostInitializeModule;
+import org.geysermc.floodgate.util.PrefixCheckTask;
 
 public class FloodgatePlatform {
     private static final UUID KEY = UUID.randomUUID();
@@ -114,6 +115,9 @@ public class FloodgatePlatform {
         }
 
         this.guice = guice.createChildInjector(new PostInitializeModule(postInitializeModules));
+
+        PrefixCheckTask.checkAndExecuteDelayed(config, logger);
+
         return true;
     }
 
