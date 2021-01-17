@@ -43,6 +43,7 @@ import java.util.regex.Pattern;
 
 public class Utils {
     private static final Pattern NON_UNIQUE_PREFIX = Pattern.compile("^[a-zA-Z0-9_]{0,16}$");
+    private static final Pattern DATABASE_NAME = Pattern.compile(Constants.DATABASE_NAME_FORMAT);
 
     /**
      * This method is used in Addons.<br> Most addons can be removed once the player associated to
@@ -95,5 +96,9 @@ public class Utils {
 
     public static boolean isUniquePrefix(String prefix) {
         return !NON_UNIQUE_PREFIX.matcher(prefix).matches();
+    }
+
+    public static boolean isValidDatabaseName(String databaseName) {
+        return DATABASE_NAME.matcher(databaseName).matches();
     }
 }

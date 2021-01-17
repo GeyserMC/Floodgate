@@ -37,6 +37,8 @@ import org.geysermc.floodgate.api.link.LinkRequest;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.database.config.DatabaseConfig;
+import org.geysermc.floodgate.database.config.DatabaseConfigLoader;
 
 public abstract class CommonPlayerLink implements PlayerLink {
     @Getter(AccessLevel.PROTECTED)
@@ -55,6 +57,9 @@ public abstract class CommonPlayerLink implements PlayerLink {
     private FloodgateApi api;
 
     @Inject
+    private DatabaseConfigLoader configLoader;
+
+    @Inject
     private void init(FloodgateConfig config) {
         FloodgateConfig.PlayerLinkConfig linkConfig = config.getPlayerLink();
         enabled = linkConfig.isEnabled();
@@ -68,6 +73,10 @@ public abstract class CommonPlayerLink implements PlayerLink {
 
     public boolean isRequestedPlayer(LinkRequest request, UUID bedrockId) {
         return request.isRequestedPlayer(api.getPlayer(bedrockId));
+    }
+
+    public <T extends DatabaseConfig> T getConfig(Class<T> configClass) {
+        return configLoader.loadAs(configClass);
     }
 
     @Override

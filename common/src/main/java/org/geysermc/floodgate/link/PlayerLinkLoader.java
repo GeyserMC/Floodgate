@@ -32,6 +32,7 @@ import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import com.google.inject.name.Names;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -40,14 +41,16 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 import javax.inject.Named;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.util.Utils;
 
 @Singleton
+@SuppressWarnings("unchecked")
 public final class PlayerLinkLoader {
     @Inject private Injector injector;
     @Inject private FloodgateConfig config;
@@ -88,14 +91,16 @@ public final class PlayerLinkLoader {
         }
 
         Path implementationPath = files.get(0);
+        final String databaseName;
 
         // We only want to load one database implementation
         if (files.size() > 1) {
             boolean found = false;
+            databaseName = linkingConfig.getType();
 
-            String type = linkingConfig.getType().toLowerCase(Locale.ROOT);
+            String expectedName = "floodgate-" + databaseName + "-database.jar";
             for (Path path : files) {
-                if (path.getFileName().toString().toLowerCase(Locale.ROOT).contains(type)) {
+                if (expectedName.equalsIgnoreCase(path.getFileName().toString())) {
                     implementationPath = path;
                     found = true;
                 }
@@ -106,9 +111,19 @@ public final class PlayerLinkLoader {
                         linkingConfig.getType());
                 return null;
             }
+        } else {
+            String name = implementationPath.getFileName().toString();
+            if (!Utils.isValidDatabaseName(name)) {
+                logger.error("Found database {} but the name doesn't match {}",
+                        name, Constants.DATABASE_NAME_FORMAT);
+                return null;
+            }
+            int firstSplit = name.indexOf('-') + 1;
+            databaseName = name.substring(firstSplit, name.indexOf('-', firstSplit));
         }
 
-        Class<? extends PlayerLink> mainClass;
+        boolean init = true;
+
         try {
             URL pluginUrl = implementationPath.toUri().toURL();
 
@@ -116,37 +131,51 @@ public final class PlayerLinkLoader {
                     new URL[]{pluginUrl}, PlayerLinkLoader.class.getClassLoader())) {
 
                 String mainClassName;
+                JsonObject linkConfig;
 
                 try (InputStream linkConfigStream =
-                             classLoader.getResourceAsStream("config.json")) {
+                             classLoader.getResourceAsStream("init.json")) {
 
-                    requireNonNull(linkConfigStream, "Implementation should have a config");
+                    requireNonNull(linkConfigStream, "Implementation should have an init file");
 
-                    JsonObject linkConfig = new Gson().fromJson(
+                    linkConfig = new Gson().fromJson(
                             new InputStreamReader(linkConfigStream), JsonObject.class
                     );
 
                     mainClassName = linkConfig.get("mainClass").getAsString();
                 }
 
-                mainClass = (Class<? extends PlayerLink>) classLoader.loadClass(mainClassName);
+                Class<? extends PlayerLink> mainClass =
+                        (Class<? extends PlayerLink>) classLoader.loadClass(mainClassName);
+
+                init = false;
+
+                Injector linkInjector = injector.createChildInjector(binder -> {
+                    binder.bind(String.class)
+                            .annotatedWith(Names.named("databaseName"))
+                            .toInstance(databaseName);
+                    binder.bind(ClassLoader.class).annotatedWith(
+                            Names.named("databaseClassLoader")).toInstance(classLoader);
+                    binder.bind(JsonObject.class)
+                            .annotatedWith(Names.named("databaseInitData"))
+                            .toInstance(linkConfig);
+                });
+
+                PlayerLink instance = linkInjector.getInstance(mainClass);
+                instance.load();
+                return instance;
             }
         } catch (ClassCastException exception) {
             logger.error("The database implementation ({}) doesn't extend the PlayerLink class!",
                     implementationPath.getFileName().toString(), exception);
             return null;
         } catch (Exception exception) {
-            logger.error("Error while loading database jar", exception);
+            if (init) {
+                logger.error("Error while initialising database jar", exception);
+            } else {
+                logger.error("Error while loading database jar", exception);
+            }
             return null;
         }
-
-        try {
-            PlayerLink instance = injector.getInstance(mainClass);
-            instance.load();
-            return instance;
-        } catch (Exception exception) {
-            logger.error("Error while initializing database jar", exception);
-        }
-        return null;
     }
 }

@@ -23,9 +23,10 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.util;
+package org.geysermc.floodgate.database.config;
 
-public final class Constants {
-    public static final String DATABASE_NAME_FORMAT = "^floodgate-[a-zA-Z0-9_]{0,16}-database.jar$";
-    public static final int LOGIN_SUCCESS_PACKET_ID = 2;
+/**
+ * Base class for every database related configuration.
+ */
+public interface DatabaseConfig {
 }
