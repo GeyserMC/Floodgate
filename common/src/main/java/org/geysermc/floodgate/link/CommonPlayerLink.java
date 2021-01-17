@@ -26,6 +26,7 @@
 package org.geysermc.floodgate.link;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -57,7 +58,7 @@ public abstract class CommonPlayerLink implements PlayerLink {
     private FloodgateApi api;
 
     @Inject
-    private DatabaseConfigLoader configLoader;
+    private Injector injector;
 
     @Inject
     private void init(FloodgateConfig config) {
@@ -75,8 +76,19 @@ public abstract class CommonPlayerLink implements PlayerLink {
         return request.isRequestedPlayer(api.getPlayer(bedrockId));
     }
 
+    /**
+     * Get the config present in init.json and turn it into the given config class. This method will
+     * automatically copy and save the default config if the config doesn't exist.
+     *
+     * @param configClass the class to convert the config to
+     * @param <T>         the config type
+     * @return the loaded config or null if something went wrong.
+     * @see DatabaseConfigLoader#loadAs(Class)
+     */
     public <T extends DatabaseConfig> T getConfig(Class<T> configClass) {
-        return configLoader.loadAs(configClass);
+        // this method is not intended to be used more than once. It'll make a new instance of
+        // DatabaseConfigLoader and DatabaseConfig every time you run this method.
+        return injector.getInstance(DatabaseConfigLoader.class).loadAs(configClass);
     }
 
     @Override
