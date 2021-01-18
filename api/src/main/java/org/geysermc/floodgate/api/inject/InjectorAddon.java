@@ -48,6 +48,16 @@ public interface InjectorAddon {
     void onLoginDone(Channel channel);
 
     /**
+     * Called when the channel has been closed. Note that this method will be called for every
+     * closed connection (if it is injected), so it'll also run this method for closed connections
+     * between a server and the proxy (when Floodgate is running on a proxy).
+     *
+     * @param channel the channel that the injecor injected
+     */
+    default void onChannelClosed(Channel channel) {
+    }
+
+    /**
      * Called when Floodgate is removing the injection from the server. The addon should remove his
      * traces otherwise it is likely that an error will popup after the server is injected again.
      *

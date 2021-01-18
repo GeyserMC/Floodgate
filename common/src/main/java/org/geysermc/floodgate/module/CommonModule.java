@@ -151,6 +151,13 @@ public class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
+    @Named("kickMessageAttribute")
+    public AttributeKey<String> kickMessageAttribute() {
+        return AttributeKey.valueOf("floodgate-kick-message");
+    }
+
+    @Provides
+    @Singleton
     @Named("playerAttribute")
     public AttributeKey<FloodgatePlayer> playerAttribute() {
         return AttributeKey.valueOf("floodgate-player");

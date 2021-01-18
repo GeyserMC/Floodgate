@@ -32,7 +32,7 @@ import static org.geysermc.floodgate.util.ReflectionUtils.getPrefixedClass;
 import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.AttributeKey;
 import io.netty.util.ReferenceCountUtil;
 import java.lang.reflect.Field;
@@ -46,7 +46,7 @@ import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
 
 @RequiredArgsConstructor
-public final class VelocityProxyDataHandler extends SimpleChannelInboundHandler<Object> {
+public final class VelocityProxyDataHandler extends ChannelInboundHandlerAdapter {
     private static final Field HANDSHAKE;
     private static final Class<?> HANDSHAKE_PACKET;
     private static final Field HANDSHAKE_SERVER_ADDRESS;
@@ -76,12 +76,12 @@ public final class VelocityProxyDataHandler extends SimpleChannelInboundHandler<
     private boolean done;
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         ReferenceCountUtil.retain(msg);
-        // we're only interested in the Handshake packet
+        // we're only interested in the Handshake packet.
+        // it should be the first packet but you never know
         if (done || !HANDSHAKE_PACKET.isInstance(msg)) {
             ctx.fireChannelRead(msg);
-            done = true;
             return;
         }
 
@@ -105,7 +105,8 @@ public final class VelocityProxyDataHandler extends SimpleChannelInboundHandler<
             case SUCCESS:
                 break;
             case EXCEPTION:
-                ctx.channel().attr(kickMessageAttribute).set(config.getDisconnect().getInvalidKey());
+                ctx.channel().attr(kickMessageAttribute)
+                        .set(config.getDisconnect().getInvalidKey());
                 return;
             case INVALID_DATA_LENGTH:
                 ctx.channel().attr(kickMessageAttribute)

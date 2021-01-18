@@ -75,10 +75,6 @@ public class BungeeUserAudience implements UserAudience, ForwardingAudience.Sing
     @Override
     public void sendMessage(@NonNull Identity source, @NonNull Component message,
                             @NonNull MessageType type) {
-        if (type != MessageType.CHAT) {
-            throw new IllegalStateException("Cannot send any other messages then chat messages");
-        }
-
         this.source.sendMessage(GsonComponentSerializer.gson().serialize(message));
     }
 

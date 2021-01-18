@@ -42,7 +42,6 @@ import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.player.GameProfileRequestEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.proxy.InboundConnection;
-import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.util.GameProfile;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
@@ -62,7 +61,6 @@ import org.geysermc.floodgate.util.VelocityCommandUtil;
 
 public final class VelocityListener {
     private static final Field INITIAL_MINECRAFT_CONNECTION;
-    private static final Field MINECRAFT_CONNECTION;
     private static final Field CHANNEL;
 
     static {
@@ -70,8 +68,6 @@ public final class VelocityListener {
 
         Class<?> minecraftConnection = getPrefixedClass("connection.MinecraftConnection");
         INITIAL_MINECRAFT_CONNECTION = getFieldOfType(initialConnection, minecraftConnection);
-        Class<?> connectedPlayer = getPrefixedClass("connection.client.ConnectedPlayer");
-        MINECRAFT_CONNECTION = getFieldOfType(connectedPlayer, minecraftConnection);
         CHANNEL = getFieldOfType(minecraftConnection, Channel.class);
     }
 
@@ -167,21 +163,6 @@ public final class VelocityListener {
 
     @Subscribe(order = PostOrder.LAST)
     public void onDisconnect(DisconnectEvent event) {
-        Player player = event.getPlayer();
-
-        VelocityCommandUtil.AUDIENCE_CACHE.remove(player.getUniqueId()); //todo
-
-        try {
-            Object minecraftConnection = getValue(player, MINECRAFT_CONNECTION);
-            Channel channel = getCastedValue(minecraftConnection, CHANNEL);
-            FloodgatePlayer fPlayer = channel.attr(playerAttribute).get();
-
-            if (fPlayer != null && api.removePlayer(fPlayer)) {
-                api.removeEncryptedData(event.getPlayer().getUniqueId());
-                logger.translatedInfo("floodgate.ingame.disconnect_name", player.getUsername());
-            }
-        } catch (Exception exception) {
-            logger.error("Failed to remove the player", exception);
-        }
+        VelocityCommandUtil.AUDIENCE_CACHE.remove(event.getPlayer().getUniqueId()); //todo
     }
 }

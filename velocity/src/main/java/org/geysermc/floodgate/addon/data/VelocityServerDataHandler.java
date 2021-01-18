@@ -47,6 +47,7 @@ import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 
+@SuppressWarnings("ConstantConditions")
 @RequiredArgsConstructor
 public final class VelocityServerDataHandler extends MessageToMessageEncoder<Object> {
     private static final Class<?> HANDSHAKE_PACKET;
@@ -74,6 +75,7 @@ public final class VelocityServerDataHandler extends MessageToMessageEncoder<Obj
 
     private final ProxyFloodgateConfig config;
     private final ProxyFloodgateApi api;
+    //private final AttributeKey<FloodgatePlayer> playerAttribute;
     private boolean done;
 
     @Override
@@ -99,6 +101,14 @@ public final class VelocityServerDataHandler extends MessageToMessageEncoder<Obj
 
         //noinspection ConstantConditions
         FloodgatePlayer player = api.getPlayer(velocityPlayer.getUniqueId());
+
+        //todo use something similar to what's written below for a more direct approach
+
+        // get the Proxy <-> Player channel from the Proxy <-> Server channel
+        //MinecraftConnection minecraftConnection = ctx.pipeline().get("handler");
+        //((VelocityServerConnection) minecraftConnection.association).proxyPlayer.connection.channel
+
+        //FloodgatePlayer player = playerChannel.attr(playerAttribute).get();
 
         // player is not a Floodgate player
         if (player == null) {

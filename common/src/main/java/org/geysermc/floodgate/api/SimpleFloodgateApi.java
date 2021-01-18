@@ -39,7 +39,7 @@ import org.geysermc.floodgate.util.Utils;
 
 @RequiredArgsConstructor
 public class SimpleFloodgateApi implements FloodgateApi {
-    private final Map<UUID, FloodgatePlayer> players = new HashMap<>();
+    public final Map<UUID, FloodgatePlayer> players = new HashMap<>();
     private final PluginMessageHandler pluginMessageHandler;
 
     @Override
@@ -146,7 +146,6 @@ public class SimpleFloodgateApi implements FloodgateApi {
      * instance directly.
      */
     public boolean removePlayer(FloodgatePlayer player) {
-        boolean removed = players.remove(player.getJavaUniqueId(), player);
-        return removed && player.getLinkedPlayer() != null;
+        return players.remove(player.getJavaUniqueId(), player);
     }
 }

@@ -25,32 +25,50 @@
 
 package org.geysermc.floodgate.listener;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.inject.Inject;
-import com.google.inject.Injector;
+import com.google.inject.name.Named;
+import io.netty.channel.Channel;
+import io.netty.util.AttributeKey;
+import java.lang.reflect.Field;
 import java.util.UUID;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
-import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.event.ServerConnectedEvent;
 import net.md_5.bungee.api.plugin.Listener;
+import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
+import net.md_5.bungee.netty.ChannelWrapper;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
-import org.geysermc.floodgate.handler.BungeeDataHandler;
 import org.geysermc.floodgate.player.FloodgatePlayerImpl;
 import org.geysermc.floodgate.pluginmessage.BungeePluginMessageHandler;
 import org.geysermc.floodgate.skin.SkinHandler;
 import org.geysermc.floodgate.util.BungeeCommandUtil;
 import org.geysermc.floodgate.util.LanguageManager;
+import org.geysermc.floodgate.util.ReflectionUtils;
 
+@SuppressWarnings("ConstantConditions")
 public final class BungeeListener implements Listener {
-    private BungeeDataHandler dataHandler;
+    private static final Field CHANNEL_WRAPPER;
+    private static final Field PLAYER_NAME;
+
+    static {
+        CHANNEL_WRAPPER =
+                ReflectionUtils.getFieldOfType(InitialHandler.class, ChannelWrapper.class);
+        checkNotNull(CHANNEL_WRAPPER, "ChannelWrapper field cannot be null");
+
+        PLAYER_NAME = ReflectionUtils.getField(InitialHandler.class, "name");
+        checkNotNull(PLAYER_NAME, "Initial name field cannot be null");
+    }
+
     @Inject private ProxyFloodgateApi api;
     @Inject private LanguageManager languageManager;
     @Inject private FloodgateLogger logger;
@@ -60,14 +78,12 @@ public final class BungeeListener implements Listener {
     @Inject private SkinHandler skinHandler;
 
     @Inject
-    public void init(Injector injector) {
-        dataHandler = injector.getInstance(BungeeDataHandler.class);
-    }
+    @Named("playerAttribute")
+    private AttributeKey<FloodgatePlayer> playerAttribute;
 
-    @EventHandler(priority = EventPriority.LOW)
-    public void onServerConnect(ServerConnectEvent event) {
-        dataHandler.handleServerConnect(event.getPlayer());
-    }
+    @Inject
+    @Named("kickMessageAttribute")
+    private AttributeKey<String> kickMessageAttribute;
 
     @EventHandler
     public void onServerConnected(ServerConnectedEvent event) {
@@ -89,15 +105,31 @@ public final class BungeeListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOW)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPreLogin(PreLoginEvent event) {
-        dataHandler.handlePreLogin(event);
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPreLoginMonitor(PreLoginEvent event) {
+        // well, no reason to check if the player will be kicked anyway
         if (event.isCancelled()) {
-            api.removePlayer(event.getConnection().getUniqueId(), true);
+            return;
+        }
+
+        PendingConnection connection = event.getConnection();
+
+        ChannelWrapper wrapper = ReflectionUtils.getCastedValue(connection, CHANNEL_WRAPPER);
+        Channel channel = wrapper.getHandle();
+
+        // check if the player has to be kicked
+        String kickReason = channel.attr(kickMessageAttribute).get();
+        if (kickReason != null) {
+            event.setCancelled(true);
+            event.setCancelReason(kickReason);
+            return;
+        }
+
+        FloodgatePlayer player = channel.attr(playerAttribute).get();
+        if (player != null) {
+            connection.setOnlineMode(false);
+            connection.setUniqueId(player.getCorrectUniqueId());
+            ReflectionUtils.setValue(connection, PLAYER_NAME, player.getCorrectUsername());
         }
     }
 
@@ -118,21 +150,7 @@ public final class BungeeListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onLoginMonitor(LoginEvent event) {
-        if (event.isCancelled()) {
-            api.removePlayer(event.getConnection().getUniqueId());
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerDisconnect(PlayerDisconnectEvent event) {
-        ProxiedPlayer player = event.getPlayer();
-
-        BungeeCommandUtil.AUDIENCE_CACHE.remove(player.getUniqueId()); //todo
-
-        if (api.removePlayer(player.getUniqueId()) != null) {
-            api.removeEncryptedData(player.getUniqueId());
-            logger.translatedInfo("floodgate.ingame.disconnect_name", player.getName());
-        }
+        BungeeCommandUtil.AUDIENCE_CACHE.remove(event.getPlayer().getUniqueId()); //todo
     }
 }

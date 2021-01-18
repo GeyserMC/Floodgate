@@ -35,9 +35,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
@@ -45,8 +43,6 @@ import org.geysermc.floodgate.util.ReflectionUtils;
 
 @RequiredArgsConstructor
 public final class SpigotInjector extends CommonPlatformInjector {
-    private final Set<Channel> injectedClients = new HashSet<>();
-
     private Object serverConnection;
     private String injectedFieldName;
 
@@ -115,7 +111,11 @@ public final class SpigotInjector extends CommonPlatformInjector {
                     @Override
                     protected void initChannel(Channel channel) {
                         injectAddonsCall(channel, false);
-                        injectedClients.add(channel);
+                        addInjectedClient(channel);
+                        channel.closeFuture().addListener(listener -> {
+                            channelClosedCall(channel);
+                            removeInjectedClient(channel);
+                        });
                     }
                 });
             }
@@ -129,10 +129,10 @@ public final class SpigotInjector extends CommonPlatformInjector {
         }
 
         // remove injection from clients
-        for (Channel channel : injectedClients) {
+        for (Channel channel : getInjectedClients()) {
             removeAddonsCall(channel);
         }
-        injectedClients.clear();
+        getInjectedClients().clear();
 
         // and change the list back to the original
         Object serverConnection = getServerConnection();

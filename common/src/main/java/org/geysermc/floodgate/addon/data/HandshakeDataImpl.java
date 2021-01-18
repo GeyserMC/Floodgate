@@ -65,15 +65,23 @@ public class HandshakeDataImpl implements HandshakeData {
         this.rawSkin = rawSkin;
         this.hostname = hostname;
 
-        String prefix = config.getUsernamePrefix();
-        int usernameLength = Math.min(bedrockData.getUsername().length(), 16 - prefix.length());
-        String javaUsername = prefix + bedrockData.getUsername().substring(0, usernameLength);
-        if (config.isReplaceSpaces()) {
-            javaUsername = javaUsername.replaceAll(" ", "_");
-        }
-        this.javaUsername = javaUsername;
+        String javaUsername = null;
+        UUID javaUniqueId = null;
 
-        this.javaUniqueId = Utils.getJavaUuid(bedrockData.getXuid());
+        if (bedrockData != null) {
+
+            String prefix = config.getUsernamePrefix();
+            int usernameLength = Math.min(bedrockData.getUsername().length(), 16 - prefix.length());
+            javaUsername = prefix + bedrockData.getUsername().substring(0, usernameLength);
+            if (config.isReplaceSpaces()) {
+                javaUsername = javaUsername.replaceAll(" ", "_");
+            }
+
+            javaUniqueId = Utils.getJavaUuid(bedrockData.getXuid());
+        }
+
+        this.javaUsername = javaUsername;
+        this.javaUniqueId = javaUniqueId;
     }
 
     @Override

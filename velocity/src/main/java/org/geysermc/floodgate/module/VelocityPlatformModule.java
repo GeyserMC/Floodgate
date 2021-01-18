@@ -38,7 +38,6 @@ import com.google.inject.name.Named;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.event.EventManager;
 import com.velocitypowered.api.proxy.ProxyServer;
-import io.netty.util.AttributeKey;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.VelocityPlugin;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -147,12 +146,5 @@ public final class VelocityPlatformModule extends AbstractModule {
     @Named("implementationName")
     public String implementationName() {
         return "Velocity";
-    }
-
-    @Provides
-    @Singleton
-    @Named("kickMessageAttribute")
-    public AttributeKey<String> kickMessageAttribute() {
-        return AttributeKey.valueOf("floodgate-kick-message");
     }
 }

@@ -30,11 +30,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 
 public abstract class CommonPlatformInjector implements PlatformInjector {
+    @Getter(AccessLevel.PROTECTED)
     private final Set<Channel> injectedClients = new HashSet<>();
+
     private final Map<Class<?>, InjectorAddon> addons = new HashMap<>();
 
     protected boolean addInjectedClient(Channel channel) {
@@ -82,6 +86,20 @@ public abstract class CommonPlatformInjector implements PlatformInjector {
         for (InjectorAddon addon : addons.values()) {
             if (addon.shouldInject()) {
                 addon.onLoginDone(channel);
+            }
+        }
+    }
+
+    /**
+     * Method to loop throguh all the addons and call {@link InjectorAddon#onChannelClosed(Channel)}
+     * if {@link InjectorAddon#shouldInject()}
+     *
+     * @param channel the channel that was injected
+     */
+    public void channelClosedCall(Channel channel) {
+        for (InjectorAddon addon : addons.values()) {
+            if (addon.shouldInject()) {
+                addon.onChannelClosed(channel);
             }
         }
     }

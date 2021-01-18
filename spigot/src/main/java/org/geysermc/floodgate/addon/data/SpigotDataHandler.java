@@ -34,7 +34,8 @@ import static org.geysermc.floodgate.util.ReflectionUtils.makeAccessible;
 import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.ReferenceCountUtil;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -54,7 +55,7 @@ import org.geysermc.floodgate.util.ReflectionUtils;
 import org.geysermc.floodgate.util.SpigotUtils;
 
 @RequiredArgsConstructor
-public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object> {
+public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
     private static final Field SOCKET_ADDRESS;
     private static final Class<?> HANDSHAKE_PACKET;
     private static final Field HANDSHAKE_HOST;
@@ -160,7 +161,8 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
     private boolean done;
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object packet) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object packet) throws Exception {
+        ReferenceCountUtil.retain(packet);
         // we're done but we're not yet removed from the connection
         if (done) {
             ctx.fireChannelRead(packet);
@@ -244,7 +246,9 @@ public final class SpigotDataHandler extends SimpleChannelInboundHandler<Object>
         } finally {
             // don't let the packet through if the packet is the login packet
             // because we want to skip the login cycle
-            if (!isLogin) {
+            if (isLogin) {
+                ReferenceCountUtil.release(packet, 2);
+            } else {
                 ctx.fireChannelRead(packet);
             }
 

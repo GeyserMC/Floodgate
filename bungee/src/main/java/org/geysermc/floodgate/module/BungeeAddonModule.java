@@ -30,6 +30,7 @@ import com.google.inject.Singleton;
 import com.google.inject.multibindings.ProvidesIntoSet;
 import org.geysermc.floodgate.addon.AddonManagerAddon;
 import org.geysermc.floodgate.addon.DebugAddon;
+import org.geysermc.floodgate.addon.data.BungeeDataAddon;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.register.AddonRegister;
 
@@ -43,6 +44,12 @@ public final class BungeeAddonModule extends AbstractModule {
     @ProvidesIntoSet
     public InjectorAddon managerAddon() {
         return new AddonManagerAddon();
+    }
+
+    @Singleton
+    @ProvidesIntoSet
+    public InjectorAddon dataAddon() {
+        return new BungeeDataAddon();
     }
 
     @Singleton

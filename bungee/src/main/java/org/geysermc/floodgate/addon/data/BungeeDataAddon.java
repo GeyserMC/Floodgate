@@ -37,7 +37,7 @@ import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.util.Utils;
 
-public final class VelocityDataAddon implements InjectorAddon {
+public class BungeeDataAddon implements InjectorAddon {
     @Inject private FloodgateHandshakeHandler handshakeHandler;
     @Inject private ProxyFloodgateConfig config;
     @Inject private ProxyFloodgateApi api;
@@ -64,14 +64,13 @@ public final class VelocityDataAddon implements InjectorAddon {
         if (toServer) {
             channel.pipeline().addAfter(
                     packetEncoder, "floodgate_data_handler",
-                    new VelocityServerDataHandler(config, api)
+                    new BungeeServerDataHandler(config, api, playerAttribute)
             );
             return;
         }
-        // The handler is already added so we should add our handler before it
         channel.pipeline().addBefore(
                 packetHandler, "floodgate_data_handler",
-                new VelocityProxyDataHandler(config, handshakeHandler, kickMessageAttribute, logger)
+                new BungeeProxyDataHandler(config, handshakeHandler, kickMessageAttribute)
         );
     }
 
@@ -85,7 +84,7 @@ public final class VelocityDataAddon implements InjectorAddon {
         FloodgatePlayer player = channel.attr(playerAttribute).get();
         if (player != null && api.removePlayer(player)) {
             api.removeEncryptedData(player.getCorrectUniqueId());
-            logger.translatedInfo("floodgate.ingame.disconnect_name", player.getUsername());
+            logger.translatedInfo("floodgate.ingame.disconnect_name", player.getCorrectUsername());
         }
     }
 

@@ -23,38 +23,36 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.module;
+package org.geysermc.floodgate.command;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
-import com.google.inject.multibindings.ProvidesIntoSet;
-import org.geysermc.floodgate.command.LinkAccountCommand;
-import org.geysermc.floodgate.command.TestCommand;
-import org.geysermc.floodgate.command.UnlinkAccountCommand;
+import cloud.commandframework.Command;
+import cloud.commandframework.CommandManager;
+import cloud.commandframework.context.CommandContext;
+import net.kyori.adventure.text.Component;
+import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.floodgate.api.SimpleFloodgateApi;
+import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
-import org.geysermc.floodgate.register.CommandRegister;
+import org.geysermc.floodgate.player.UserAudience;
+import org.geysermc.floodgate.util.Constants;
 
-public class CommandModule extends AbstractModule {
+public class TestCommand implements FloodgateCommand {
     @Override
-    protected void configure() {
-        bind(CommandRegister.class).asEagerSingleton();
+    public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
+        return commandManager.commandBuilder("floodgate-test")
+                .senderType(UserAudience.class)
+                .handler(this::execute)
+                .build();
     }
 
-    @Singleton
-    @ProvidesIntoSet
-    public FloodgateCommand linkAccountCommand() {
-        return new LinkAccountCommand();
+    @Override
+    public void execute(CommandContext<UserAudience> context) {
+        int players = ((SimpleFloodgateApi) FloodgateApi.getInstance()).players.size();
+        context.getSender().sendMessage(Component.text(players));
     }
 
-    @Singleton
-    @ProvidesIntoSet
-    public FloodgateCommand unlinkAccountCommand() {
-        return new UnlinkAccountCommand();
-    }
-
-    @Singleton
-    @ProvidesIntoSet
-    public FloodgateCommand testCommand() {
-        return new TestCommand();
+    @Override
+    public boolean shouldRegister(FloodgateConfig config) {
+        return Constants.DEBUG_MODE;
     }
 }

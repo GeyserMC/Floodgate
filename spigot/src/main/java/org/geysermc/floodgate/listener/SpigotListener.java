@@ -27,11 +27,9 @@ package org.geysermc.floodgate.listener;
 
 import com.google.inject.Inject;
 import java.util.UUID;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
@@ -49,17 +47,9 @@ public final class SpigotListener implements Listener {
     @Inject private FloodgateLogger logger;
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onAsyncPreLogin(AsyncPlayerPreLoginEvent event) {
-        if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
-            api.removePlayer(event.getUniqueId(), true);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerLogin(PlayerLoginEvent event) {
         UUID uniqueId = event.getPlayer().getUniqueId();
         if (event.getResult() != PlayerLoginEvent.Result.ALLOWED) {
-            api.removePlayer(uniqueId);
             return;
         }
 
@@ -79,12 +69,6 @@ public final class SpigotListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
-        Player player = event.getPlayer();
-
-        SpigotCommandUtil.AUDIENCE_CACHE.remove(player.getUniqueId()); //todo
-
-        if (api.removePlayer(player.getUniqueId()) != null) {
-            logger.translatedInfo("floodgate.ingame.disconnect_name", player.getName());
-        }
+        SpigotCommandUtil.AUDIENCE_CACHE.remove(event.getPlayer().getUniqueId()); //todo
     }
 }
