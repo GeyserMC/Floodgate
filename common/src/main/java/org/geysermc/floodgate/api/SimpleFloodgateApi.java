@@ -25,6 +25,8 @@
 
 package org.geysermc.floodgate.api;
 
+import com.google.common.collect.ImmutableSet;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -39,8 +41,18 @@ import org.geysermc.floodgate.util.Utils;
 
 @RequiredArgsConstructor
 public class SimpleFloodgateApi implements FloodgateApi {
-    public final Map<UUID, FloodgatePlayer> players = new HashMap<>();
+    private final Map<UUID, FloodgatePlayer> players = new HashMap<>();
     private final PluginMessageHandler pluginMessageHandler;
+
+    @Override
+    public Collection<FloodgatePlayer> getPlayers() {
+        return ImmutableSet.copyOf(players.values());
+    }
+
+    @Override
+    public int getPlayerCount() {
+        return players.size();
+    }
 
     @Override
     public boolean isFloodgatePlayer(UUID uuid) {

@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.api;
 
+import java.util.Collection;
 import java.util.UUID;
 import org.geysermc.cumulus.Form;
 import org.geysermc.cumulus.util.FormBuilder;
@@ -38,6 +39,16 @@ public interface FloodgateApi {
     static FloodgateApi getInstance() {
         return InstanceHolder.getApi();
     }
+
+    /**
+     * Returns all the online Floodgate players.
+     */
+    Collection<FloodgatePlayer> getPlayers();
+
+    /**
+     * Returns the number of Floodgate players who are currently online.
+     */
+    int getPlayerCount();
 
     /**
      * Method to determine if the given <b>online</b> player is a bedrock player
