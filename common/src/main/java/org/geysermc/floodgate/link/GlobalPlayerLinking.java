@@ -28,6 +28,7 @@ package org.geysermc.floodgate.link;
 import com.google.gson.JsonObject;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.api.link.LinkRequestResult;
 import org.geysermc.floodgate.util.HttpUtils;
 import org.geysermc.floodgate.util.HttpUtils.HttpResponse;
@@ -35,14 +36,15 @@ import org.geysermc.floodgate.util.LinkedPlayer;
 import org.geysermc.floodgate.util.Utils;
 
 public class GlobalPlayerLinking extends CommonPlayerLink {
-    private static final String GET_BEDROCK_LINK = "http://localhost:4000/api/link/bedrock?xuid=";
+    private static final String GET_BEDROCK_LINK = "https://api.geysermc.org/v1/link/bedrock?xuid=";
 
     @Override
     public void load() {
     }
 
     @Override
-    public CompletableFuture<LinkedPlayer> getLinkedPlayer(UUID bedrockId) {
+    @NonNull
+    public CompletableFuture<LinkedPlayer> getLinkedPlayer(@NonNull UUID bedrockId) {
         return CompletableFuture.supplyAsync(
                 () -> {
                     HttpResponse response =
@@ -73,7 +75,8 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
     }
 
     @Override
-    public CompletableFuture<Boolean> isLinkedPlayer(UUID bedrockId) {
+    @NonNull
+    public CompletableFuture<Boolean> isLinkedPlayer(@NonNull UUID bedrockId) {
         return CompletableFuture.supplyAsync(
                 () -> {
                     HttpResponse response =
@@ -99,32 +102,42 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
     // player linking and unlinking now goes through the global player linking server.
     // so individual servers can't register nor unlink players.
 
-    //todo don't return null
-
     @Override
-    public CompletableFuture<Void> linkPlayer(UUID bedrockId, UUID javaId, String username) {
-        return null;
+    @NonNull
+    public CompletableFuture<Void> linkPlayer(
+            @NonNull UUID bedrockId,
+            @NonNull UUID javaId,
+            @NonNull String username) {
+        return failedFuture();
     }
 
     @Override
-    public CompletableFuture<Void> unlinkPlayer(UUID javaId) {
-        return null;
+    @NonNull
+    public CompletableFuture<Void> unlinkPlayer(@NonNull UUID javaId) {
+        return failedFuture();
     }
 
     @Override
+    @NonNull
     public CompletableFuture<?> createLinkRequest(
-            UUID javaId,
-            String javaUsername,
-            String bedrockUsername) {
-        return null;
+            @NonNull UUID javaId,
+            @NonNull String javaUsername,
+            @NonNull String bedrockUsername) {
+        return failedFuture();
     }
 
     @Override
+    @NonNull
     public CompletableFuture<LinkRequestResult> verifyLinkRequest(
-            UUID bedrockId,
-            String javaUsername,
-            String bedrockUsername,
-            String code) {
-        return null;
+            @NonNull UUID bedrockId,
+            @NonNull String javaUsername,
+            @NonNull String bedrockUsername,
+            @NonNull String code) {
+        return failedFuture();
+    }
+
+    private <U> CompletableFuture<U> failedFuture() {
+        return Utils.failedFuture(new IllegalStateException(
+                "Cannot perform this action when Global Linking is enabled"));
     }
 }

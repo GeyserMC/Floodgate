@@ -27,10 +27,12 @@ package org.geysermc.floodgate.link;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.link.LinkRequestResult;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.util.LinkedPlayer;
+import org.geysermc.floodgate.util.Utils;
 
 /**
  * Simple class used when PlayerLinking is disabled. This class has been made because Floodgate
@@ -42,45 +44,50 @@ final class DisabledPlayerLink implements PlayerLink {
     public void load() {
     }
 
-    //todo don't return null
-
     @Override
-    public CompletableFuture<LinkedPlayer> getLinkedPlayer(UUID bedrockId) {
-        return null;
+    @NonNull
+    public CompletableFuture<LinkedPlayer> getLinkedPlayer(@NonNull UUID bedrockId) {
+        return failedFuture();
     }
 
     @Override
-    public CompletableFuture<Boolean> isLinkedPlayer(UUID bedrockId) {
-        return null;
+    @NonNull
+    public CompletableFuture<Boolean> isLinkedPlayer(@NonNull UUID bedrockId) {
+        return failedFuture();
     }
 
     @Override
-    public CompletableFuture<Void> linkPlayer(UUID bedrockId, UUID javaId, String username) {
-        return null;
+    @NonNull
+    public CompletableFuture<Void> linkPlayer(
+            @NonNull UUID bedrockId,
+            @NonNull UUID javaId,
+            @NonNull String username) {
+        return failedFuture();
     }
 
     @Override
-    public CompletableFuture<Void> unlinkPlayer(UUID javaId) {
-        return null;
+    @NonNull
+    public CompletableFuture<Void> unlinkPlayer(@NonNull UUID javaId) {
+        return failedFuture();
     }
 
     @Override
+    @NonNull
     public CompletableFuture<?> createLinkRequest(
-            UUID javaId,
-            String javaUsername,
-            String bedrockUsername
-    ) {
-        return null;
+            @NonNull UUID javaId,
+            @NonNull String javaUsername,
+            @NonNull String bedrockUsername) {
+        return failedFuture();
     }
 
     @Override
+    @NonNull
     public CompletableFuture<LinkRequestResult> verifyLinkRequest(
-            UUID bedrockId,
-            String javaUsername,
-            String bedrockUsername,
-            String code
-    ) {
-        return null;
+            @NonNull UUID bedrockId,
+            @NonNull String javaUsername,
+            @NonNull String bedrockUsername,
+            @NonNull String code) {
+        return failedFuture();
     }
 
     @Override
@@ -100,5 +107,10 @@ final class DisabledPlayerLink implements PlayerLink {
 
     @Override
     public void stop() {
+    }
+
+    private <U> CompletableFuture<U> failedFuture() {
+        return Utils.failedFuture(new IllegalStateException(
+                "Cannot perform this action when PlayerLinking is disabled"));
     }
 }

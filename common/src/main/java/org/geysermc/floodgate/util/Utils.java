@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 public class Utils {
@@ -100,5 +101,19 @@ public class Utils {
 
     public static boolean isValidDatabaseName(String databaseName) {
         return DATABASE_NAME.matcher(databaseName).matches();
+    }
+
+    /**
+     * Returns a new CompletableFuture that is already completed exceptionally with the given
+     * exception.
+     *
+     * @param ex  the exception
+     * @param <U> the type of the value
+     * @return the exceptionally completed CompletableFuture
+     */
+    public static <U> CompletableFuture<U> failedFuture(Throwable ex) {
+        CompletableFuture<U> future = new CompletableFuture<>();
+        future.completeExceptionally(ex);
+        return future;
     }
 }
