@@ -30,15 +30,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
-import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
+import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.util.BedrockData;
 
 public final class ProxyFloodgateApi extends SimpleFloodgateApi {
     private final Map<UUID, String> encryptedData = new HashMap<>();
     private final FloodgateCipher cipher;
 
-    public ProxyFloodgateApi(PluginMessageHandler pluginMessageHandler, FloodgateCipher cipher) {
-        super(pluginMessageHandler);
+    public ProxyFloodgateApi(PluginMessageManager pluginMessageManager, FloodgateCipher cipher) {
+        super(pluginMessageManager);
         this.cipher = cipher;
     }
 

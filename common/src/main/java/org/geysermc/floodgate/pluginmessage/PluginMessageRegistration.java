@@ -23,31 +23,8 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.module;
+package org.geysermc.floodgate.pluginmessage;
 
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import java.nio.file.Path;
-import org.geysermc.floodgate.api.SimpleFloodgateApi;
-import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
-
-public final class ServerCommonModule extends CommonModule {
-    public ServerCommonModule(Path dataDirectory) {
-        super(dataDirectory);
-    }
-
-    @Provides
-    @Singleton
-    @Named("configClass")
-    public Class<? extends FloodgateConfig> floodgateConfigClass() {
-        return FloodgateConfig.class;
-    }
-
-    @Provides
-    @Singleton
-    public SimpleFloodgateApi floodgateApi(PluginMessageManager pluginMessageManager) {
-        return new SimpleFloodgateApi(pluginMessageManager);
-    }
+public interface PluginMessageRegistration {
+    void register(PluginMessageChannel channel);
 }

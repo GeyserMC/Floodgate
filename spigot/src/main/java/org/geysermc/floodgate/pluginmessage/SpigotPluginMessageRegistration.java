@@ -23,31 +23,26 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.module;
+package org.geysermc.floodgate.pluginmessage;
 
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import java.nio.file.Path;
-import org.geysermc.floodgate.api.SimpleFloodgateApi;
-import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
+import lombok.RequiredArgsConstructor;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.messaging.Messenger;
 
-public final class ServerCommonModule extends CommonModule {
-    public ServerCommonModule(Path dataDirectory) {
-        super(dataDirectory);
-    }
+@RequiredArgsConstructor
+public class SpigotPluginMessageRegistration implements PluginMessageRegistration {
+    private final JavaPlugin plugin;
 
-    @Provides
-    @Singleton
-    @Named("configClass")
-    public Class<? extends FloodgateConfig> floodgateConfigClass() {
-        return FloodgateConfig.class;
-    }
+    @Override
+    public void register(PluginMessageChannel channel) {
+        Messenger messenger = plugin.getServer().getMessenger();
 
-    @Provides
-    @Singleton
-    public SimpleFloodgateApi floodgateApi(PluginMessageManager pluginMessageManager) {
-        return new SimpleFloodgateApi(pluginMessageManager);
+        messenger.registerIncomingPluginChannel(
+                plugin,
+                channel.getIdentifier(),
+                (channel1, player, message) ->
+                        channel.handleServerCall(message, player.getUniqueId(), player.getName()));
+
+        messenger.registerOutgoingPluginChannel(plugin, channel.getIdentifier());
     }
 }

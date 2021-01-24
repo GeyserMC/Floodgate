@@ -54,7 +54,8 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
-import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
+import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
+import org.geysermc.floodgate.pluginmessage.channel.SkinChannel;
 import org.geysermc.floodgate.skin.SkinHandler;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.VelocityCommandUtil;
@@ -82,7 +83,7 @@ public final class VelocityListener {
     @Inject private FloodgateLogger logger;
 
     @Inject private ProxyFloodgateConfig config;
-    @Inject private PluginMessageHandler pluginMessageHandler;
+    @Inject private PluginMessageManager pluginMessageManager;
     @Inject private SkinHandler skinHandler;
 
     @Inject
@@ -155,7 +156,8 @@ public final class VelocityListener {
 
         // send skin request to server if data forwarding allows that
         if (config.isSendFloodgateData()) {
-            pluginMessageHandler.sendSkinRequest(player.getCorrectUniqueId(), player.getRawSkin());
+            pluginMessageManager.getChannel(SkinChannel.class)
+                    .sendSkinRequest(player.getCorrectUniqueId(), player.getRawSkin());
         } else {
             skinHandler.handleSkinUploadFor(player, null);
         }

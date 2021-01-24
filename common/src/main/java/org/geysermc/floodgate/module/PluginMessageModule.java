@@ -25,29 +25,29 @@
 
 package org.geysermc.floodgate.module;
 
-import com.google.inject.Provides;
+import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import java.nio.file.Path;
-import org.geysermc.floodgate.api.SimpleFloodgateApi;
-import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
+import com.google.inject.multibindings.ProvidesIntoSet;
+import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
+import org.geysermc.floodgate.pluginmessage.channel.FormChannel;
+import org.geysermc.floodgate.pluginmessage.channel.SkinChannel;
+import org.geysermc.floodgate.register.PluginMessageRegister;
 
-public final class ServerCommonModule extends CommonModule {
-    public ServerCommonModule(Path dataDirectory) {
-        super(dataDirectory);
+public final class PluginMessageModule extends AbstractModule {
+    @Override
+    protected void configure() {
+        bind(PluginMessageRegister.class).asEagerSingleton();
     }
 
-    @Provides
     @Singleton
-    @Named("configClass")
-    public Class<? extends FloodgateConfig> floodgateConfigClass() {
-        return FloodgateConfig.class;
+    @ProvidesIntoSet
+    public PluginMessageChannel formChannel() {
+        return new FormChannel();
     }
 
-    @Provides
     @Singleton
-    public SimpleFloodgateApi floodgateApi(PluginMessageManager pluginMessageManager) {
-        return new SimpleFloodgateApi(pluginMessageManager);
+    @ProvidesIntoSet
+    public PluginMessageChannel skinChannel() {
+        return new SkinChannel();
     }
 }

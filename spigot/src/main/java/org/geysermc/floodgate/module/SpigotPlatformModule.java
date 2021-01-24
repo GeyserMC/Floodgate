@@ -42,11 +42,11 @@ import org.geysermc.floodgate.listener.SpigotListenerRegistration;
 import org.geysermc.floodgate.logger.JavaUtilFloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
-import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
-import org.geysermc.floodgate.pluginmessage.SpigotPluginMessageHandler;
-import org.geysermc.floodgate.pluginmessage.SpigotPluginMessageRegister;
+import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
+import org.geysermc.floodgate.pluginmessage.PluginMessageRegistration;
+import org.geysermc.floodgate.pluginmessage.SpigotPluginMessageRegistration;
+import org.geysermc.floodgate.pluginmessage.SpigotPluginMessageUtils;
 import org.geysermc.floodgate.pluginmessage.SpigotSkinApplier;
-import org.geysermc.floodgate.skin.ServerSkinHandler;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.SpigotCommandUtil;
@@ -55,11 +55,6 @@ import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
 @RequiredArgsConstructor
 public final class SpigotPlatformModule extends AbstractModule {
     private final SpigotPlugin plugin;
-
-    @Override
-    protected void configure() {
-        bind(PluginMessageHandler.class).to(SpigotPluginMessageHandler.class);
-    }
 
     @Provides
     @Singleton
@@ -83,12 +78,9 @@ public final class SpigotPlatformModule extends AbstractModule {
             FloodgateApi api,
             SpigotVersionSpecificMethods versionSpecificMethods,
             FloodgateLogger logger,
-            LanguageManager languageManager
-    ) {
-        return new SpigotCommandUtil(
-                plugin.getServer(), api, versionSpecificMethods,
-                plugin, logger, languageManager
-        );
+            LanguageManager languageManager) {
+        return new SpigotCommandUtil(plugin.getServer(), api, versionSpecificMethods, plugin,
+                logger, languageManager);
     }
 
     @Provides
@@ -137,34 +129,21 @@ public final class SpigotPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public SpigotPluginMessageHandler pluginMessageHandler(
-            FloodgateConfigHolder configHolder,
-            @Named("formChannel") String formChannel,
-            @Named("skinChannel") String skinChannel
-    ) {
-        return new SpigotPluginMessageHandler(configHolder, plugin, formChannel, skinChannel);
+    public PluginMessageUtils pluginMessageUtils() {
+        return new SpigotPluginMessageUtils(plugin);
     }
 
     @Provides
     @Singleton
-    public SpigotPluginMessageRegister pluginMessageRegister(
-            FloodgateApi api,
-            @Named("formChannel") String formChannel,
-            @Named("skinChannel") String skinChannel,
-            SpigotPluginMessageHandler pluginMessageHandler,
-            ServerSkinHandler skinHandler,
-            FloodgateLogger logger
-    ) {
-        return new SpigotPluginMessageRegister(plugin, api, formChannel, skinChannel,
-                pluginMessageHandler, skinHandler, logger);
+    public PluginMessageRegistration pluginMessageRegister() {
+        return new SpigotPluginMessageRegistration(plugin);
     }
 
     @Provides
     @Singleton
     public SkinApplier skinApplier(
             SpigotVersionSpecificMethods versionSpecificMethods,
-            FloodgateConfigHolder configHolder
-    ) {
+            FloodgateConfigHolder configHolder) {
         return new SpigotSkinApplier(versionSpecificMethods, plugin, configHolder);
     }
 

@@ -30,7 +30,7 @@ import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.ProvidesIntoSet;
 import org.geysermc.floodgate.listener.VelocityListener;
-import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
+import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.register.ListenerRegister;
 
 public final class VelocityListenerModule extends AbstractModule {
@@ -47,7 +47,7 @@ public final class VelocityListenerModule extends AbstractModule {
 
     @Singleton
     @ProvidesIntoSet
-    public Object pluginMessageListener(PluginMessageHandler handler) {
+    public Object pluginMessageListener(PluginMessageUtils handler) {
         return handler; // Plugin message handler is also the listener
     }
 }

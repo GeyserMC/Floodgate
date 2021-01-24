@@ -23,31 +23,53 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.module;
+package org.geysermc.floodgate.pluginmessage;
 
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import java.nio.file.Path;
-import org.geysermc.floodgate.api.SimpleFloodgateApi;
-import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
+import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-public final class ServerCommonModule extends CommonModule {
-    public ServerCommonModule(Path dataDirectory) {
-        super(dataDirectory);
+public interface PluginMessageChannel {
+
+    String getIdentifier();
+
+    Result handleProxyCall(
+            byte[] data,
+            UUID targetUuid,
+            String targetUsername,
+            Identity targetIdentity,
+            UUID sourceUuid,
+            String sourceUsername,
+            Identity sourceIdentity);
+
+    Result handleServerCall(byte[] data, UUID targetUuid, String targetUsername);
+
+    @Getter
+    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+    final class Result {
+        private static final Result FORWARD = new Result(true, null);
+        private static final Result HANDLED = new Result(false, null);
+
+        private final boolean allowed;
+        private final String reason;
+
+        public static Result forward() {
+            return FORWARD;
+        }
+
+        public static Result handled() {
+            return HANDLED;
+        }
+
+        public static Result kick(String reason) {
+            return new Result(false, reason);
+        }
     }
 
-    @Provides
-    @Singleton
-    @Named("configClass")
-    public Class<? extends FloodgateConfig> floodgateConfigClass() {
-        return FloodgateConfig.class;
-    }
-
-    @Provides
-    @Singleton
-    public SimpleFloodgateApi floodgateApi(PluginMessageManager pluginMessageManager) {
-        return new SimpleFloodgateApi(pluginMessageManager);
+    enum Identity {
+        UNKNOWN,
+        SERVER,
+        PLAYER
     }
 }

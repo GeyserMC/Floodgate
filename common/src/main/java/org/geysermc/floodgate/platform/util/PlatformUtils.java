@@ -23,31 +23,39 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.module;
+package org.geysermc.floodgate.platform.util;
 
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import java.nio.file.Path;
-import org.geysermc.floodgate.api.SimpleFloodgateApi;
-import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
+import java.util.Collection;
+import org.geysermc.floodgate.platform.command.CommandMessage;
+import org.geysermc.floodgate.platform.command.CommandUtil;
 
-public final class ServerCommonModule extends CommonModule {
-    public ServerCommonModule(Path dataDirectory) {
-        super(dataDirectory);
-    }
+public interface PlatformUtils {
+    /**
+     * Send a message to the specified player, no matter what platform Floodgate is running on.
+     *
+     * @param player  the player to send the message to
+     * @param message the command message
+     * @param locale  the locale of the player
+     * @param args    the arguments
+     */
+    void sendMessage(Object player, String locale, CommandMessage message, Object... args);
 
-    @Provides
-    @Singleton
-    @Named("configClass")
-    public Class<? extends FloodgateConfig> floodgateConfigClass() {
-        return FloodgateConfig.class;
-    }
+    /**
+     * Same as {@link CommandUtil#sendMessage(Object, String, CommandMessage, Object...)} except it
+     * kicks the player.
+     *
+     * @param player  the player to send the message to
+     * @param message the command message
+     * @param locale  the locale of the player
+     * @param args    the arguments
+     */
+    void kickPlayer(Object player, String locale, CommandMessage message, Object... args);
 
-    @Provides
-    @Singleton
-    public SimpleFloodgateApi floodgateApi(PluginMessageManager pluginMessageManager) {
-        return new SimpleFloodgateApi(pluginMessageManager);
+    Collection<String> getOnlineUsernames(PlayerType limitTo);
+
+    enum PlayerType {
+        ALL_PLAYERS,
+        ONLY_BEDROCK,
+        ONLY_JAVA
     }
 }

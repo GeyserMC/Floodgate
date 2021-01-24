@@ -39,18 +39,20 @@ import net.md_5.bungee.api.plugin.Plugin;
 import org.geysermc.floodgate.BungeePlugin;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.inject.bungee.BungeeInjector;
 import org.geysermc.floodgate.listener.BungeeListenerRegistration;
 import org.geysermc.floodgate.logger.JavaUtilFloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
-import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
+import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.player.FloodgateCommandPreprocessor;
 import org.geysermc.floodgate.player.UserAudience;
-import org.geysermc.floodgate.pluginmessage.BungeePluginMessageHandler;
+import org.geysermc.floodgate.pluginmessage.BungeePluginMessageRegistration;
+import org.geysermc.floodgate.pluginmessage.BungeePluginMessageUtils;
 import org.geysermc.floodgate.pluginmessage.BungeeSkinApplier;
+import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
+import org.geysermc.floodgate.pluginmessage.PluginMessageRegistration;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.util.BungeeCommandUtil;
 import org.geysermc.floodgate.util.LanguageManager;
@@ -58,11 +60,6 @@ import org.geysermc.floodgate.util.LanguageManager;
 @RequiredArgsConstructor
 public final class BungeePlatformModule extends AbstractModule {
     private final BungeePlugin plugin;
-
-    @Override
-    protected void configure() {
-        bind(PluginMessageHandler.class).to(BungeePluginMessageHandler.class);
-    }
 
     @Provides
     @Singleton
@@ -95,8 +92,10 @@ public final class BungeePlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public CommandUtil commandUtil(FloodgateApi api, FloodgateLogger logger,
-                                   LanguageManager languageManager) {
+    public CommandUtil commandUtil(
+            FloodgateApi api,
+            FloodgateLogger logger,
+            LanguageManager languageManager) {
         return new BungeeCommandUtil(plugin.getProxy(), api, logger, languageManager);
     }
 
@@ -108,8 +107,16 @@ public final class BungeePlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public BungeePluginMessageHandler pluginMessageHandler(FloodgateConfigHolder configHolder) {
-        return new BungeePluginMessageHandler(configHolder);
+    public PluginMessageUtils pluginMessageUtils(
+            PluginMessageManager manager,
+            FloodgateLogger logger) {
+        return new BungeePluginMessageUtils(manager, logger);
+    }
+
+    @Provides
+    @Singleton
+    public PluginMessageRegistration pluginMessageRegistration() {
+        return new BungeePluginMessageRegistration();
     }
 
     @Provides

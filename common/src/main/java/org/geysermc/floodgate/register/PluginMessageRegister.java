@@ -23,31 +23,28 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.module;
+package org.geysermc.floodgate.register;
 
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import java.nio.file.Path;
-import org.geysermc.floodgate.api.SimpleFloodgateApi;
-import org.geysermc.floodgate.config.FloodgateConfig;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import java.util.Set;
+import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
+import org.geysermc.floodgate.pluginmessage.PluginMessageRegistration;
 
-public final class ServerCommonModule extends CommonModule {
-    public ServerCommonModule(Path dataDirectory) {
-        super(dataDirectory);
-    }
+public class PluginMessageRegister {
+    @Inject private Injector guice;
+    @Inject private PluginMessageManager manager;
+    @Inject private PluginMessageRegistration registration;
 
-    @Provides
-    @Singleton
-    @Named("configClass")
-    public Class<? extends FloodgateConfig> floodgateConfigClass() {
-        return FloodgateConfig.class;
-    }
+    @Inject
+    public void registerChannels(Set<PluginMessageChannel> channels) {
+        // we can safely add the channels this way
+        guice.injectMembers(manager);
 
-    @Provides
-    @Singleton
-    public SimpleFloodgateApi floodgateApi(PluginMessageManager pluginMessageManager) {
-        return new SimpleFloodgateApi(pluginMessageManager);
+        for (PluginMessageChannel channel : channels) {
+            guice.injectMembers(channel);
+            registration.register(channel);
+        }
     }
 }

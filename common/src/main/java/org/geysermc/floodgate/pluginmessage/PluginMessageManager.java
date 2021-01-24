@@ -23,31 +23,35 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.module;
+package org.geysermc.floodgate.pluginmessage;
 
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import java.nio.file.Path;
-import org.geysermc.floodgate.api.SimpleFloodgateApi;
-import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
+import com.google.inject.Inject;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
-public final class ServerCommonModule extends CommonModule {
-    public ServerCommonModule(Path dataDirectory) {
-        super(dataDirectory);
+public class PluginMessageManager {
+    private final Map<Class<? extends PluginMessageChannel>, PluginMessageChannel> classInstanceMap = new HashMap<>();
+    private final Map<String, PluginMessageChannel> identifierInstanceMap = new HashMap<>();
+
+    @Inject
+    public void addChannels(Set<PluginMessageChannel> channels) {
+        if (!classInstanceMap.isEmpty()) {
+            return;
+        }
+
+        for (PluginMessageChannel channel : channels) {
+            classInstanceMap.put(channel.getClass(), channel);
+            identifierInstanceMap.put(channel.getIdentifier(), channel);
+        }
     }
 
-    @Provides
-    @Singleton
-    @Named("configClass")
-    public Class<? extends FloodgateConfig> floodgateConfigClass() {
-        return FloodgateConfig.class;
+    @SuppressWarnings("unchecked")
+    public <T extends PluginMessageChannel> T getChannel(Class<T> channelType) {
+        return (T) classInstanceMap.get(channelType);
     }
 
-    @Provides
-    @Singleton
-    public SimpleFloodgateApi floodgateApi(PluginMessageManager pluginMessageManager) {
-        return new SimpleFloodgateApi(pluginMessageManager);
+    public PluginMessageChannel getChannel(String identifier) {
+        return identifierInstanceMap.get(identifier);
     }
 }

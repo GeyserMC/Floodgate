@@ -31,13 +31,10 @@ import com.google.inject.name.Named;
 import java.nio.file.Path;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
-import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
-import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.skin.SkinHandler;
+import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 
 public final class ProxyCommonModule extends CommonModule {
     public ProxyCommonModule(Path dataDirectory) {
@@ -59,14 +56,9 @@ public final class ProxyCommonModule extends CommonModule {
 
     @Provides
     @Singleton
-    public ProxyFloodgateApi proxyFloodgateApi(PluginMessageHandler pluginMessageHandler,
-                                               FloodgateCipher cipher) {
-        return new ProxyFloodgateApi(pluginMessageHandler, cipher);
-    }
-
-    @Provides
-    @Singleton
-    public SkinHandler skinHandler(SkinApplier skinApplier, FloodgateLogger logger) {
-        return new SkinHandler(skinApplier, logger);
+    public ProxyFloodgateApi proxyFloodgateApi(
+            PluginMessageManager pluginMessageManager,
+            FloodgateCipher cipher) {
+        return new ProxyFloodgateApi(pluginMessageManager, cipher);
     }
 }

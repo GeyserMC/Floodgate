@@ -41,17 +41,19 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.VelocityPlugin;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.inject.velocity.VelocityInjector;
 import org.geysermc.floodgate.listener.VelocityListenerRegistration;
-import org.geysermc.floodgate.listener.VelocityPluginMessageHandler;
 import org.geysermc.floodgate.logger.Slf4jFloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
-import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
+import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.player.FloodgateCommandPreprocessor;
 import org.geysermc.floodgate.player.UserAudience;
+import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
+import org.geysermc.floodgate.pluginmessage.PluginMessageRegistration;
+import org.geysermc.floodgate.pluginmessage.VelocityPluginMessageRegistration;
+import org.geysermc.floodgate.pluginmessage.VelocityPluginMessageUtils;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.VelocityCommandUtil;
@@ -104,8 +106,14 @@ public final class VelocityPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public PluginMessageHandler pluginMessageHandler(FloodgateConfigHolder configHolder) {
-        return new VelocityPluginMessageHandler(configHolder);
+    public PluginMessageUtils pluginMessageUtils(PluginMessageManager pluginMessageManager) {
+        return new VelocityPluginMessageUtils(pluginMessageManager);
+    }
+
+    @Provides
+    @Singleton
+    public PluginMessageRegistration pluginMessageRegistration(ProxyServer proxy) {
+        return new VelocityPluginMessageRegistration(proxy);
     }
 
     @Provides

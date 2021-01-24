@@ -33,6 +33,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import java.nio.file.Path;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.module.CommandModule;
+import org.geysermc.floodgate.module.PluginMessageModule;
 import org.geysermc.floodgate.module.ProxyCommonModule;
 import org.geysermc.floodgate.module.VelocityAddonModule;
 import org.geysermc.floodgate.module.VelocityListenerModule;
@@ -62,8 +63,10 @@ public final class VelocityPlugin {
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
         platform.enable(
-                new CommandModule(), new VelocityListenerModule(),
-                new VelocityAddonModule()
+                new CommandModule(),
+                new VelocityListenerModule(),
+                new VelocityAddonModule(),
+                new PluginMessageModule()
         );
     }
 }

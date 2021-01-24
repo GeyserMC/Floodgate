@@ -30,6 +30,7 @@ import com.google.inject.Injector;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.api.InstanceHolder;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.module.PluginMessageModule;
 import org.geysermc.floodgate.module.ServerCommonModule;
 import org.geysermc.floodgate.module.SpigotAddonModule;
 import org.geysermc.floodgate.module.SpigotCommandModule;
@@ -65,7 +66,8 @@ public final class SpigotPlugin extends JavaPlugin {
         platform.enable(
                 new SpigotCommandModule(this),
                 new SpigotListenerModule(),
-                new SpigotAddonModule()
+                new SpigotAddonModule(),
+                new PluginMessageModule()
         );
 
         // add ProtocolSupport support (hack)

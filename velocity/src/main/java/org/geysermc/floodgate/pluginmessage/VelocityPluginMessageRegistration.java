@@ -23,31 +23,20 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.module;
+package org.geysermc.floodgate.pluginmessage;
 
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import java.nio.file.Path;
-import org.geysermc.floodgate.api.SimpleFloodgateApi;
-import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
+import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
+import lombok.RequiredArgsConstructor;
 
-public final class ServerCommonModule extends CommonModule {
-    public ServerCommonModule(Path dataDirectory) {
-        super(dataDirectory);
-    }
+@RequiredArgsConstructor
+public class VelocityPluginMessageRegistration implements PluginMessageRegistration {
+    private final ProxyServer proxy;
 
-    @Provides
-    @Singleton
-    @Named("configClass")
-    public Class<? extends FloodgateConfig> floodgateConfigClass() {
-        return FloodgateConfig.class;
-    }
-
-    @Provides
-    @Singleton
-    public SimpleFloodgateApi floodgateApi(PluginMessageManager pluginMessageManager) {
-        return new SimpleFloodgateApi(pluginMessageManager);
+    @Override
+    public void register(PluginMessageChannel channel) {
+        ChannelIdentifier identifier = MinecraftChannelIdentifier.from(channel.getIdentifier());
+        proxy.getChannelRegistrar().register(identifier);
     }
 }

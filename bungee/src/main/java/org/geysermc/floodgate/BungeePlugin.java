@@ -33,6 +33,7 @@ import org.geysermc.floodgate.module.BungeeAddonModule;
 import org.geysermc.floodgate.module.BungeeListenerModule;
 import org.geysermc.floodgate.module.BungeePlatformModule;
 import org.geysermc.floodgate.module.CommandModule;
+import org.geysermc.floodgate.module.PluginMessageModule;
 import org.geysermc.floodgate.module.ProxyCommonModule;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
@@ -60,7 +61,12 @@ public final class BungeePlugin extends Plugin {
 
     @Override
     public void onEnable() {
-        platform.enable(new CommandModule(), new BungeeListenerModule(), new BungeeAddonModule());
+        platform.enable(
+                new CommandModule(),
+                new BungeeListenerModule(),
+                new BungeeAddonModule(),
+                new PluginMessageModule()
+        );
     }
 
     @Override

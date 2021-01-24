@@ -26,48 +26,23 @@
 package org.geysermc.floodgate.pluginmessage;
 
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.cumulus.Form;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
-import org.geysermc.floodgate.platform.pluginmessage.PluginMessageHandler;
+import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 
-public class SpigotPluginMessageHandler extends PluginMessageHandler {
+@RequiredArgsConstructor
+public class SpigotPluginMessageUtils extends PluginMessageUtils {
     private final JavaPlugin plugin;
-    private final String formChannel;
-    private final String skinChannel;
-
-    public SpigotPluginMessageHandler(
-            FloodgateConfigHolder configHolder,
-            JavaPlugin plugin,
-            String formChannel,
-            String skinChannel
-    ) {
-        super(configHolder);
-        this.plugin = plugin;
-        this.formChannel = formChannel;
-        this.skinChannel = skinChannel;
-    }
 
     @Override
-    public boolean sendForm(UUID playerId, Form form) {
+    public boolean sendMessage(UUID player, String channel, byte[] data) {
         try {
-            byte[] formData = createFormData(form);
-            Bukkit.getPlayer(playerId).sendPluginMessage(plugin, formChannel, formData);
+            Bukkit.getPlayer(player).sendPluginMessage(plugin, channel, data);
         } catch (Exception exception) {
             exception.printStackTrace();
             return false;
         }
         return true;
-    }
-
-    @Override
-    public void sendSkinResponse(UUID playerId, boolean failed, String response) {
-        try {
-            byte[] responseData = createSkinResponseData(failed, response);
-            Bukkit.getPlayer(playerId).sendPluginMessage(plugin, skinChannel, responseData);
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
     }
 }

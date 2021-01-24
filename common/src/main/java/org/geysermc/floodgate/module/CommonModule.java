@@ -52,6 +52,9 @@ import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.crypto.KeyProducer;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
+import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
+import org.geysermc.floodgate.skin.SkinApplier;
+import org.geysermc.floodgate.skin.SkinHandler;
 import org.geysermc.floodgate.util.LanguageManager;
 
 @RequiredArgsConstructor
@@ -94,13 +97,13 @@ public class CommonModule extends AbstractModule {
     @Singleton
     public ConfigLoader configLoader(
             @Named("configClass") Class<? extends FloodgateConfig> configClass,
-            DefaultConfigHandler defaultConfigHandler, ConfigUpdater configUpdater,
-            KeyProducer producer, FloodgateCipher cipher, FloodgateLogger logger) {
-
-        return new ConfigLoader(
-                dataDirectory, configClass, defaultConfigHandler,
-                configUpdater, producer, cipher, logger
-        );
+            DefaultConfigHandler defaultConfigHandler,
+            ConfigUpdater configUpdater,
+            KeyProducer producer,
+            FloodgateCipher cipher,
+            FloodgateLogger logger) {
+        return new ConfigLoader(dataDirectory, configClass, defaultConfigHandler, configUpdater,
+                producer, cipher, logger);
     }
 
     @Provides
@@ -111,15 +114,17 @@ public class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public ConfigUpdater configUpdater(ConfigFileUpdater configFileUpdater,
-                                       FloodgateLogger logger) {
+    public ConfigUpdater configUpdater(
+            ConfigFileUpdater configFileUpdater,
+            FloodgateLogger logger) {
         return new ConfigUpdater(dataDirectory, configFileUpdater, logger);
     }
 
     @Provides
     @Singleton
-    public LanguageManager languageLoader(FloodgateConfigHolder configHolder,
-                                          FloodgateLogger logger) {
+    public LanguageManager languageLoader(
+            FloodgateConfigHolder configHolder,
+            FloodgateLogger logger) {
         return new LanguageManager(configHolder, logger);
     }
 
@@ -137,8 +142,7 @@ public class CommonModule extends AbstractModule {
             FloodgateCipher cipher,
             FloodgateConfigHolder configHolder,
             @Named("playerAttribute") AttributeKey<FloodgatePlayer> playerAttribute,
-            FloodgateLogger logger
-    ) {
+            FloodgateLogger logger) {
         return new FloodgateHandshakeHandler(
                 handshakeHandlers,
                 api,
@@ -147,6 +151,21 @@ public class CommonModule extends AbstractModule {
                 playerAttribute,
                 logger
         );
+    }
+
+    @Provides
+    @Singleton
+    public PluginMessageManager pluginMessageManager() {
+        return new PluginMessageManager();
+    }
+
+    @Provides
+    @Singleton
+    public SkinHandler skinHandler(
+            PluginMessageManager pluginMessageManager,
+            SkinApplier skinApplier,
+            FloodgateLogger logger) {
+        return new SkinHandler(pluginMessageManager, skinApplier, logger);
     }
 
     @Provides
@@ -161,19 +180,5 @@ public class CommonModule extends AbstractModule {
     @Named("playerAttribute")
     public AttributeKey<FloodgatePlayer> playerAttribute() {
         return AttributeKey.valueOf("floodgate-player");
-    }
-
-    @Provides
-    @Singleton
-    @Named("formChannel")
-    public String formChannel() {
-        return "floodgate:form";
-    }
-
-    @Provides
-    @Singleton
-    @Named("skinChannel")
-    public String skinChannel() {
-        return "floodgate:skin";
     }
 }

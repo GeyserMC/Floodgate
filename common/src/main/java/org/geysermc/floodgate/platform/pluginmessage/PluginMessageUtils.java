@@ -23,31 +23,20 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.module;
+package org.geysermc.floodgate.platform.pluginmessage;
 
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import java.nio.file.Path;
-import org.geysermc.floodgate.api.SimpleFloodgateApi;
-import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
+import java.util.UUID;
 
-public final class ServerCommonModule extends CommonModule {
-    public ServerCommonModule(Path dataDirectory) {
-        super(dataDirectory);
+public class PluginMessageUtils {
+    public boolean sendMessage(UUID player, String channel, byte[] data) {
+        return sendMessage(player, false, channel, data);
     }
 
-    @Provides
-    @Singleton
-    @Named("configClass")
-    public Class<? extends FloodgateConfig> floodgateConfigClass() {
-        return FloodgateConfig.class;
-    }
-
-    @Provides
-    @Singleton
-    public SimpleFloodgateApi floodgateApi(PluginMessageManager pluginMessageManager) {
-        return new SimpleFloodgateApi(pluginMessageManager);
+    public boolean sendMessage(UUID player, boolean toServer, String channel, byte[] data) {
+        if (!toServer) {
+            return sendMessage(player, channel, data);
+        }
+        throw new IllegalStateException(
+                "Cannot send plugin message to server on a non-proxy platform");
     }
 }

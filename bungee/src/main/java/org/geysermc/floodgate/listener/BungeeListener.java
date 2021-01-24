@@ -49,7 +49,8 @@ import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.player.FloodgatePlayerImpl;
-import org.geysermc.floodgate.pluginmessage.BungeePluginMessageHandler;
+import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
+import org.geysermc.floodgate.pluginmessage.channel.SkinChannel;
 import org.geysermc.floodgate.skin.SkinHandler;
 import org.geysermc.floodgate.util.BungeeCommandUtil;
 import org.geysermc.floodgate.util.LanguageManager;
@@ -74,7 +75,7 @@ public final class BungeeListener implements Listener {
     @Inject private FloodgateLogger logger;
 
     @Inject private ProxyFloodgateConfig config;
-    @Inject private BungeePluginMessageHandler pluginMessageHandler;
+    @Inject private PluginMessageManager pluginMessageManager;
     @Inject private SkinHandler skinHandler;
 
     @Inject
@@ -99,7 +100,8 @@ public final class BungeeListener implements Listener {
 
         // send skin request to server if data forwarding allows that
         if (config.isSendFloodgateData()) {
-            pluginMessageHandler.sendSkinRequest(event.getServer(), player.getRawSkin());
+            pluginMessageManager.getChannel(SkinChannel.class)
+                    .sendSkinRequest(player.getCorrectUniqueId(), player.getRawSkin());
         } else {
             skinHandler.handleSkinUploadFor(player, null);
         }

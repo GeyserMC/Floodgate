@@ -30,22 +30,29 @@ import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.player.PropertyKey;
+import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
+import org.geysermc.floodgate.pluginmessage.channel.SkinChannel;
 import org.geysermc.floodgate.util.RawSkin;
 
 @RequiredArgsConstructor
 public class SkinHandler {
+    private final PluginMessageManager pluginMessageManager;
     private final SkinUploader uploader = new SkinUploader();
     private final SkinApplier skinApplier;
     private final FloodgateLogger logger;
 
-    public final void handleSkinUploadFor(FloodgatePlayer player,
-                                          BiConsumer<Boolean, String> consumer) {
+    public final void handleSkinUploadFor(
+            FloodgatePlayer player,
+            BiConsumer<Boolean, String> consumer) {
+
         handleSkinUploadFor(player, player.getRawSkin(), consumer);
     }
 
-    public final void handleSkinUploadFor(FloodgatePlayer player,
-                                          RawSkin rawSkin,
-                                          BiConsumer<Boolean, String> consumer) {
+    public final void handleSkinUploadFor(
+            FloodgatePlayer player,
+            RawSkin rawSkin,
+            BiConsumer<Boolean, String> consumer) {
+
         if (player == null || rawSkin == null) {
             if (consumer != null) {
                 consumer.accept(true, "Skin or Player is null");
@@ -84,6 +91,24 @@ public class SkinHandler {
                     player.addProperty(PropertyKey.SKIN_UPLOADED, uploadResult.getResponse());
 
                     skinApplier.applySkin(player, uploadResult);
+                });
+    }
+
+    public void handleServerSkinUpload(FloodgatePlayer player) {
+        handleServerSkinUpload(player, player.getRawSkin());
+    }
+
+    public void handleServerSkinUpload(FloodgatePlayer player, RawSkin rawSkin) {
+        if (player == null || rawSkin == null) {
+            return;
+        }
+
+        handleSkinUploadFor(player, rawSkin,
+                (failed, response) -> {
+                    if (player.isFromProxy()) {
+                        pluginMessageManager.getChannel(SkinChannel.class)
+                                .sendSkinResponse(player.getCorrectUniqueId(), failed, response);
+                    }
                 });
     }
 }

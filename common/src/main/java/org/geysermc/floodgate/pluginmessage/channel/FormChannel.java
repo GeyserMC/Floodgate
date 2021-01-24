@@ -23,42 +23,82 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.platform.pluginmessage;
+package org.geysermc.floodgate.pluginmessage.channel;
 
 import com.google.common.base.Charsets;
-import com.google.gson.Gson;
+import com.google.inject.Inject;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.geysermc.cumulus.Form;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
-import org.geysermc.floodgate.util.RawSkin;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
+import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
 
-public abstract class PluginMessageHandler {
-    protected static final Gson GSON = new Gson();
-    protected final Short2ObjectMap<Form> storedForms = new Short2ObjectOpenHashMap<>();
+public class FormChannel implements PluginMessageChannel {
+    private final Short2ObjectMap<Form> storedForms = new Short2ObjectOpenHashMap<>();
     private final AtomicInteger nextFormId = new AtomicInteger(0);
-    private final FloodgateConfigHolder configHolder;
 
-    protected PluginMessageHandler(FloodgateConfigHolder configHolder) {
-        this.configHolder = configHolder;
+    @Inject private PluginMessageUtils pluginMessageUtils;
+    @Inject private FloodgateConfig config;
+    @Inject private FloodgateLogger logger;
+
+    @Override
+    public String getIdentifier() {
+        return "floodgate:form";
     }
 
-    public abstract boolean sendForm(UUID player, Form form);
+    @Override
+    public Result handleProxyCall(
+            byte[] data,
+            UUID targetUuid,
+            String targetUsername,
+            Identity targetIdentity,
+            UUID sourceUuid,
+            String sourceUsername,
+            Identity sourceIdentity) {
 
-    public boolean sendSkinRequest(UUID player, RawSkin skin) {
-        return false; // Non-proxy implementations don't send requests
+        if (sourceIdentity == Identity.SERVER) {
+            // send it to the client
+            return Result.forward();
+        }
+
+        if (sourceIdentity == Identity.PLAYER) {
+            if (data.length < 2) {
+                return Result.kick("Invalid form response");
+            }
+
+            short formId = getFormId(data);
+
+            // if the bit is not set, it's for the connected server
+            if ((formId & 0x8000) == 0) {
+                return Result.forward();
+            }
+
+            if (!callResponseConsumer(data)) {
+                logger.error("Couldn't find stored form with id {} for player {}",
+                        formId, sourceUsername);
+            }
+        }
+        return Result.handled();
     }
 
-    public void sendSkinResponse(UUID player, boolean failed, String response) {
-        // Proxy implementations don't send responses
+    @Override
+    public Result handleServerCall(byte[] data, UUID targetUuid, String targetUsername) {
+        callResponseConsumer(data);
+        return Result.handled();
     }
 
-    protected byte[] createFormData(Form form) {
+    public boolean sendForm(UUID player, Form form) {
+        byte[] formData = createFormData(form);
+        return pluginMessageUtils.sendMessage(player, false, getIdentifier(), formData);
+    }
+
+    public byte[] createFormData(Form form) {
         short formId = getNextFormId();
-        if (configHolder.isProxy()) {
+        if (config.isProxy()) {
             formId |= 0x8000;
         }
         storedForms.put(formId, form);
@@ -73,39 +113,10 @@ public abstract class PluginMessageHandler {
         return data;
     }
 
-    protected byte[] createSkinRequestData(byte[] data) {
-        // data format:
-        // 0 = is request
-        // remaining = request data
-
-        byte[] output = new byte[data.length + 1];
-
-        output[0] = 1;
-        System.arraycopy(data, 0, output, 1, data.length);
-
-        return output;
-    }
-
-    protected byte[] createSkinResponseData(boolean failed, String data) {
-        // data format:
-        // 0 = is request
-        // 1 = has failed
-        // remaining = response data
-
-        byte[] rawData = data.getBytes(StandardCharsets.UTF_8);
-        byte[] output = new byte[rawData.length + 2];
-
-        output[0] = 0;
-        output[1] = (byte) (failed ? 1 : 0);
-        System.arraycopy(rawData, 0, output, 2, rawData.length);
-
-        return output;
-    }
-
-    public boolean callResponseConsumer(byte[] data) {
+    protected boolean callResponseConsumer(byte[] data) {
         Form storedForm = storedForms.remove(getFormId(data));
         if (storedForm != null) {
-            String responseData = new String(data, 2, data.length -2, Charsets.UTF_8);
+            String responseData = new String(data, 2, data.length - 2, Charsets.UTF_8);
             storedForm.getResponseHandler().accept(responseData);
             return true;
         }

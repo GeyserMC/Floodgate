@@ -33,11 +33,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.pluginmessage.SpigotPluginMessageRegister;
 
 public final class SpigotPlatform extends FloodgatePlatform {
     @Inject private JavaPlugin plugin;
-    @Inject private Injector guice;
 
     @Inject
     public SpigotPlatform(FloodgateApi api, PlatformInjector platformInjector,
@@ -52,7 +50,6 @@ public final class SpigotPlatform extends FloodgatePlatform {
             Bukkit.getPluginManager().disablePlugin(plugin);
             return false;
         }
-        guice.getInstance(SpigotPluginMessageRegister.class).register();
         return true;
     }
 }
