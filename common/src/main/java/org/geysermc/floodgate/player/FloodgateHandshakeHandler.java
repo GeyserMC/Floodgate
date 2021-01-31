@@ -149,7 +149,7 @@ public final class FloodgateHandshakeHandler {
             channel.attr(playerAttribute).set(player);
 
             int port = ((InetSocketAddress) channel.remoteAddress()).getPort();
-            InetSocketAddress socketAddress = new InetSocketAddress(bedrockData.getIp(), port);
+            InetSocketAddress socketAddress = new InetSocketAddress(handshakeData.getBedrockIp(), port);
             player.addProperty(PropertyKey.SOCKET_ADDRESS, socketAddress);
 
             return new HandshakeResult(ResultType.SUCCESS, handshakeData, bedrockData, player);

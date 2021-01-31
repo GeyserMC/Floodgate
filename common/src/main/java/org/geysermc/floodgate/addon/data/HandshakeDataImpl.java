@@ -47,6 +47,7 @@ public class HandshakeDataImpl implements HandshakeData {
     @Setter private LinkedPlayer linkedPlayer;
     @Setter private RawSkin rawSkin;
     @Setter private String hostname;
+    @Setter private String bedrockIp;
     @Setter private String disconnectReason;
 
     public HandshakeDataImpl(
@@ -69,7 +70,6 @@ public class HandshakeDataImpl implements HandshakeData {
         UUID javaUniqueId = null;
 
         if (bedrockData != null) {
-
             String prefix = config.getUsernamePrefix();
             int usernameLength = Math.min(bedrockData.getUsername().length(), 16 - prefix.length());
             javaUsername = prefix + bedrockData.getUsername().substring(0, usernameLength);
@@ -78,6 +78,7 @@ public class HandshakeDataImpl implements HandshakeData {
             }
 
             javaUniqueId = Utils.getJavaUuid(bedrockData.getXuid());
+            this.bedrockIp = bedrockData.getIp();
         }
 
         this.javaUsername = javaUsername;
