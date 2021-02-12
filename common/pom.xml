@@ -36,6 +36,16 @@
       <version>8.3.1</version>
     </dependency>
     <dependency>
+      <groupId>com.nukkitx.fastutil</groupId>
+      <artifactId>fastutil-int-object-maps</artifactId>
+      <version>8.3.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.java-websocket</groupId>
+      <artifactId>Java-Websocket</artifactId>
+      <version>1.5.1</version>
+    </dependency>
+    <dependency>
       <groupId>org.geysermc.floodgate</groupId>
       <artifactId>api</artifactId>
       <version>${project.parent.version}</version>

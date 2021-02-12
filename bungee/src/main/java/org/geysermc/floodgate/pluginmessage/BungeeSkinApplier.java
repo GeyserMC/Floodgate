@@ -35,14 +35,13 @@ import net.md_5.bungee.connection.LoginResult.Property;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.skin.SkinUploader.UploadResult;
 
 @RequiredArgsConstructor
 public final class BungeeSkinApplier implements SkinApplier {
     private final FloodgateLogger logger;
 
     @Override
-    public void applySkin(FloodgatePlayer uuid, UploadResult result) {
+    public void applySkin(FloodgatePlayer uuid, JsonObject skinResult) {
         ProxiedPlayer player = ProxyServer.getInstance().getPlayer(uuid.getCorrectUniqueId());
 
         InitialHandler handler;
@@ -61,11 +60,10 @@ public final class BungeeSkinApplier implements SkinApplier {
             loginResult = new LoginResult(null, null, null);
         }
 
-        JsonObject response = result.getResponse();
         Property property = new Property(
                 "textures",
-                response.get("value").getAsString(),
-                response.get("signature").getAsString()
+                skinResult.get("value").getAsString(),
+                skinResult.get("signature").getAsString()
         );
 
         loginResult.setProperties(new Property[]{property});

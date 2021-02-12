@@ -33,22 +33,19 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.skin.SkinUploader.UploadResult;
 
 @RequiredArgsConstructor
 public class VelocitySkinApplier implements SkinApplier {
     private final ProxyServer server;
 
     @Override
-    public void applySkin(FloodgatePlayer floodgatePlayer, UploadResult result) {
+    public void applySkin(FloodgatePlayer floodgatePlayer, JsonObject skinResult) {
         server.getPlayer(floodgatePlayer.getCorrectUniqueId()).ifPresent(player -> {
-            JsonObject response = result.getResponse();
-
             List<Property> properties = new ArrayList<>(player.getGameProfileProperties());
             properties.add(new Property(
                     "textures",
-                    response.get("value").getAsString(),
-                    response.get("signature").getAsString()
+                    skinResult.get("value").getAsString(),
+                    skinResult.get("signature").getAsString()
             ));
             player.setGameProfileProperties(properties);
         });

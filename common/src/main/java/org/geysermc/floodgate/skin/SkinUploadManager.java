@@ -25,9 +25,29 @@
 
 package org.geysermc.floodgate.skin;
 
-import com.google.gson.JsonObject;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import lombok.AllArgsConstructor;
+import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
 
-public interface SkinApplier {
-    void applySkin(FloodgatePlayer floodgatePlayer, JsonObject skinResult);
+@AllArgsConstructor
+public final class SkinUploadManager {
+    private final Int2ObjectMap<SkinUploadSocket> connections = new Int2ObjectOpenHashMap<>();
+    private final FloodgateApi api;
+    private final SkinApplier applier;
+    private final FloodgateLogger logger;
+
+    public void addConnectionIfNeeded(int id, String verifyCode) {
+        connections.computeIfAbsent(id, (ignored) -> {
+            SkinUploadSocket socket =
+                    new SkinUploadSocket(id, verifyCode, this, api, applier, logger);
+            socket.connect();
+            return socket;
+        });
+    }
+
+    public void removeConnection(int id, SkinUploadSocket socket) {
+        connections.remove(id, socket);
+    }
 }

@@ -43,6 +43,8 @@ public class SpigotPluginMessageRegistration implements PluginMessageRegistratio
                 (channel1, player, message) ->
                         channel.handleServerCall(message, player.getUniqueId(), player.getName()));
 
+        //todo actually do something with the result, lol
+
         messenger.registerOutgoingPluginChannel(plugin, channel.getIdentifier());
     }
 }

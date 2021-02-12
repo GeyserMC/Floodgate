@@ -29,7 +29,6 @@ import io.netty.channel.Channel;
 import java.util.UUID;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.LinkedPlayer;
-import org.geysermc.floodgate.util.RawSkin;
 
 /**
  * For advanced users only! You shouldn't play with this unless you know what you're doing.<br>
@@ -75,18 +74,6 @@ public interface HandshakeData {
      * @param player the player to use as link
      */
     void setLinkedPlayer(LinkedPlayer player);
-
-    /**
-     * Returns the skin of the client. Can be null even though the player is a Floodgate player.
-     */
-    RawSkin getRawSkin();
-
-    /**
-     * Manually set the skin of the client.
-     *
-     * @param rawSkin the skin of the client
-     */
-    void setRawSkin(RawSkin rawSkin);
 
     /**
      * Returns the hostname used in the handshake packet. This is the hostname after Floodgate

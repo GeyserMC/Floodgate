@@ -54,7 +54,7 @@ import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.skin.SkinHandler;
+import org.geysermc.floodgate.skin.SkinUploadManager;
 import org.geysermc.floodgate.util.LanguageManager;
 
 @RequiredArgsConstructor
@@ -141,16 +141,12 @@ public class CommonModule extends AbstractModule {
             SimpleFloodgateApi api,
             FloodgateCipher cipher,
             FloodgateConfigHolder configHolder,
+            SkinUploadManager skinUploadManager,
             @Named("playerAttribute") AttributeKey<FloodgatePlayer> playerAttribute,
             FloodgateLogger logger) {
-        return new FloodgateHandshakeHandler(
-                handshakeHandlers,
-                api,
-                cipher,
-                configHolder,
-                playerAttribute,
-                logger
-        );
+
+        return new FloodgateHandshakeHandler(handshakeHandlers, api, cipher, configHolder,
+                skinUploadManager, playerAttribute, logger);
     }
 
     @Provides
@@ -161,11 +157,11 @@ public class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public SkinHandler skinHandler(
-            PluginMessageManager pluginMessageManager,
+    public SkinUploadManager skinUploadManager(
+            FloodgateApi api,
             SkinApplier skinApplier,
             FloodgateLogger logger) {
-        return new SkinHandler(pluginMessageManager, skinApplier, logger);
+        return new SkinUploadManager(api, skinApplier, logger);
     }
 
     @Provides

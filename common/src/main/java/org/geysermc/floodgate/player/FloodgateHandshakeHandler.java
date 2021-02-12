@@ -46,13 +46,11 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
-import org.geysermc.floodgate.crypto.AesCipher;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
-import org.geysermc.floodgate.util.Base64Utils;
+import org.geysermc.floodgate.skin.SkinUploadManager;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.InvalidFormatException;
 import org.geysermc.floodgate.util.LinkedPlayer;
-import org.geysermc.floodgate.util.RawSkin;
 import org.geysermc.floodgate.util.Utils;
 
 @RequiredArgsConstructor
@@ -61,6 +59,7 @@ public final class FloodgateHandshakeHandler {
     private final SimpleFloodgateApi api;
     private final FloodgateCipher cipher;
     private final FloodgateConfigHolder configHolder;
+    private final SkinUploadManager skinUploadManager;
     private final AttributeKey<FloodgatePlayer> playerAttribute;
     private final FloodgateLogger logger;
 
@@ -85,22 +84,8 @@ public final class FloodgateHandshakeHandler {
                     channel, null, hostname);
         }
 
-        // header + base64 iv - 0x21 - encrypted data - 0x21 - RawSkin
-        int expectedHeaderLength = FloodgateCipher.HEADER_LENGTH +
-                Base64Utils.getEncodedLength(AesCipher.IV_LENGTH);
-        int lastSplitIndex = data.lastIndexOf(0x21);
-
         try {
-            byte[] floodgateData;
-            byte[] rawSkinData = null;
-
-            // if it has a RawSkin
-            if (lastSplitIndex - expectedHeaderLength > 0) {
-                floodgateData = data.substring(0, lastSplitIndex).getBytes(Charsets.UTF_8);
-                rawSkinData = data.substring(lastSplitIndex + 1).getBytes(Charsets.UTF_8);
-            } else {
-                floodgateData = data.getBytes(Charsets.UTF_8);
-            }
+            byte[] floodgateData = data.getBytes(Charsets.UTF_8);
 
             // actual decryption
             String decrypted = cipher.decryptToString(floodgateData);
@@ -110,14 +95,6 @@ public final class FloodgateHandshakeHandler {
                 return callHandlerAndReturnResult(
                         ResultType.INVALID_DATA_LENGTH,
                         channel, bedrockData, hostname);
-            }
-
-            RawSkin rawSkin = null;
-            // only decompile the skin after knowing that the floodgateData is legit
-            // note that we don't store a hash or anything in the BedrockData,
-            // so a mitm can change skins
-            if (rawSkinData != null) {
-                rawSkin = RawSkin.decode(rawSkinData);
             }
 
             LinkedPlayer linkedPlayer;
@@ -133,8 +110,13 @@ public final class FloodgateHandshakeHandler {
 
             HandshakeData handshakeData = new HandshakeDataImpl(
                     channel, true, bedrockData.clone(), configHolder.get(),
-                    linkedPlayer != null ? linkedPlayer.clone() : null, rawSkin, hostname);
+                    linkedPlayer != null ? linkedPlayer.clone() : null, hostname);
             handshakeHandlers.callHandshakeHandlers(handshakeData);
+
+            if (!handshakeData.shouldDisconnect()) {
+                skinUploadManager.addConnectionIfNeeded(bedrockData.getSubscribeId(),
+                        bedrockData.getVerifyCode());
+            }
 
             UUID javaUuid = Utils.getJavaUuid(bedrockData.getXuid());
             handshakeData.setHostname(correctHostname(
@@ -149,7 +131,8 @@ public final class FloodgateHandshakeHandler {
             channel.attr(playerAttribute).set(player);
 
             int port = ((InetSocketAddress) channel.remoteAddress()).getPort();
-            InetSocketAddress socketAddress = new InetSocketAddress(handshakeData.getBedrockIp(), port);
+            InetSocketAddress socketAddress = new InetSocketAddress(handshakeData.getBedrockIp(),
+                    port);
             player.addProperty(PropertyKey.SOCKET_ADDRESS, socketAddress);
 
             return new HandshakeResult(ResultType.SUCCESS, handshakeData, bedrockData, player);
@@ -185,7 +168,7 @@ public final class FloodgateHandshakeHandler {
             String hostname) {
 
         HandshakeData handshakeData = new HandshakeDataImpl(channel, bedrockData != null,
-                bedrockData, configHolder.get(), null, null, hostname);
+                bedrockData, configHolder.get(), null, hostname);
         handshakeHandlers.callHandshakeHandlers(handshakeData);
 
         if (bedrockData != null) {

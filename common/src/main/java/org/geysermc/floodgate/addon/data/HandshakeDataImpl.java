@@ -33,7 +33,6 @@ import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.LinkedPlayer;
-import org.geysermc.floodgate.util.RawSkin;
 import org.geysermc.floodgate.util.Utils;
 
 @Getter
@@ -45,7 +44,6 @@ public class HandshakeDataImpl implements HandshakeData {
     private final UUID javaUniqueId;
 
     @Setter private LinkedPlayer linkedPlayer;
-    @Setter private RawSkin rawSkin;
     @Setter private String hostname;
     @Setter private String bedrockIp;
     @Setter private String disconnectReason;
@@ -56,14 +54,12 @@ public class HandshakeDataImpl implements HandshakeData {
             BedrockData bedrockData,
             FloodgateConfig config,
             LinkedPlayer linkedPlayer,
-            RawSkin rawSkin,
             String hostname) {
 
         this.channel = channel;
         this.floodgatePlayer = floodgatePlayer;
         this.bedrockData = bedrockData;
         this.linkedPlayer = linkedPlayer;
-        this.rawSkin = rawSkin;
         this.hostname = hostname;
 
         String javaUsername = null;

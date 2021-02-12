@@ -32,7 +32,6 @@ import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.util.DeviceOs;
 import org.geysermc.floodgate.util.InputMode;
 import org.geysermc.floodgate.util.LinkedPlayer;
-import org.geysermc.floodgate.util.RawSkin;
 import org.geysermc.floodgate.util.UiProfile;
 
 public interface FloodgatePlayer {
@@ -106,11 +105,6 @@ public interface FloodgatePlayer {
      * Returns the LinkedPlayer object if the player is linked to a Java account.
      */
     LinkedPlayer getLinkedPlayer();
-
-    /**
-     * Returns the raw skin of the Bedrock player
-     */
-    RawSkin getRawSkin();
 
     default boolean sendForm(Form form) {
         return FloodgateApi.getInstance().sendForm(getCorrectUniqueId(), form);

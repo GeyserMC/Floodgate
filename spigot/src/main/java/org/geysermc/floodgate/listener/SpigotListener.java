@@ -36,13 +36,11 @@ import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.player.FloodgatePlayerImpl;
-import org.geysermc.floodgate.skin.SkinHandler;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.SpigotCommandUtil;
 
 public final class SpigotListener implements Listener {
     @Inject private SimpleFloodgateApi api;
-    @Inject private SkinHandler skinHandler;
     @Inject private LanguageManager languageManager;
     @Inject private FloodgateLogger logger;
 
@@ -62,7 +60,6 @@ public final class SpigotListener implements Listener {
                     "floodgate.ingame.login_name",
                     player.getCorrectUsername(), player.getCorrectUniqueId()
             );
-            skinHandler.handleServerSkinUpload(player);
             languageManager.loadLocale(player.getLanguageCode());
         }
     }

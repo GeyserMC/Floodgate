@@ -11,10 +11,6 @@ username-prefix: "*"
 # Should spaces be replaced with '_' in bedrock usernames?
 replace-spaces: true
 
-# Should Floodgate apply the transferred Bedrock to Java skin directly to all Java players?
-# This might cause some
-apply-skin-directly: true
-
 # The default locale for Floodgate. By default, Floodgate uses the system locale
 # default-locale: en_US
 

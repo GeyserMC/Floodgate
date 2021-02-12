@@ -46,7 +46,6 @@ import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.DeviceOs;
 import org.geysermc.floodgate.util.InputMode;
 import org.geysermc.floodgate.util.LinkedPlayer;
-import org.geysermc.floodgate.util.RawSkin;
 import org.geysermc.floodgate.util.UiProfile;
 import org.geysermc.floodgate.util.Utils;
 
@@ -67,7 +66,9 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
     private final boolean fromProxy;
     private final boolean proxy; // if current platform is a proxy
     private final LinkedPlayer linkedPlayer;
-    private final RawSkin rawSkin;
+
+    private final int subscribeId;
+    private final String verifyCode;
 
     @Getter(AccessLevel.PRIVATE)
     public Map<PropertyKey, Object> propertyKeyToValue;
@@ -92,16 +93,14 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
         InputMode inputMode = InputMode.getById(data.getInputMode());
 
         LinkedPlayer linkedPlayer = handshakeData.getLinkedPlayer();
-        RawSkin skin = handshakeData.getRawSkin();
 
         FloodgatePlayerImpl player = new FloodgatePlayerImpl(
                 data.getVersion(), data.getUsername(), handshakeData.getJavaUsername(),
                 javaUniqueId, data.getXuid(), deviceOs, data.getLanguageCode(), uiProfile,
                 inputMode, data.getIp(), data.isFromProxy(), api instanceof ProxyFloodgateApi,
-                linkedPlayer, skin);
+                linkedPlayer, data.getSubscribeId(), data.getVerifyCode());
 
-        // RawSkin should be removed, fromProxy should be changed
-        // and encrypted data can be changed after fetching the linkedPlayer
+        // fromProxy and linked player might have to be changed
         if (api instanceof ProxyFloodgateApi) {
             InstanceHolder.castApi(ProxyFloodgateApi.class)
                     .updateEncryptedData(player.getCorrectUniqueId(), player.toBedrockData());
@@ -155,9 +154,9 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
     }
 
     public BedrockData toBedrockData() {
-        return BedrockData.of(
-                version, username, xuid, deviceOs.ordinal(), languageCode,
-                uiProfile.ordinal(), inputMode.ordinal(), ip, linkedPlayer, proxy);
+        return BedrockData.of(version, username, xuid, deviceOs.ordinal(), languageCode,
+                uiProfile.ordinal(), inputMode.ordinal(), ip, linkedPlayer, proxy, subscribeId,
+                verifyCode);
     }
 
     @Override

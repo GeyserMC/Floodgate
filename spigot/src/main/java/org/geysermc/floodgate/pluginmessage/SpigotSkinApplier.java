@@ -34,9 +34,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.geysermc.floodgate.SpigotPlugin;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.skin.SkinUploader.UploadResult;
 import org.geysermc.floodgate.util.ReflectionUtils;
 import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
 
@@ -52,19 +50,16 @@ public final class SpigotSkinApplier implements SkinApplier {
 
     private final SpigotVersionSpecificMethods versionSpecificMethods;
     private final SpigotPlugin plugin;
-    private final FloodgateConfigHolder configHolder;
 
     public SpigotSkinApplier(
             SpigotVersionSpecificMethods versionSpecificMethods,
-            SpigotPlugin plugin,
-            FloodgateConfigHolder configHolder) {
+            SpigotPlugin plugin) {
         this.versionSpecificMethods = versionSpecificMethods;
         this.plugin = plugin;
-        this.configHolder = configHolder;
     }
 
     @Override
-    public void applySkin(FloodgatePlayer floodgatePlayer, UploadResult result) {
+    public void applySkin(FloodgatePlayer floodgatePlayer, JsonObject skinResult) {
         Player player = Bukkit.getPlayer(floodgatePlayer.getCorrectUniqueId());
         GameProfile profile = ReflectionUtils.castedInvoke(player, GET_PROFILE_METHOD);
 
@@ -72,28 +67,24 @@ public final class SpigotSkinApplier implements SkinApplier {
             throw new IllegalStateException("The GameProfile cannot be null! " + player.getName());
         }
 
-        JsonObject response = result.getResponse();
-
         PropertyMap properties = profile.getProperties();
 
         //todo check if removing all texture properties breaks some stuff
         properties.removeAll("textures");
         Property property = new Property(
                 "textures",
-                response.get("value").getAsString(),
-                response.get("signature").getAsString());
+                skinResult.get("value").getAsString(),
+                skinResult.get("signature").getAsString());
         properties.put("textures", property);
 
-        if (configHolder.get().isApplySkinDirectly()) {
-            // By running as a task, we don't run into async issues
-            plugin.getServer().getScheduler().runTask(plugin, () -> {
-                for (Player p : Bukkit.getOnlinePlayers()) {
-                    if (!p.equals(player) && p.canSee(player)) {
-                        versionSpecificMethods.hidePlayer(p, player);
-                        versionSpecificMethods.showPlayer(p, player);
-                    }
+        // By running as a task, we don't run into async issues
+        plugin.getServer().getScheduler().runTask(plugin, () -> {
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (!p.equals(player) && p.canSee(player)) {
+                    versionSpecificMethods.hidePlayer(p, player);
+                    versionSpecificMethods.showPlayer(p, player);
                 }
-            });
-        }
+            }
+        });
     }
 }

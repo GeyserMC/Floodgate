@@ -37,7 +37,6 @@ import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
-import net.md_5.bungee.api.event.ServerConnectedEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.event.EventHandler;
@@ -46,12 +45,7 @@ import net.md_5.bungee.netty.ChannelWrapper;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.api.player.PropertyKey;
-import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.player.FloodgatePlayerImpl;
-import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
-import org.geysermc.floodgate.pluginmessage.channel.SkinChannel;
-import org.geysermc.floodgate.skin.SkinHandler;
 import org.geysermc.floodgate.util.BungeeCommandUtil;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.ReflectionUtils;
@@ -74,10 +68,6 @@ public final class BungeeListener implements Listener {
     @Inject private LanguageManager languageManager;
     @Inject private FloodgateLogger logger;
 
-    @Inject private ProxyFloodgateConfig config;
-    @Inject private PluginMessageManager pluginMessageManager;
-    @Inject private SkinHandler skinHandler;
-
     @Inject
     @Named("playerAttribute")
     private AttributeKey<FloodgatePlayer> playerAttribute;
@@ -85,27 +75,6 @@ public final class BungeeListener implements Listener {
     @Inject
     @Named("kickMessageAttribute")
     private AttributeKey<String> kickMessageAttribute;
-
-    @EventHandler
-    public void onServerConnected(ServerConnectedEvent event) {
-        FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
-        if (player == null) {
-            return;
-        }
-
-        // only ask for skin upload if it hasn't been uploaded already
-        if (player.hasProperty(PropertyKey.SKIN_UPLOADED)) {
-            return;
-        }
-
-        // send skin request to server if data forwarding allows that
-        if (config.isSendFloodgateData()) {
-            pluginMessageManager.getChannel(SkinChannel.class)
-                    .sendSkinRequest(player.getCorrectUniqueId(), player.getRawSkin());
-        } else {
-            skinHandler.handleSkinUploadFor(player, null);
-        }
-    }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPreLogin(PreLoginEvent event) {

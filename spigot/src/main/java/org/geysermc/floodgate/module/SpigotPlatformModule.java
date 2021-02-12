@@ -35,7 +35,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.SpigotPlugin;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.inject.spigot.SpigotInjector;
 import org.geysermc.floodgate.listener.SpigotListenerRegistration;
@@ -141,10 +140,8 @@ public final class SpigotPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public SkinApplier skinApplier(
-            SpigotVersionSpecificMethods versionSpecificMethods,
-            FloodgateConfigHolder configHolder) {
-        return new SpigotSkinApplier(versionSpecificMethods, plugin, configHolder);
+    public SkinApplier skinApplier(SpigotVersionSpecificMethods versionSpecificMethods) {
+        return new SpigotSkinApplier(versionSpecificMethods, plugin);
     }
 
     @Provides

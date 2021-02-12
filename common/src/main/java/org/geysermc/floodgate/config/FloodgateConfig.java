@@ -37,7 +37,6 @@ public class FloodgateConfig {
     private String keyFileName;
     private String usernamePrefix;
     private boolean replaceSpaces;
-    private boolean applySkinDirectly; //todo how is this possible for proxies?
 
     private String defaultLocale;
 
