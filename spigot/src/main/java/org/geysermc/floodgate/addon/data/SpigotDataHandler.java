@@ -180,6 +180,9 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
                 HandshakeResult result = handshakeHandler.handle(ctx.channel(), handshakeValue);
                 HandshakeData handshakeData = result.getHandshakeData();
 
+                setValue(packet, HANDSHAKE_HOST, handshakeData.getHostname());
+                logger.info(handshakeData.getHostname());
+
                 if (handshakeData.getDisconnectReason() != null) {
                     ctx.close(); // todo disconnect with message
                     return;
@@ -202,8 +205,6 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
 
                 player = result.getFloodgatePlayer();
                 bungeeData = SpigotUtils.isBungeeData();
-
-                setValue(packet, HANDSHAKE_HOST, handshakeData.getHostname());
 
                 if (!bungeeData) {
                     // Use a spoofedUUID for initUUID (just like Bungeecord)

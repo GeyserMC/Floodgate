@@ -73,7 +73,7 @@ public final class FloodgateHandshakeHandler {
                 data = value;
                 continue;
             }
-            hostnameBuilder.append(value);
+            hostnameBuilder.append(value).append('\0');
         }
         // hostname now doesn't have Floodgate data anymore if it had
         String hostname = hostnameBuilder.toString();
