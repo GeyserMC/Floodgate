@@ -47,12 +47,9 @@ public final class UserAudienceArgument extends CommandArgument<UserAudience, Us
             final String name,
             final boolean allowUuid,
             final boolean allowOffline,
-            final PlayerType limitTo
-    ) {
-        return new UserAudienceArgument(
-                name,
-                new UserAudienceParser(allowUuid, allowOffline, limitTo)
-        );
+            final PlayerType limitTo) {
+        return new UserAudienceArgument(name,
+                new UserAudienceParser(allowUuid, allowOffline, limitTo));
     }
 
     public static UserAudienceArgument of(
@@ -95,8 +92,7 @@ public final class UserAudienceArgument extends CommandArgument<UserAudience, Us
         @Override
         public @NonNull ArgumentParseResult<UserAudience> parse(
                 final @NonNull CommandContext<@NonNull UserAudience> commandContext,
-                final @NonNull Queue<@NonNull String> inputQueue
-        ) {
+                final @NonNull Queue<@NonNull String> inputQueue) {
             CommandUtil commandUtil = commandContext.get("CommandUtil");
 
             final String input = inputQueue.peek();
@@ -153,8 +149,7 @@ public final class UserAudienceArgument extends CommandArgument<UserAudience, Us
         @Override
         public @NonNull List<String> suggestions(
                 final @NonNull CommandContext<UserAudience> commandContext,
-                final @NonNull String input
-        ) {
+                final @NonNull String input) {
             final CommandUtil commandUtil = commandContext.get("CommandUtil");
             final String trimmedInput = input.trim();
 

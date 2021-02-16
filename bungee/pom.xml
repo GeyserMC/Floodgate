@@ -43,7 +43,12 @@
     <dependency>
       <groupId>net.kyori</groupId>
       <artifactId>adventure-text-serializer-gson</artifactId>
-      <version>${adventure.version}</version>
+      <version>${adventure-serializer.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.kyori</groupId>
+      <artifactId>adventure-text-serializer-bungeecord</artifactId>
+      <version>${adventure-serializer.version}</version>
     </dependency>
     <!-- the following common dependencies are already present on the platform -->
     <dependency>

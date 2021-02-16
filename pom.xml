@@ -63,7 +63,7 @@
     <bungee.version>1.15-SNAPSHOT</bungee.version>
     <velocity.version>1.1.0</velocity.version>
     <cloud.version>1.3.0</cloud.version>
-    <adventure.version>4.3.0</adventure.version>
+    <adventure-serializer.version>4.0.0-SNAPSHOT</adventure-serializer.version>
 
     <outputName>floodgate-${project.name}</outputName>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

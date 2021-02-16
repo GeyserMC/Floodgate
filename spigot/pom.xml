@@ -57,8 +57,8 @@
     </dependency>
     <dependency>
       <groupId>net.kyori</groupId>
-      <artifactId>adventure-text-serializer-gson</artifactId>
-      <version>${adventure.version}</version>
+      <artifactId>adventure-text-serializer-craftbukkit</artifactId>
+      <version>${adventure-serializer.version}</version>
     </dependency>
     <!-- the following common dependencies are already present on the platform -->
     <dependency>

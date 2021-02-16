@@ -32,6 +32,7 @@ import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -105,6 +106,14 @@ public class BungeeUserAudience implements UserAudience, ForwardingAudience.Sing
 
         public BungeeConsoleAudience(CommandSender source, CommandUtil commandUtil) {
             super(new UUID(0, 0), "en_us", source, commandUtil);
+        }
+
+        @Override
+        public void sendMessage(
+                @NonNull Identity source,
+                @NonNull Component message,
+                @NonNull MessageType type) {
+            source().sendMessage(BungeeComponentSerializer.get().serialize(message));
         }
     }
 

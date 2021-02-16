@@ -99,6 +99,10 @@
       <name>Minecraft Libraries</name>
       <url>https://libraries.minecraft.net</url>
     </repository>
+    <repository>
+      <id>paper repo</id>
+      <url>https://papermc.io/repo/repository/maven-public/</url>
+    </repository>
   </repositories>
 
   <build>

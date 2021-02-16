@@ -25,6 +25,8 @@
 
 package org.geysermc.floodgate.util;
 
+import static net.kyori.adventure.text.serializer.craftbukkit.BukkitComponentSerializer.legacy;
+
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.audience.Audience;
@@ -73,8 +75,10 @@ public class SpigotUserAudience implements UserAudience, ForwardingAudience.Sing
     }
 
     @Override
-    public void sendMessage(@NonNull Identity source, @NonNull Component message,
-                            @NonNull MessageType type) {
+    public void sendMessage(
+            @NonNull Identity source,
+            @NonNull Component message,
+            @NonNull MessageType type) {
         this.source.sendMessage(GsonComponentSerializer.gson().serialize(message));
     }
 
@@ -105,6 +109,14 @@ public class SpigotUserAudience implements UserAudience, ForwardingAudience.Sing
 
         public SpigotConsoleAudience(CommandSender source, CommandUtil commandUtil) {
             super(new UUID(0, 0), "en_us", source, commandUtil);
+        }
+
+        @Override
+        public void sendMessage(
+                @NonNull Identity source,
+                @NonNull Component message,
+                @NonNull MessageType type) {
+            source().sendMessage(legacy().serialize(message));
         }
     }
 
