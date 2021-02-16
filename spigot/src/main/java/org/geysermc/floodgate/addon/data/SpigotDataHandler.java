@@ -51,6 +51,7 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.util.BedrockData;
+import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.ReflectionUtils;
 import org.geysermc.floodgate.util.SpigotUtils;
 
@@ -188,15 +189,25 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
                     return;
                 }
 
+                //todo use kickMessageAttribute and let this be common logic
+
                 switch (result.getResultType()) {
                     case SUCCESS:
                         break;
+                    case EXCEPTION:
+                        logger.info(config.getDisconnect().getInvalidKey());
+                        ctx.close();
+                        return;
                     case INVALID_DATA_LENGTH:
                         int dataLength = result.getBedrockData().getDataLength();
                         logger.info(
                                 config.getDisconnect().getInvalidArgumentsLength(),
                                 BedrockData.EXPECTED_LENGTH, dataLength
                         );
+                        ctx.close();
+                        return;
+                    case TIMESTAMP_DENIED:
+                        logger.info(Constants.TIMESTAMP_DENIED_MESSAGE);
                         ctx.close();
                         return;
                     default: // only continue when SUCCESS

@@ -45,7 +45,7 @@ import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
-import org.geysermc.floodgate.player.FloodgateHandshakeHandler.ResultType;
+import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
 @SuppressWarnings("ConstantConditions")
@@ -115,14 +115,20 @@ public class BungeeProxyDataHandler extends ChannelInboundHandlerAdapter {
             return;
         }
 
-        if (result.getResultType() == ResultType.EXCEPTION) {
-            ctx.channel().attr(kickMessageAttribute).set(
-                    config.getDisconnect().getInvalidKey());
-        }
-
-        if (result.getResultType() == ResultType.INVALID_DATA_LENGTH) {
-            ctx.channel().attr(kickMessageAttribute)
-                    .set(config.getDisconnect().getInvalidArgumentsLength());
+        switch (result.getResultType()) {
+            case EXCEPTION:
+                ctx.channel().attr(kickMessageAttribute).set(
+                        config.getDisconnect().getInvalidKey());
+                break;
+            case INVALID_DATA_LENGTH:
+                ctx.channel().attr(kickMessageAttribute)
+                        .set(config.getDisconnect().getInvalidArgumentsLength());
+                break;
+            case TIMESTAMP_DENIED:
+                ctx.channel().attr(kickMessageAttribute).set(Constants.TIMESTAMP_DENIED_MESSAGE);
+                break;
+            default:
+                break;
         }
     }
 }

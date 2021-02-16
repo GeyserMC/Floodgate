@@ -28,11 +28,14 @@ package org.geysermc.floodgate.player;
 import static org.geysermc.floodgate.util.BedrockData.EXPECTED_LENGTH;
 
 import com.google.common.base.Charsets;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.net.InetSocketAddress;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -55,6 +58,12 @@ import org.geysermc.floodgate.util.Utils;
 
 @RequiredArgsConstructor
 public final class FloodgateHandshakeHandler {
+    private final Cache<String, Long> handleCache =
+            CacheBuilder.newBuilder()
+                    .maximumSize(500)
+                    .expireAfterWrite(1, TimeUnit.MINUTES)
+                    .build();
+
     private final HandshakeHandlersImpl handshakeHandlers;
     private final SimpleFloodgateApi api;
     private final FloodgateCipher cipher;
@@ -96,6 +105,29 @@ public final class FloodgateHandshakeHandler {
                         ResultType.INVALID_DATA_LENGTH,
                         channel, bedrockData, hostname);
             }
+
+            // timestamp checks
+
+            long timeDifference = System.currentTimeMillis() - bedrockData.getTimestamp();
+            if (timeDifference > 6000 || timeDifference < 0) {
+                return callHandlerAndReturnResult(
+                        ResultType.TIMESTAMP_DENIED,
+                        channel, bedrockData, hostname);
+            }
+
+            Long cachedTimestamp = handleCache.getIfPresent(bedrockData.getXuid());
+            if (cachedTimestamp != null) {
+                // the cached timestamp is newer than the gotten timestamp
+                // you also can't reuse the data (the timestamp is there to prevent that as well)
+                if (cachedTimestamp >= bedrockData.getTimestamp()) {
+                    return callHandlerAndReturnResult(
+                            ResultType.TIMESTAMP_DENIED,
+                            channel, bedrockData, hostname);
+                }
+            }
+
+            handleCache.put(bedrockData.getXuid(), bedrockData.getTimestamp());
+
 
             LinkedPlayer linkedPlayer;
 
@@ -212,6 +244,7 @@ public final class FloodgateHandshakeHandler {
         EXCEPTION,
         NOT_FLOODGATE_DATA,
         INVALID_DATA_LENGTH,
+        TIMESTAMP_DENIED,
         SUCCESS
     }
 

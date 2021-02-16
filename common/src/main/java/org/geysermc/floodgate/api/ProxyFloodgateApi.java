@@ -26,15 +26,11 @@
 package org.geysermc.floodgate.api;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.util.BedrockData;
 
 public final class ProxyFloodgateApi extends SimpleFloodgateApi {
-    private final Map<UUID, String> encryptedData = new HashMap<>();
     private final FloodgateCipher cipher;
 
     public ProxyFloodgateApi(PluginMessageManager pluginMessageManager, FloodgateCipher cipher) {
@@ -42,25 +38,16 @@ public final class ProxyFloodgateApi extends SimpleFloodgateApi {
         this.cipher = cipher;
     }
 
-    public String getEncryptedData(UUID uuid) {
-        return encryptedData.get(uuid);
-    }
-
-    public void addEncryptedData(UUID uuid, String encryptedData) {
-        this.encryptedData.put(uuid, encryptedData); // just override already existing data I guess
-    }
-
-    public void removeEncryptedData(UUID uuid) {
-        encryptedData.remove(uuid);
-    }
-
-    public void updateEncryptedData(UUID uuid, BedrockData bedrockData) {
+    public byte[] createEncryptedData(BedrockData bedrockData) {
         try {
-            byte[] encryptedData = cipher.encryptFromString(bedrockData.toString());
-            addEncryptedData(uuid, new String(encryptedData, StandardCharsets.UTF_8));
+            return cipher.encryptFromString(bedrockData.toString());
         } catch (Exception exception) {
-            throw new IllegalStateException("We failed to update the BedrockData, " +
-                    "but we can't continue without the updated version!", exception);
+            throw new IllegalStateException("We failed to create the encrypted data, " +
+                    "but creating encrypted data is mandatory!", exception);
         }
+    }
+
+    public String createEncryptedDataString(BedrockData bedrockData) {
+        return new String(createEncryptedData(bedrockData), StandardCharsets.UTF_8);
     }
 }

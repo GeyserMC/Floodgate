@@ -25,7 +25,6 @@
 
 package org.geysermc.floodgate.addon.data;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.geysermc.floodgate.util.ReflectionUtils.castedInvoke;
 import static org.geysermc.floodgate.util.ReflectionUtils.getCastedValue;
@@ -46,6 +45,8 @@ import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
+import org.geysermc.floodgate.player.FloodgatePlayerImpl;
+import org.geysermc.floodgate.util.BedrockData;
 
 @SuppressWarnings("ConstantConditions")
 @RequiredArgsConstructor
@@ -116,8 +117,8 @@ public final class VelocityServerDataHandler extends MessageToMessageEncoder<Obj
             return;
         }
 
-        String encryptedData = api.getEncryptedData(player.getCorrectUniqueId());
-        checkArgument(encryptedData != null, "Encrypted data cannot be null");
+        BedrockData data = player.as(FloodgatePlayerImpl.class).toBedrockData();
+        String encryptedData = api.createEncryptedDataString(data);
 
         // use the same system that we use on bungee, our data goes before all the other data
         int addressFinished = address.indexOf('\0');

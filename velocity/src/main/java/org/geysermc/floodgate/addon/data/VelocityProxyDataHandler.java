@@ -44,6 +44,7 @@ import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
+import org.geysermc.floodgate.util.Constants;
 
 @RequiredArgsConstructor
 public final class VelocityProxyDataHandler extends ChannelInboundHandlerAdapter {
@@ -111,6 +112,9 @@ public final class VelocityProxyDataHandler extends ChannelInboundHandlerAdapter
             case INVALID_DATA_LENGTH:
                 ctx.channel().attr(kickMessageAttribute)
                         .set(config.getDisconnect().getInvalidArgumentsLength());
+                return;
+            case TIMESTAMP_DENIED:
+                ctx.channel().attr(kickMessageAttribute).set(Constants.TIMESTAMP_DENIED_MESSAGE);
                 return;
             default: // only continue when SUCCESS
                 return;

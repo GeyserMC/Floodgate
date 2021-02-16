@@ -34,9 +34,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.InstanceHolder;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
+import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
@@ -84,7 +84,7 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
             BedrockData data,
             HandshakeData handshakeData) {
 
-        FloodgateApi api = FloodgateApi.getInstance();
+        SimpleFloodgateApi api = InstanceHolder.castApi(SimpleFloodgateApi.class);
 
         UUID javaUniqueId = Utils.getJavaUuid(data.getXuid());
 
@@ -94,18 +94,11 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
 
         LinkedPlayer linkedPlayer = handshakeData.getLinkedPlayer();
 
-        FloodgatePlayerImpl player = new FloodgatePlayerImpl(
+        return new FloodgatePlayerImpl(
                 data.getVersion(), data.getUsername(), handshakeData.getJavaUsername(),
                 javaUniqueId, data.getXuid(), deviceOs, data.getLanguageCode(), uiProfile,
                 inputMode, data.getIp(), data.isFromProxy(), api instanceof ProxyFloodgateApi,
                 linkedPlayer, data.getSubscribeId(), data.getVerifyCode());
-
-        // fromProxy and linked player might have to be changed
-        if (api instanceof ProxyFloodgateApi) {
-            InstanceHolder.castApi(ProxyFloodgateApi.class)
-                    .updateEncryptedData(player.getCorrectUniqueId(), player.toBedrockData());
-        }
-        return player;
     }
 
     /**

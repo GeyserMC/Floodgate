@@ -42,6 +42,8 @@ import net.md_5.bungee.protocol.packet.Handshake;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
+import org.geysermc.floodgate.player.FloodgatePlayerImpl;
+import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
 @SuppressWarnings("ConstantConditions")
@@ -92,7 +94,8 @@ public class BungeeServerDataHandler extends MessageToMessageEncoder<Object> {
         FloodgatePlayer player = wrapper.getHandle().attr(playerAttribute).get();
 
         if (player != null) {
-            String encryptedData = api.getEncryptedData(player.getCorrectUniqueId());
+            BedrockData data = player.as(FloodgatePlayerImpl.class).toBedrockData();
+            String encryptedData = api.createEncryptedDataString(data);
 
             Handshake handshake = (Handshake) packet;
             String address = handshake.getHost();
