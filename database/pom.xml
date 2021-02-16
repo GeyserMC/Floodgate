@@ -19,6 +19,7 @@
 
   <modules>
     <module>sqlite</module>
+    <module>mariadb</module>
   </modules>
 
   <properties>

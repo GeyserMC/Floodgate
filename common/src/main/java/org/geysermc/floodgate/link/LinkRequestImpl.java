@@ -47,6 +47,15 @@ public final class LinkRequestImpl implements LinkRequest {
         requestTime = Instant.now().getEpochSecond();
     }
 
+    public LinkRequestImpl(String javaUsername, UUID javaUniqueId,
+                           String linkCode, String bedrockUsername, long requestTime) {
+        this.javaUniqueId = javaUniqueId;
+        this.javaUsername = javaUsername;
+        this.linkCode = linkCode;
+        this.bedrockUsername = bedrockUsername;
+        this.requestTime = requestTime;
+    }
+
     @Override
     public boolean isExpired(long linkTimeout) {
         long timePassed = Instant.now().getEpochSecond() - requestTime;

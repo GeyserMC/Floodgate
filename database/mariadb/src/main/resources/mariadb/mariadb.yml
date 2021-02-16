@@ -1,0 +1,4 @@
+hostname: "localhost"
+database: "floodgate"
+username: "floodgate"
+password: ""

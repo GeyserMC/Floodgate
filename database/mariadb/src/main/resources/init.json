@@ -1,0 +1,4 @@
+{
+  "mainClass": "org.geysermc.floodgate.database.MariadbDatabase",
+  "config": "mariadb.yml"
+}
