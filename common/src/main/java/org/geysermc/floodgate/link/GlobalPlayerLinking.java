@@ -36,7 +36,7 @@ import org.geysermc.floodgate.util.LinkedPlayer;
 import org.geysermc.floodgate.util.Utils;
 
 public class GlobalPlayerLinking extends CommonPlayerLink {
-    private static final String GET_BEDROCK_LINK = "https://api.geysermc.org/v1/link/bedrock?xuid=";
+    private static final String GET_BEDROCK_LINK = "https://api.geysermc.org/v1/link/bedrock/";
 
     @Override
     public void load() {
