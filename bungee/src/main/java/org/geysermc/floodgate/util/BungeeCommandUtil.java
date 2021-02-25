@@ -144,6 +144,16 @@ public final class BungeeCommandUtil implements CommandUtil {
         cast(player).disconnect(translateAndTransform(locale, message, args));
     }
 
+    @Override
+    public boolean whitelistPlayer(String xuid, String username) {
+        return false; // todo
+    }
+
+    @Override
+    public boolean removePlayerFromWhitelist(String xuid, String username) {
+        return false; // todo
+    }
+
     public BaseComponent[] translateAndTransform(String locale, CommandMessage message,
                                                  Object... args) {
         return TextComponent.fromLegacyText(message.translateMessage(manager, locale, args));

@@ -28,7 +28,10 @@ package org.geysermc.floodgate.util;
 public final class Constants {
     public static final String DATABASE_NAME_FORMAT = "^floodgate-[a-zA-Z0-9_]{0,16}-database.jar$";
     public static final int LOGIN_SUCCESS_PACKET_ID = 2;
-    public static final String WEBSOCKET_URL = "wss://api.geysermc.org/ws";
+
+    private static final String API_BASE_URL = "s://api.geysermc.org";
+    public static final String WEBSOCKET_URL = "ws" + API_BASE_URL + "/ws";
+    public static final String GET_XUID_URL = "http" + API_BASE_URL + "/v1/xbox/xuid/";
 
     public static final boolean DEBUG_MODE = true;
 

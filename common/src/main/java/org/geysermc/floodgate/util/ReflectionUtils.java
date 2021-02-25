@@ -25,21 +25,16 @@
 
 package org.geysermc.floodgate.util;
 
-import static org.geysermc.floodgate.util.MessageFormatter.format;
-
-import com.google.common.base.Preconditions;
 import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.Setter;
 
 public final class ReflectionUtils {
-    private static final Field MODIFIERS_FIELD;
-
     /**
      * The package name that is shared between all the {@link #getPrefixedClass(String)} calls so
      * that the className will be a lot shorter. Example net.minecraft.server.v1_8R3.PacketHandshakingInSetProtocol
@@ -49,43 +44,6 @@ public final class ReflectionUtils {
     @Getter
     @Setter
     private static String prefix;
-
-    static {
-        Field modifiersField = null;
-        try {
-            modifiersField = Field.class.getDeclaredField("modifiers");
-        } catch (NoSuchFieldException ignored) {
-            // Java 12 compatibility, thanks to https://github.com/powermock/powermock/pull/1010
-            try {
-                Method declaredFields = getMethod(Class.class, "getDeclaredFields0", boolean.class);
-                if (declaredFields == null) {
-                    throw new NoSuchMethodException("Cannot find method getDeclaredFields0");
-                }
-
-                Field[] fields = castedInvoke(Field.class, declaredFields, false);
-                if (fields == null) {
-                    throw new RuntimeException("The Field class cannot have null fields");
-                }
-
-                for (Field field : fields) {
-                    if ("modifiers".equals(field.getName())) {
-                        modifiersField = field;
-                        break;
-                    }
-                }
-            } catch (Exception exception) {
-                throw new RuntimeException(format(
-                        "Cannot find the modifiers field :/\nJava version: {}\nVendor: {} ({})",
-                        System.getProperty("java.version"),
-                        System.getProperty("java.vendor"),
-                        System.getProperty("java.vendor.url")
-                ), exception);
-            }
-        }
-
-        Preconditions.checkNotNull(modifiersField, "Modifiers field cannot be null!");
-        MODIFIERS_FIELD = modifiersField;
-    }
 
     /**
      * Get a class that is prefixed with the prefix provided in {@link #setPrefix(String)}. Calling
@@ -115,6 +73,24 @@ public final class ReflectionUtils {
             return Class.forName(className);
         } catch (ClassNotFoundException exception) {
             exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Nullable
+    public static Constructor<?> getConstructor(Class<?> clazz, Class<?>... parameters) {
+        try {
+            return clazz.getConstructor(parameters);
+        } catch (NoSuchMethodException e) {
+            return null;
+        }
+    }
+
+    @Nullable
+    public static Object newInstance(Constructor<?> constructor, Object... parameters) {
+        try {
+            return constructor.newInstance(parameters);
+        } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
             return null;
         }
     }
@@ -289,33 +265,6 @@ public final class ReflectionUtils {
     }
 
     /**
-     * Set the value of a <b>final</b> field. This method first makes the field accessible, then
-     * removes the final modifier and then sets the value.<br> This method will not throw exceptions
-     * when failed, but it'll log the error to the console.
-     *
-     * @param instance the instance to set the value to
-     * @param field    the field to set the value to
-     * @param value    the value to set
-     * @return true if succeeded
-     */
-    public static boolean setFinalValue(Object instance, Field field, Object value) {
-        try {
-            makeAccessible(field);
-
-            int modifiers = field.getModifiers();
-            if (Modifier.isFinal(modifiers)) {
-                makeAccessible(MODIFIERS_FIELD);
-                MODIFIERS_FIELD.setInt(field, modifiers & ~Modifier.FINAL);
-            }
-            setValue(instance, field, value);
-            return true;
-        } catch (Exception exception) {
-            exception.printStackTrace();
-            return false;
-        }
-    }
-
-    /**
      * Get a method from a class, it doesn't matter if the field is public or not. This method will
      * first try to get a declared field and if that failed it'll try to get a public field.<br>
      * Instead of throwing an exception when the method wasn't found, it will return null, but the
@@ -328,8 +277,10 @@ public final class ReflectionUtils {
      * @return the requested method if it has been found, otherwise null
      */
     @Nullable
-    public static Method getMethod(Class<?> clazz, String method, boolean declared,
-                                   Class<?>... arguments) {
+    public static Method getMethod(
+            Class<?> clazz, String method,
+            boolean declared,
+            Class<?>... arguments) {
         try {
             if (declared) {
                 return clazz.getMethod(method, arguments);
@@ -370,6 +321,46 @@ public final class ReflectionUtils {
     @Nullable
     public static Method getMethod(Object instance, String methodName, Class<?>... arguments) {
         return getMethod(instance.getClass(), methodName, arguments);
+    }
+
+    /**
+     * Get a method from a class by using the name of the method.
+     *
+     * @param clazz      the class to search the method in
+     * @param methodName the name of the method
+     * @param declared   if the method is declared or public
+     * @return the method if it has been found, otherwise null
+     */
+    @Nullable
+    public static Method getMethodByName(Class<?> clazz, String methodName, boolean declared) {
+        Method[] methods = declared ? clazz.getDeclaredMethods() : clazz.getMethods();
+        for (Method method : methods) {
+            if (method.getName().equals(methodName)) {
+                return method;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get a method from a class without having to provide a method name.
+     *
+     * @param clazz     the class to search the method in
+     * @param paramType the type of one of the method parameters
+     * @param declared  if the method is declared or public
+     * @return the method if it has been found, otherwise null
+     */
+    @Nullable
+    public static Method getMethodFromParam(Class<?> clazz, Class<?> paramType, boolean declared) {
+        Method[] methods = declared ? clazz.getDeclaredMethods() : clazz.getMethods();
+        for (Method method : methods) {
+            for (Class<?> parameter : method.getParameterTypes()) {
+                if (parameter == paramType) {
+                    return method;
+                }
+            }
+        }
+        return null;
     }
 
     /**

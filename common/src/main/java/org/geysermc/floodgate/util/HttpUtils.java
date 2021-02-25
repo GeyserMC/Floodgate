@@ -27,26 +27,32 @@ package org.geysermc.floodgate.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import java.awt.image.BufferedImage;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import javax.imageio.ImageIO;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @SuppressWarnings("all")
 public class HttpUtils {
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
+
     private static final Gson GSON = new Gson();
     private static final String USER_AGENT = "GeyserMC/Floodgate";
     private static final String CONNECTION_STRING = "--";
     private static final String BOUNDARY = "******";
     private static final String END = "\r\n";
+
+    public static CompletableFuture<HttpResponse> asyncGet(String urlString) {
+        return CompletableFuture.supplyAsync(() -> {
+            return get(urlString);
+        }, EXECUTOR_SERVICE);
+    }
 
     public static HttpResponse get(String urlString) {
         HttpURLConnection connection;
@@ -65,42 +71,6 @@ public class HttpUtils {
             connection.setRequestProperty("ContentType", "application/json");
         } catch (Exception exception) {
             throw new RuntimeException("Failed to create request", exception);
-        }
-
-        return readResponse(connection);
-    }
-
-    public static HttpResponse post(String urlString, BufferedImage... images) {
-        HttpURLConnection connection;
-
-        try {
-            URL url = new URL(urlString);
-            connection = (HttpURLConnection) url.openConnection();
-        } catch (Exception exception) {
-            throw new RuntimeException("Failed to create connection", exception);
-        }
-
-        DataOutputStream outputStream = null;
-
-        try {
-            connection.setRequestMethod("POST");
-            connection.setDoOutput(true);
-            connection.setUseCaches(false);
-            connection.setRequestProperty("User-Agent", USER_AGENT);
-            connection.setRequestProperty(
-                    "Content-Type",
-                    "multipart/form-data;boundary=" + BOUNDARY
-            );
-
-            outputStream = new DataOutputStream(connection.getOutputStream());
-            writeDataFor(outputStream, images);
-        } catch (Exception exception) {
-            throw new RuntimeException("Failed to create request", exception);
-        } finally {
-            try {
-                outputStream.close();
-            } catch (Exception ignored) {
-            }
         }
 
         return readResponse(connection);
@@ -133,31 +103,6 @@ public class HttpUtils {
                 streamReader.close();
             } catch (Exception ignored) {
             }
-        }
-    }
-
-    public static void writeDataFor(DataOutputStream outputStream, BufferedImage... images) {
-        try {
-            for (int i = 0; i < images.length; i++) {
-                outputStream.writeBytes(CONNECTION_STRING + BOUNDARY + END);
-                outputStream.writeBytes(
-                        "Content-Disposition:form-data;name=file;filename=image" + i + ".png");
-                outputStream.writeBytes(END);
-                outputStream.writeBytes(END);
-                fileDataForImage(outputStream, images[i]);
-                outputStream.writeBytes(END);
-            }
-            outputStream.writeBytes(CONNECTION_STRING + BOUNDARY + CONNECTION_STRING + END);
-        } catch (Exception exception) {
-            throw new RuntimeException(exception);
-        }
-    }
-
-    public static void fileDataForImage(OutputStream outputStream, BufferedImage image) {
-        try {
-            ImageIO.write(image, "png", outputStream);
-        } catch (IOException exception) {
-            throw new RuntimeException(exception);
         }
     }
 

@@ -143,6 +143,16 @@ public final class VelocityCommandUtil implements CommandUtil {
         cast(player).disconnect(translateAndTransform(locale, message, args));
     }
 
+    @Override
+    public boolean whitelistPlayer(String xuid, String username) {
+        return false; // todo
+    }
+
+    @Override
+    public boolean removePlayerFromWhitelist(String xuid, String username) {
+        return false; // todo
+    }
+
     public Component translateAndTransform(String locale, CommandMessage message,
                                            Object... args) {
         return Component.text(message.translateMessage(manager, locale, args));

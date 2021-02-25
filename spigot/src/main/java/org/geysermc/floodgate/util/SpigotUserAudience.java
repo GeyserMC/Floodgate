@@ -25,8 +25,6 @@
 
 package org.geysermc.floodgate.util;
 
-import static net.kyori.adventure.text.serializer.craftbukkit.BukkitComponentSerializer.legacy;
-
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.audience.Audience;
@@ -35,6 +33,7 @@ import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -106,7 +105,6 @@ public class SpigotUserAudience implements UserAudience, ForwardingAudience.Sing
 
     public static final class SpigotConsoleAudience extends SpigotUserAudience
             implements ConsoleAudience {
-
         public SpigotConsoleAudience(CommandSender source, CommandUtil commandUtil) {
             super(new UUID(0, 0), "en_us", source, commandUtil);
         }
@@ -116,7 +114,7 @@ public class SpigotUserAudience implements UserAudience, ForwardingAudience.Sing
                 @NonNull Identity source,
                 @NonNull Component message,
                 @NonNull MessageType type) {
-            source().sendMessage(legacy().serialize(message));
+            source().sendMessage(LegacyComponentSerializer.legacySection().serialize(message));
         }
     }
 

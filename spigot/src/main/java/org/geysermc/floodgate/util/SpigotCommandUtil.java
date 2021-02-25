@@ -147,6 +147,16 @@ public final class SpigotCommandUtil implements CommandUtil {
                 () -> cast(player).kickPlayer(translateAndTransform(locale, message, args)));
     }
 
+    @Override
+    public boolean whitelistPlayer(String xuid, String username) {
+        return WhitelistUtils.addPlayer(xuid, username);
+    }
+
+    @Override
+    public boolean removePlayerFromWhitelist(String xuid, String username) {
+        return WhitelistUtils.removePlayer(xuid, username);
+    }
+
     public String translateAndTransform(String locale, CommandMessage message, Object... args) {
         // unlike others, Bukkit doesn't have to transform a message into another class.
         return message.translateMessage(manager, locale, args);

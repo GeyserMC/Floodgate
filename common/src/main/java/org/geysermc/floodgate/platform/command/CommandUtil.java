@@ -69,4 +69,23 @@ public interface CommandUtil {
      * @param args    the arguments
      */
     void kickPlayer(Object player, String locale, CommandMessage message, Object... args);
+
+    /**
+     * Whitelist the given Bedrock player.
+     *
+     * @param xuid     the xuid of the username to be whitelisted
+     * @param username the username to be whitelisted
+     * @return true if the player has been whitelisted, false if the player was already whitelisted
+     */
+    boolean whitelistPlayer(String xuid, String username);
+
+    /**
+     * Removes the given Bedrock player from the whitelist.
+     *
+     * @param xuid     the xuid of the username to be removed from the whitelist
+     * @param username the username to be removed from the whitelist
+     * @return true if the player has been removed from the whitelist, false if the player wasn't
+     * whitelisted
+     */
+    boolean removePlayerFromWhitelist(String xuid, String username);
 }
