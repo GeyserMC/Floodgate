@@ -25,15 +25,18 @@
 
 package org.geysermc.floodgate.command;
 
+import static org.geysermc.floodgate.command.CommonCommandMessage.CHECK_CONSOLE;
+
+import cloud.commandframework.ArgumentDescription;
 import cloud.commandframework.Command;
 import cloud.commandframework.CommandManager;
-import cloud.commandframework.Description;
 import cloud.commandframework.context.CommandContext;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
-import net.kyori.adventure.text.Component;
+import lombok.Getter;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.platform.command.CommandMessage;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.player.UserAudience;
@@ -48,7 +51,7 @@ public class WhitelistCommand implements FloodgateCommand {
     @Override
     public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
         Command.Builder<UserAudience> builder = commandManager.commandBuilder("fwhitelist",
-                Description.of("Easy way to whitelist Bedrock players"))
+                ArgumentDescription.of("Easy way to whitelist Bedrock players"))
                 .permission("floodgate.command.fwhitelist");
 
         commandManager.command(builder
@@ -73,8 +76,7 @@ public class WhitelistCommand implements FloodgateCommand {
         }
 
         if (name.length() < 1 || name.length() > 16) {
-            sender.sendMessage(Component.text(
-                    "The given username '" + name + "' is not a valid username."));
+            sender.sendMessage(Message.INVALID_USERNAME);
             return;
         }
 
@@ -85,8 +87,7 @@ public class WhitelistCommand implements FloodgateCommand {
         HttpUtils.asyncGet(Constants.GET_XUID_URL + name)
                 .whenComplete((result, error) -> {
                     if (error != null) {
-                        sender.sendMessage(Component.text(
-                                "An error occurred. See the console for more info"));
+                        sender.sendMessage(Message.API_UNAVAILABLE);
                         error.printStackTrace();
                         return;
                     }
@@ -95,8 +96,7 @@ public class WhitelistCommand implements FloodgateCommand {
                     boolean success = response.get("success").getAsBoolean();
 
                     if (!success) {
-                        sender.sendMessage(Component.text(
-                                "An error occurred. See the console for more info"));
+                        sender.sendMessage(Message.UNEXPECTED_ERROR);
                         logger.error(
                                 "Got an error from requesting the xuid of a Bedrock player: {}",
                                 response.get("message").getAsString());
@@ -105,8 +105,7 @@ public class WhitelistCommand implements FloodgateCommand {
 
                     JsonObject data = response.getAsJsonObject("data");
                     if (data.size() == 0) {
-                        sender.sendMessage(Component.text(
-                                "Couldn't find the user '" + tempName + "'"));
+                        sender.sendMessage(Message.USER_NOT_FOUND);
                         return;
                     }
 
@@ -114,12 +113,18 @@ public class WhitelistCommand implements FloodgateCommand {
                     CommandUtil commandUtil = context.get("CommandUtil");
 
                     try {
-                        if (add && commandUtil.whitelistPlayer(xuid, tempName)) {
-                            sender.sendMessage(Component.text("Player has been whitelisted :)"));
-                        } else if (!add && commandUtil.removePlayerFromWhitelist(xuid, tempName)) {
-                            sender.sendMessage(Component.text("Player has been removed :o"));
+                        if (add) {
+                            if (commandUtil.whitelistPlayer(xuid, tempName)) {
+                                sender.sendMessage(Message.PLAYER_ADDED);
+                            } else {
+                                sender.sendMessage(Message.PLAYER_ALREADY_WHITELISTED);
+                            }
                         } else {
-                            sender.sendMessage(Component.text("Player was already whitelisted :o"));
+                            if (commandUtil.removePlayerFromWhitelist(xuid, tempName)) {
+                                sender.sendMessage(Message.PLAYER_REMOVED);
+                            } else {
+                                sender.sendMessage(Message.PLAYER_NOT_WHITELISTED);
+                            }
                         }
                     } catch (Exception exception) {
                         logger.error(
@@ -132,5 +137,25 @@ public class WhitelistCommand implements FloodgateCommand {
     @Override
     public void execute(CommandContext<UserAudience> context) {
         // ignored, all the logic is in the other method
+    }
+
+    @Getter
+    public enum Message implements CommandMessage {
+        INVALID_USERNAME("floodgate.command.fwhitelist.invalid_username"),
+        API_UNAVAILABLE("floodgate.command.fwhitelist.api_unavailable " + CHECK_CONSOLE),
+        USER_NOT_FOUND("floodgate.command.fwhitelist.user_not_found"),
+        PLAYER_ADDED("floodgate.command.fwhitelist.player_added"),
+        PLAYER_REMOVED("floodgate.command.fwhitelist.player_removed"),
+        PLAYER_ALREADY_WHITELISTED("floodgate.command.fwhitelist.player_already_whitelisted"),
+        PLAYER_NOT_WHITELISTED("floodgate.command.fwhitelist.player_not_whitelisted"),
+        UNEXPECTED_ERROR("floodgate.command.fwhitelist.unexpected_error " + CHECK_CONSOLE);
+
+        private final String rawMessage;
+        private final String[] translateParts;
+
+        Message(String rawMessage) {
+            this.rawMessage = rawMessage;
+            this.translateParts = rawMessage.split(" ");
+        }
     }
 }

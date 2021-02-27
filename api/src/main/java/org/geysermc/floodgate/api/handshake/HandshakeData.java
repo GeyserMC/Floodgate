@@ -90,20 +90,20 @@ public interface HandshakeData {
     void setHostname(String hostname);
 
     /**
-     * Returns the IP address of the Bedrock client. The initial value is {@link
-     * BedrockData#getIp()} (or null if BedrockData is null) but will return the changed IP if it
-     * has been changed using {@link #setBedrockIp(String)}
+     * Returns the IP address of the client. The initial value is {@link BedrockData#getIp()} when
+     * BedrockData isn't null, or null if BedrockData is null. This method will return the changed
+     * IP if it has been changed using {@link #setIp(String)}
      */
-    String getBedrockIp();
+    String getIp();
 
     /**
-     * Set the IP address of the Bedrock client. Floodgate doesn't perform any checks if the
+     * Set the IP address of the connected client. Floodgate doesn't perform any checks if the
      * provided data is valid (hence one of the reasons why this class has been made for advanced
      * users), thank you for not abusing Floodgate's trust in you :)
      *
-     * @param address the IP address of the Bedrock client
+     * @param address the IP address of the client
      */
-    void setBedrockIp(String address);
+    void setIp(String address);
 
     /**
      * Returns the reason to disconnect the current player.

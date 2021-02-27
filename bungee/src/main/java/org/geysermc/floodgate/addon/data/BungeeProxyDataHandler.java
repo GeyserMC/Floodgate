@@ -41,7 +41,6 @@ import net.md_5.bungee.protocol.DefinedPacket;
 import net.md_5.bungee.protocol.PacketWrapper;
 import net.md_5.bungee.protocol.packet.Handshake;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
-import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
@@ -93,10 +92,10 @@ public class BungeeProxyDataHandler extends ChannelInboundHandlerAdapter {
         HandshakeResult result = handler.handle(ctx.channel(), data);
         HandshakeData handshakeData = result.getHandshakeData();
 
-        // we'll change the IP address from the proxy to the IP of the Bedrock client very early on
-        // so that almost every plugin will use the IP of the Bedrock client
-        if (result.getFloodgatePlayer() != null) {
-
+        // we'll change the IP address from the proxy to the real IP of the client very early on
+        // so that almost every plugin will use the real IP of the client
+        InetSocketAddress newIp = result.getNewIp(ctx.channel());
+        if (newIp != null) {
             HandlerBoss handlerBoss = ctx.pipeline().get(HandlerBoss.class);
             // InitialHandler extends PacketHandler and implements PendingConnection
             InitialHandler connection = ReflectionUtils.getCastedValue(handlerBoss, HANDLER);
@@ -104,10 +103,7 @@ public class BungeeProxyDataHandler extends ChannelInboundHandlerAdapter {
             ChannelWrapper channelWrapper =
                     ReflectionUtils.getCastedValue(connection, CHANNEL_WRAPPER);
 
-            InetSocketAddress address =
-                    result.getFloodgatePlayer().getProperty(PropertyKey.SOCKET_ADDRESS);
-
-            channelWrapper.setRemoteAddress(address);
+            channelWrapper.setRemoteAddress(newIp);
         }
 
         if (handshakeData.getDisconnectReason() != null) {

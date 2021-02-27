@@ -150,10 +150,7 @@ public final class FloodgateHandshakeHandler {
                         bedrockData.getVerifyCode());
             }
 
-            UUID javaUuid = Utils.getJavaUuid(bedrockData.getXuid());
-            handshakeData.setHostname(correctHostname(
-                    handshakeData.getHostname(), bedrockData, javaUuid
-            ));
+            correctHostname(handshakeData);
 
             FloodgatePlayer player =
                     FloodgatePlayerImpl.from(bedrockData, handshakeData);
@@ -163,8 +160,7 @@ public final class FloodgateHandshakeHandler {
             channel.attr(playerAttribute).set(player);
 
             int port = ((InetSocketAddress) channel.remoteAddress()).getPort();
-            InetSocketAddress socketAddress = new InetSocketAddress(handshakeData.getBedrockIp(),
-                    port);
+            InetSocketAddress socketAddress = new InetSocketAddress(handshakeData.getIp(), port);
             player.addProperty(PropertyKey.SOCKET_ADDRESS, socketAddress);
 
             return new HandshakeResult(ResultType.SUCCESS, handshakeData, bedrockData, player);
@@ -204,27 +200,27 @@ public final class FloodgateHandshakeHandler {
         handshakeHandlers.callHandshakeHandlers(handshakeData);
 
         if (bedrockData != null) {
-            UUID javaUuid = Utils.getJavaUuid(bedrockData.getXuid());
-            handshakeData.setHostname(correctHostname(
-                    handshakeData.getHostname(), bedrockData, javaUuid
-            ));
+            correctHostname(handshakeData);
         }
 
         return new HandshakeResult(resultType, handshakeData, bedrockData, null);
     }
 
-    private String correctHostname(String hostname, BedrockData data, UUID correctUuid) {
+    private void correctHostname(HandshakeData handshakeData) {
+        BedrockData bedrockData = handshakeData.getBedrockData();
+        UUID correctUuid = Utils.getJavaUuid(bedrockData.getXuid());
+
         // replace the ip and uuid with the Bedrock client IP and an uuid based of the xuid
-        String[] split = hostname.split("\0");
+        String[] split = handshakeData.getHostname().split("\0");
         if (split.length >= 3) {
             if (logger.isDebug()) {
                 logger.info("Replacing hostname arg1 '{}' with '{}' and arg2 '{}' with '{}'",
-                        split[1], data.getIp(), split[2], correctUuid.toString());
+                        split[1], bedrockData.getIp(), split[2], correctUuid.toString());
             }
-            split[1] = data.getIp();
+            split[1] = bedrockData.getIp();
             split[2] = correctUuid.toString();
         }
-        return String.join("\0", split);
+        handshakeData.setHostname(String.join("\0", split));
     }
 
     private LinkedPlayer fetchLinkedPlayer(UUID javaUniqueId) {
@@ -255,5 +251,16 @@ public final class FloodgateHandshakeHandler {
         private final HandshakeData handshakeData;
         private final BedrockData bedrockData;
         private final FloodgatePlayer floodgatePlayer;
+
+        public InetSocketAddress getNewIp(Channel channel) {
+            if (floodgatePlayer != null) {
+                return floodgatePlayer.getProperty(PropertyKey.SOCKET_ADDRESS);
+            }
+            if (handshakeData.getIp() != null) {
+                int port = ((InetSocketAddress) channel.remoteAddress()).getPort();
+                return new InetSocketAddress(handshakeData.getIp(), port);
+            }
+            return null;
+        }
     }
 }

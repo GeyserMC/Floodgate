@@ -27,9 +27,9 @@ package org.geysermc.floodgate.command;
 
 import static org.geysermc.floodgate.command.CommonCommandMessage.CHECK_CONSOLE;
 
+import cloud.commandframework.ArgumentDescription;
 import cloud.commandframework.Command;
 import cloud.commandframework.CommandManager;
-import cloud.commandframework.Description;
 import cloud.commandframework.context.CommandContext;
 import com.google.inject.Inject;
 import lombok.Getter;
@@ -49,7 +49,7 @@ public final class UnlinkAccountCommand implements FloodgateCommand {
     @Override
     public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
         return commandManager.commandBuilder("unlinkaccount",
-                Description.of("Unlink your Java account from your Bedrock account"))
+                ArgumentDescription.of("Unlink your Java account from your Bedrock account"))
                 .senderType(PlayerAudience.class)
                 .permission("floodgate.command.unlinkaccount")
                 .handler(this::execute)

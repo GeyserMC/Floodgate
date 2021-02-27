@@ -27,9 +27,9 @@ package org.geysermc.floodgate.command;
 
 import static org.geysermc.floodgate.command.CommonCommandMessage.CHECK_CONSOLE;
 
+import cloud.commandframework.ArgumentDescription;
 import cloud.commandframework.Command;
 import cloud.commandframework.CommandManager;
-import cloud.commandframework.Description;
 import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.context.CommandContext;
 import com.google.inject.Inject;
@@ -55,7 +55,7 @@ public final class LinkAccountCommand implements FloodgateCommand {
     @Override
     public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
         return commandManager.commandBuilder("linkaccount",
-                Description.of("Link your Java account with your Bedrock account"))
+                ArgumentDescription.of("Link your Java account with your Bedrock account"))
                 .senderType(PlayerAudience.class)
                 .permission("floodgate.command.linkaccount")
                 .argument(UserAudienceArgument.of("player", true))

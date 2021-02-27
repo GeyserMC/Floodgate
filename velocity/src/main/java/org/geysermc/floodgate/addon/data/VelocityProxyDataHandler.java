@@ -36,11 +36,11 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.AttributeKey;
 import io.netty.util.ReferenceCountUtil;
 import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
@@ -97,6 +97,12 @@ public final class VelocityProxyDataHandler extends ChannelInboundHandlerAdapter
         HandshakeResult result = handshakeHandler.handle(ctx.channel(), address);
         HandshakeData handshakeData = result.getHandshakeData();
 
+        InetSocketAddress newIp = result.getNewIp(ctx.channel());
+        if (newIp != null) {
+            Object connection = ctx.pipeline().get("handler");
+            setValue(connection, REMOTE_ADDRESS, newIp);
+        }
+
         if (handshakeData.getDisconnectReason() != null) {
             ctx.channel().attr(kickMessageAttribute).set(handshakeData.getDisconnectReason());
             return;
@@ -123,9 +129,6 @@ public final class VelocityProxyDataHandler extends ChannelInboundHandlerAdapter
         FloodgatePlayer player = result.getFloodgatePlayer();
 
         setValue(packet, HANDSHAKE_SERVER_ADDRESS, handshakeData.getHostname());
-
-        Object connection = ctx.pipeline().get("handler");
-        setValue(connection, REMOTE_ADDRESS, player.getProperty(PropertyKey.SOCKET_ADDRESS));
 
         logger.info("Floodgate player who is logged in as {} {} joined",
                 player.getCorrectUsername(), player.getCorrectUniqueId());

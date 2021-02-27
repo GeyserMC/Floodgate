@@ -46,7 +46,6 @@ import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
@@ -182,10 +181,15 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
                 HandshakeData handshakeData = result.getHandshakeData();
 
                 setValue(packet, HANDSHAKE_HOST, handshakeData.getHostname());
-                logger.info(handshakeData.getHostname());
+
+                InetSocketAddress newIp = result.getNewIp(ctx.channel());
+                if (newIp != null) {
+                    setValue(networkManager, SOCKET_ADDRESS, newIp);
+                    //todo the socket address will be overridden when bungeeData is true
+                }
 
                 if (handshakeData.getDisconnectReason() != null) {
-                    ctx.close(); // todo disconnect with message
+                    ctx.close(); //todo disconnect with message
                     return;
                 }
 
@@ -220,10 +224,6 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
                 if (!bungeeData) {
                     // Use a spoofedUUID for initUUID (just like Bungeecord)
                     setValue(networkManager, "spoofedUUID", player.getCorrectUniqueId());
-
-                    // Use the player his IP for stuff instead of Geyser his IP
-                    InetSocketAddress address = player.getProperty(PropertyKey.SOCKET_ADDRESS);
-                    setValue(networkManager, SOCKET_ADDRESS, address);
                 }
             } else if (isLogin) {
                 if (!bungeeData) {

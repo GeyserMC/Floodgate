@@ -45,7 +45,7 @@ public class HandshakeDataImpl implements HandshakeData {
 
     @Setter private LinkedPlayer linkedPlayer;
     @Setter private String hostname;
-    @Setter private String bedrockIp;
+    @Setter private String ip;
     @Setter private String disconnectReason;
 
     public HandshakeDataImpl(
@@ -74,7 +74,7 @@ public class HandshakeDataImpl implements HandshakeData {
             }
 
             javaUniqueId = Utils.getJavaUuid(bedrockData.getXuid());
-            this.bedrockIp = bedrockData.getIp();
+            this.ip = bedrockData.getIp();
         }
 
         this.javaUsername = javaUsername;
