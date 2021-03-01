@@ -105,7 +105,12 @@ final class SkinUploadSocket extends WebSocketClient {
             String xuid = message.get("xuid").getAsString();
             FloodgatePlayer player = api.getPlayer(Utils.getJavaUuid(xuid));
             if (player != null) {
-                applier.applySkin(player, message);
+                if (!message.get("success").getAsBoolean()) {
+                    logger.info("Failed to upload skin for {} ({})", xuid,
+                            player.getCorrectUsername());
+                    return;
+                }
+                applier.applySkin(player, message.getAsJsonObject("data"));
             }
         }
     }
