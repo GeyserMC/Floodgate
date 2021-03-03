@@ -274,6 +274,8 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         super.exceptionCaught(ctx, cause);
-        cause.printStackTrace();
+        if (config.isDebug()) {
+            cause.printStackTrace();
+        }
     }
 }
