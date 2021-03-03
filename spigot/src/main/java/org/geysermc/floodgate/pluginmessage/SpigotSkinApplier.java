@@ -60,7 +60,22 @@ public final class SpigotSkinApplier implements SkinApplier {
 
     @Override
     public void applySkin(FloodgatePlayer floodgatePlayer, JsonObject skinResult) {
+        applySkin0(floodgatePlayer, skinResult, true);
+    }
+
+    private void applySkin0(FloodgatePlayer floodgatePlayer, JsonObject result, boolean firstTry) {
         Player player = Bukkit.getPlayer(floodgatePlayer.getCorrectUniqueId());
+
+        // player is probably not logged in yet
+        if (player == null) {
+            if (firstTry) {
+                Bukkit.getScheduler().runTaskLater(plugin,
+                        () -> applySkin0(floodgatePlayer, result, false),
+                        10 * 1000);
+            }
+            return;
+        }
+
         GameProfile profile = ReflectionUtils.castedInvoke(player, GET_PROFILE_METHOD);
 
         if (profile == null) {
@@ -69,12 +84,11 @@ public final class SpigotSkinApplier implements SkinApplier {
 
         PropertyMap properties = profile.getProperties();
 
-        //todo check if removing all texture properties breaks some stuff
         properties.removeAll("textures");
         Property property = new Property(
                 "textures",
-                skinResult.get("value").getAsString(),
-                skinResult.get("signature").getAsString());
+                result.get("value").getAsString(),
+                result.get("signature").getAsString());
         properties.put("textures", property);
 
         // By running as a task, we don't run into async issues

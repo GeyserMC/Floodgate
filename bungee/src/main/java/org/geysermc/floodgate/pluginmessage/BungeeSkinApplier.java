@@ -43,6 +43,9 @@ public final class BungeeSkinApplier implements SkinApplier {
     @Override
     public void applySkin(FloodgatePlayer uuid, JsonObject skinResult) {
         ProxiedPlayer player = ProxyServer.getInstance().getPlayer(uuid.getCorrectUniqueId());
+        if (player == null) {
+            return;
+        }
 
         InitialHandler handler;
         try {
