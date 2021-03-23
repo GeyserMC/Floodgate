@@ -43,18 +43,6 @@
     <system>GitHub Issues</system>
     <url>https://github.com/GeyserMC/Cumulus/issues</url>
   </issueManagement>
-  <distributionManagement>
-    <repository>
-      <id>releases</id>
-      <name>opencollab-releases</name>
-      <url>https://repo.opencollab.dev/maven-releases</url>
-    </repository>
-    <snapshotRepository>
-      <id>snapshots</id>
-      <name>opencollab-snapshots</name>
-      <url>https://repo.opencollab.dev/maven-snapshots</url>
-    </snapshotRepository>
-  </distributionManagement>
 
   <properties>
     <geyser.version>1.3.0-SNAPSHOT</geyser.version>
