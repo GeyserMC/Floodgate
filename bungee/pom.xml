@@ -16,7 +16,7 @@
     <dependency>
       <groupId>com.github.SpigotMC.BungeeCord</groupId>
       <artifactId>bungeecord-proxy</artifactId>
-      <version>master-SNAPSHOT</version>
+      <version>a7c6ede</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
