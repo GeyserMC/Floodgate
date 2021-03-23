@@ -10,11 +10,12 @@ pipeline {
     stages {
         stage ('Build') {
             steps {
+                sh 'git submodule update --init --recursive'
                 sh 'mvn clean package'
             }
             post {
                 success {
-                    archiveArtifacts artifacts: '**/target/floodgate-*.jar', fingerprint: true
+                    archiveArtifacts artifacts: '**/target/floodgate-*.jar', excludes: "**/target/floodgate-common.jar", fingerprint: true
                 }
             }
         }
