@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.config.loader.ConfigLoader;
 import org.yaml.snakeyaml.Yaml;
 
 @RequiredArgsConstructor
@@ -45,7 +46,7 @@ public final class ConfigUpdater {
     private final ConfigFileUpdater fileUpdater;
     private final FloodgateLogger logger;
 
-    public void update(String defaultConfigLocation) {
+    public void update(ConfigLoader loader, String defaultConfigLocation) {
         Path configLocation = dataFolder.resolve("config.yml");
 
         Map<String, Object> config;
@@ -79,13 +80,27 @@ public final class ConfigUpdater {
                 return;
             }
         } else {
-            logger.warn("You're using a pre-rewrite config file, please note that Floodgate will " +
-                    "throw an exception if you didn't already update your Floodgate key" +
-                    "(across all your servers, including Geyser). " +
-                    "We'll still try to update the config," +
-                    "but please regenerate the keys if it failed before asking for support.");
+            logger.warn("We've detected a pre-rewrite config file, please note that Floodgate " +
+                    "doesn't not work properly if you don't update your Floodgate key used on " +
+                    "all your servers (including Geyser). We'll try to update your Floodgate " +
+                    "config now and we'll also generate a new Floodgate key for you, but if " +
+                    "you're running a network or if you're running a Spigot server with " +
+                    "Geyser Standalone please update as you'll no longer be able to connect.");
             renames.put("enabled", "enable"); //todo make dump system and add a boolean 'found-legacy-key' or something like that
             renames.put("allowed", "allow-linking");
+
+            // relocate the old key so that they can restore it if it was a new key
+            Path keyFilePath = dataFolder.resolve((String) config.get("key-file-name"));
+            if (Files.exists(keyFilePath)) {
+                try {
+                    Files.copy(keyFilePath, dataFolder.resolve("old-key.pem"));
+                } catch (IOException exception) {
+                    throw new RuntimeException(
+                            "Failed to relocate the old key to make place for a new key",
+                            exception);
+                }
+            }
+            loader.generateKey(keyFilePath);
         }
 
         try {
