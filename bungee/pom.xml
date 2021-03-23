@@ -43,7 +43,7 @@
     <dependency>
       <groupId>net.kyori</groupId>
       <artifactId>adventure-text-serializer-gson</artifactId>
-      <version>${adventure-platform.version}</version>
+      <version>${adventure-api.version}</version>
     </dependency>
     <dependency>
       <groupId>net.kyori</groupId>
