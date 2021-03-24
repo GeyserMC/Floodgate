@@ -27,8 +27,8 @@ player-link:
   # Whether to enable the linking system. Turning this off will prevent
   # players from using the linking feature even if they are already linked.
   enabled: true
-  # Whether to use global linking. Global linking uses a central server to request link
-  # accounts, allowing people to link once, join everywhere (on servers with global linking).
+  # Whether to use global linking. Global Linking uses a central server to request linked accounts,
+  # allowing people to link once and join everywhere (on servers with global linking).
   use-global-linking: true
 
   # Uncomment the following lines when you want to use player linking, but you don't want to
