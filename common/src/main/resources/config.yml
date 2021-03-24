@@ -6,7 +6,7 @@ key-file-name: key.pem
 # Floodgate prepends a prefix to bedrock usernames to avoid conflicts
 # However, certain conflicts can cause issues with some plugins so this prefix is configurable using the property below
 # It is recommended to use a prefix that does not contain alphanumerical to avoid the possibility of duplicate usernames.
-username-prefix: "*"
+username-prefix: "."
 
 # Should spaces be replaced with '_' in bedrock usernames?
 replace-spaces: true
@@ -27,25 +27,24 @@ player-link:
   # Whether to enable the linking system. Turning this off will prevent
   # players from using the linking feature even if they are already linked.
   enabled: true
-  # Whether to use global linking. Global linking is that Floodgate uses a central server to link
-  # accounts so that players only have to sign in once and they'll be linked on all servers that
-  # enabled player linking and global linking
+  # Whether to use global linking. Global linking uses a central server to request link
+  # accounts, allowing people to link once, join everywhere (on servers with global linking).
   use-global-linking: true
 
-  # Uncomment the following lines when you want to use account linking, but you don't want to
+  # Uncomment the following lines when you want to use player linking, but you don't want to
   # use the global auth servers. You should normally only disable global linking when
   # your internet access is limited.
 
-#  # Whether to allow the use of /linkaccount and /unlinkaccount
-#  # You can also use allow specific people to use the commands using the
-#  # permissions floodgate.command.linkaccount and floodgate.command.unlinkaccount.
-#  # This is only for linking, already connected people will stay connected
+  # Whether to allow the use of /linkaccount and /unlinkaccount
+  # You can also use allow specific people to use the commands using the
+  # permissions floodgate.command.linkaccount and floodgate.command.unlinkaccount.
+  # This is only for linking, already connected people will stay connected
 #  allowed: true
-#  # The amount of time until a link code expires in seconds
+  # The amount of time until a link code expires in seconds
 #  link-code-timeout: 300
-#  # The database type you want to use.
-#  # The option is only used when there is more then one database implementations found
-#  # in the configuration directory
+  # The database type you want to use.
+  # The option is only used when there is more then one database implementations found
+  # in the configuration directory
 #  type: sqlite
 
 # Do not change this
