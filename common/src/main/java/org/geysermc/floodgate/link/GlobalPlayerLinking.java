@@ -67,9 +67,9 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
                     }
 
                     return LinkedPlayer.of(
-                            data.get("javaName").getAsString(),
-                            UUID.fromString(data.get("javaId").getAsString()),
-                            Utils.getJavaUuid(data.get("bedrockId").getAsLong()));
+                            data.get("java_name").getAsString(),
+                            UUID.fromString(data.get("java_id").getAsString()),
+                            Utils.getJavaUuid(data.get("bedrock_id").getAsLong()));
                 },
                 getExecutorService());
     }
