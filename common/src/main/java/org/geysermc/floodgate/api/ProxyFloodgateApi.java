@@ -26,6 +26,7 @@
 package org.geysermc.floodgate.api;
 
 import java.nio.charset.StandardCharsets;
+import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.util.BedrockData;
@@ -33,8 +34,11 @@ import org.geysermc.floodgate.util.BedrockData;
 public final class ProxyFloodgateApi extends SimpleFloodgateApi {
     private final FloodgateCipher cipher;
 
-    public ProxyFloodgateApi(PluginMessageManager pluginMessageManager, FloodgateCipher cipher) {
-        super(pluginMessageManager);
+    public ProxyFloodgateApi(
+            PluginMessageManager pluginMessageManager,
+            FloodgateConfigHolder configHolder,
+            FloodgateCipher cipher) {
+        super(pluginMessageManager, configHolder);
         this.cipher = cipher;
     }
 

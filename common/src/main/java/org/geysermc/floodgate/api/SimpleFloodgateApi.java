@@ -35,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 import org.geysermc.cumulus.Form;
 import org.geysermc.cumulus.util.FormBuilder;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.player.FloodgatePlayerImpl;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.pluginmessage.channel.FormChannel;
@@ -44,6 +45,12 @@ import org.geysermc.floodgate.util.Utils;
 public class SimpleFloodgateApi implements FloodgateApi {
     private final Map<UUID, FloodgatePlayer> players = new HashMap<>();
     private final PluginMessageManager pluginMessageManager;
+    private final FloodgateConfigHolder configHolder;
+
+    @Override
+    public String getPlayerPrefix() {
+        return configHolder.get().getUsernamePrefix();
+    }
 
     @Override
     public Collection<FloodgatePlayer> getPlayers() {

@@ -41,6 +41,12 @@ public interface FloodgateApi {
     }
 
     /**
+     * Returns the character(s) that will be added in front of a Bedrock player's name to prevent
+     * username duplicates.
+     */
+    String getPlayerPrefix();
+
+    /**
      * Returns all the online Floodgate players.
      */
     Collection<FloodgatePlayer> getPlayers();

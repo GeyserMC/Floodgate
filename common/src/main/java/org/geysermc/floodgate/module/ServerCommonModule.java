@@ -31,6 +31,7 @@ import com.google.inject.name.Named;
 import java.nio.file.Path;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 
 public final class ServerCommonModule extends CommonModule {
@@ -47,7 +48,9 @@ public final class ServerCommonModule extends CommonModule {
 
     @Provides
     @Singleton
-    public SimpleFloodgateApi floodgateApi(PluginMessageManager pluginMessageManager) {
-        return new SimpleFloodgateApi(pluginMessageManager);
+    public SimpleFloodgateApi floodgateApi(
+            PluginMessageManager pluginMessageManager,
+            FloodgateConfigHolder configHolder) {
+        return new SimpleFloodgateApi(pluginMessageManager, configHolder);
     }
 }
