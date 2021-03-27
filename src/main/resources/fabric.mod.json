@@ -16,7 +16,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.geysermc.floodgate.FabricMod"
+      "org.geysermc.floodgate.FabricMod"
     ]
   },
   "accessWidener": "floodgate.accesswidener",

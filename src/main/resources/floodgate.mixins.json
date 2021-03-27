@@ -4,9 +4,9 @@
   "package": "com.geysermc.floodgate.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "HandshakeC2SPacketMixin",
-    "ServerLoginNetworkHandlerMixin",
-    "ServerNetworkIoMixin"
+    "org.geysermc.floodgate.mixin.HandshakeC2SPacketMixin",
+    "org.geysermc.floodgate.mixin.ServerLoginNetworkHandlerMixin",
+    "org.geysermc.floodgate.mixin.ServerNetworkIoMixin"
   ],
   "injectors": {
     "defaultRequire": 1
