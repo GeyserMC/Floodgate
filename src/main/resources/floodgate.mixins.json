@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.geysermc.floodgate.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "HandshakeC2SPacketMixin",
+    "ServerLoginNetworkHandlerMixin",
+    "ServerNetworkIoMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
