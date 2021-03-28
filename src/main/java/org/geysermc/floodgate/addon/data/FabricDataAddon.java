@@ -12,7 +12,7 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.util.Utils;
 
-public class FabricDataAddon implements InjectorAddon {
+public final class FabricDataAddon implements InjectorAddon {
     @Inject private FloodgateHandshakeHandler handshakeHandler;
     @Inject private FloodgateConfig config;
     @Inject private SimpleFloodgateApi api;

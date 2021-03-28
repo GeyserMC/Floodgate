@@ -10,7 +10,7 @@ import org.geysermc.floodgate.util.LanguageManager;
 import static org.geysermc.floodgate.util.MessageFormatter.format;
 
 @RequiredArgsConstructor
-public class Log4jFloodgateLogger implements FloodgateLogger {
+public final class Log4jFloodgateLogger implements FloodgateLogger {
     private final Logger logger;
     private final LanguageManager languageManager;
 

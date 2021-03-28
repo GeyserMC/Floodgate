@@ -1,7 +1,10 @@
 package org.geysermc.floodgate.module;
 
 import org.geysermc.floodgate.inject.fabric.FabricInjector;
+import org.geysermc.floodgate.listener.FabricEventListener;
+import org.geysermc.floodgate.listener.FabricEventRegistration;
 import org.geysermc.floodgate.logger.Log4jFloodgateLogger;
+import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 import org.geysermc.floodgate.pluginmessage.FabricSkinApplier;
 import org.geysermc.floodgate.util.FabricCommandUtil;
 import com.google.inject.AbstractModule;
@@ -20,7 +23,7 @@ import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.util.LanguageManager;
 
 @RequiredArgsConstructor
-public class FabricPlatformModule extends AbstractModule {
+public final class FabricPlatformModule extends AbstractModule {
     private final MinecraftServer server;
     private final FabricServerAudiences adventure;
 
@@ -49,6 +52,12 @@ public class FabricPlatformModule extends AbstractModule {
             FloodgateLogger logger,
             LanguageManager languageManager) {
         return new FabricCommandUtil(adventure, api, logger, languageManager, server);
+    }
+
+    @Provides
+    @Singleton
+    public ListenerRegistration<FabricEventListener> listenerRegistration() {
+        return new FabricEventRegistration();
     }
 
     /*

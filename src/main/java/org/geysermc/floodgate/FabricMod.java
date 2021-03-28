@@ -1,9 +1,6 @@
 package org.geysermc.floodgate;
 
 import org.geysermc.floodgate.inject.fabric.FabricInjector;
-import org.geysermc.floodgate.module.FabricAddonModule;
-import org.geysermc.floodgate.module.FabricCommandModule;
-import org.geysermc.floodgate.module.FabricPlatformModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import net.fabricmc.api.ModInitializer;
@@ -12,6 +9,10 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.minecraft.server.MinecraftServer;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.module.FabricAddonModule;
+import org.geysermc.floodgate.module.FabricCommandModule;
+import org.geysermc.floodgate.module.FabricListenerModule;
+import org.geysermc.floodgate.module.FabricPlatformModule;
 import org.geysermc.floodgate.module.ServerCommonModule;
 
 public class FabricMod implements ModInitializer {
@@ -35,7 +36,8 @@ public class FabricMod implements ModInitializer {
             injector.getInstance(FabricPlatform.class)
                     .enable(
                             new FabricAddonModule(),
-                            new FabricCommandModule()
+                            new FabricCommandModule(),
+                            new FabricListenerModule()
                     );
 
             long endCtm = System.currentTimeMillis();

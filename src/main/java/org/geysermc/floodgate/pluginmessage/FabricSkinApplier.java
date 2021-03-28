@@ -13,7 +13,7 @@ import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.skin.SkinApplier;
 
 @RequiredArgsConstructor
-public class FabricSkinApplier implements SkinApplier {
+public final class FabricSkinApplier implements SkinApplier {
     private final MinecraftServer server;
 
     @Override

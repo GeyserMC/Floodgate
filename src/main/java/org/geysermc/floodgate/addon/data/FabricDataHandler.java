@@ -20,7 +20,7 @@ import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.Constants;
 
 @RequiredArgsConstructor
-public class FabricDataHandler extends ChannelInboundHandlerAdapter {
+public final class FabricDataHandler extends ChannelInboundHandlerAdapter {
     private final FloodgateConfig config;
     private final FloodgateHandshakeHandler handshakeHandler;
     private final FloodgateLogger logger;

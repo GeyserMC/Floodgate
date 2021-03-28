@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 
 @RequiredArgsConstructor
-public class FabricInjector extends CommonPlatformInjector {
+public final class FabricInjector extends CommonPlatformInjector {
     private static FabricInjector instance;
 
     @Getter private final boolean injected = true;

@@ -14,7 +14,7 @@ import java.net.InetAddress;
 import java.util.List;
 
 @Mixin(ServerNetworkIo.class)
-public class ServerNetworkIoMixin {
+public abstract class ServerNetworkIoMixin {
 
     @Shadow @Final private List<ChannelFuture> channels;
 

@@ -15,7 +15,7 @@ import org.geysermc.floodgate.player.UserAudience;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-public class FabricUserAudience implements UserAudience, ForwardingAudience.Single {
+public final class FabricUserAudience implements UserAudience, ForwardingAudience.Single {
     private final UUID uuid;
     private final String locale;
     private final ServerCommandSource source;

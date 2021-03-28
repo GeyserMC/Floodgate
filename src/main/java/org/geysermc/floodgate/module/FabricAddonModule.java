@@ -9,7 +9,7 @@ import org.geysermc.floodgate.addon.DebugAddon;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.register.AddonRegister;
 
-public class FabricAddonModule extends AbstractModule {
+public final class FabricAddonModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(AddonRegister.class).asEagerSingleton();

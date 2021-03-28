@@ -24,7 +24,7 @@ import org.geysermc.floodgate.player.UserAudienceArgument;
 import java.util.*;
 
 @RequiredArgsConstructor
-public class FabricCommandUtil implements CommandUtil {
+public final class FabricCommandUtil implements CommandUtil {
     @Getter private final FabricServerAudiences adventure;
     @Getter private final FloodgateApi api;
     @Getter private final FloodgateLogger logger;

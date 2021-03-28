@@ -7,7 +7,7 @@ import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 
-public class FabricPlatform extends FloodgatePlatform {
+public final class FabricPlatform extends FloodgatePlatform {
     @Inject
     public FabricPlatform(FloodgateApi api, PlatformInjector platformInjector, FloodgateLogger logger, Injector guice) {
         super(api, platformInjector, logger, guice);
