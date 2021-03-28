@@ -57,6 +57,18 @@ public class FloodgateConfig {
         private boolean allowLinking;
         @JsonProperty("link-code-timeout")
         private long linkCodeTimeout;
+        @JsonProperty("database-hostname")
+        private String databaseHostname;
+        @JsonProperty("database-port")
+        private Integer databasePort;
+        @JsonProperty("database-username")
+        private String databaseUsername;
+        @JsonProperty("database-password")
+        private String databasePassword;
+        @JsonProperty("database-name")
+        private String databaseName;
+        @JsonProperty("database-prefix")
+        private String databasePrefix;
     }
 
     public static FloodgateConfig load(Logger logger, Path configPath) {

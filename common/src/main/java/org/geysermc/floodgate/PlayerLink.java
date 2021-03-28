@@ -2,6 +2,7 @@ package org.geysermc.floodgate;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.geysermc.floodgate.link.MySQLPlayerLink;
 import org.geysermc.floodgate.link.SQLitePlayerLink;
 
 import java.nio.file.Path;
@@ -17,6 +18,13 @@ public abstract class PlayerLink {
     @Getter private static boolean enabled;
     @Getter private static long verifyLinkTimeout;
     @Getter private static boolean allowLinking;
+
+    @Getter private static String databaseHostname;
+    @Getter private static Integer databasePort;
+    @Getter private static String databaseUsername;
+    @Getter private static String databasePassword;
+    @Getter private static String databaseName;
+    @Getter private static String databasePrefix;
 
     @Getter private final ExecutorService executorService = Executors.newFixedThreadPool(11);
     @Getter private Logger logger;
@@ -43,6 +51,13 @@ public abstract class PlayerLink {
             PlayerLink.enabled = linkConfig.isEnabled();
             PlayerLink.verifyLinkTimeout = linkConfig.getLinkCodeTimeout();
             PlayerLink.allowLinking = linkConfig.isAllowLinking();
+            PlayerLink.databaseHostname = linkConfig.getDatabaseHostname();
+            PlayerLink.databasePort = linkConfig.getDatabasePort();
+            PlayerLink.databaseUsername = linkConfig.getDatabaseUsername();
+            PlayerLink.databasePassword = linkConfig.getDatabasePassword();
+            PlayerLink.databaseName = linkConfig.getDatabaseName();
+            PlayerLink.databasePrefix = linkConfig.getDatabasePrefix();
+
             instance.logger = logger;
             instance.load(dataFolder);
             return instance;
@@ -69,7 +84,8 @@ public abstract class PlayerLink {
     @AllArgsConstructor
     @Getter
     public enum ImplementationType {
-        SQLITE(SQLitePlayerLink::new);
+        SQLITE(SQLitePlayerLink::new),
+        MYSQL(MySQLPlayerLink::new);
 
         private Supplier<? extends PlayerLink> instanceSupplier;
 

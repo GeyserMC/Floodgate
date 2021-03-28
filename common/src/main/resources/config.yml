@@ -25,8 +25,17 @@ player-link:
   # players from using the linking feature even if they are already linked.
   enable: false
   # The type of storage system you want to use
-  # Currently implemented: SQLite
+  # Currently implemented: SQLite, MySQL
   type: sqlite
+
+  # MySQL related config
+  database-hostname: localhost
+  database-port: 3306
+  database-username: floodgate
+  database-password: s3cur3pa55
+  database-name: floodgate
+  database-prefix: floodgate_
+
   # Whether to allow the use of /linkaccount and /unlinkaccount
   # You can also use allow specific people to use the commands using the
   # permissions floodgate.linkaccount and floodgate.unlinkaccount.
