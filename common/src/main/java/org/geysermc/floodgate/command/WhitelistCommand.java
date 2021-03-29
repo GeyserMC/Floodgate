@@ -143,7 +143,7 @@ public class WhitelistCommand implements FloodgateCommand {
     @Override
     public boolean shouldRegister(FloodgateConfig config) {
         // currently only Spigot (our only non-Proxy platform) has a whitelist build-in.
-        return config instanceof ProxyFloodgateConfig;
+        return !(config instanceof ProxyFloodgateConfig);
     }
 
     @Getter
