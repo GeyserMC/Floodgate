@@ -14,12 +14,13 @@ import org.geysermc.floodgate.skin.SkinApplier;
 
 @RequiredArgsConstructor
 public final class FabricSkinApplier implements SkinApplier {
-    private final MinecraftServer server;
+    // See FabricCommandUtil
+    private static MinecraftServer SERVER;
 
     @Override
     public void applySkin(FloodgatePlayer floodgatePlayer, JsonObject skinResult) {
-        this.server.execute(() -> {
-            ServerPlayerEntity bedrockPlayer = this.server.getPlayerManager().getPlayer(floodgatePlayer.getCorrectUniqueId());
+        SERVER.execute(() -> {
+            ServerPlayerEntity bedrockPlayer = SERVER.getPlayerManager().getPlayer(floodgatePlayer.getCorrectUniqueId());
             if (bedrockPlayer == null) {
                 // Disconnected probably?
                 return;
@@ -36,7 +37,7 @@ public final class FabricSkinApplier implements SkinApplier {
             properties.put("textures", property);
 
             // Skin is applied - now it's time to refresh the player for everyone. Oof.
-            for (ServerPlayerEntity otherPlayer : this.server.getPlayerManager().getPlayerList()) {
+            for (ServerPlayerEntity otherPlayer : SERVER.getPlayerManager().getPlayerList()) {
                 if (otherPlayer == bedrockPlayer) {
                     continue;
                 }
@@ -54,5 +55,9 @@ public final class FabricSkinApplier implements SkinApplier {
                 }
             }
         });
+    }
+
+    public static void setServer(MinecraftServer server) {
+        SERVER = server;
     }
 }

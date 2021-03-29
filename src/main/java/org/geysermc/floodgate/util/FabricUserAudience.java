@@ -1,6 +1,7 @@
 package org.geysermc.floodgate.util;
 
 import lombok.RequiredArgsConstructor;
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.audience.MessageType;
@@ -15,7 +16,7 @@ import org.geysermc.floodgate.player.UserAudience;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-public final class FabricUserAudience implements UserAudience, ForwardingAudience.Single {
+public class FabricUserAudience implements UserAudience, ForwardingAudience.Single {
     private final UUID uuid;
     private final String locale;
     private final ServerCommandSource source;
@@ -33,6 +34,10 @@ public final class FabricUserAudience implements UserAudience, ForwardingAudienc
 
     @Override
     public @NonNull String username() {
+        if (source == null) {
+            return "";
+        }
+
         return source.getName();
     }
 
@@ -48,17 +53,12 @@ public final class FabricUserAudience implements UserAudience, ForwardingAudienc
 
     @Override
     public boolean hasPermission(@NonNull String permission) {
-        //TODO
-        return true;
+        return Permissions.check(source, permission);
     }
 
     @Override
     public void sendMessage(@NonNull Identity source, @NonNull Component message, @NonNull MessageType type) {
-        if (this.source.getEntity() instanceof ServerPlayerEntity) {
-            ((ServerPlayerEntity) this.source.getEntity()).sendMessage(
-                    commandUtil.getAdventure().toNative(message), false
-            );
-        }
+        commandUtil.getAdventure().audience(this.source).sendMessage(message);
     }
 
     @Override
@@ -81,6 +81,36 @@ public final class FabricUserAudience implements UserAudience, ForwardingAudienc
             ((ServerPlayerEntity) source.getEntity()).networkHandler.disconnect(
                     commandUtil.translateAndTransform(this.locale, message, args)
             );
+        }
+    }
+
+    /**
+     * Used whenever a name has been explicitly defined for us. Most helpful in offline players.
+     */
+    public static final class NamedFabricUserAudience extends FabricUserAudience implements PlayerAudience {
+        private final String name;
+        private final boolean online;
+
+        public NamedFabricUserAudience(
+                String name,
+                UUID uuid,
+                String locale,
+                ServerCommandSource source,
+                FabricCommandUtil commandUtil,
+                boolean online) {
+            super(uuid, locale, source, commandUtil);
+            this.name = name;
+            this.online = online;
+        }
+
+        @Override
+        public @NonNull String username() {
+            return name;
+        }
+
+        @Override
+        public boolean online() {
+            return online;
         }
     }
 }

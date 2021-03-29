@@ -25,11 +25,15 @@ import java.util.*;
 
 @RequiredArgsConstructor
 public final class FabricCommandUtil implements CommandUtil {
-    @Getter private final FabricServerAudiences adventure;
+    // Static because commands *need* to be initialized before the server is available
+    // Otherwise it would be a class variable
+    private static MinecraftServer SERVER;
+    // This one also requires the server so it's bundled in
+    private static FabricServerAudiences ADVENTURE;
+
     @Getter private final FloodgateApi api;
     @Getter private final FloodgateLogger logger;
     @Getter private final LanguageManager manager;
-    @Getter private final MinecraftServer server;
 
     @Override
     public @NonNull UserAudience getAudience(@NonNull Object source) {
@@ -46,8 +50,8 @@ public final class FabricCommandUtil implements CommandUtil {
     }
 
     @Override
-    public @Nullable UserAudience getAudienceByUuid(@NonNull UUID uuid) {
-        ServerPlayerEntity player = this.server.getPlayerManager().getPlayer(uuid);
+    public UserAudience getAudienceByUuid(@NonNull UUID uuid) {
+        ServerPlayerEntity player = SERVER.getPlayerManager().getPlayer(uuid);
         if (player != null) {
             return getAudience0(player);
         }
@@ -55,8 +59,8 @@ public final class FabricCommandUtil implements CommandUtil {
     }
 
     @Override
-    public @Nullable UserAudience getAudienceByUsername(@NonNull String username) {
-        ServerPlayerEntity player = this.server.getPlayerManager().getPlayer(username);
+    public UserAudience getAudienceByUsername(@NonNull String username) {
+        ServerPlayerEntity player = SERVER.getPlayerManager().getPlayer(username);
         if (player != null) {
             return getAudience0(player);
         }
@@ -66,10 +70,11 @@ public final class FabricCommandUtil implements CommandUtil {
     private FabricUserAudience getAudience0(ServerPlayerEntity player) {
         // Marked as internal??? Should probably find a better way to get this.
         Locale locale = ((ConnectionAccess) player.networkHandler.getConnection()).getChannel().attr(FriendlyByteBufBridge.CHANNEL_LOCALE).get();
-        return new FabricUserAudience(
+        return new FabricUserAudience.NamedFabricUserAudience(
+                player.getName().asString(),
                 player.getUuid(), locale != null ?
                 locale.getLanguage().toLowerCase(Locale.ROOT) + "_" + locale.getCountry().toUpperCase(Locale.ROOT) :
-                manager.getDefaultLocale(), player.getCommandSource(), this);
+                manager.getDefaultLocale(), player.getCommandSource(), this, true);
     }
 
     @Override
@@ -80,16 +85,16 @@ public final class FabricCommandUtil implements CommandUtil {
     @Override
     public @NonNull UserAudience getOfflineAudienceByUsername(@NonNull String username) {
         UUID uuid = null;
-        GameProfile profile = this.server.getUserCache().findByName(username);
+        GameProfile profile = SERVER.getUserCache().findByName(username);
         if (profile != null) {
             uuid = profile.getId();
         }
-        return new FabricUserAudience(uuid, username, null, this);
+        return new FabricUserAudience.NamedFabricUserAudience(username, uuid, username, null, this, false);
     }
 
     @Override
     public @NonNull Collection<String> getOnlineUsernames(UserAudienceArgument.@NonNull PlayerType limitTo) {
-        List<ServerPlayerEntity> players = this.server.getPlayerManager().getPlayerList();
+        List<ServerPlayerEntity> players = SERVER.getPlayerManager().getPlayerList();
 
         Collection<String> usernames = new ArrayList<>();
         switch (limitTo) {
@@ -120,7 +125,14 @@ public final class FabricCommandUtil implements CommandUtil {
 
     @Override
     public void sendMessage(Object player, String locale, CommandMessage message, Object... args) {
-        getPlayer(player).sendMessage(translateAndTransform(locale, message, args), false);
+        ServerCommandSource commandSource = (ServerCommandSource) player;
+        if (commandSource.getEntity() instanceof ServerPlayerEntity) {
+            SERVER.execute(() -> ((ServerPlayerEntity) commandSource.getEntity())
+                    .sendMessage(translateAndTransform(locale, message, args), false));
+        } else {
+            // Console?
+            logger.info(message.translateMessage(manager, locale, args));
+        }
     }
 
     @Override
@@ -131,14 +143,14 @@ public final class FabricCommandUtil implements CommandUtil {
     @Override
     public boolean whitelistPlayer(String xuid, String username) {
         GameProfile profile = new GameProfile(Utils.getJavaUuid(xuid), username);
-        this.server.getPlayerManager().getWhitelist().add(new WhitelistEntry(profile));
+        SERVER.getPlayerManager().getWhitelist().add(new WhitelistEntry(profile));
         return true;
     }
 
     @Override
     public boolean removePlayerFromWhitelist(String xuid, String username) {
         GameProfile profile = new GameProfile(Utils.getJavaUuid(xuid), username);
-        this.server.getPlayerManager().getWhitelist().remove(profile);
+        SERVER.getPlayerManager().getWhitelist().remove(profile);
         return true;
     }
 
@@ -147,12 +159,21 @@ public final class FabricCommandUtil implements CommandUtil {
             ServerCommandSource source = (ServerCommandSource) instance;
             return source.getPlayer();
         } catch (ClassCastException | CommandSyntaxException exception) {
-            logger.error("Failed to cast {} to Player", instance.getClass().getName());
+            logger.error("Failed to cast {} as a player", instance.getClass().getName());
             throw new RuntimeException();
         }
     }
 
     public Text translateAndTransform(String locale, CommandMessage message, Object... args) {
         return Text.of(message.translateMessage(manager, locale, args));
+    }
+
+    public FabricServerAudiences getAdventure() {
+        return ADVENTURE;
+    }
+
+    public static void setLaterVariables(MinecraftServer server, FabricServerAudiences adventure) {
+        SERVER = server;
+        ADVENTURE = adventure;
     }
 }

@@ -12,8 +12,6 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import lombok.RequiredArgsConstructor;
-import net.kyori.adventure.platform.fabric.FabricServerAudiences;
-import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -24,20 +22,6 @@ import org.geysermc.floodgate.util.LanguageManager;
 
 @RequiredArgsConstructor
 public final class FabricPlatformModule extends AbstractModule {
-    private final MinecraftServer server;
-    private final FabricServerAudiences adventure;
-
-    @Provides
-    @Singleton
-    public MinecraftServer server() {
-        return server;
-    }
-
-    @Provides
-    @Singleton
-    public FabricServerAudiences adventure() {
-        return adventure;
-    }
 
     @Provides
     @Singleton
@@ -51,7 +35,7 @@ public final class FabricPlatformModule extends AbstractModule {
             FloodgateApi api,
             FloodgateLogger logger,
             LanguageManager languageManager) {
-        return new FabricCommandUtil(adventure, api, logger, languageManager, server);
+        return new FabricCommandUtil(api, logger, languageManager);
     }
 
     @Provides
@@ -96,7 +80,7 @@ public final class FabricPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public SkinApplier skinApplier(MinecraftServer server) {
-        return new FabricSkinApplier(server);
+    public SkinApplier skinApplier() {
+        return new FabricSkinApplier();
     }
 }
