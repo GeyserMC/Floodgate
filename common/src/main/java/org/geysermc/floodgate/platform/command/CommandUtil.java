@@ -50,14 +50,14 @@ public interface CommandUtil {
     @NonNull Collection<String> getOnlineUsernames(final @NonNull PlayerType limitTo);
 
     /**
-     * Send a message to the specified player, no matter what platform Floodgate is running on.
+     * Send a message to the specified target, no matter what platform Floodgate is running on.
      *
-     * @param player  the player to send the message to
+     * @param target  the target to send the message to
      * @param message the command message
      * @param locale  the locale of the player
      * @param args    the arguments
      */
-    void sendMessage(Object player, String locale, CommandMessage message, Object... args);
+    void sendMessage(Object target, String locale, CommandMessage message, Object... args);
 
     /**
      * Same as {@link CommandUtil#sendMessage(Object, String, CommandMessage, Object...)} except it
@@ -75,9 +75,12 @@ public interface CommandUtil {
      *
      * @param xuid     the xuid of the username to be whitelisted
      * @param username the username to be whitelisted
-     * @return true if the player has been whitelisted, false if the player was already whitelisted
+     * @return true if the player has been whitelisted, false if the player was already whitelisted.
+     * Defaults to false when this platform doesn't support whitelisting.
      */
-    boolean whitelistPlayer(String xuid, String username);
+    default boolean whitelistPlayer(String xuid, String username) {
+        return false;
+    }
 
     /**
      * Removes the given Bedrock player from the whitelist.
@@ -85,7 +88,9 @@ public interface CommandUtil {
      * @param xuid     the xuid of the username to be removed from the whitelist
      * @param username the username to be removed from the whitelist
      * @return true if the player has been removed from the whitelist, false if the player wasn't
-     * whitelisted
+     * whitelisted. Defaults to false when this platform doesn't support whitelisting.
      */
-    boolean removePlayerFromWhitelist(String xuid, String username);
+    default boolean removePlayerFromWhitelist(String xuid, String username) {
+        return false;
+    }
 }
