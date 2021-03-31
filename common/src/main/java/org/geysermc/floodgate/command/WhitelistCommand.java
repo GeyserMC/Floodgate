@@ -83,7 +83,11 @@ public class WhitelistCommand implements FloodgateCommand {
 
         // todo let it use translations
 
-        final String tempName = name;
+        String prefixedName = name;
+        if (config.isReplaceSpaces()) {
+            prefixedName = prefixedName.replace(' ', '_');
+        }
+        String finalName = config.getUsernamePrefix() + prefixedName;
 
         HttpUtils.asyncGet(Constants.GET_XUID_URL + name)
                 .whenComplete((result, error) -> {
@@ -115,13 +119,13 @@ public class WhitelistCommand implements FloodgateCommand {
 
                     try {
                         if (add) {
-                            if (commandUtil.whitelistPlayer(xuid, tempName)) {
+                            if (commandUtil.whitelistPlayer(xuid, finalName)) {
                                 sender.sendMessage(Message.PLAYER_ADDED);
                             } else {
                                 sender.sendMessage(Message.PLAYER_ALREADY_WHITELISTED);
                             }
                         } else {
-                            if (commandUtil.removePlayerFromWhitelist(xuid, tempName)) {
+                            if (commandUtil.removePlayerFromWhitelist(xuid, finalName)) {
                                 sender.sendMessage(Message.PLAYER_REMOVED);
                             } else {
                                 sender.sendMessage(Message.PLAYER_NOT_WHITELISTED);
