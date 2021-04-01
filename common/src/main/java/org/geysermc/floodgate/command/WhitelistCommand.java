@@ -36,6 +36,7 @@ import com.google.inject.Inject;
 import lombok.Getter;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.platform.command.CommandMessage;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
@@ -137,6 +138,12 @@ public class WhitelistCommand implements FloodgateCommand {
     @Override
     public void execute(CommandContext<UserAudience> context) {
         // ignored, all the logic is in the other method
+    }
+
+    @Override
+    public boolean shouldRegister(FloodgateConfig config) {
+        // currently only Spigot (our only non-Proxy platform) has a whitelist build-in.
+        return !(config instanceof ProxyFloodgateConfig);
     }
 
     @Getter

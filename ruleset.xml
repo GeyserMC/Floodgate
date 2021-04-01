@@ -13,7 +13,6 @@
   <exclude-pattern>.*/DefaultConfigHandler.*</exclude-pattern><!-- NullAssignment -->
   <exclude-pattern>.*/ConfigFileUpdater.*</exclude-pattern><!-- NullAssignment -->
   <exclude-pattern>.*/FloodgateConfig.*</exclude-pattern><!-- RedundantFieldInitializer -->
-  <exclude-pattern>.*/MariadbDatabase.*</exclude-pattern>
 
   <rule ref="category/java/bestpractices.xml/MissingOverride" />
   <rule ref="category/java/bestpractices.xml/UseCollectionIsEmpty" />

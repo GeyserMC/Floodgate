@@ -136,8 +136,8 @@ public final class SpigotCommandUtil implements CommandUtil {
     }
 
     @Override
-    public void sendMessage(Object player, String locale, CommandMessage message, Object... args) {
-        cast(player).sendMessage(translateAndTransform(locale, message, args));
+    public void sendMessage(Object target, String locale, CommandMessage message, Object... args) {
+        ((CommandSender) target).sendMessage(translateAndTransform(locale, message, args));
     }
 
     @Override
