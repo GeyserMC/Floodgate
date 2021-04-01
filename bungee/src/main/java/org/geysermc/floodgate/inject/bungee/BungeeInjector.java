@@ -26,16 +26,16 @@
 package org.geysermc.floodgate.inject.bungee;
 
 import io.netty.channel.Channel;
-import java.util.function.Consumer;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.CtField;
-import javassist.CtMethod;
-import javassist.Modifier;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInitializer;
+import java.lang.reflect.Field;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.md_5.bungee.netty.PipelineUtils;
+import net.md_5.bungee.protocol.Varint21LengthFieldPrepender;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
+import org.geysermc.floodgate.util.BungeeReflectionUtils;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
 @RequiredArgsConstructor
@@ -46,38 +46,19 @@ public final class BungeeInjector extends CommonPlatformInjector {
     @Override
     public boolean inject() {
         try {
-            // short version: needed a reliable way to access the encoder and decoder before the
-            // handshake packet.
+            // Can everyone just switch to Velocity please :)
 
-            ClassPool classPool = ClassPool.getDefault();
+            Field framePrepender = ReflectionUtils.getField(PipelineUtils.class, "framePrepender");
 
-            CtClass handlerBossClass = classPool.get("net.md_5.bungee.netty.HandlerBoss");
+            // we have to remove the final modifier before asking for the value
+            // because we can't remove it after we got the current value
+            BungeeReflectionUtils.removeFinal(framePrepender);
 
-            // create a new field that we can access
-            CtField channelConsumerField = new CtField(
-                    classPool.get("java.util.function.Consumer"), "channelConsumer",
-                    handlerBossClass
+            BungeeCustomPrepender customPrepender = new BungeeCustomPrepender(
+                    ReflectionUtils.getCastedValue(null, framePrepender)
             );
-            channelConsumerField.setModifiers(Modifier.PUBLIC | Modifier.STATIC);
-            handlerBossClass.addField(channelConsumerField);
 
-            // edit a method to call the new field when we need it
-            CtMethod channelActiveMethod = handlerBossClass.getMethod(
-                    "channelActive", "(Lio/netty/channel/ChannelHandlerContext;)V");
-            channelActiveMethod.insertBefore(
-                    "{if (handler != null) {channelConsumer.accept(ctx.channel());}}");
-
-            Class<?> clazz = handlerBossClass.toClass();
-
-            Consumer<Channel> channelConsumer = channel ->
-                    injectClient(channel, channel.parent() != null);
-
-            // set the field we just made
-            ReflectionUtils.setValue(
-                    null,
-                    ReflectionUtils.getField(clazz, "channelConsumer"),
-                    channelConsumer
-            );
+            ReflectionUtils.setValue(null, framePrepender, customPrepender);
 
             injected = true;
             return true;
@@ -100,5 +81,27 @@ public final class BungeeInjector extends CommonPlatformInjector {
             channelClosedCall(channel);
             removeInjectedClient(channel);
         });
+    }
+
+    @RequiredArgsConstructor
+    private final class BungeeCustomPrepender extends Varint21LengthFieldPrepender {
+        private final Varint21LengthFieldPrepender original;
+
+        @Override
+        public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+            original.handlerAdded(ctx);
+            ctx.executor().execute(
+                    () -> ctx.channel().pipeline().addFirst(new BungeeInjectorInitializer()));
+        }
+    }
+
+    private final class BungeeInjectorInitializer extends ChannelInitializer<Channel> {
+        @Override
+        protected void initChannel(Channel channel) {
+            if (!channel.isOpen()) {
+                return;
+            }
+            injectClient(channel, channel.parent() != null);
+        }
     }
 }
