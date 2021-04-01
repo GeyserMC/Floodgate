@@ -46,7 +46,6 @@ import org.geysermc.floodgate.config.loader.ConfigLoader;
 import org.geysermc.floodgate.link.PlayerLinkLoader;
 import org.geysermc.floodgate.module.ConfigLoadedModule;
 import org.geysermc.floodgate.module.PostInitializeModule;
-import org.geysermc.floodgate.properties.FloodgateGitPropertiesHolder;
 import org.geysermc.floodgate.util.FileUtils;
 import org.geysermc.floodgate.util.PrefixCheckTask;
 
@@ -78,7 +77,6 @@ public class FloodgatePlatform {
             @Named("dataDirectory") Path dataDirectory,
             ConfigLoader configLoader,
             FloodgateConfigHolder configHolder,
-            FloodgateGitPropertiesHolder gitPropertiesHolder,
             HandshakeHandlers handshakeHandlers) {
 
         if (!Files.isDirectory(dataDirectory)) {
@@ -100,10 +98,9 @@ public class FloodgatePlatform {
         Properties gitProperties = new Properties();
         try {
             gitProperties.load(FileUtils.getResource("git.properties"));
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
         }
-        gitPropertiesHolder.set(gitProperties);
+        org.geysermc.floodgate.util.FloodgateGitPropertiesHolder.setGitProperties(gitProperties);
 
         guice = guice.createChildInjector(new ConfigLoadedModule(config));
         PlayerLink link = guice.getInstance(PlayerLinkLoader.class).load();
