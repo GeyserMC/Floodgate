@@ -278,7 +278,8 @@ public final class ReflectionUtils {
      */
     @Nullable
     public static Method getMethod(
-            Class<?> clazz, String method,
+            Class<?> clazz,
+            String method,
             boolean declared,
             Class<?>... arguments) {
         try {
@@ -355,7 +356,7 @@ public final class ReflectionUtils {
         Method[] methods = declared ? clazz.getDeclaredMethods() : clazz.getMethods();
         for (Method method : methods) {
             for (Class<?> parameter : method.getParameterTypes()) {
-                if (parameter == paramType) {
+                if (parameter.equals(paramType)) {
                     return method;
                 }
             }
@@ -439,9 +440,7 @@ public final class ReflectionUtils {
      * @return the accessibleObject
      */
     public static <T extends AccessibleObject> T makeAccessible(T accessibleObject) {
-        if (!accessibleObject.isAccessible()) {
-            accessibleObject.setAccessible(true);
-        }
+        accessibleObject.setAccessible(true);
         return accessibleObject;
     }
 }

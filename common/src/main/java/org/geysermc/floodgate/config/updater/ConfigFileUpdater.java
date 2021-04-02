@@ -84,6 +84,11 @@ public final class ConfigFileUpdater {
                 map = null;
             }
 
+            // ignore comments
+            if (line.charAt(currentSpaces.length()) == '#') {
+                continue;
+            }
+
             int splitIndex = line.indexOf(':');
             // if the line has a 'key: value' structure
             if (splitIndex != -1) {
@@ -97,13 +102,25 @@ public final class ConfigFileUpdater {
 
                     spaces = "  ";
                     //todo allow rename of subcategory?
+                    //noinspection unchecked
                     map = (Map<String, Object>) currentVersion.get(line.substring(0, splitIndex));
-                    map.entrySet().forEach(System.out::println);
                     continue;
                 }
 
                 String name = line.substring(spaces.length(), splitIndex);
-                String oldName = renames.getOrDefault(name, name);
+
+                // don't change the config-version to the old value!
+                if (name.equals("config-version")) {
+                    continue;
+                }
+
+                // allow multiple renames
+                String tempName;
+                String oldName = name;
+                do {
+                    tempName = oldName;
+                    oldName = renames.getOrDefault(oldName, oldName);
+                } while (!oldName.equals(tempName));
 
                 Object value;
                 if (map != null) {

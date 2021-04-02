@@ -41,11 +41,13 @@ import org.geysermc.floodgate.api.link.LinkRequestResult;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.link.GlobalPlayerLinking;
 import org.geysermc.floodgate.platform.command.CommandMessage;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.player.UserAudience.PlayerAudience;
 import org.geysermc.floodgate.player.UserAudienceArgument;
+import org.geysermc.floodgate.util.Constants;
 
 @NoArgsConstructor
 public final class LinkAccountCommand implements FloodgateCommand {
@@ -69,8 +71,21 @@ public final class LinkAccountCommand implements FloodgateCommand {
         UserAudience sender = context.getSender();
 
         PlayerLink link = api.getPlayerLink();
+
+        //todo make this less hacky
+        if (link instanceof GlobalPlayerLinking) {
+            if (((GlobalPlayerLinking) link).getDatabaseImpl() != null) {
+                sender.sendMessage(CommonCommandMessage.LOCAL_LINKING_NOTICE,
+                        Constants.LINK_INFO_URL);
+            } else {
+                sender.sendMessage(CommonCommandMessage.GLOBAL_LINKING_NOTICE,
+                        Constants.LINK_INFO_URL);
+                return;
+            }
+        }
+
         if (!link.isEnabledAndAllowed()) {
-            sender.sendMessage(Message.LINK_REQUEST_DISABLED);
+            sender.sendMessage(CommonCommandMessage.LINKING_DISABLED);
             return;
         }
 
@@ -144,7 +159,9 @@ public final class LinkAccountCommand implements FloodgateCommand {
 
     @Override
     public boolean shouldRegister(FloodgateConfig config) {
-        return !config.getPlayerLink().isUseGlobalLinking();
+        FloodgateConfig.PlayerLinkConfig linkConfig = config.getPlayerLink();
+        return linkConfig.isEnabled() &&
+                (linkConfig.isEnableOwnLinking() || linkConfig.isEnableGlobalLinking());
     }
 
     @Getter
@@ -157,8 +174,7 @@ public final class LinkAccountCommand implements FloodgateCommand {
         LINK_REQUEST_COMPLETED("floodgate.command.link_account.link_request_completed"),
         LINK_REQUEST_ERROR("floodgate.command.link_request.error " + CHECK_CONSOLE),
         INVALID_CODE("floodgate.command.link_account.invalid_code"),
-        NO_LINK_REQUESTED("floodgate.command.link_account.no_link_requested"),
-        LINK_REQUEST_DISABLED("floodgate.commands.linking_disabled");
+        NO_LINK_REQUESTED("floodgate.command.link_account.no_link_requested");
 
         private final String rawMessage;
         private final String[] translateParts;

@@ -41,7 +41,7 @@ import org.yaml.snakeyaml.Yaml;
 
 @RequiredArgsConstructor
 public final class ConfigUpdater {
-    private static final int CONFIG_VERSION = 1;
+    private static final int CONFIG_VERSION = 2;
     private final Path dataFolder;
     private final ConfigFileUpdater fileUpdater;
     private final FloodgateLogger logger;
@@ -61,25 +61,11 @@ public final class ConfigUpdater {
         // new name -> old name
         Map<String, String> renames = new HashMap<>();
 
+        int version = 0; // pre-rewrite is the default config version
+
         Object versionElement = config.get("config-version");
-        // not a pre-rewrite config
-        if (versionElement != null) {
-            checkArgument(
-                    versionElement instanceof Integer,
-                    "Config version should be an integer. Did someone mess with the config?"
-            );
-
-            int version = (int) versionElement;
-            checkArgument(
-                    version == CONFIG_VERSION,
-                    format("Config is newer then possible on this version! Expected {}, got {}",
-                            CONFIG_VERSION, version));
-
-            // config is already up-to-date
-            if (version == CONFIG_VERSION) {
-                return;
-            }
-        } else {
+        // only rewrite configs have a config-version
+        if (versionElement == null) {
             logger.warn("We've detected a pre-rewrite config file, please note that Floodgate " +
                     "doesn't not work properly if you don't update your Floodgate key used on " +
                     "all your servers (including Geyser). We'll try to update your Floodgate " +
@@ -101,6 +87,29 @@ public final class ConfigUpdater {
                 }
             }
             loader.generateKey(keyFilePath);
+        } else {
+            // get (and verify) the config version
+            checkArgument(
+                    versionElement instanceof Integer,
+                    "Config version should be an integer. Did someone mess with the config?"
+            );
+
+            version = (int) versionElement;
+            checkArgument(
+                    version > 0 && version <= CONFIG_VERSION,
+                    format("Config is newer then possible on this version! Expected {}, got {}",
+                            CONFIG_VERSION, version));
+        }
+
+        // config is already up-to-date
+        if (version == CONFIG_VERSION) {
+            return;
+        }
+
+        if (version < 2) {
+            // renamed 'use-global-linking' to 'enable-global-linking'
+            // and added 'enable-own-linking'
+            renames.put("enable-global-linking", "use-global-linking");
         }
 
         try {

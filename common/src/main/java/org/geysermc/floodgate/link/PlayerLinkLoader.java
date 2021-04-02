@@ -65,14 +65,9 @@ public final class PlayerLinkLoader {
             throw new IllegalStateException("Config cannot be null!");
         }
 
-        FloodgateConfig.PlayerLinkConfig linkingConfig = config.getPlayerLink();
-        if (!linkingConfig.isEnabled()) {
+        FloodgateConfig.PlayerLinkConfig lConfig = config.getPlayerLink();
+        if (!lConfig.isEnabled()) {
             return new DisabledPlayerLink();
-        }
-
-        // we use our own internal PlayerLinking when global linking is enabled
-        if (linkingConfig.isUseGlobalLinking()) {
-            return injector.getInstance(GlobalPlayerLinking.class);
         }
 
         List<Path> files;
@@ -83,6 +78,12 @@ public final class PlayerLinkLoader {
         } catch (IOException exception) {
             logger.error("Failed to list possible database implementations", exception);
             return null;
+        }
+
+        // we can skip the rest if global linking is enabled and no database implementations has been
+        // found, or when global linking is enabled and own player linking is disabled.
+        if (lConfig.isEnableGlobalLinking() && (files.isEmpty() || !lConfig.isEnableOwnLinking())) {
+            return injector.getInstance(GlobalPlayerLinking.class);
         }
 
         if (files.isEmpty()) {
@@ -96,7 +97,7 @@ public final class PlayerLinkLoader {
         // We only want to load one database implementation
         if (files.size() > 1) {
             boolean found = false;
-            databaseName = linkingConfig.getType();
+            databaseName = lConfig.getType();
 
             String expectedName = "floodgate-" + databaseName + "-database.jar";
             for (Path path : files) {
@@ -107,8 +108,7 @@ public final class PlayerLinkLoader {
             }
 
             if (!found) {
-                logger.error("Failed to find an implementation for type: {}",
-                        linkingConfig.getType());
+                logger.error("Failed to find an implementation for type: {}", lConfig.getType());
                 return null;
             }
         } else {
@@ -127,41 +127,54 @@ public final class PlayerLinkLoader {
         try {
             URL pluginUrl = implementationPath.toUri().toURL();
 
-            try (URLClassLoader classLoader = new URLClassLoader(
-                    new URL[]{pluginUrl}, PlayerLinkLoader.class.getClassLoader())) {
+            // we don't have a way to close this properly since we have no stop method and we have
+            // to be able to load classes on the fly, but that doesn't matter anyway since Floodgate
+            // doesn't support reloading
+            URLClassLoader classLoader = new URLClassLoader(
+                    new URL[]{pluginUrl},
+                    PlayerLinkLoader.class.getClassLoader()
+            );
 
-                String mainClassName;
-                JsonObject linkConfig;
+            String mainClassName;
+            JsonObject linkConfig;
 
-                try (InputStream linkConfigStream =
-                             classLoader.getResourceAsStream("init.json")) {
+            try (InputStream linkConfigStream =
+                         classLoader.getResourceAsStream("init.json")) {
 
-                    requireNonNull(linkConfigStream, "Implementation should have an init file");
+                requireNonNull(linkConfigStream, "Implementation should have an init file");
 
-                    linkConfig = new Gson().fromJson(
-                            new InputStreamReader(linkConfigStream), JsonObject.class
-                    );
+                linkConfig = new Gson().fromJson(
+                        new InputStreamReader(linkConfigStream), JsonObject.class
+                );
 
-                    mainClassName = linkConfig.get("mainClass").getAsString();
-                }
+                mainClassName = linkConfig.get("mainClass").getAsString();
+            }
 
-                Class<? extends PlayerLink> mainClass =
-                        (Class<? extends PlayerLink>) classLoader.loadClass(mainClassName);
+            Class<? extends PlayerLink> mainClass =
+                    (Class<? extends PlayerLink>) classLoader.loadClass(mainClassName);
 
-                init = false;
+            init = false;
 
-                Injector linkInjector = injector.createChildInjector(binder -> {
-                    binder.bind(String.class)
-                            .annotatedWith(Names.named("databaseName"))
-                            .toInstance(databaseName);
-                    binder.bind(ClassLoader.class).annotatedWith(
-                            Names.named("databaseClassLoader")).toInstance(classLoader);
-                    binder.bind(JsonObject.class)
-                            .annotatedWith(Names.named("databaseInitData"))
-                            .toInstance(linkConfig);
-                });
+            Injector linkInjector = injector.createChildInjector(binder -> {
+                binder.bind(String.class)
+                        .annotatedWith(Names.named("databaseName"))
+                        .toInstance(databaseName);
+                binder.bind(ClassLoader.class).annotatedWith(
+                        Names.named("databaseClassLoader")).toInstance(classLoader);
+                binder.bind(JsonObject.class)
+                        .annotatedWith(Names.named("databaseInitData"))
+                        .toInstance(linkConfig);
+            });
 
-                PlayerLink instance = linkInjector.getInstance(mainClass);
+            PlayerLink instance = linkInjector.getInstance(mainClass);
+
+            // we use our own internal PlayerLinking when global linking is enabled
+            if (lConfig.isEnableGlobalLinking()) {
+                GlobalPlayerLinking linking = injector.getInstance(GlobalPlayerLinking.class);
+                linking.setDatabaseImpl(instance);
+                linking.load();
+                return linking;
+            } else {
                 instance.load();
                 return instance;
             }

@@ -27,25 +27,33 @@ player-link:
   # Whether to enable the linking system. Turning this off will prevent
   # players from using the linking feature even if they are already linked.
   enabled: true
-  # Whether to use global linking. Global Linking uses a central server to request linked accounts,
-  # allowing people to link once and join everywhere (on servers with global linking).
-  use-global-linking: true
 
-  # Uncomment the following lines when you want to use player linking, but you don't want to
-  # use the global auth servers. You should normally only disable global linking when
-  # your internet access is limited.
+  # Uncomment the following line when you want to host your own linking database.
+  # -> This can work in addition to global linking.
+  # Note that you have to install a linking database implementation before enabling this, because
+  # it'll cause errors otherwise.
+  #enable-own-linking: true
+
+  # The following three options only apply when 'enable-own-linking' is set to 'true'
 
   # Whether to allow the use of /linkaccount and /unlinkaccount
   # You can also use allow specific people to use the commands using the
   # permissions floodgate.command.linkaccount and floodgate.command.unlinkaccount.
   # This is only for linking, already connected people will stay connected
-#  allowed: true
-  # The amount of time until a link code expires in seconds
-#  link-code-timeout: 300
-  # The database type you want to use.
-  # The option is only used when there is more then one database implementations found
-  # in the configuration directory
-#  type: sqlite
+  allowed: true
+  # The amount of time until a link code expires in seconds.
+  link-code-timeout: 300
+  # The player linking database type you want to use. This option is only used when there
+  # are multiple database implementations found in the configuration directory.
+  type: sqlite
+
+  # Whether to enable global linking. Global Linking is a central server where people can link their
+  # accounts (Java and Bedrock) and join on servers that have Global Linking enabled. The goal of
+  # Global Linking is to make linking easier by not having to link your accounts on every server.
+  # -> Your server-specific linking database will have priority over global linking.
+  # Global Linking should normally only be disabled when you don't have internet access or when
+  # you have limited internet access.
+  enable-global-linking: true
 
 # Do not change this
-config-version: 1
+config-version: 2

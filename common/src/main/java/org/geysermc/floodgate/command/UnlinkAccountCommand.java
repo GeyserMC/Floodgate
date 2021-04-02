@@ -37,10 +37,12 @@ import lombok.NoArgsConstructor;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.link.GlobalPlayerLinking;
 import org.geysermc.floodgate.platform.command.CommandMessage;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.player.UserAudience.PlayerAudience;
+import org.geysermc.floodgate.util.Constants;
 
 @NoArgsConstructor
 public final class UnlinkAccountCommand implements FloodgateCommand {
@@ -61,8 +63,21 @@ public final class UnlinkAccountCommand implements FloodgateCommand {
         UserAudience sender = context.getSender();
 
         PlayerLink link = api.getPlayerLink();
+
+        //todo make this less hacky
+        if (link instanceof GlobalPlayerLinking) {
+            if (((GlobalPlayerLinking) link).getDatabaseImpl() != null) {
+                sender.sendMessage(CommonCommandMessage.LOCAL_LINKING_NOTICE,
+                        Constants.LINK_INFO_URL);
+            } else {
+                sender.sendMessage(CommonCommandMessage.GLOBAL_LINKING_NOTICE,
+                        Constants.LINK_INFO_URL);
+                return;
+            }
+        }
+
         if (!link.isEnabledAndAllowed()) {
-            sender.sendMessage(Message.LINKING_NOT_ENABLED);
+            sender.sendMessage(CommonCommandMessage.LINKING_DISABLED);
             return;
         }
 
@@ -92,15 +107,16 @@ public final class UnlinkAccountCommand implements FloodgateCommand {
 
     @Override
     public boolean shouldRegister(FloodgateConfig config) {
-        return !config.getPlayerLink().isUseGlobalLinking();
+        FloodgateConfig.PlayerLinkConfig linkConfig = config.getPlayerLink();
+        return linkConfig.isEnabled() &&
+                (linkConfig.isEnableOwnLinking() || linkConfig.isEnableGlobalLinking());
     }
 
     @Getter
     public enum Message implements CommandMessage {
         NOT_LINKED("floodgate.command.unlink_account.not_linked"),
         UNLINK_SUCCESS("floodgate.command.unlink_account.unlink_success"),
-        UNLINK_ERROR("floodgate.command.unlink_account.error " + CHECK_CONSOLE),
-        LINKING_NOT_ENABLED("floodgate.commands.linking_disabled");
+        UNLINK_ERROR("floodgate.command.unlink_account.error " + CHECK_CONSOLE);
 
         private final String rawMessage;
         private final String[] translateParts;

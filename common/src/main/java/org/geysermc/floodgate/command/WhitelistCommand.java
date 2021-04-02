@@ -83,11 +83,12 @@ public class WhitelistCommand implements FloodgateCommand {
 
         // todo let it use translations
 
-        String prefixedName = name;
+        String tempName = name;
         if (config.isReplaceSpaces()) {
-            prefixedName = prefixedName.replace(' ', '_');
+            tempName = tempName.replace(' ', '_');
         }
-        String finalName = config.getUsernamePrefix() + prefixedName;
+        final String correctName = config.getUsernamePrefix() + tempName;
+        final String strippedName = name;
 
         HttpUtils.asyncGet(Constants.GET_XUID_URL + name)
                 .whenComplete((result, error) -> {
@@ -119,16 +120,17 @@ public class WhitelistCommand implements FloodgateCommand {
 
                     try {
                         if (add) {
-                            if (commandUtil.whitelistPlayer(xuid, finalName)) {
-                                sender.sendMessage(Message.PLAYER_ADDED);
+                            if (commandUtil.whitelistPlayer(xuid, correctName)) {
+                                sender.sendMessage(Message.PLAYER_ADDED, strippedName);
                             } else {
-                                sender.sendMessage(Message.PLAYER_ALREADY_WHITELISTED);
+                                sender.sendMessage(Message.PLAYER_ALREADY_WHITELISTED,
+                                        strippedName);
                             }
                         } else {
-                            if (commandUtil.removePlayerFromWhitelist(xuid, finalName)) {
-                                sender.sendMessage(Message.PLAYER_REMOVED);
+                            if (commandUtil.removePlayerFromWhitelist(xuid, correctName)) {
+                                sender.sendMessage(Message.PLAYER_REMOVED, strippedName);
                             } else {
-                                sender.sendMessage(Message.PLAYER_NOT_WHITELISTED);
+                                sender.sendMessage(Message.PLAYER_NOT_WHITELISTED, strippedName);
                             }
                         }
                     } catch (Exception exception) {

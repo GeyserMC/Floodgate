@@ -34,10 +34,12 @@ import org.geysermc.floodgate.platform.command.CommandMessage;
  */
 @Getter
 public enum CommonCommandMessage implements CommandMessage {
+    LINKING_DISABLED("floodgate.commands.linking_disabled"),
     NOT_A_PLAYER("floodgate.commands.not_a_player"),
-    NO_PERMISSION("floodgate.commands.no_permission"),
     CHECK_CONSOLE("floodgate.commands.check_console"),
-    IS_LINKED_ERROR("floodgate.commands.is_linked_error");
+    IS_LINKED_ERROR("floodgate.commands.is_linked_error"),
+    LOCAL_LINKING_NOTICE("floodgate.commands.local_linking_notice"),
+    GLOBAL_LINKING_NOTICE("floodgate.commands.global_linking_notice");
 
     private final String rawMessage;
     private final String[] translateParts;

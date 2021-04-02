@@ -28,23 +28,58 @@ package org.geysermc.floodgate.link;
 import com.google.gson.JsonObject;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.api.link.LinkRequestResult;
+import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.util.HttpUtils;
 import org.geysermc.floodgate.util.HttpUtils.HttpResponse;
 import org.geysermc.floodgate.util.LinkedPlayer;
 import org.geysermc.floodgate.util.Utils;
 
+@Getter
 public class GlobalPlayerLinking extends CommonPlayerLink {
     private static final String GET_BEDROCK_LINK = "https://api.geysermc.org/v1/link/bedrock/";
+    private PlayerLink databaseImpl;
+
+    public void setDatabaseImpl(PlayerLink databaseImpl) {
+        if (this.databaseImpl == null) {
+            this.databaseImpl = databaseImpl;
+        }
+    }
 
     @Override
     public void load() {
+        if (databaseImpl != null) {
+            databaseImpl.load();
+        }
+    }
+
+    @Override
+    public void stop() {
+        super.stop();
+        if (databaseImpl != null) {
+            databaseImpl.stop();
+        }
     }
 
     @Override
     @NonNull
     public CompletableFuture<LinkedPlayer> getLinkedPlayer(@NonNull UUID bedrockId) {
+        if (databaseImpl == null) {
+            return getLinkedPlayer0(bedrockId);
+        }
+
+        return databaseImpl.getLinkedPlayer(bedrockId).thenComposeAsync(result -> {
+            if (result != null) {
+                return CompletableFuture.completedFuture(result);
+            }
+            return getLinkedPlayer0(bedrockId);
+        });
+    }
+
+    @NonNull
+    private CompletableFuture<LinkedPlayer> getLinkedPlayer0(@NonNull UUID bedrockId) {
         return CompletableFuture.supplyAsync(
                 () -> {
                     HttpResponse response =
@@ -77,6 +112,20 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
     @Override
     @NonNull
     public CompletableFuture<Boolean> isLinkedPlayer(@NonNull UUID bedrockId) {
+        if (databaseImpl == null) {
+            return isLinkedPlayer0(bedrockId);
+        }
+
+        return databaseImpl.isLinkedPlayer(bedrockId).thenComposeAsync(result -> {
+            if (result != null) {
+                return CompletableFuture.completedFuture(result);
+            }
+            return isLinkedPlayer0(bedrockId);
+        });
+    }
+
+    @NonNull
+    private CompletableFuture<Boolean> isLinkedPlayer0(@NonNull UUID bedrockId) {
         return CompletableFuture.supplyAsync(
                 () -> {
                     HttpResponse response =
@@ -108,12 +157,18 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
             @NonNull UUID bedrockId,
             @NonNull UUID javaId,
             @NonNull String username) {
+        if (databaseImpl != null) {
+            return databaseImpl.linkPlayer(bedrockId, javaId, username);
+        }
         return failedFuture();
     }
 
     @Override
     @NonNull
     public CompletableFuture<Void> unlinkPlayer(@NonNull UUID javaId) {
+        if (databaseImpl != null) {
+            return databaseImpl.unlinkPlayer(javaId);
+        }
         return failedFuture();
     }
 
@@ -123,6 +178,9 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
             @NonNull UUID javaId,
             @NonNull String javaUsername,
             @NonNull String bedrockUsername) {
+        if (databaseImpl != null) {
+            return databaseImpl.createLinkRequest(javaId, javaUsername, bedrockUsername);
+        }
         return failedFuture();
     }
 
@@ -133,7 +191,15 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
             @NonNull String javaUsername,
             @NonNull String bedrockUsername,
             @NonNull String code) {
+        if (databaseImpl != null) {
+            return databaseImpl.verifyLinkRequest(bedrockId, javaUsername, bedrockUsername, code);
+        }
         return failedFuture();
+    }
+
+    @Override
+    public boolean isEnabledAndAllowed() {
+        return databaseImpl != null && databaseImpl.isEnabledAndAllowed();
     }
 
     private <U> CompletableFuture<U> failedFuture() {

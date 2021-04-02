@@ -33,6 +33,8 @@ public final class Constants {
     public static final String WEBSOCKET_URL = "ws" + API_BASE_URL + "/ws";
     public static final String GET_XUID_URL = "http" + API_BASE_URL + "/v1/xbox/xuid/";
 
+    public static final String LINK_INFO_URL = "https://link.geysermc.org/";
+
     public static final boolean DEBUG_MODE = true;
 
     public static final String TIMESTAMP_DENIED_MESSAGE =
