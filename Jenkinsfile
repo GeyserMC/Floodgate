@@ -20,7 +20,7 @@ pipeline {
             }
             post {
                 success {
-                    archiveArtifacts artifacts: 'build/libs/*.jar', includes: 'build/libs/floodgate-fabric.jar', fingerprint: true
+                    archiveArtifacts artifacts: 'build/libs/floodgate-fabric.jar', fingerprint: true
                 }
             }
         }
