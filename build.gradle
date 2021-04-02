@@ -1,5 +1,9 @@
+import net.fabricmc.loom.task.RemapJarTask
+
 plugins {
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
     id 'fabric-loom' version '0.7-SNAPSHOT'
+    id 'java'
     id 'maven-publish'
 }
 
@@ -27,23 +31,23 @@ dependencies {
     // You may need to force-disable transitiveness on them.
 
     // Base Floodgate
-    include(implementation("org.geysermc.floodgate:common:2.0-SNAPSHOT"))
+    implementation("org.geysermc.floodgate:common:${project.mod_version}")
+    shadow("org.geysermc.floodgate:common:${project.mod_version}")
 
-    // Cloud - commands
-    // Snapshot in order to get Fabric version
-    include(modImplementation('cloud.commandframework:cloud-fabric:1.5.0-SNAPSHOT'))
+    include(modImplementation('cloud.commandframework:cloud-fabric:1.5.0-SNAPSHOT') {
+        because "Commands library implementation for Fabric - only supported on the snapshot"
+    })
 
-    // Fabric Adventure platform
-    // For translating from Adventure to Minecraft
     include(modImplementation('net.kyori:adventure-platform-fabric:4.0.0-SNAPSHOT') {
+        because "Chat library implementation for Fabric that includes methods for communicating with the server"
         // Thanks to zml for this fix
         // The package modifies Brigadier which causes a LinkageError at runtime if included
         exclude group: 'ca.stellardrift', module: "colonel"
     })
 
     // Lombok
-    compileOnly 'org.projectlombok:lombok:1.18.16'
-    annotationProcessor 'org.projectlombok:lombok:1.18.16'
+    compileOnly "org.projectlombok:lombok:${project.lombok_version}"
+    annotationProcessor "org.projectlombok:lombok:${project.lombok_version}"
 }
 
 repositories {
@@ -95,8 +99,37 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     from sourceSets.main.allSource
 }
 
-jar {
-    from "LICENSE"
+shadowJar {
+//    dependencies {
+//        exclude('net.fabricmc:.*')
+//        //include(dependency('org.geysermc.floodgate:.*'))
+//        //include(dependency("org.geysermc.cumulus:.*"))
+//        //include(dependency('org.geysermc:.*'))
+//        exclude '/mappings/*'
+//    }
+    configurations = [project.configurations.shadow]
+    //dependencies {
+        //exclude(dependency('cloud.commandframework:cloud-fabric:.*'))
+        //exclude(dependency('net.kyori:adventure-platform-fabric:.*'))
+    //}
+
+    //relocate 'net.kyori', 'org.geysermc.floodgate.relocations.kyori'
+    //relocate 'cloud.commandframework', 'org.geysermc.floodgate.relocations.cloud'
+}
+
+task remappedShadowJar(type: RemapJarTask) {
+    dependsOn tasks.shadowJar
+    input = tasks.shadowJar.archivePath
+    addNestedDependencies = true
+    remapAccessWidener = true // Required for our access widener changes to go into effect and not crash on startup
+    archiveName = "Floodgate-Fabric.jar"
+}
+
+tasks.assemble.dependsOn tasks.remappedShadowJar
+
+artifacts {
+    archives remappedShadowJar
+    shadow shadowJar
 }
 
 // configure the maven publication
