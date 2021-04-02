@@ -32,6 +32,7 @@ import java.lang.reflect.Field;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.netty.PipelineUtils;
+import net.md_5.bungee.protocol.MinecraftEncoder;
 import net.md_5.bungee.protocol.Varint21LengthFieldPrepender;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
@@ -55,7 +56,7 @@ public final class BungeeInjector extends CommonPlatformInjector {
             BungeeReflectionUtils.removeFinal(framePrepender);
 
             BungeeCustomPrepender customPrepender = new BungeeCustomPrepender(
-                    ReflectionUtils.getCastedValue(null, framePrepender)
+                    ReflectionUtils.getCastedValue(null, framePrepender), logger
             );
 
             ReflectionUtils.setValue(null, framePrepender, customPrepender);
@@ -86,12 +87,22 @@ public final class BungeeInjector extends CommonPlatformInjector {
     @RequiredArgsConstructor
     private final class BungeeCustomPrepender extends Varint21LengthFieldPrepender {
         private final Varint21LengthFieldPrepender original;
+        private final FloodgateLogger logger;
 
         @Override
         public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
             original.handlerAdded(ctx);
-            ctx.executor().execute(
-                    () -> ctx.channel().pipeline().addFirst(new BungeeInjectorInitializer()));
+            // we're getting called before the decoder and encoder are added.
+            // we'll have to wait a while :(
+            ctx.executor().execute(() -> {
+                while (ctx.channel().isOpen()) {
+                    if (ctx.channel().pipeline().get(MinecraftEncoder.class) != null) {
+                        logger.debug("found packet encoder :)");
+                        ctx.channel().pipeline().addFirst(new BungeeInjectorInitializer());
+                        return;
+                    }
+                }
+            });
         }
     }
 

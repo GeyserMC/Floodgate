@@ -54,6 +54,8 @@ public final class DebugAddon implements InjectorAddon {
 
     @Override
     public void onInject(Channel channel, boolean toServer) {
+        logger.info("Successfully called onInject. To server? " + toServer);
+
         channel.pipeline().addBefore(
                 packetEncoder, "floodgate_debug_out",
                 new ChannelOutDebugHandler(implementationName, toServer, logger)
