@@ -32,6 +32,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import java.net.ConnectException;
 import java.net.URI;
+import javax.net.ssl.SSLException;
 import lombok.Getter;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -138,8 +139,13 @@ final class SkinUploadSocket extends WebSocketClient {
 
     @Override
     public void onError(Exception exception) {
-        // skip can't connect exceptions and the syntax error in onClose because of that.
-        if (exception instanceof ConnectException || exception instanceof JsonSyntaxException) {
+        // skip can't connect exceptions and the syntax error in onClose that happens because of it.
+        // they might however help during debugging so we'll log them when debug is enabled
+        if (exception instanceof ConnectException || exception instanceof JsonSyntaxException ||
+                exception instanceof SSLException) {
+            if (logger.isDebug()) {
+                logger.error("[debug] Got an error", exception);
+            }
             return;
         }
         logger.error("Got an error", exception);

@@ -143,6 +143,11 @@ public final class FloodgateHandshakeHandler {
             HandshakeData handshakeData = new HandshakeDataImpl(
                     channel, true, bedrockData.clone(), configHolder.get(),
                     linkedPlayer != null ? linkedPlayer.clone() : null, hostname);
+
+            if (configHolder.get().getPlayerLink().isRequireLink() && linkedPlayer == null) {
+                handshakeData.setDisconnectReason("floodgate.core.not_linked");
+            }
+
             handshakeHandlers.callHandshakeHandlers(handshakeData);
 
             if (!handshakeData.shouldDisconnect()) {

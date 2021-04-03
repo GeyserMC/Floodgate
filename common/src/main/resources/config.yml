@@ -28,6 +28,9 @@ player-link:
   # players from using the linking feature even if they are already linked.
   enabled: true
 
+  # Whether to require a linked account in order to be able to join the server.
+  require-link: false
+
   # Uncomment the following line when you want to host your own linking database.
   # -> This can work in addition to global linking.
   # Note that you have to install a linking database implementation before enabling this, because

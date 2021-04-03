@@ -67,6 +67,7 @@ public class FloodgateConfig {
     @Getter
     public static class PlayerLinkConfig {
         private boolean enabled;
+        private boolean requireLink;
         private boolean enableOwnLinking = false;
         private boolean allowed;
         private long linkCodeTimeout;
