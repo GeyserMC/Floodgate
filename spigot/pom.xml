@@ -110,15 +110,20 @@
               <goal>shade</goal>
             </goals>
             <configuration>
-              <!-- dump hack to make pre 1.12 work -->
               <relocations>
+                <!-- hack to make pre 1.12 work -->
                 <relocation>
                   <pattern>com.google.common</pattern>
-                  <shadedPattern>org.geysermc.floodgate.shaded.google.common</shadedPattern>
+                  <shadedPattern>org.geysermc.floodgate.shaded.com.google.common</shadedPattern>
                 </relocation>
                 <relocation>
                   <pattern>com.google.guava</pattern>
-                  <shadedPattern>org.geysermc.floodgate.shaded.google.guava</shadedPattern>
+                  <shadedPattern>org.geysermc.floodgate.shaded.com.google.guava</shadedPattern>
+                </relocation>
+                <!-- hack to make (old versions? of) Paper work -->
+                <relocation>
+                  <pattern>it.unimi</pattern>
+                  <shadedPattern>org.geysermc.floodgate.shaded.it.unimi</shadedPattern>
                 </relocation>
               </relocations>
             </configuration>
