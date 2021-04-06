@@ -52,6 +52,7 @@
     <cloud.version>1.4.0</cloud.version>
     <adventure-api.version>4.5.0</adventure-api.version>
     <adventure-platform.version>4.0.0-SNAPSHOT</adventure-platform.version>
+    <fastutil.version>8.5.3</fastutil.version>
 
     <outputName>floodgate-${project.name}</outputName>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
