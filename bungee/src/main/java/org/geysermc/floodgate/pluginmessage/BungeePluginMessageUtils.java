@@ -85,7 +85,7 @@ public final class BungeePluginMessageUtils extends PluginMessageUtils implement
         Result result = channel.handleProxyCall(event.getData(), targetUuid, targetUsername,
                 targetIdentity, sourceUuid, sourceUsername, sourceIdentity);
 
-        event.setCancelled(result.isAllowed());
+        event.setCancelled(!result.isAllowed());
 
         if (!result.isAllowed() && result.getReason() != null) {
             logKick(source, result.getReason());
