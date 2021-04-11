@@ -104,7 +104,8 @@ public final class BungeeInjector extends CommonPlatformInjector {
                     }
 
                     // half a second should be more than enough
-                    if (++tries > 25) {
+                    tries++;
+                    if (tries > 25) {
                         logger.debug("Failed to inject " + ctx.channel().pipeline());
                         return;
                     }
