@@ -95,11 +95,23 @@ public final class BungeeInjector extends CommonPlatformInjector {
             // we're getting called before the decoder and encoder are added.
             // we'll have to wait a while :(
             ctx.executor().execute(() -> {
+                int tries = 0;
                 while (ctx.channel().isOpen()) {
                     if (ctx.channel().pipeline().get(MinecraftEncoder.class) != null) {
                         logger.debug("found packet encoder :)");
                         ctx.channel().pipeline().addFirst(new BungeeInjectorInitializer());
                         return;
+                    }
+
+                    // half a second should be more than enough
+                    if (++tries > 25) {
+                        logger.debug("Failed to inject " + ctx.channel().pipeline());
+                        return;
+                    }
+
+                    try {
+                        Thread.sleep(20);
+                    } catch (InterruptedException ignored) {
                     }
                 }
             });

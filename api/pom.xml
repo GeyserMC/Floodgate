@@ -24,6 +24,11 @@
       <artifactId>common</artifactId>
       <version>${geyser.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.geysermc.cumulus</groupId>
+      <artifactId>cumulus</artifactId>
+      <version>${cumulus.version}</version>
+    </dependency>
   </dependencies>
 
   <repositories>
