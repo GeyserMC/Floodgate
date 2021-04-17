@@ -100,19 +100,42 @@ final class SkinUploadSocket extends WebSocketClient {
             return;
         }
 
-        if (type == WebsocketEventType.SUBSCRIBERS_COUNT) {
-            subscribersCount = message.get("subscribers_count").getAsInt();
-        } else if (type == WebsocketEventType.SKIN_UPLOADED) {
-            String xuid = message.get("xuid").getAsString();
-            FloodgatePlayer player = api.getPlayer(Utils.getJavaUuid(xuid));
-            if (player != null) {
-                if (!message.get("success").getAsBoolean()) {
-                    logger.info("Failed to upload skin for {} ({})", xuid,
-                            player.getCorrectUsername());
-                    return;
+        switch (type) {
+            case SUBSCRIBERS_COUNT:
+                subscribersCount = message.get("subscribers_count").getAsInt();
+                break;
+            case SKIN_UPLOADED:
+                String xuid = message.get("xuid").getAsString();
+                FloodgatePlayer player = api.getPlayer(Utils.getJavaUuid(xuid));
+                if (player != null) {
+                    if (!message.get("success").getAsBoolean()) {
+                        logger.info("Failed to upload skin for {} ({})", xuid,
+                                player.getCorrectUsername());
+                        return;
+                    }
+                    applier.applySkin(player, message.getAsJsonObject("data"));
                 }
-                applier.applySkin(player, message.getAsJsonObject("data"));
-            }
+                break;
+            case LOG_MESSAGE:
+                String logMessage = message.get("message").getAsString();
+                switch (message.get("priority").getAsInt()) {
+                    case -1:
+                        logger.debug("Got a message from skin uploader: " + logMessage);
+                        break;
+                    case 0:
+                        logger.info("Got a message from skin uploader: " + logMessage);
+                        break;
+                    case 1:
+                        logger.error("Got a message from skin uploader: " + logMessage);
+                        break;
+                    default:
+                        logger.info(logMessage);
+                        break;
+                }
+                break;
+            default:
+                // we don't handle the remaining types
+                break;
         }
     }
 
