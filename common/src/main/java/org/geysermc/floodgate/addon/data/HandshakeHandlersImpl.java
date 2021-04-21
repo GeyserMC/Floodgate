@@ -25,8 +25,8 @@
 
 package org.geysermc.floodgate.addon.data;
 
-import io.netty.util.collection.IntObjectHashMap;
-import io.netty.util.collection.IntObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Random;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.api.handshake.HandshakeHandler;
@@ -34,7 +34,7 @@ import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 
 public class HandshakeHandlersImpl implements HandshakeHandlers {
     private final Random random = new Random();
-    private final IntObjectMap<HandshakeHandler> handshakeHandlers = new IntObjectHashMap<>();
+    private final Int2ObjectMap<HandshakeHandler> handshakeHandlers = new Int2ObjectOpenHashMap<>();
 
     @Override
     public int addHandshakeHandler(HandshakeHandler handshakeHandler) {
