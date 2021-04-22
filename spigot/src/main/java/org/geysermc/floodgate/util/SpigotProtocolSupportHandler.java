@@ -51,7 +51,7 @@ public class SpigotProtocolSupportHandler implements HandshakeHandler {
         getFromChannel = ReflectionUtils.getMethod(connectionImpl, "getFromChannel", Channel.class);
         getLoginProfile = ReflectionUtils.getMethod(connectionImpl, "getLoginProfile");
 
-        Class<?> profile = ReflectionUtils.getClass("protocolsupport.api.utils.Profile");
+        Class<?> profile = ReflectionUtils.getClass("protocolsupport.protocol.utils.authlib.LoginProfile");
 
         setName = ReflectionUtils.getMethod(profile, "setName", String.class);
         setOriginalName = ReflectionUtils.getMethod(profile, "setOriginalName", String.class);
@@ -69,12 +69,12 @@ public class SpigotProtocolSupportHandler implements HandshakeHandler {
         Class<?> loginListener = ReflectionUtils.getClass(
                 "protocolsupport.protocol.packet.handler.AbstractLoginListener");
 
-        handleLoginStart = ReflectionUtils.getMethod(loginListener, "handleLoginStart", UUID.class);
+        handleLoginStart = ReflectionUtils.getMethod(loginListener, "handleLoginStart", String.class);
     }
 
     @Override
     public void handle(HandshakeData data) {
-        if (data.isFloodgatePlayer() && SpigotUtils.isBungeeData()) {
+        if (data.isFloodgatePlayer() && !SpigotUtils.isBungeeData()) {
             Object connection = ReflectionUtils.invoke(null, getFromChannel, data.getChannel());
             Object profile = ReflectionUtils.invoke(connection, getLoginProfile);
 
