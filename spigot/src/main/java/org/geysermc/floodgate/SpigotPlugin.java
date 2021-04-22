@@ -28,7 +28,6 @@ package org.geysermc.floodgate;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.api.InstanceHolder;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.module.PluginMessageModule;
 import org.geysermc.floodgate.module.ServerCommonModule;
@@ -42,6 +41,7 @@ import org.geysermc.floodgate.util.SpigotProtocolSupportListener;
 
 public final class SpigotPlugin extends JavaPlugin {
     private SpigotPlatform platform;
+    private Injector injector;
 
     @Override
     public void onLoad() {
@@ -49,7 +49,7 @@ public final class SpigotPlugin extends JavaPlugin {
         ReflectionUtils.setPrefix("net.minecraft.server." + minecraftVersion);
 
         long ctm = System.currentTimeMillis();
-        Injector injector = Guice.createInjector(
+        injector = Guice.createInjector(
                 new ServerCommonModule(getDataFolder().toPath()),
                 new SpigotPlatformModule(this)
         );
@@ -72,8 +72,7 @@ public final class SpigotPlugin extends JavaPlugin {
 
         // add ProtocolSupport support (hack)
         if (getServer().getPluginManager().getPlugin("ProtocolSupport") != null) {
-            InstanceHolder.getHandshakeHandlers()
-                    .addHandshakeHandler(new SpigotProtocolSupportHandler());
+            injector.getInstance(SpigotProtocolSupportHandler.class);
             SpigotProtocolSupportListener.registerHack(this);
         }
     }

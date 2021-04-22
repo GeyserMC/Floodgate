@@ -23,45 +23,35 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.module;
+package org.geysermc.floodgate.addon.packethandler;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
-import com.google.inject.multibindings.ProvidesIntoSet;
-import org.geysermc.floodgate.addon.AddonManagerAddon;
-import org.geysermc.floodgate.addon.DebugAddon;
-import org.geysermc.floodgate.addon.PacketHandlerAddon;
-import org.geysermc.floodgate.addon.data.SpigotDataAddon;
-import org.geysermc.floodgate.api.inject.InjectorAddon;
-import org.geysermc.floodgate.register.AddonRegister;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.MessageToMessageEncoder;
+import java.util.List;
+import org.geysermc.floodgate.api.util.TriFunction;
+import org.geysermc.floodgate.packet.PacketHandlersImpl;
 
-public final class SpigotAddonModule extends AbstractModule {
+public class ChannelOutPacketHandler extends MessageToMessageEncoder<Object> {
+    private final PacketHandlersImpl packetHandlers;
+    private final boolean toServer;
+
+    public ChannelOutPacketHandler(PacketHandlersImpl packetHandlers, boolean toServer) {
+        this.packetHandlers = packetHandlers;
+        this.toServer = toServer;
+    }
+
     @Override
-    protected void configure() {
-        bind(AddonRegister.class).asEagerSingleton();
-    }
+    protected void encode(ChannelHandlerContext ctx, Object msg, List<Object> out) {
+        Object packet = msg;
+        for (TriFunction<ChannelHandlerContext, Object, Boolean, Object> consumer :
+                packetHandlers.getPacketHandlers(msg.getClass())) {
 
-    @Singleton
-    @ProvidesIntoSet
-    public InjectorAddon managerAddon() {
-        return new AddonManagerAddon();
-    }
+            Object res = consumer.apply(ctx, msg, toServer);
+            if (!res.equals(msg)) {
+                packet = res;
+            }
+        }
 
-    @Singleton
-    @ProvidesIntoSet
-    public InjectorAddon dataAddon() {
-        return new SpigotDataAddon();
-    }
-
-    @Singleton
-    @ProvidesIntoSet
-    public InjectorAddon debugAddon() {
-        return new DebugAddon();
-    }
-
-    @Singleton
-    @ProvidesIntoSet
-    public InjectorAddon packetHandlerAddon() {
-        return new PacketHandlerAddon();
+        out.add(packet);
     }
 }

@@ -5,5 +5,3 @@ author: ${project.organization.name}
 website: ${project.url}
 main: org.geysermc.floodgate.SpigotPlugin
 api-version: 1.13
-softdepend:
-  - ProtocolSupport

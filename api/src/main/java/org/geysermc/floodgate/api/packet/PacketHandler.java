@@ -23,45 +23,21 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.module;
+package org.geysermc.floodgate.api.packet;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
-import com.google.inject.multibindings.ProvidesIntoSet;
-import org.geysermc.floodgate.addon.AddonManagerAddon;
-import org.geysermc.floodgate.addon.DebugAddon;
-import org.geysermc.floodgate.addon.PacketHandlerAddon;
-import org.geysermc.floodgate.addon.data.SpigotDataAddon;
-import org.geysermc.floodgate.api.inject.InjectorAddon;
-import org.geysermc.floodgate.register.AddonRegister;
+import io.netty.channel.ChannelHandlerContext;
 
-public final class SpigotAddonModule extends AbstractModule {
-    @Override
-    protected void configure() {
-        bind(AddonRegister.class).asEagerSingleton();
-    }
-
-    @Singleton
-    @ProvidesIntoSet
-    public InjectorAddon managerAddon() {
-        return new AddonManagerAddon();
-    }
-
-    @Singleton
-    @ProvidesIntoSet
-    public InjectorAddon dataAddon() {
-        return new SpigotDataAddon();
-    }
-
-    @Singleton
-    @ProvidesIntoSet
-    public InjectorAddon debugAddon() {
-        return new DebugAddon();
-    }
-
-    @Singleton
-    @ProvidesIntoSet
-    public InjectorAddon packetHandlerAddon() {
-        return new PacketHandlerAddon();
-    }
+/**
+ * For advanced users only! You shouldn't play with this unless you know what you're doing.
+ */
+public interface PacketHandler {
+    /**
+     * Called when a registered packet has been seen.
+     *
+     * @param ctx         the channel handler context of the connection
+     * @param packet      the packet instance
+     * @param serverbound if the packet is serverbound
+     * @return the packet it should forward. Can be null or a different packet / instance
+     */
+    Object handle(ChannelHandlerContext ctx, Object packet, boolean serverbound);
 }
