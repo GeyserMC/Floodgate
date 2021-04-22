@@ -30,11 +30,14 @@ import lombok.Getter;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.link.PlayerLink;
+import org.geysermc.floodgate.api.packet.PacketHandlers;
 
 public final class InstanceHolder {
     @Getter private static FloodgateApi api;
     @Getter private static PlayerLink playerLink;
+
     @Getter private static PlatformInjector injector;
+    @Getter private static PacketHandlers packetHandlers;
     @Getter private static HandshakeHandlers handshakeHandlers;
     private static UUID storedKey;
 
@@ -42,6 +45,7 @@ public final class InstanceHolder {
             FloodgateApi floodgateApi,
             PlayerLink link,
             PlatformInjector platformInjector,
+            PacketHandlers packetHandlers,
             HandshakeHandlers handshakeHandlers,
             UUID key) {
 
@@ -56,6 +60,7 @@ public final class InstanceHolder {
         api = floodgateApi;
         playerLink = link;
         injector = platformInjector;
+        InstanceHolder.packetHandlers = packetHandlers;
         InstanceHolder.handshakeHandlers = handshakeHandlers;
         return true;
     }
