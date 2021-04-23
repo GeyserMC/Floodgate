@@ -54,17 +54,31 @@ public class MysqlDatabase extends CommonPlayerLink {
         try {
             Class.forName("org.mariadb.jdbc.Driver");
             MysqlConfig databaseconfig = getConfig(MysqlConfig.class);
-            pool = new MariaDbPoolDataSource(
-                    "jdbc:mariadb://" + databaseconfig.getHostname() + "/" +
-                            databaseconfig.getDatabase() +
-                            "?user=" + databaseconfig.getUsername() + "&password=" +
-                            databaseconfig.getPassword() +
-                            "&minPoolSize=2&maxPoolSize=10"
-            );
+
+            pool = new MariaDbPoolDataSource();
+
+            String hostname = databaseconfig.getHostname();
+            if (hostname.contains(":")) {
+                String[] split = hostname.split(":");
+
+                pool.setServerName(split[0]);
+                try {
+                    pool.setPortNumber(Integer.parseInt(split[1]));
+                } catch (NumberFormatException exception) {
+                    getLogger().info("{} is not a valid port! Will use the default port", split[1]);
+                }
+            } else {
+                pool.setServerName(hostname);
+            }
+
+            pool.setUser(databaseconfig.getUsername());
+            pool.setPassword(databaseconfig.getPassword());
+            pool.setDatabaseName(databaseconfig.getDatabase());
+            pool.setMinPoolSize(2);
+            pool.setMaxPoolSize(10);
 
             try (Connection connection = pool.getConnection()) {
                 try (Statement statement = connection.createStatement()) {
-                    statement.setQueryTimeout(25);  // set timeout to 30 sec.
                     statement.executeUpdate(
                             "CREATE TABLE IF NOT EXISTS `LinkedPlayers` ( " +
                                     "`bedrockId` BINARY(16) NOT NULL , " +
@@ -150,8 +164,10 @@ public class MysqlDatabase extends CommonPlayerLink {
 
     @Override
     @NonNull
-    public CompletableFuture<Void> linkPlayer(@NonNull UUID bedrockId, @NonNull UUID javaId,
-                                              @NonNull String javaUsername) {
+    public CompletableFuture<Void> linkPlayer(
+            @NonNull UUID bedrockId,
+            @NonNull UUID javaId,
+            @NonNull String javaUsername) {
         return CompletableFuture.runAsync(
                 () -> linkPlayer0(bedrockId, javaId, javaUsername),
                 getExecutorService());
@@ -198,7 +214,8 @@ public class MysqlDatabase extends CommonPlayerLink {
     @Override
     @NonNull
     public CompletableFuture<String> createLinkRequest(
-            @NonNull UUID javaId, @NonNull String javaUsername,
+            @NonNull UUID javaId,
+            @NonNull String javaUsername,
             @NonNull String bedrockUsername) {
         return CompletableFuture.supplyAsync(() -> {
             String linkCode = createCode();
@@ -209,8 +226,11 @@ public class MysqlDatabase extends CommonPlayerLink {
         }, getExecutorService());
     }
 
-    private void createLinkRequest0(String javaUsername, UUID javaId, String linkCode,
-                                    String bedrockUsername) {
+    private void createLinkRequest0(
+            String javaUsername,
+            UUID javaId,
+            String linkCode,
+            String bedrockUsername) {
         try (Connection connection = pool.getConnection()) {
             try (PreparedStatement query = connection.prepareStatement(
                     "INSERT INTO `LinkedPlayersRequest` VALUES (?, ?, ?, ?, ?) " +

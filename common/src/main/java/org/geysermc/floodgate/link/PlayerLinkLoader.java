@@ -32,6 +32,7 @@ import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import com.google.inject.name.Names;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -45,8 +46,8 @@ import javax.inject.Named;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.database.config.DatabaseConfigLoader;
 import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.util.InjectorHolder;
 import org.geysermc.floodgate.util.Utils;
 
 @Singleton
@@ -155,12 +156,20 @@ public final class PlayerLinkLoader {
 
             init = false;
 
+            InjectorHolder injectorHolder = new InjectorHolder();
             Injector linkInjector = injector.createChildInjector(binder -> {
-                DatabaseConfigLoader configLoader = new DatabaseConfigLoader(
-                        dataDirectory, databaseName, classLoader, linkConfig
-                );
-                binder.bind(DatabaseConfigLoader.class).toInstance(configLoader);
+                binder.bind(String.class)
+                        .annotatedWith(Names.named("databaseName"))
+                        .toInstance(databaseName);
+                binder.bind(ClassLoader.class).annotatedWith(
+                        Names.named("databaseClassLoader")).toInstance(classLoader);
+                binder.bind(JsonObject.class)
+                        .annotatedWith(Names.named("databaseInitData"))
+                        .toInstance(linkConfig);
+                binder.bind(InjectorHolder.class)
+                        .toInstance(injectorHolder);
             });
+            injectorHolder.set(linkInjector);
 
             PlayerLink instance = linkInjector.getInstance(mainClass);
 

@@ -61,7 +61,6 @@ public class SqliteDatabase extends CommonPlayerLink {
             Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath.toString());
             try (Statement statement = connection.createStatement()) {
-                statement.setQueryTimeout(30);  // set timeout to 30 sec.
                 statement.executeUpdate(
                         "create table if not exists LinkedPlayers (bedrockId string, javaUniqueId string, javaUsername string)"
                 );

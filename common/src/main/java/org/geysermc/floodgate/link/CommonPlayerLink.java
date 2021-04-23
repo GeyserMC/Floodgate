@@ -39,6 +39,7 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.database.config.DatabaseConfig;
 import org.geysermc.floodgate.database.config.DatabaseConfigLoader;
+import org.geysermc.floodgate.util.InjectorHolder;
 
 public abstract class CommonPlayerLink implements PlayerLink {
     @Getter(AccessLevel.PROTECTED)
@@ -57,7 +58,7 @@ public abstract class CommonPlayerLink implements PlayerLink {
     private FloodgateApi api;
 
     @Inject
-    private DatabaseConfigLoader configLoader;
+    private InjectorHolder injectorHolder;
 
     @Inject
     private void init(FloodgateConfig config) {
@@ -86,8 +87,8 @@ public abstract class CommonPlayerLink implements PlayerLink {
      */
     public <T extends DatabaseConfig> T getConfig(Class<T> configClass) {
         // this method is not intended to be used more than once. It'll make a new instance of
-        // DatabaseConfig every time you run this method.
-        return configLoader.loadAs(configClass);
+        // DatabaseConfigLoader and DatabaseConfig every time you run this method.
+        return injectorHolder.get().getInstance(DatabaseConfigLoader.class).loadAs(configClass);
     }
 
     @Override
