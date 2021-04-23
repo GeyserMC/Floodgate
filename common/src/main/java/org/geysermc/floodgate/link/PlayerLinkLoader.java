@@ -175,7 +175,7 @@ public final class PlayerLinkLoader {
 
             // we use our own internal PlayerLinking when global linking is enabled
             if (lConfig.isEnableGlobalLinking()) {
-                GlobalPlayerLinking linking = injector.getInstance(GlobalPlayerLinking.class);
+                GlobalPlayerLinking linking = linkInjector.getInstance(GlobalPlayerLinking.class);
                 linking.setDatabaseImpl(instance);
                 linking.load();
                 return linking;
