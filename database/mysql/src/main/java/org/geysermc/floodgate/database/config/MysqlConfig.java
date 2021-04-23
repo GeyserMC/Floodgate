@@ -28,7 +28,7 @@ package org.geysermc.floodgate.database.config;
 import lombok.Getter;
 
 @Getter
-public class MariadbConfig implements DatabaseConfig {
+public class MysqlConfig implements DatabaseConfig {
         private String hostname = "localhost";
         private String database = "floodgate";
         private String username = "floodgate";

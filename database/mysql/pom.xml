@@ -10,7 +10,7 @@
     <version>2.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>mariadb</artifactId>
+  <artifactId>mysql</artifactId>
 
   <dependencies>
     <dependency>

@@ -39,21 +39,21 @@ import java.util.concurrent.CompletionException;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.api.link.LinkRequest;
 import org.geysermc.floodgate.api.link.LinkRequestResult;
-import org.geysermc.floodgate.database.config.MariadbConfig;
+import org.geysermc.floodgate.database.config.MysqlConfig;
 import org.geysermc.floodgate.link.CommonPlayerLink;
 import org.geysermc.floodgate.link.LinkRequestImpl;
 import org.geysermc.floodgate.util.LinkedPlayer;
 import org.mariadb.jdbc.MariaDbPoolDataSource;
 
-public class MariadbDatabase extends CommonPlayerLink {
+public class MysqlDatabase extends CommonPlayerLink {
     private MariaDbPoolDataSource pool;
 
     @Override
     public void load() {
-        getLogger().info("Connecting to mariadb database...");
+        getLogger().info("Connecting to a MySQL-like database...");
         try {
             Class.forName("org.mariadb.jdbc.Driver");
-            MariadbConfig databaseconfig = getConfig(MariadbConfig.class);
+            MysqlConfig databaseconfig = getConfig(MysqlConfig.class);
             pool = new MariaDbPoolDataSource(
                     "jdbc:mariadb://" + databaseconfig.getHostname() + "/" +
                             databaseconfig.getDatabase() +
@@ -85,9 +85,9 @@ public class MariadbDatabase extends CommonPlayerLink {
                     );
                 }
             }
-            getLogger().info("Connected to mariadb database.");
+            getLogger().info("Connected to MySQL-like database.");
         } catch (ClassNotFoundException exception) {
-            getLogger().error("The required class to load the MariaDB database wasn't found");
+            getLogger().error("The required class to load the MySQL database wasn't found");
         } catch (SQLException exception) {
             getLogger().error("Error while loading database", exception);
         }
