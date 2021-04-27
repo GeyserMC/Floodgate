@@ -61,6 +61,10 @@ public class VelocityPlugin {
             e.printStackTrace();
         }
         this.logger = logger;
+        if (isCompatible(server.getVersion().getVersion().replace("-SNAPSHOT", ""), "1.1.5")) {
+            logger.warning("Velocity 1.1.5 currently does not work with Floodgate! This is unlikely to be fixed.");
+            logger.warning("Either downgrade to Velocity 1.1.4 or upgrade to Floodgate 2.0: https://github.com/GeyserMC/Floodgate/wiki/Floodgate-2.0");
+        }
         if (!injectSucceed) return;
 
         this.workingSet = new HashSet<>();
@@ -206,6 +210,36 @@ public class VelocityPlugin {
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Failed to remove the player", e);
         }
+    }
+
+    private boolean isCompatible(String version, String whichVersion) {
+        int[] currentVersion = parseVersion(version);
+        int[] otherVersion = parseVersion(whichVersion);
+        int length = Math.max(currentVersion.length, otherVersion.length);
+        for (int index = 0; index < length; index = index + 1) {
+            int self = (index < currentVersion.length) ? currentVersion[index] : 0;
+            int other = (index < otherVersion.length) ? otherVersion[index] : 0;
+
+            if (self != other) {
+                return (self - other) > 0;
+            }
+        }
+        return true;
+    }
+
+    private int[] parseVersion(String versionParam) {
+        versionParam = (versionParam == null) ? "" : versionParam;
+        String[] stringArray = versionParam.split("[_.-]");
+        int[] temp = new int[stringArray.length];
+        for (int index = 0; index <= (stringArray.length - 1); index = index + 1) {
+            String t = stringArray[index].replaceAll("\\D", "");
+            try {
+                temp[index] = Integer.parseInt(t);
+            } catch (NumberFormatException ex) {
+                temp[index] = 0;
+            }
+        }
+        return temp;
     }
 
     private Field handshakeField;
