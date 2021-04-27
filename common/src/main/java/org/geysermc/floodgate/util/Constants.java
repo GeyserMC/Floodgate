@@ -32,6 +32,7 @@ public final class Constants {
     private static final String API_BASE_URL = "s://api.geysermc.org";
     public static final String WEBSOCKET_URL = "ws" + API_BASE_URL + "/ws";
     public static final String GET_XUID_URL = "http" + API_BASE_URL + "/v1/xbox/xuid/";
+    public static final String GET_GAMERTAG_URL = "http" + API_BASE_URL + "/v1/xbox/gamertag/";
 
     public static final String LINK_INFO_URL = "https://link.geysermc.org/";
 

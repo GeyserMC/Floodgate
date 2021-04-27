@@ -27,6 +27,7 @@ package org.geysermc.floodgate.api;
 
 import java.util.Collection;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import org.geysermc.cumulus.Form;
 import org.geysermc.cumulus.util.FormBuilder;
 import org.geysermc.floodgate.api.link.PlayerLink;
@@ -93,6 +94,42 @@ public interface FloodgateApi {
     boolean sendForm(UUID uuid, Form form);
 
     boolean sendForm(UUID uuid, FormBuilder<?, ?> formBuilder);
+
+    /**
+     * Get the xuid of the user that has the given gamertag.
+     *
+     * @param gamertag the gamertag of the player
+     * @return the xuid of the player with the given gamertag, or null when there is no player with
+     * the given gamertag
+     */
+    CompletableFuture<Long> getXuidFor(String gamertag);
+
+    /**
+     * Get the xuid of the player that has the given gamertag. It does the same thing as {@link
+     * #getXuidFor(String)} except that this method will return the xuid in Floodgate uuid format
+     * instead of just a long
+     *
+     * @param gamertag the gamertag of the player
+     * @return the xuid of the player with the given gamertag, or null when there is no player with
+     * the given gamertag
+     */
+    default CompletableFuture<UUID> getUuidFor(String gamertag) {
+        return getXuidFor(gamertag).thenApply(xuid -> {
+            if (xuid == null) {
+                return null;
+            }
+            return createJavaPlayerId(xuid);
+        });
+    }
+
+    /**
+     * Get the gamertag of the user that has the given xuid.
+     *
+     * @param xuid the gamertag of the player
+     * @return the gamertag of the player with the given xuid, or null when there is not player with
+     * the given xuid
+     */
+    CompletableFuture<String> getGamertagFor(long xuid);
 
     /**
      * Returns the instance that manages all the linking.
