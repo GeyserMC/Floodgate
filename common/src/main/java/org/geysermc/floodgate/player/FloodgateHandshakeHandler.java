@@ -213,7 +213,7 @@ public final class FloodgateHandshakeHandler {
 
     private void correctHostname(HandshakeData handshakeData) {
         BedrockData bedrockData = handshakeData.getBedrockData();
-        UUID correctUuid = Utils.getJavaUuid(bedrockData.getXuid());
+        UUID correctUuid = handshakeData.getCorrectUniqueId();
 
         // replace the ip and uuid with the Bedrock client IP and an uuid based of the xuid
         String[] split = handshakeData.getHostname().split("\0");

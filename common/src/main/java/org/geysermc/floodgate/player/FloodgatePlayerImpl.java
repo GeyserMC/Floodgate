@@ -28,17 +28,14 @@ package org.geysermc.floodgate.player;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.InstanceHolder;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
-import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
-import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.api.player.PropertyKey.Result;
@@ -84,7 +81,7 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
             BedrockData data,
             HandshakeData handshakeData) {
 
-        SimpleFloodgateApi api = InstanceHolder.castApi(SimpleFloodgateApi.class);
+        FloodgateApi api = InstanceHolder.getApi();
 
         UUID javaUniqueId = Utils.getJavaUuid(data.getXuid());
 
@@ -99,41 +96,6 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
                 javaUniqueId, data.getXuid(), deviceOs, data.getLanguageCode(), uiProfile,
                 inputMode, data.getIp(), data.isFromProxy(), api instanceof ProxyFloodgateApi,
                 linkedPlayer, data.getSubscribeId(), data.getVerifyCode());
-    }
-
-    /**
-     * Fetch and return the LinkedPlayer object associated to the player if the player is linked.
-     * Please note that this method loads the LinkedPlayer synchronously.
-     *
-     * @return LinkedPlayer or null if the player isn't linked or linking isn't enabled
-     * @see #fetchLinkedPlayerAsync(PlayerLink, UUID) for the asynchronously alternative
-     */
-    public static LinkedPlayer fetchLinkedPlayer(PlayerLink link, UUID javaUniqueId) {
-        if (!link.isEnabled()) {
-            return null;
-        }
-
-        try {
-            return link.getLinkedPlayer(javaUniqueId).get();
-        } catch (InterruptedException | ExecutionException exception) {
-            exception.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * Fetch and return the LinkedPlayer object associated to the player if the player is linked.
-     *
-     * @return a future holding the LinkedPlayer or null if the player isn't linked or when linking
-     * isn't enabled
-     * @see #fetchLinkedPlayer(PlayerLink, UUID) for the sync version
-     */
-    public static CompletableFuture<LinkedPlayer> fetchLinkedPlayerAsync(
-            PlayerLink link,
-            UUID javaUniqueId) {
-        return link.isEnabled() ?
-                link.getLinkedPlayer(javaUniqueId) :
-                CompletableFuture.completedFuture(null);
     }
 
     @Override
