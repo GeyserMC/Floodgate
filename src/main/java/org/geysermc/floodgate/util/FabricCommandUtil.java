@@ -2,6 +2,7 @@ package org.geysermc.floodgate.util;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import io.netty.channel.Channel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.platform.fabric.FabricServerAudiences;
@@ -13,7 +14,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandMessage;
@@ -69,7 +69,13 @@ public final class FabricCommandUtil implements CommandUtil {
 
     private FabricUserAudience getAudience0(ServerPlayerEntity player) {
         // Marked as internal??? Should probably find a better way to get this.
-        Locale locale = ((ConnectionAccess) player.networkHandler.getConnection()).getChannel().attr(FriendlyByteBufBridge.CHANNEL_LOCALE).get();
+        Locale locale;
+        Channel channel = ((ConnectionAccess) player.networkHandler.getConnection()).getChannel();
+        if (channel != null) {
+            locale = channel.attr(FriendlyByteBufBridge.CHANNEL_LOCALE).get();
+        } else {
+            locale = null;
+        }
         return new FabricUserAudience.NamedFabricUserAudience(
                 player.getName().asString(),
                 player.getUuid(), locale != null ?
