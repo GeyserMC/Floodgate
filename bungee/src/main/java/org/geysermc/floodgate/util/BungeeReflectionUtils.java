@@ -30,53 +30,88 @@ import static org.geysermc.floodgate.util.ReflectionUtils.castedInvoke;
 import static org.geysermc.floodgate.util.ReflectionUtils.getMethod;
 import static org.geysermc.floodgate.util.ReflectionUtils.makeAccessible;
 
-import com.google.common.base.Preconditions;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import sun.misc.Unsafe;
 
-// Reflection for just Bungee specific reflection because Bungee doesn't like accessibility
+// Reflection for just Bungee specific reflection because Bungee doesn't like accessibility :)
 public class BungeeReflectionUtils {
     private static final Field MODIFIERS_FIELD;
+    private static final Unsafe UNSAFE;
 
     static {
-        Field modifiersField;
+        Field modifiersField = null; // Should not be null pre-Java-16
+        Unsafe unsafe = null; // Should not be null post-Java-16
         try {
             modifiersField = Field.class.getDeclaredField("modifiers");
         } catch (NoSuchFieldException ignored) {
-            modifiersField = fixJava12Support();
-        }
+            try {
+                modifiersField = fixJava12Support();
+            } catch (Exception e) {
+                if (Constants.DEBUG_MODE) {
+                    e.printStackTrace();
+                }
 
-        Preconditions.checkNotNull(modifiersField, "Modifiers field cannot be null!");
-        MODIFIERS_FIELD = modifiersField;
-    }
-
-    private static Field fixJava12Support() {
-        // Java 12 compatibility, thanks to https://github.com/powermock/powermock/pull/1010
-        try {
-            Method declaredFields = getMethod(Class.class, "getDeclaredFields0", boolean.class);
-            if (declaredFields == null) {
-                throw new NoSuchMethodException("Cannot find method getDeclaredFields0");
-            }
-
-            Field[] fields = castedInvoke(Field.class, declaredFields, false);
-            if (fields == null) {
-                throw new RuntimeException("The Field class cannot have null fields");
-            }
-
-            for (Field field : fields) {
-                if ("modifiers".equals(field.getName())) {
-                    return field;
+                // At this point, we're probably using Java 16
+                try {
+                    Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
+                    unsafeField.setAccessible(true);
+                    unsafe = (Unsafe) unsafeField.get(null);
+                } catch (Exception exception) {
+                    throw new RuntimeException(format(
+                        "Cannot initialize required reflection setup :/\nJava version: {}\nVendor: {} ({})",
+                        System.getProperty("java.version"),
+                        System.getProperty("java.vendor"),
+                        System.getProperty("java.vendor.url")
+                    ), exception);
                 }
             }
-            return null;
-        } catch (Exception exception) {
+        }
+
+        MODIFIERS_FIELD = modifiersField;
+        UNSAFE = unsafe;
+    }
+
+    private static Field fixJava12Support() throws Exception {
+        // Java 12 compatibility, thanks to https://github.com/powermock/powermock/pull/1010
+        Method declaredFields = getMethod(Class.class, "getDeclaredFields0", boolean.class);
+        if (declaredFields == null) {
+            throw new NoSuchMethodException("Cannot find method getDeclaredFields0");
+        }
+
+        Field[] fields = castedInvoke(Field.class, declaredFields, false);
+        if (fields == null) {
+            throw new RuntimeException("The Field class cannot have null fields");
+        }
+
+        for (Field field : fields) {
+            if ("modifiers".equals(field.getName())) {
+                return field;
+            }
+        }
+        return null;
+    }
+
+    public static boolean isJava16() {
+        return UNSAFE != null;
+    }
+
+    public static void setJava16Field(Object object, Field field, Object result) {
+        try {
+            boolean isStatic = Modifier.isStatic(field.getModifiers());
+            long offset = isStatic ? UNSAFE.staticFieldOffset(field) : UNSAFE.objectFieldOffset(field);
+            if (isStatic) {
+                UNSAFE.putObject(UNSAFE.staticFieldBase(field), offset, result);
+            } else {
+                UNSAFE.putObject(object, offset, result);
+            }
+        } catch (Exception e) {
             throw new RuntimeException(format(
-                    "Cannot find the modifiers field :/\nJava version: {}\nVendor: {} ({})",
+                    "Cannot initialize required reflection setup :/\nJava version: {}\nVendor: {} ({})",
                     System.getProperty("java.version"),
                     System.getProperty("java.vendor"),
-                    System.getProperty("java.vendor.url")
-            ), exception);
+                    System.getProperty("java.vendor.url"), e));
         }
     }
 

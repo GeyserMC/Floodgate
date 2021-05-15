@@ -51,15 +51,21 @@ public final class BungeeInjector extends CommonPlatformInjector {
 
             Field framePrepender = ReflectionUtils.getField(PipelineUtils.class, "framePrepender");
 
-            // we have to remove the final modifier before asking for the value
-            // because we can't remove it after we got the current value
-            BungeeReflectionUtils.removeFinal(framePrepender);
+            if (!BungeeReflectionUtils.isJava16()) {
+                // we have to remove the final modifier before asking for the value
+                // because we can't remove it after we got the current value
+                BungeeReflectionUtils.removeFinal(framePrepender);
+            }
 
             BungeeCustomPrepender customPrepender = new BungeeCustomPrepender(
                     ReflectionUtils.getCastedValue(null, framePrepender), logger
             );
 
-            ReflectionUtils.setValue(null, framePrepender, customPrepender);
+            if (BungeeReflectionUtils.isJava16()) {
+                BungeeReflectionUtils.setJava16Field(null, framePrepender, customPrepender);
+            } else {
+                ReflectionUtils.setValue(null, framePrepender, customPrepender);
+            }
 
             injected = true;
             return true;
