@@ -12,6 +12,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.WhitelistEntry;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.api.FloodgateApi;
@@ -171,7 +172,7 @@ public final class FabricCommandUtil implements CommandUtil {
     }
 
     public Text translateAndTransform(String locale, CommandMessage message, Object... args) {
-        return Text.of(message.translateMessage(manager, locale, args));
+        return new LiteralText(message.translateMessage(manager, locale, args));
     }
 
     public FabricServerAudiences getAdventure() {
