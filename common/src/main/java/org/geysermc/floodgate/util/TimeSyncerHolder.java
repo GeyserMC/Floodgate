@@ -25,21 +25,20 @@
 
 package org.geysermc.floodgate.util;
 
-public final class Constants {
-    public static final String DATABASE_NAME_FORMAT = "^floodgate-[a-zA-Z0-9_]{0,16}-database.jar$";
-    public static final int LOGIN_SUCCESS_PACKET_ID = 2;
+import org.geysermc.floodgate.time.TimeSyncer;
 
-    private static final String API_BASE_URL = "s://api.geysermc.org";
-    public static final String WEBSOCKET_URL = "ws" + API_BASE_URL + "/ws";
-    public static final String GET_XUID_URL = "http" + API_BASE_URL + "/v1/xbox/xuid/";
-    public static final String GET_GAMERTAG_URL = "http" + API_BASE_URL + "/v1/xbox/gamertag/";
+public final class TimeSyncerHolder {
+    private static TimeSyncer timeSyncer;
 
-    public static final String LINK_INFO_URL = "https://link.geysermc.org/";
+    public static void init() {
+        timeSyncer = new TimeSyncer(Constants.NTP_SERVER);
+    }
 
-    public static final boolean DEBUG_MODE = true;
+    public static void set(TimeSyncer syncer) {
+        timeSyncer = syncer;
+    }
 
-    public static final String NTP_SERVER = "time.cloudflare.com";
-    public static final String TIMESTAMP_DENIED_MESSAGE =
-            "Something isn't right with this data." +
-            " Try logging in again or contact a server administrator if the issue persists.";
+    public static TimeSyncer get() {
+        return timeSyncer;
+    }
 }
