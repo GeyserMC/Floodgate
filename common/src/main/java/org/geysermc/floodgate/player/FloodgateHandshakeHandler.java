@@ -51,9 +51,11 @@ import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.skin.SkinUploadManager;
+import org.geysermc.floodgate.time.TimeSyncer;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.InvalidFormatException;
 import org.geysermc.floodgate.util.LinkedPlayer;
+import org.geysermc.floodgate.util.TimeSyncerHolder;
 import org.geysermc.floodgate.util.Utils;
 
 @RequiredArgsConstructor
@@ -108,7 +110,14 @@ public final class FloodgateHandshakeHandler {
 
             // timestamp checks
 
-            long timeDifference = System.currentTimeMillis() - bedrockData.getTimestamp();
+            TimeSyncer timeSyncer = TimeSyncerHolder.get();
+
+            if (!timeSyncer.hasUsefulOffset()) {
+                logger.warn("We couldn't make sure that your system clock is accurate. " +
+                        "This can cause issues with logging in.");
+            }
+
+            long timeDifference = timeSyncer.getRealMillis() - bedrockData.getTimestamp();
             if (timeDifference > 6000 || timeDifference < 0) {
                 return callHandlerAndReturnResult(
                         ResultType.TIMESTAMP_DENIED,
