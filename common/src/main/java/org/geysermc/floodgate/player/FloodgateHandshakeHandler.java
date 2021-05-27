@@ -53,6 +53,7 @@ import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.skin.SkinUploadManager;
 import org.geysermc.floodgate.time.TimeSyncer;
 import org.geysermc.floodgate.util.BedrockData;
+import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.InvalidFormatException;
 import org.geysermc.floodgate.util.LinkedPlayer;
 import org.geysermc.floodgate.util.TimeSyncerHolder;
@@ -119,6 +120,11 @@ public final class FloodgateHandshakeHandler {
 
             long timeDifference = timeSyncer.getRealMillis() - bedrockData.getTimestamp();
             if (timeDifference > 6000 || timeDifference < 0) {
+                if (Constants.DEBUG_MODE || logger.isDebug()) {
+                    logger.info("Current time: " + System.currentTimeMillis());
+                    logger.info("Stored time: " + bedrockData.getTimestamp());
+                    logger.info("Time offset: " + timeSyncer.getTimeOffset());
+                }
                 return callHandlerAndReturnResult(
                         ResultType.TIMESTAMP_DENIED,
                         channel, bedrockData, hostname);
