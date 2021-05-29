@@ -52,7 +52,7 @@ import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.ReflectionUtils;
-import org.geysermc.floodgate.util.SpigotUtils;
+import org.geysermc.floodgate.util.ProxyUtils;
 
 @RequiredArgsConstructor
 public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
@@ -219,7 +219,7 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
                 }
 
                 player = result.getFloodgatePlayer();
-                bungeeData = SpigotUtils.isBungeeData();
+                bungeeData = ProxyUtils.isProxyData();
 
                 if (!bungeeData) {
                     // Use a spoofedUUID for initUUID (just like Bungeecord)
