@@ -46,7 +46,7 @@ public final class ProxyUtils {
             velocitySupport = getField(paperConfig, "velocitySupport");
         } catch (ClassNotFoundException e) {
             // We're not on a platform that has modern forwarding
-            velocitySupport = null;
+            velocitySupport = null; // NOPMD - there's really not a better way around this unless you want to use an optional
         }
         IS_MODERN_FORWARDING = velocitySupport;
     }
