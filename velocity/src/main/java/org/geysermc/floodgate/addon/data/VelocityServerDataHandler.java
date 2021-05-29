@@ -92,7 +92,7 @@ public final class VelocityServerDataHandler extends MessageToMessageEncoder<Obj
         this.api = api;
 
         Enum<?> forwardingMode = castedInvoke(proxy.getConfiguration(), GET_FORWARDING_MODE);
-        this.isModernForwarding = forwardingMode.name().equals("MODERN");
+        this.isModernForwarding = "MODERN".equals(forwardingMode.name());
     }
 
     @Override
