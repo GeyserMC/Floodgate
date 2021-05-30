@@ -55,6 +55,12 @@ public class BungeePlugin extends Plugin implements Listener {
         CommandUtil commandUtil = new CommandUtil();
         getProxy().getPluginManager().registerCommand(this, new LinkAccountCommand(playerLink, commandUtil));
         getProxy().getPluginManager().registerCommand(this, new UnlinkAccountCommand(playerLink, commandUtil));
+
+        getLogger().warning("Recent BungeeCord changes break Floodgate 1.0!");
+        getLogger().warning("If you use a Waterfall build after 419, or a BungeeCord build after 1567, Floodgate will not work!");
+        getLogger().warning("One solution is to update to Floodgate 2.0, which will become the main version of Floodgate for 1.17: https://github.com/GeyserMC/Floodgate/wiki/Floodgate-2.0");
+        getLogger().warning("The other solution is to downgrade your BungeeCord/Waterfall installation:");
+        getLogger().warning("https://ci.md-5.net/job/BungeeCord/1567/ or https://papermc.io/api/v2/projects/waterfall/versions/1.16/builds/419/downloads/waterfall-1.16-419.jar");
     }
 
     @Override
