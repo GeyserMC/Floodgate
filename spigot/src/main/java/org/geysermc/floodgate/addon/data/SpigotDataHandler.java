@@ -33,6 +33,7 @@ import static org.geysermc.floodgate.util.ReflectionUtils.getPrefixedClass;
 import static org.geysermc.floodgate.util.ReflectionUtils.makeAccessible;
 import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
 
+import com.mojang.authlib.GameProfile;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
@@ -60,8 +61,6 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
     private static final Class<?> HANDSHAKE_PACKET;
     private static final Field HANDSHAKE_HOST;
 
-    private static final Class<?> GAME_PROFILE;
-    private static final Constructor<?> GAME_PROFILE_CONSTRUCTOR;
     private static final Field LOGIN_PROFILE;
 
     private static final Class<?> LOGIN_START_PACKET;
@@ -91,21 +90,9 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
         LOGIN_START_PACKET = getPrefixedClass("PacketLoginInStart");
         checkNotNull(LOGIN_START_PACKET, "PacketLoginInStart cannot be null");
 
-        GAME_PROFILE = ReflectionUtils.getClass("com.mojang.authlib.GameProfile");
-        checkNotNull(GAME_PROFILE, "GameProfile class cannot be null");
-
-        Constructor<?> gameProfileConstructor = null;
-        try {
-            gameProfileConstructor = GAME_PROFILE.getConstructor(UUID.class, String.class);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-        GAME_PROFILE_CONSTRUCTOR = gameProfileConstructor;
-        checkNotNull(GAME_PROFILE_CONSTRUCTOR, "GameProfileConstructor cannot be null");
-
         LOGIN_LISTENER = getPrefixedClass("LoginListener");
         checkNotNull(LOGIN_LISTENER, "LoginListener cannot be null");
-        LOGIN_PROFILE = getFieldOfType(LOGIN_LISTENER, GAME_PROFILE);
+        LOGIN_PROFILE = getFieldOfType(LOGIN_LISTENER, GameProfile.class);
         checkNotNull(LOGIN_PROFILE, "Profile from LoginListener cannot be null");
         INIT_UUID = getMethod(LOGIN_LISTENER, "initUUID");
         checkNotNull(INIT_UUID, "initUUID from LoginListener cannot be null");
@@ -237,7 +224,7 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
                     }
 
                     // set the player his GameProfile, we can't change the username without this
-                    Object gameProfile = GAME_PROFILE_CONSTRUCTOR.newInstance(
+                    GameProfile gameProfile = new GameProfile(
                             player.getCorrectUniqueId(), player.getCorrectUsername()
                     );
                     setValue(loginListener, LOGIN_PROFILE, gameProfile);
