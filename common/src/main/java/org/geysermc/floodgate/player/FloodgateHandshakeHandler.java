@@ -51,9 +51,12 @@ import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.skin.SkinUploadManager;
+import org.geysermc.floodgate.time.TimeSyncer;
 import org.geysermc.floodgate.util.BedrockData;
+import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.InvalidFormatException;
 import org.geysermc.floodgate.util.LinkedPlayer;
+import org.geysermc.floodgate.util.TimeSyncerHolder;
 import org.geysermc.floodgate.util.Utils;
 
 @RequiredArgsConstructor
@@ -61,7 +64,7 @@ public final class FloodgateHandshakeHandler {
     private final Cache<String, Long> handleCache =
             CacheBuilder.newBuilder()
                     .maximumSize(500)
-                    .expireAfterWrite(1, TimeUnit.MINUTES)
+                    .expireAfterWrite(10, TimeUnit.SECONDS)
                     .build();
 
     private final HandshakeHandlersImpl handshakeHandlers;
@@ -108,8 +111,23 @@ public final class FloodgateHandshakeHandler {
 
             // timestamp checks
 
-            long timeDifference = System.currentTimeMillis() - bedrockData.getTimestamp();
-            if (timeDifference > 6000 || timeDifference < 0) {
+            TimeSyncer timeSyncer = TimeSyncerHolder.get();
+
+            if (!timeSyncer.hasUsefulOffset()) {
+                logger.warn("We couldn't make sure that your system clock is accurate. " +
+                        "This can cause issues with logging in.");
+            }
+
+            // the time syncer is accurate, but we have to account for some minor differences
+            final int errorMargin = 150; // 150ms
+
+            long timeDifference = timeSyncer.getRealMillis() - bedrockData.getTimestamp();
+            if (timeDifference > 6000 + errorMargin || timeDifference < -errorMargin) {
+                if (Constants.DEBUG_MODE || logger.isDebug()) {
+                    logger.info("Current time: " + System.currentTimeMillis());
+                    logger.info("Stored time: " + bedrockData.getTimestamp());
+                    logger.info("Time offset: " + timeSyncer.getTimeOffset());
+                }
                 return callHandlerAndReturnResult(
                         ResultType.TIMESTAMP_DENIED,
                         channel, bedrockData, hostname);
@@ -117,9 +135,10 @@ public final class FloodgateHandshakeHandler {
 
             Long cachedTimestamp = handleCache.getIfPresent(bedrockData.getXuid());
             if (cachedTimestamp != null) {
-                // the cached timestamp is newer than the gotten timestamp
-                // you also can't reuse the data (the timestamp is there to prevent that as well)
-                if (cachedTimestamp >= bedrockData.getTimestamp()) {
+                // the cached timestamp should be older than the received timestamp
+                // and it should also not be possible to reuse the handshake
+                long diff = bedrockData.getTimestamp() - cachedTimestamp;
+                if (diff == 0 || diff < 0 && -diff > errorMargin) {
                     return callHandlerAndReturnResult(
                             ResultType.TIMESTAMP_DENIED,
                             channel, bedrockData, hostname);

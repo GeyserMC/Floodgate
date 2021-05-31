@@ -38,6 +38,7 @@ public final class Constants {
 
     public static final boolean DEBUG_MODE = true;
 
+    public static final String NTP_SERVER = "time.cloudflare.com";
     public static final String TIMESTAMP_DENIED_MESSAGE =
             "Something isn't right with this data." +
             " Try logging in again or contact a server administrator if the issue persists.";

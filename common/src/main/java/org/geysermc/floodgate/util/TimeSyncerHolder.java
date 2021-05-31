@@ -25,22 +25,20 @@
 
 package org.geysermc.floodgate.util;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.geysermc.floodgate.util.ReflectionUtils.getField;
+import org.geysermc.floodgate.time.TimeSyncer;
 
-import java.lang.reflect.Field;
+public final class TimeSyncerHolder {
+    private static TimeSyncer timeSyncer;
 
-@SuppressWarnings("ConstantConditions")
-public final class SpigotUtils {
-    private static final Field IS_BUNGEE_DATA;
-
-    static {
-        Class<?> spigotConfig = ReflectionUtils.getClass("org.spigotmc.SpigotConfig");
-        IS_BUNGEE_DATA = getField(spigotConfig, "bungee");
-        checkNotNull(IS_BUNGEE_DATA, "bungee field cannot be null. Are you using CraftBukkit?");
+    public static void init() {
+        timeSyncer = new TimeSyncer(Constants.NTP_SERVER);
     }
 
-    public static boolean isBungeeData() {
-        return ReflectionUtils.getCastedValue(null, IS_BUNGEE_DATA);
+    public static void set(TimeSyncer syncer) {
+        timeSyncer = syncer;
+    }
+
+    public static TimeSyncer get() {
+        return timeSyncer;
     }
 }

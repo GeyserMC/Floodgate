@@ -47,6 +47,7 @@ import org.geysermc.floodgate.link.PlayerLinkLoader;
 import org.geysermc.floodgate.module.ConfigLoadedModule;
 import org.geysermc.floodgate.module.PostInitializeModule;
 import org.geysermc.floodgate.util.PrefixCheckTask;
+import org.geysermc.floodgate.util.TimeSyncerHolder;
 
 public class FloodgatePlatform {
     private static final UUID KEY = UUID.randomUUID();
@@ -96,6 +97,8 @@ public class FloodgatePlatform {
         configHolder.set(config);
         guice = guice.createChildInjector(new ConfigLoadedModule(config));
         PlayerLink link = guice.getInstance(PlayerLinkLoader.class).load();
+
+        TimeSyncerHolder.init();
 
         InstanceHolder.set(api, link, this.injector, packetHandlers, handshakeHandlers, KEY);
     }
