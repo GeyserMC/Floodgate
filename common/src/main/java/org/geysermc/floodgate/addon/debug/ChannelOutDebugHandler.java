@@ -27,29 +27,53 @@ package org.geysermc.floodgate.addon.debug;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 
+@Sharable
 public final class ChannelOutDebugHandler extends MessageToByteEncoder<ByteBuf> {
     private final String direction;
     private final FloodgateLogger logger;
 
-    public ChannelOutDebugHandler(String implementationType, boolean toServer,
-                                  FloodgateLogger logger) {
+    private final boolean toServer;
+    private final StateChangeDetector changeDetector;
+
+    public ChannelOutDebugHandler(
+            String implementationType,
+            boolean toServer,
+            StateChangeDetector changeDetector,
+            FloodgateLogger logger) {
         this.direction = implementationType + (toServer ? " -> Server" : " -> Player");
         this.logger = logger;
+        this.toServer = toServer;
+        this.changeDetector = changeDetector;
     }
 
     @Override
     protected void encode(ChannelHandlerContext ctx, ByteBuf msg, ByteBuf out) {
-        int index = msg.readerIndex();
+        try {
+            int index = msg.readerIndex();
 
-        logger.info("{}:\n{}", direction, ByteBufUtil.prettyHexDump(msg));
+            if (changeDetector.shouldPrintPacket(msg, toServer)) {
+                logger.info(
+                        "{} {}:\n{}",
+                        direction,
+                        changeDetector.getCurrentState(),
+                        ByteBufUtil.prettyHexDump(msg)
+                );
 
-        // reset index
-        msg.readerIndex(index);
+                // proxy acts as a client when it connects to a server
+                changeDetector.checkPacket(msg, toServer);
+            }
 
-        out.writeBytes(msg);
+            // reset index
+            msg.readerIndex(index);
+
+            out.writeBytes(msg);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

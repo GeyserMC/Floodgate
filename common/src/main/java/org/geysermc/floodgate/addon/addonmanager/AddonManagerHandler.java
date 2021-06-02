@@ -32,6 +32,7 @@ import io.netty.handler.codec.MessageToByteEncoder;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.util.Utils;
 
 @RequiredArgsConstructor
 public final class AddonManagerHandler extends MessageToByteEncoder<ByteBuf> {
@@ -58,27 +59,12 @@ public final class AddonManagerHandler extends MessageToByteEncoder<ByteBuf> {
         }
 
         int index = msg.readerIndex();
-        if (readVarInt(msg) == Constants.LOGIN_SUCCESS_PACKET_ID) {
+        if (Utils.readVarInt(msg) == Constants.LOGIN_SUCCESS_PACKET_ID) {
             loggedIn = true;
             injector.loginSuccessCall(channel);
         }
 
         msg.readerIndex(index);
         out.writeBytes(msg);
-    }
-
-    private int readVarInt(ByteBuf buffer) {
-        int out = 0;
-        int count = 0;
-        byte current;
-        do {
-            current = buffer.readByte();
-            out |= (current & 0x7F) << (count++ * 7);
-
-            if (count > 5) {
-                throw new RuntimeException("VarInt is bigger then allowed");
-            }
-        } while ((current & 0x80) != 0);
-        return out;
     }
 }

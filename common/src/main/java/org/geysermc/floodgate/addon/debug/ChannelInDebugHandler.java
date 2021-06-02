@@ -27,29 +27,51 @@ package org.geysermc.floodgate.addon.debug;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 
+@Sharable
 public final class ChannelInDebugHandler extends SimpleChannelInboundHandler<ByteBuf> {
-    private final String message;
+    private final String direction;
     private final FloodgateLogger logger;
 
-    public ChannelInDebugHandler(String implementationType, boolean toServer,
-                                 FloodgateLogger logger) {
-        this.message = (toServer ? "Server ->" : "Player ->") + ' ' + implementationType;
+    private final boolean toServer;
+    private final StateChangeDetector changeDetector;
+
+    public ChannelInDebugHandler(
+            String implementationType,
+            boolean toServer,
+            StateChangeDetector changeDetector,
+            FloodgateLogger logger) {
+        this.direction = (toServer ? "Server -> " : "Player -> ") + implementationType;
         this.logger = logger;
+        this.toServer = toServer;
+        this.changeDetector = changeDetector;
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {
-        int index = msg.readerIndex();
+        try {
+            int index = msg.readerIndex();
 
-        logger.info("{}:\n{}", message, ByteBufUtil.prettyHexDump(msg));
+            if (changeDetector.shouldPrintPacket(msg, !toServer)) {
+                logger.info("{} {}:\n{}",
+                        direction,
+                        changeDetector.getCurrentState(),
+                        ByteBufUtil.prettyHexDump(msg)
+                );
 
-        // reset index
-        msg.readerIndex(index);
+                changeDetector.checkPacket(msg, !toServer);
+            }
 
-        ctx.fireChannelRead(msg.retain());
+            // reset index
+            msg.readerIndex(index);
+
+            ctx.fireChannelRead(msg.retain());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

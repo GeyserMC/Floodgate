@@ -23,30 +23,14 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.util;
+package org.geysermc.floodgate.addon.debug;
 
-public final class Constants {
-    public static final boolean DEBUG_MODE = true;
-    public static final boolean PRINT_ALL_PACKETS = false;
+public enum State {
+    HANDSHAKE, STATUS, LOGIN, PLAY;
 
-    public static final String DATABASE_NAME_FORMAT = "^floodgate-[a-zA-Z0-9_]{0,16}-database.jar$";
+    public static final State[] VALUES = values();
 
-
-    private static final String API_BASE_URL = "s://api.geysermc.org";
-    public static final String WEBSOCKET_URL = "ws" + API_BASE_URL + "/ws";
-    public static final String GET_XUID_URL = "http" + API_BASE_URL + "/v1/xbox/xuid/";
-    public static final String GET_GAMERTAG_URL = "http" + API_BASE_URL + "/v1/xbox/gamertag/";
-
-    public static final String LINK_INFO_URL = "https://link.geysermc.org/";
-
-
-    public static final String NTP_SERVER = "time.cloudflare.com";
-    public static final String TIMESTAMP_DENIED_MESSAGE =
-            "Something isn't right with this data." +
-            " Try logging in again or contact a server administrator if the issue persists.";
-
-
-    public static final int HANDSHAKE_PACKET_ID = 0;
-    public static final int LOGIN_SUCCESS_PACKET_ID = 2;
-    public static final int SET_COMPRESSION_PACKET_ID = 3;
+    public static State getById(int id) {
+        return id < VALUES.length ? VALUES[id] : null;
+    }
 }

@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.util;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
 import java.io.BufferedReader;
@@ -101,6 +102,21 @@ public class Utils {
 
     public static boolean isValidDatabaseName(String databaseName) {
         return DATABASE_NAME.matcher(databaseName).matches();
+    }
+
+    public static int readVarInt(ByteBuf buffer) {
+        int out = 0;
+        int count = 0;
+        byte current;
+        do {
+            current = buffer.readByte();
+            out |= (current & 0x7F) << (count++ * 7);
+
+            if (count > 5) {
+                throw new RuntimeException("VarInt is bigger then allowed");
+            }
+        } while ((current & 0x80) != 0);
+        return out;
     }
 
     /**
