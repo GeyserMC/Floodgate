@@ -101,7 +101,7 @@ final class SkinUploadSocket extends WebSocketClient {
         }
 
         switch (type) {
-            case SUBSCRIBERS_COUNT:
+            case SUBSCRIBER_COUNT:
                 subscribersCount = message.get("subscribers_count").getAsInt();
                 break;
             case SKIN_UPLOADED:
