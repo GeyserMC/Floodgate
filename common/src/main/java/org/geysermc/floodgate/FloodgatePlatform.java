@@ -127,7 +127,7 @@ public class FloodgatePlatform {
     }
 
     public boolean disable() {
-        if (injector != null) {
+        if (injector != null && injector.canRemoveInjection()) {
             try {
                 if (!injector.removeInjection()) {
                     logger.error("Failed to remove the injection!");
