@@ -188,7 +188,6 @@ public class CommonModule extends AbstractModule {
             GitProperties properties) {
         // will be loaded after enabling, so we can use the link instance in InstanceHolder
         PlayerLink link = InstanceHolder.getPlayerLink();
-        logger.info(link.getName());
 
         String branch = properties.getProperty("git.branch");
         String build = properties.getProperty("git.build.number");
