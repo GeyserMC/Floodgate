@@ -39,6 +39,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
@@ -82,6 +83,16 @@ public class Utils {
         CharsetDecoder decoder = charset.newDecoder();
         Reader reader = new InputStreamReader(inputStream, decoder);
         return new BufferedReader(reader);
+    }
+
+    public static Properties readProperties(String resourceFile) {
+        Properties properties = new Properties();
+        try (InputStream is = Utils.class.getClassLoader().getResourceAsStream(resourceFile)) {
+            properties.load(is);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return properties;
     }
 
     public static String getLocale(Locale locale) {

@@ -173,7 +173,7 @@ public class NewsChecker {
                 return;
             }
 
-            String fullDatabaseName = Constants.NEWS_PROJECT_NAME + link.getName();
+            String fullDatabaseName = Constants.NEWS_PROJECT_NAME + '/' + link.getName();
             if (!fullDatabaseName.equals(item.getProject())) {
                 return;
             }
