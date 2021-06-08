@@ -179,17 +179,14 @@ public class NewsChecker {
             }
         }
 
-        switch (item.getType()) {
-            case BUILD_SPECIFIC:
-                if (!item.getDataAs(BuildSpecificData.class).isAffected(branch, build)) {
-                    return;
-                }
-                break;
-            case CHECK_AFTER:
-                long checkAfter = item.getDataAs(CheckAfterData.class).getCheckAfter();
-                long delayMs = System.currentTimeMillis() - checkAfter;
-                schedule(delayMs > 0 ? delayMs : 0);
-                break;
+        if (item.getType() == NewsType.BUILD_SPECIFIC) {
+            if (!item.getDataAs(BuildSpecificData.class).isAffected(branch, build)) {
+                return;
+            }
+        } else if (item.getType() == NewsType.CHECK_AFTER) {
+            long checkAfter = item.getDataAs(CheckAfterData.class).getCheckAfter();
+            long delayMs = System.currentTimeMillis() - checkAfter;
+            schedule(delayMs > 0 ? delayMs : 0);
         }
 
         activeNewsItems.put(item.getId(), item);
