@@ -32,7 +32,7 @@ import net.kyori.adventure.identity.Identified;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.geysermc.floodgate.platform.command.CommandMessage;
+import org.geysermc.floodgate.platform.command.TranslatableMessage;
 
 public interface UserAudience extends Identified, Identity, Audience {
     @Override
@@ -51,11 +51,11 @@ public interface UserAudience extends Identified, Identity, Audience {
                      final @NonNull Component message,
                      final @NonNull MessageType type);
 
-    void sendMessage(CommandMessage message, Object... args);
+    void sendMessage(TranslatableMessage message, Object... args);
 
     void disconnect(@NonNull final Component reason);
 
-    void disconnect(CommandMessage message, Object... args);
+    void disconnect(TranslatableMessage message, Object... args);
 
     @Override
     default @NonNull Identity identity() {

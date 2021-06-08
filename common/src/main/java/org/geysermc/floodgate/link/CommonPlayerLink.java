@@ -26,6 +26,8 @@
 package org.geysermc.floodgate.link;
 
 import com.google.inject.Inject;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -89,6 +91,11 @@ public abstract class CommonPlayerLink implements PlayerLink {
         // this method is not intended to be used more than once. It'll make a new instance of
         // DatabaseConfigLoader and DatabaseConfig every time you run this method.
         return injectorHolder.get().getInstance(DatabaseConfigLoader.class).loadAs(configClass);
+    }
+
+    @Override
+    public String getName() {
+        return injectorHolder.get().getInstance(Key.get(String.class, Names.named("databaseName")));
     }
 
     @Override

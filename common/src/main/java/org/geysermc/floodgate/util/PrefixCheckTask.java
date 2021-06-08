@@ -46,7 +46,7 @@ public final class PrefixCheckTask {
                         "**********************************\n" +
                         "* You specified an empty prefix in your Floodgate config for Bedrock players!\n" +
                         "* Should a Java player join and a Bedrock player join with the same username, unwanted results and conflicts will happen!\n" +
-                        "* We strongly recommend using . as the prefix, but other alternatives that will not conflict include: *, - and +\n" +
+                        "* We strongly recommend using . as the prefix, but other alternatives that will not conflict include: +, - and *\n" +
                         "**********************************");
                 return;
             }
@@ -54,9 +54,9 @@ public final class PrefixCheckTask {
             logger.warn(
                     "\n" +
                     "**********************************\n" +
-                    "The prefix you entered in your Floodgate config ({}) could lead to username conflicts!\n" +
-                    "Should a Java player join with the username {}Notch, and a Bedrock player join as Notch (who will be given the name {}Notch), unwanted results will happen!\n" +
-                    "We strongly recommend using . as the prefix, but other alternatives that will not conflict include: *, - and +\n" +
+                    "* The prefix you entered in your Floodgate config ({}) could lead to username conflicts!\n" +
+                    "* Should a Java player join with the username {}Notch, and a Bedrock player join as Notch (who will be given the name {}Notch), unwanted results will happen!\n" +
+                    "* We strongly recommend using . as the prefix, but other alternatives that will not conflict include: +, - and *\n" +
                     "**********************************",
                     config.getUsernamePrefix(), config.getUsernamePrefix(),
                     config.getUsernamePrefix(), config.getUsernamePrefix());

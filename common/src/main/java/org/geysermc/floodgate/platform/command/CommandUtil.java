@@ -50,25 +50,51 @@ public interface CommandUtil {
     @NonNull Collection<String> getOnlineUsernames(final @NonNull PlayerType limitTo);
 
     /**
-     * Send a message to the specified target, no matter what platform Floodgate is running on.
+     * Checks if the given player has the given permission.
      *
-     * @param target  the target to send the message to
-     * @param message the command message
-     * @param locale  the locale of the player
-     * @param args    the arguments
+     * @param player     the player to check
+     * @param permission the permission to check
+     * @return true or false depending on if the player has the permission
      */
-    void sendMessage(Object target, String locale, CommandMessage message, Object... args);
+    boolean hasPermission(Object player, String permission);
 
     /**
-     * Same as {@link CommandUtil#sendMessage(Object, String, CommandMessage, Object...)} except it
-     * kicks the player.
+     * Get all online players with the given permission.
      *
-     * @param player  the player to send the message to
+     * @param permission the permission to check
+     * @return a list of online players that have the given permission
+     */
+    Collection<Object> getOnlinePlayersWithPermission(String permission);
+
+    /**
+     * Send a message to the specified target, no matter what platform Floodgate is running on.
+     *
+     * @param target  the player that should receive the message
      * @param message the command message
      * @param locale  the locale of the player
      * @param args    the arguments
      */
-    void kickPlayer(Object player, String locale, CommandMessage message, Object... args);
+    void sendMessage(Object target, String locale, TranslatableMessage message, Object... args);
+
+    /**
+     * Sends a raw message to the specified target, no matter what platform Floodgate is running
+     * on.
+     *
+     * @param target  the player that should receive the message
+     * @param message the message
+     */
+    void sendMessage(Object target, String message);
+
+    /**
+     * Same as {@link CommandUtil#sendMessage(Object, String, TranslatableMessage, Object...)}
+     * except it kicks the player using the given message as the kick reason.
+     *
+     * @param player  the player that should be kicked
+     * @param message the command message
+     * @param locale  the locale of the player
+     * @param args    the arguments
+     */
+    void kickPlayer(Object player, String locale, TranslatableMessage message, Object... args);
 
     /**
      * Whitelist the given Bedrock player.

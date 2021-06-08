@@ -33,7 +33,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.api.link.LinkRequestResult;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.util.HttpUtils;
-import org.geysermc.floodgate.util.HttpUtils.HttpResponse;
+import org.geysermc.floodgate.util.HttpUtils.DefaultHttpResponse;
 import org.geysermc.floodgate.util.LinkedPlayer;
 import org.geysermc.floodgate.util.Utils;
 
@@ -53,6 +53,15 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
         if (databaseImpl != null) {
             databaseImpl.load();
         }
+    }
+
+    @Override
+    public String getName() {
+        if (databaseImpl != null) {
+            return databaseImpl.getName();
+        }
+        // Global Linking is integrated
+        return null;
     }
 
     @Override
@@ -82,7 +91,7 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
     private CompletableFuture<LinkedPlayer> getLinkedPlayer0(@NonNull UUID bedrockId) {
         return CompletableFuture.supplyAsync(
                 () -> {
-                    HttpResponse response =
+                    DefaultHttpResponse response =
                             HttpUtils.get(GET_BEDROCK_LINK + bedrockId.getLeastSignificantBits());
 
                     // both on code != 200 and fails with 200 'success' will be false
@@ -128,7 +137,7 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
     private CompletableFuture<Boolean> isLinkedPlayer0(@NonNull UUID bedrockId) {
         return CompletableFuture.supplyAsync(
                 () -> {
-                    HttpResponse response =
+                    DefaultHttpResponse response =
                             HttpUtils.get(GET_BEDROCK_LINK + bedrockId.getLeastSignificantBits());
 
                     // both on http != 200 and fails with 200 success will be false

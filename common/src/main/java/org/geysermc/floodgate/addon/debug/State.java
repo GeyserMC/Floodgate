@@ -28,7 +28,7 @@ package org.geysermc.floodgate.addon.debug;
 public enum State {
     HANDSHAKE, STATUS, LOGIN, PLAY;
 
-    public static final State[] VALUES = values();
+    private static final State[] VALUES = values();
 
     public static State getById(int id) {
         return id < VALUES.length ? VALUES[id] : null;

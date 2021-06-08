@@ -34,9 +34,11 @@ import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.addon.data.HandshakeHandlersImpl;
 import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.floodgate.api.InstanceHolder;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
+import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
@@ -52,7 +54,9 @@ import org.geysermc.floodgate.crypto.Base64Topping;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.crypto.KeyProducer;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
+import org.geysermc.floodgate.news.NewsChecker;
 import org.geysermc.floodgate.packet.PacketHandlersImpl;
+import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.skin.SkinApplier;
@@ -167,6 +171,15 @@ public class CommonModule extends AbstractModule {
             SkinApplier skinApplier,
             FloodgateLogger logger) {
         return new SkinUploadManager(api, skinApplier, logger);
+    }
+
+    @Provides
+    @Singleton
+    public NewsChecker newsChecker(CommandUtil commandUtil, FloodgateLogger logger) {
+        // will be loaded after enabling, so we can use the link instance in InstanceHolder
+        PlayerLink link = InstanceHolder.getPlayerLink();
+        logger.info(link.getName());
+        return new NewsChecker(link, commandUtil, logger, null, -1);
     }
 
     @Provides

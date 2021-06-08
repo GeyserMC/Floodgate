@@ -28,6 +28,7 @@ package org.geysermc.floodgate.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -40,8 +41,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.platform.command.CommandMessage;
 import org.geysermc.floodgate.platform.command.CommandUtil;
+import org.geysermc.floodgate.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.player.UserAudienceArgument.PlayerType;
 import org.geysermc.floodgate.util.BungeeUserAudience.BungeeConsoleAudience;
@@ -135,17 +136,40 @@ public final class BungeeCommandUtil implements CommandUtil {
     }
 
     @Override
-    public void sendMessage(Object target, String locale, CommandMessage message, Object... args) {
+    public boolean hasPermission(Object player, String permission) {
+        return cast(player).hasPermission(permission);
+    }
+
+    @Override
+    public Collection<Object> getOnlinePlayersWithPermission(String permission) {
+        List<Object> players = new ArrayList<>();
+        for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
+            if (hasPermission(player, permission)) {
+                players.add(player);
+            }
+        }
+        return players;
+    }
+
+    @Override
+    public void sendMessage(Object target, String locale, TranslatableMessage message, Object... args) {
         ((CommandSender) target).sendMessage(translateAndTransform(locale, message, args));
     }
 
     @Override
-    public void kickPlayer(Object player, String locale, CommandMessage message, Object... args) {
+    public void sendMessage(Object target, String message) {
+        ((CommandSender) target).sendMessage(message);
+    }
+
+    @Override
+    public void kickPlayer(Object player, String locale, TranslatableMessage message, Object... args) {
         cast(player).disconnect(translateAndTransform(locale, message, args));
     }
 
-    public BaseComponent[] translateAndTransform(String locale, CommandMessage message,
-                                                 Object... args) {
+    public BaseComponent[] translateAndTransform(
+            String locale,
+            TranslatableMessage message,
+            Object... args) {
         return TextComponent.fromLegacyText(message.translateMessage(manager, locale, args));
     }
 

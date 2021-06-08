@@ -28,6 +28,7 @@ package org.geysermc.floodgate.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -40,8 +41,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.platform.command.CommandMessage;
 import org.geysermc.floodgate.platform.command.CommandUtil;
+import org.geysermc.floodgate.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.player.UserAudienceArgument.PlayerType;
 import org.geysermc.floodgate.util.SpigotUserAudience.SpigotConsoleAudience;
@@ -136,12 +137,33 @@ public final class SpigotCommandUtil implements CommandUtil {
     }
 
     @Override
-    public void sendMessage(Object target, String locale, CommandMessage message, Object... args) {
-        ((CommandSender) target).sendMessage(translateAndTransform(locale, message, args));
+    public boolean hasPermission(Object player, String permission) {
+        return cast(player).hasPermission(permission);
     }
 
     @Override
-    public void kickPlayer(Object player, String locale, CommandMessage message, Object... args) {
+    public Collection<Object> getOnlinePlayersWithPermission(String permission) {
+        List<Object> players = new ArrayList<>();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (hasPermission(player, permission)) {
+                players.add(player);
+            }
+        }
+        return players;
+    }
+
+    @Override
+    public void sendMessage(Object target, String locale, TranslatableMessage message, Object... args) {
+        sendMessage(target, translateAndTransform(locale, message, args));
+    }
+
+    @Override
+    public void sendMessage(Object target, String message) {
+        ((CommandSender) target).sendMessage(message);
+    }
+
+    @Override
+    public void kickPlayer(Object player, String locale, TranslatableMessage message, Object... args) {
         // Have to run this in the main thread so we don't get a `Asynchronous player kick!` error
         Bukkit.getScheduler().runTask(plugin,
                 () -> cast(player).kickPlayer(translateAndTransform(locale, message, args)));
@@ -157,7 +179,7 @@ public final class SpigotCommandUtil implements CommandUtil {
         return WhitelistUtils.removePlayer(xuid, username);
     }
 
-    public String translateAndTransform(String locale, CommandMessage message, Object... args) {
+    public String translateAndTransform(String locale, TranslatableMessage message, Object... args) {
         // unlike others, Bukkit doesn't have to transform a message into another class.
         return message.translateMessage(manager, locale, args);
     }

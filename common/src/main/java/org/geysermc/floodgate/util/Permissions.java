@@ -23,34 +23,22 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.command;
+package org.geysermc.floodgate.util;
 
-import lombok.Getter;
-import org.geysermc.floodgate.platform.command.TranslatableMessage;
+public enum Permissions {
+    COMMAND_LINK("floodgate.command.linkaccount"),
+    COMMAND_UNLINK("floodgate.command.unlinkaccount"),
+    COMMAND_WHITELIST("floodgate.command.fwhitelist"),
 
-/**
- * Messages (or part of messages) that are used in two or more commands and thus are 'commonly
- * used'
- */
-@Getter
-public enum CommonCommandMessage implements TranslatableMessage {
-    LINKING_DISABLED("floodgate.commands.linking_disabled"),
-    NOT_A_PLAYER("floodgate.commands.not_a_player"),
-    CHECK_CONSOLE("floodgate.commands.check_console"),
-    IS_LINKED_ERROR("floodgate.commands.is_linked_error"),
-    LOCAL_LINKING_NOTICE("floodgate.commands.local_linking_notice"),
-    GLOBAL_LINKING_NOTICE("floodgate.commands.global_linking_notice");
+    NEWS_RECEIVE("floodgate.news.receive");
 
-    private final String rawMessage;
-    private final String[] translateParts;
+    private final String permission;
 
-    CommonCommandMessage(String rawMessage) {
-        this.rawMessage = rawMessage;
-        this.translateParts = rawMessage.split(" ");
+    Permissions(String permission) {
+        this.permission = permission;
     }
 
-    @Override
-    public String toString() {
-        return getRawMessage();
+    public String get() {
+        return permission;
     }
 }

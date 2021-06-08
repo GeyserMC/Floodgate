@@ -38,11 +38,12 @@ import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.link.GlobalPlayerLinking;
-import org.geysermc.floodgate.platform.command.CommandMessage;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
+import org.geysermc.floodgate.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.player.UserAudience.PlayerAudience;
 import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.util.Permissions;
 
 @NoArgsConstructor
 public final class UnlinkAccountCommand implements FloodgateCommand {
@@ -53,7 +54,7 @@ public final class UnlinkAccountCommand implements FloodgateCommand {
         return commandManager.commandBuilder("unlinkaccount",
                 ArgumentDescription.of("Unlink your Java account from your Bedrock account"))
                 .senderType(PlayerAudience.class)
-                .permission("floodgate.command.unlinkaccount")
+                .permission(Permissions.COMMAND_UNLINK.get())
                 .handler(this::execute)
                 .build();
     }
@@ -113,7 +114,7 @@ public final class UnlinkAccountCommand implements FloodgateCommand {
     }
 
     @Getter
-    public enum Message implements CommandMessage {
+    public enum Message implements TranslatableMessage {
         NOT_LINKED("floodgate.command.unlink_account.not_linked"),
         UNLINK_SUCCESS("floodgate.command.unlink_account.unlink_success"),
         UNLINK_ERROR("floodgate.command.unlink_account.error " + CHECK_CONSOLE);

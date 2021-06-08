@@ -46,6 +46,7 @@ import org.geysermc.floodgate.config.loader.ConfigLoader;
 import org.geysermc.floodgate.link.PlayerLinkLoader;
 import org.geysermc.floodgate.module.ConfigLoadedModule;
 import org.geysermc.floodgate.module.PostInitializeModule;
+import org.geysermc.floodgate.news.NewsChecker;
 import org.geysermc.floodgate.util.PrefixCheckTask;
 import org.geysermc.floodgate.util.TimeSyncerHolder;
 
@@ -123,6 +124,7 @@ public class FloodgatePlatform {
 
         PrefixCheckTask.checkAndExecuteDelayed(config, logger);
 
+        guice.getInstance(NewsChecker.class).start();
         return true;
     }
 

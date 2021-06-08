@@ -37,8 +37,8 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.geysermc.floodgate.platform.command.CommandMessage;
 import org.geysermc.floodgate.platform.command.CommandUtil;
+import org.geysermc.floodgate.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.player.UserAudience;
 
 @RequiredArgsConstructor
@@ -74,13 +74,15 @@ public class BungeeUserAudience implements UserAudience, ForwardingAudience.Sing
     }
 
     @Override
-    public void sendMessage(@NonNull Identity source, @NonNull Component message,
-                            @NonNull MessageType type) {
+    public void sendMessage(
+            @NonNull Identity source,
+            @NonNull Component message,
+            @NonNull MessageType type) {
         this.source.sendMessage(GsonComponentSerializer.gson().serialize(message));
     }
 
     @Override
-    public void sendMessage(CommandMessage message, Object... args) {
+    public void sendMessage(TranslatableMessage message, Object... args) {
         commandUtil.sendMessage(source(), locale(), message, args);
     }
 
@@ -92,7 +94,7 @@ public class BungeeUserAudience implements UserAudience, ForwardingAudience.Sing
     }
 
     @Override
-    public void disconnect(CommandMessage message, Object... args) {
+    public void disconnect(TranslatableMessage message, Object... args) {
         commandUtil.kickPlayer(source(), locale(), message, args);
     }
 

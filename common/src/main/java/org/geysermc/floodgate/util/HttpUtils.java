@@ -48,13 +48,21 @@ public class HttpUtils {
     private static final String BOUNDARY = "******";
     private static final String END = "\r\n";
 
-    public static CompletableFuture<HttpResponse> asyncGet(String urlString) {
+    public static CompletableFuture<DefaultHttpResponse> asyncGet(String urlString) {
         return CompletableFuture.supplyAsync(() -> {
             return get(urlString);
         }, EXECUTOR_SERVICE);
     }
 
-    public static HttpResponse get(String urlString) {
+    public static DefaultHttpResponse get(String urlString) {
+        return readDefaultResponse(request(urlString));
+    }
+
+    public static <T> HttpResponse<T> getSilent(String urlString, Class<T> clazz) {
+        return readResponseSilent(request(urlString), clazz);
+    }
+
+    private static HttpURLConnection request(String urlString) {
         HttpURLConnection connection;
 
         try {
@@ -68,34 +76,37 @@ public class HttpUtils {
             connection.setRequestMethod("GET");
             connection.setUseCaches(false);
             connection.setRequestProperty("User-Agent", USER_AGENT);
-            connection.setRequestProperty("ContentType", "application/json");
         } catch (Exception exception) {
             throw new RuntimeException("Failed to create request", exception);
         }
 
-        return readResponse(connection);
+        return connection;
     }
 
-    private static HttpResponse readResponse(HttpURLConnection connection) {
-        InputStream stream = null;
-        try {
-            stream = connection.getInputStream();
-        } catch (Exception exception) {
-            try {
-                stream = connection.getErrorStream();
-            } catch (Exception exception1) {
-                throw new RuntimeException("Both the input and the error stream failed?!");
-            }
-        }
-
-        InputStreamReader streamReader = new InputStreamReader(stream);
+    private static <T> HttpResponse<T> readResponseSilent(HttpURLConnection connection, Class<T> clazz) {
+        InputStreamReader streamReader = createReader(connection);
 
         try {
             int responseCode = connection.getResponseCode();
+            T response = GSON.fromJson(streamReader, clazz);
+            return new HttpResponse<>(responseCode, response);
+        } catch (Exception ignored) {
+            return new HttpResponse<>(-1, null);
+        } finally {
+            try {
+                streamReader.close();
+            } catch (Exception ignored) {
+            }
+        }
+    }
 
+    private static DefaultHttpResponse readDefaultResponse(HttpURLConnection connection) {
+        InputStreamReader streamReader = createReader(connection);
+
+        try {
+            int responseCode = connection.getResponseCode();
             JsonObject response = GSON.fromJson(streamReader, JsonObject.class);
-
-            return new HttpResponse(responseCode, response);
+            return new DefaultHttpResponse(responseCode, response);
         } catch (Exception exception) {
             throw new RuntimeException("Failed to read response", exception);
         } finally {
@@ -106,10 +117,30 @@ public class HttpUtils {
         }
     }
 
+    private static InputStreamReader createReader(HttpURLConnection connection) {
+        InputStream stream = null;
+        try {
+            stream = connection.getInputStream();
+        } catch (Exception exception) {
+            try {
+                stream = connection.getErrorStream();
+            } catch (Exception exception1) {
+                throw new RuntimeException("Both the input and the error stream failed?!");
+            }
+        }
+        return new InputStreamReader(stream);
+    }
+
     @Getter
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
-    public static final class HttpResponse {
+    public static class HttpResponse<T> {
         private final int httpCode;
-        private final JsonObject response;
+        private final T response;
+    }
+
+    public static final class DefaultHttpResponse extends HttpResponse<JsonObject> {
+        private DefaultHttpResponse(int httpCode, JsonObject response) {
+            super(httpCode, response);
+        }
     }
 }

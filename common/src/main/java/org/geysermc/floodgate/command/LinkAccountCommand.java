@@ -42,12 +42,13 @@ import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.link.GlobalPlayerLinking;
-import org.geysermc.floodgate.platform.command.CommandMessage;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
+import org.geysermc.floodgate.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.player.UserAudience.PlayerAudience;
 import org.geysermc.floodgate.player.UserAudienceArgument;
 import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.util.Permissions;
 
 @NoArgsConstructor
 public final class LinkAccountCommand implements FloodgateCommand {
@@ -59,7 +60,7 @@ public final class LinkAccountCommand implements FloodgateCommand {
         return commandManager.commandBuilder("linkaccount",
                 ArgumentDescription.of("Link your Java account with your Bedrock account"))
                 .senderType(PlayerAudience.class)
-                .permission("floodgate.command.linkaccount")
+                .permission(Permissions.COMMAND_LINK.get())
                 .argument(UserAudienceArgument.of("player", true))
                 .argument(StringArgument.optional("code"))
                 .handler(this::execute)
@@ -165,7 +166,7 @@ public final class LinkAccountCommand implements FloodgateCommand {
     }
 
     @Getter
-    public enum Message implements CommandMessage {
+    public enum Message implements TranslatableMessage {
         ALREADY_LINKED("floodgate.command.link_account.already_linked"),
         JAVA_USAGE("floodgate.command.link_account.java_usage"),
         LINK_REQUEST_CREATED("floodgate.command.link_account.link_request_created"),

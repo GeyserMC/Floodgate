@@ -91,6 +91,11 @@ final class DisabledPlayerLink implements PlayerLink {
     }
 
     @Override
+    public String getName() {
+        return null;
+    }
+
+    @Override
     public boolean isEnabled() {
         return false;
     }

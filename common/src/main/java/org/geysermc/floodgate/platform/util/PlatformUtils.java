@@ -26,8 +26,8 @@
 package org.geysermc.floodgate.platform.util;
 
 import java.util.Collection;
-import org.geysermc.floodgate.platform.command.CommandMessage;
 import org.geysermc.floodgate.platform.command.CommandUtil;
+import org.geysermc.floodgate.platform.command.TranslatableMessage;
 
 public interface PlatformUtils {
     /**
@@ -38,10 +38,10 @@ public interface PlatformUtils {
      * @param locale  the locale of the player
      * @param args    the arguments
      */
-    void sendMessage(Object player, String locale, CommandMessage message, Object... args);
+    void sendMessage(Object player, String locale, TranslatableMessage message, Object... args);
 
     /**
-     * Same as {@link CommandUtil#sendMessage(Object, String, CommandMessage, Object...)} except it
+     * Same as {@link CommandUtil#sendMessage(Object, String, TranslatableMessage, Object...)} except it
      * kicks the player.
      *
      * @param player  the player to send the message to
@@ -49,7 +49,7 @@ public interface PlatformUtils {
      * @param locale  the locale of the player
      * @param args    the arguments
      */
-    void kickPlayer(Object player, String locale, CommandMessage message, Object... args);
+    void kickPlayer(Object player, String locale, TranslatableMessage message, Object... args);
 
     Collection<String> getOnlineUsernames(PlayerType limitTo);
 

@@ -35,8 +35,8 @@ import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.geysermc.floodgate.platform.command.CommandMessage;
 import org.geysermc.floodgate.platform.command.CommandUtil;
+import org.geysermc.floodgate.platform.command.TranslatableMessage;
 
 @RequiredArgsConstructor
 public abstract class VelocityUserAudience implements UserAudience, ForwardingAudience.Single {
@@ -78,7 +78,7 @@ public abstract class VelocityUserAudience implements UserAudience, ForwardingAu
     }
 
     @Override
-    public void sendMessage(CommandMessage message, Object... args) {
+    public void sendMessage(TranslatableMessage message, Object... args) {
         commandUtil.sendMessage(source(), locale(), message, args);
     }
 
@@ -90,7 +90,7 @@ public abstract class VelocityUserAudience implements UserAudience, ForwardingAu
     }
 
     @Override
-    public void disconnect(CommandMessage message, Object... args) {
+    public void disconnect(TranslatableMessage message, Object... args) {
         commandUtil.kickPlayer(source(), locale(), message, args);
     }
 

@@ -119,6 +119,12 @@ public interface PlayerLink {
     );
 
     /**
+     * Returns the name of this database implementation. This will return null when Player Linking
+     * is disabled or when <b>only</b> Global Linking is used.
+     */
+    String getName();
+
+    /**
      * Return if account linking is enabled. The difference between enabled and allowed is that
      * 'enabled' still allows already linked people to join with their linked account while 'allow
      * linking' allows people to link accounts using the commands.

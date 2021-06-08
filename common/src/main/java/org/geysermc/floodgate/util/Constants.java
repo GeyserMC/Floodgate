@@ -26,6 +26,8 @@
 package org.geysermc.floodgate.util;
 
 public final class Constants {
+    public static final char COLOR_CHAR = '§';
+
     public static final boolean DEBUG_MODE = true;
     public static final boolean PRINT_ALL_PACKETS = false;
 
@@ -36,8 +38,11 @@ public final class Constants {
     public static final String WEBSOCKET_URL = "ws" + API_BASE_URL + "/ws";
     public static final String GET_XUID_URL = "http" + API_BASE_URL + "/v1/xbox/xuid/";
     public static final String GET_GAMERTAG_URL = "http" + API_BASE_URL + "/v1/xbox/gamertag/";
+    public static final String NEWS_OVERVIEW_URL = "http" + API_BASE_URL + "/v1/news";
 
     public static final String LINK_INFO_URL = "https://link.geysermc.org/";
+
+    public static final String NEWS_PROJECT_NAME = "floodgate";
 
 
     public static final String NTP_SERVER = "time.cloudflare.com";

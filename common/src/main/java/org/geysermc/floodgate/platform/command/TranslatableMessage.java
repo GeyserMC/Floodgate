@@ -28,10 +28,10 @@ package org.geysermc.floodgate.platform.command;
 import org.geysermc.floodgate.util.LanguageManager;
 
 /**
- * CommandMessage is the interface of a message that can be send to a command source after executing
- * a command. Messages are generally implemented using enums.
+ * TranslatableMessage is the interface for a message that can be translated.
+ * Messages are generally implemented using enums.
  */
-public interface CommandMessage {
+public interface TranslatableMessage {
     /**
      * Returns the message attached to the enum identifier
      */

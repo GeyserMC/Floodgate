@@ -37,13 +37,14 @@ import lombok.Getter;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
-import org.geysermc.floodgate.platform.command.CommandMessage;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
+import org.geysermc.floodgate.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.player.UserAudienceArgument;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.HttpUtils;
+import org.geysermc.floodgate.util.Permissions;
 
 public class WhitelistCommand implements FloodgateCommand {
     @Inject private FloodgateConfig config;
@@ -53,7 +54,7 @@ public class WhitelistCommand implements FloodgateCommand {
     public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
         Command.Builder<UserAudience> builder = commandManager.commandBuilder("fwhitelist",
                 ArgumentDescription.of("Easy way to whitelist Bedrock players"))
-                .permission("floodgate.command.fwhitelist");
+                .permission(Permissions.COMMAND_WHITELIST.get());
 
         commandManager.command(builder
                 .literal("add", "a")
@@ -153,7 +154,7 @@ public class WhitelistCommand implements FloodgateCommand {
     }
 
     @Getter
-    public enum Message implements CommandMessage {
+    public enum Message implements TranslatableMessage {
         INVALID_USERNAME("floodgate.command.fwhitelist.invalid_username"),
         API_UNAVAILABLE("floodgate.command.fwhitelist.api_unavailable " + CHECK_CONSOLE),
         USER_NOT_FOUND("floodgate.command.fwhitelist.user_not_found"),
