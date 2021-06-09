@@ -28,7 +28,7 @@ package org.geysermc.floodgate.util;
 public final class Constants {
     public static final char COLOR_CHAR = '§';
 
-    public static final boolean DEBUG_MODE = true;
+    public static final boolean DEBUG_MODE = false;
     public static final boolean PRINT_ALL_PACKETS = false;
 
     public static final String DATABASE_NAME_FORMAT = "^floodgate-[a-zA-Z0-9_]{0,16}-database.jar$";
