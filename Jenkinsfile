@@ -1,8 +1,8 @@
 pipeline {
     agent any
     tools {
-        gradle 'Gradle 6'
-        jdk 'Java 8'
+        gradle 'Gradle 7'
+        jdk 'Java 16'
     }
 
     parameters {
@@ -43,7 +43,7 @@ pipeline {
                         )
                         rtGradleRun (
                                 usesPlugin: false,
-                                tool: 'Gradle 6',
+                                tool: 'Gradle 7',
                                 rootDir: "",
                                 buildFile: 'build.gradle',
                                 tasks: 'build artifactoryPublish',

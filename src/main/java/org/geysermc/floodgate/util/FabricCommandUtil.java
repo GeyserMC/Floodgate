@@ -5,9 +5,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.netty.channel.Channel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.kyori.adventure.platform.fabric.impl.accessor.ConnectionAccess;
 import net.kyori.adventure.platform.fabric.impl.server.FriendlyByteBufBridge;
+import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.WhitelistEntry;
 import net.minecraft.server.command.ServerCommandSource;
@@ -17,7 +19,7 @@ import net.minecraft.text.Text;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.platform.command.CommandMessage;
+import org.geysermc.floodgate.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.player.UserAudienceArgument;
@@ -131,7 +133,23 @@ public final class FabricCommandUtil implements CommandUtil {
     }
 
     @Override
-    public void sendMessage(Object player, String locale, CommandMessage message, Object... args) {
+    public boolean hasPermission(Object player, String permission) {
+        return Permissions.check((Entity) player, permission);
+    }
+
+    @Override
+    public Collection<Object> getOnlinePlayersWithPermission(String permission) {
+        List<Object> players = new ArrayList<>();
+        for (ServerPlayerEntity player : SERVER.getPlayerManager().getPlayerList()) {
+            if (hasPermission(player, permission)) {
+                players.add(player);
+            }
+        }
+        return players;
+    }
+
+    @Override
+    public void sendMessage(Object player, String locale, TranslatableMessage message, Object... args) {
         ServerCommandSource commandSource = (ServerCommandSource) player;
         if (commandSource.getEntity() instanceof ServerPlayerEntity) {
             SERVER.execute(() -> ((ServerPlayerEntity) commandSource.getEntity())
@@ -143,7 +161,19 @@ public final class FabricCommandUtil implements CommandUtil {
     }
 
     @Override
-    public void kickPlayer(Object player, String locale, CommandMessage message, Object... args) {
+    public void sendMessage(Object target, String message) {
+        ServerCommandSource commandSource = (ServerCommandSource) target;
+        if (commandSource.getEntity() instanceof ServerPlayerEntity) {
+            SERVER.execute(() -> ((ServerPlayerEntity) commandSource.getEntity())
+                    .sendMessage(new LiteralText(message), false));
+        } else {
+            // Console?
+            logger.info(message);
+        }
+    }
+
+    @Override
+    public void kickPlayer(Object player, String locale, TranslatableMessage message, Object... args) {
         getPlayer(player).networkHandler.disconnect(translateAndTransform(locale, message, args));
     }
 
@@ -171,7 +201,7 @@ public final class FabricCommandUtil implements CommandUtil {
         }
     }
 
-    public Text translateAndTransform(String locale, CommandMessage message, Object... args) {
+    public Text translateAndTransform(String locale, TranslatableMessage message, Object... args) {
         return new LiteralText(message.translateMessage(manager, locale, args));
     }
 

@@ -10,7 +10,7 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.geysermc.floodgate.platform.command.CommandMessage;
+import org.geysermc.floodgate.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.player.UserAudience;
 
 import java.util.UUID;
@@ -62,7 +62,7 @@ public class FabricUserAudience implements UserAudience, ForwardingAudience.Sing
     }
 
     @Override
-    public void sendMessage(CommandMessage message, Object... args) {
+    public void sendMessage(TranslatableMessage message, Object... args) {
         commandUtil.sendMessage(this.source, this.locale, message, args);
     }
 
@@ -76,7 +76,7 @@ public class FabricUserAudience implements UserAudience, ForwardingAudience.Sing
     }
 
     @Override
-    public void disconnect(CommandMessage message, Object... args) {
+    public void disconnect(TranslatableMessage message, Object... args) {
         if (source.getEntity() instanceof ServerPlayerEntity) {
             ((ServerPlayerEntity) source.getEntity()).networkHandler.disconnect(
                     commandUtil.translateAndTransform(this.locale, message, args)

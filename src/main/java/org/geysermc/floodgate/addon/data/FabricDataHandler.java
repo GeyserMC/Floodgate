@@ -1,6 +1,5 @@
 package org.geysermc.floodgate.addon.data;
 
-import org.geysermc.floodgate.mixin_interface.HandshakeS2CPacketAddressGetter;
 import org.geysermc.floodgate.mixin_interface.ServerLoginNetworkHandlerSetter;
 import com.mojang.authlib.GameProfile;
 import io.netty.channel.ChannelHandlerContext;
@@ -42,11 +41,12 @@ public final class FabricDataHandler extends ChannelInboundHandlerAdapter {
             if (isHandshake) {
                 networkManager = (ClientConnection) ctx.channel().pipeline().get("packet_handler");
 
-                String handshakeValue = ((HandshakeS2CPacketAddressGetter) packet).getAddress();
-                FloodgateHandshakeHandler.HandshakeResult result = handshakeHandler.handle(ctx.channel(), handshakeValue);
+                HandshakeC2SPacket handshakePacket = (HandshakeC2SPacket) packet;
+                FloodgateHandshakeHandler.HandshakeResult result = handshakeHandler.handle(ctx.channel(), handshakePacket.getAddress());
                 HandshakeData handshakeData = result.getHandshakeData();
 
-                ((HandshakeS2CPacketAddressGetter) packet).setAddress(handshakeData.getHostname());
+                packet = new HandshakeC2SPacket(handshakeData.getHostname(), handshakePacket.getPort(), handshakePacket.getIntendedState());
+                ReferenceCountUtil.retain(packet);
 
                 if (handshakeData.getDisconnectReason() != null) {
                     ctx.close(); //todo disconnect with message
