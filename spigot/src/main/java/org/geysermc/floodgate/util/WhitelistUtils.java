@@ -25,53 +25,19 @@
 
 package org.geysermc.floodgate.util;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.geysermc.floodgate.util.ClassNames.ADD_WHITELIST_ENTRY;
+import static org.geysermc.floodgate.util.ClassNames.GET_PLAYER_LIST;
+import static org.geysermc.floodgate.util.ClassNames.GET_SERVER;
+import static org.geysermc.floodgate.util.ClassNames.GET_WHITELIST;
+import static org.geysermc.floodgate.util.ClassNames.IS_WHITELISTED;
+import static org.geysermc.floodgate.util.ClassNames.REMOVE_WHITELIST_ENTRY;
+import static org.geysermc.floodgate.util.ClassNames.WHITELIST_ENTRY;
 
 import com.mojang.authlib.GameProfile;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import org.bukkit.Bukkit;
 
 @SuppressWarnings("ConstantConditions")
 public final class WhitelistUtils {
-    private static final Method GET_SERVER;
-    private static final Method GET_PLAYER_LIST;
-    private static final Method GET_WHITELIST;
-    private static final Method IS_WHITELISTED;
-    private static final Constructor<?> WHITELIST_ENTRY;
-    private static final Method ADD_ENTRY;
-    private static final Method REMOVE_ENTRY;
-
-    static {
-        Class<?> bukkitServerClass = Bukkit.getServer().getClass();
-        GET_SERVER = ReflectionUtils.getMethod(bukkitServerClass, "getServer");
-        checkNotNull(GET_SERVER, bukkitServerClass.getName() + " doesn't have a getServer method?");
-
-        Class<?> minecraftServer = ReflectionUtils.getPrefixedClass("MinecraftServer");
-        GET_PLAYER_LIST = ReflectionUtils.getMethod(minecraftServer, "getPlayerList");
-        checkNotNull(GET_PLAYER_LIST, "Cannot find getPlayerList");
-
-        Class<?> playerList = ReflectionUtils.getPrefixedClass("PlayerList");
-        GET_WHITELIST = ReflectionUtils.getMethod(playerList, "getWhitelist");
-        checkNotNull(GET_WHITELIST, "Cannot find getWhitelist");
-
-        Class<?> whitelist = ReflectionUtils.getPrefixedClass("WhiteList");
-        IS_WHITELISTED = ReflectionUtils.getMethod(whitelist, "isWhitelisted", GameProfile.class);
-        checkNotNull(IS_WHITELISTED, "Couldn't find the isWhitelisted method!");
-
-        Class<?> whitelistEntry = ReflectionUtils.getPrefixedClass("WhiteListEntry");
-        WHITELIST_ENTRY = ReflectionUtils.getConstructor(whitelistEntry, GameProfile.class);
-        checkNotNull(WHITELIST_ENTRY, "Could not find required WhiteListEntry constructor");
-
-        Class<?> jsonList = ReflectionUtils.getPrefixedClass("JsonList");
-        ADD_ENTRY = ReflectionUtils.getMethodByName(jsonList, "add", false);
-        checkNotNull(ADD_ENTRY, "Cannot find add method");
-
-        Class<?> jsonListEntry = ReflectionUtils.getPrefixedClass("JsonListEntry");
-        REMOVE_ENTRY = ReflectionUtils.getMethodFromParam(jsonList, jsonListEntry, false);
-        checkNotNull(REMOVE_ENTRY, "Cannot find remove method");
-    }
-
     /**
      * Whitelist the given Bedrock player.
      *
@@ -90,7 +56,7 @@ public final class WhitelistUtils {
 
         Object entry = ReflectionUtils.newInstance(WHITELIST_ENTRY, profile);
 
-        ReflectionUtils.invoke(whitelist, ADD_ENTRY, entry);
+        ReflectionUtils.invoke(whitelist, ADD_WHITELIST_ENTRY, entry);
         return true;
     }
 
@@ -111,9 +77,7 @@ public final class WhitelistUtils {
             return false;
         }
 
-        Object entry = ReflectionUtils.newInstance(WHITELIST_ENTRY, profile);
-
-        ReflectionUtils.invoke(whitelist, REMOVE_ENTRY, entry);
+        ReflectionUtils.invoke(whitelist, REMOVE_WHITELIST_ENTRY, profile);
         return true;
     }
 

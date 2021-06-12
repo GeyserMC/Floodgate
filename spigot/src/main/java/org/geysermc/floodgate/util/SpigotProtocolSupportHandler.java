@@ -85,7 +85,7 @@ public class SpigotProtocolSupportHandler implements PacketHandler {
 
     @Inject
     public void register(PacketHandlers packetHandlers) {
-        packetHandlers.register(this, ReflectionUtils.getPrefixedClass("PacketLoginInStart"));
+        packetHandlers.register(this, ClassNames.LOGIN_START_PACKET);
     }
 
     @Override

@@ -29,25 +29,16 @@ import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
-import java.lang.reflect.Method;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.geysermc.floodgate.SpigotPlugin;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.skin.SkinApplier;
+import org.geysermc.floodgate.util.ClassNames;
 import org.geysermc.floodgate.util.ReflectionUtils;
 import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
 
 public final class SpigotSkinApplier implements SkinApplier {
-    private static final Method GET_PROFILE_METHOD;
-
-    static {
-        String version = ReflectionUtils.getPrefix().split("\\.")[3];
-        Class<?> craftPlayerClass = ReflectionUtils.getClass(
-                "org.bukkit.craftbukkit." + version + ".entity.CraftPlayer");
-        GET_PROFILE_METHOD = ReflectionUtils.getMethod(craftPlayerClass, "getProfile");
-    }
-
     private final SpigotVersionSpecificMethods versionSpecificMethods;
     private final SpigotPlugin plugin;
 
@@ -76,7 +67,7 @@ public final class SpigotSkinApplier implements SkinApplier {
             return;
         }
 
-        GameProfile profile = ReflectionUtils.castedInvoke(player, GET_PROFILE_METHOD);
+        GameProfile profile = ReflectionUtils.castedInvoke(player, ClassNames.GET_PROFILE_METHOD);
 
         if (profile == null) {
             throw new IllegalStateException("The GameProfile cannot be null! " + player.getName());

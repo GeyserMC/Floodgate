@@ -35,7 +35,6 @@ import org.geysermc.floodgate.module.SpigotAddonModule;
 import org.geysermc.floodgate.module.SpigotCommandModule;
 import org.geysermc.floodgate.module.SpigotListenerModule;
 import org.geysermc.floodgate.module.SpigotPlatformModule;
-import org.geysermc.floodgate.util.ReflectionUtils;
 import org.geysermc.floodgate.util.SpigotProtocolSupportHandler;
 import org.geysermc.floodgate.util.SpigotProtocolSupportListener;
 
@@ -45,9 +44,6 @@ public final class SpigotPlugin extends JavaPlugin {
 
     @Override
     public void onLoad() {
-        String minecraftVersion = getServer().getClass().getPackage().getName().split("\\.")[3];
-        ReflectionUtils.setPrefix("net.minecraft.server." + minecraftVersion);
-
         long ctm = System.currentTimeMillis();
         injector = Guice.createInjector(
                 new ServerCommonModule(getDataFolder().toPath()),

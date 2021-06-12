@@ -39,6 +39,7 @@ import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
+import org.geysermc.floodgate.util.ClassNames;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
 @RequiredArgsConstructor
@@ -156,12 +157,14 @@ public final class SpigotInjector extends CommonPlatformInjector {
         if (serverConnection != null) {
             return serverConnection;
         }
-        Class<?> minecraftServer = ReflectionUtils.getPrefixedClass("MinecraftServer");
-        assert minecraftServer != null;
+        Class<?> minecraftServer = ClassNames.MINECRAFT_SERVER;
 
+        // method by CraftBukkit to get the instance of the MinecraftServer
         Object minecraftServerInstance = ReflectionUtils.invokeStatic(minecraftServer, "getServer");
+
         for (Method method : minecraftServer.getDeclaredMethods()) {
-            if ("ServerConnection".equals(method.getReturnType().getSimpleName())) {
+            if (ClassNames.SERVER_CONNECTION.equals(method.getReturnType())) {
+                // making sure that it's a getter
                 if (method.getParameterTypes().length == 0) {
                     serverConnection = method.invoke(minecraftServerInstance);
                 }

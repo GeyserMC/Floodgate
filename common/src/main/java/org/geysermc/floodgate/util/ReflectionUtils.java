@@ -34,6 +34,7 @@ import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.Setter;
 
+@SuppressWarnings("PMD.AvoidBranchingStatementAsLastInLoop")
 public final class ReflectionUtils {
     /**
      * The package name that is shared between all the {@link #getPrefixedClass(String)} calls so
@@ -74,6 +75,22 @@ public final class ReflectionUtils {
         } catch (ClassNotFoundException exception) {
             exception.printStackTrace();
             return null;
+        }
+    }
+
+    public static Class<?> getClassSilently(String className) {
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException ignored) {
+            return null;
+        }
+    }
+
+    public static Class<?> getClassOrThrow(String className) {
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException exception) {
+            throw new IllegalStateException(exception);
         }
     }
 
@@ -322,6 +339,34 @@ public final class ReflectionUtils {
     @Nullable
     public static Method getMethod(Object instance, String methodName, Class<?>... arguments) {
         return getMethod(instance.getClass(), methodName, arguments);
+    }
+
+    @Nullable
+    public static Method getMethod(
+            Class<?> clazz,
+            Class<?> returnType,
+            boolean declared,
+            Class<?>... parameterTypes) {
+
+        Method[] methods = declared ? clazz.getDeclaredMethods() : clazz.getMethods();
+
+        outer : for (Method method : methods) {
+            if (parameterTypes.length != method.getParameterCount() ||
+                    !method.getReturnType().equals(returnType)) {
+                continue;
+            }
+
+            Class<?>[] parameters = method.getParameterTypes();
+
+            for (int i = 0; i < parameters.length; i++) {
+                if (!parameters[i].equals(parameterTypes[i])) {
+                    continue outer;
+                }
+            }
+
+            return method;
+        }
+        return null;
     }
 
     /**

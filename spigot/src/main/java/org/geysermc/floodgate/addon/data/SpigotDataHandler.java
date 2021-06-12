@@ -25,23 +25,14 @@
 
 package org.geysermc.floodgate.addon.data;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.geysermc.floodgate.util.ReflectionUtils.getCastedValue;
-import static org.geysermc.floodgate.util.ReflectionUtils.getFieldOfType;
-import static org.geysermc.floodgate.util.ReflectionUtils.getMethod;
-import static org.geysermc.floodgate.util.ReflectionUtils.getPrefixedClass;
-import static org.geysermc.floodgate.util.ReflectionUtils.makeAccessible;
 import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
 
 import com.mojang.authlib.GameProfile;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -50,93 +41,12 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.util.BedrockData;
+import org.geysermc.floodgate.util.ClassNames;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.ProxyUtils;
 
 @RequiredArgsConstructor
 public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
-    private static final Field SOCKET_ADDRESS;
-    private static final Class<?> HANDSHAKE_PACKET;
-    private static final Field HANDSHAKE_HOST;
-
-    private static final Field LOGIN_PROFILE;
-
-    private static final Class<?> LOGIN_START_PACKET;
-    private static final Class<?> LOGIN_LISTENER;
-    private static final Method INIT_UUID;
-
-    private static final Class<?> LOGIN_HANDLER;
-    private static final Constructor<?> LOGIN_HANDLER_CONSTRUCTOR;
-    private static final Method FIRE_LOGIN_EVENTS;
-
-    private static final Field PACKET_LISTENER;
-    private static final Field PROTOCOL_STATE;
-    private static final Object READY_TO_ACCEPT_PROTOCOL_STATE;
-
-    static {
-        Class<?> networkManager = getPrefixedClass("NetworkManager");
-        checkNotNull(networkManager, "NetworkManager class cannot be null");
-
-        SOCKET_ADDRESS = getFieldOfType(networkManager, SocketAddress.class, false);
-        checkNotNull(SOCKET_ADDRESS, "SocketAddress field cannot be null");
-
-        HANDSHAKE_PACKET = getPrefixedClass("PacketHandshakingInSetProtocol");
-        checkNotNull(HANDSHAKE_PACKET, "PacketHandshakingInSetProtocol cannot be null");
-        HANDSHAKE_HOST = getFieldOfType(HANDSHAKE_PACKET, String.class);
-        checkNotNull(HANDSHAKE_HOST, "Host field from handshake packet cannot be null");
-
-        LOGIN_START_PACKET = getPrefixedClass("PacketLoginInStart");
-        checkNotNull(LOGIN_START_PACKET, "PacketLoginInStart cannot be null");
-
-        LOGIN_LISTENER = getPrefixedClass("LoginListener");
-        checkNotNull(LOGIN_LISTENER, "LoginListener cannot be null");
-        LOGIN_PROFILE = getFieldOfType(LOGIN_LISTENER, GameProfile.class);
-        checkNotNull(LOGIN_PROFILE, "Profile from LoginListener cannot be null");
-        INIT_UUID = getMethod(LOGIN_LISTENER, "initUUID");
-        checkNotNull(INIT_UUID, "initUUID from LoginListener cannot be null");
-
-        Field protocolStateField = null;
-        for (Field field : LOGIN_LISTENER.getDeclaredFields()) {
-            if (field.getType().isEnum()) {
-                protocolStateField = field;
-            }
-        }
-        PROTOCOL_STATE = protocolStateField;
-        checkNotNull(PROTOCOL_STATE, "Protocol state field from LoginListener cannot be null");
-
-        Enum<?>[] protocolStates = (Enum<?>[]) PROTOCOL_STATE.getType().getEnumConstants();
-        Object readyToAcceptState = null;
-        for (Enum<?> protocolState : protocolStates) {
-            if ("READY_TO_ACCEPT".equals(protocolState.name())) {
-                readyToAcceptState = protocolState;
-            }
-        }
-        READY_TO_ACCEPT_PROTOCOL_STATE = readyToAcceptState;
-        checkNotNull(READY_TO_ACCEPT_PROTOCOL_STATE,
-                "Ready to accept state from Protocol state cannot be null");
-
-        Class<?> packetListenerClass = getPrefixedClass("PacketListener");
-        PACKET_LISTENER = getFieldOfType(networkManager, packetListenerClass);
-        checkNotNull(PACKET_LISTENER, "PacketListener cannot be null");
-
-        LOGIN_HANDLER = getPrefixedClass("LoginListener$LoginHandler");
-        checkNotNull(LOGIN_HANDLER, "LoginHandler cannot be null");
-
-        Constructor<?> loginHandlerConstructor = null;
-        try {
-            loginHandlerConstructor = makeAccessible(
-                    LOGIN_HANDLER.getDeclaredConstructor(LOGIN_LISTENER));
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-        LOGIN_HANDLER_CONSTRUCTOR = loginHandlerConstructor;
-        checkNotNull(LOGIN_HANDLER_CONSTRUCTOR, "LoginHandler constructor cannot be null");
-
-        FIRE_LOGIN_EVENTS = getMethod(LOGIN_HANDLER, "fireEvents");
-        checkNotNull(FIRE_LOGIN_EVENTS, "fireEvents from LoginHandler cannot be null");
-    }
-
-    /* per player stuff */
     private final FloodgateConfig config;
     private final FloodgateHandshakeHandler handshakeHandler;
     private final FloodgateLogger logger;
@@ -154,22 +64,22 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
             return;
         }
 
-        boolean isHandshake = HANDSHAKE_PACKET.isInstance(packet);
-        boolean isLogin = LOGIN_START_PACKET.isInstance(packet);
+        boolean isHandshake = ClassNames.HANDSHAKE_PACKET.isInstance(packet);
+        boolean isLogin = ClassNames.LOGIN_START_PACKET.isInstance(packet);
 
         try {
             if (isHandshake) {
                 networkManager = ctx.channel().pipeline().get("packet_handler");
 
-                String handshakeValue = getCastedValue(packet, HANDSHAKE_HOST);
+                String handshakeValue = getCastedValue(packet, ClassNames.HANDSHAKE_HOST);
                 HandshakeResult result = handshakeHandler.handle(ctx.channel(), handshakeValue);
                 HandshakeData handshakeData = result.getHandshakeData();
 
-                setValue(packet, HANDSHAKE_HOST, handshakeData.getHostname());
+                setValue(packet, ClassNames.HANDSHAKE_HOST, handshakeData.getHostname());
 
                 InetSocketAddress newIp = result.getNewIp(ctx.channel());
                 if (newIp != null) {
-                    setValue(networkManager, SOCKET_ADDRESS, newIp);
+                    setValue(networkManager, ClassNames.SOCKET_ADDRESS, newIp);
                     //todo the socket address will be overridden when bungeeData is true
                 }
 
@@ -213,10 +123,10 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
             } else if (isLogin) {
                 if (!bungeeData) {
                     // we have to fake the offline player (login) cycle
-                    Object loginListener = PACKET_LISTENER.get(networkManager);
+                    Object loginListener = ClassNames.PACKET_LISTENER.get(networkManager);
 
                     // check if the server is actually in the Login state
-                    if (!LOGIN_LISTENER.isInstance(loginListener)) {
+                    if (!ClassNames.LOGIN_LISTENER.isInstance(loginListener)) {
                         // player is not in the login state, abort
                         return;
                     }
@@ -225,19 +135,20 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
                     GameProfile gameProfile = new GameProfile(
                             player.getCorrectUniqueId(), player.getCorrectUsername()
                     );
-                    setValue(loginListener, LOGIN_PROFILE, gameProfile);
+                    setValue(loginListener, ClassNames.LOGIN_PROFILE, gameProfile);
 
                     // just like on Spigot:
 
                     // LoginListener#initUUID
                     // new LoginHandler().fireEvents();
-                    // LoginListener#protocolState = READY_TO_ACCEPT
 
                     // and the tick of LoginListener will do the rest
 
-                    INIT_UUID.invoke(loginListener);
-                    FIRE_LOGIN_EVENTS.invoke(LOGIN_HANDLER_CONSTRUCTOR.newInstance(loginListener));
-                    setValue(loginListener, PROTOCOL_STATE, READY_TO_ACCEPT_PROTOCOL_STATE);
+                    ClassNames.INIT_UUID.invoke(loginListener);
+
+                    Object loginHandler =
+                            ClassNames.LOGIN_HANDLER_CONSTRUCTOR.newInstance(loginListener);
+                    ClassNames.FIRE_LOGIN_EVENTS.invoke(loginHandler);
                 }
             }
         } finally {
