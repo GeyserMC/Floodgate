@@ -42,6 +42,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import javax.inject.Named;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -61,6 +62,7 @@ public final class PlayerLinkLoader {
     @Named("dataDirectory")
     private Path dataDirectory;
 
+    @Nonnull
     public PlayerLink load() {
         if (config == null) {
             throw new IllegalStateException("Config cannot be null!");
@@ -78,7 +80,7 @@ public final class PlayerLinkLoader {
                     .collect(Collectors.toList());
         } catch (IOException exception) {
             logger.error("Failed to list possible database implementations", exception);
-            return null;
+            return new DisabledPlayerLink();
         }
 
         // we can skip the rest if global linking is enabled and no database implementations has been
@@ -89,7 +91,7 @@ public final class PlayerLinkLoader {
 
         if (files.isEmpty()) {
             logger.error("Failed to find a database implementation");
-            return null;
+            return new DisabledPlayerLink();
         }
 
         Path implementationPath = files.get(0);
@@ -110,14 +112,14 @@ public final class PlayerLinkLoader {
 
             if (!found) {
                 logger.error("Failed to find an implementation for type: {}", lConfig.getType());
-                return null;
+                return new DisabledPlayerLink();
             }
         } else {
             String name = implementationPath.getFileName().toString();
             if (!Utils.isValidDatabaseName(name)) {
                 logger.error("Found database {} but the name doesn't match {}",
                         name, Constants.DATABASE_NAME_FORMAT);
-                return null;
+                return new DisabledPlayerLink();
             }
             int firstSplit = name.indexOf('-') + 1;
             databaseName = name.substring(firstSplit, name.indexOf('-', firstSplit));
@@ -186,14 +188,14 @@ public final class PlayerLinkLoader {
         } catch (ClassCastException exception) {
             logger.error("The database implementation ({}) doesn't extend the PlayerLink class!",
                     implementationPath.getFileName().toString(), exception);
-            return null;
+            return new DisabledPlayerLink();
         } catch (Exception exception) {
             if (init) {
                 logger.error("Error while initialising database jar", exception);
             } else {
                 logger.error("Error while loading database jar", exception);
             }
-            return null;
+            return new DisabledPlayerLink();
         }
     }
 }
