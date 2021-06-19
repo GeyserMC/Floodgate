@@ -26,6 +26,7 @@
 package org.geysermc.floodgate.skin;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.AllArgsConstructor;
 import org.geysermc.floodgate.api.FloodgateApi;
@@ -33,7 +34,9 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 
 @AllArgsConstructor
 public final class SkinUploadManager {
-    private final Int2ObjectMap<SkinUploadSocket> connections = new Int2ObjectOpenHashMap<>();
+    private final Int2ObjectMap<SkinUploadSocket> connections =
+            Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>());
+
     private final FloodgateApi api;
     private final SkinApplier applier;
     private final FloodgateLogger logger;
