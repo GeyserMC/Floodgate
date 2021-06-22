@@ -36,7 +36,6 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
-import org.geysermc.floodgate.util.Utils;
 
 public final class VelocityDataAddon implements InjectorAddon {
     @Inject private FloodgateHandshakeHandler handshakeHandler;
