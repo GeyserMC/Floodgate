@@ -30,7 +30,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.AttributeKey;
-import io.netty.util.ReferenceCountUtil;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import lombok.RequiredArgsConstructor;
@@ -65,22 +64,17 @@ public class BungeeProxyDataHandler extends ChannelInboundHandlerAdapter {
     private final ProxyFloodgateConfig config;
     private final FloodgateHandshakeHandler handler;
     private final AttributeKey<String> kickMessageAttribute;
-    private boolean done;
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        ReferenceCountUtil.retain(msg);
-        if (done || !(msg instanceof PacketWrapper)) {
-            ctx.fireChannelRead(msg);
-            return;
-        }
+        if (msg instanceof PacketWrapper) {
+            DefinedPacket packet = ((PacketWrapper) msg).packet;
 
-        DefinedPacket packet = ((PacketWrapper) msg).packet;
-
-        // we're only interested in the Handshake packet
-        if (packet instanceof Handshake) {
-            handleHandshake(ctx, (Handshake) packet);
-            done = true;
+            // we're only interested in the Handshake packet
+            if (packet instanceof Handshake) {
+                handleHandshake(ctx, (Handshake) packet);
+                ctx.pipeline().remove(this);
+            }
         }
 
         ctx.fireChannelRead(msg);

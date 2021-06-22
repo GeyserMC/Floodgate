@@ -28,11 +28,10 @@ package org.geysermc.floodgate.addon.data;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToMessageEncoder;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
+import io.netty.channel.ChannelPromise;
 import io.netty.util.AttributeKey;
-import io.netty.util.ReferenceCountUtil;
 import java.lang.reflect.Field;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.ServerConnector;
 import net.md_5.bungee.UserConnection;
@@ -41,14 +40,13 @@ import net.md_5.bungee.netty.HandlerBoss;
 import net.md_5.bungee.protocol.packet.Handshake;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.player.FloodgatePlayerImpl;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
 @SuppressWarnings("ConstantConditions")
 @RequiredArgsConstructor
-public class BungeeServerDataHandler extends MessageToMessageEncoder<Object> {
+public class BungeeServerDataHandler extends ChannelOutboundHandlerAdapter {
     private static final Field HANDLER;
     private static final Field USER_CONNECTION;
     private static final Field CHANNEL_WRAPPER;
@@ -65,51 +63,40 @@ public class BungeeServerDataHandler extends MessageToMessageEncoder<Object> {
         checkNotNull(CHANNEL_WRAPPER, "ChannelWrapper field cannot be null");
     }
 
-    private final ProxyFloodgateConfig config;
     private final ProxyFloodgateApi api;
     private final AttributeKey<FloodgatePlayer> playerAttribute;
-    private boolean done;
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, Object packet, List<Object> out) {
-        ReferenceCountUtil.retain(packet);
-        if (done) {
-            out.add(packet);
-            return;
+    public void write(ChannelHandlerContext ctx, Object packet, ChannelPromise promise)
+            throws Exception {
+        if (packet instanceof Handshake) {
+            // get the Proxy <-> Player channel from the Proxy <-> Server channel
+            HandlerBoss handlerBoss = ctx.pipeline().get(HandlerBoss.class);
+            ServerConnector connector = ReflectionUtils.getCastedValue(handlerBoss, HANDLER);
+            UserConnection connection = ReflectionUtils.getCastedValue(connector, USER_CONNECTION);
+            ChannelWrapper wrapper = ReflectionUtils.getCastedValue(connection, CHANNEL_WRAPPER);
+
+            FloodgatePlayer player = wrapper.getHandle().attr(playerAttribute).get();
+
+            if (player != null) {
+                BedrockData data = player.as(FloodgatePlayerImpl.class).toBedrockData();
+                String encryptedData = api.createEncryptedDataString(data);
+
+                Handshake handshake = (Handshake) packet;
+                String address = handshake.getHost();
+
+                // our data goes before all the other data
+                int addressFinished = address.indexOf('\0');
+                String originalAddress = address.substring(0, addressFinished);
+                String remaining = address.substring(addressFinished);
+
+                handshake.setHost(originalAddress + '\0' + encryptedData + remaining);
+                // Bungeecord will add his data after our data
+            }
+
+            ctx.pipeline().remove(this);
         }
 
-        // passes the information through to the connecting server if enabled
-        if (!(packet instanceof Handshake) || !config.isSendFloodgateData()) {
-            done = true;
-            out.add(packet);
-            return;
-        }
-
-        // get the Proxy <-> Player channel from the Proxy <-> Server channel
-        HandlerBoss handlerBoss = ctx.pipeline().get(HandlerBoss.class);
-        ServerConnector connector = ReflectionUtils.getCastedValue(handlerBoss, HANDLER);
-        UserConnection connection = ReflectionUtils.getCastedValue(connector, USER_CONNECTION);
-        ChannelWrapper wrapper = ReflectionUtils.getCastedValue(connection, CHANNEL_WRAPPER);
-
-        FloodgatePlayer player = wrapper.getHandle().attr(playerAttribute).get();
-
-        if (player != null) {
-            BedrockData data = player.as(FloodgatePlayerImpl.class).toBedrockData();
-            String encryptedData = api.createEncryptedDataString(data);
-
-            Handshake handshake = (Handshake) packet;
-            String address = handshake.getHost();
-
-            // our data goes before all the other data
-            int addressFinished = address.indexOf('\0');
-            String originalAddress = address.substring(0, addressFinished);
-            String remaining = address.substring(addressFinished);
-
-            handshake.setHost(originalAddress + '\0' + encryptedData + remaining);
-            // Bungeecord will add his data after our data
-        }
-
-        done = true;
-        out.add(packet);
+        ctx.write(packet, promise);
     }
 }

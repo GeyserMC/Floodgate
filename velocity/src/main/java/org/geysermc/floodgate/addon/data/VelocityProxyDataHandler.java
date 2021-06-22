@@ -34,7 +34,6 @@ import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.AttributeKey;
-import io.netty.util.ReferenceCountUtil;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import lombok.RequiredArgsConstructor;
@@ -74,21 +73,17 @@ public final class VelocityProxyDataHandler extends ChannelInboundHandlerAdapter
     private final FloodgateHandshakeHandler handshakeHandler;
     private final AttributeKey<String> kickMessageAttribute;
     private final FloodgateLogger logger;
-    private boolean done;
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        ReferenceCountUtil.retain(msg);
         // we're only interested in the Handshake packet.
         // it should be the first packet but you never know
-        if (done || !HANDSHAKE_PACKET.isInstance(msg)) {
-            ctx.fireChannelRead(msg);
-            return;
+        if (HANDSHAKE_PACKET.isInstance(msg)) {
+            handleClientToProxy(ctx, msg);
+            ctx.pipeline().remove(this);
         }
 
-        handleClientToProxy(ctx, msg);
         ctx.fireChannelRead(msg);
-        done = true;
     }
 
     private void handleClientToProxy(ChannelHandlerContext ctx, Object packet) {
