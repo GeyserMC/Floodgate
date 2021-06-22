@@ -98,6 +98,8 @@ public class BungeeServerDataHandler extends ChannelOutboundHandlerAdapter {
         }
 
         ctx.write(packet, promise);
-        ctx.pipeline().remove(this);
+        if (!config.isSendFloodgateData() || packet instanceof Handshake) {
+            ctx.pipeline().remove(this);
+        }
     }
 }

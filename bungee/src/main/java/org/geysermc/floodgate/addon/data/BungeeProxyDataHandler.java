@@ -30,7 +30,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.AttributeKey;
-import io.netty.util.ReferenceCountUtil;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import lombok.RequiredArgsConstructor;

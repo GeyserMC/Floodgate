@@ -31,7 +31,6 @@ import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
 import com.mojang.authlib.GameProfile;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.util.ReferenceCountUtil;
 import java.net.InetSocketAddress;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.handshake.HandshakeData;

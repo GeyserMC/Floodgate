@@ -138,6 +138,8 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
         }
 
         ctx.write(packet, promise);
-        ctx.pipeline().remove(this);
+        if (!config.isSendFloodgateData() || HANDSHAKE_PACKET.isInstance(packet)) {
+            ctx.pipeline().remove(this);
+        }
     }
 }

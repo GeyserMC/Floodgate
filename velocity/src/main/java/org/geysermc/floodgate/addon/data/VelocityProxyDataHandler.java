@@ -34,7 +34,6 @@ import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.AttributeKey;
-import io.netty.util.ReferenceCountUtil;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import lombok.RequiredArgsConstructor;
