@@ -51,19 +51,13 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
     private final FloodgateLogger logger;
     private Object networkManager;
     private FloodgatePlayer player;
-    private boolean bungeeData;
-    private boolean done;
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object packet) throws Exception {
-        // we're done but we're not yet removed from the connection
-        if (done) {
-            ctx.fireChannelRead(packet);
-            return;
-        }
-
         boolean isHandshake = ClassNames.HANDSHAKE_PACKET.isInstance(packet);
         boolean isLogin = ClassNames.LOGIN_START_PACKET.isInstance(packet);
+
+        boolean bungeeData = false;
 
         try {
             if (isHandshake) {
@@ -119,35 +113,33 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
                     setValue(networkManager, "spoofedUUID", player.getCorrectUniqueId());
                 }
             } else if (isLogin) {
-                if (!bungeeData) {
-                    // we have to fake the offline player (login) cycle
-                    Object loginListener = ClassNames.PACKET_LISTENER.get(networkManager);
+                // we have to fake the offline player (login) cycle
+                Object loginListener = ClassNames.PACKET_LISTENER.get(networkManager);
 
-                    // check if the server is actually in the Login state
-                    if (!ClassNames.LOGIN_LISTENER.isInstance(loginListener)) {
-                        // player is not in the login state, abort
-                        return;
-                    }
-
-                    // set the player his GameProfile, we can't change the username without this
-                    GameProfile gameProfile = new GameProfile(
-                            player.getCorrectUniqueId(), player.getCorrectUsername()
-                    );
-                    setValue(loginListener, ClassNames.LOGIN_PROFILE, gameProfile);
-
-                    // just like on Spigot:
-
-                    // LoginListener#initUUID
-                    // new LoginHandler().fireEvents();
-
-                    // and the tick of LoginListener will do the rest
-
-                    ClassNames.INIT_UUID.invoke(loginListener);
-
-                    Object loginHandler =
-                            ClassNames.LOGIN_HANDLER_CONSTRUCTOR.newInstance(loginListener);
-                    ClassNames.FIRE_LOGIN_EVENTS.invoke(loginHandler);
+                // check if the server is actually in the Login state
+                if (!ClassNames.LOGIN_LISTENER.isInstance(loginListener)) {
+                    // player is not in the login state, abort
+                    return;
                 }
+
+                // set the player his GameProfile, we can't change the username without this
+                GameProfile gameProfile = new GameProfile(
+                        player.getCorrectUniqueId(), player.getCorrectUsername()
+                );
+                setValue(loginListener, ClassNames.LOGIN_PROFILE, gameProfile);
+
+                // just like on Spigot:
+
+                // LoginListener#initUUID
+                // new LoginHandler().fireEvents();
+
+                // and the tick of LoginListener will do the rest
+
+                ClassNames.INIT_UUID.invoke(loginListener);
+
+                Object loginHandler =
+                        ClassNames.LOGIN_HANDLER_CONSTRUCTOR.newInstance(loginListener);
+                ClassNames.FIRE_LOGIN_EVENTS.invoke(loginHandler);
             }
         } finally {
             // don't let the packet through if the packet is the login packet
@@ -155,9 +147,9 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
                 ctx.fireChannelRead(packet);
             }
 
-            if (isHandshake && bungeeData || isLogin && !bungeeData || player == null) {
-                // we're done, we'll just wait for the loginSuccessCall
-                done = true;
+            if (isHandshake && bungeeData || isLogin || player == null) {
+                // We're done
+                ctx.pipeline().remove(this);
             }
         }
     }

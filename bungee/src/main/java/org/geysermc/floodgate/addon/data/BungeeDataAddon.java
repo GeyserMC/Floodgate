@@ -62,10 +62,12 @@ public class BungeeDataAddon implements InjectorAddon {
     @Override
     public void onInject(Channel channel, boolean toServer) {
         if (toServer) {
-            channel.pipeline().addAfter(
-                    packetEncoder, "floodgate_data_handler",
-                    new BungeeServerDataHandler(config, api, playerAttribute)
-            );
+            if (config.isSendFloodgateData()) {
+                channel.pipeline().addAfter(
+                        packetEncoder, "floodgate_data_handler",
+                        new BungeeServerDataHandler(api, playerAttribute)
+                );
+            }
             return;
         }
         channel.pipeline().addBefore(
@@ -76,7 +78,6 @@ public class BungeeDataAddon implements InjectorAddon {
 
     @Override
     public void onLoginDone(Channel channel) {
-        onRemoveInject(channel);
     }
 
     @Override
@@ -89,7 +90,6 @@ public class BungeeDataAddon implements InjectorAddon {
 
     @Override
     public void onRemoveInject(Channel channel) {
-        Utils.removeHandler(channel.pipeline(), "floodgate_data_handler");
     }
 
     @Override

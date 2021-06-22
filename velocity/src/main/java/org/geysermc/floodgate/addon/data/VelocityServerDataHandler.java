@@ -78,15 +78,12 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
         checkNotNull(GET_PLAYER, "getPlayer in VelocityServerConnection cannot be null");
     }
 
-    private final ProxyFloodgateConfig config;
     private final ProxyFloodgateApi api;
     private final boolean isModernForwarding;
     //private final AttributeKey<FloodgatePlayer> playerAttribute;
 
-    public VelocityServerDataHandler(ProxyFloodgateConfig config,
-                                     ProxyFloodgateApi api,
+    public VelocityServerDataHandler(ProxyFloodgateApi api,
                                      ProxyServer proxy) {
-        this.config = config;
         this.api = api;
 
         Enum<?> forwardingMode = castedInvoke(proxy.getConfiguration(), GET_FORWARDING_MODE);
@@ -96,7 +93,7 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
     @Override
     public void write(ChannelHandlerContext ctx, Object packet, ChannelPromise promise)
             throws Exception {
-        if (HANDSHAKE_PACKET.isInstance(packet) && config.isSendFloodgateData()) {
+        if (HANDSHAKE_PACKET.isInstance(packet)) {
             String address = getCastedValue(packet, HANDSHAKE_ADDRESS);
 
             // get the FloodgatePlayer from the ConnectedPlayer
@@ -135,11 +132,10 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
                 setValue(packet, HANDSHAKE_ADDRESS, originalAddress + '\0' + encryptedData
                         + remaining);
             }
+
+            ctx.pipeline().remove(this);
         }
 
         ctx.write(packet, promise);
-        if (!config.isSendFloodgateData() || HANDSHAKE_PACKET.isInstance(packet)) {
-            ctx.pipeline().remove(this);
-        }
     }
 }

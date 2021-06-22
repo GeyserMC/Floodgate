@@ -64,14 +64,13 @@ public class BungeeServerDataHandler extends ChannelOutboundHandlerAdapter {
         checkNotNull(CHANNEL_WRAPPER, "ChannelWrapper field cannot be null");
     }
 
-    private final ProxyFloodgateConfig config;
     private final ProxyFloodgateApi api;
     private final AttributeKey<FloodgatePlayer> playerAttribute;
 
     @Override
     public void write(ChannelHandlerContext ctx, Object packet, ChannelPromise promise)
             throws Exception {
-        if (packet instanceof Handshake && config.isSendFloodgateData()) {
+        if (packet instanceof Handshake) {
             // get the Proxy <-> Player channel from the Proxy <-> Server channel
             HandlerBoss handlerBoss = ctx.pipeline().get(HandlerBoss.class);
             ServerConnector connector = ReflectionUtils.getCastedValue(handlerBoss, HANDLER);
@@ -95,11 +94,10 @@ public class BungeeServerDataHandler extends ChannelOutboundHandlerAdapter {
                 handshake.setHost(originalAddress + '\0' + encryptedData + remaining);
                 // Bungeecord will add his data after our data
             }
+
+            ctx.pipeline().remove(this);
         }
 
         ctx.write(packet, promise);
-        if (!config.isSendFloodgateData() || packet instanceof Handshake) {
-            ctx.pipeline().remove(this);
-        }
     }
 }

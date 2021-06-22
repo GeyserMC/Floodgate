@@ -61,7 +61,6 @@ public final class SpigotDataAddon implements InjectorAddon {
 
     @Override
     public void onLoginDone(Channel channel) {
-        onRemoveInject(channel);
     }
 
     @Override
@@ -74,7 +73,6 @@ public final class SpigotDataAddon implements InjectorAddon {
 
     @Override
     public void onRemoveInject(Channel channel) {
-        Utils.removeHandler(channel.pipeline(), "floodgate_data_handler");
     }
 
     @Override
