@@ -74,21 +74,17 @@ public final class VelocityProxyDataHandler extends ChannelInboundHandlerAdapter
     private final FloodgateHandshakeHandler handshakeHandler;
     private final AttributeKey<String> kickMessageAttribute;
     private final FloodgateLogger logger;
-    private boolean done;
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        ReferenceCountUtil.retain(msg);
         // we're only interested in the Handshake packet.
         // it should be the first packet but you never know
-        if (done || !HANDSHAKE_PACKET.isInstance(msg)) {
-            ctx.fireChannelRead(msg);
-            return;
+        if (HANDSHAKE_PACKET.isInstance(msg)) {
+            handleClientToProxy(ctx, msg);
         }
 
-        handleClientToProxy(ctx, msg);
         ctx.fireChannelRead(msg);
-        done = true;
+        ctx.pipeline().remove(this);
     }
 
     private void handleClientToProxy(ChannelHandlerContext ctx, Object packet) {

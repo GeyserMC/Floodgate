@@ -65,25 +65,20 @@ public class BungeeProxyDataHandler extends ChannelInboundHandlerAdapter {
     private final ProxyFloodgateConfig config;
     private final FloodgateHandshakeHandler handler;
     private final AttributeKey<String> kickMessageAttribute;
-    private boolean done;
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        ReferenceCountUtil.retain(msg);
-        if (done || !(msg instanceof PacketWrapper)) {
-            ctx.fireChannelRead(msg);
-            return;
-        }
+        if (msg instanceof PacketWrapper) {
+            DefinedPacket packet = ((PacketWrapper) msg).packet;
 
-        DefinedPacket packet = ((PacketWrapper) msg).packet;
-
-        // we're only interested in the Handshake packet
-        if (packet instanceof Handshake) {
-            handleHandshake(ctx, (Handshake) packet);
-            done = true;
+            // we're only interested in the Handshake packet
+            if (packet instanceof Handshake) {
+                handleHandshake(ctx, (Handshake) packet);
+            }
         }
 
         ctx.fireChannelRead(msg);
+        ctx.pipeline().remove(this);
     }
 
     private void handleHandshake(ChannelHandlerContext ctx, Handshake packet) {

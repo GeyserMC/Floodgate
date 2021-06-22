@@ -57,7 +57,6 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object packet) throws Exception {
-        ReferenceCountUtil.retain(packet);
         // we're done but we're not yet removed from the connection
         if (done) {
             ctx.fireChannelRead(packet);
@@ -153,10 +152,7 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
             }
         } finally {
             // don't let the packet through if the packet is the login packet
-            // because we want to skip the login cycle
-            if (isLogin) {
-                ReferenceCountUtil.release(packet, 2);
-            } else {
+            if (!isLogin) {
                 ctx.fireChannelRead(packet);
             }
 
