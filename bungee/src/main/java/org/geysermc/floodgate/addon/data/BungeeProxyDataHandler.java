@@ -74,11 +74,11 @@ public class BungeeProxyDataHandler extends ChannelInboundHandlerAdapter {
             // we're only interested in the Handshake packet
             if (packet instanceof Handshake) {
                 handleHandshake(ctx, (Handshake) packet);
+                ctx.pipeline().remove(this);
             }
         }
 
         ctx.fireChannelRead(msg);
-        ctx.pipeline().remove(this);
     }
 
     private void handleHandshake(ChannelHandlerContext ctx, Handshake packet) {

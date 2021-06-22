@@ -81,10 +81,10 @@ public final class VelocityProxyDataHandler extends ChannelInboundHandlerAdapter
         // it should be the first packet but you never know
         if (HANDSHAKE_PACKET.isInstance(msg)) {
             handleClientToProxy(ctx, msg);
+            ctx.pipeline().remove(this);
         }
 
         ctx.fireChannelRead(msg);
-        ctx.pipeline().remove(this);
     }
 
     private void handleClientToProxy(ChannelHandlerContext ctx, Object packet) {
