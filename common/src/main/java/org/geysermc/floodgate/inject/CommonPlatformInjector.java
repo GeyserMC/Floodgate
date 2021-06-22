@@ -45,7 +45,7 @@ public abstract class CommonPlatformInjector implements PlatformInjector {
         return injectedClients.add(channel);
     }
 
-    protected boolean removeInjectedClient(Channel channel) {
+    public boolean removeInjectedClient(Channel channel) {
         return injectedClients.remove(channel);
     }
 
@@ -72,20 +72,6 @@ public abstract class CommonPlatformInjector implements PlatformInjector {
         for (InjectorAddon addon : addons.values()) {
             if (addon.shouldInject()) {
                 addon.onInject(channel, proxyToServer);
-            }
-        }
-    }
-
-    /**
-     * Method to loop through all the addons and call {@link InjectorAddon#onLoginDone(Channel)} if
-     * {@link InjectorAddon#shouldInject()}.
-     *
-     * @param channel the channel that was injected
-     */
-    public void loginSuccessCall(Channel channel) {
-        for (InjectorAddon addon : addons.values()) {
-            if (addon.shouldInject()) {
-                addon.onLoginDone(channel);
             }
         }
     }

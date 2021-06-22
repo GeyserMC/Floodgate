@@ -113,10 +113,6 @@ public final class SpigotInjector extends CommonPlatformInjector {
                     protected void initChannel(Channel channel) {
                         injectAddonsCall(channel, false);
                         addInjectedClient(channel);
-                        channel.closeFuture().addListener(listener -> {
-                            channelClosedCall(channel);
-                            removeInjectedClient(channel);
-                        });
                     }
                 });
             }

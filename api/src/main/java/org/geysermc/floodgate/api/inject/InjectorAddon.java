@@ -39,15 +39,6 @@ public interface InjectorAddon {
     void onInject(Channel channel, boolean toServer);
 
     /**
-     * Called when the player successfully logged in. That is the moment that most of the addons can
-     * deregister. Note that it is entirely optional to remove the addon from the channel, the
-     * injector won't force the addon to remove.
-     *
-     * @param channel the channel that the injector injected
-     */
-    void onLoginDone(Channel channel);
-
-    /**
      * Called when the channel has been closed. Note that this method will be called for every
      * closed connection (if it is injected), so it'll also run this method for closed connections
      * between a server and the proxy (when Floodgate is running on a proxy).

@@ -105,10 +105,6 @@ public final class VelocityInjector extends CommonPlatformInjector {
 
             injector.injectAddonsCall(channel, proxyToServer);
             injector.addInjectedClient(channel);
-            channel.closeFuture().addListener(listener -> {
-                injector.channelClosedCall(channel);
-                injector.removeInjectedClient(channel);
-            });
         }
     }
 }

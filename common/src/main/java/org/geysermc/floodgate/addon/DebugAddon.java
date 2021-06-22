@@ -71,11 +71,6 @@ public final class DebugAddon implements InjectorAddon {
     }
 
     @Override
-    public void onLoginDone(Channel channel) {
-        onRemoveInject(channel);
-    }
-
-    @Override
     public void onRemoveInject(Channel channel) {
         ChannelPipeline pipeline = channel.pipeline();
 

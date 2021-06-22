@@ -58,11 +58,6 @@ public class PacketHandlerAddon implements InjectorAddon {
     }
 
     @Override
-    public void onLoginDone(Channel channel) {
-
-    }
-
-    @Override
     public void onRemoveInject(Channel channel) {
         ChannelPipeline pipeline = channel.pipeline();
 

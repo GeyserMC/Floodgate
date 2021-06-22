@@ -59,10 +59,6 @@ public final class SpigotDataAddon implements InjectorAddon {
     }
 
     @Override
-    public void onLoginDone(Channel channel) {
-    }
-
-    @Override
     public void onChannelClosed(Channel channel) {
         FloodgatePlayer player = channel.attr(playerAttribute).get();
         if (player != null && api.removePlayer(player)) {

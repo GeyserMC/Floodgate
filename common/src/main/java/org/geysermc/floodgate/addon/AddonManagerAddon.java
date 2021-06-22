@@ -27,27 +27,22 @@ package org.geysermc.floodgate.addon;
 
 import com.google.inject.Inject;
 import io.netty.channel.Channel;
-import org.geysermc.floodgate.addon.addonmanager.AddonManagerHandler;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
-import org.geysermc.floodgate.util.Utils;
 
 public final class AddonManagerAddon implements InjectorAddon {
     @Inject private CommonPlatformInjector injector;
 
     @Override
     public void onInject(Channel channel, boolean toServer) {
-        channel.pipeline().addLast("floodgate_addon", new AddonManagerHandler(injector, channel));
-    }
-
-    @Override
-    public void onLoginDone(Channel channel) {
-        // AddonManagerHandler is also responsible for removing the addons when the channel closes
+        channel.closeFuture().addListener(listener -> {
+            injector.channelClosedCall(channel);
+            injector.removeInjectedClient(channel);
+        });
     }
 
     @Override
     public void onRemoveInject(Channel channel) {
-        Utils.removeHandler(channel.pipeline(), "floodgate_addon");
     }
 
     @Override

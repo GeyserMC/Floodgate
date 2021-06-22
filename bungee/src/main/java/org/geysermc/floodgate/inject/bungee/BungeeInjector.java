@@ -79,10 +79,6 @@ public final class BungeeInjector extends CommonPlatformInjector {
     public void injectClient(Channel channel, boolean clientToProxy) {
         injectAddonsCall(channel, !clientToProxy);
         addInjectedClient(channel);
-        channel.closeFuture().addListener(listener -> {
-            channelClosedCall(channel);
-            removeInjectedClient(channel);
-        });
     }
 
     @RequiredArgsConstructor
