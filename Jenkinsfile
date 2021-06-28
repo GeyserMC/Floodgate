@@ -92,5 +92,12 @@ pipeline {
                 discordSend description: "**Build:** [${currentBuild.id}](${env.BUILD_URL})\n**Status:** [${currentBuild.currentResult}](${env.BUILD_URL})\n${changes}\n\n[**Artifacts on Jenkins**](https://ci.opencollab.dev/job/GeyserMC/job/Floodgate)", footer: 'Open Collaboration Jenkins', link: env.BUILD_URL, successful: currentBuild.resultIsBetterOrEqualTo('SUCCESS'), title: "${env.JOB_NAME} #${currentBuild.id}", webhookURL: DISCORD_WEBHOOK
             }
         }
+        success {
+            script {
+                if (env.BRANCH_NAME == 'master') {
+                    build propagate: false, wait: false, job: 'GeyserMC/Floodgate-Fabric/master', parameters: [booleanParam(name: 'SKIP_DISCORD', value: true)]
+                }
+            }
+        }
     }
 }
