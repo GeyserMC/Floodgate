@@ -66,7 +66,7 @@ public class HttpUtils {
         HttpURLConnection connection;
 
         try {
-            URL url = new URL(urlString);
+            URL url = new URL(urlString.replace(" ", "%20")); // Encode spaces correctly
             connection = (HttpURLConnection) url.openConnection();
         } catch (Exception exception) {
             throw new RuntimeException("Failed to create connection", exception);
