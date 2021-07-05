@@ -107,6 +107,11 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
         return linkedPlayer != null ? linkedPlayer.getJavaUsername() : javaUsername;
     }
 
+    @Override
+    public boolean isLinked() {
+        return linkedPlayer != null;
+    }
+
     public BedrockData toBedrockData() {
         TimeSyncer timeSyncer = TimeSyncerHolder.get();
 

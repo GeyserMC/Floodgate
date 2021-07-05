@@ -25,9 +25,8 @@
 
 package org.geysermc.floodgate.skin;
 
-import com.google.gson.JsonObject;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
 public interface SkinApplier {
-    void applySkin(FloodgatePlayer floodgatePlayer, JsonObject skinResult);
+    void applySkin(FloodgatePlayer floodgatePlayer, SkinData skinData);
 }

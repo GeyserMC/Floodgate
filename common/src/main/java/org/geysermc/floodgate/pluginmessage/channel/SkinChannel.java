@@ -36,6 +36,7 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
 import org.geysermc.floodgate.skin.SkinApplier;
+import org.geysermc.floodgate.skin.SkinData;
 
 public class SkinChannel implements PluginMessageChannel {
     @Inject private FloodgateApi api;
@@ -91,6 +92,10 @@ public class SkinChannel implements PluginMessageChannel {
             return Result.kick("Got invalid skin data");
         }
 
+        if (floodgatePlayer.isLinked()) {
+            return Result.handled();
+        }
+
         String value = split[0];
         String signature = split[1];
 
@@ -98,8 +103,10 @@ public class SkinChannel implements PluginMessageChannel {
         result.addProperty("value", value);
         result.addProperty("signature", signature);
 
-        floodgatePlayer.addProperty(PropertyKey.SKIN_UPLOADED, result);
-        skinApplier.applySkin(floodgatePlayer, result);
+        SkinData skinData = new SkinData(value, signature);
+
+        floodgatePlayer.addProperty(PropertyKey.SKIN_UPLOADED, skinData);
+        skinApplier.applySkin(floodgatePlayer, skinData);
 
         return Result.handled();
     }

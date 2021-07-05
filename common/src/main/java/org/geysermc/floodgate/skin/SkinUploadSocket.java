@@ -37,6 +37,7 @@ import lombok.Getter;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.util.Utils;
 import org.geysermc.floodgate.util.WebsocketEventType;
 import org.java_websocket.client.WebSocketClient;
@@ -113,7 +114,11 @@ final class SkinUploadSocket extends WebSocketClient {
                                 player.getCorrectUsername());
                         return;
                     }
-                    applier.applySkin(player, message.getAsJsonObject("data"));
+                    if (!player.isLinked()) {
+                        SkinData skinData = SkinData.from(message.getAsJsonObject("data"));
+                        player.addProperty(PropertyKey.SKIN_UPLOADED, skinData);
+                        applier.applySkin(player, skinData);
+                    }
                 }
                 break;
             case LOG_MESSAGE:
