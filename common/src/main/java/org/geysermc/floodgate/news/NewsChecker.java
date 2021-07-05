@@ -37,6 +37,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.news.data.AnnouncementData;
 import org.geysermc.floodgate.news.data.BuildSpecificData;
 import org.geysermc.floodgate.news.data.CheckAfterData;
 import org.geysermc.floodgate.platform.command.CommandUtil;
@@ -179,16 +180,26 @@ public class NewsChecker {
             }
         }
 
-        if (item.getType() == NewsType.BUILD_SPECIFIC) {
-            if (!item.getDataAs(BuildSpecificData.class).isAffected(branch, build)) {
-                return;
-            }
-        } else if (item.getType() == NewsType.CHECK_AFTER) {
-            long checkAfter = item.getDataAs(CheckAfterData.class).getCheckAfter();
-            long delayMs = System.currentTimeMillis() - checkAfter;
-            schedule(delayMs > 0 ? delayMs : 0);
+        switch (item.getType()) {
+            case ANNOUNCEMENT:
+                if (!item.getDataAs(AnnouncementData.class).isAffected(Constants.NEWS_PROJECT_NAME)) {
+                    return;
+                }
+                break;
+            case BUILD_SPECIFIC:
+                if (!item.getDataAs(BuildSpecificData.class).isAffected(branch, build)) {
+                    return;
+                }
+                break;
+            case CHECK_AFTER:
+                long checkAfter = item.getDataAs(CheckAfterData.class).getCheckAfter();
+                long delayMs = System.currentTimeMillis() - checkAfter;
+                schedule(delayMs > 0 ? delayMs : 0);
+                break;
+            case CONFIG_SPECIFIC:
+                //todo
+                break;
         }
-
         activeNewsItems.put(item.getId(), item);
         activateNews(item);
     }
