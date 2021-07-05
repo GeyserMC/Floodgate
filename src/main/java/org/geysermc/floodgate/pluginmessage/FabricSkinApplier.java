@@ -1,7 +1,6 @@
 package org.geysermc.floodgate.pluginmessage;
 
 import com.google.common.collect.Lists;
-import com.google.gson.JsonObject;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.datafixers.util.Pair;
@@ -16,6 +15,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.skin.SkinApplier;
+import org.geysermc.floodgate.skin.SkinData;
 
 import java.util.Collection;
 import java.util.List;
@@ -26,7 +26,7 @@ public final class FabricSkinApplier implements SkinApplier {
     private static MinecraftServer SERVER;
 
     @Override
-    public void applySkin(FloodgatePlayer floodgatePlayer, JsonObject skinResult) {
+    public void applySkin(FloodgatePlayer floodgatePlayer, SkinData skinData) {
         SERVER.execute(() -> {
             ServerPlayerEntity bedrockPlayer = SERVER.getPlayerManager().getPlayer(floodgatePlayer.getCorrectUniqueId());
             if (bedrockPlayer == null) {
@@ -38,11 +38,7 @@ public final class FabricSkinApplier implements SkinApplier {
             PropertyMap properties = bedrockPlayer.getGameProfile().getProperties();
 
             properties.removeAll("textures");
-            Property property = new Property(
-                    "textures",
-                    skinResult.get("value").getAsString(),
-                    skinResult.get("signature").getAsString());
-            properties.put("textures", property);
+            properties.put("textures", new Property("textures", skinData.getValue(), skinData.getSignature()));
 
             // Skin is applied - now it's time to refresh the player for everyone. Oof.
             for (ServerPlayerEntity otherPlayer : SERVER.getPlayerManager().getPlayerList()) {
