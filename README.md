@@ -5,6 +5,8 @@
 [![Discord](https://img.shields.io/discord/613163671870242838.svg?color=%237289da&label=discord)](http://discord.geysermc.org/)
 [![HitCount](https://hits.dwyl.com/GeyserMC/Floodgate.svg)](http://hits.dwyl.com/GeyserMC/Floodgate)
 
+[Download](https://ci.opencollab.dev/job/GeyserMC/job/Floodgate/job/master/)
+
 Hybrid mode plugin to allow for connections from [Geyser](https://github.com/GeyserMC/Geyser) to join online mode servers.
 
 Geyser is an open collaboration project by [CubeCraft Games](https://cubecraft.net).
