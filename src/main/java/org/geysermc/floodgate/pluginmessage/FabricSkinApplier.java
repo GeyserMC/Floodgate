@@ -49,7 +49,7 @@ public final class FabricSkinApplier implements SkinApplier {
                 boolean loadedInWorld = otherPlayer.getEntityWorld().getEntityById(bedrockPlayer.getId()) != null;
                 if (loadedInWorld) {
                     // Player is loaded in this world
-                    otherPlayer.networkHandler.sendPacket(new EntityDestroyS2CPacket(bedrockPlayer.getId()));
+                    otherPlayer.networkHandler.sendPacket(new EntitiesDestroyS2CPacket(bedrockPlayer.getId()));
                 }
                 otherPlayer.networkHandler.sendPacket(new PlayerListS2CPacket(PlayerListS2CPacket.Action.REMOVE_PLAYER, bedrockPlayer));
 

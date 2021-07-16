@@ -94,9 +94,9 @@ public final class FabricCommandUtil implements CommandUtil {
     @Override
     public @NonNull UserAudience getOfflineAudienceByUsername(@NonNull String username) {
         UUID uuid = null;
-        GameProfile profile = SERVER.getUserCache().findByName(username);
-        if (profile != null) {
-            uuid = profile.getId();
+        Optional<GameProfile> profile = SERVER.getUserCache().findByName(username);
+        if (profile.isPresent()) {
+            uuid = profile.get().getId();
         }
         return new FabricUserAudience.NamedFabricUserAudience(username, uuid, username, null, this, false);
     }
