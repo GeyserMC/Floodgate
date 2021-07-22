@@ -32,6 +32,7 @@ import org.geysermc.floodgate.command.LinkAccountCommand;
 import org.geysermc.floodgate.command.TestCommand;
 import org.geysermc.floodgate.command.UnlinkAccountCommand;
 import org.geysermc.floodgate.command.WhitelistCommand;
+import org.geysermc.floodgate.command.main.MainCommand;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.register.CommandRegister;
 
@@ -63,5 +64,11 @@ public class CommandModule extends AbstractModule {
     @ProvidesIntoSet
     public FloodgateCommand testCommand() {
         return new TestCommand();
+    }
+
+    @Singleton
+    @ProvidesIntoSet
+    public FloodgateCommand mainCommand() {
+        return new MainCommand();
     }
 }

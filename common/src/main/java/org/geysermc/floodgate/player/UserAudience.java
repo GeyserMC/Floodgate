@@ -53,6 +53,10 @@ public interface UserAudience extends Identified, Identity, Audience {
 
     void sendMessage(TranslatableMessage message, Object... args);
 
+    default void sendMessage(String message) {
+        sendMessage(Component.text(message));
+    }
+
     void disconnect(@NonNull final Component reason);
 
     void disconnect(TranslatableMessage message, Object... args);

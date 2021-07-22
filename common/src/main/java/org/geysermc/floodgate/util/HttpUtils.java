@@ -56,6 +56,10 @@ public class HttpUtils {
         return readDefaultResponse(request(urlString));
     }
 
+    public static <T> HttpResponse<T> get(String urlString, Class<T> clazz) {
+        return readResponse(request(urlString), clazz);
+    }
+
     public static <T> HttpResponse<T> getSilent(String urlString, Class<T> clazz) {
         return readResponseSilent(request(urlString), clazz);
     }
@@ -82,9 +86,7 @@ public class HttpUtils {
     }
 
     @NonNull
-    private static <T> HttpResponse<T> readResponseSilent(
-            HttpURLConnection connection,
-            Class<T> clazz) {
+    private static <T> HttpResponse<T> readResponse(HttpURLConnection connection, Class<T> clazz) {
         InputStreamReader streamReader = createReader(connection);
         if (streamReader == null) {
             return new HttpResponse<>(-1, null);
@@ -101,6 +103,17 @@ public class HttpUtils {
                 streamReader.close();
             } catch (Exception ignored) {
             }
+        }
+    }
+
+    @NonNull
+    private static <T> HttpResponse<T> readResponseSilent(
+            HttpURLConnection connection,
+            Class<T> clazz) {
+        try {
+            return readResponse(connection, clazz);
+        } catch (Exception ignored) {
+            return new HttpResponse<>(-1, null);
         }
     }
 
@@ -150,6 +163,10 @@ public class HttpUtils {
     public static class HttpResponse<T> {
         private final int httpCode;
         private final T response;
+
+        public boolean isCodeOk() {
+            return httpCode >= 200 && httpCode < 300;
+        }
     }
 
     public static final class DefaultHttpResponse extends HttpResponse<JsonObject> {
