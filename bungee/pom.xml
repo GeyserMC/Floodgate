@@ -93,12 +93,17 @@
             <configuration>
               <relocations>
                 <relocation>
+                  <pattern>net.kyori</pattern>
+                  <shadedPattern>org.geysermc.floodgate.shaded.net.kyori</shadedPattern>
+                </relocation>
+                <relocation>
                   <pattern>cloud.commandframework</pattern>
                   <shadedPattern>org.geysermc.floodgate.shaded.cloud.commandframework</shadedPattern>
                 </relocation>
+                <!-- used in cloud -->
                 <relocation>
-                  <pattern>net.kyori</pattern>
-                  <shadedPattern>org.geysermc.floodgate.shaded.net.kyori</shadedPattern>
+                  <pattern>io.leangen.geantyref</pattern>
+                  <shadedPattern>org.geysermc.floodgate.shaded.io.leangen.geantyref</shadedPattern>
                 </relocation>
               </relocations>
             </configuration>

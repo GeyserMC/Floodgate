@@ -119,6 +119,11 @@
                   <pattern>cloud.commandframework</pattern>
                   <shadedPattern>org.geysermc.floodgate.shaded.cloud.commandframework</shadedPattern>
                 </relocation>
+                <!-- used in cloud -->
+                <relocation>
+                  <pattern>io.leangen.geantyref</pattern>
+                  <shadedPattern>org.geysermc.floodgate.shaded.io.leangen.geantyref</shadedPattern>
+                </relocation>
               </relocations>
             </configuration>
           </execution>
