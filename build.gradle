@@ -32,7 +32,10 @@ dependencies {
 
     // Base Floodgate
     implementation("org.geysermc.floodgate:common:${project.mod_version}")
-    shadow("org.geysermc.floodgate:common:${project.mod_version}")
+    shadow("org.geysermc.floodgate:common:${project.mod_version}") {
+        exclude group: 'com.google.guava', module: "guava"
+        exclude group: 'com.google.code.gson', module: "gson"
+    }
 
     include(modImplementation('cloud.commandframework:cloud-fabric:1.5.0-SNAPSHOT') {
         because "Commands library implementation for Fabric - only supported on the snapshot"
