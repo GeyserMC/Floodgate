@@ -45,6 +45,14 @@
             <goals>
               <goal>shade</goal>
             </goals>
+            <configuration>
+              <relocations>
+                <relocation>
+                  <pattern>org.mariadb</pattern>
+                  <shadedPattern>org.geysermc.floodgate.shaded.org.mariadb</shadedPattern>
+                </relocation>
+              </relocations>
+            </configuration>
           </execution>
         </executions>
         <configuration>

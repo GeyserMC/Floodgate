@@ -50,6 +50,7 @@
       <artifactId>common</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <!-- the following dependencies are (also) relocated -->
     <dependency>
       <groupId>cloud.commandframework</groupId>
       <artifactId>cloud-bukkit</artifactId>
@@ -111,6 +112,14 @@
             </goals>
             <configuration>
               <relocations>
+                <relocation>
+                  <pattern>cloud.commandframework</pattern>
+                  <shadedPattern>org.geysermc.floodgate.shaded.cloud.commandframework</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>net.kyori</pattern>
+                  <shadedPattern>org.geysermc.floodgate.shaded.net.kyori</shadedPattern>
+                </relocation>
                 <!-- hack to make pre 1.12 work -->
                 <relocation>
                   <pattern>com.google.common</pattern>

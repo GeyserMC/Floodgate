@@ -59,7 +59,7 @@ public class SqliteDatabase extends CommonPlayerLink {
         Path databasePath = dataDirectory.resolve("linked-players.db");
         try {
             Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath.toString());
+            connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath);
             try (Statement statement = connection.createStatement()) {
                 statement.executeUpdate(
                         "create table if not exists LinkedPlayers (bedrockId string, javaUniqueId string, javaUsername string)"

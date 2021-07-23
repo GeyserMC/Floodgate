@@ -53,6 +53,12 @@
     </dependency>
     <!-- the following common dependencies are already present on the platform -->
     <dependency>
+      <groupId>net.kyori</groupId>
+      <artifactId>adventure-api</artifactId>
+      <version>${adventure-api.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
       <version>2.8.5</version>
@@ -107,6 +113,14 @@
             <goals>
               <goal>shade</goal>
             </goals>
+            <configuration>
+              <relocations>
+                <relocation>
+                  <pattern>cloud.commandframework</pattern>
+                  <shadedPattern>org.geysermc.floodgate.shaded.cloud.commandframework</shadedPattern>
+                </relocation>
+              </relocations>
+            </configuration>
           </execution>
         </executions>
         <configuration>

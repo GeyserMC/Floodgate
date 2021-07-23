@@ -24,6 +24,7 @@
       <artifactId>common</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <!-- following dependencies are relocated -->
     <dependency>
       <groupId>cloud.commandframework</groupId>
       <artifactId>cloud-bungee</artifactId>
@@ -89,6 +90,18 @@
             <goals>
               <goal>shade</goal>
             </goals>
+            <configuration>
+              <relocations>
+                <relocation>
+                  <pattern>cloud.commandframework</pattern>
+                  <shadedPattern>org.geysermc.floodgate.shaded.cloud.commandframework</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>net.kyori</pattern>
+                  <shadedPattern>org.geysermc.floodgate.shaded.net.kyori</shadedPattern>
+                </relocation>
+              </relocations>
+            </configuration>
           </execution>
         </executions>
         <configuration>

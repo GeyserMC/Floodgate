@@ -45,6 +45,14 @@
             <goals>
               <goal>shade</goal>
             </goals>
+            <configuration>
+              <relocations>
+                <relocation>
+                  <pattern>org.sqlite</pattern>
+                  <shadedPattern>org.geysermc.floodgate.shaded.org.sqlite</shadedPattern>
+                </relocation>
+              </relocations>
+            </configuration>
           </execution>
         </executions>
         <configuration>
