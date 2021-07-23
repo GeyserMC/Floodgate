@@ -111,6 +111,8 @@ shadowJar {
     //relocate 'net.kyori', 'org.geysermc.floodgate.relocations.kyori'
     //relocate 'cloud.commandframework', 'org.geysermc.floodgate.relocations.cloud'
     relocate 'it.unimi.dsi.fastutil', 'org.geysermc.floodgate.relocations.fastutil'
+    relocate 'com.google.common', 'org.geysermc.floodgate.relocations.google.common'
+
 }
 
 task remappedShadowJar(type: RemapJarTask) {
