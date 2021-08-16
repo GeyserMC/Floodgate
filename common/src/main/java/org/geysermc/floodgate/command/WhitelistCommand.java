@@ -77,7 +77,7 @@ public class WhitelistCommand implements FloodgateCommand {
             name = name.substring(config.getUsernamePrefix().length());
         }
 
-        if (name.length() < 1 || name.length() > 16) {
+        if (name.startsWith(config.getUsernamePrefix()) || name.length() < 1 || name.length() > 16) {
             sender.sendMessage(Message.INVALID_USERNAME);
             return;
         }
