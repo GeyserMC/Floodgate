@@ -38,9 +38,10 @@ public final class Constants {
     public static final String HEALTH_URL = "http" + API_BASE_URL + "/health";
 
     public static final String WEBSOCKET_URL = "ws" + API_BASE_URL + "/ws";
-    public static final String GET_XUID_URL = "http" + API_BASE_URL + "/v1/xbox/xuid/";
-    public static final String GET_GAMERTAG_URL = "http" + API_BASE_URL + "/v1/xbox/gamertag/";
+    public static final String GET_XUID_URL = "http" + API_BASE_URL + "/v1/xbox/xuid";
+    public static final String GET_GAMERTAG_URL = "http" + API_BASE_URL + "/v1/xbox/gamertag";
     public static final String NEWS_OVERVIEW_URL = "http" + API_BASE_URL + "/v1/news";
+    public static final String GET_BEDROCK_LINK = "http" + API_BASE_URL + "/v1/link/bedrock";
 
     public static final String LINK_INFO_URL = "https://link.geysermc.org/";
 

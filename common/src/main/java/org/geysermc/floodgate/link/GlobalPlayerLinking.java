@@ -25,6 +25,8 @@
 
 package org.geysermc.floodgate.link;
 
+import static org.geysermc.floodgate.util.Constants.GET_BEDROCK_LINK;
+
 import com.google.gson.JsonObject;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -39,7 +41,6 @@ import org.geysermc.floodgate.util.Utils;
 
 @Getter
 public class GlobalPlayerLinking extends CommonPlayerLink {
-    private static final String GET_BEDROCK_LINK = "https://api.geysermc.org/v1/link/bedrock/";
     private PlayerLink databaseImpl;
 
     public void setDatabaseImpl(PlayerLink databaseImpl) {
@@ -93,6 +94,11 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
                 () -> {
                     DefaultHttpResponse response =
                             HttpUtils.get(GET_BEDROCK_LINK + bedrockId.getLeastSignificantBits());
+
+                    // the global api is most likely down
+                    if (!response.isCodeOk()) {
+                        return null;
+                    }
 
                     // both on code != 200 and fails with 200 'success' will be false
                     if (!response.getResponse().get("success").getAsBoolean()) {
