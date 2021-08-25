@@ -31,18 +31,20 @@ import static org.geysermc.floodgate.util.ReflectionUtils.getField;
 import static org.geysermc.floodgate.util.ReflectionUtils.getPrefixedClass;
 import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
 
+import com.google.common.collect.Queues;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
+import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
-import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.util.Constants;
 
 @RequiredArgsConstructor
@@ -71,61 +73,95 @@ public final class VelocityProxyDataHandler extends ChannelInboundHandlerAdapter
 
     private final ProxyFloodgateConfig config;
     private final FloodgateHandshakeHandler handshakeHandler;
+    private final PacketBlocker blocker;
     private final AttributeKey<String> kickMessageAttribute;
     private final FloodgateLogger logger;
 
+    private final Queue<Object> packetQueue = Queues.newConcurrentLinkedQueue();
+
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
+        // prevent other packets from being handled while we handle the handshake packet
+        if (!packetQueue.isEmpty()) {
+            packetQueue.add(msg);
+            return;
+        }
+
         // we're only interested in the Handshake packet.
         // it should be the first packet but you never know
         if (HANDSHAKE_PACKET.isInstance(msg)) {
-            handleClientToProxy(ctx, msg);
-            ctx.pipeline().remove(this);
+            blocker.enable();
+            packetQueue.add(msg);
+
+            handleClientToProxy(ctx, msg).thenRun(() -> {
+                Object packet;
+                while ((packet = packetQueue.poll()) != null) {
+                    ctx.fireChannelRead(packet);
+                }
+                ctx.pipeline().remove(this);
+                blocker.disable();
+            });
+            return;
         }
 
         ctx.fireChannelRead(msg);
     }
 
-    private void handleClientToProxy(ChannelHandlerContext ctx, Object packet) {
+    private CompletableFuture<Void> handleClientToProxy(ChannelHandlerContext ctx, Object packet) {
         String address = getCastedValue(packet, HANDSHAKE_SERVER_ADDRESS);
 
-        HandshakeResult result = handshakeHandler.handle(ctx.channel(), address);
-        HandshakeData handshakeData = result.getHandshakeData();
+        return handshakeHandler.handle(ctx.channel(), address).thenAccept(result -> {
+            HandshakeData handshakeData = result.getHandshakeData();
 
-        InetSocketAddress newIp = result.getNewIp(ctx.channel());
-        if (newIp != null) {
-            Object connection = ctx.pipeline().get("handler");
-            setValue(connection, REMOTE_ADDRESS, newIp);
+            InetSocketAddress newIp = result.getNewIp(ctx.channel());
+            if (newIp != null) {
+                Object connection = ctx.pipeline().get("handler");
+                setValue(connection, REMOTE_ADDRESS, newIp);
+            }
+
+            if (handshakeData.getDisconnectReason() != null) {
+                ctx.channel().attr(kickMessageAttribute).set(handshakeData.getDisconnectReason());
+                return;
+            }
+
+            switch (result.getResultType()) {
+                case SUCCESS:
+                    break;
+                case EXCEPTION:
+                    ctx.channel().attr(kickMessageAttribute)
+                            .set(config.getDisconnect().getInvalidKey());
+                    return;
+                case INVALID_DATA_LENGTH:
+                    ctx.channel().attr(kickMessageAttribute)
+                            .set(config.getDisconnect().getInvalidArgumentsLength());
+                    return;
+                case TIMESTAMP_DENIED:
+                    ctx.channel().attr(kickMessageAttribute)
+                            .set(Constants.TIMESTAMP_DENIED_MESSAGE);
+                    return;
+                default: // only continue when SUCCESS
+                    return;
+            }
+
+            FloodgatePlayer player = result.getFloodgatePlayer();
+
+            setValue(packet, HANDSHAKE_SERVER_ADDRESS, handshakeData.getHostname());
+
+            logger.info("Floodgate player who is logged in as {} {} joined",
+                    player.getCorrectUsername(), player.getCorrectUniqueId());
+        }).handle((v, error) -> {
+            if (error != null) {
+                error.printStackTrace();
+            }
+            return v;
+        });
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        super.exceptionCaught(ctx, cause);
+        if (config.isDebug()) {
+            cause.printStackTrace();
         }
-
-        if (handshakeData.getDisconnectReason() != null) {
-            ctx.channel().attr(kickMessageAttribute).set(handshakeData.getDisconnectReason());
-            return;
-        }
-
-        switch (result.getResultType()) {
-            case SUCCESS:
-                break;
-            case EXCEPTION:
-                ctx.channel().attr(kickMessageAttribute)
-                        .set(config.getDisconnect().getInvalidKey());
-                return;
-            case INVALID_DATA_LENGTH:
-                ctx.channel().attr(kickMessageAttribute)
-                        .set(config.getDisconnect().getInvalidArgumentsLength());
-                return;
-            case TIMESTAMP_DENIED:
-                ctx.channel().attr(kickMessageAttribute).set(Constants.TIMESTAMP_DENIED_MESSAGE);
-                return;
-            default: // only continue when SUCCESS
-                return;
-        }
-
-        FloodgatePlayer player = result.getFloodgatePlayer();
-
-        setValue(packet, HANDSHAKE_SERVER_ADDRESS, handshakeData.getHostname());
-
-        logger.info("Floodgate player who is logged in as {} {} joined",
-                player.getCorrectUsername(), player.getCorrectUniqueId());
     }
 }

@@ -43,6 +43,10 @@ public final class SpigotDataAddon implements InjectorAddon {
     @Inject private FloodgateLogger logger;
 
     @Inject
+    @Named("packetDecoder")
+    private String packetDecoder;
+
+    @Inject
     @Named("packetHandler")
     private String packetHandlerName;
 
@@ -52,9 +56,12 @@ public final class SpigotDataAddon implements InjectorAddon {
 
     @Override
     public void onInject(Channel channel, boolean toServer) {
+        PacketBlocker blocker = new PacketBlocker();
+        channel.pipeline().addBefore(packetDecoder, "floodgate_packet_blocker", blocker);
+
         channel.pipeline().addBefore(
                 packetHandlerName, "floodgate_data_handler",
-                new SpigotDataHandler(config, handshakeHandler, logger)
+                new SpigotDataHandler(config, handshakeHandler, blocker, logger)
         );
     }
 

@@ -27,11 +27,14 @@ package org.geysermc.floodgate.addon.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.Queues;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
+import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.netty.ChannelWrapper;
@@ -42,7 +45,6 @@ import net.md_5.bungee.protocol.packet.Handshake;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
-import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
@@ -63,62 +65,96 @@ public class BungeeProxyDataHandler extends ChannelInboundHandlerAdapter {
 
     private final ProxyFloodgateConfig config;
     private final FloodgateHandshakeHandler handler;
+    private final PacketBlocker blocker;
     private final AttributeKey<String> kickMessageAttribute;
+
+    private final Queue<Object> packetQueue = Queues.newConcurrentLinkedQueue();
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
+        // prevent other packets from being handled while we handle the handshake packet
+        if (!packetQueue.isEmpty()) {
+            packetQueue.add(msg);
+            return;
+        }
+
         if (msg instanceof PacketWrapper) {
             DefinedPacket packet = ((PacketWrapper) msg).packet;
 
             // we're only interested in the Handshake packet
             if (packet instanceof Handshake) {
-                handleHandshake(ctx, (Handshake) packet);
-                ctx.pipeline().remove(this);
+                blocker.enable();
+                packetQueue.add(msg);
+
+                handleHandshake(ctx, (Handshake) packet).thenRun(() -> {
+                    Object queuedPacket;
+                    while ((queuedPacket = packetQueue.poll()) != null) {
+                        ctx.fireChannelRead(queuedPacket);
+                    }
+                    ctx.pipeline().remove(this);
+                    blocker.disable();
+                });
+                return;
             }
         }
 
         ctx.fireChannelRead(msg);
     }
 
-    private void handleHandshake(ChannelHandlerContext ctx, Handshake packet) {
+    private CompletableFuture<Void> handleHandshake(ChannelHandlerContext ctx, Handshake packet) {
         String data = packet.getHost();
 
-        HandshakeResult result = handler.handle(ctx.channel(), data);
-        HandshakeData handshakeData = result.getHandshakeData();
+        return handler.handle(ctx.channel(), data).thenAccept(result -> {
+            HandshakeData handshakeData = result.getHandshakeData();
 
-        // we'll change the IP address from the proxy to the real IP of the client very early on
-        // so that almost every plugin will use the real IP of the client
-        InetSocketAddress newIp = result.getNewIp(ctx.channel());
-        if (newIp != null) {
-            HandlerBoss handlerBoss = ctx.pipeline().get(HandlerBoss.class);
-            // InitialHandler extends PacketHandler and implements PendingConnection
-            InitialHandler connection = ReflectionUtils.getCastedValue(handlerBoss, HANDLER);
+            // we'll change the IP address from the proxy to the real IP of the client very early on
+            // so that almost every plugin will use the real IP of the client
+            InetSocketAddress newIp = result.getNewIp(ctx.channel());
+            if (newIp != null) {
+                HandlerBoss handlerBoss = ctx.pipeline().get(HandlerBoss.class);
+                // InitialHandler extends PacketHandler and implements PendingConnection
+                InitialHandler connection = ReflectionUtils.getCastedValue(handlerBoss, HANDLER);
 
-            ChannelWrapper channelWrapper =
-                    ReflectionUtils.getCastedValue(connection, CHANNEL_WRAPPER);
+                ChannelWrapper channelWrapper =
+                        ReflectionUtils.getCastedValue(connection, CHANNEL_WRAPPER);
 
-            channelWrapper.setRemoteAddress(newIp);
-        }
+                channelWrapper.setRemoteAddress(newIp);
+            }
 
-        if (handshakeData.getDisconnectReason() != null) {
-            ctx.channel().attr(kickMessageAttribute).set(handshakeData.getDisconnectReason());
-            return;
-        }
+            if (handshakeData.getDisconnectReason() != null) {
+                ctx.channel().attr(kickMessageAttribute).set(handshakeData.getDisconnectReason());
+                return;
+            }
 
-        switch (result.getResultType()) {
-            case EXCEPTION:
-                ctx.channel().attr(kickMessageAttribute).set(
-                        config.getDisconnect().getInvalidKey());
-                break;
-            case INVALID_DATA_LENGTH:
-                ctx.channel().attr(kickMessageAttribute)
-                        .set(config.getDisconnect().getInvalidArgumentsLength());
-                break;
-            case TIMESTAMP_DENIED:
-                ctx.channel().attr(kickMessageAttribute).set(Constants.TIMESTAMP_DENIED_MESSAGE);
-                break;
-            default:
-                break;
+            switch (result.getResultType()) {
+                case EXCEPTION:
+                    ctx.channel().attr(kickMessageAttribute)
+                            .set(config.getDisconnect().getInvalidKey());
+                    break;
+                case INVALID_DATA_LENGTH:
+                    ctx.channel().attr(kickMessageAttribute)
+                            .set(config.getDisconnect().getInvalidArgumentsLength());
+                    break;
+                case TIMESTAMP_DENIED:
+                    ctx.channel().attr(kickMessageAttribute)
+                            .set(Constants.TIMESTAMP_DENIED_MESSAGE);
+                    break;
+                default:
+                    break;
+            }
+        }).handle((v, error) -> {
+            if (error != null) {
+                error.printStackTrace();
+            }
+            return v;
+        });
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        super.exceptionCaught(ctx, cause);
+        if (config.isDebug()) {
+            cause.printStackTrace();
         }
     }
 }

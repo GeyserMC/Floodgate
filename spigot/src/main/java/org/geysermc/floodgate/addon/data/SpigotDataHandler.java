@@ -28,17 +28,18 @@ package org.geysermc.floodgate.addon.data;
 import static org.geysermc.floodgate.util.ReflectionUtils.getCastedValue;
 import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
 
+import com.google.common.collect.Queues;
 import com.mojang.authlib.GameProfile;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import java.net.InetSocketAddress;
+import java.util.Queue;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
-import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.ClassNames;
 import org.geysermc.floodgate.util.Constants;
@@ -48,23 +49,30 @@ import org.geysermc.floodgate.util.ProxyUtils;
 public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
     private final FloodgateConfig config;
     private final FloodgateHandshakeHandler handshakeHandler;
+    private final PacketBlocker blocker;
     private final FloodgateLogger logger;
+
+    private final Queue<Object> packetQueue = Queues.newConcurrentLinkedQueue();
+
     private Object networkManager;
     private FloodgatePlayer player;
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object packet) throws Exception {
-        boolean isHandshake = ClassNames.HANDSHAKE_PACKET.isInstance(packet);
-        boolean isLogin = ClassNames.LOGIN_START_PACKET.isInstance(packet);
+        // prevent other packets from being handled while we handle the handshake packet
+        if (!packetQueue.isEmpty()) {
+            packetQueue.add(packet);
+            return;
+        }
 
-        boolean bungeeData = false;
+        if (ClassNames.HANDSHAKE_PACKET.isInstance(packet)) {
+            blocker.enable();
+            packetQueue.add(packet);
 
-        try {
-            if (isHandshake) {
-                networkManager = ctx.channel().pipeline().get("packet_handler");
+            networkManager = ctx.channel().pipeline().get("packet_handler");
+            String handshakeValue = getCastedValue(packet, ClassNames.HANDSHAKE_HOST);
 
-                String handshakeValue = getCastedValue(packet, ClassNames.HANDSHAKE_HOST);
-                HandshakeResult result = handshakeHandler.handle(ctx.channel(), handshakeValue);
+            handshakeHandler.handle(ctx.channel(), handshakeValue).thenApply(result -> {
                 HandshakeData handshakeData = result.getHandshakeData();
 
                 setValue(packet, ClassNames.HANDSHAKE_HOST, handshakeData.getHostname());
@@ -77,7 +85,7 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
 
                 if (handshakeData.getDisconnectReason() != null) {
                     ctx.close(); //todo disconnect with message
-                    return;
+                    return true;
                 }
 
                 //todo use kickMessageAttribute and let this be common logic
@@ -88,7 +96,7 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
                     case EXCEPTION:
                         logger.info(config.getDisconnect().getInvalidKey());
                         ctx.close();
-                        return;
+                        return true;
                     case INVALID_DATA_LENGTH:
                         int dataLength = result.getBedrockData().getDataLength();
                         logger.info(
@@ -96,62 +104,82 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
                                 BedrockData.EXPECTED_LENGTH, dataLength
                         );
                         ctx.close();
-                        return;
+                        return true;
                     case TIMESTAMP_DENIED:
                         logger.info(Constants.TIMESTAMP_DENIED_MESSAGE);
                         ctx.close();
-                        return;
+                        return true;
                     default: // only continue when SUCCESS
-                        return;
+                        return true;
                 }
 
                 player = result.getFloodgatePlayer();
-                bungeeData = ProxyUtils.isProxyData();
+                boolean bungeeData = ProxyUtils.isProxyData();
 
                 if (!bungeeData) {
                     // Use a spoofedUUID for initUUID (just like Bungeecord)
                     setValue(networkManager, "spoofedUUID", player.getCorrectUniqueId());
                 }
-            } else if (isLogin) {
-                // we have to fake the offline player (login) cycle
-                Object loginListener = ClassNames.PACKET_LISTENER.get(networkManager);
-
-                // check if the server is actually in the Login state
-                if (!ClassNames.LOGIN_LISTENER.isInstance(loginListener)) {
-                    // player is not in the login state, abort
-                    return;
+                return bungeeData || player == null;
+            }).thenAccept(shouldRemove -> {
+                Object queuedPacket;
+                while ((queuedPacket = packetQueue.poll()) != null) {
+                    try {
+                        if (checkLogin(ctx, packet)) {
+                            break;
+                        }
+                    } catch (Exception ignored) {}
+                    ctx.fireChannelRead(queuedPacket);
                 }
 
-                // set the player his GameProfile, we can't change the username without this
-                GameProfile gameProfile = new GameProfile(
-                        player.getCorrectUniqueId(), player.getCorrectUsername()
-                );
-                setValue(loginListener, ClassNames.LOGIN_PROFILE, gameProfile);
-
-                // just like on Spigot:
-
-                // LoginListener#initUUID
-                // new LoginHandler().fireEvents();
-
-                // and the tick of LoginListener will do the rest
-
-                ClassNames.INIT_UUID.invoke(loginListener);
-
-                Object loginHandler =
-                        ClassNames.LOGIN_HANDLER_CONSTRUCTOR.newInstance(loginListener);
-                ClassNames.FIRE_LOGIN_EVENTS.invoke(loginHandler);
-            }
-        } finally {
-            // don't let the packet through if the packet is the login packet
-            if (!isLogin) {
-                ctx.fireChannelRead(packet);
-            }
-
-            if (isHandshake && bungeeData || isLogin || player == null) {
-                // We're done
-                ctx.pipeline().remove(this);
-            }
+                if (shouldRemove) {
+                    ctx.pipeline().remove(SpigotDataHandler.this);
+                }
+                blocker.disable();
+            });
+            return;
         }
+
+        if (!checkLogin(ctx, packet)) {
+            ctx.fireChannelRead(packet);
+        }
+    }
+
+    private boolean checkLogin(ChannelHandlerContext ctx, Object packet) throws Exception {
+        if (ClassNames.LOGIN_START_PACKET.isInstance(packet)) {
+            // we have to fake the offline player (login) cycle
+            Object loginListener = ClassNames.PACKET_LISTENER.get(networkManager);
+
+            // check if the server is actually in the Login state
+            if (!ClassNames.LOGIN_LISTENER.isInstance(loginListener)) {
+                // player is not in the login state, abort
+                ctx.pipeline().remove(this);
+                return true;
+            }
+
+            // set the player his GameProfile, we can't change the username without this
+            GameProfile gameProfile = new GameProfile(
+                    player.getCorrectUniqueId(), player.getCorrectUsername()
+            );
+            setValue(loginListener, ClassNames.LOGIN_PROFILE, gameProfile);
+
+            // just like on Spigot:
+
+            // LoginListener#initUUID
+            // new LoginHandler().fireEvents();
+
+            // and the tick of LoginListener will do the rest
+
+            ClassNames.INIT_UUID.invoke(loginListener);
+
+            Object loginHandler =
+                    ClassNames.LOGIN_HANDLER_CONSTRUCTOR.newInstance(loginListener);
+            ClassNames.FIRE_LOGIN_EVENTS.invoke(loginHandler);
+
+            ctx.pipeline().remove(this);
+            return true;
+        }
+        return false;
     }
 
     @Override
