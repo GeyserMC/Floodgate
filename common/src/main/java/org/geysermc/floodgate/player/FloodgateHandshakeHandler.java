@@ -35,7 +35,7 @@ import com.google.common.cache.CacheBuilder;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import it.unimi.dsi.fastutil.Pair;
-import it.unimi.dsi.fastutil.objects.ObjectObjectMutablePair;
+import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import java.net.InetSocketAddress;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -279,10 +279,10 @@ public final class FloodgateHandshakeHandler {
 
     private CompletableFuture<Pair<BedrockData, LinkedPlayer>> fetchLinkedPlayer(BedrockData data) {
         if (!api.getPlayerLink().isEnabled()) {
-            return CompletableFuture.completedFuture(null);
+            return CompletableFuture.completedFuture(new ObjectObjectImmutablePair<>(data, null));
         }
         return api.getPlayerLink().getLinkedPlayer(Utils.getJavaUuid(data.getXuid()))
-                .thenApply(link -> new ObjectObjectMutablePair<>(data, link));
+                .thenApply(link -> new ObjectObjectImmutablePair<>(data, link));
     }
 
     public enum ResultType {
