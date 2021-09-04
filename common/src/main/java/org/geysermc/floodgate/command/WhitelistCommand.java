@@ -31,6 +31,7 @@ import cloud.commandframework.ArgumentDescription;
 import cloud.commandframework.Command;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.context.CommandContext;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import lombok.Getter;
@@ -111,12 +112,14 @@ public class WhitelistCommand implements FloodgateCommand {
                     }
 
                     JsonObject data = response.getAsJsonObject("data");
-                    if (data.size() == 0) {
+                    JsonElement xuidElement = data.get("xuid");
+
+                    if (xuidElement == null) {
                         sender.sendMessage(Message.USER_NOT_FOUND);
                         return;
                     }
 
-                    String xuid = data.get("xuid").getAsString();
+                    String xuid = xuidElement.getAsString();
                     CommandUtil commandUtil = context.get("CommandUtil");
 
                     try {
