@@ -282,7 +282,14 @@ public final class FloodgateHandshakeHandler {
             return CompletableFuture.completedFuture(new ObjectObjectImmutablePair<>(data, null));
         }
         return api.getPlayerLink().getLinkedPlayer(Utils.getJavaUuid(data.getXuid()))
-                .thenApply(link -> new ObjectObjectImmutablePair<>(data, link));
+                .thenApply(link -> new ObjectObjectImmutablePair<>(data, link))
+                .handle((result, error) -> {
+                    if (error != null) {
+                        logger.error("The player linking implementation returned an error", error.getCause());
+                        return new ObjectObjectImmutablePair<>(data, null);
+                    }
+                    return result;
+                });
     }
 
     public enum ResultType {

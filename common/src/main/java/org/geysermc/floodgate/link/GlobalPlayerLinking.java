@@ -27,6 +27,7 @@ package org.geysermc.floodgate.link;
 
 import static org.geysermc.floodgate.util.Constants.GET_BEDROCK_LINK;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -111,13 +112,14 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
 
                     JsonObject data = response.getResponse().getAsJsonObject("data");
 
-                    // no link if data is empty
-                    if (data.size() == 0) {
+                    JsonElement javaName = data.get("java_name");
+                    // javaName will be null when the player isn't linked
+                    if (javaName == null) {
                         return null;
                     }
 
                     return LinkedPlayer.of(
-                            data.get("java_name").getAsString(),
+                            javaName.getAsString(),
                             UUID.fromString(data.get("java_id").getAsString()),
                             Utils.getJavaUuid(data.get("bedrock_id").getAsLong()));
                 },
@@ -158,7 +160,7 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
                     JsonObject data = response.getResponse().getAsJsonObject("data");
 
                     // no link if data is empty, otherwise the player is linked
-                    return data.size() != 0;
+                    return data.entrySet().size() != 0;
                 },
                 getExecutorService());
     }
