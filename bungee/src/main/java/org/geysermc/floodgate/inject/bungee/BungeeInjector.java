@@ -26,8 +26,11 @@
 package org.geysermc.floodgate.inject.bungee;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
 import java.lang.reflect.Field;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +54,9 @@ public final class BungeeInjector extends CommonPlatformInjector {
 
             Field framePrepender = ReflectionUtils.getField(PipelineUtils.class, "framePrepender");
 
+            // Required in order to inject into both Geyser <-> proxy AND proxy <-> server
+            // (Instead of just replacing the ChannelInitializer which is only called for
+            // player <-> proxy)
             BungeeCustomPrepender customPrepender = new BungeeCustomPrepender(
                     ReflectionUtils.getCastedValue(null, framePrepender), logger
             );
@@ -81,6 +87,8 @@ public final class BungeeInjector extends CommonPlatformInjector {
         addInjectedClient(channel);
     }
 
+    private static final String BUNGEE_INIT = "floodgate-bungee-init";
+
     @RequiredArgsConstructor
     private final class BungeeCustomPrepender extends Varint21LengthFieldPrepender {
         private final Varint21LengthFieldPrepender original;
@@ -89,30 +97,22 @@ public final class BungeeInjector extends CommonPlatformInjector {
         @Override
         public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
             original.handlerAdded(ctx);
-            // we're getting called before the decoder and encoder are added.
-            // we'll have to wait a while :(
-            ctx.executor().execute(() -> {
-                int tries = 0;
-                while (ctx.channel().isOpen()) {
-                    if (ctx.channel().pipeline().get(MinecraftEncoder.class) != null) {
-                        logger.debug("found packet encoder :)");
-                        ctx.channel().pipeline().addFirst(new BungeeInjectorInitializer());
-                        return;
-                    }
-
-                    // half a second should be more than enough
-                    tries++;
-                    if (tries > 25) {
-                        logger.debug("Failed to inject " + ctx.channel().pipeline());
-                        return;
-                    }
-
-                    try {
-                        Thread.sleep(20);
-                    } catch (InterruptedException ignored) {
-                    }
-                }
-            });
+            // The Minecraft encoder being in the pipeline isn't present until later
+            ctx.pipeline().addBefore(PipelineUtils.FRAME_DECODER, BUNGEE_INIT,
+                    new ChannelInboundHandlerAdapter() {
+                        @Override
+                        public void channelRead(ChannelHandlerContext ctx, Object msg)
+                                throws Exception {
+                            if (ctx.channel().pipeline().get(MinecraftEncoder.class) == null) {
+                                logger.debug("Minecraft encoder class not found while " +
+                                        "injecting!");
+                            } else {
+                                ctx.channel().pipeline().addFirst(new BungeeInjectorInitializer());
+                            }
+                            ctx.channel().pipeline().remove(BUNGEE_INIT);
+                            super.channelRead(ctx, msg);
+                        }
+                    });
         }
     }
 
