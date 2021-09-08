@@ -184,6 +184,9 @@ public final class FloodgateHandshakeHandler {
                         channel, null, hostname
                 );
             } catch (Exception exception) {
+                if (exception instanceof HandshakeResult) {
+                    throw (HandshakeResult) exception;
+                }
                 exception.printStackTrace();
 
                 throw callHandlerAndReturnResult(
