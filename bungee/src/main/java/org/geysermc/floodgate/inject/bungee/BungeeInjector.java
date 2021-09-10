@@ -27,7 +27,9 @@ package org.geysermc.floodgate.inject.bungee;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
+import io.netty.channel.ChannelPromise;
 import java.lang.reflect.Field;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +43,8 @@ import org.geysermc.floodgate.util.ReflectionUtils;
 
 @RequiredArgsConstructor
 public final class BungeeInjector extends CommonPlatformInjector {
+    private static final String BUNGEE_INIT = "floodgate-bungee-init";
+
     private final FloodgateLogger logger;
     @Getter private boolean injected;
 
@@ -51,8 +55,11 @@ public final class BungeeInjector extends CommonPlatformInjector {
 
             Field framePrepender = ReflectionUtils.getField(PipelineUtils.class, "framePrepender");
 
+            // Required in order to inject into both Geyser <-> proxy AND proxy <-> server
+            // (Instead of just replacing the ChannelInitializer which is only called for
+            // player <-> proxy)
             BungeeCustomPrepender customPrepender = new BungeeCustomPrepender(
-                    ReflectionUtils.getCastedValue(null, framePrepender), logger
+                    this, ReflectionUtils.getCastedValue(null, framePrepender)
             );
 
             BungeeReflectionUtils.setFieldValue(null, framePrepender, customPrepender);
@@ -76,53 +83,76 @@ public final class BungeeInjector extends CommonPlatformInjector {
         return false;
     }
 
-    public void injectClient(Channel channel, boolean clientToProxy) {
+    void injectClient(Channel channel, boolean clientToProxy) {
+        if (!channel.isOpen()) {
+            return;
+        }
+
+        if (channel.pipeline().get(MinecraftEncoder.class) == null) {
+            logger.debug(
+                    "Minecraft encoder not found while injecting! {}",
+                    String.join(", ", channel.pipeline().names())
+            );
+            return;
+        }
+
         injectAddonsCall(channel, !clientToProxy);
         addInjectedClient(channel);
     }
 
     @RequiredArgsConstructor
-    private final class BungeeCustomPrepender extends Varint21LengthFieldPrepender {
+    private static final class BungeeCustomPrepender extends Varint21LengthFieldPrepender {
+        private final BungeeInjector injector;
         private final Varint21LengthFieldPrepender original;
-        private final FloodgateLogger logger;
 
         @Override
         public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
             original.handlerAdded(ctx);
-            // we're getting called before the decoder and encoder are added.
-            // we'll have to wait a while :(
-            ctx.executor().execute(() -> {
-                int tries = 0;
-                while (ctx.channel().isOpen()) {
-                    if (ctx.channel().pipeline().get(MinecraftEncoder.class) != null) {
-                        logger.debug("found packet encoder :)");
-                        ctx.channel().pipeline().addFirst(new BungeeInjectorInitializer());
-                        return;
-                    }
+            // The Minecraft encoder being in the pipeline isn't present until later
 
-                    // half a second should be more than enough
-                    tries++;
-                    if (tries > 25) {
-                        logger.debug("Failed to inject " + ctx.channel().pipeline());
-                        return;
-                    }
-
-                    try {
-                        Thread.sleep(20);
-                    } catch (InterruptedException ignored) {
-                    }
-                }
-            });
+            if (ctx.channel().parent() != null) {
+                // Client <-> Proxy
+                ctx.pipeline().addBefore(
+                        PipelineUtils.FRAME_DECODER, BUNGEE_INIT,
+                        new BungeeClientToProxyInjectInitializer(injector)
+                );
+            } else {
+                // Proxy <-> Server
+                ctx.pipeline().addLast(
+                        BUNGEE_INIT, new BungeeProxyToServerInjectInitializer(injector)
+                );
+            }
         }
     }
 
-    private final class BungeeInjectorInitializer extends ChannelInitializer<Channel> {
+    @RequiredArgsConstructor
+    private static final class BungeeClientToProxyInjectInitializer
+            extends ChannelInboundHandlerAdapter {
+
+        private final BungeeInjector injector;
+
         @Override
-        protected void initChannel(Channel channel) {
-            if (!channel.isOpen()) {
-                return;
-            }
-            injectClient(channel, channel.parent() != null);
+        public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+            injector.injectClient(ctx.channel(), true);
+
+            ctx.pipeline().remove(this);
+            super.channelRead(ctx, msg);
+        }
+    }
+
+    @RequiredArgsConstructor
+    private static final class BungeeProxyToServerInjectInitializer
+            extends ChannelOutboundHandlerAdapter {
+
+        private final BungeeInjector injector;
+
+        @Override
+        public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise)
+                throws Exception {
+            injector.injectClient(ctx.channel(), false);
+
+            ctx.pipeline().remove(this);
+            super.write(ctx, msg, promise);
         }
     }
 }
