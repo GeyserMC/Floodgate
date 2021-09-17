@@ -141,7 +141,6 @@
         <configuration>
           <finalName>${outputName}</finalName>
           <shadedArtifactAttached>true</shadedArtifactAttached>
-          <outputDirectory>D:\Intellij\localserver\velocity\plugins</outputDirectory>
         </configuration>
       </plugin>
     </plugins>

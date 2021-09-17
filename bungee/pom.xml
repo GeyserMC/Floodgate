@@ -118,7 +118,6 @@
         <configuration>
           <finalName>${outputName}</finalName>
           <shadedArtifactAttached>true</shadedArtifactAttached>
-          <outputDirectory>D:\Intellij\localserver\bungee\plugins</outputDirectory>
         </configuration>
       </plugin>
     </plugins>
