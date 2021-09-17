@@ -94,6 +94,10 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
                     case SUCCESS:
                         break;
                     case EXCEPTION:
+                        logger.info(Constants.INTERNAL_ERROR_MESSAGE);
+                        ctx.close();
+                        return true;
+                    case DECRYPT_ERROR:
                         logger.info(config.getDisconnect().getInvalidKey());
                         ctx.close();
                         return true;

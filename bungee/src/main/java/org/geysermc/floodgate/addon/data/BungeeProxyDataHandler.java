@@ -129,6 +129,10 @@ public class BungeeProxyDataHandler extends ChannelInboundHandlerAdapter {
             switch (result.getResultType()) {
                 case EXCEPTION:
                     ctx.channel().attr(kickMessageAttribute)
+                            .set(Constants.INTERNAL_ERROR_MESSAGE);
+                    break;
+                case DECRYPT_ERROR:
+                    ctx.channel().attr(kickMessageAttribute)
                             .set(config.getDisconnect().getInvalidKey());
                     break;
                 case INVALID_DATA_LENGTH:

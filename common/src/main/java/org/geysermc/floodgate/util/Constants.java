@@ -52,6 +52,9 @@ public final class Constants {
     public static final String TIMESTAMP_DENIED_MESSAGE =
             "Something isn't right with this data." +
             " Try logging in again or contact a server administrator if the issue persists.";
+    public static final String INTERNAL_ERROR_MESSAGE =
+            "An internal error happened while handling Floodgate data." + 
+            " Try logging in again or contact a server administrator if the issue persists.";
 
 
     public static final int HANDSHAKE_PACKET_ID = 0;

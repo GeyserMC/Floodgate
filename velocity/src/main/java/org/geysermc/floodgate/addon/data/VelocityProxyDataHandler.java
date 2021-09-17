@@ -129,6 +129,10 @@ public final class VelocityProxyDataHandler extends ChannelInboundHandlerAdapter
                     break;
                 case EXCEPTION:
                     ctx.channel().attr(kickMessageAttribute)
+                            .set(Constants.INTERNAL_ERROR_MESSAGE);
+                    return;
+                case DECRYPT_ERROR:
+                    ctx.channel().attr(kickMessageAttribute)
                             .set(config.getDisconnect().getInvalidKey());
                     return;
                 case INVALID_DATA_LENGTH:

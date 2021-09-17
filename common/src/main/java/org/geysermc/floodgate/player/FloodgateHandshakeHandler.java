@@ -180,7 +180,7 @@ public final class FloodgateHandshakeHandler {
                 formatException.printStackTrace();
 
                 throw callHandlerAndReturnResult(
-                        ResultType.EXCEPTION,
+                        ResultType.DECRYPT_ERROR,
                         channel, null, hostname
                 );
             } catch (Exception exception) {
@@ -202,6 +202,8 @@ public final class FloodgateHandshakeHandler {
             if (error instanceof HandshakeResult) {
                 return (HandshakeResult) error;
             }
+
+            error.printStackTrace();
 
             return callHandlerAndReturnResult(
                     ResultType.EXCEPTION,
@@ -298,6 +300,7 @@ public final class FloodgateHandshakeHandler {
     public enum ResultType {
         EXCEPTION,
         NOT_FLOODGATE_DATA,
+        DECRYPT_ERROR,
         INVALID_DATA_LENGTH,
         TIMESTAMP_DENIED,
         SUCCESS
