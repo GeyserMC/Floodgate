@@ -62,8 +62,7 @@ public final class MainCommand implements FloodgateCommand {
 
     @Override
     public void execute(CommandContext<UserAudience> context) {
-        StringBuilder helpMessage = new StringBuilder(28)
-                .append("Available subcommands are:\n");
+        StringBuilder helpMessage = new StringBuilder("Available subcommands are:\n");
 
         for (SubCommand subCommand : SubCommand.VALUES) {
             helpMessage.append('\n').append(COLOR_CHAR).append('b')
