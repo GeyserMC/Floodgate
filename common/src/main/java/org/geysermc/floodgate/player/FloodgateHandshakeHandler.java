@@ -39,6 +39,7 @@ import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import java.net.InetSocketAddress;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -197,6 +198,13 @@ public final class FloodgateHandshakeHandler {
         }).thenCompose(this::fetchLinkedPlayer).handle((result, error) -> {
             if (error == null) {
                 return handlePart2(channel, hostname, result.left(), result.right());
+            }
+
+            if (error instanceof CompletionException) {
+                if (error.getCause() == null) {
+                    error.printStackTrace();
+                }
+                error = error.getCause();
             }
 
             if (error instanceof HandshakeResult) {
