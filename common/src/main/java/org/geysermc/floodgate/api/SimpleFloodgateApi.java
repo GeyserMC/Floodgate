@@ -41,6 +41,7 @@ import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.player.FloodgatePlayerImpl;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.pluginmessage.channel.FormChannel;
+import org.geysermc.floodgate.pluginmessage.channel.TransferChannel;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.HttpUtils;
 import org.geysermc.floodgate.util.Utils;
@@ -107,6 +108,13 @@ public class SimpleFloodgateApi implements FloodgateApi {
     @Override
     public boolean sendForm(UUID uuid, FormBuilder<?, ?> formBuilder) {
         return sendForm(uuid, formBuilder.build());
+    }
+
+    @Override
+    public boolean transferPlayer(UUID uuid, String address, int port) {
+        return pluginMessageManager
+                .getChannel(TransferChannel.class)
+                .sendTransfer(uuid, address, port);
     }
 
     @Override

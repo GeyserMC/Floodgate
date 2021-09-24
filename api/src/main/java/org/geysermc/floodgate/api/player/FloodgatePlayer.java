@@ -119,6 +119,10 @@ public interface FloodgatePlayer {
         return sendForm(formBuilder.build());
     }
 
+    default boolean transfer(String address, int port) {
+        return FloodgateApi.getInstance().transferPlayer(getCorrectUniqueId(), address, port);
+    }
+
     boolean hasProperty(PropertyKey key);
 
     boolean hasProperty(String key);

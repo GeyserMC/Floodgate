@@ -31,6 +31,7 @@ import com.google.inject.multibindings.ProvidesIntoSet;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
 import org.geysermc.floodgate.pluginmessage.channel.FormChannel;
 import org.geysermc.floodgate.pluginmessage.channel.SkinChannel;
+import org.geysermc.floodgate.pluginmessage.channel.TransferChannel;
 import org.geysermc.floodgate.register.PluginMessageRegister;
 
 public final class PluginMessageModule extends AbstractModule {
@@ -49,5 +50,11 @@ public final class PluginMessageModule extends AbstractModule {
     @ProvidesIntoSet
     public PluginMessageChannel skinChannel() {
         return new SkinChannel();
+    }
+
+    @Singleton
+    @ProvidesIntoSet
+    public PluginMessageChannel transferChannel() {
+        return new TransferChannel();
     }
 }
