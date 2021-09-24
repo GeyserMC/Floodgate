@@ -78,8 +78,6 @@ public class HttpUtils {
             connection.setRequestMethod("GET");
             connection.setUseCaches(false);
             connection.setRequestProperty("User-Agent", USER_AGENT);
-            connection.setConnectTimeout(3000);
-            connection.setReadTimeout(5000);
         } catch (Exception exception) {
             throw new RuntimeException("Failed to create request", exception);
         }
