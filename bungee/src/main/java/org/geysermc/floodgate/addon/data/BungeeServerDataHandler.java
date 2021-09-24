@@ -67,8 +67,7 @@ public class BungeeServerDataHandler extends ChannelOutboundHandlerAdapter {
     private final AttributeKey<FloodgatePlayer> playerAttribute;
 
     @Override
-    public void write(ChannelHandlerContext ctx, Object packet, ChannelPromise promise)
-            throws Exception {
+    public void write(ChannelHandlerContext ctx, Object packet, ChannelPromise promise) {
         if (packet instanceof Handshake) {
             // get the Proxy <-> Player channel from the Proxy <-> Server channel
             HandlerBoss handlerBoss = ctx.pipeline().get(HandlerBoss.class);

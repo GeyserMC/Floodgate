@@ -121,6 +121,8 @@ public class BungeeProxyDataHandler extends ChannelInboundHandlerAdapter {
                 channelWrapper.setRemoteAddress(newIp);
             }
 
+            packet.setHost(handshakeData.getHostname());
+
             if (handshakeData.getDisconnectReason() != null) {
                 ctx.channel().attr(kickMessageAttribute).set(handshakeData.getDisconnectReason());
                 return;
