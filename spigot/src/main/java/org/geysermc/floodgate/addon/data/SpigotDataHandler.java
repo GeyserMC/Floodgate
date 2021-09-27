@@ -109,10 +109,6 @@ public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
                         );
                         ctx.close();
                         return true;
-                    case TIMESTAMP_DENIED:
-                        logger.info(Constants.TIMESTAMP_DENIED_MESSAGE);
-                        ctx.close();
-                        return true;
                     default: // only continue when SUCCESS
                         return true;
                 }

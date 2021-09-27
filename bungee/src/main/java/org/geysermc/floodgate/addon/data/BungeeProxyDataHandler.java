@@ -141,10 +141,6 @@ public class BungeeProxyDataHandler extends ChannelInboundHandlerAdapter {
                     ctx.channel().attr(kickMessageAttribute)
                             .set(config.getDisconnect().getInvalidArgumentsLength());
                     break;
-                case TIMESTAMP_DENIED:
-                    ctx.channel().attr(kickMessageAttribute)
-                            .set(Constants.TIMESTAMP_DENIED_MESSAGE);
-                    break;
                 default:
                     break;
             }

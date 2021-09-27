@@ -141,10 +141,6 @@ public final class VelocityProxyDataHandler extends ChannelInboundHandlerAdapter
                     ctx.channel().attr(kickMessageAttribute)
                             .set(config.getDisconnect().getInvalidArgumentsLength());
                     return;
-                case TIMESTAMP_DENIED:
-                    ctx.channel().attr(kickMessageAttribute)
-                            .set(Constants.TIMESTAMP_DENIED_MESSAGE);
-                    return;
                 default: // only continue when SUCCESS
                     return;
             }

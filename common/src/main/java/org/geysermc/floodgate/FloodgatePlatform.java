@@ -104,7 +104,10 @@ public class FloodgatePlatform {
         guice = guice.createChildInjector(new ConfigLoadedModule(config));
         PlayerLink link = guice.getInstance(PlayerLinkLoader.class).load();
 
-        TimeSyncerHolder.init();
+        if (config.isProxy()) {
+            // We can't assume, for now, that the backend Floodgate instances are updated to remove this
+            TimeSyncerHolder.init();
+        }
 
         InstanceHolder.set(api, link, this.injector, packetHandlers, handshakeHandlers, KEY);
 
