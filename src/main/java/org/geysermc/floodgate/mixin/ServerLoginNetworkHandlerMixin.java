@@ -5,19 +5,15 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ServerLoginNetworkHandler.class)
 public abstract class ServerLoginNetworkHandlerMixin implements ServerLoginNetworkHandlerSetter {
     @Shadow
-    private GameProfile profile;
+    ServerLoginNetworkHandler.State state;
 
-    @Shadow
-    private ServerLoginNetworkHandler.State state;
-
-    @Override
-    public void setGameProfile(GameProfile profile) {
-        this.profile = profile;
-    }
+    @Accessor("profile")
+    public abstract void setGameProfile(GameProfile profile);
 
     @Override
     public void setLoginState() {

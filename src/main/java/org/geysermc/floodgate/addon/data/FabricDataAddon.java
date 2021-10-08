@@ -28,9 +28,12 @@ public final class FabricDataAddon implements InjectorAddon {
 
     @Override
     public void onInject(Channel channel, boolean toServer) {
+        PacketBlocker blocker = new PacketBlocker();
+        channel.pipeline().addBefore("decoder", "floodgate_packet_blocker", blocker);
+
         channel.pipeline().addBefore(
                 packetHandlerName, "floodgate_data_handler",
-                new FabricDataHandler(config, handshakeHandler, logger)
+                new FabricDataHandler(config, handshakeHandler, blocker, logger)
         );
     }
 

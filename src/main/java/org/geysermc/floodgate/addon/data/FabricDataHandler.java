@@ -1,5 +1,7 @@
 package org.geysermc.floodgate.addon.data;
 
+import com.google.common.collect.Queues;
+import org.geysermc.floodgate.mixin.ClientConnectionMixin;
 import org.geysermc.floodgate.mixin_interface.ServerLoginNetworkHandlerSetter;
 import com.mojang.authlib.GameProfile;
 import io.netty.channel.ChannelHandlerContext;
@@ -18,39 +20,59 @@ import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.Constants;
 
+import java.net.InetSocketAddress;
+import java.util.Queue;
+
 @RequiredArgsConstructor
 public final class FabricDataHandler extends ChannelInboundHandlerAdapter {
     private final FloodgateConfig config;
     private final FloodgateHandshakeHandler handshakeHandler;
+    private final PacketBlocker blocker;
     private final FloodgateLogger logger;
+
+    private final Queue<Object> packetQueue = Queues.newConcurrentLinkedQueue();
+
     private ClientConnection networkManager;
     private FloodgatePlayer player;
-    private boolean done;
+
+    /**
+     * As a variable so we can change it without reflection
+     */
+    HandshakeC2SPacket handshakePacket;
+    /**
+     * A boolean to compensate for the above
+     */
+    private boolean packetsBlocked;
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object packet) throws Exception {
-        ReferenceCountUtil.retain(packet);
-        if (done) {
-            super.channelRead(ctx, packet);
+    public void channelRead(ChannelHandlerContext ctx, Object packet) {
+        // prevent other packets from being handled while we handle the handshake packet
+        if (packetsBlocked) {
+            packetQueue.add(packet);
             return;
         }
 
-        boolean isHandshake = packet instanceof HandshakeC2SPacket;
-        boolean isLogin = packet instanceof LoginHelloC2SPacket;
-        try {
-            if (isHandshake) {
-                networkManager = (ClientConnection) ctx.channel().pipeline().get("packet_handler");
+        if (packet instanceof HandshakeC2SPacket handshakePacket) {
+            blocker.enable();
+            packetsBlocked = true;
+            this.handshakePacket = handshakePacket;
 
-                HandshakeC2SPacket handshakePacket = (HandshakeC2SPacket) packet;
-                FloodgateHandshakeHandler.HandshakeResult result = handshakeHandler.handle(ctx.channel(), handshakePacket.getAddress());
+            networkManager = (ClientConnection) ctx.channel().pipeline().get("packet_handler");
+
+            handshakeHandler.handle(ctx.channel(), handshakePacket.getAddress()).thenApply(result -> {
                 HandshakeData handshakeData = result.getHandshakeData();
 
-                packet = new HandshakeC2SPacket(handshakeData.getHostname(), handshakePacket.getPort(), handshakePacket.getIntendedState());
-                ReferenceCountUtil.retain(packet);
+                this.handshakePacket = new HandshakeC2SPacket(handshakeData.getHostname(),
+                        handshakePacket.getPort(), handshakePacket.getIntendedState());
+
+                InetSocketAddress newIp = result.getNewIp(ctx.channel());
+                if (newIp != null) {
+                    ((ClientConnectionMixin) networkManager).setAddress(newIp);
+                }
 
                 if (handshakeData.getDisconnectReason() != null) {
                     ctx.close(); //todo disconnect with message
-                    return;
+                    return true;
                 }
 
                 //todo use kickMessageAttribute and let this be common logic
@@ -59,9 +81,13 @@ public final class FabricDataHandler extends ChannelInboundHandlerAdapter {
                     case SUCCESS:
                         break;
                     case EXCEPTION:
+                        logger.info(Constants.INTERNAL_ERROR_MESSAGE);
+                        ctx.close();
+                        return true;
+                    case DECRYPT_ERROR:
                         logger.info(config.getDisconnect().getInvalidKey());
                         ctx.close();
-                        return;
+                        return true;
                     case INVALID_DATA_LENGTH:
                         int dataLength = result.getBedrockData().getDataLength();
                         logger.info(
@@ -69,43 +95,57 @@ public final class FabricDataHandler extends ChannelInboundHandlerAdapter {
                                 BedrockData.EXPECTED_LENGTH, dataLength
                         );
                         ctx.close();
-                        return;
-                    case TIMESTAMP_DENIED:
-                        logger.info(Constants.TIMESTAMP_DENIED_MESSAGE);
-                        ctx.close();
-                        return;
+                        return true;
                     default: // only continue when SUCCESS
-                        return;
+                        return true;
                 }
 
                 player = result.getFloodgatePlayer();
-            } else if (isLogin) {
-                // we have to fake the offline player (login) cycle
-                if (!(networkManager.getPacketListener() instanceof ServerLoginNetworkHandler)) {
-                    // player is not in the login state, abort
-                    return;
+                return player == null;
+            }).thenAccept(shouldRemove -> {
+                ctx.fireChannelRead(this.handshakePacket);
+                Object queuedPacket;
+                while ((queuedPacket = packetQueue.poll()) != null) {
+                    if (checkLogin(ctx, packet)) {
+                        break;
+                    }
+                    ctx.fireChannelRead(queuedPacket);
                 }
 
-                GameProfile gameProfile = new GameProfile(player.getCorrectUniqueId(), player.getCorrectUsername());
+                if (shouldRemove) {
+                    ctx.pipeline().remove(FabricDataHandler.this);
+                }
+                blocker.disable();
+                packetsBlocked = false;
+            });
+            return;
+        }
 
-                ((ServerLoginNetworkHandlerSetter) networkManager.getPacketListener()).setGameProfile(gameProfile);
-                ((ServerLoginNetworkHandlerSetter) networkManager.getPacketListener()).setLoginState();
-            }
-        } finally {
-            // don't let the packet through if the packet is the login packet
-            // because we want to skip the login cycle
-            if (isLogin) {
-                ReferenceCountUtil.release(packet, 2);
-            } else {
-                ctx.fireChannelRead(packet);
-            }
-
-            if (isLogin || player == null) {
-                // we're done, we'll just wait for the loginSuccessCall
-                done = true;
-            }
+        if (!checkLogin(ctx, packet)) {
+            ctx.fireChannelRead(packet);
         }
     }
+
+    private boolean checkLogin(ChannelHandlerContext ctx, Object packet) {
+        if (packet instanceof LoginHelloC2SPacket) {
+            // we have to fake the offline player (login) cycle
+            if (!(networkManager.getPacketListener() instanceof ServerLoginNetworkHandler)) {
+                // player is not in the login state, abort
+                ctx.pipeline().remove(this);
+                return true;
+            }
+
+            GameProfile gameProfile = new GameProfile(player.getCorrectUniqueId(), player.getCorrectUsername());
+
+            ((ServerLoginNetworkHandlerSetter) networkManager.getPacketListener()).setGameProfile(gameProfile);
+            ((ServerLoginNetworkHandlerSetter) networkManager.getPacketListener()).setLoginState();
+
+            ctx.pipeline().remove(this);
+            return true;
+        }
+        return false;
+    }
+
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {

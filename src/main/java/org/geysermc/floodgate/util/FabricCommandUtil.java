@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.kyori.adventure.platform.fabric.FabricServerAudiences;
+import net.kyori.adventure.platform.fabric.PlayerLocales;
 import net.kyori.adventure.platform.fabric.impl.accessor.ConnectionAccess;
 import net.kyori.adventure.platform.fabric.impl.server.FriendlyByteBufBridge;
 import net.minecraft.entity.Entity;
@@ -71,14 +72,8 @@ public final class FabricCommandUtil implements CommandUtil {
     }
 
     private FabricUserAudience getAudience0(ServerPlayerEntity player) {
-        // Marked as internal??? Should probably find a better way to get this.
-        Locale locale;
-        Channel channel = ((ConnectionAccess) player.networkHandler.getConnection()).getChannel();
-        if (channel != null) {
-            locale = channel.attr(FriendlyByteBufBridge.CHANNEL_LOCALE).get();
-        } else {
-            locale = null;
-        }
+        // Apparently can be null even if Javadocs say otherwise
+        Locale locale = PlayerLocales.locale(player);
         return new FabricUserAudience.NamedFabricUserAudience(
                 player.getName().asString(),
                 player.getUuid(), locale != null ?
@@ -191,7 +186,7 @@ public final class FabricCommandUtil implements CommandUtil {
         return true;
     }
 
-    protected ServerPlayerEntity getPlayer(Object instance) {
+    private ServerPlayerEntity getPlayer(Object instance) {
         try {
             ServerCommandSource source = (ServerCommandSource) instance;
             return source.getPlayer();
