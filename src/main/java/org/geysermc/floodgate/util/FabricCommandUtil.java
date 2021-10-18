@@ -2,14 +2,11 @@ package org.geysermc.floodgate.util;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import io.netty.channel.Channel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.kyori.adventure.platform.fabric.PlayerLocales;
-import net.kyori.adventure.platform.fabric.impl.accessor.ConnectionAccess;
-import net.kyori.adventure.platform.fabric.impl.server.FriendlyByteBufBridge;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.WhitelistEntry;
@@ -173,15 +170,15 @@ public final class FabricCommandUtil implements CommandUtil {
     }
 
     @Override
-    public boolean whitelistPlayer(String xuid, String username) {
-        GameProfile profile = new GameProfile(Utils.getJavaUuid(xuid), username);
+    public boolean whitelistPlayer(UUID uuid, String username) {
+        GameProfile profile = new GameProfile(uuid, username);
         SERVER.getPlayerManager().getWhitelist().add(new WhitelistEntry(profile));
         return true;
     }
 
     @Override
-    public boolean removePlayerFromWhitelist(String xuid, String username) {
-        GameProfile profile = new GameProfile(Utils.getJavaUuid(xuid), username);
+    public boolean removePlayerFromWhitelist(UUID uuid, String username) {
+        GameProfile profile = new GameProfile(uuid, username);
         SERVER.getPlayerManager().getWhitelist().remove(profile);
         return true;
     }
