@@ -107,7 +107,7 @@ public final class SpigotCommandUtil implements CommandUtil {
 
     @Override
     public @NonNull Collection<String> getOnlineUsernames(@NonNull PlayerType limitTo) {
-        Collection<Player> players = (Collection<Player>) server.getOnlinePlayers();
+        Collection<? extends Player> players = server.getOnlinePlayers();
 
         Collection<String> usernames = new ArrayList<>();
         switch (limitTo) {
@@ -170,13 +170,13 @@ public final class SpigotCommandUtil implements CommandUtil {
     }
 
     @Override
-    public boolean whitelistPlayer(String xuid, String username) {
-        return WhitelistUtils.addPlayer(xuid, username);
+    public boolean whitelistPlayer(UUID uuid, String username) {
+        return WhitelistUtils.addPlayer(uuid, username);
     }
 
     @Override
-    public boolean removePlayerFromWhitelist(String xuid, String username) {
-        return WhitelistUtils.removePlayer(xuid, username);
+    public boolean removePlayerFromWhitelist(UUID uuid, String username) {
+        return WhitelistUtils.removePlayer(uuid, username);
     }
 
     public String translateAndTransform(String locale, TranslatableMessage message, Object... args) {
@@ -184,7 +184,7 @@ public final class SpigotCommandUtil implements CommandUtil {
         return message.translateMessage(manager, locale, args);
     }
 
-    protected Player cast(Object instance) {
+    private Player cast(Object instance) {
         try {
             return (Player) instance;
         } catch (ClassCastException exception) {

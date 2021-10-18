@@ -34,21 +34,23 @@ import static org.geysermc.floodgate.util.ClassNames.REMOVE_WHITELIST_ENTRY;
 import static org.geysermc.floodgate.util.ClassNames.WHITELIST_ENTRY;
 
 import com.mojang.authlib.GameProfile;
+import java.util.UUID;
 import org.bukkit.Bukkit;
 
 @SuppressWarnings("ConstantConditions")
 public final class WhitelistUtils {
+
     /**
      * Whitelist the given Bedrock player.
      *
-     * @param xuid     the xuid of the Bedrock player to be whitelisted
+     * @param uuid     the UUID of the Bedrock player to be whitelisted
      * @param username the username of the Bedrock player to be whitelisted
      * @return true if the player has been whitelisted, false if the player is already whitelisted
      */
-    public static boolean addPlayer(String xuid, String username) {
+    public static boolean addPlayer(UUID uuid, String username) {
         Object whitelist = getWhitelist();
 
-        GameProfile profile = new GameProfile(Utils.getJavaUuid(xuid), username);
+        GameProfile profile = new GameProfile(uuid, username);
 
         if (ReflectionUtils.castedInvoke(whitelist, IS_WHITELISTED, profile)) {
             return false;
@@ -63,15 +65,15 @@ public final class WhitelistUtils {
     /**
      * Removes the given Bedrock player from the whitelist.
      *
-     * @param xuid     the xuid of the Bedrock player to be removed
+     * @param uuid     the UUID of the Bedrock player to be removed
      * @param username the username of the Bedrock player to be removed
      * @return true if the player has been removed from the whitelist, false if the player wasn't
      * whitelisted
      */
-    public static boolean removePlayer(String xuid, String username) {
+    public static boolean removePlayer(UUID uuid, String username) {
         Object whitelist = getWhitelist();
 
-        GameProfile profile = new GameProfile(Utils.getJavaUuid(xuid), username);
+        GameProfile profile = new GameProfile(uuid, username);
 
         if (!(boolean) ReflectionUtils.castedInvoke(whitelist, IS_WHITELISTED, profile)) {
             return false;

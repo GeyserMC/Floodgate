@@ -34,7 +34,9 @@ import cloud.commandframework.context.CommandContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
+import java.util.UUID;
 import lombok.Getter;
+import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
@@ -43,6 +45,7 @@ import org.geysermc.floodgate.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.player.UserAudienceArgument;
+import org.geysermc.floodgate.player.UserAudienceArgument.PlayerType;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.HttpUtils;
 import org.geysermc.floodgate.util.Permissions;
@@ -59,12 +62,12 @@ public class WhitelistCommand implements FloodgateCommand {
 
         commandManager.command(builder
                 .literal("add", "a")
-                .argument(UserAudienceArgument.of("player", true))
+                .argument(UserAudienceArgument.of("player", true, true, PlayerType.ONLY_BEDROCK))
                 .handler(context -> performCommand(context, true)));
 
         return builder
                 .literal("remove", "r")
-                .argument(UserAudienceArgument.of("player", true))
+                .argument(UserAudienceArgument.of("player", true, true, PlayerType.ONLY_BEDROCK))
                 .handler(context -> performCommand(context, false))
                 .build();
     }
@@ -72,7 +75,38 @@ public class WhitelistCommand implements FloodgateCommand {
     public void performCommand(CommandContext<UserAudience> context, boolean add) {
         UserAudience sender = context.getSender();
         UserAudience player = context.get("player");
+        UUID uuid = player.uuid();
         String name = player.username();
+
+        if (name == null && uuid == null) {
+            sender.sendMessage(Message.UNEXPECTED_ERROR);
+            return;
+        }
+
+        if (uuid != null) {
+            if (!FloodgateApi.getInstance().isFloodgateId(uuid)) {
+                sender.sendMessage(Message.INVALID_USERNAME);
+                return;
+            }
+
+            CommandUtil commandUtil = context.get("CommandUtil");
+
+            if (add) {
+                if (commandUtil.whitelistPlayer(uuid, "unknown")) {
+                    sender.sendMessage(Message.PLAYER_ADDED, uuid.toString());
+                } else {
+                    sender.sendMessage(Message.PLAYER_ALREADY_WHITELISTED,
+                            uuid.toString());
+                }
+            } else {
+                if (commandUtil.removePlayerFromWhitelist(uuid, "unknown")) {
+                    sender.sendMessage(Message.PLAYER_REMOVED, uuid.toString());
+                } else {
+                    sender.sendMessage(Message.PLAYER_NOT_WHITELISTED, uuid.toString());
+                }
+            }
+            return;
+        }
 
         if (name.startsWith(config.getUsernamePrefix())) {
             name = name.substring(config.getUsernamePrefix().length());
@@ -92,6 +126,7 @@ public class WhitelistCommand implements FloodgateCommand {
         final String correctName = config.getUsernamePrefix() + tempName;
         final String strippedName = name;
 
+        // We need to get the UUID of the player if it's not manually specified
         HttpUtils.asyncGet(Constants.GET_XUID_URL + name)
                 .whenComplete((result, error) -> {
                     if (error != null) {
