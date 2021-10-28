@@ -47,7 +47,7 @@ import org.geysermc.floodgate.link.PlayerLinkLoader;
 import org.geysermc.floodgate.module.ConfigLoadedModule;
 import org.geysermc.floodgate.module.PostInitializeModule;
 import org.geysermc.floodgate.news.NewsChecker;
-import org.geysermc.floodgate.util.FloodgateInfoHolder;
+import org.geysermc.floodgate.util.GeyserDumpUtils;
 import org.geysermc.floodgate.util.GitProperties;
 import org.geysermc.floodgate.util.PrefixCheckTask;
 import org.geysermc.floodgate.util.TimeSyncerHolder;
@@ -112,7 +112,7 @@ public class FloodgatePlatform {
         InstanceHolder.set(api, link, this.injector, packetHandlers, handshakeHandlers, KEY);
 
         // for Geyser dump
-        FloodgateInfoHolder.setGitProperties(properties.getProperties());
+        GeyserDumpUtils.setGitProperties(properties.getProperties());
 
         guice.getInstance(NewsChecker.class).start();
     }

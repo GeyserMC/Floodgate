@@ -25,7 +25,7 @@
 
 package org.geysermc.floodgate.config;
 
-import org.geysermc.floodgate.util.FloodgateInfoHolder;
+import org.geysermc.floodgate.util.GeyserDumpUtils;
 
 public class FloodgateConfigHolder {
     private FloodgateConfig config;
@@ -54,6 +54,6 @@ public class FloodgateConfigHolder {
     public void set(FloodgateConfig config) {
         this.config = config;
         // for Geyser dump
-        FloodgateInfoHolder.setConfig(config);
+        GeyserDumpUtils.setConfig(config);
     }
 }
