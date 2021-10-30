@@ -23,37 +23,19 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.config;
+package org.geysermc.floodgate.util;
 
-import org.geysermc.floodgate.util.GeyserDumpInfoHolder;
+import java.util.Properties;
 
-public class FloodgateConfigHolder {
-    private FloodgateConfig config;
+/**
+ * Simple holder for the reflection that Geyser uses to fetch floodgate information
+ * to be added to Geyser's dumps
+ */
+public final class GeyserDumpInfoHolder {
 
-    public boolean has() {
-        return config != null;
-    }
+    // If this class or its fields are changed, changes must also be made in
+    // org.geysermc.connector.dump.FloodgateInfo
 
-    public boolean isProxy() {
-        return config instanceof ProxyFloodgateConfig;
-    }
-
-    public FloodgateConfig get() {
-        return config;
-    }
-
-    public ProxyFloodgateConfig getAsProxy() {
-        return getAs();
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T extends FloodgateConfig> T getAs() {
-        return (T) config;
-    }
-
-    public void set(FloodgateConfig config) {
-        this.config = config;
-        // for Geyser dump
-        GeyserDumpInfoHolder.config = config;
-    }
+    public static Object config;
+    public static Properties gitProperties;
 }
