@@ -136,18 +136,16 @@ public class WhitelistCommand implements FloodgateCommand {
                     }
 
                     JsonObject response = result.getResponse();
-                    boolean success = response.get("success").getAsBoolean();
 
-                    if (!success) {
+                    if (!result.isCodeOk()) {
                         sender.sendMessage(Message.UNEXPECTED_ERROR);
                         logger.error(
                                 "Got an error from requesting the xuid of a Bedrock player: {}",
-                                response.get("message").getAsString());
-                        return;
+                                response.get("message").getAsString()
+                        );
                     }
 
-                    JsonObject data = response.getAsJsonObject("data");
-                    JsonElement xuidElement = data.get("xuid");
+                    JsonElement xuidElement = response.get("xuid");
 
                     if (xuidElement == null) {
                         sender.sendMessage(Message.USER_NOT_FOUND);
@@ -175,7 +173,8 @@ public class WhitelistCommand implements FloodgateCommand {
                     } catch (Exception exception) {
                         logger.error(
                                 "An unexpected error happened while executing the whitelist command",
-                                exception);
+                                exception
+                        );
                     }
                 });
     }

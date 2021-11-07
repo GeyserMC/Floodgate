@@ -26,6 +26,7 @@
 package org.geysermc.floodgate.api;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.Collection;
 import java.util.HashMap;
@@ -126,18 +127,13 @@ public class SimpleFloodgateApi implements FloodgateApi {
         return HttpUtils.asyncGet(Constants.GET_XUID_URL + gamertag)
                 .thenApply(result -> {
                     JsonObject response = result.getResponse();
-                    boolean success = response.get("success").getAsBoolean();
 
-                    if (!success) {
+                    if (!result.isCodeOk()) {
                         throw new IllegalStateException(response.get("message").getAsString());
                     }
 
-                    JsonObject data = response.getAsJsonObject("data");
-                    if (data.size() == 0) {
-                        return null;
-                    }
-
-                    return data.get("xuid").getAsLong();
+                    JsonElement xuid = response.get("xuid");
+                    return xuid != null ? xuid.getAsLong() : null;
                 });
     }
 
@@ -146,18 +142,13 @@ public class SimpleFloodgateApi implements FloodgateApi {
         return HttpUtils.asyncGet(Constants.GET_GAMERTAG_URL + xuid)
                 .thenApply(result -> {
                     JsonObject response = result.getResponse();
-                    boolean success = response.get("success").getAsBoolean();
 
-                    if (!success) {
+                    if (!result.isCodeOk()) {
                         throw new IllegalStateException(response.get("message").getAsString());
                     }
 
-                    JsonObject data = response.getAsJsonObject("data");
-                    if (data.size() == 0) {
-                        return null;
-                    }
-
-                    return data.get("gamertag").getAsString();
+                    JsonElement gamertag = response.get("gamertag");
+                    return gamertag != null ? gamertag.getAsString() : null;
                 });
     }
 
