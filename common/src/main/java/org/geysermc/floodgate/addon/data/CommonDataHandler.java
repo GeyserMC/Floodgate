@@ -66,6 +66,7 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
     }
 
     protected void handle(Object handshakePacket, String hostname) {
+        this.handshakePacket = handshakePacket;
         Pair<String, String> separated = handshakeHandler.separateHostname(hostname);
 
         if (separated.left() == null) {
@@ -75,7 +76,6 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
         }
 
         blocker.enable();
-        this.handshakePacket = handshakePacket;
 
         Channel channel = ctx.channel();
 
