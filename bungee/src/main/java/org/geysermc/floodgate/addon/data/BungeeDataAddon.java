@@ -79,7 +79,7 @@ public class BungeeDataAddon implements InjectorAddon {
 
         channel.pipeline().addBefore(
                 packetHandler, "floodgate_data_handler",
-                new BungeeProxyDataHandler(config, handshakeHandler, blocker, kickMessageAttribute)
+                new BungeeProxyDataHandler(handshakeHandler, config, kickMessageAttribute, blocker)
         );
     }
 

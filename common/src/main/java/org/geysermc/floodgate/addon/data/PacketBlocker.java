@@ -63,6 +63,10 @@ public class PacketBlocker extends ChannelInboundHandlerAdapter {
         ctx.pipeline().remove(this);
     }
 
+    public boolean enabled() {
+        return blockPackets;
+    }
+
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         if (blockPackets || !packetQueue.isEmpty()) {

@@ -33,6 +33,7 @@ import static org.geysermc.floodgate.util.ReflectionUtils.makeAccessible;
 
 import com.google.common.base.Preconditions;
 import com.mojang.authlib.GameProfile;
+import io.netty.channel.ChannelHandlerContext;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -65,6 +66,8 @@ public class ClassNames {
     public static final Method IS_WHITELISTED;
     public static final Method ADD_WHITELIST_ENTRY;
     public static final Method REMOVE_WHITELIST_ENTRY;
+    public static final Method LOGIN_DISCONNECT;
+    public static final Method NETWORK_EXCEPTION_CAUGHT;
     public static final Method INIT_UUID;
     public static final Method FIRE_LOGIN_EVENTS;
 
@@ -165,6 +168,15 @@ public class ClassNames {
 
         LOGIN_PROFILE = getFieldOfType(LOGIN_LISTENER, GameProfile.class);
         checkNotNull(LOGIN_PROFILE, "Profile from LoginListener");
+
+        LOGIN_DISCONNECT = getMethod(LOGIN_LISTENER, "disconnect", String.class);
+        checkNotNull(LOGIN_DISCONNECT, "LoginListener's disconnect method");
+
+        NETWORK_EXCEPTION_CAUGHT = getMethod(
+                networkManager,
+                "exceptionCaught",
+                ChannelHandlerContext.class, Throwable.class
+        );
 
         // there are multiple no-arg void methods
         INIT_UUID = getMethod(LOGIN_LISTENER, "initUUID");
