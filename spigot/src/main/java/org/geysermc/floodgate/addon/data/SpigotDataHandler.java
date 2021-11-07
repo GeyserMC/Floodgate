@@ -57,8 +57,9 @@ public final class SpigotDataHandler extends CommonDataHandler {
     }
 
     @Override
-    protected void setHostname(Object handshakePacket, String hostname) {
+    protected Object setHostname(Object handshakePacket, String hostname) {
         setValue(handshakePacket, ClassNames.HANDSHAKE_HOST, hostname);
+        return handshakePacket;
     }
 
     @Override

@@ -74,10 +74,11 @@ public class BungeeProxyDataHandler extends CommonDataHandler {
     }
 
     @Override
-    protected void setHostname(Object wrapperWithHandshake, String hostname) {
+    protected Object setHostname(Object wrapperWithHandshake, String hostname) {
         PacketWrapper wrapper = (PacketWrapper) wrapperWithHandshake;
         Handshake handshake = (Handshake) wrapper.packet;
         handshake.setHost(hostname);
+        return wrapper;
     }
 
     @Override

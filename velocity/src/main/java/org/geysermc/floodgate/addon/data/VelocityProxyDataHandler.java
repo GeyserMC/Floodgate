@@ -83,8 +83,9 @@ public final class VelocityProxyDataHandler extends CommonDataHandler {
     }
 
     @Override
-    protected void setHostname(Object handshakePacket, String hostname) {
+    protected Object setHostname(Object handshakePacket, String hostname) {
         setValue(handshakePacket, HANDSHAKE_SERVER_ADDRESS, hostname);
+        return handshakePacket;
     }
 
     @Override

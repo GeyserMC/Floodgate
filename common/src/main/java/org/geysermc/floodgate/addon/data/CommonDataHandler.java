@@ -48,11 +48,12 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
     protected final PacketBlocker blocker;
 
     protected final Queue<Object> packetQueue = Queues.newConcurrentLinkedQueue();
+    protected Object handshakePacket;
     protected ChannelHandlerContext ctx;
 
     protected abstract void setNewIp(Channel channel, InetSocketAddress newIp);
 
-    protected abstract void setHostname(Object handshakePacket, String hostname);
+    protected abstract Object setHostname(Object handshakePacket, String hostname);
 
     protected abstract boolean channelRead(Object packet) throws Exception;
 
@@ -68,13 +69,13 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
         Pair<String, String> separated = handshakeHandler.separateHostname(hostname);
 
         if (separated.left() == null) {
-            // not a Floodgate player
-            removeSelf();
+            // not a Floodgate player, make sure to resend the cancelled handshake packet
+            disablePacketQueue(true);
             return;
         }
 
         blocker.enable();
-        packetQueue.add(handshakePacket);
+        this.handshakePacket = handshakePacket;
 
         Channel channel = ctx.channel();
 
@@ -90,7 +91,7 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
                         setNewIp(channel, newIp);
                     }
 
-                    setHostname(handshakePacket, handshakeData.getHostname());
+                    this.handshakePacket = setHostname(handshakePacket, handshakeData.getHostname());
 
                     if (handshakeData.shouldDisconnect()) {
                         setKickMessage(handshakeData.getDisconnectReason());
@@ -121,6 +122,10 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
     }
 
     protected void disablePacketQueue(boolean removeSelf) {
+        if (handshakePacket != null && shouldCallFireRead(handshakePacket)) {
+            ctx.fireChannelRead(handshakePacket);
+        }
+
         Object queuedPacket;
         while ((queuedPacket = packetQueue.poll()) != null) {
             if (shouldCallFireRead(queuedPacket)) {
