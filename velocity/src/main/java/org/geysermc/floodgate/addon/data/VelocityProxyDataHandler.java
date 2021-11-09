@@ -95,7 +95,7 @@ public final class VelocityProxyDataHandler extends CommonDataHandler {
             logger.info("Floodgate player who is logged in as {} {} joined",
                     player.getCorrectUsername(), player.getCorrectUniqueId());
         }
-        return true;
+        return super.shouldRemoveHandler(result);
     }
 
     @Override

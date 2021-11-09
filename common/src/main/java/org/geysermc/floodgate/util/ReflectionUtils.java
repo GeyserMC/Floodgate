@@ -59,6 +59,15 @@ public final class ReflectionUtils {
         return getClass(prefix + "." + className);
     }
 
+    @Nullable
+    public static Class<?> getPrefixedClassSilently(String className) {
+        try {
+            return Class.forName(prefix + "." + className);
+        } catch (ClassNotFoundException ignored) {
+            return null;
+        }
+    }
+
     /**
      * Get the class from a class name. Calling this method is equal to calling {@link
      * Class#forName(String)} where String is the class name.<br> This method will return null when
@@ -485,7 +494,9 @@ public final class ReflectionUtils {
      * @return the accessibleObject
      */
     public static <T extends AccessibleObject> T makeAccessible(T accessibleObject) {
-        accessibleObject.setAccessible(true);
+        if (!accessibleObject.isAccessible()) {
+            accessibleObject.setAccessible(true);
+        }
         return accessibleObject;
     }
 }
