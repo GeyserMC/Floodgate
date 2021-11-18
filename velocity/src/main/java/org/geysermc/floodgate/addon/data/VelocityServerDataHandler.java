@@ -119,7 +119,7 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
                 int addressFinished = address.indexOf('\0');
                 String originalAddress;
                 String remaining;
-                if (isModernForwarding && addressFinished == -1) {
+                if (isModernForwarding || addressFinished == -1) {
                     // There is no additional data to hook onto
                     originalAddress = address;
                     remaining = "";
