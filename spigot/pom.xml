@@ -119,6 +119,10 @@
             <configuration>
               <relocations>
                 <relocation>
+                  <pattern>com.google.inject</pattern>
+                  <shadedPattern>org.geysermc.floodgate.shaded.com.google.inject</shadedPattern>
+                </relocation>
+                <relocation>
                   <pattern>net.kyori</pattern>
                   <shadedPattern>org.geysermc.floodgate.shaded.net.kyori</shadedPattern>
                 </relocation>
