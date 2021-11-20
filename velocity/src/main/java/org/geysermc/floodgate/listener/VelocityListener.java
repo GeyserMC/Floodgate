@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.listener;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.geysermc.floodgate.util.ReflectionUtils.getCastedValue;
 import static org.geysermc.floodgate.util.ReflectionUtils.getField;
 import static org.geysermc.floodgate.util.ReflectionUtils.getFieldOfType;
@@ -55,12 +56,14 @@ import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.util.LanguageManager;
+import org.geysermc.floodgate.util.ReflectionUtils;
 import org.geysermc.floodgate.util.VelocityCommandUtil;
 
 public final class VelocityListener {
     private static final Field INITIAL_MINECRAFT_CONNECTION;
     private static final Field INITIAL_CONNECTION_DELEGATE;
     private static final Field CHANNEL;
+    private static final Field PLAYER_NAME;
 
     static {
         Class<?> initialConnection = getPrefixedClass("connection.client.InitialInboundConnection");
@@ -81,6 +84,9 @@ public final class VelocityListener {
         }
 
         CHANNEL = getFieldOfType(minecraftConnection, Channel.class);
+
+        PLAYER_NAME = ReflectionUtils.getField(PreLoginEvent.class, "username");
+        checkNotNull(PLAYER_NAME, "PreLoginEvent username field cannot be null");
     }
 
     private final Cache<InboundConnection, FloodgatePlayer> playerCache =
@@ -133,6 +139,7 @@ public final class VelocityListener {
         if (player != null) {
             event.setResult(PreLoginEvent.PreLoginComponentResult.forceOfflineMode());
             playerCache.put(event.getConnection(), player);
+            ReflectionUtils.setValue(event, PLAYER_NAME, player.getCorrectUsername());
         }
     }
 
