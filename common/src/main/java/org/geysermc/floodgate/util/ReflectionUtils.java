@@ -87,6 +87,12 @@ public final class ReflectionUtils {
         }
     }
 
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public static <T> Class<T> getCastedClass(String className) {
+        return (Class<T>) getClass(className);
+    }
+
     public static Class<?> getClassSilently(String className) {
         try {
             return Class.forName(className);
@@ -104,16 +110,23 @@ public final class ReflectionUtils {
     }
 
     @Nullable
-    public static Constructor<?> getConstructor(Class<?> clazz, Class<?>... parameters) {
+    public static <T> Constructor<T> getConstructor(Class<T> clazz, boolean declared, Class<?>... parameters) {
         try {
-            return clazz.getConstructor(parameters);
+            Constructor<T> constructor;
+            if (declared) {
+                constructor = clazz.getDeclaredConstructor(parameters);
+            } else {
+                constructor = clazz.getConstructor(parameters);
+            }
+            makeAccessible(constructor);
+            return constructor;
         } catch (NoSuchMethodException e) {
             return null;
         }
     }
 
     @Nullable
-    public static Object newInstance(Constructor<?> constructor, Object... parameters) {
+    public static <T> T newInstance(Constructor<T> constructor, Object... parameters) {
         try {
             return constructor.newInstance(parameters);
         } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {

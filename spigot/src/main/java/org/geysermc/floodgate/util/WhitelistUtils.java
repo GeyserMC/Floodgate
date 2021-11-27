@@ -25,17 +25,10 @@
 
 package org.geysermc.floodgate.util;
 
-import static org.geysermc.floodgate.util.ClassNames.ADD_WHITELIST_ENTRY;
-import static org.geysermc.floodgate.util.ClassNames.GET_PLAYER_LIST;
-import static org.geysermc.floodgate.util.ClassNames.GET_SERVER;
-import static org.geysermc.floodgate.util.ClassNames.GET_WHITELIST;
-import static org.geysermc.floodgate.util.ClassNames.IS_WHITELISTED;
-import static org.geysermc.floodgate.util.ClassNames.REMOVE_WHITELIST_ENTRY;
-import static org.geysermc.floodgate.util.ClassNames.WHITELIST_ENTRY;
-
 import com.mojang.authlib.GameProfile;
 import java.util.UUID;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 
 @SuppressWarnings("ConstantConditions")
 public final class WhitelistUtils {
@@ -48,17 +41,16 @@ public final class WhitelistUtils {
      * @return true if the player has been whitelisted, false if the player is already whitelisted
      */
     public static boolean addPlayer(UUID uuid, String username) {
-        Object whitelist = getWhitelist();
-
         GameProfile profile = new GameProfile(uuid, username);
 
-        if (ReflectionUtils.castedInvoke(whitelist, IS_WHITELISTED, profile)) {
+        OfflinePlayer player = ReflectionUtils.newInstance(
+                ClassNames.CRAFT_OFFLINE_PLAYER_CONSTRUCTOR,
+                Bukkit.getServer(), profile
+        );
+        if (player.isWhitelisted()) {
             return false;
         }
-
-        Object entry = ReflectionUtils.newInstance(WHITELIST_ENTRY, profile);
-
-        ReflectionUtils.invoke(whitelist, ADD_WHITELIST_ENTRY, entry);
+        player.setWhitelisted(true);
         return true;
     }
 
@@ -71,21 +63,16 @@ public final class WhitelistUtils {
      * whitelisted
      */
     public static boolean removePlayer(UUID uuid, String username) {
-        Object whitelist = getWhitelist();
-
         GameProfile profile = new GameProfile(uuid, username);
 
-        if (!(boolean) ReflectionUtils.castedInvoke(whitelist, IS_WHITELISTED, profile)) {
+        OfflinePlayer player = ReflectionUtils.newInstance(
+                ClassNames.CRAFT_OFFLINE_PLAYER_CONSTRUCTOR,
+                Bukkit.getServer(), profile
+        );
+        if (!player.isWhitelisted()) {
             return false;
         }
-
-        ReflectionUtils.invoke(whitelist, REMOVE_WHITELIST_ENTRY, profile);
+        player.setWhitelisted(false);
         return true;
-    }
-
-    private static Object getWhitelist() {
-        Object minecraftServer = ReflectionUtils.invoke(Bukkit.getServer(), GET_SERVER);
-        Object playerList = ReflectionUtils.invoke(minecraftServer, GET_PLAYER_LIST);
-        return ReflectionUtils.invoke(playerList, GET_WHITELIST);
     }
 }
