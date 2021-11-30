@@ -78,7 +78,10 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
 
         if (separation.headerVersion() != FloodgateCipher.VERSION) {
             disablePacketQueue(true);
-            setKickMessage(Constants.UNSUPPORTED_DATA_VERSION);
+            setKickMessage(String.format(
+                    Constants.UNSUPPORTED_DATA_VERSION,
+                    FloodgateCipher.VERSION, separation.headerVersion()
+            ));
             return;
         }
 
