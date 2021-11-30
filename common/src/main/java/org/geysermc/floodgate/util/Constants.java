@@ -52,6 +52,10 @@ public final class Constants {
     public static final String INTERNAL_ERROR_MESSAGE =
             "An internal error happened while handling Floodgate data." + 
             " Try logging in again or contact a server administrator if the issue persists.";
+    public static final String UNSUPPORTED_DATA_VERSION =
+            "Received an unsupported Floodgate data version." +
+            " This Floodgate version is made for data version %s, received %s." +
+            " Make sure that Floodgate is up-to-date.";
 
 
     public static final int HANDSHAKE_PACKET_ID = 0;

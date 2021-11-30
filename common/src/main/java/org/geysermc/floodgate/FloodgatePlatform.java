@@ -50,7 +50,6 @@ import org.geysermc.floodgate.news.NewsChecker;
 import org.geysermc.floodgate.util.FloodgateInfoHolder;
 import org.geysermc.floodgate.util.GitProperties;
 import org.geysermc.floodgate.util.PrefixCheckTask;
-import org.geysermc.floodgate.util.TimeSyncerHolder;
 
 public class FloodgatePlatform {
     private static final UUID KEY = UUID.randomUUID();
@@ -103,11 +102,6 @@ public class FloodgatePlatform {
         configHolder.set(config);
         guice = guice.createChildInjector(new ConfigLoadedModule(config));
         PlayerLink link = guice.getInstance(PlayerLinkLoader.class).load();
-
-        if (config.isProxy()) {
-            // We can't assume, for now, that the backend Floodgate instances are updated to remove this
-            TimeSyncerHolder.init();
-        }
 
         InstanceHolder.set(api, link, this.injector, packetHandlers, handshakeHandlers, KEY);
 

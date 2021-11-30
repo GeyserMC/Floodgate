@@ -23,22 +23,29 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.util;
+package org.geysermc.floodgate.player;
 
-import org.geysermc.floodgate.time.TimeSyncer;
+public class HostnameSeparationResult {
+    private final String floodgateData;
+    private final int headerVersion;
+    private final String hostnameRemainder;
 
-public final class TimeSyncerHolder {
-    private static TimeSyncer timeSyncer;
-
-    public static void init() {
-        timeSyncer = new TimeSyncer(Constants.NTP_SERVER);
+    public HostnameSeparationResult(
+            String floodgateData, int headerVersion, String hostnameRemainder) {
+        this.floodgateData = floodgateData;
+        this.headerVersion = headerVersion;
+        this.hostnameRemainder = hostnameRemainder;
     }
 
-    public static void set(TimeSyncer syncer) {
-        timeSyncer = syncer;
+    public String floodgateData() {
+        return floodgateData;
     }
 
-    public static TimeSyncer get() {
-        return timeSyncer;
+    public int headerVersion() {
+        return headerVersion;
+    }
+
+    public String hostnameRemainder() {
+        return hostnameRemainder;
     }
 }

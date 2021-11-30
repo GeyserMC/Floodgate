@@ -95,7 +95,7 @@ final class SkinUploadSocket extends WebSocketClient {
         }
 
         int typeId = message.get("event_id").getAsInt();
-        WebsocketEventType type = WebsocketEventType.getById(typeId);
+        WebsocketEventType type = WebsocketEventType.fromId(typeId);
         if (type == null) {
             logger.warn("Got unknown type {}. Ensure that Floodgate is up-to-date", typeId);
             return;

@@ -25,7 +25,6 @@
 
 package org.geysermc.floodgate.command.main;
 
-import static org.geysermc.floodgate.time.SntpClientUtils.requestTimeOffset;
 import static org.geysermc.floodgate.util.Constants.COLOR_CHAR;
 
 import cloud.commandframework.context.CommandContext;
@@ -46,8 +45,7 @@ final class FirewallCheckSubcommand {
     static void executeFirewall(CommandContext<UserAudience> context) {
         UserAudience sender = context.getSender();
         executeChecks(
-                globalApiCheck(sender),
-                timeSyncCheck(sender)
+                globalApiCheck(sender)
         ).whenComplete((response, $) ->
                 sender.sendMessage(String.format(
                         COLOR_CHAR + "eThe checks have finished. %s/%s were successful",
@@ -70,18 +68,6 @@ final class FirewallCheckSubcommand {
                         ));
                     }
                 });
-    }
-
-    private static BooleanSupplier timeSyncCheck(UserAudience sender) {
-        return executeFirewallText(sender, "time sync", () -> {
-            // UDP packets can get lost
-            for (int i = 0; i < 3; i++) {
-                if (requestTimeOffset(Constants.NTP_SERVER, 2000) != Long.MIN_VALUE) {
-                    return;
-                }
-            }
-            throw new IllegalStateException("Failed to receive time offset");
-        });
     }
 
     private static BooleanSupplier executeFirewallText(

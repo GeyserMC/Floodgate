@@ -45,7 +45,7 @@
   </issueManagement>
 
   <properties>
-    <geyser.version>1.4.3-SNAPSHOT</geyser.version>
+    <geyser.version>2.0.0-SNAPSHOT</geyser.version>
     <cumulus.version>1.0-SNAPSHOT</cumulus.version>
     <spigot.version>1.13-R0.1-SNAPSHOT</spigot.version>
     <fastutil.version>8.5.3</fastutil.version>

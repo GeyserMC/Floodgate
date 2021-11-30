@@ -91,20 +91,23 @@ public final class FloodgateHandshakeHandler {
      * @return The first string is the Floodgate data (or null if there isn't) and the second string
      * is the hostname without the Floodgate.
      */
-    public Pair<String, String> separateHostname(@NonNull String hostname) {
+    public HostnameSeparationResult separateHostname(@NonNull String hostname) {
         String[] hostnameItems = hostname.split("\0");
         String floodgateData = null;
+        int dataVersion = -1;
 
         StringBuilder hostnameBuilder = new StringBuilder();
         for (String value : hostnameItems) {
-            if (floodgateData == null && FloodgateCipher.hasHeader(value)) {
+            int version = FloodgateCipher.version(value);
+            if (floodgateData == null && version != -1) {
                 floodgateData = value;
+                dataVersion = version;
                 continue;
             }
             hostnameBuilder.append(value).append('\0');
         }
         // hostname now doesn't have Floodgate data anymore if it had
-        return Pair.of(floodgateData, hostnameBuilder.toString());
+        return new HostnameSeparationResult(floodgateData, dataVersion, hostnameBuilder.toString());
     }
 
     public CompletableFuture<HandshakeResult> handle(

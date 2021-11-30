@@ -30,14 +30,15 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.AttributeKey;
-import it.unimi.dsi.fastutil.Pair;
 import java.net.InetSocketAddress;
 import java.util.Queue;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
+import org.geysermc.floodgate.player.HostnameSeparationResult;
 import org.geysermc.floodgate.util.Constants;
 
 @RequiredArgsConstructor
@@ -67,11 +68,17 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
 
     protected void handle(Object handshakePacket, String hostname) {
         this.handshakePacket = handshakePacket;
-        Pair<String, String> separated = handshakeHandler.separateHostname(hostname);
+        HostnameSeparationResult separation = handshakeHandler.separateHostname(hostname);
 
-        if (separated.left() == null) {
+        if (separation.floodgateData() == null) {
             // not a Floodgate player, make sure to resend the cancelled handshake packet
             disablePacketQueue(true);
+            return;
+        }
+
+        if (separation.headerVersion() != FloodgateCipher.VERSION) {
+            disablePacketQueue(true);
+            setKickMessage(Constants.UNSUPPORTED_DATA_VERSION);
             return;
         }
 
@@ -80,7 +87,7 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
         Channel channel = ctx.channel();
 
         handshakeHandler
-                .handle(channel, separated.left(), separated.right())
+                .handle(channel, separation.floodgateData(), separation.hostnameRemainder())
                 .thenApply(result -> {
                     HandshakeData handshakeData = result.getHandshakeData();
 
