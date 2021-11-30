@@ -27,7 +27,7 @@
 
   <modules>
     <module>api</module>
-    <module>core</module>
+    <module>common</module>
     <module>spigot</module>
     <module>bungee</module>
     <module>velocity</module>
