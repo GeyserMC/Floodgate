@@ -6,7 +6,8 @@
   "mixins": [
     "ClientConnectionMixin",
     "ServerLoginNetworkHandlerMixin",
-    "ServerNetworkIoMixin"
+    "ServerNetworkIoMixin",
+    "ClientIntentionPacketMixin"
   ],
   "injectors": {
     "defaultRequire": 1
