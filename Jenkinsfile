@@ -2,7 +2,7 @@ pipeline {
     agent any
     tools {
         gradle 'Gradle 7'
-        jdk 'Java 16'
+        jdk 'Java 17'
     }
 
     parameters {
@@ -16,7 +16,7 @@ pipeline {
     stages {
         stage ('Build') {
             steps {
-                sh 'gradle clean build --refresh-dependencies'
+                sh './gradlew clean build --refresh-dependencies'
             }
             post {
                 success {
