@@ -7,8 +7,8 @@ import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.player.UserAudience;
@@ -19,7 +19,7 @@ import java.util.UUID;
 public class FabricUserAudience implements UserAudience, ForwardingAudience.Single {
     private final UUID uuid;
     private final String locale;
-    private final ServerCommandSource source;
+    private final CommandSourceStack source;
     private final FabricCommandUtil commandUtil;
 
     @Override
@@ -38,7 +38,7 @@ public class FabricUserAudience implements UserAudience, ForwardingAudience.Sing
             return "";
         }
 
-        return source.getName();
+        return source.getTextName();
     }
 
     @Override
@@ -47,7 +47,7 @@ public class FabricUserAudience implements UserAudience, ForwardingAudience.Sing
     }
 
     @Override
-    public @NonNull ServerCommandSource source() {
+    public @NonNull CommandSourceStack source() {
         return source;
     }
 
@@ -68,8 +68,8 @@ public class FabricUserAudience implements UserAudience, ForwardingAudience.Sing
 
     @Override
     public void disconnect(@NonNull Component reason) {
-        if (source.getEntity() instanceof ServerPlayerEntity) {
-            ((ServerPlayerEntity) source.getEntity()).networkHandler.disconnect(
+        if (source.getEntity() instanceof ServerPlayer) {
+            ((ServerPlayer) source.getEntity()).connection.disconnect(
                     commandUtil.getAdventure().toNative(reason)
             );
         }
@@ -77,8 +77,8 @@ public class FabricUserAudience implements UserAudience, ForwardingAudience.Sing
 
     @Override
     public void disconnect(TranslatableMessage message, Object... args) {
-        if (source.getEntity() instanceof ServerPlayerEntity) {
-            ((ServerPlayerEntity) source.getEntity()).networkHandler.disconnect(
+        if (source.getEntity() instanceof ServerPlayer) {
+            ((ServerPlayer) source.getEntity()).connection.disconnect(
                     commandUtil.translateAndTransform(this.locale, message, args)
             );
         }
@@ -95,7 +95,7 @@ public class FabricUserAudience implements UserAudience, ForwardingAudience.Sing
                 String name,
                 UUID uuid,
                 String locale,
-                ServerCommandSource source,
+                CommandSourceStack source,
                 FabricCommandUtil commandUtil,
                 boolean online) {
             super(uuid, locale, source, commandUtil);

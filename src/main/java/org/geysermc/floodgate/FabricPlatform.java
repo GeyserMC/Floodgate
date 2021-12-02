@@ -2,7 +2,6 @@ package org.geysermc.floodgate;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import org.geysermc.floodgate.FloodgatePlatform;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;

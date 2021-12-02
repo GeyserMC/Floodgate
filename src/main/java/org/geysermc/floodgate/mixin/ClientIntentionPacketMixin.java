@@ -1,14 +1,14 @@
 package org.geysermc.floodgate.mixin;
 
-import net.minecraft.network.packet.c2s.handshake.HandshakeC2SPacket;
+import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(HandshakeC2SPacket.class)
+@Mixin(ClientIntentionPacket.class)
 public interface ClientIntentionPacketMixin {
 
-    @Accessor("address")
+    @Accessor("hostName")
     @Mutable
     void setAddress(String address);
 }

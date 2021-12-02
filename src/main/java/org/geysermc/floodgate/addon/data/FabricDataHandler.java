@@ -2,17 +2,17 @@ package org.geysermc.floodgate.addon.data;
 
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
-import net.minecraft.text.Text;
+import net.minecraft.network.Connection;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
+import net.minecraft.network.protocol.login.ServerboundHelloPacket;
+import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.mixin.ClientConnectionMixin;
+import org.geysermc.floodgate.mixin.ConnectionMixin;
 import org.geysermc.floodgate.mixin.ClientIntentionPacketMixin;
-import org.geysermc.floodgate.mixin_interface.ServerLoginNetworkHandlerSetter;
+import org.geysermc.floodgate.mixin_interface.ServerLoginPacketListenerSetter;
 import com.mojang.authlib.GameProfile;
 import io.netty.channel.ChannelHandlerContext;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.network.packet.c2s.handshake.HandshakeC2SPacket;
-import net.minecraft.network.packet.c2s.login.LoginHelloC2SPacket;
-import net.minecraft.server.network.ServerLoginNetworkHandler;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
@@ -22,7 +22,7 @@ import java.net.InetSocketAddress;
 
 public final class FabricDataHandler extends CommonDataHandler {
     private final FloodgateLogger logger;
-    private ClientConnection networkManager;
+    private Connection networkManager;
     private FloodgatePlayer player;
 
     public FabricDataHandler(
@@ -35,7 +35,7 @@ public final class FabricDataHandler extends CommonDataHandler {
 
     @Override
     protected void setNewIp(Channel channel, InetSocketAddress newIp) {
-        ((ClientConnectionMixin) this.networkManager).setAddress(newIp);
+        ((ConnectionMixin) this.networkManager).setAddress(newIp);
     }
 
     @Override
@@ -69,25 +69,25 @@ public final class FabricDataHandler extends CommonDataHandler {
 
     @Override
     protected boolean channelRead(Object packet) {
-        if (packet instanceof HandshakeC2SPacket handshakePacket) {
+        if (packet instanceof ClientIntentionPacket intentionPacket) {
             ctx.pipeline().addAfter("splitter", "floodgate_packet_blocker", blocker);
-            networkManager = (ClientConnection) ctx.channel().pipeline().get("packet_handler");
-            handle(packet, handshakePacket.getAddress());
+            networkManager = (Connection) ctx.channel().pipeline().get("packet_handler");
+            handle(packet, intentionPacket.getHostName());
             return false;
         }
         return !checkAndHandleLogin(packet);
     }
 
     private boolean checkAndHandleLogin(Object packet) {
-        if (packet instanceof LoginHelloC2SPacket) {
+        if (packet instanceof ServerboundHelloPacket) {
             String kickMessage = getKickMessage();
             if (kickMessage != null) {
-                networkManager.disconnect(Text.of(kickMessage));
+                networkManager.disconnect(Component.nullToEmpty(kickMessage));
                 return true;
             }
 
             // we have to fake the offline player (login) cycle
-            if (!(networkManager.getPacketListener() instanceof ServerLoginNetworkHandler)) {
+            if (!(networkManager.getPacketListener() instanceof ServerLoginPacketListenerImpl)) {
                 // player is not in the login state, abort
                 ctx.pipeline().remove(this);
                 return true;
@@ -95,8 +95,8 @@ public final class FabricDataHandler extends CommonDataHandler {
 
             GameProfile gameProfile = new GameProfile(player.getCorrectUniqueId(), player.getCorrectUsername());
 
-            ((ServerLoginNetworkHandlerSetter) networkManager.getPacketListener()).setGameProfile(gameProfile);
-            ((ServerLoginNetworkHandlerSetter) networkManager.getPacketListener()).setLoginState();
+            ((ServerLoginPacketListenerSetter) networkManager.getPacketListener()).setGameProfile(gameProfile);
+            ((ServerLoginPacketListenerSetter) networkManager.getPacketListener()).setLoginState();
 
             ctx.pipeline().remove(this);
             return true;

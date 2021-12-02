@@ -7,13 +7,13 @@ import lombok.RequiredArgsConstructor;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.kyori.adventure.platform.fabric.PlayerLocales;
-import net.minecraft.entity.Entity;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.WhitelistEntry;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.UserWhiteListEntry;
+import net.minecraft.world.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -38,13 +38,12 @@ public final class FabricCommandUtil implements CommandUtil {
 
     @Override
     public @NonNull UserAudience getAudience(@NonNull Object source) {
-        if (!(source instanceof ServerCommandSource)) {
+        if (!(source instanceof CommandSourceStack commandSource)) {
             throw new RuntimeException();
         }
 
-        ServerCommandSource commandSource = (ServerCommandSource) source;
-        if (commandSource.getEntity() instanceof ServerPlayerEntity) {
-            return getAudience0((ServerPlayerEntity) commandSource.getEntity());
+        if (commandSource.getEntity() instanceof ServerPlayer) {
+            return getAudience0((ServerPlayer) commandSource.getEntity());
         }
 
         return new FabricUserAudience(null, manager.getDefaultLocale(), commandSource, this);
@@ -52,7 +51,7 @@ public final class FabricCommandUtil implements CommandUtil {
 
     @Override
     public UserAudience getAudienceByUuid(@NonNull UUID uuid) {
-        ServerPlayerEntity player = SERVER.getPlayerManager().getPlayer(uuid);
+        ServerPlayer player = SERVER.getPlayerList().getPlayer(uuid);
         if (player != null) {
             return getAudience0(player);
         }
@@ -61,21 +60,21 @@ public final class FabricCommandUtil implements CommandUtil {
 
     @Override
     public UserAudience getAudienceByUsername(@NonNull String username) {
-        ServerPlayerEntity player = SERVER.getPlayerManager().getPlayer(username);
+        ServerPlayer player = SERVER.getPlayerList().getPlayerByName(username);
         if (player != null) {
             return getAudience0(player);
         }
         return getOfflineAudienceByUsername(username);
     }
 
-    private FabricUserAudience getAudience0(ServerPlayerEntity player) {
+    private FabricUserAudience getAudience0(ServerPlayer player) {
         // Apparently can be null even if Javadocs say otherwise
         Locale locale = PlayerLocales.locale(player);
         return new FabricUserAudience.NamedFabricUserAudience(
-                player.getName().asString(),
-                player.getUuid(), locale != null ?
+                player.getName().getString(),
+                player.getUUID(), locale != null ?
                 locale.getLanguage().toLowerCase(Locale.ROOT) + "_" + locale.getCountry().toUpperCase(Locale.ROOT) :
-                manager.getDefaultLocale(), player.getCommandSource(), this, true);
+                manager.getDefaultLocale(), player.createCommandSourceStack(), this, true);
     }
 
     @Override
@@ -86,7 +85,7 @@ public final class FabricCommandUtil implements CommandUtil {
     @Override
     public @NonNull UserAudience getOfflineAudienceByUsername(@NonNull String username) {
         UUID uuid = null;
-        Optional<GameProfile> profile = SERVER.getUserCache().findByName(username);
+        Optional<GameProfile> profile = SERVER.getProfileCache().get(username);
         if (profile.isPresent()) {
             uuid = profile.get().getId();
         }
@@ -95,26 +94,26 @@ public final class FabricCommandUtil implements CommandUtil {
 
     @Override
     public @NonNull Collection<String> getOnlineUsernames(UserAudienceArgument.@NonNull PlayerType limitTo) {
-        List<ServerPlayerEntity> players = SERVER.getPlayerManager().getPlayerList();
+        List<ServerPlayer> players = SERVER.getPlayerList().getPlayers();
 
         Collection<String> usernames = new ArrayList<>();
         switch (limitTo) {
             case ALL_PLAYERS:
-                for (ServerPlayerEntity player : players) {
-                    usernames.add(player.getName().asString());
+                for (ServerPlayer player : players) {
+                    usernames.add(player.getName().getString());
                 }
                 break;
             case ONLY_JAVA:
-                for (ServerPlayerEntity player : players) {
-                    if (!api.isFloodgatePlayer(player.getUuid())) {
-                        usernames.add(player.getName().asString());
+                for (ServerPlayer player : players) {
+                    if (!api.isFloodgatePlayer(player.getUUID())) {
+                        usernames.add(player.getName().getString());
                     }
                 }
                 break;
             case ONLY_BEDROCK:
-                for (ServerPlayerEntity player : players) {
-                    if (api.isFloodgatePlayer(player.getUuid())) {
-                        usernames.add(player.getName().asString());
+                for (ServerPlayer player : players) {
+                    if (api.isFloodgatePlayer(player.getUUID())) {
+                        usernames.add(player.getName().getString());
                     }
                 }
                 break;
@@ -132,7 +131,7 @@ public final class FabricCommandUtil implements CommandUtil {
     @Override
     public Collection<Object> getOnlinePlayersWithPermission(String permission) {
         List<Object> players = new ArrayList<>();
-        for (ServerPlayerEntity player : SERVER.getPlayerManager().getPlayerList()) {
+        for (ServerPlayer player : SERVER.getPlayerList().getPlayers()) {
             if (hasPermission(player, permission)) {
                 players.add(player);
             }
@@ -142,10 +141,10 @@ public final class FabricCommandUtil implements CommandUtil {
 
     @Override
     public void sendMessage(Object player, String locale, TranslatableMessage message, Object... args) {
-        ServerCommandSource commandSource = (ServerCommandSource) player;
-        if (commandSource.getEntity() instanceof ServerPlayerEntity) {
-            SERVER.execute(() -> ((ServerPlayerEntity) commandSource.getEntity())
-                    .sendMessage(translateAndTransform(locale, message, args), false));
+        CommandSourceStack commandSource = (CommandSourceStack) player;
+        if (commandSource.getEntity() instanceof ServerPlayer) {
+            SERVER.execute(() -> ((ServerPlayer) commandSource.getEntity())
+                    .displayClientMessage(translateAndTransform(locale, message, args), false));
         } else {
             // Console?
             logger.info(message.translateMessage(manager, locale, args));
@@ -154,10 +153,10 @@ public final class FabricCommandUtil implements CommandUtil {
 
     @Override
     public void sendMessage(Object target, String message) {
-        ServerCommandSource commandSource = (ServerCommandSource) target;
-        if (commandSource.getEntity() instanceof ServerPlayerEntity) {
-            SERVER.execute(() -> ((ServerPlayerEntity) commandSource.getEntity())
-                    .sendMessage(new LiteralText(message), false));
+        CommandSourceStack commandSource = (CommandSourceStack) target;
+        if (commandSource.getEntity() instanceof ServerPlayer) {
+            SERVER.execute(() -> ((ServerPlayer) commandSource.getEntity())
+                    .displayClientMessage(new TextComponent(message), false));
         } else {
             // Console?
             logger.info(message);
@@ -166,35 +165,35 @@ public final class FabricCommandUtil implements CommandUtil {
 
     @Override
     public void kickPlayer(Object player, String locale, TranslatableMessage message, Object... args) {
-        getPlayer(player).networkHandler.disconnect(translateAndTransform(locale, message, args));
+        getPlayer(player).connection.disconnect(translateAndTransform(locale, message, args));
     }
 
     @Override
     public boolean whitelistPlayer(UUID uuid, String username) {
         GameProfile profile = new GameProfile(uuid, username);
-        SERVER.getPlayerManager().getWhitelist().add(new WhitelistEntry(profile));
+        SERVER.getPlayerList().getWhiteList().add(new UserWhiteListEntry(profile));
         return true;
     }
 
     @Override
     public boolean removePlayerFromWhitelist(UUID uuid, String username) {
         GameProfile profile = new GameProfile(uuid, username);
-        SERVER.getPlayerManager().getWhitelist().remove(profile);
+        SERVER.getPlayerList().getWhiteList().remove(profile);
         return true;
     }
 
-    private ServerPlayerEntity getPlayer(Object instance) {
+    private ServerPlayer getPlayer(Object instance) {
         try {
-            ServerCommandSource source = (ServerCommandSource) instance;
-            return source.getPlayer();
+            CommandSourceStack source = (CommandSourceStack) instance;
+            return source.getPlayerOrException();
         } catch (ClassCastException | CommandSyntaxException exception) {
             logger.error("Failed to cast {} as a player", instance.getClass().getName());
             throw new RuntimeException();
         }
     }
 
-    public Text translateAndTransform(String locale, TranslatableMessage message, Object... args) {
-        return new LiteralText(message.translateMessage(manager, locale, args));
+    public Component translateAndTransform(String locale, TranslatableMessage message, Object... args) {
+        return new TextComponent(message.translateMessage(manager, locale, args));
     }
 
     public FabricServerAudiences getAdventure() {
