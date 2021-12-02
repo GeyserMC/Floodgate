@@ -2,13 +2,13 @@ import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
     id 'com.github.johnrengelman.shadow' version '7.0.0'
-    id 'fabric-loom' version '0.8-SNAPSHOT'
+    id 'fabric-loom' version '0.10-SNAPSHOT'
     id 'java'
     id 'maven-publish'
 }
 
-sourceCompatibility = JavaVersion.VERSION_16
-targetCompatibility = JavaVersion.VERSION_16
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 
 archivesBaseName = project.archives_base_name
 version = project.mod_version
@@ -37,11 +37,11 @@ dependencies {
         exclude group: 'com.google.code.gson', module: "gson"
     }
 
-    include(modImplementation('cloud.commandframework:cloud-fabric:1.5.0-SNAPSHOT') {
-        because "Commands library implementation for Fabric - only supported on the snapshot"
+    include(modImplementation('cloud.commandframework:cloud-fabric:1.5.0') {
+        because "Commands library implementation for Fabric"
     })
 
-    include(modImplementation('net.kyori:adventure-platform-fabric:4.1.0-SNAPSHOT') {
+    include(modImplementation('net.kyori:adventure-platform-fabric:5.0.0') {
         because "Chat library implementation for Fabric that includes methods for communicating with the server"
         // Thanks to zml for this fix
         // The package modifies Brigadier which causes a LinkageError at runtime if included
@@ -55,12 +55,11 @@ dependencies {
 
 repositories {
     //mavenLocal()
-    // For Cloud snapshots
     maven {
         url = 'https://oss.sonatype.org/content/repositories/snapshots'
     }
     maven {
-        url = "https://repo.incendo.org/content/repositories/snapshots"
+        url = "https://repo.incendo.org/content/repositories/releases"
     }
     // Standard OpenCollab repositories
     maven {
