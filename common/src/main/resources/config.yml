@@ -31,11 +31,11 @@ player-link:
   # Whether to require a linked account in order to be able to join the server.
   require-link: false
 
-  # Uncomment the following line when you want to host your own linking database.
+  # Set the following option to true when you want to host your own linking database.
   # -> This can work in addition to global linking.
   # Note that you have to install a linking database implementation before enabling this, because
   # it'll cause errors otherwise.
-  #enable-own-linking: true
+  enable-own-linking: false
 
   # The following three options only apply when 'enable-own-linking' is set to 'true'
 
