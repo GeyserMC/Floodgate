@@ -15,7 +15,7 @@ pipeline {
             }
             post {
                 success {
-                    archiveArtifacts artifacts: '**/target/floodgate-*.jar', excludes: "**/target/floodgate-common.jar", fingerprint: true
+                    archiveArtifacts artifacts: '**/target/floodgate-*.jar', excludes: "**/target/floodgate-core.jar", fingerprint: true
                 }
             }
         }
@@ -24,7 +24,7 @@ pipeline {
             when {
                 anyOf {
                     branch "master"
-                    branch "dev/2.0"
+                    branch "dev/2.1.1"
                 }
             }
 

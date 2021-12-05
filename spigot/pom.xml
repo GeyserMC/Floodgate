@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.geysermc.floodgate</groupId>
     <artifactId>parent</artifactId>
-    <version>2.1.0-SNAPSHOT</version>
+    <version>2.1.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>spigot</artifactId>
@@ -53,7 +53,7 @@
     <!-- end of hack -->
     <dependency>
       <groupId>org.geysermc.floodgate</groupId>
-      <artifactId>common</artifactId>
+      <artifactId>core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <!-- the following dependencies are (also) relocated -->

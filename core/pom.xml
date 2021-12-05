@@ -7,10 +7,10 @@
   <parent>
     <artifactId>parent</artifactId>
     <groupId>org.geysermc.floodgate</groupId>
-    <version>2.1.0-SNAPSHOT</version>
+    <version>2.1.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>common</artifactId>
+  <artifactId>core</artifactId>
 
   <properties>
     <java-websocket.version>1.5.2</java-websocket.version>
