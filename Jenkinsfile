@@ -15,7 +15,7 @@ pipeline {
             }
             post {
                 success {
-                    archiveArtifacts artifacts: '**/target/floodgate-*.jar', excludes: "**/target/floodgate-core.jar", fingerprint: true
+                    archiveArtifacts artifacts: '**/target/floodgate-*.jar', excludes: "**/target/floodgate-(api|core).jar", fingerprint: true
                 }
             }
         }
