@@ -40,10 +40,11 @@ pipeline {
                         serverId: "opencollab-artifactory"
                 )
                 rtGradleRun(
+                        usesPlugin: false,
                         tool: 'Gradle 7',
                         rootDir: "",
                         buildFile: 'build.gradle',
-                        tasks: 'build artifactoryPublish'
+                        tasks: 'build artifactoryPublish',
                         deployerId: "GRADLE_DEPLOYER",
                         resolverId: "GRADLE_RESOLVER"
                 )
