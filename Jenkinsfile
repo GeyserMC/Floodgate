@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools {
-        maven 'Maven 3'
+        maven 'Gradle 7'
         jdk 'Java 8'
     }
     options {
@@ -11,11 +11,11 @@ pipeline {
         stage ('Build') {
             steps {
                 sh 'git submodule update --init --recursive'
-                sh 'mvn clean package'
+                sh './gradlew clean build'
             }
             post {
                 success {
-                    archiveArtifacts artifacts: '**/target/floodgate-*.jar', excludes: "**/target/floodgate-api.jar,**/target/floodgate-core.jar", fingerprint: true
+                    archiveArtifacts artifacts: '**/build/libs/floodgate-*.jar', excludes: "**/build/libs/floodgate-api.jar,**/build/libs/floodgate-core.jar", fingerprint: true
                 }
             }
         }
