@@ -29,23 +29,23 @@ pipeline {
             }
 
             steps {
-                rtMavenDeployer(
-                        id: "maven-deployer",
+                rtGradleDeployer(
+                        id: "GRADLE_DEPLOYER",
                         serverId: "opencollab-artifactory",
                         releaseRepo: "maven-releases",
                         snapshotRepo: "maven-snapshots"
                 )
-                rtMavenResolver(
-                        id: "maven-resolver",
-                        serverId: "opencollab-artifactory",
-                        releaseRepo: "maven-deploy-release",
-                        snapshotRepo: "maven-deploy-snapshot"
+                rtGradleResolver(
+                        id: "GRADLE_RESOLVER",
+                        serverId: "opencollab-artifactory"
                 )
-                rtMavenRun(
-                        pom: 'pom.xml',
-                        goals: 'source:jar install -DskipTests',
-                        deployerId: "maven-deployer",
-                        resolverId: "maven-resolver"
+                rtGradleRun(
+                        tool: 'Gradle 7',
+                        rootDir: "",
+                        buildFile: 'build.gradle',
+                        tasks: 'build artifactoryPublish'
+                        deployerId: "GRADLE_DEPLOYER",
+                        resolverId: "GRADLE_RESOLVER"
                 )
                 rtPublishBuildInfo(
                         serverId: "opencollab-artifactory"

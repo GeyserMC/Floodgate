@@ -2,6 +2,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
     `java-library`
+    `maven-publish`
     id("floodgate.build-logic") apply false
 //    id("com.github.spotbugs") version "4.8.0" apply false
 
@@ -13,12 +14,13 @@ plugins {
     id("io.freefair.lombok") version "6.3.0" apply false
 }
 
-allprojects {
+subprojects {
 //    apply(plugin = "pmd")
 //    apply(plugin = "com.github.spotbugs")
 
     apply {
         plugin("java-library")
+        plugin("maven-publish")
         plugin("com.github.johnrengelman.shadow")
         plugin("io.freefair.lombok")
         plugin("floodgate.build-logic")
@@ -52,6 +54,14 @@ allprojects {
 
         compileJava {
             options.encoding = Charsets.UTF_8.name()
+        }
+    }
+
+    publishing {
+        publications {
+            create<MavenPublication>("maven") {
+                from(components["java"])
+            }
         }
     }
 }
