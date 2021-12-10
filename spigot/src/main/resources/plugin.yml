@@ -1,7 +1,7 @@
-name: ${project.parent.name}
-description: ${project.description}
-version: ${project.version}
-author: ${project.organization.name}
-website: ${project.url}
+name: ${name}
+description: ${description}
+version: ${version}
+author: ${author}
+website: ${url}
 main: org.geysermc.floodgate.SpigotPlugin
 api-version: 1.13

@@ -3,7 +3,7 @@ var guavaVersion = "21.0"
 var gsonVersion = "2.8.5"
 
 dependencies {
-    api(project(":core", "shadow"))
+    api(project(":core"))
 
     implementation("com.google.guava", "guava", guavaVersion)
     implementation("cloud.commandframework", "cloud-bukkit", Versions.cloudVersion)

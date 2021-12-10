@@ -3,7 +3,7 @@ var gsonVersion = "2.8.0";
 var guavaVersion = "21.0";
 
 dependencies {
-    api(project(":core", "shadow"))
+    api(project(":core"))
     implementation("cloud.commandframework", "cloud-bungee", "1.5.0")
     implementation("net.kyori", "adventure-text-serializer-gson", Versions.adventureApiVersion)
     implementation("net.kyori", "adventure-text-serializer-bungeecord", Versions.adventurePlatformVersion)
