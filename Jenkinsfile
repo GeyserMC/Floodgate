@@ -32,7 +32,6 @@ pipeline {
                 rtGradleDeployer(
                         id: "GRADLE_DEPLOYER",
                         serverId: "opencollab-artifactory",
-                        repo: "opencollab-deployer",
                         releaseRepo: "maven-releases",
                         snapshotRepo: "maven-snapshots"
                 )

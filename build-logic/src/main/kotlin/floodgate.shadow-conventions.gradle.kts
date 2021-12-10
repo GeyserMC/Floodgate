@@ -36,7 +36,7 @@ publishing {
 artifactory {
     publish {
         repository {
-            setRepoKey("opencollab-deployer")
+            setRepoKey("maven-snapshots")
             setMavenCompatible(true)
         }
         defaults {
