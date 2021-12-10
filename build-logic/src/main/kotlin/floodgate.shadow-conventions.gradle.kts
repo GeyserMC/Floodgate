@@ -3,6 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
     id("floodgate.base-conventions")
     id("com.github.johnrengelman.shadow")
+    id("com.jfrog.artifactory")
 }
 
 tasks {
@@ -29,5 +30,20 @@ publishing {
     publications.named<MavenPublication>("mavenJava") {
         artifact(tasks["shadowJar"])
         artifact(tasks["sourcesJar"])
+    }
+}
+
+artifactory {
+    publish {
+        repository {
+            setRepoKey("opencollab-deployer")
+            setMavenCompatible(true)
+        }
+        defaults {
+            publishConfigs("archives")
+            setPublishArtifacts(true)
+            setPublishPom(true)
+            setPublishIvy(false)
+        }
     }
 }

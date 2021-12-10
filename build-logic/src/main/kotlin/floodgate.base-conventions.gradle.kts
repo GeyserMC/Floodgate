@@ -31,8 +31,8 @@ java {
 
 publishing {
     publications.create<MavenPublication>("mavenJava") {
-        groupId = rootProject.group as String
-        artifactId = project.name
-        version = rootProject.version as String
+        groupId = project.group as String
+        artifactId = "floodgate-" + project.name
+        version = project.version as String
     }
 }

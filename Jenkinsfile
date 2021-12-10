@@ -32,6 +32,7 @@ pipeline {
                 rtGradleDeployer(
                         id: "GRADLE_DEPLOYER",
                         serverId: "opencollab-artifactory",
+                        repo: "opencollab-deployer",
                         releaseRepo: "maven-releases",
                         snapshotRepo: "maven-snapshots"
                 )
@@ -40,11 +41,12 @@ pipeline {
                         serverId: "opencollab-artifactory"
                 )
                 rtGradleRun(
-                        usesPlugin: false,
+                        usesPlugin: true,
                         tool: 'Gradle 7',
                         rootDir: "",
+                        useWrapper: true,
                         buildFile: 'build.gradle.kts',
-                        tasks: 'build publish',
+                        tasks: 'build artifactoryPublish',
                         deployerId: "GRADLE_DEPLOYER",
                         resolverId: "GRADLE_RESOLVER"
                 )

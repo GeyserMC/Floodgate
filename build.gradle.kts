@@ -5,6 +5,11 @@ plugins {
     id("io.freefair.lombok") version "6.3.0" apply false
 }
 
+allprojects{
+    group = "org.geysermc.floodgate"
+    version = "2.1.1-SNAPSHOT"
+}
+
 val platforms = setOf(
     projects.bungee,
     projects.spigot,
@@ -23,12 +28,9 @@ subprojects {
         plugin("floodgate.build-logic")
     }
 
-    group = "org.geysermc.floodgate"
-    //todo make nicer
-    if (project.name in arrayOf("mysql", "sqlite")) {
-        group = group as String + ".database"
+    if (project.projectDir.startsWith("database/")) {
+        group = rootProject.group as String + ".database"
     }
-    version = "2.1.1-SNAPSHOT"
 
     when (this) {
         in platforms -> plugins.apply("floodgate.shadow-conventions")
