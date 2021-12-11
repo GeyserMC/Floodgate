@@ -28,14 +28,17 @@ subprojects {
         plugin("floodgate.build-logic")
     }
 
-    if (project.projectDir.startsWith("database/")) {
-        group = rootProject.group as String + ".database"
-    }
+    val relativePath = projectDir.relativeTo(rootProject.projectDir).path
 
-    when (this) {
-        in platforms -> plugins.apply("floodgate.shadow-conventions")
-        api -> plugins.apply("floodgate.base-conventions")
-        else -> plugins.apply("floodgate.standard-conventions")
+    if (relativePath.startsWith("database" + File.separator)) {
+        group = rootProject.group as String + ".database"
+        plugins.apply("floodgate.database-conventions")
+    } else {
+        when (this) {
+            in platforms -> plugins.apply("floodgate.shadow-conventions")
+            api -> plugins.apply("floodgate.shadow-conventions")
+            else -> plugins.apply("floodgate.base-conventions")
+        }
     }
 
     dependencies {
