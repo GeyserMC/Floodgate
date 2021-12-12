@@ -1,10 +1,8 @@
-plugins {
-    war
-}
+val sqliteJdbcVersion = "3.36.0.3"
 
 dependencies {
-    providedCompile(projects.core)
-    implementation("org.xerial:sqlite-jdbc:3.36.0.3")
+    provided(projects.core)
+    implementation("org.xerial", "sqlite-jdbc", sqliteJdbcVersion)
 }
 
-description = "sqlite"
+description = "The Floodgate database extension for SQLite"

@@ -1,10 +1,10 @@
-plugins {
-    war
-}
+val mariadbClientVersion = "2.7.4"
 
 dependencies {
-    providedCompile(projects.core)
-    implementation("org.mariadb.jdbc:mariadb-java-client:2.7.4")
+    provided(projects.core)
+    implementation("org.mariadb.jdbc", "mariadb-java-client" , mariadbClientVersion)
 }
 
-description = "mysql"
+description = "The Floodgate database extension for MySQL"
+
+relocate("org.mariadb")

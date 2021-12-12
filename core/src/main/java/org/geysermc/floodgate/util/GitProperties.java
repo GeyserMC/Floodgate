@@ -31,7 +31,9 @@ public class GitProperties {
     private final Properties properties;
 
     public GitProperties() {
-        properties = Utils.readProperties("git.properties");
+//        properties = Utils.readProperties("git.properties");
+        properties = new Properties();
+        properties.setProperty("git.branch", "dev/2.1.1");
     }
 
     public Properties getProperties() {

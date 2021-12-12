@@ -15,15 +15,21 @@ tasks {
         archiveBaseName.set("floodgate-${project.name}")
         archiveVersion.set("")
         archiveClassifier.set("")
-        configureRelocations()
+
+        val sJar: ShadowJar = this
+
+        doFirst {
+            providedDependencies[project.name]?.forEach { string ->
+                sJar.dependencies {
+                    println("Excluding $string from ${project.name}")
+                    exclude(dependency(string))
+                }
+            }
+        }
     }
     named("build") {
         dependsOn(shadowJar)
     }
-}
-
-fun ShadowJar.configureRelocations() {
-    //todo platform-independent relocations
 }
 
 publishing {

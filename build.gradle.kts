@@ -5,9 +5,10 @@ plugins {
     id("io.freefair.lombok") version "6.3.0" apply false
 }
 
-allprojects{
+allprojects {
     group = "org.geysermc.floodgate"
     version = "2.1.1-SNAPSHOT"
+    description = "Allows Bedrock players to join Java edition servers while keeping the server in online mode"
 }
 
 val platforms = setOf(
@@ -15,6 +16,9 @@ val platforms = setOf(
     projects.spigot,
     projects.velocity
 ).map { it.dependencyProject }
+
+//todo re-add git properties (or at least build number, branch and commit)
+// re-add pmd and organisation/license/sdcm/issuemanagement stuff
 
 val api: Project = projects.api.dependencyProject
 
@@ -39,9 +43,5 @@ subprojects {
             api -> plugins.apply("floodgate.shadow-conventions")
             else -> plugins.apply("floodgate.base-conventions")
         }
-    }
-
-    dependencies {
-        compileOnly("org.checkerframework", "checker-qual", Versions.checkerQual)
     }
 }

@@ -4,6 +4,10 @@ plugins {
 //    id("net.ltgt.errorprone")
 }
 
+dependencies {
+    compileOnly("org.checkerframework", "checker-qual", Versions.checkerQual)
+}
+
 tasks {
     processResources {
         filesMatching(listOf("plugin.yml", "bungee.yml", "velocity-plugin.json")) {

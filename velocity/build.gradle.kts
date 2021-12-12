@@ -4,17 +4,20 @@ var gsonVersion = "2.8.8"
 var guavaVersion = "25.1-jre"
 
 dependencies {
-    implementation(project(":core"))
+    api(projects.core)
     api("cloud.commandframework", "cloud-velocity", Versions.cloudVersion)
-    compileOnly("net.kyori", "adventure-api", Versions.adventureApiVersion)
-    compileOnly("com.google.code.gson", "gson", gsonVersion)
-    compileOnly("com.google.guava", "guava", guavaVersion)
-    compileOnly("com.google.inject", "guice", Versions.guiceVersion)
-    compileOnly("org.yaml", "snakeyaml", Versions.snakeyamlVersion)
-    compileOnly("com.velocitypowered", "velocity-api", velocityVersion)
-    compileOnly("org.apache.logging.log4j", "log4j-core", log4jVersion)
-    compileOnly("io.netty", "netty-transport", Versions.nettyVersion)
-    compileOnly("io.netty", "netty-codec", Versions.nettyVersion)
 }
 
-description = "velocity"
+relocate("cloud.commandframework")
+// used in cloud
+relocate("io.leangen.geantyref")
+
+
+// these dependencies are already present on the platform
+provided("net.kyori", "adventure-api", Versions.adventureApiVersion, 0b100)
+provided("com.google.code.gson", "gson", gsonVersion)
+provided("com.google.guava", "guava", guavaVersion)
+provided("com.google.inject", "guice", Versions.guiceVersion)
+provided("org.yaml", "snakeyaml", Versions.snakeyamlVersion) // included in Configurate
+provided("com.velocitypowered", "velocity-api", velocityVersion)
+provided("org.apache.logging.log4j", "log4j-core", log4jVersion)
