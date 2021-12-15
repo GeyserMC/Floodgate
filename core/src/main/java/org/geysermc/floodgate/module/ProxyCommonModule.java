@@ -31,6 +31,7 @@ import com.google.inject.name.Named;
 import java.nio.file.Path;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
@@ -60,7 +61,8 @@ public final class ProxyCommonModule extends CommonModule {
     public ProxyFloodgateApi proxyFloodgateApi(
             PluginMessageManager pluginMessageManager,
             FloodgateConfigHolder configHolder,
+            FloodgateLogger logger,
             FloodgateCipher cipher) {
-        return new ProxyFloodgateApi(pluginMessageManager, configHolder, cipher);
+        return new ProxyFloodgateApi(pluginMessageManager, configHolder, logger, cipher);
     }
 }

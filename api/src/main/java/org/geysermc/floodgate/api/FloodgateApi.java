@@ -32,6 +32,7 @@ import org.geysermc.cumulus.Form;
 import org.geysermc.cumulus.util.FormBuilder;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.api.unsafe.Unsafe;
 
 public interface FloodgateApi {
     /**
@@ -139,4 +140,6 @@ public interface FloodgateApi {
     default PlayerLink getPlayerLink() {
         return InstanceHolder.getPlayerLink();
     }
+
+    Unsafe unsafe();
 }

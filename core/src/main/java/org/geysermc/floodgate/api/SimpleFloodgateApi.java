@@ -37,7 +37,9 @@ import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.cumulus.Form;
 import org.geysermc.cumulus.util.FormBuilder;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.api.unsafe.Unsafe;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.player.FloodgatePlayerImpl;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
@@ -52,6 +54,7 @@ public class SimpleFloodgateApi implements FloodgateApi {
     private final Map<UUID, FloodgatePlayer> players = new HashMap<>();
     private final PluginMessageManager pluginMessageManager;
     private final FloodgateConfigHolder configHolder;
+    private final FloodgateLogger logger;
 
     @Override
     public String getPlayerPrefix() {
@@ -150,6 +153,15 @@ public class SimpleFloodgateApi implements FloodgateApi {
                     JsonElement gamertag = response.get("gamertag");
                     return gamertag != null ? gamertag.getAsString() : null;
                 });
+    }
+
+    @Override
+    public final Unsafe unsafe() {
+        String callerClass = Thread.currentThread().getStackTrace()[2].getClassName();
+        logger.warn("A plugin is trying to access an unsafe part of the Floodgate api!" +
+                " The use of this api can result in client crashes if used incorrectly." +
+                " Caller: " + callerClass);
+        return new UnsafeFloodgateApi(pluginMessageManager);
     }
 
     public FloodgatePlayer addPlayer(UUID uuid, FloodgatePlayer player) {

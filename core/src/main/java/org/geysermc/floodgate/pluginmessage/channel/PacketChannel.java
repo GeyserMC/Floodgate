@@ -26,36 +26,30 @@
 package org.geysermc.floodgate.pluginmessage.channel;
 
 import com.google.inject.Inject;
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+import org.geysermc.floodgate.api.UnsafeFloodgateApi;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
 
-public class TransferChannel implements PluginMessageChannel {
+public final class PacketChannel implements PluginMessageChannel {
     @Inject private PluginMessageUtils pluginMessageUtils;
 
     @Override
     public String getIdentifier() {
-        return "floodgate:transfer";
+        return "floodgate:packet";
     }
 
     @Override
-    public Result handleProxyCall(
-            byte[] data,
-            UUID targetUuid,
-            String targetUsername,
-            Identity targetIdentity,
-            UUID sourceUuid,
-            String sourceUsername,
-            Identity sourceIdentity) {
-
+    public Result handleProxyCall(byte[] data, UUID targetUuid, String targetUsername,
+                                  Identity targetIdentity, UUID sourceUuid, String sourceUsername,
+                                  Identity sourceIdentity) {
         if (sourceIdentity == Identity.SERVER) {
             // send it to the client
             return Result.forward();
         }
 
         if (sourceIdentity == Identity.PLAYER) {
-            handleServerCall(data, targetUuid, targetUsername);
+            return handleServerCall(data, targetUuid, targetUsername);
         }
 
         return Result.handled();
@@ -63,19 +57,18 @@ public class TransferChannel implements PluginMessageChannel {
 
     @Override
     public Result handleServerCall(byte[] data, UUID targetUuid, String targetUsername) {
-        return Result.kick("I'm sorry, I'm unable to transfer a server :(");
+        return Result.kick("Cannot send packets from Geyser/Floodgate to Floodgate");
     }
 
-    public boolean sendTransfer(UUID player, String address, int port) {
-        byte[] addressBytes = address.getBytes(StandardCharsets.UTF_8);
-        byte[] data = new byte[addressBytes.length + 4];
+    public boolean sendPacket(UUID player, byte[] packet, boolean encrypt, UnsafeFloodgateApi api) {
+        if (api == null) {
+            throw new IllegalArgumentException("Can only send a packet using the unsafe api");
+        }
 
-        data[0] = (byte) (port >> 24);
-        data[1] = (byte) (port >> 16);
-        data[2] = (byte) (port >> 8);
-        data[3] = (byte) (port);
-        System.arraycopy(addressBytes, 0, data, 4, addressBytes.length);
+        byte[] finalData = new byte[packet.length + 1];
+        finalData[0] = (byte) (encrypt ? 1 : 0);
+        System.arraycopy(packet, 0, finalData, 1, packet.length);
 
-        return pluginMessageUtils.sendMessage(player, getIdentifier(), data);
+        return pluginMessageUtils.sendMessage(player, getIdentifier(), finalData);
     }
 }

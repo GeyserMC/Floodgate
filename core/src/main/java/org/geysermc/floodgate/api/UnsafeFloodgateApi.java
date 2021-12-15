@@ -25,35 +25,31 @@
 
 package org.geysermc.floodgate.api;
 
-import java.nio.charset.StandardCharsets;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
-import org.geysermc.floodgate.crypto.FloodgateCipher;
+import java.util.UUID;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.api.unsafe.Unsafe;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
-import org.geysermc.floodgate.util.BedrockData;
+import org.geysermc.floodgate.pluginmessage.channel.PacketChannel;
 
-public final class ProxyFloodgateApi extends SimpleFloodgateApi {
-    private final FloodgateCipher cipher;
+public final class UnsafeFloodgateApi implements Unsafe {
+    private final PacketChannel packetChannel;
 
-    public ProxyFloodgateApi(
-            PluginMessageManager pluginMessageManager,
-            FloodgateConfigHolder configHolder,
-            FloodgateLogger logger,
-            FloodgateCipher cipher) {
-        super(pluginMessageManager, configHolder, logger);
-        this.cipher = cipher;
-    }
-
-    public byte[] createEncryptedData(BedrockData bedrockData) {
-        try {
-            return cipher.encryptFromString(bedrockData.toString());
-        } catch (Exception exception) {
-            throw new IllegalStateException("We failed to create the encrypted data, " +
-                    "but creating encrypted data is mandatory!", exception);
+    UnsafeFloodgateApi(PluginMessageManager pluginMessageManager) {
+        StackTraceElement element = Thread.currentThread().getStackTrace()[2];
+        if (!SimpleFloodgateApi.class.getName().equals(element.getClassName())) {
+            throw new IllegalStateException("Use the Floodgate api to get an instance");
         }
+
+        packetChannel = pluginMessageManager.getChannel(PacketChannel.class);
     }
 
-    public String createEncryptedDataString(BedrockData bedrockData) {
-        return new String(createEncryptedData(bedrockData), StandardCharsets.UTF_8);
+    @Override
+    public void sendPacket(UUID bedrockPlayer, byte[] packetData, boolean encrypt) {
+        packetChannel.sendPacket(bedrockPlayer, packetData, encrypt, this);
+    }
+
+    @Override
+    public void sendPacket(FloodgatePlayer player, byte[] packetData, boolean encrypt) {
+        sendPacket(player.getCorrectUniqueId(), packetData, encrypt);
     }
 }

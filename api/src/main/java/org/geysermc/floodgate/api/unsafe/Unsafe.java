@@ -23,36 +23,21 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.module;
+package org.geysermc.floodgate.api.unsafe;
 
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import java.nio.file.Path;
-import org.geysermc.floodgate.api.SimpleFloodgateApi;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
-import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
+import java.util.UUID;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
-public final class ServerCommonModule extends CommonModule {
-    public ServerCommonModule(Path dataDirectory) {
-        super(dataDirectory);
+public interface Unsafe {
+    void sendPacket(UUID bedrockPlayer, byte[] packetData, boolean encrypt);
+
+    default void sendPacket(UUID bedrockPlayer, byte[] packetData) {
+        sendPacket(bedrockPlayer, packetData, true);
     }
 
-    @Provides
-    @Singleton
-    @Named("configClass")
-    public Class<? extends FloodgateConfig> floodgateConfigClass() {
-        return FloodgateConfig.class;
-    }
+    void sendPacket(FloodgatePlayer player, byte[] packetData, boolean encrypt);
 
-    @Provides
-    @Singleton
-    public SimpleFloodgateApi floodgateApi(
-            PluginMessageManager pluginMessageManager,
-            FloodgateConfigHolder configHolder,
-            FloodgateLogger logger) {
-        return new SimpleFloodgateApi(pluginMessageManager, configHolder, logger);
+    default void sendPacket(FloodgatePlayer player, byte[] packetData) {
+        sendPacket(player, packetData, true);
     }
 }
