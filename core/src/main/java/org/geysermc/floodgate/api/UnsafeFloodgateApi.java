@@ -44,12 +44,12 @@ public final class UnsafeFloodgateApi implements Unsafe {
     }
 
     @Override
-    public void sendPacket(UUID bedrockPlayer, byte[] packetData, boolean encrypt) {
-        packetChannel.sendPacket(bedrockPlayer, packetData, encrypt, this);
+    public void sendPacket(UUID bedrockPlayer, byte[] packetData) {
+        packetChannel.sendPacket(bedrockPlayer, packetData, this);
     }
 
     @Override
-    public void sendPacket(FloodgatePlayer player, byte[] packetData, boolean encrypt) {
-        sendPacket(player.getCorrectUniqueId(), packetData, encrypt);
+    public void sendPacket(FloodgatePlayer player, byte[] packetData) {
+        sendPacket(player.getCorrectUniqueId(), packetData);
     }
 }

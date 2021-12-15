@@ -60,15 +60,10 @@ public final class PacketChannel implements PluginMessageChannel {
         return Result.kick("Cannot send packets from Geyser/Floodgate to Floodgate");
     }
 
-    public boolean sendPacket(UUID player, byte[] packet, boolean encrypt, UnsafeFloodgateApi api) {
+    public boolean sendPacket(UUID player, byte[] packet, UnsafeFloodgateApi api) {
         if (api == null) {
             throw new IllegalArgumentException("Can only send a packet using the unsafe api");
         }
-
-        byte[] finalData = new byte[packet.length + 1];
-        finalData[0] = (byte) (encrypt ? 1 : 0);
-        System.arraycopy(packet, 0, finalData, 1, packet.length);
-
-        return pluginMessageUtils.sendMessage(player, getIdentifier(), finalData);
+        return pluginMessageUtils.sendMessage(player, getIdentifier(), packet);
     }
 }

@@ -29,15 +29,6 @@ import java.util.UUID;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
 public interface Unsafe {
-    void sendPacket(UUID bedrockPlayer, byte[] packetData, boolean encrypt);
-
-    default void sendPacket(UUID bedrockPlayer, byte[] packetData) {
-        sendPacket(bedrockPlayer, packetData, true);
-    }
-
-    void sendPacket(FloodgatePlayer player, byte[] packetData, boolean encrypt);
-
-    default void sendPacket(FloodgatePlayer player, byte[] packetData) {
-        sendPacket(player, packetData, true);
-    }
+    void sendPacket(UUID bedrockPlayer, byte[] packetData);
+    void sendPacket(FloodgatePlayer player, byte[] packetData);
 }
