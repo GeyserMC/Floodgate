@@ -26,7 +26,6 @@
 package org.geysermc.floodgate.api;
 
 import java.util.UUID;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.unsafe.Unsafe;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.pluginmessage.channel.PacketChannel;
@@ -44,12 +43,11 @@ public final class UnsafeFloodgateApi implements Unsafe {
     }
 
     @Override
-    public void sendPacket(UUID bedrockPlayer, byte[] packetData) {
-        packetChannel.sendPacket(bedrockPlayer, packetData, this);
-    }
+    public void sendPacket(UUID bedrockPlayer, int packetId, byte[] packetData) {
+        byte[] fullData = new byte[packetData.length + 1];
+        fullData[0] = (byte) packetId;
+        System.arraycopy(packetData, 0, fullData, 1, packetData.length);
 
-    @Override
-    public void sendPacket(FloodgatePlayer player, byte[] packetData) {
-        sendPacket(player.getCorrectUniqueId(), packetData);
+        packetChannel.sendPacket(bedrockPlayer, fullData, this);
     }
 }
