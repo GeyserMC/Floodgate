@@ -25,13 +25,15 @@
 
 package org.geysermc.floodgate.api;
 
-import java.util.Collection;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import org.geysermc.cumulus.Form;
 import org.geysermc.cumulus.util.FormBuilder;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+
+import java.util.Collection;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public interface FloodgateApi {
     /**
@@ -96,6 +98,10 @@ public interface FloodgateApi {
     boolean sendForm(UUID uuid, FormBuilder<?, ?> formBuilder);
 
     boolean transferPlayer(UUID uuid, String address, int port);
+    
+    boolean sendForm(UUID uuid, String formJson);
+
+    boolean sendForm(UUID uuid, String formJson, Consumer<String> responseHandler);
 
     /**
      * Get the xuid of the user that has the given gamertag.

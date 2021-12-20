@@ -26,16 +26,21 @@
 package org.geysermc.floodgate.pluginmessage.channel;
 
 import com.google.common.base.Charsets;
+import com.google.gson.JsonParser;
 import com.google.inject.Inject;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.geysermc.cumulus.Form;
+import org.geysermc.cumulus.Forms;
+import org.geysermc.cumulus.util.FormType;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
+
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 public class FormChannel implements PluginMessageChannel {
     private final Short2ObjectMap<Form> storedForms = new Short2ObjectOpenHashMap<>();
@@ -92,21 +97,54 @@ public class FormChannel implements PluginMessageChannel {
     }
 
     public boolean sendForm(UUID player, Form form) {
-        byte[] formData = createFormData(form);
+        return sendForm(player, form.getJsonData(), form.getResponseHandler());
+    }
+
+    public boolean sendForm(UUID player, String formJson) {
+        return sendForm(player, formJson, null);
+    }
+
+    public boolean sendForm(UUID player, String formJson, Consumer<String> responseHandler) {
+        byte[] formData = createFormData(formJson, responseHandler);
         return pluginMessageUtils.sendMessage(player, false, getIdentifier(), formData);
     }
 
     public byte[] createFormData(Form form) {
+        return createFormData(form.getJsonData(), form.getResponseHandler());
+    }
+
+    public byte[] createFormData(String formJson, Consumer<String> responseHandler) {
         short formId = getNextFormId();
         if (config.isProxy()) {
             formId |= 0x8000;
         }
+
+        String formTypeString = new JsonParser().parse(formJson).getAsJsonObject().get("type").getAsString();
+
+        FormType formType;
+        switch (formTypeString) {
+            case "form":
+                formType = FormType.SIMPLE_FORM;
+                break;
+            case "modal":
+                formType = FormType.MODAL_FORM;
+                break;
+            case "custom_form":
+                formType = FormType.CUSTOM_FORM;
+                break;
+            default:
+                throw new RuntimeException("Unknown form type " + formTypeString);
+        }
+
+        Form form = Forms.fromJson(formJson, formType);
+        if (responseHandler != null) form.setResponseHandler(responseHandler);
+
         storedForms.put(formId, form);
 
-        byte[] jsonData = form.getJsonData().getBytes(Charsets.UTF_8);
+        byte[] jsonData = formJson.getBytes(Charsets.UTF_8);
 
         byte[] data = new byte[jsonData.length + 3];
-        data[0] = (byte) form.getType().ordinal();
+        data[0] = (byte) formType.ordinal();
         data[1] = (byte) (formId >> 8 & 0xFF);
         data[2] = (byte) (formId & 0xFF);
         System.arraycopy(jsonData, 0, data, 3, jsonData.length);

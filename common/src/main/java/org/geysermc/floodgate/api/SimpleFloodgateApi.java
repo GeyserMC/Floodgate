@@ -28,12 +28,6 @@ package org.geysermc.floodgate.api;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.cumulus.Form;
 import org.geysermc.cumulus.util.FormBuilder;
@@ -46,6 +40,14 @@ import org.geysermc.floodgate.pluginmessage.channel.TransferChannel;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.HttpUtils;
 import org.geysermc.floodgate.util.Utils;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 @RequiredArgsConstructor
 public class SimpleFloodgateApi implements FloodgateApi {
@@ -103,7 +105,7 @@ public class SimpleFloodgateApi implements FloodgateApi {
 
     @Override
     public boolean sendForm(UUID uuid, Form form) {
-        return pluginMessageManager.getChannel(FormChannel.class).sendForm(uuid, form);
+        return sendForm(uuid, form.getJsonData(), form.getResponseHandler());
     }
 
     @Override
@@ -116,6 +118,16 @@ public class SimpleFloodgateApi implements FloodgateApi {
         return pluginMessageManager
                 .getChannel(TransferChannel.class)
                 .sendTransfer(uuid, address, port);
+    }
+
+    @Override
+    public boolean sendForm(UUID uuid, String formJson) {
+        return sendForm(uuid, formJson, null);
+    }
+
+    @Override
+    public boolean sendForm(UUID uuid, String formJson, Consumer<String> responseHandler) {
+        return pluginMessageManager.getChannel(FormChannel.class).sendForm(uuid, formJson, responseHandler);
     }
 
     @Override
