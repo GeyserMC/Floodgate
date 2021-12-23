@@ -145,6 +145,7 @@ public class FloodgatePlatform {
             }
         }
 
+        guice.getInstance(NewsChecker.class).shutdown();
         api.getPlayerLink().stop();
         return true;
     }
