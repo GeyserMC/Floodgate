@@ -45,5 +45,9 @@ public class FabricMod implements ModInitializer {
             injector.getInstance(FloodgateLogger.class)
                     .translatedInfo("floodgate.core.finish", endCtm - ctm);
         });
+
+        ServerLifecycleEvents.SERVER_STOPPING.register((server) -> {
+            platform.disable();
+        });
     }
 }
