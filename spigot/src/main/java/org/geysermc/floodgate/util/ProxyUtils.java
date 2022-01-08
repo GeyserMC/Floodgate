@@ -34,6 +34,7 @@ import java.lang.reflect.Field;
 public final class ProxyUtils {
     private static final Field IS_BUNGEE_DATA;
     private static final Field IS_MODERN_FORWARDING;
+    private static final boolean IS_PAPER_SERVER;
 
     static {
         Class<?> spigotConfig = ReflectionUtils.getClass("org.spigotmc.SpigotConfig");
@@ -41,14 +42,22 @@ public final class ProxyUtils {
         checkNotNull(IS_BUNGEE_DATA, "bungee field cannot be null. Are you using CraftBukkit?");
 
         Field velocitySupport;
+        boolean isPaper = false;
+
         try {
             Class<?> paperConfig = Class.forName("com.destroystokyo.paper.PaperConfig");
+            isPaper = true;
             velocitySupport = getField(paperConfig, "velocitySupport");
         } catch (ClassNotFoundException e) {
             // We're not on a platform that has modern forwarding
             velocitySupport = null; // NOPMD - there's really not a better way around this unless you want to use an optional
         }
         IS_MODERN_FORWARDING = velocitySupport;
+        IS_PAPER_SERVER = isPaper;
+    }
+
+    public static boolean isPaperServer() {
+        return IS_PAPER_SERVER;
     }
 
     public static boolean isProxyData() {

@@ -76,14 +76,19 @@ public final class SpigotDataHandler extends CommonDataHandler {
 
         // the server will do all the work if BungeeCord mode is enabled,
         // otherwise we have to help the server.
-        boolean bungeeData = ProxyUtils.isProxyData();
+        boolean needsAssistance = !ProxyUtils.isProxyData();
+        
+        // Paper and forks now have username validation, so we have to help Paper as well.
+        // The username is only validated in the login start packet, and that packet doesn't reach
+        // the server handler when we follow the non-bungee-data route
+        needsAssistance |= ProxyUtils.isPaperServer();
 
-        if (!bungeeData) {
+        if (needsAssistance) {
             // Use a spoofedUUID for initUUID (just like Bungeecord)
             setValue(networkManager, "spoofedUUID", player.getCorrectUniqueId());
         }
 
-        return bungeeData;
+        return !needsAssistance;
     }
 
     @Override
