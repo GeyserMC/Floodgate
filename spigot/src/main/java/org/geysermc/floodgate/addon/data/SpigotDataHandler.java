@@ -37,7 +37,6 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.util.ClassNames;
-import org.geysermc.floodgate.util.ProxyUtils;
 
 public final class SpigotDataHandler extends CommonDataHandler {
     private Object networkManager;
@@ -52,7 +51,6 @@ public final class SpigotDataHandler extends CommonDataHandler {
 
     @Override
     protected void setNewIp(Channel channel, InetSocketAddress newIp) {
-        //todo the socket address will be overridden when bungeeData is true
         setValue(networkManager, ClassNames.SOCKET_ADDRESS, newIp);
     }
 
@@ -74,27 +72,19 @@ public final class SpigotDataHandler extends CommonDataHandler {
             return true;
         }
 
-        // the server will do all the work if BungeeCord mode is enabled,
-        // otherwise we have to help the server.
-        boolean needsAssistance = !ProxyUtils.isProxyData();
-        
-        // Paper and forks now have username validation, so we have to help Paper as well.
+        // Paper now has username validation, so we have to help Paper to bypass the check.
         // The username is only validated in the login start packet, and that packet doesn't reach
-        // the server handler when we follow the non-bungee-data route
-        needsAssistance |= ProxyUtils.isPaperServer();
+        // the server handler when we call our own login cycle.
 
-        if (needsAssistance) {
-            // Use a spoofedUUID for initUUID (just like Bungeecord)
-            setValue(networkManager, "spoofedUUID", player.getCorrectUniqueId());
-        }
-
-        return !needsAssistance;
+        // After internal discussion, we've decided to require assistance for all Spigot platforms,
+        // in case Spigot decides to add username validation as well.
+        return false;
     }
 
     @Override
     protected boolean shouldCallFireRead(Object queuedPacket) {
-        // we have to ignore the 'login start' packet if BungeeCord mode is disabled,
-        // otherwise the server might ask the user to login
+        // we have to ignore the 'login start' packet,
+        // otherwise the server will ask the user to login
         try {
             if (checkAndHandleLogin(queuedPacket)) {
                 return false;
@@ -146,6 +136,10 @@ public final class SpigotDataHandler extends CommonDataHandler {
                     player.getCorrectUniqueId(), player.getCorrectUsername()
             );
             setValue(packetListener, ClassNames.LOGIN_PROFILE, gameProfile);
+
+            //todo we can remove this line + the initUUID line, but then if a skin has been sent
+            // from a proxy using bungee data, we won't be able to show it
+            setValue(networkManager, "spoofedUUID", player.getCorrectUniqueId());
 
             // we have to fake the offline player (login) cycle
             // just like on Spigot:
