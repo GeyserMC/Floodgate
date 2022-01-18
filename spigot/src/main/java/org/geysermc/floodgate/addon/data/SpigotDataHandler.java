@@ -37,10 +37,12 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.util.ClassNames;
+import org.geysermc.floodgate.util.ProxyUtils;
 
 public final class SpigotDataHandler extends CommonDataHandler {
     private Object networkManager;
     private FloodgatePlayer player;
+    private boolean proxyData;
 
     public SpigotDataHandler(
             FloodgateHandshakeHandler handshakeHandler,
@@ -72,13 +74,18 @@ public final class SpigotDataHandler extends CommonDataHandler {
             return true;
         }
 
-        // Paper now has username validation, so we have to help Paper to bypass the check.
-        // The username is only validated in the login start packet, and that packet doesn't reach
-        // the server handler when we call our own login cycle.
+        // the server will do all the work if BungeeCord mode is enabled,
+        // otherwise we have to help the server.
+        proxyData = ProxyUtils.isProxyData();
 
-        // After internal discussion, we've decided to require assistance for all Spigot platforms,
-        // in case Spigot decides to add username validation as well.
-        return false;
+        if (!proxyData) {
+            // Use a spoofedUUID for initUUID (just like Bungeecord)
+            setValue(networkManager, "spoofedUUID", player.getCorrectUniqueId());
+        }
+
+        // we can only remove the handler if the data is proxy data and username validation doesn't
+        // exist. Otherwise, we need to wait and disable it.
+        return proxyData && ClassNames.PAPER_DISABLE_USERNAME_VALIDATION == null;
     }
 
     @Override
@@ -131,15 +138,21 @@ public final class SpigotDataHandler extends CommonDataHandler {
                 return true;
             }
 
+            if (ClassNames.PAPER_DISABLE_USERNAME_VALIDATION != null) {
+                // ensure that Paper will not be checking
+                setValue(packetListener, ClassNames.PAPER_DISABLE_USERNAME_VALIDATION, true);
+                if (proxyData) {
+                    // the server will handle the rest if we have proxy data
+                    ctx.pipeline().remove(this);
+                    return false;
+                }
+            }
+
             // set the player his GameProfile, we can't change the username without this
             GameProfile gameProfile = new GameProfile(
                     player.getCorrectUniqueId(), player.getCorrectUsername()
             );
             setValue(packetListener, ClassNames.LOGIN_PROFILE, gameProfile);
-
-            //todo we can remove this line + the initUUID line, but then if a skin has been sent
-            // from a proxy using bungee data, we won't be able to show it
-            setValue(networkManager, "spoofedUUID", player.getCorrectUniqueId());
 
             // we have to fake the offline player (login) cycle
             // just like on Spigot:
