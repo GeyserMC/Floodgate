@@ -37,6 +37,12 @@ public class SpigotHandshakeHandler implements HandshakeHandler {
 
     @Override
     public void handle(HandshakeData data) {
+        // we never have to do anything when BedrockData is null.
+        // BedrockData is null when something went wrong (e.g. invalid key / exception)
+        if (data.getBedrockData() == null) {
+            return;
+        }
+
         BedrockData bedrockData = data.getBedrockData();
         UUID correctUuid = data.getCorrectUniqueId();
 
