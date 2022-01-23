@@ -47,7 +47,6 @@ import org.geysermc.floodgate.link.PlayerLinkLoader;
 import org.geysermc.floodgate.module.ConfigLoadedModule;
 import org.geysermc.floodgate.module.PostInitializeModule;
 import org.geysermc.floodgate.news.NewsChecker;
-import org.geysermc.floodgate.util.GitProperties;
 import org.geysermc.floodgate.util.PrefixCheckTask;
 
 public class FloodgatePlatform {
@@ -59,9 +58,6 @@ public class FloodgatePlatform {
 
     private FloodgateConfig config;
     private Injector guice;
-
-    @Inject
-    private GitProperties properties;
 
     @Inject
     public FloodgatePlatform(
@@ -104,8 +100,7 @@ public class FloodgatePlatform {
 
         InstanceHolder.set(api, link, this.injector, packetHandlers, handshakeHandlers, KEY);
 
-        // for Geyser dump
-//        FloodgateInfoHolder.setGitProperties(properties.getProperties());
+        // todo provide build number and branch for Geyser dump
 
         guice.getInstance(NewsChecker.class).start();
     }

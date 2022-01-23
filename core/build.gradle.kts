@@ -1,3 +1,9 @@
+import net.kyori.blossom.BlossomExtension
+
+plugins {
+    id("net.kyori.blossom")
+}
+
 dependencies {
     api(projects.api)
 
@@ -13,3 +19,9 @@ dependencies {
 // present on all platforms
 provided("io.netty", "netty-transport", Versions.nettyVersion)
 provided("io.netty", "netty-codec", Versions.nettyVersion)
+
+configure<BlossomExtension> {
+    val constantsFile = "src/main/java/org/geysermc/floodgate/util/Constants.java"
+    replaceToken("\${branch}", branchName(), constantsFile)
+    replaceToken("\${buildNumber}", buildNumber(), constantsFile)
+}

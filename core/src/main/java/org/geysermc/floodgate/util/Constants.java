@@ -26,6 +26,9 @@
 package org.geysermc.floodgate.util;
 
 public final class Constants {
+    public static final int BUILD_NUMBER = Integer.parseInt("${buildNumber}");
+    public static final String GIT_BRANCH = "${branch}";
+
     public static final char COLOR_CHAR = '§';
 
     public static final boolean DEBUG_MODE = false;

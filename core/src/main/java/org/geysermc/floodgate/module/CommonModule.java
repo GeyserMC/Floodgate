@@ -59,7 +59,7 @@ import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinUploadManager;
-import org.geysermc.floodgate.util.GitProperties;
+import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.LanguageManager;
 
 @RequiredArgsConstructor
@@ -174,24 +174,8 @@ public class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public GitProperties gitProperties() {
-        return new GitProperties();
-    }
-
-    @Provides
-    @Singleton
-    public NewsChecker newsChecker(
-            CommandUtil commandUtil,
-            FloodgateLogger logger,
-            GitProperties properties) {
-
-        String branch = properties.getProperty("git.branch");
-        String build = properties.getProperty("git.build.number");
-        int buildNumber = -1;
-        if (build != null) {
-            buildNumber = Integer.parseInt(build);
-        }
-        return new NewsChecker(commandUtil, logger, branch, buildNumber);
+    public NewsChecker newsChecker(CommandUtil commandUtil, FloodgateLogger logger) {
+        return new NewsChecker(commandUtil, logger, Constants.GIT_BRANCH, Constants.BUILD_NUMBER);
     }
 
     @Provides

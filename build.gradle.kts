@@ -1,6 +1,6 @@
 plugins {
     `java-library`
-    id("floodgate.build-logic") apply false
+    id("floodgate.build-logic")
 //    id("com.github.spotbugs") version "4.8.0" apply false
     id("io.freefair.lombok") version "6.3.0" apply false
 }
@@ -17,8 +17,7 @@ val platforms = setOf(
     projects.velocity
 ).map { it.dependencyProject }
 
-//todo re-add git properties (or at least build number, branch and commit)
-// re-add pmd and organisation/license/sdcm/issuemanagement stuff
+//todo re-add pmd and organisation/license/sdcm/issuemanagement stuff
 
 val api: Project = projects.api.dependencyProject
 
