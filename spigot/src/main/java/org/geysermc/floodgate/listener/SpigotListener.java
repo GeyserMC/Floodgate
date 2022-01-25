@@ -55,7 +55,8 @@ public final class SpigotListener implements Listener {
         // he would've been disconnected by now
         FloodgatePlayer player = api.getPlayer(uniqueId);
         if (player != null) {
-            player.as(FloodgatePlayerImpl.class).setLogin(false);
+            //todo we should probably move this log message earlier in the process, so that we know
+            // that Floodgate has done its job
             logger.translatedInfo(
                     "floodgate.ingame.login_name",
                     player.getCorrectUsername(), player.getCorrectUniqueId()
@@ -66,6 +67,8 @@ public final class SpigotListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
+        api.playerRemoved(event.getPlayer().getUniqueId());
+
         SpigotCommandUtil.AUDIENCE_CACHE.remove(event.getPlayer().getUniqueId()); //todo
     }
 }

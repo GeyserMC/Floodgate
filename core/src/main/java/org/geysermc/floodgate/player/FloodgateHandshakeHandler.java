@@ -222,7 +222,7 @@ public final class FloodgateHandshakeHandler {
 
             FloodgatePlayer player = FloodgatePlayerImpl.from(bedrockData, handshakeData);
 
-            api.addPlayer(player.getJavaUniqueId(), player);
+            api.addPlayer(player);
 
             channel.attr(playerAttribute).set(player);
 

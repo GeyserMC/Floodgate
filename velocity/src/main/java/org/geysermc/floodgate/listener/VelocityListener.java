@@ -158,6 +158,8 @@ public final class VelocityListener {
 
     @Subscribe(order = PostOrder.LAST)
     public void onDisconnect(DisconnectEvent event) {
+        api.playerRemoved(event.getPlayer().getUniqueId());
+
         VelocityCommandUtil.AUDIENCE_CACHE.remove(event.getPlayer().getUniqueId()); //todo
     }
 }

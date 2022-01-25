@@ -25,6 +25,8 @@
 
 package org.geysermc.floodgate.api;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -33,7 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import javax.annotation.Nullable;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.cumulus.Form;
 import org.geysermc.cumulus.util.FormBuilder;
@@ -41,7 +43,6 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.unsafe.Unsafe;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
-import org.geysermc.floodgate.player.FloodgatePlayerImpl;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.pluginmessage.channel.FormChannel;
 import org.geysermc.floodgate.pluginmessage.channel.TransferChannel;
@@ -52,6 +53,11 @@ import org.geysermc.floodgate.util.Utils;
 @RequiredArgsConstructor
 public class SimpleFloodgateApi implements FloodgateApi {
     private final Map<UUID, FloodgatePlayer> players = new HashMap<>();
+    private final Cache<UUID, FloodgatePlayer> pendingRemove =
+            CacheBuilder.newBuilder()
+                    .expireAfterWrite(20, TimeUnit.SECONDS)
+                    .build();
+
     private final PluginMessageManager pluginMessageManager;
     private final FloodgateConfigHolder configHolder;
     private final FloodgateLogger logger;
@@ -79,10 +85,14 @@ public class SimpleFloodgateApi implements FloodgateApi {
     @Override
     public FloodgatePlayer getPlayer(UUID uuid) {
         FloodgatePlayer selfPlayer = players.get(uuid);
+        if (selfPlayer != null) {
+            return selfPlayer;
+        }
+
         // bedrock players are always stored by their xuid,
         // so we return the instance if we know that the given uuid is a Floodgate uuid
-        if (selfPlayer != null || isFloodgateId(uuid)) {
-            return selfPlayer;
+        if (isFloodgateId(uuid)) {
+            return pendingRemove.getIfPresent(uuid);
         }
 
         // make it possible to find player by Java id (linked players)
@@ -91,7 +101,8 @@ public class SimpleFloodgateApi implements FloodgateApi {
                 return player;
             }
         }
-        return null;
+        // and don't forget the pending remove linked players
+        return getPendingRemovePlayer(uuid);
     }
 
     @Override
@@ -164,67 +175,39 @@ public class SimpleFloodgateApi implements FloodgateApi {
         return new UnsafeFloodgateApi(pluginMessageManager);
     }
 
-    public FloodgatePlayer addPlayer(UUID uuid, FloodgatePlayer player) {
-        return players.put(uuid, player);
+    public FloodgatePlayer addPlayer(FloodgatePlayer player) {
+        // Bedrock players are always stored by their xuid
+        return players.put(player.getJavaUniqueId(), player);
     }
 
     /**
-     * Removes a player (should only be used internally)
-     *
-     * @param onlineId    The UUID of the online player
-     * @param removeLogin true if it should remove a sessions who is still logging in
-     * @return the FloodgatePlayer the player was logged in with
+     * This method is invoked when the player is no longer on the server, but the related platform-
+     * dependant event hasn't fired yet
      */
-    @Nullable
-    public FloodgatePlayer removePlayer(UUID onlineId, boolean removeLogin) {
-        FloodgatePlayer selfPlayer = players.get(onlineId);
-        // the player is a non-linked player or a linked player but somehow someone tried to
-        // remove the player by his xuid, we have to find out
-        if (selfPlayer != null) {
-            // we don't allow them to remove a player by his xuid
-            // because a linked player is never registered by his linked java uuid
-            if (selfPlayer.getLinkedPlayer() != null) {
-                return null;
-            }
+    public boolean setPendingRemove(FloodgatePlayer player) {
+        pendingRemove.put(player.getJavaUniqueId(), player);
+        return players.remove(player.getJavaUniqueId(), player);
+    }
 
-            // removeLogin logic
-            if (!canRemove(selfPlayer, removeLogin)) {
-                return null;
-            }
-
-            // passed the test
-            players.remove(onlineId);
-            // was the account linked?
-            return selfPlayer;
+    public void playerRemoved(UUID correctUuid) {
+        // we can remove the player directly if it is a Floodgate UUID.
+        // since it's stored by their Floodgate UUID
+        if (isFloodgateId(correctUuid)) {
+            pendingRemove.invalidate(correctUuid);
+            return;
         }
+        FloodgatePlayer linkedPlayer = getPendingRemovePlayer(correctUuid);
+        if (linkedPlayer != null) {
+            pendingRemove.invalidate(linkedPlayer.getJavaUniqueId());
+        }
+    }
 
-        // we still want to be able to remove a linked-player by his linked java uuid
-        for (FloodgatePlayer player : players.values()) {
-            if (canRemove(player, removeLogin) && player.getCorrectUniqueId().equals(onlineId)) {
-                players.remove(player.getJavaUniqueId());
+    private FloodgatePlayer getPendingRemovePlayer(UUID correctUuid) {
+        for (FloodgatePlayer player : pendingRemove.asMap().values()) {
+            if (player.getCorrectUniqueId().equals(correctUuid)) {
                 return player;
             }
         }
         return null;
-    }
-
-    protected boolean canRemove(FloodgatePlayer player, boolean removeLogin) {
-        FloodgatePlayerImpl impl = player.as(FloodgatePlayerImpl.class);
-        return impl.isLogin() && removeLogin || !impl.isLogin() && !removeLogin;
-    }
-
-    /**
-     * Equivalant of {@link #removePlayer(UUID, boolean)} but with removeLogin = false.
-     */
-    public FloodgatePlayer removePlayer(UUID onlineId) {
-        return removePlayer(onlineId, false);
-    }
-
-    /**
-     * Equivalent of {@link #removePlayer(UUID, boolean)} except that it removes a FloodgatePlayer
-     * instance directly.
-     */
-    public boolean removePlayer(FloodgatePlayer player) {
-        return players.remove(player.getJavaUniqueId(), player);
     }
 }

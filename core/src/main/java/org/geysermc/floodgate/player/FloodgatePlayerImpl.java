@@ -31,7 +31,6 @@ import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.InstanceHolder;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
@@ -68,16 +67,11 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
     private final String verifyCode;
 
     @Getter(AccessLevel.PRIVATE)
-    public Map<PropertyKey, Object> propertyKeyToValue;
+    private Map<PropertyKey, Object> propertyKeyToValue;
     @Getter(AccessLevel.PRIVATE)
     private Map<String, PropertyKey> stringToPropertyKey;
 
-    /**
-     * Returns true if the player is still logging in
-     */
-    @Setter private boolean login = true;
-
-    protected static FloodgatePlayerImpl from(BedrockData data, HandshakeData handshakeData) {
+    static FloodgatePlayerImpl from(BedrockData data, HandshakeData handshakeData) {
         FloodgateApi api = InstanceHolder.getApi();
 
         UUID javaUniqueId = Utils.getJavaUuid(data.getXuid());
