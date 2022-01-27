@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.util;
 
+import static org.geysermc.floodgate.util.ReflectionUtils.getField;
 import static org.geysermc.floodgate.util.ReflectionUtils.getFieldOfType;
 import static org.geysermc.floodgate.util.ReflectionUtils.getMethod;
 
@@ -37,6 +38,7 @@ import java.lang.reflect.Method;
 import java.net.SocketAddress;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @SuppressWarnings("PMD.SystemPrintln")
 public class ClassNames {
@@ -56,6 +58,8 @@ public class ClassNames {
     public static final Field HANDSHAKE_HOST;
     public static final Field LOGIN_PROFILE;
     public static final Field PACKET_LISTENER;
+    @Nullable
+    public static final Field PAPER_DISABLE_USERNAME_VALIDATION;
 
     public static final Method GET_PROFILE_METHOD;
     public static final Method LOGIN_DISCONNECT;
@@ -157,6 +161,13 @@ public class ClassNames {
 
         FIRE_LOGIN_EVENTS = getMethod(LOGIN_HANDLER, "fireEvents");
         checkNotNull(FIRE_LOGIN_EVENTS, "fireEvents from LoginHandler");
+
+        PAPER_DISABLE_USERNAME_VALIDATION = getField(LOGIN_LISTENER,
+                "iKnowThisMayNotBeTheBestIdeaButPleaseDisableUsernameValidation");
+        if (Constants.DEBUG_MODE) {
+            System.out.println("Paper disable username validation field exists? " +
+                    (PAPER_DISABLE_USERNAME_VALIDATION != null));
+        }
     }
 
     private static Class<?> getClassOrFallBack(String className, String fallbackName) {

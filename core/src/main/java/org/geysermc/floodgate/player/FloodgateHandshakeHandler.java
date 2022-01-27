@@ -35,7 +35,6 @@ import io.netty.util.AttributeKey;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import java.net.InetSocketAddress;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import lombok.AccessLevel;
@@ -218,8 +217,6 @@ public final class FloodgateHandshakeHandler {
                         bedrockData.getVerifyCode());
             }
 
-            correctHostname(handshakeData);
-
             FloodgatePlayer player = FloodgatePlayerImpl.from(bedrockData, handshakeData);
 
             api.addPlayer(player);
@@ -247,28 +244,7 @@ public final class FloodgateHandshakeHandler {
                 bedrockData, configHolder.get(), null, hostname);
         handshakeHandlers.callHandshakeHandlers(handshakeData);
 
-        if (bedrockData != null) {
-            correctHostname(handshakeData);
-        }
-
         return new HandshakeResult(resultType, handshakeData, bedrockData, null);
-    }
-
-    private void correctHostname(HandshakeData handshakeData) {
-        BedrockData bedrockData = handshakeData.getBedrockData();
-        UUID correctUuid = handshakeData.getCorrectUniqueId();
-
-        // replace the ip and uuid with the Bedrock client IP and an uuid based of the xuid
-        String[] split = handshakeData.getHostname().split("\0");
-        if (split.length >= 3) {
-            if (logger.isDebug()) {
-                logger.info("Replacing hostname arg1 '{}' with '{}' and arg2 '{}' with '{}'",
-                        split[1], bedrockData.getIp(), split[2], correctUuid.toString());
-            }
-            split[1] = bedrockData.getIp();
-            split[2] = correctUuid.toString();
-        }
-        handshakeData.setHostname(String.join("\0", split));
     }
 
     private CompletableFuture<Pair<BedrockData, LinkedPlayer>> fetchLinkedPlayer(BedrockData data) {

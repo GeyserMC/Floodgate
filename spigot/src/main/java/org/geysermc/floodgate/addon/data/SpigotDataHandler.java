@@ -42,6 +42,7 @@ import org.geysermc.floodgate.util.ProxyUtils;
 public final class SpigotDataHandler extends CommonDataHandler {
     private Object networkManager;
     private FloodgatePlayer player;
+    private boolean proxyData;
 
     public SpigotDataHandler(
             FloodgateHandshakeHandler handshakeHandler,
@@ -52,7 +53,6 @@ public final class SpigotDataHandler extends CommonDataHandler {
 
     @Override
     protected void setNewIp(Channel channel, InetSocketAddress newIp) {
-        //todo the socket address will be overridden when bungeeData is true
         setValue(networkManager, ClassNames.SOCKET_ADDRESS, newIp);
     }
 
@@ -76,20 +76,22 @@ public final class SpigotDataHandler extends CommonDataHandler {
 
         // the server will do all the work if BungeeCord mode is enabled,
         // otherwise we have to help the server.
-        boolean bungeeData = ProxyUtils.isProxyData();
+        proxyData = ProxyUtils.isProxyData();
 
-        if (!bungeeData) {
+        if (!proxyData) {
             // Use a spoofedUUID for initUUID (just like Bungeecord)
             setValue(networkManager, "spoofedUUID", player.getCorrectUniqueId());
         }
 
-        return bungeeData;
+        // we can only remove the handler if the data is proxy data and username validation doesn't
+        // exist. Otherwise, we need to wait and disable it.
+        return proxyData && ClassNames.PAPER_DISABLE_USERNAME_VALIDATION == null;
     }
 
     @Override
     protected boolean shouldCallFireRead(Object queuedPacket) {
-        // we have to ignore the 'login start' packet if BungeeCord mode is disabled,
-        // otherwise the server might ask the user to login
+        // we have to ignore the 'login start' packet,
+        // otherwise the server will ask the user to login
         try {
             if (checkAndHandleLogin(queuedPacket)) {
                 return false;
@@ -134,6 +136,16 @@ public final class SpigotDataHandler extends CommonDataHandler {
                 // ProtocolSupport, who likes to break things, doesn't work otherwise
                 ctx.pipeline().remove(this);
                 return true;
+            }
+
+            if (ClassNames.PAPER_DISABLE_USERNAME_VALIDATION != null) {
+                // ensure that Paper will not be checking
+                setValue(packetListener, ClassNames.PAPER_DISABLE_USERNAME_VALIDATION, true);
+                if (proxyData) {
+                    // the server will handle the rest if we have proxy data
+                    ctx.pipeline().remove(this);
+                    return false;
+                }
             }
 
             // set the player his GameProfile, we can't change the username without this
