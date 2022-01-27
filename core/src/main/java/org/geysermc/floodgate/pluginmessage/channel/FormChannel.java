@@ -31,13 +31,16 @@ import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.geysermc.cumulus.Form;
+import org.geysermc.cumulus.form.Form;
+import org.geysermc.cumulus.form.impl.FormDefinition;
+import org.geysermc.cumulus.form.impl.FormDefinitions;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
 
 public class FormChannel implements PluginMessageChannel {
+    private final FormDefinitions formDefinitions = FormDefinitions.instance();
     private final Short2ObjectMap<Form> storedForms = new Short2ObjectOpenHashMap<>();
     private final AtomicInteger nextFormId = new AtomicInteger(0);
 
@@ -103,10 +106,15 @@ public class FormChannel implements PluginMessageChannel {
         }
         storedForms.put(formId, form);
 
-        byte[] jsonData = form.getJsonData().getBytes(Charsets.UTF_8);
+        FormDefinition<Form, ?, ?> definition = formDefinitions.definitionFor(form);
+
+        byte[] jsonData =
+                definition.codec()
+                        .jsonData(form)
+                        .getBytes(Charsets.UTF_8);
 
         byte[] data = new byte[jsonData.length + 3];
-        data[0] = (byte) form.getType().ordinal();
+        data[0] = (byte) definition.formType().ordinal();
         data[1] = (byte) (formId >> 8 & 0xFF);
         data[2] = (byte) (formId & 0xFF);
         System.arraycopy(jsonData, 0, data, 3, jsonData.length);
@@ -117,7 +125,12 @@ public class FormChannel implements PluginMessageChannel {
         Form storedForm = storedForms.remove(getFormId(data));
         if (storedForm != null) {
             String responseData = new String(data, 2, data.length - 2, Charsets.UTF_8);
-            storedForm.getResponseHandler().accept(responseData);
+            try {
+                formDefinitions.definitionFor(storedForm)
+                        .handleFormResponse(storedForm, responseData);
+            } catch (Exception e) {
+                logger.error("Error while processing form response!", e);
+            }
             return true;
         }
         return false;

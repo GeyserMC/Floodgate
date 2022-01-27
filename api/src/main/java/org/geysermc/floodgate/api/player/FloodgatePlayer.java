@@ -26,7 +26,7 @@
 package org.geysermc.floodgate.api.player;
 
 import java.util.UUID;
-import org.geysermc.cumulus.Form;
+import org.geysermc.cumulus.form.Form;
 import org.geysermc.cumulus.util.FormBuilder;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.util.DeviceOs;
@@ -115,7 +115,7 @@ public interface FloodgatePlayer {
         return FloodgateApi.getInstance().sendForm(getCorrectUniqueId(), form);
     }
 
-    default boolean sendForm(FormBuilder<?, ?> formBuilder) {
+    default boolean sendForm(FormBuilder<?, ?, ?> formBuilder) {
         return sendForm(formBuilder.build());
     }
 

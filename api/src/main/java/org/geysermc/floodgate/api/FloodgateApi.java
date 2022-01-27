@@ -28,7 +28,7 @@ package org.geysermc.floodgate.api;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import org.geysermc.cumulus.Form;
+import org.geysermc.cumulus.form.Form;
 import org.geysermc.cumulus.util.FormBuilder;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
@@ -94,7 +94,7 @@ public interface FloodgateApi {
 
     boolean sendForm(UUID uuid, Form form);
 
-    boolean sendForm(UUID uuid, FormBuilder<?, ?> formBuilder);
+    boolean sendForm(UUID uuid, FormBuilder<?, ?, ?> formBuilder);
 
     boolean transferPlayer(UUID uuid, String address, int port);
 
