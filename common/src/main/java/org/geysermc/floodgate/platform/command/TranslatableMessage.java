@@ -28,8 +28,8 @@ package org.geysermc.floodgate.platform.command;
 import org.geysermc.floodgate.util.LanguageManager;
 
 /**
- * TranslatableMessage is the interface for a message that can be translated.
- * Messages are generally implemented using enums.
+ * TranslatableMessage is the interface for a message that can be translated. Messages are generally
+ * implemented using enums.
  */
 public interface TranslatableMessage {
     /**
@@ -52,7 +52,7 @@ public interface TranslatableMessage {
         for (int i = 0; i < translateParts.length; i++) {
             builder.append(manager.getString(translateParts[i], locale, args));
             if (translateParts.length != i + 1) {
-                builder.append(" ");
+                builder.append(' ');
             }
         }
         return builder.toString();

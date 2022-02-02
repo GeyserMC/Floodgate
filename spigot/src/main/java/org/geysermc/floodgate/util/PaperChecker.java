@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,25 +23,22 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.listener;
+package org.geysermc.floodgate.util;
 
-import com.google.inject.Inject;
-import lombok.RequiredArgsConstructor;
-import org.bukkit.Bukkit;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.platform.listener.ListenerRegistration;
+public class PaperChecker {
 
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
-public final class SpigotListenerRegistration implements ListenerRegistration<Listener> {
-    private final JavaPlugin plugin;
+    private static boolean SUPPORTS_PAPER;
 
-    @Override
-    public void register(Listener listener) {
-        if (listener == null) {
-            return;
+    static {
+        try {
+            Class.forName("com.destroystokyo.paper.PaperConfig");
+            SUPPORTS_PAPER = true;
+        } catch (ClassNotFoundException e) {
+            SUPPORTS_PAPER = false;
         }
+    }
 
-        Bukkit.getServer().getPluginManager().registerEvents(listener, plugin);
+    public static boolean supportsPaper() {
+        return SUPPORTS_PAPER;
     }
 }

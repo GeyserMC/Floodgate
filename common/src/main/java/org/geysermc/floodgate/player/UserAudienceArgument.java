@@ -111,7 +111,7 @@ public final class UserAudienceArgument extends CommandArgument<UserAudience, Us
                     StringBuilder builder = new StringBuilder(input);
                     while (!inputQueue.isEmpty()) {
                         String string = inputQueue.remove();
-                        builder.append(" ").append(string);
+                        builder.append(' ').append(string);
                         if (string.endsWith("\"")) {
                             break;
                         }

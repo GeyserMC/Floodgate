@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,23 +25,30 @@
 
 package org.geysermc.floodgate.listener;
 
+import com.destroystokyo.paper.event.profile.PreFillProfileEvent;
+import com.destroystokyo.paper.profile.ProfileProperty;
 import com.google.inject.Inject;
-import lombok.RequiredArgsConstructor;
-import org.bukkit.Bukkit;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.platform.listener.ListenerRegistration;
+import org.geysermc.floodgate.api.SimpleFloodgateApi;
 
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
-public final class SpigotListenerRegistration implements ListenerRegistration<Listener> {
-    private final JavaPlugin plugin;
+public final class PaperProfileListener implements Listener {
+    @Inject private SimpleFloodgateApi api;
 
-    @Override
-    public void register(Listener listener) {
-        if (listener == null) {
+    @EventHandler
+    public void onFill(PreFillProfileEvent event) {
+        UUID id = event.getPlayerProfile().getId();
+        if (!this.api.isFloodgatePlayer(id) ||
+                event.getPlayerProfile().getProperties().stream().anyMatch(
+                        prop -> "textures".equals(prop.getName()))) {
             return;
         }
 
-        Bukkit.getServer().getPluginManager().registerEvents(listener, plugin);
+        Set<ProfileProperty> properties = new HashSet<>(event.getPlayerProfile().getProperties());
+        properties.add(new ProfileProperty("textures", "", ""));
+        event.setProperties(properties);
     }
 }
