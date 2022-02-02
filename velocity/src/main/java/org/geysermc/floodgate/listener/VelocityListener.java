@@ -44,6 +44,7 @@ import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.player.GameProfileRequestEvent;
 import com.velocitypowered.api.proxy.InboundConnection;
 import com.velocitypowered.api.util.GameProfile;
+import com.velocitypowered.api.util.GameProfile.Property;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
@@ -141,8 +142,11 @@ public final class VelocityListener {
         FloodgatePlayer player = playerCache.getIfPresent(event.getConnection());
         if (player != null) {
             playerCache.invalidate(event.getConnection());
-            event.setGameProfile(new GameProfile(
-                    player.getCorrectUniqueId(), player.getCorrectUsername(), new ArrayList<>()));
+            GameProfile profile = new GameProfile(
+                    player.getCorrectUniqueId(), player.getCorrectUsername(), new ArrayList<>());
+            // To fix the February 2 2022 Mojang authentication changes
+            profile.addProperty(new Property("textures", "", ""));
+            event.setGameProfile(profile);
         }
     }
 
