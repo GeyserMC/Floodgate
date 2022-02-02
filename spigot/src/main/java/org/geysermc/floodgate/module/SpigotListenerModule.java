@@ -30,12 +30,10 @@ import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.ProvidesIntoSet;
 import org.bukkit.event.Listener;
-import org.geysermc.floodgate.listener.PaperProfileListener;
 import org.geysermc.floodgate.listener.SpigotListener;
 import org.geysermc.floodgate.register.ListenerRegister;
-import org.geysermc.floodgate.util.PaperChecker;
 
-public final class SpigotListenerModule extends AbstractModule {
+public class SpigotListenerModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(new TypeLiteral<ListenerRegister<Listener>>() {}).asEagerSingleton();
@@ -45,11 +43,5 @@ public final class SpigotListenerModule extends AbstractModule {
     @ProvidesIntoSet
     public Listener spigotListener() {
         return new SpigotListener();
-    }
-
-    @Singleton
-    @ProvidesIntoSet
-    public Listener paperProfileListener() {
-        return PaperChecker.supportsPaper() ? new PaperProfileListener() : null;
     }
 }

@@ -23,22 +23,24 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.util;
+package org.geysermc.floodgate.module;
 
-public class PaperChecker {
+import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.ProvidesIntoSet;
+import org.bukkit.event.Listener;
+import org.geysermc.floodgate.listener.PaperProfileListener;
+import org.geysermc.floodgate.register.ListenerRegister;
 
-    private static boolean SUPPORTS_PAPER;
-
-    static {
-        try {
-            Class.forName("com.destroystokyo.paper.PaperConfig");
-            SUPPORTS_PAPER = true;
-        } catch (ClassNotFoundException e) {
-            SUPPORTS_PAPER = false;
-        }
+public class PaperListenerModule extends SpigotListenerModule {
+    @Override
+    protected void configure() {
+        bind(new TypeLiteral<ListenerRegister<Listener>>() {}).asEagerSingleton();
     }
 
-    public static boolean supportsPaper() {
-        return SUPPORTS_PAPER;
+    @Singleton
+    @ProvidesIntoSet
+    public Listener paperProfileListener() {
+        return new PaperProfileListener();
     }
 }
