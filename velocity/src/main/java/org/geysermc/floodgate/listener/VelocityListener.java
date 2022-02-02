@@ -49,6 +49,7 @@ import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import net.kyori.adventure.text.Component;
@@ -142,11 +143,10 @@ public final class VelocityListener {
         FloodgatePlayer player = playerCache.getIfPresent(event.getConnection());
         if (player != null) {
             playerCache.invalidate(event.getConnection());
-            GameProfile profile = new GameProfile(
-                    player.getCorrectUniqueId(), player.getCorrectUsername(), new ArrayList<>());
-            // To fix the February 2 2022 Mojang authentication changes
-            profile.addProperty(new Property("textures", "", ""));
-            event.setGameProfile(profile);
+            // The texture properties addition is to fix the February 2 2022 Mojang authentication changes
+            event.setGameProfile(new GameProfile(player.getCorrectUniqueId(),
+                    player.getCorrectUsername(), Collections.singletonList(
+                            new Property("textures", "", ""))));
         }
     }
 
