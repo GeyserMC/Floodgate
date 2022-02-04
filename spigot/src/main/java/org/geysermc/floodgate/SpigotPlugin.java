@@ -30,12 +30,14 @@ import com.google.inject.Injector;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.module.PaperListenerModule;
 import org.geysermc.floodgate.module.PluginMessageModule;
 import org.geysermc.floodgate.module.ServerCommonModule;
 import org.geysermc.floodgate.module.SpigotAddonModule;
 import org.geysermc.floodgate.module.SpigotCommandModule;
 import org.geysermc.floodgate.module.SpigotListenerModule;
 import org.geysermc.floodgate.module.SpigotPlatformModule;
+import org.geysermc.floodgate.util.ReflectionUtils;
 import org.geysermc.floodgate.util.SpigotHandshakeHandler;
 import org.geysermc.floodgate.util.SpigotProtocolSupportHandler;
 import org.geysermc.floodgate.util.SpigotProtocolSupportListener;
@@ -63,10 +65,16 @@ public final class SpigotPlugin extends JavaPlugin {
     public void onEnable() {
         platform.enable(
                 new SpigotCommandModule(this),
-                new SpigotListenerModule(),
                 new SpigotAddonModule(),
                 new PluginMessageModule()
         );
+
+        if (ReflectionUtils.getClassSilently(
+                "com.destroystokyo.paper.event.profile.PreFillProfileEvent") != null) {
+            platform.enable(new PaperListenerModule());
+        } else {
+            platform.enable(new SpigotListenerModule());
+        }
 
         //todo add proper support for disabling things on shutdown and enabling this on enable
         injector.getInstance(HandshakeHandlers.class)

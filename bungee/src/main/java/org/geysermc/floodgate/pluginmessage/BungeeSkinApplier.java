@@ -25,6 +25,10 @@
 
 package org.geysermc.floodgate.pluginmessage;
 
+import static org.geysermc.floodgate.util.ReflectionUtils.getFieldOfType;
+import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
+
+import java.lang.reflect.Field;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -38,6 +42,12 @@ import org.geysermc.floodgate.skin.SkinData;
 
 @RequiredArgsConstructor
 public final class BungeeSkinApplier implements SkinApplier {
+    private static final Field LOGIN_RESULT;
+
+    static {
+        LOGIN_RESULT = getFieldOfType(InitialHandler.class, LoginResult.class);
+    }
+    
     private final FloodgateLogger logger;
 
     @Override
@@ -61,6 +71,7 @@ public final class BungeeSkinApplier implements SkinApplier {
         if (loginResult == null) {
             // id and name are unused and properties will be overridden
             loginResult = new LoginResult(null, null, null);
+            setValue(handler, LOGIN_RESULT, loginResult);
         }
 
         Property property = new Property("textures", skinData.getValue(), skinData.getSignature());

@@ -36,6 +36,7 @@ import java.util.UUID;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
+import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.connection.InitialHandler;
@@ -46,6 +47,8 @@ import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.player.FloodgatePlayerImpl;
+import org.geysermc.floodgate.skin.SkinApplier;
+import org.geysermc.floodgate.skin.SkinData;
 import org.geysermc.floodgate.util.BungeeCommandUtil;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.ReflectionUtils;
@@ -67,6 +70,7 @@ public final class BungeeListener implements Listener {
     @Inject private ProxyFloodgateApi api;
     @Inject private LanguageManager languageManager;
     @Inject private FloodgateLogger logger;
+    @Inject private SkinApplier skinApplier;
 
     @Inject
     @Named("playerAttribute")
@@ -118,6 +122,15 @@ public final class BungeeListener implements Listener {
                     player.getCorrectUsername(), uniqueId
             );
             languageManager.loadLocale(player.getLanguageCode());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPostLogin(PostLoginEvent event) {
+        // To fix the February 2 2022 Mojang authentication changes
+        FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
+        if (player != null) {
+            skinApplier.applySkin(player, new SkinData("", ""));
         }
     }
 

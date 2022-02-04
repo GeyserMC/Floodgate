@@ -23,25 +23,24 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.listener;
+package org.geysermc.floodgate.module;
 
-import com.google.inject.Inject;
-import lombok.RequiredArgsConstructor;
-import org.bukkit.Bukkit;
+import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.ProvidesIntoSet;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.platform.listener.ListenerRegistration;
+import org.geysermc.floodgate.listener.PaperProfileListener;
+import org.geysermc.floodgate.register.ListenerRegister;
 
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
-public final class SpigotListenerRegistration implements ListenerRegistration<Listener> {
-    private final JavaPlugin plugin;
-
+public class PaperListenerModule extends SpigotListenerModule {
     @Override
-    public void register(Listener listener) {
-        if (listener == null) {
-            return;
-        }
+    protected void configure() {
+        bind(new TypeLiteral<ListenerRegister<Listener>>() {}).asEagerSingleton();
+    }
 
-        Bukkit.getServer().getPluginManager().registerEvents(listener, plugin);
+    @Singleton
+    @ProvidesIntoSet
+    public Listener paperProfileListener() {
+        return new PaperProfileListener();
     }
 }
