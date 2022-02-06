@@ -63,18 +63,15 @@ public final class SpigotPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        boolean usePaperListener = ReflectionUtils.getClassSilently(
+                "com.destroystokyo.paper.event.profile.PreFillProfileEvent") != null;
+
         platform.enable(
                 new SpigotCommandModule(this),
                 new SpigotAddonModule(),
-                new PluginMessageModule()
+                new PluginMessageModule(),
+                (usePaperListener ? new PaperListenerModule() : new SpigotListenerModule())
         );
-
-        if (ReflectionUtils.getClassSilently(
-                "com.destroystokyo.paper.event.profile.PreFillProfileEvent") != null) {
-            platform.enable(new PaperListenerModule());
-        } else {
-            platform.enable(new SpigotListenerModule());
-        }
 
         //todo add proper support for disabling things on shutdown and enabling this on enable
         injector.getInstance(HandshakeHandlers.class)

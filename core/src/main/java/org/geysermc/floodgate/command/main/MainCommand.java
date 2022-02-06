@@ -35,9 +35,9 @@ import cloud.commandframework.context.CommandContext;
 import java.util.Locale;
 import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
+import org.geysermc.floodgate.command.util.Permission;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.player.UserAudience;
-import org.geysermc.floodgate.util.Permissions;
 
 public final class MainCommand implements FloodgateCommand {
     @Override
@@ -46,12 +46,13 @@ public final class MainCommand implements FloodgateCommand {
                 "floodgate",
                 ArgumentDescription.of("A set of Floodgate related actions in one command"))
                 .senderType(UserAudience.class)
-                .permission(Permissions.COMMAND_MAIN.get())
+                .permission(Permission.COMMAND_MAIN.get())
                 .handler(this::execute);
 
         for (SubCommand subCommand : SubCommand.VALUES) {
             commandManager.command(builder
                     .literal(subCommand.name().toLowerCase(Locale.ROOT), subCommand.description)
+                    .permission(subCommand.permission.get())
                     .handler(subCommand.executor::accept)
             );
         }
@@ -65,10 +66,12 @@ public final class MainCommand implements FloodgateCommand {
         StringBuilder helpMessage = new StringBuilder("Available subcommands are:\n");
 
         for (SubCommand subCommand : SubCommand.VALUES) {
-            helpMessage.append('\n').append(COLOR_CHAR).append('b')
-                    .append(subCommand.name().toLowerCase(Locale.ROOT))
-                    .append(COLOR_CHAR).append("f - ").append(COLOR_CHAR).append('7')
-                    .append(subCommand.description);
+            if (context.getSender().hasPermission(subCommand.permission.get())) {
+                helpMessage.append('\n').append(COLOR_CHAR).append('b')
+                        .append(subCommand.name().toLowerCase(Locale.ROOT))
+                        .append(COLOR_CHAR).append("f - ").append(COLOR_CHAR).append('7')
+                        .append(subCommand.description);
+            }
         }
 
         context.getSender().sendMessage(helpMessage.toString());
@@ -77,11 +80,12 @@ public final class MainCommand implements FloodgateCommand {
     @RequiredArgsConstructor
     enum SubCommand {
         FIREWALL("Check if your outgoing firewall allows Floodgate to work properly",
-                FirewallCheckSubcommand::executeFirewall);
+                Permission.COMMAND_MAIN_FIREWALL, FirewallCheckSubcommand::executeFirewall);
 
         static final SubCommand[] VALUES = values();
 
         final String description;
+        final Permission permission;
         final Consumer<CommandContext<UserAudience>> executor;
     }
 }

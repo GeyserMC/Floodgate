@@ -43,7 +43,7 @@ import org.geysermc.floodgate.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.player.UserAudience.PlayerAudience;
 import org.geysermc.floodgate.util.Constants;
-import org.geysermc.floodgate.util.Permissions;
+import org.geysermc.floodgate.command.util.Permission;
 
 @NoArgsConstructor
 public final class UnlinkAccountCommand implements FloodgateCommand {
@@ -54,7 +54,7 @@ public final class UnlinkAccountCommand implements FloodgateCommand {
         return commandManager.commandBuilder("unlinkaccount",
                 ArgumentDescription.of("Unlink your Java account from your Bedrock account"))
                 .senderType(PlayerAudience.class)
-                .permission(Permissions.COMMAND_UNLINK.get())
+                .permission(Permission.COMMAND_UNLINK.get())
                 .handler(this::execute)
                 .build();
     }

@@ -72,7 +72,7 @@ public final class ConfigUpdater {
                     "config now and we'll also generate a new Floodgate key for you, but if " +
                     "you're running a network or if you're running a Spigot server with " +
                     "Geyser Standalone please update as you'll no longer be able to connect.");
-            renames.put("enabled", "enable"); //todo make dump system and add a boolean 'found-legacy-key' or something like that
+            renames.put("enabled", "enable");
             renames.put("allowed", "allow-linking");
 
             // relocate the old key so that they can restore it if it was a new key

@@ -32,8 +32,12 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.permissions.PermissionDefault;
+import org.bukkit.plugin.PluginManager;
 import org.geysermc.floodgate.SpigotPlugin;
+import org.geysermc.floodgate.command.util.Permission;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.player.FloodgateCommandPreprocessor;
 import org.geysermc.floodgate.player.UserAudience;
@@ -41,6 +45,12 @@ import org.geysermc.floodgate.player.UserAudience;
 @RequiredArgsConstructor
 public final class SpigotCommandModule extends CommandModule {
     private final SpigotPlugin plugin;
+
+    @Override
+    protected void configure() {
+        super.configure();
+        registerPermissions();
+    }
 
     @Provides
     @Singleton
@@ -54,5 +64,21 @@ public final class SpigotCommandModule extends CommandModule {
         );
         commandManager.registerCommandPreProcessor(new FloodgateCommandPreprocessor<>(commandUtil));
         return commandManager;
+    }
+
+    private void registerPermissions() {
+        PluginManager manager = Bukkit.getPluginManager();
+        for (Permission permission : Permission.values()) {
+            if (manager.getPermission(permission.get()) != null) {
+                continue;
+            }
+
+            PermissionDefault defaultValue =
+                    PermissionDefault.getByName(permission.defaultValue().name());
+
+            manager.addPermission(new org.bukkit.permissions.Permission(
+                    permission.get(), defaultValue
+            ));
+        }
     }
 }

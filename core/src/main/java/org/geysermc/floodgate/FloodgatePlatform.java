@@ -100,7 +100,7 @@ public class FloodgatePlatform {
 
         InstanceHolder.set(api, link, this.injector, packetHandlers, handshakeHandlers, KEY);
 
-        // todo provide build number and branch for Geyser dump
+        // todo this was the place where we provided the build number and branch for Geyser dump
 
         guice.getInstance(NewsChecker.class).start();
     }

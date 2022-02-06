@@ -43,7 +43,7 @@ import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.HttpUtils;
 import org.geysermc.floodgate.util.HttpUtils.HttpResponse;
-import org.geysermc.floodgate.util.Permissions;
+import org.geysermc.floodgate.command.util.Permission;
 
 public class NewsChecker {
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
@@ -72,8 +72,6 @@ public class NewsChecker {
     }
 
     private void checkNews() {
-        // todo also check news for the downloaded database types
-
         HttpResponse<JsonArray> response =
                 HttpUtils.getSilent(
                         Constants.NEWS_OVERVIEW_URL + Constants.NEWS_PROJECT_NAME,
@@ -121,14 +119,14 @@ public class NewsChecker {
                     return;
                 }
 
-                if (commandUtil.hasPermission(player, Permissions.NEWS_RECEIVE.get())) {
+                if (commandUtil.hasPermission(player, Permission.NEWS_RECEIVE.get())) {
                     String message = Constants.COLOR_CHAR + "a " + news.getMessage();
                     commandUtil.sendMessage(player, message);
                 }
                 break;
             case BROADCAST_TO_OPERATORS:
                 Collection<Object> onlinePlayers = commandUtil.getOnlinePlayersWithPermission(
-                        Permissions.NEWS_RECEIVE.get()
+                        Permission.NEWS_RECEIVE.get()
                 );
 
                 for (Object onlinePlayer : onlinePlayers) {
@@ -182,7 +180,8 @@ public class NewsChecker {
                 schedule(delayMs > 0 ? delayMs : 0);
                 break;
             case CONFIG_SPECIFIC:
-                //todo
+                //todo this can replace the downloaded database types update check.
+                // check if ConfigUtils has a way to check this easily
                 break;
         }
         activeNewsItems.put(item.getId(), item);

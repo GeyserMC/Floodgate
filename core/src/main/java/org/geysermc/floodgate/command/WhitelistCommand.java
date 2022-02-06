@@ -48,7 +48,7 @@ import org.geysermc.floodgate.player.UserAudienceArgument;
 import org.geysermc.floodgate.player.UserAudienceArgument.PlayerType;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.HttpUtils;
-import org.geysermc.floodgate.util.Permissions;
+import org.geysermc.floodgate.command.util.Permission;
 
 public class WhitelistCommand implements FloodgateCommand {
     @Inject private FloodgateConfig config;
@@ -58,7 +58,7 @@ public class WhitelistCommand implements FloodgateCommand {
     public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
         Command.Builder<UserAudience> builder = commandManager.commandBuilder("fwhitelist",
                 ArgumentDescription.of("Easy way to whitelist Bedrock players"))
-                .permission(Permissions.COMMAND_WHITELIST.get());
+                .permission(Permission.COMMAND_WHITELIST.get());
 
         commandManager.command(builder
                 .literal("add", "a")

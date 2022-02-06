@@ -48,7 +48,7 @@ import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.player.UserAudience.PlayerAudience;
 import org.geysermc.floodgate.player.UserAudienceArgument;
 import org.geysermc.floodgate.util.Constants;
-import org.geysermc.floodgate.util.Permissions;
+import org.geysermc.floodgate.command.util.Permission;
 
 @NoArgsConstructor
 public final class LinkAccountCommand implements FloodgateCommand {
@@ -60,7 +60,7 @@ public final class LinkAccountCommand implements FloodgateCommand {
         return commandManager.commandBuilder("linkaccount",
                 ArgumentDescription.of("Link your Java account with your Bedrock account"))
                 .senderType(PlayerAudience.class)
-                .permission(Permissions.COMMAND_LINK.get())
+                .permission(Permission.COMMAND_LINK.get())
                 .argument(UserAudienceArgument.of("player", true))
                 .argument(StringArgument.optional("code"))
                 .handler(this::execute)
