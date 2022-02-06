@@ -23,23 +23,37 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.util;
+package org.geysermc.floodgate.command.util;
 
-public enum Permissions {
-    COMMAND_MAIN("floodgate.command.floodgate"),
-    COMMAND_LINK("floodgate.command.linkaccount"),
-    COMMAND_UNLINK("floodgate.command.unlinkaccount"),
-    COMMAND_WHITELIST("floodgate.command.fwhitelist"),
+import static org.geysermc.floodgate.command.util.PermissionDefault.OP;
+import static org.geysermc.floodgate.command.util.PermissionDefault.TRUE;
 
-    NEWS_RECEIVE("floodgate.news.receive");
+public enum Permission {
+    COMMAND_MAIN("floodgate.command.floodgate", TRUE),
+    COMMAND_MAIN_FIREWALL(COMMAND_MAIN, "firewall", OP),
+    COMMAND_LINK("floodgate.command.linkaccount", TRUE),
+    COMMAND_UNLINK("floodgate.command.unlinkaccount", TRUE),
+    COMMAND_WHITELIST("floodgate.command.fwhitelist", OP),
+
+    NEWS_RECEIVE("floodgate.news.receive", OP);
 
     private final String permission;
+    private final PermissionDefault defaultValue;
 
-    Permissions(String permission) {
+    Permission(String permission, PermissionDefault defaultValue) {
         this.permission = permission;
+        this.defaultValue = defaultValue;
+    }
+
+    Permission(Permission parent, String child, PermissionDefault defaultValue) {
+        this(parent.get() + "." + child, defaultValue);
     }
 
     public String get() {
         return permission;
+    }
+
+    public PermissionDefault defaultValue() {
+        return defaultValue;
     }
 }
