@@ -70,7 +70,7 @@ public class HandshakeDataImpl implements HandshakeData {
             int usernameLength = Math.min(bedrockData.getUsername().length(), 16 - prefix.length());
             javaUsername = prefix + bedrockData.getUsername().substring(0, usernameLength);
             if (config.isReplaceSpaces()) {
-                javaUsername = javaUsername.replaceAll(" ", "_");
+                javaUsername = javaUsername.replace(" ", "_");
             }
 
             javaUniqueId = Utils.getJavaUuid(bedrockData.getXuid());
