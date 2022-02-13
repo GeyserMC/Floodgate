@@ -25,7 +25,6 @@
 
 package org.geysermc.floodgate.config;
 
-import java.security.Key;
 import lombok.Getter;
 
 /**
@@ -34,44 +33,13 @@ import lombok.Getter;
  */
 @Getter
 public class FloodgateConfig {
-    private String keyFileName;
-    private String usernamePrefix;
-    private boolean replaceSpaces;
-
     private String defaultLocale;
-
-    private DisconnectMessages disconnect;
-    private PlayerLinkConfig playerLink;
 
     private boolean debug;
     private int configVersion;
-
-    private Key key;
-
-    public void setKey(Key key) {
-        if (this.key == null) {
-            this.key = key;
-        }
-    }
 
     public boolean isProxy() {
         return this instanceof ProxyFloodgateConfig;
     }
 
-    @Getter
-    public static class DisconnectMessages {
-        private String invalidKey;
-        private String invalidArgumentsLength;
-    }
-
-    @Getter
-    public static class PlayerLinkConfig {
-        private boolean enabled;
-        private boolean requireLink;
-        private boolean enableOwnLinking = false;
-        private boolean allowed;
-        private long linkCodeTimeout;
-        private String type;
-        private boolean enableGlobalLinking;
-    }
 }

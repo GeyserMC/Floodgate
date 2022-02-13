@@ -41,7 +41,7 @@ import org.yaml.snakeyaml.Yaml;
 
 @RequiredArgsConstructor
 public final class ConfigUpdater {
-    private static final int CONFIG_VERSION = 2;
+    private static final int CONFIG_VERSION = 1;
     private final Path dataFolder;
     private final ConfigFileUpdater fileUpdater;
     private final FloodgateLogger logger;
@@ -75,18 +75,6 @@ public final class ConfigUpdater {
             renames.put("enabled", "enable");
             renames.put("allowed", "allow-linking");
 
-            // relocate the old key so that they can restore it if it was a new key
-            Path keyFilePath = dataFolder.resolve((String) config.get("key-file-name"));
-            if (Files.exists(keyFilePath)) {
-                try {
-                    Files.copy(keyFilePath, dataFolder.resolve("old-key.pem"));
-                } catch (IOException exception) {
-                    throw new RuntimeException(
-                            "Failed to relocate the old key to make place for a new key",
-                            exception);
-                }
-            }
-            loader.generateKey(keyFilePath);
         } else {
             // get (and verify) the config version
             checkArgument(
@@ -106,7 +94,7 @@ public final class ConfigUpdater {
             return;
         }
 
-        if (version < 2) {
+        if (version < CONFIG_VERSION) {
             // renamed 'use-global-linking' to 'enable-global-linking'
             // and added 'enable-own-linking'
             renames.put("enable-global-linking", "use-global-linking");

@@ -50,7 +50,6 @@ import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
-import org.geysermc.floodgate.skin.SkinUploadManager;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.InvalidFormatException;
 import org.geysermc.floodgate.util.LinkedPlayer;
@@ -61,7 +60,6 @@ public final class FloodgateHandshakeHandler {
     private final SimpleFloodgateApi api;
     private final FloodgateCipher cipher;
     private final FloodgateConfigHolder configHolder;
-    private final SkinUploadManager skinUploadManager;
     private final AttributeKey<FloodgatePlayer> playerAttribute;
     private final FloodgateLogger logger;
 
@@ -70,7 +68,6 @@ public final class FloodgateHandshakeHandler {
             SimpleFloodgateApi api,
             FloodgateCipher cipher,
             FloodgateConfigHolder configHolder,
-            SkinUploadManager skinUploadManager,
             AttributeKey<FloodgatePlayer> playerAttribute,
             FloodgateLogger logger) {
 
@@ -78,7 +75,6 @@ public final class FloodgateHandshakeHandler {
         this.api = api;
         this.cipher = cipher;
         this.configHolder = configHolder;
-        this.skinUploadManager = skinUploadManager;
         this.playerAttribute = playerAttribute;
         this.logger = logger;
     }
@@ -156,7 +152,8 @@ public final class FloodgateHandshakeHandler {
 
                 // we'll use the LinkedPlayer provided by Bungee or Velocity (if they included one)
                 if (bedrockData.hasPlayerLink()) {
-                    throw handlePart2(channel, hostname, bedrockData, bedrockData.getLinkedPlayer());
+                    throw handlePart2(channel, hostname, bedrockData,
+                            bedrockData.getLinkedPlayer());
                 }
                 //todo add option to not check for links when the data comes from a proxy
 

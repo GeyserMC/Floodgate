@@ -53,18 +53,11 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
     private final String username;
     private final String javaUsername;
     private final UUID javaUniqueId;
-    private final String xuid;
-    private final DeviceOs deviceOs;
     private final String languageCode;
-    private final UiProfile uiProfile;
-    private final InputMode inputMode;
     private final String ip;
     private final boolean fromProxy;
     private final boolean proxy; // if current platform is a proxy
     private final LinkedPlayer linkedPlayer;
-
-    private final int subscribeId;
-    private final String verifyCode;
 
     @Getter(AccessLevel.PRIVATE)
     private Map<PropertyKey, Object> propertyKeyToValue;
@@ -84,9 +77,9 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
 
         return new FloodgatePlayerImpl(
                 data.getVersion(), data.getUsername(), handshakeData.getJavaUsername(),
-                javaUniqueId, data.getXuid(), deviceOs, data.getLanguageCode(), uiProfile,
-                inputMode, data.getIp(), data.isFromProxy(), api instanceof ProxyFloodgateApi,
-                linkedPlayer, data.getSubscribeId(), data.getVerifyCode());
+                javaUniqueId, data.getLanguageCode(), data.getIp(), data.isFromProxy(),
+                api instanceof ProxyFloodgateApi,
+                linkedPlayer);
     }
 
     @Override
@@ -99,15 +92,8 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
         return linkedPlayer != null ? linkedPlayer.getJavaUsername() : javaUsername;
     }
 
-    @Override
-    public boolean isLinked() {
-        return linkedPlayer != null;
-    }
-
     public BedrockData toBedrockData() {
-        return BedrockData.of(version, username, xuid, deviceOs.ordinal(), languageCode,
-                uiProfile.ordinal(), inputMode.ordinal(), ip, linkedPlayer, proxy, subscribeId,
-                verifyCode);
+        return BedrockData.of(version, username, languageCode, ip, linkedPlayer, proxy);
     }
 
     @Override

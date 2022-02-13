@@ -44,9 +44,6 @@ public final class ConfigLoader {
     private final DefaultConfigHandler configCreator;
     private final ConfigUpdater updater;
 
-    private final KeyProducer keyProducer;
-    private final FloodgateCipher cipher;
-
     private final FloodgateLogger logger;
 
     @SuppressWarnings("unchecked")
@@ -90,49 +87,7 @@ public final class ConfigLoader {
                     "Failed to load the config! Try to delete the config file", exception);
         }
 
-        Path keyPath = dataFolder.resolve(configInstance.getKeyFileName());
-        // don't assume that the key always exists with the existence of a config
-        if (!Files.exists(keyPath)) {
-            generateKey(keyPath);
-        }
-
-        try {
-            Key key = keyProducer.produceFrom(keyPath);
-            cipher.init(key);
-            configInstance.setKey(key);
-        } catch (IOException exception) {
-            logger.error("Error while reading the key", exception);
-            throw new RuntimeException("Failed to read the key!", exception);
-        }
-
         return configInstance;
     }
 
-    public void generateKey(Path keyPath) {
-        try {
-            Key key = keyProducer.produce();
-            cipher.init(key);
-
-            String test = "abcdefghijklmnopqrstuvwxyz0123456789";
-            byte[] encrypted = cipher.encryptFromString(test);
-            String decrypted = cipher.decryptToString(encrypted);
-
-            if (!test.equals(decrypted)) {
-                logger.error("Whoops, we tested the generated Floodgate keys but " +
-                        "the decrypted test message doesn't match the original.\n" +
-                        "Original message: " + test + "." +
-                        "Decrypted message: " + decrypted + ".\n" +
-                        "The encrypted message itself: " + new String(encrypted)
-                );
-                throw new RuntimeException(
-                        "Tested the generated public and private key but, " +
-                                "the decrypted message doesn't match the original!"
-                );
-            }
-
-            Files.write(keyPath, key.getEncoded());
-        } catch (Exception exception) {
-            logger.error("Error while creating key", exception);
-        }
-    }
 }

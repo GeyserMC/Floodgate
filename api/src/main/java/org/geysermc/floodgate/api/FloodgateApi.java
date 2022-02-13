@@ -27,9 +27,6 @@ package org.geysermc.floodgate.api;
 
 import java.util.Collection;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import org.geysermc.cumulus.Form;
-import org.geysermc.cumulus.util.FormBuilder;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.unsafe.Unsafe;
@@ -41,12 +38,6 @@ public interface FloodgateApi {
     static FloodgateApi getInstance() {
         return InstanceHolder.getApi();
     }
-
-    /**
-     * Returns the character(s) that will be added in front of a Bedrock player's name to prevent
-     * username duplicates.
-     */
-    String getPlayerPrefix();
 
     /**
      * Returns all the online Floodgate players.
@@ -73,66 +64,6 @@ public interface FloodgateApi {
      * @return FloodgatePlayer if the given uuid is a Bedrock player
      */
     FloodgatePlayer getPlayer(UUID uuid);
-
-    /**
-     * Create a valid Java player uuid of a xuid
-     *
-     * @param xuid the xuid that should be converted
-     * @return the created uuid based of the given xuid
-     */
-    UUID createJavaPlayerId(long xuid);
-
-    /**
-     * Checks if the uuid of the player has the {@link #createJavaPlayerId(long)} format. This
-     * method can't validate a linked player uuid, since that doesn't equal the format. Use {@link
-     * #isFloodgatePlayer(UUID)} if you want to include linked accounts.
-     *
-     * @param uuid the uuid to check
-     * @return true if the given uuid has the correct format.
-     */
-    boolean isFloodgateId(UUID uuid);
-
-    boolean sendForm(UUID uuid, Form form);
-
-    boolean sendForm(UUID uuid, FormBuilder<?, ?> formBuilder);
-
-    boolean transferPlayer(UUID uuid, String address, int port);
-
-    /**
-     * Get the xuid of the user that has the given gamertag.
-     *
-     * @param gamertag the gamertag of the player
-     * @return the xuid of the player with the given gamertag, or null when there is no player with
-     * the given gamertag
-     */
-    CompletableFuture<Long> getXuidFor(String gamertag);
-
-    /**
-     * Get the xuid of the player that has the given gamertag. It does the same thing as {@link
-     * #getXuidFor(String)} except that this method will return the xuid in Floodgate uuid format
-     * instead of just a long
-     *
-     * @param gamertag the gamertag of the player
-     * @return the xuid of the player with the given gamertag, or null when there is no player with
-     * the given gamertag
-     */
-    default CompletableFuture<UUID> getUuidFor(String gamertag) {
-        return getXuidFor(gamertag).thenApply(xuid -> {
-            if (xuid == null) {
-                return null;
-            }
-            return createJavaPlayerId(xuid);
-        });
-    }
-
-    /**
-     * Get the gamertag of the user that has the given xuid.
-     *
-     * @param xuid the gamertag of the player
-     * @return the gamertag of the player with the given xuid, or null when there is not player with
-     * the given xuid
-     */
-    CompletableFuture<String> getGamertagFor(long xuid);
 
     /**
      * Returns the instance that manages all the linking.
