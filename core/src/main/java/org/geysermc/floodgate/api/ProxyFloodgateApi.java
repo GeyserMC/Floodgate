@@ -25,35 +25,12 @@
 
 package org.geysermc.floodgate.api;
 
-import java.nio.charset.StandardCharsets;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
-import org.geysermc.floodgate.crypto.FloodgateCipher;
-import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
-import org.geysermc.floodgate.util.BedrockData;
 
 public final class ProxyFloodgateApi extends SimpleFloodgateApi {
-    private final FloodgateCipher cipher;
 
-    public ProxyFloodgateApi(
-            PluginMessageManager pluginMessageManager,
-            FloodgateConfigHolder configHolder,
-            FloodgateLogger logger,
-            FloodgateCipher cipher) {
-        super(pluginMessageManager, configHolder, logger);
-        this.cipher = cipher;
+    public ProxyFloodgateApi(FloodgateLogger logger) {
+        super(logger);
     }
 
-    public byte[] createEncryptedData(BedrockData bedrockData) {
-        try {
-            return cipher.encryptFromString(bedrockData.toString());
-        } catch (Exception exception) {
-            throw new IllegalStateException("We failed to create the encrypted data, " +
-                    "but creating encrypted data is mandatory!", exception);
-        }
-    }
-
-    public String createEncryptedDataString(BedrockData bedrockData) {
-        return new String(createEncryptedData(bedrockData), StandardCharsets.UTF_8);
-    }
 }

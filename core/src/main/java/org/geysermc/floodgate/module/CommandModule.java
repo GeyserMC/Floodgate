@@ -28,10 +28,7 @@ package org.geysermc.floodgate.module;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.ProvidesIntoSet;
-import org.geysermc.floodgate.command.LinkAccountCommand;
 import org.geysermc.floodgate.command.TestCommand;
-import org.geysermc.floodgate.command.UnlinkAccountCommand;
-import org.geysermc.floodgate.command.WhitelistCommand;
 import org.geysermc.floodgate.command.main.MainCommand;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.register.CommandRegister;
@@ -40,18 +37,6 @@ public class CommandModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(CommandRegister.class).asEagerSingleton();
-    }
-
-    @Singleton
-    @ProvidesIntoSet
-    public FloodgateCommand linkAccountCommand() {
-        return new LinkAccountCommand();
-    }
-
-    @Singleton
-    @ProvidesIntoSet
-    public FloodgateCommand unlinkAccountCommand() {
-        return new UnlinkAccountCommand();
     }
 
     @Singleton

@@ -27,19 +27,14 @@ package org.geysermc.floodgate.api;
 
 import java.util.UUID;
 import org.geysermc.floodgate.api.unsafe.Unsafe;
-import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
-import org.geysermc.floodgate.pluginmessage.channel.PacketChannel;
 
 public final class UnsafeFloodgateApi implements Unsafe {
-    private final PacketChannel packetChannel;
 
-    UnsafeFloodgateApi(PluginMessageManager pluginMessageManager) {
+    UnsafeFloodgateApi() {
         StackTraceElement element = Thread.currentThread().getStackTrace()[2];
         if (!SimpleFloodgateApi.class.getName().equals(element.getClassName())) {
             throw new IllegalStateException("Use the Floodgate api to get an instance");
         }
-
-        packetChannel = pluginMessageManager.getChannel(PacketChannel.class);
     }
 
     @Override
@@ -48,6 +43,6 @@ public final class UnsafeFloodgateApi implements Unsafe {
         fullData[0] = (byte) packetId;
         System.arraycopy(packetData, 0, fullData, 1, packetData.length);
 
-        packetChannel.sendPacket(bedrockPlayer, fullData, this);
+//      TODO  packetChannel.sendPacket(bedrockPlayer, fullData, this);
     }
 }

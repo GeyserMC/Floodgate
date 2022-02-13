@@ -64,8 +64,7 @@ public final class VelocityInjector extends CommonPlatformInjector {
         invoke(serverInitializerHolder, serverSetter,
                 new VelocityChannelInitializer(this, serverInitializer, false));
 
-        // Proxy <-> Server
-
+        // Proxy <-> Server TODO REMOVE
         Object backendInitializerHolder = getValue(connectionManager, "backendChannelInitializer");
         ChannelInitializer backendInitializer = castedInvoke(backendInitializerHolder, "get");
 

@@ -59,4 +59,4 @@ player-link:
   enable-global-linking: true
 
 # Do not change this
-config-version: 2
+config-version: 1

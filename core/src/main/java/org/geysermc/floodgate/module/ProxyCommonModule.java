@@ -33,10 +33,7 @@ import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
-import org.geysermc.floodgate.crypto.FloodgateCipher;
-import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 
 public final class ProxyCommonModule extends CommonModule {
     public ProxyCommonModule(Path dataDirectory) {
@@ -59,10 +56,8 @@ public final class ProxyCommonModule extends CommonModule {
     @Provides
     @Singleton
     public ProxyFloodgateApi proxyFloodgateApi(
-            PluginMessageManager pluginMessageManager,
-            FloodgateConfigHolder configHolder,
-            FloodgateLogger logger,
-            FloodgateCipher cipher) {
-        return new ProxyFloodgateApi(pluginMessageManager, configHolder, logger, cipher);
+            FloodgateLogger logger
+    ) {
+        return new ProxyFloodgateApi(logger);
     }
 }

@@ -26,13 +26,7 @@
 package org.geysermc.floodgate.api.player;
 
 import java.util.UUID;
-import org.geysermc.cumulus.Form;
-import org.geysermc.cumulus.util.FormBuilder;
-import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.util.DeviceOs;
-import org.geysermc.floodgate.util.InputMode;
 import org.geysermc.floodgate.util.LinkedPlayer;
-import org.geysermc.floodgate.util.UiProfile;
 
 public interface FloodgatePlayer {
     /**
@@ -72,29 +66,9 @@ public interface FloodgatePlayer {
     String getUsername();
 
     /**
-     * Returns the Xbox Unique Identifier of the Bedrock client
-     */
-    String getXuid();
-
-    /**
-     * Returns the Operating System of the Bedrock client
-     */
-    DeviceOs getDeviceOs();
-
-    /**
      * Returns the language code of the Bedrock client
      */
     String getLanguageCode();
-
-    /**
-     * Returns the User Interface Profile of the Bedrock client
-     */
-    UiProfile getUiProfile();
-
-    /**
-     * Returns the Input Mode of the Bedrock client
-     */
-    InputMode getInputMode();
 
     /**
      * Returns if the Floodgate player is connected through a proxy
@@ -105,23 +79,6 @@ public interface FloodgatePlayer {
      * Returns the LinkedPlayer object if the player is linked to a Java account.
      */
     LinkedPlayer getLinkedPlayer();
-
-    /**
-     * Returns true if the player is linked to a Java account
-     */
-    boolean isLinked();
-
-    default boolean sendForm(Form form) {
-        return FloodgateApi.getInstance().sendForm(getCorrectUniqueId(), form);
-    }
-
-    default boolean sendForm(FormBuilder<?, ?> formBuilder) {
-        return sendForm(formBuilder.build());
-    }
-
-    default boolean transfer(String address, int port) {
-        return FloodgateApi.getInstance().transferPlayer(getCorrectUniqueId(), address, port);
-    }
 
     boolean hasProperty(PropertyKey key);
 

@@ -153,7 +153,8 @@ public final class SpigotCommandUtil implements CommandUtil {
     }
 
     @Override
-    public void sendMessage(Object target, String locale, TranslatableMessage message, Object... args) {
+    public void sendMessage(Object target, String locale, TranslatableMessage message,
+                            Object... args) {
         sendMessage(target, translateAndTransform(locale, message, args));
     }
 
@@ -163,23 +164,15 @@ public final class SpigotCommandUtil implements CommandUtil {
     }
 
     @Override
-    public void kickPlayer(Object player, String locale, TranslatableMessage message, Object... args) {
+    public void kickPlayer(Object player, String locale, TranslatableMessage message,
+                           Object... args) {
         // Have to run this in the main thread so we don't get a `Asynchronous player kick!` error
         Bukkit.getScheduler().runTask(plugin,
                 () -> cast(player).kickPlayer(translateAndTransform(locale, message, args)));
     }
 
-    @Override
-    public boolean whitelistPlayer(UUID uuid, String username) {
-        return WhitelistUtils.addPlayer(uuid, username);
-    }
-
-    @Override
-    public boolean removePlayerFromWhitelist(UUID uuid, String username) {
-        return WhitelistUtils.removePlayer(uuid, username);
-    }
-
-    public String translateAndTransform(String locale, TranslatableMessage message, Object... args) {
+    public String translateAndTransform(String locale, TranslatableMessage message,
+                                        Object... args) {
         // unlike others, Bukkit doesn't have to transform a message into another class.
         return message.translateMessage(manager, locale, args);
     }
