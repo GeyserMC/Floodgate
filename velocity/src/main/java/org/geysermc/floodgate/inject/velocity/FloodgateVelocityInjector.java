@@ -26,26 +26,21 @@
 package org.geysermc.floodgate.inject.velocity;
 
 import static org.geysermc.floodgate.util.ReflectionUtils.castedInvoke;
-import static org.geysermc.floodgate.util.ReflectionUtils.getCastedValue;
+import static org.geysermc.floodgate.util.ReflectionUtils.getMethod;
 import static org.geysermc.floodgate.util.ReflectionUtils.getValue;
+import static org.geysermc.floodgate.util.ReflectionUtils.invoke;
 
 import com.velocitypowered.api.proxy.ProxyServer;
-import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.WriteBufferWaterMark;
-import io.netty.channel.local.LocalAddress;
+import java.lang.reflect.Method;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
-import org.geysermc.floodgate.network.netty.LocalServerChannelWrapper;
 
 @RequiredArgsConstructor
-public final class VelocityInjector extends CommonPlatformInjector {
+public final class FloodgateVelocityInjector extends CommonPlatformInjector {
     private final ProxyServer server;
     private final FloodgateLogger logger;
 
@@ -63,30 +58,19 @@ public final class VelocityInjector extends CommonPlatformInjector {
         // Client <-> Proxy
 
         Object serverInitializerHolder = getValue(connectionManager, "serverChannelInitializer");
-        ChannelInitializer<Channel> channelInitializer = castedInvoke(serverInitializerHolder,
-                "get");
+        ChannelInitializer serverInitializer = castedInvoke(serverInitializerHolder, "get");
 
-        // Is set on Velocity's end for listening to Java connections
-        // required on ours or else the initial world load process won't finish sometimes
-        WriteBufferWaterMark serverWriteMark = getCastedValue(connectionManager,
-                "SERVER_WRITE_MARK");
+        Method serverSetter = getMethod(serverInitializerHolder, "set", ChannelInitializer.class);
+        invoke(serverInitializerHolder, serverSetter,
+                new VelocityChannelInitializer(this, serverInitializer, false));
 
-        EventLoopGroup bossGroup = castedInvoke(connectionManager, "getBossGroup");
-        EventLoopGroup workerGroup = getCastedValue(connectionManager, "workerGroup");
+        // Proxy <-> Server TODO REMOVE
+        Object backendInitializerHolder = getValue(connectionManager, "backendChannelInitializer");
+        ChannelInitializer backendInitializer = castedInvoke(backendInitializerHolder, "get");
 
-        ChannelFuture channelFuture = (new ServerBootstrap()
-                .channel(LocalServerChannelWrapper.class)
-                .childHandler(channelInitializer)
-                .group(bossGroup, workerGroup) // Cannot be DefaultEventLoopGroup
-                .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK,
-                        serverWriteMark) // Required or else rare network freezes can occur
-                .localAddress(LocalAddress.ANY))
-                .bind()
-                .syncUninterruptibly();
-
-        this.localChannel = channelFuture;
-        this.serverSocketAddress = channelFuture.channel().localAddress();
-
+        Method backendSetter = getMethod(backendInitializerHolder, "set", ChannelInitializer.class);
+        invoke(backendInitializerHolder, backendSetter,
+                new VelocityChannelInitializer(this, backendInitializer, true));
         return injected = true;
     }
 
@@ -97,8 +81,29 @@ public final class VelocityInjector extends CommonPlatformInjector {
 
     @Override
     public boolean removeInjection() {
-        logger.error("Floodgate cannot remove itself from Velocity without a reboot");
+        logger.error("Floodgate cannot remove itself from Bungee without a reboot");
         return false;
     }
 
+    @RequiredArgsConstructor
+    @SuppressWarnings("rawtypes")
+    private static final class VelocityChannelInitializer extends ChannelInitializer<Channel> {
+        private static final Method initChannel;
+
+        static {
+            initChannel = getMethod(ChannelInitializer.class, "initChannel", Channel.class);
+        }
+
+        private final FloodgateVelocityInjector injector;
+        private final ChannelInitializer original;
+        private final boolean proxyToServer;
+
+        @Override
+        protected void initChannel(Channel channel) {
+            invoke(original, initChannel, channel);
+
+            injector.injectAddonsCall(channel, proxyToServer);
+            injector.addInjectedClient(channel);
+        }
+    }
 }

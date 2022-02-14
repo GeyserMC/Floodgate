@@ -26,6 +26,8 @@
 package org.geysermc.floodgate.inject;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -35,7 +37,22 @@ import lombok.Getter;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 
+/**
+ * Used to inject tunneled clients directly into the server, bypassing the need to implement a
+ * complete TCP connection, by creating a local channel.
+ */
 public abstract class CommonPlatformInjector implements PlatformInjector {
+    /**
+     * The local channel we can use to inject ourselves into the server without creating a TCP
+     * connection.
+     */
+    protected ChannelFuture localChannel;
+    /**
+     * The LocalAddress to use to connect to the server without connecting over TCP.
+     */
+    @Getter protected SocketAddress serverSocketAddress;
+
+
     @Getter(AccessLevel.PROTECTED)
     private final Set<Channel> injectedClients = new HashSet<>();
 
