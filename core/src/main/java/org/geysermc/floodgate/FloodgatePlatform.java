@@ -112,7 +112,7 @@ public class FloodgatePlatform {
         }
 
         try {
-            if (!injector.inject()) {
+            if (!injector.inject()) { // TODO && !bootstrap.getGeyserConfig().isUseDirectConnection()
                 logger.error("Failed to inject the packet listener!");
                 return false;
             }

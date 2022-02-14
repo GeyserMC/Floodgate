@@ -42,7 +42,7 @@ import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.VelocityPlugin;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
-import org.geysermc.floodgate.inject.velocity.VelocityInjector;
+import org.geysermc.floodgate.inject.velocity.FloodgateVelocityInjector;
 import org.geysermc.floodgate.listener.VelocityListenerRegistration;
 import org.geysermc.floodgate.logger.Slf4jFloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandUtil;
@@ -112,7 +112,7 @@ public final class VelocityPlatformModule extends AbstractModule {
     @Provides
     @Singleton
     public CommonPlatformInjector platformInjector(ProxyServer server, FloodgateLogger logger) {
-        return new VelocityInjector(server, logger);
+        return new FloodgateVelocityInjector(server, logger);
     }
 
     @Provides
