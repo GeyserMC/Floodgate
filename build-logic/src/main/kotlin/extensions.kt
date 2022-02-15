@@ -37,12 +37,13 @@ fun Project.lastCommitHash(): String? =
 // some properties might be specific to Jenkins
 fun Project.branchName(): String =
     System.getProperty("GIT_BRANCH", "local/dev")
+
 fun Project.buildNumber(): Int =
     Integer.parseInt(System.getProperty("BUILD_NUMBER", "-1"))
 
 fun Project.relocate(pattern: String) {
     tasks.named<ShadowJar>("shadowJar") {
-        relocate(pattern, "org.geysermc.floodgate.shaded.$pattern")
+        relocate(pattern, "com.minekube.connect.shaded.$pattern")
     }
 }
 
@@ -50,9 +51,11 @@ val providedDependencies = mutableMapOf<String, MutableSet<String>>()
 
 fun Project.provided(pattern: String, name: String, version: String, excludedOn: Int = 0b110) {
     providedDependencies.getOrPut(project.name) { mutableSetOf() }
-        .add("${calcExclusion(pattern, 0b100, excludedOn)}:" +
-                "${calcExclusion(name, 0b10, excludedOn)}:" +
-                calcExclusion(version, 0b1, excludedOn))
+        .add(
+            "${calcExclusion(pattern, 0b100, excludedOn)}:" +
+                    "${calcExclusion(name, 0b10, excludedOn)}:" +
+                    calcExclusion(version, 0b1, excludedOn)
+        )
     dependencies.add("compileOnlyApi", "$pattern:$name:$version")
 }
 
