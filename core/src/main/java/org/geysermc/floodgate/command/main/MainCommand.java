@@ -32,12 +32,12 @@ import cloud.commandframework.Command;
 import cloud.commandframework.Command.Builder;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.context.CommandContext;
+import org.geysermc.floodgate.player.UserAudience;
 import java.util.Locale;
 import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.command.util.Permission;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
-import org.geysermc.floodgate.player.UserAudience;
 
 public final class MainCommand implements FloodgateCommand {
     @Override

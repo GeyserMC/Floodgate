@@ -20,25 +20,21 @@
  * THE SOFTWARE.
  *
  * @author GeyserMC
- * @link https://github.com/GeyserMC/Geyser
+ * @link https://github.com/GeyserMC/Floodgate
  */
 
 package org.geysermc.floodgate.network.netty;
 
 import io.netty.channel.local.LocalChannel;
 import java.net.InetSocketAddress;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Client -> server storing the spoofed remote address.
  */
 public class LocalChannelWithRemoteAddress extends LocalChannel {
+    @Getter
+    @Setter
     private InetSocketAddress spoofedAddress;
-
-    public InetSocketAddress spoofedRemoteAddress() {
-        return spoofedAddress;
-    }
-
-    public void spoofedRemoteAddress(InetSocketAddress socketAddress) {
-        this.spoofedAddress = socketAddress;
-    }
 }

@@ -27,24 +27,15 @@ package org.geysermc.floodgate.addon.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.geysermc.floodgate.util.ReflectionUtils.castedInvoke;
-import static org.geysermc.floodgate.util.ReflectionUtils.getCastedValue;
 import static org.geysermc.floodgate.util.ReflectionUtils.getField;
 import static org.geysermc.floodgate.util.ReflectionUtils.getMethod;
 import static org.geysermc.floodgate.util.ReflectionUtils.getPrefixedClass;
-import static org.geysermc.floodgate.util.ReflectionUtils.invoke;
-import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
 
-import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
-import io.netty.channel.ChannelPromise;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.player.FloodgatePlayerImpl;
-import org.geysermc.floodgate.util.BedrockData;
 
 @SuppressWarnings("ConstantConditions")
 public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapter {
@@ -69,7 +60,8 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
         Class<?> configClass = getPrefixedClass("config.VelocityConfiguration");
 
         GET_FORWARDING_MODE = getMethod(configClass, "getPlayerInfoForwardingMode");
-        checkNotNull(GET_FORWARDING_MODE, "getPlayerInfoForwardingMode in VelocityConfiguration cannot be null");
+        checkNotNull(GET_FORWARDING_MODE,
+                "getPlayerInfoForwardingMode in VelocityConfiguration cannot be null");
 
         Class<?> serverConnection = getPrefixedClass("connection.backend.VelocityServerConnection");
 
@@ -88,53 +80,53 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
         Enum<?> forwardingMode = castedInvoke(proxy.getConfiguration(), GET_FORWARDING_MODE);
         this.isModernForwarding = "MODERN".equals(forwardingMode.name());
     }
-
-    @Override
-    public void write(ChannelHandlerContext ctx, Object packet, ChannelPromise promise)
-            throws Exception {
-        if (HANDSHAKE_PACKET.isInstance(packet)) {
-            String address = getCastedValue(packet, HANDSHAKE_ADDRESS);
-
-            // get the FloodgatePlayer from the ConnectedPlayer
-            Object minecraftConnection = ctx.pipeline().get("handler");
-            Object association = invoke(minecraftConnection, GET_ASSOCIATION);
-            Player velocityPlayer = castedInvoke(association, GET_PLAYER);
-
-            //noinspection ConstantConditions
-            FloodgatePlayer player = api.getPlayer(velocityPlayer.getUniqueId());
-
-            //todo use something similar to what's written below for a more direct approach
-
-            // get the Proxy <-> Player channel from the Proxy <-> Server channel
-            //MinecraftConnection minecraftConnection = ctx.pipeline().get("handler");
-            //((VelocityServerConnection) minecraftConnection.association).proxyPlayer.connection.channel
-
-            //FloodgatePlayer player = playerChannel.attr(playerAttribute).get();
-            if (player != null) {
-                // Player is a Floodgate player
-                BedrockData data = player.as(FloodgatePlayerImpl.class).toBedrockData();
-                String encryptedData = api.createEncryptedDataString(data);
-
-                // use the same system that we use on bungee, our data goes before all the other data
-                int addressFinished = address.indexOf('\0');
-                String originalAddress;
-                String remaining;
-                if (isModernForwarding && addressFinished == -1) {
-                    // There is no additional data to hook onto
-                    originalAddress = address;
-                    remaining = "";
-                } else {
-                    originalAddress = address.substring(0, addressFinished);
-                    remaining = address.substring(addressFinished);
-                }
-
-                setValue(packet, HANDSHAKE_ADDRESS, originalAddress + '\0' + encryptedData
-                        + remaining);
-            }
-
-            ctx.pipeline().remove(this);
-        }
-
-        ctx.write(packet, promise);
-    }
+//
+//    @Override
+//    public void write(ChannelHandlerContext ctx, Object packet, ChannelPromise promise)
+//            throws Exception {
+//        if (HANDSHAKE_PACKET.isInstance(packet)) {
+//            String address = getCastedValue(packet, HANDSHAKE_ADDRESS);
+//
+//            // get the FloodgatePlayer from the ConnectedPlayer
+//            Object minecraftConnection = ctx.pipeline().get("handler");
+//            Object association = invoke(minecraftConnection, GET_ASSOCIATION);
+//            Player velocityPlayer = castedInvoke(association, GET_PLAYER);
+//
+//            //noinspection ConstantConditions
+//            FloodgatePlayer player = api.getPlayer(velocityPlayer.getUniqueId());
+//
+//            //todo use something similar to what's written below for a more direct approach
+//
+//            // get the Proxy <-> Player channel from the Proxy <-> Server channel
+//            //MinecraftConnection minecraftConnection = ctx.pipeline().get("handler");
+//            //((VelocityServerConnection) minecraftConnection.association).proxyPlayer.connection.channel
+//
+//            //FloodgatePlayer player = playerChannel.attr(playerAttribute).get();
+//            if (player != null) {
+//                // Player is a Floodgate player
+//                BedrockData data = player.as(FloodgatePlayerImpl.class).toBedrockData();
+//                String encryptedData = api.createEncryptedDataString(data);
+//
+//                // use the same system that we use on bungee, our data goes before all the other data
+//                int addressFinished = address.indexOf('\0');
+//                String originalAddress;
+//                String remaining;
+//                if (isModernForwarding && addressFinished == -1) {
+//                    // There is no additional data to hook onto
+//                    originalAddress = address;
+//                    remaining = "";
+//                } else {
+//                    originalAddress = address.substring(0, addressFinished);
+//                    remaining = address.substring(addressFinished);
+//                }
+//
+//                setValue(packet, HANDSHAKE_ADDRESS, originalAddress + '\0' + encryptedData
+//                        + remaining);
+//            }
+//
+//            ctx.pipeline().remove(this);
+//        }
+//
+//        ctx.write(packet, promise);
+//    }
 }

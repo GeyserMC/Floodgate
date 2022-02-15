@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  *
  * @author GeyserMC
- * @link https://github.com/GeyserMC/Geyser
+ * @link https://github.com/GeyserMC/Floodgate
  */
 
 package org.geysermc.floodgate.network.netty;
@@ -39,7 +39,7 @@ public class LocalServerChannelWrapper extends LocalServerChannel {
         if (peer instanceof LocalChannelWithRemoteAddress) {
             LocalChannelWrapper channel = new LocalChannelWrapper(this, peer);
             channel.wrapper().remoteAddress(
-                    ((LocalChannelWithRemoteAddress) peer).spoofedRemoteAddress());
+                    ((LocalChannelWithRemoteAddress) peer).getSpoofedAddress());
             return channel;
         }
         return super.newLocalChannel(peer);

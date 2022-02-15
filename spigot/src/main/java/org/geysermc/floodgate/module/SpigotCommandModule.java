@@ -30,6 +30,7 @@ import cloud.commandframework.bukkit.BukkitCommandManager;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import org.geysermc.floodgate.module.CommandModule;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;

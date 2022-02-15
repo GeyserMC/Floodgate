@@ -25,12 +25,12 @@
 
 package org.geysermc.floodgate.platform.command;
 
+import org.geysermc.floodgate.player.UserAudience;
+import org.geysermc.floodgate.player.UserAudienceArgument;
 import java.util.Collection;
 import java.util.UUID;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.geysermc.floodgate.player.UserAudience;
-import org.geysermc.floodgate.player.UserAudienceArgument.PlayerType;
 
 /**
  * An interface used across all Floodgate platforms to simple stuff in commands like kicking players
@@ -47,7 +47,7 @@ public interface CommandUtil {
 
     @NonNull UserAudience getOfflineAudienceByUsername(final @NonNull String username);
 
-    @NonNull Collection<String> getOnlineUsernames(final @NonNull PlayerType limitTo);
+    @NonNull Collection<String> getOnlineUsernames(final @NonNull UserAudienceArgument.PlayerType limitTo);
 
     /**
      * Checks if the given player has the given permission.

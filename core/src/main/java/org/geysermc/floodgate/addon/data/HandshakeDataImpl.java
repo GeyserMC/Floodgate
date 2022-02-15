@@ -25,15 +25,15 @@
 
 package org.geysermc.floodgate.addon.data;
 
+import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.util.Utils;
 import io.netty.channel.Channel;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
-import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.LinkedPlayer;
-import org.geysermc.floodgate.util.Utils;
 
 @Getter
 public class HandshakeDataImpl implements HandshakeData {

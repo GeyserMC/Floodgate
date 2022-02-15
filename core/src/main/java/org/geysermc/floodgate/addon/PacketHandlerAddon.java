@@ -27,13 +27,13 @@ package org.geysermc.floodgate.addon;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelPipeline;
 import org.geysermc.floodgate.addon.packethandler.ChannelInPacketHandler;
 import org.geysermc.floodgate.addon.packethandler.ChannelOutPacketHandler;
-import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.packet.PacketHandlersImpl;
 import org.geysermc.floodgate.util.Utils;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelPipeline;
+import org.geysermc.floodgate.api.inject.InjectorAddon;
 
 public class PacketHandlerAddon implements InjectorAddon {
     @Inject private PacketHandlersImpl packetHandlers;

@@ -27,12 +27,12 @@ package org.geysermc.floodgate.config.loader;
 
 import static org.geysermc.floodgate.util.MessageFormatter.format;
 
+import org.geysermc.floodgate.util.Utils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import org.geysermc.floodgate.util.Utils;
 
 public class DefaultConfigHandler {
     public void createDefaultConfig(String defaultConfigLocation, Path configPath) throws IOException {

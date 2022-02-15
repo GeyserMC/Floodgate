@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.player;
 
+import org.geysermc.floodgate.player.UserAudience;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import java.util.UUID;

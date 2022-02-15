@@ -25,6 +25,8 @@
 
 package org.geysermc.floodgate.util;
 
+import org.geysermc.floodgate.util.LanguageManager;
+import org.geysermc.floodgate.util.Utils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;

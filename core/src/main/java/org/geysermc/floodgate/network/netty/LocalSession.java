@@ -20,16 +20,20 @@
  * THE SOFTWARE.
  *
  * @author GeyserMC
- * @link https://github.com/GeyserMC/Geyser
+ * @link https://github.com/GeyserMC/Floodgate
  */
 
 package org.geysermc.floodgate.network.netty;
 
-import com.github.steveice10.packetlib.BuiltinFlags;
-import com.github.steveice10.packetlib.packet.PacketProtocol;
-import com.github.steveice10.packetlib.tcp.*;
+import com.minekube.connect.tunnel.TunnelConn;
+import com.minekube.connect.tunnel.TunnelConn.Handler;
+import com.minekube.connect.tunnel.Tunneler;
+import com.minekube.connect.watch.SessionProposal;
+import io.grpc.protobuf.StatusProto;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
@@ -37,108 +41,138 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.DefaultEventLoopGroup;
 import io.netty.channel.unix.PreferredDirectByteBufAllocator;
-import java.net.Inet4Address;
+import io.netty.util.AttributeKey;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.time.Duration;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import minekube.connect.v1alpha1.WatchServiceOuterClass.Player;
+import org.geysermc.floodgate.api.SimpleFloodgateApi;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.player.FloodgatePlayerImpl;
+import org.jetbrains.annotations.NotNull;
 
 /**
- * Manages a Minecraft Java session over our LocalChannel implementations.
+ * Manages a Minecraft Java session over our LocalChannel implementation.
  */
-public final class LocalSession extends TcpSession {
+@RequiredArgsConstructor
+public final class LocalSession {
+    private static final int CONNECTION_TIMEOUT = (int) Duration.ofSeconds(30).toMillis();
+
     private static DefaultEventLoopGroup DEFAULT_EVENT_LOOP_GROUP;
     private static PreferredDirectByteBufAllocator PREFERRED_DIRECT_BYTE_BUF_ALLOCATOR = null;
 
-    private final SocketAddress targetAddress;
-    private final String clientIp;
+    private final SimpleFloodgateApi api;
+    private final Tunneler tunneler;
+    private final SocketAddress targetAddress; // The server we are connecting to
+    private final SessionProposal sessionProposal;
+    private final AttributeKey<FloodgatePlayer> playerAttribute;
 
-    public LocalSession(String host, int port, SocketAddress targetAddress, String clientIp,
-                        PacketProtocol protocol) {
-        super(host, port, protocol);
-        this.targetAddress = targetAddress;
-        this.clientIp = clientIp;
-    }
+    private TunnelConn tunnelConn;
 
-    @Override
     public void connect() {
-        if (this.disconnected) {
-            throw new IllegalStateException("Connection has already been disconnected.");
+        if (tunnelConn != null) {
+            throw new IllegalStateException("Connection has already been connected.");
         }
 
         if (DEFAULT_EVENT_LOOP_GROUP == null) {
             DEFAULT_EVENT_LOOP_GROUP = new DefaultEventLoopGroup();
         }
 
+        Player p = sessionProposal.getSession().getPlayer();
+        FloodgatePlayer player = new FloodgatePlayerImpl(
+                p.getProfile(),
+                UUID.fromString(p.getProfile().getId()),
+                "", // TODO extract from http accept language header
+                p.getAddr()
+        );
+
+        LocalSession it = this;
         try {
             final Bootstrap bootstrap = new Bootstrap();
             bootstrap.channel(LocalChannelWithRemoteAddress.class);
             bootstrap.handler(new ChannelInitializer<LocalChannelWithRemoteAddress>() {
-                @Override
-                public void initChannel(LocalChannelWithRemoteAddress channel) {
-                    channel.spoofedRemoteAddress(new InetSocketAddress(clientIp, 0));
-                    PacketProtocol protocol = getPacketProtocol();
-                    protocol.newClientSession(LocalSession.this);
+                        @Override
+                        public void initChannel(@NotNull LocalChannelWithRemoteAddress channel) {
+                            String clientIp = sessionProposal.getSession().getPlayer().getAddr();
+                            if (!clientIp.isEmpty()) {
+                                channel.setSpoofedAddress(new InetSocketAddress(clientIp, 0));
+                            }
 
-                    refreshReadTimeoutHandler(channel);
-                    refreshWriteTimeoutHandler(channel);
+                            channel.attr(playerAttribute).set(player);
 
-                    ChannelPipeline pipeline = channel.pipeline();
-                    pipeline.addLast("sizer", new TcpPacketSizer(LocalSession.this,
-                            protocol.getPacketHeader().getLengthSize()));
-                    pipeline.addLast("codec", new TcpPacketCodec(LocalSession.this, true));
-                    pipeline.addLast("manager", LocalSession.this);
+                            // Start tunnel connection
+                            tunnelConn = tunneler.tunnel(
+                                    sessionProposal.getSession().getTunnelServiceAddr(),
+                                    new Handler() {
+                                        @Override
+                                        public void onReceive(byte[] data) {
+                                            // forward to downstream server
+                                            channel.writeAndFlush(data);
+                                        }
 
-                    addHAProxySupport(
-                            pipeline); // TODO remove and cache player IP from proposed session
-                }
-            }).group(DEFAULT_EVENT_LOOP_GROUP).option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
-                    getConnectTimeout() * 1000);
+                                        @Override
+                                        public void onError(Throwable t) {
+                                            it.exceptionCaught(t);
+                                        }
+
+                                        @Override
+                                        public void onClose() {
+                                            api.setPendingRemove(player);
+                                            // disconnect from server
+                                            channel.disconnect();
+                                            tunnelConn.close();
+                                            tunnelConn = null;
+                                        }
+                                    }
+                            );
+
+                            ChannelPipeline pipeline = channel.pipeline();
+                            pipeline.addLast("connect-tunnel", new ChannelInboundHandlerAdapter() {
+                                @Override
+                                public void channelRead(@NotNull ChannelHandlerContext ctx,
+                                                        @NotNull Object msg) {
+
+                                    if (msg instanceof ByteBuf) {
+                                        ByteBuf buf = (ByteBuf) msg;
+                                        byte[] bytes = ByteBufUtil.getBytes(buf, buf.readerIndex(),
+                                                buf.readableBytes(), false);
+                                        tunnelConn.write(bytes);
+                                    } else {
+                                        ctx.fireChannelRead(msg);
+                                    }
+                                }
+                            });
+                        }
+                    })
+                    .group(DEFAULT_EVENT_LOOP_GROUP)
+                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, CONNECTION_TIMEOUT);
 
             if (PREFERRED_DIRECT_BYTE_BUF_ALLOCATOR != null) {
                 bootstrap.option(ChannelOption.ALLOCATOR, PREFERRED_DIRECT_BYTE_BUF_ALLOCATOR);
             }
 
-            bootstrap.remoteAddress(targetAddress);
-
-            bootstrap.connect().addListener((future) -> {
+            bootstrap.remoteAddress(targetAddress).connect().addListener((future) -> {
                 if (!future.isSuccess()) {
-                    exceptionCaught(null, future.cause());
+                    exceptionCaught(future.cause());
+                    return;
                 }
+                api.addPlayer(player);
             });
         } catch (Throwable t) {
-            exceptionCaught(null, t);
+            exceptionCaught(t);
         }
     }
 
-    // TODO remove
-    // TODO duplicate code
-    private void addHAProxySupport(ChannelPipeline pipeline) {
-        InetSocketAddress clientAddress = getFlag(BuiltinFlags.CLIENT_PROXIED_ADDRESS);
-        if (getFlag(BuiltinFlags.ENABLE_CLIENT_PROXY_PROTOCOL, false) && clientAddress != null) {
-            pipeline.addFirst("proxy-protocol-packet-sender", new ChannelInboundHandlerAdapter() {
-                @Override
-                public void channelActive(ChannelHandlerContext ctx) throws Exception {
-                    HAProxyProxiedProtocol proxiedProtocol =
-                            clientAddress.getAddress() instanceof Inet4Address
-                                    ? HAProxyProxiedProtocol.TCP4 : HAProxyProxiedProtocol.TCP6;
-                    InetSocketAddress remoteAddress;
-                    if (ctx.channel().remoteAddress() instanceof InetSocketAddress) {
-                        remoteAddress = (InetSocketAddress) ctx.channel().remoteAddress();
-                    } else {
-                        remoteAddress = new InetSocketAddress(host, port);
-                    }
-                    ctx.channel().writeAndFlush(new HAProxyMessage(
-                            HAProxyProtocolVersion.V2, HAProxyCommand.PROXY, proxiedProtocol,
-                            clientAddress.getAddress().getHostAddress(),
-                            remoteAddress.getAddress().getHostAddress(),
-                            clientAddress.getPort(), remoteAddress.getPort()
-                    ));
-                    ctx.pipeline().remove(this);
-                    ctx.pipeline().remove("proxy-protocol-encoder");
-                    super.channelActive(ctx);
-                }
-            });
-            pipeline.addFirst("proxy-protocol-encoder", HAProxyMessageEncoder.INSTANCE);
+    private void exceptionCaught(Throwable cause) {
+        // Close tunnel stream if there is one
+        if (tunnelConn != null) {
+            tunnelConn.close();
+            tunnelConn = null;
         }
+        // Reject session proposal in case we are still able to.
+        sessionProposal.reject(StatusProto.fromThrowable(cause));
     }
 
     /**

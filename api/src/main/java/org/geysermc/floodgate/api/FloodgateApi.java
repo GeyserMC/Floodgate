@@ -27,7 +27,6 @@ package org.geysermc.floodgate.api;
 
 import java.util.Collection;
 import java.util.UUID;
-import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.unsafe.Unsafe;
 
@@ -53,24 +52,17 @@ public interface FloodgateApi {
      * Method to determine if the given <b>online</b> player is a bedrock player
      *
      * @param uuid The uuid of the <b>online</b> player
-     * @return true if the given <b>online</b> player is a Bedrock player
+     * @return true if the given <b>online</b> player is tunneled by Connect
      */
     boolean isFloodgatePlayer(UUID uuid);
 
     /**
-     * Get info about the given Bedrock player
+     * Get info about the given player.
      *
-     * @param uuid the uuid of the <b>online</b> Bedrock player
-     * @return FloodgatePlayer if the given uuid is a Bedrock player
+     * @param uuid the uuid of the <b>online</b> player
+     * @return FloodgatePlayer if the given uuid is a player tunneled by Connect
      */
     FloodgatePlayer getPlayer(UUID uuid);
-
-    /**
-     * Returns the instance that manages all the linking.
-     */
-    default PlayerLink getPlayerLink() {
-        return InstanceHolder.getPlayerLink();
-    }
 
     Unsafe unsafe();
 }

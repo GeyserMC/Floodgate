@@ -40,7 +40,7 @@ public class VelocitySkinApplier implements SkinApplier {
 
     @Override
     public void applySkin(FloodgatePlayer floodgatePlayer, SkinData skinData) {
-        server.getPlayer(floodgatePlayer.getCorrectUniqueId()).ifPresent(player -> {
+        server.getPlayer(floodgatePlayer.getUniqueId()).ifPresent(player -> {
             List<Property> properties = new ArrayList<>(player.getGameProfileProperties());
             properties.add(new Property("textures", skinData.getValue(), skinData.getSignature()));
             player.setGameProfileProperties(properties);

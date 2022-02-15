@@ -28,6 +28,7 @@ package org.geysermc.floodgate.util;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.geysermc.floodgate.util.ReflectionUtils.getField;
 
+import org.geysermc.floodgate.util.ReflectionUtils;
 import java.lang.reflect.Field;
 
 @SuppressWarnings("ConstantConditions")

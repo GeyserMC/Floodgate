@@ -41,12 +41,6 @@ public class CommandModule extends AbstractModule {
 
     @Singleton
     @ProvidesIntoSet
-    public FloodgateCommand whitelistCommand() {
-        return new WhitelistCommand();
-    }
-
-    @Singleton
-    @ProvidesIntoSet
     public FloodgateCommand testCommand() {
         return new TestCommand();
     }

@@ -27,6 +27,8 @@ package org.geysermc.floodgate.news;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import org.geysermc.floodgate.util.HttpUtils;
+import org.geysermc.floodgate.util.HttpUtils.HttpResponse;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -41,8 +43,6 @@ import org.geysermc.floodgate.news.data.BuildSpecificData;
 import org.geysermc.floodgate.news.data.CheckAfterData;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.util.Constants;
-import org.geysermc.floodgate.util.HttpUtils;
-import org.geysermc.floodgate.util.HttpUtils.HttpResponse;
 import org.geysermc.floodgate.command.util.Permission;
 
 public class NewsChecker {

@@ -34,9 +34,9 @@ import java.nio.file.Path;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.module.CommandModule;
 import org.geysermc.floodgate.module.ProxyCommonModule;
-import org.geysermc.floodgate.module.VelocityAddonModule;
 import org.geysermc.floodgate.module.VelocityListenerModule;
 import org.geysermc.floodgate.module.VelocityPlatformModule;
+import org.geysermc.floodgate.module.WatcherModule;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
 public final class VelocityPlugin {
@@ -62,9 +62,10 @@ public final class VelocityPlugin {
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
         platform.enable(
+                new WatcherModule(),
                 new CommandModule(),
-                new VelocityListenerModule(),
-                new VelocityAddonModule()
+                new VelocityListenerModule()
+//                new VelocityAddonModule()
         );
     }
 }

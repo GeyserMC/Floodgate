@@ -28,8 +28,8 @@ package org.geysermc.floodgate.api;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +40,7 @@ import org.geysermc.floodgate.api.unsafe.Unsafe;
 
 @RequiredArgsConstructor
 public class SimpleFloodgateApi implements FloodgateApi {
-    private final Map<UUID, FloodgatePlayer> players = new HashMap<>();
+    private final Map<UUID, FloodgatePlayer> players = Maps.newConcurrentMap();
     private final Cache<UUID, FloodgatePlayer> pendingRemove =
             CacheBuilder.newBuilder()
                     .expireAfterWrite(20, TimeUnit.SECONDS)
@@ -84,8 +84,7 @@ public class SimpleFloodgateApi implements FloodgateApi {
     }
 
     public FloodgatePlayer addPlayer(FloodgatePlayer player) {
-        // Bedrock players are always stored by their xuid
-        return players.put(player.getJavaUniqueId(), player);
+        return players.put(player.getUniqueId(), player);
     }
 
     /**
@@ -93,12 +92,13 @@ public class SimpleFloodgateApi implements FloodgateApi {
      * dependant event hasn't fired yet
      */
     public boolean setPendingRemove(FloodgatePlayer player) {
-        pendingRemove.put(player.getJavaUniqueId(), player);
-        return players.remove(player.getJavaUniqueId(), player);
+        pendingRemove.put(player.getUniqueId(), player);
+        return players.remove(player.getUniqueId(), player);
     }
 
     public void playerRemoved(UUID uuid) {
         pendingRemove.invalidate(uuid);
+        players.remove(uuid);
     }
 
     private FloodgatePlayer getPendingRemovePlayer(UUID uuid) {

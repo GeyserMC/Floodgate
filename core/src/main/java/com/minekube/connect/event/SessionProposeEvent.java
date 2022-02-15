@@ -23,39 +23,18 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.api.link;
+package com.minekube.connect.event;
+
+import com.minekube.connect.watch.SessionProposal;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 /**
- * This enum has all the available result types of both creating a player link request and
- * validating it.
+ * This event is fired when a new session is proposed by Connect WatchService. The proposal can be
+ * rejected to deny connecting this player.
  */
-public enum LinkRequestResult {
-    /**
-     * An unknown error encountered while creating / verifying the link request.
-     */
-    UNKNOWN_ERROR,
-    /**
-     * @deprecated this result isn't used. Instead the link code is returned
-     */
-    REQUEST_CREATED,
-    /**
-     * The specified bedrock username is already linked to a Java account.
-     */
-    ALREADY_LINKED,
-    /**
-     * The Bedrock player verified the request too late. The request has been expired.
-     */
-    REQUEST_EXPIRED,
-    /**
-     * The Java player hasn't requested a link to this Bedrock account.
-     */
-    NO_LINK_REQUESTED,
-    /**
-     * The entered code is invalid.
-     */
-    INVALID_CODE,
-    /**
-     * The link request has been verified successfully!
-     */
-    LINK_COMPLETED
+@Data
+@RequiredArgsConstructor
+public class SessionProposeEvent {
+    private final SessionProposal sessionProposal;
 }

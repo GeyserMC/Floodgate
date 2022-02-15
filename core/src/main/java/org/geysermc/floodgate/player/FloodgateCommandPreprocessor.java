@@ -27,9 +27,9 @@ package org.geysermc.floodgate.player;
 
 import cloud.commandframework.execution.preprocessor.CommandPreprocessingContext;
 import cloud.commandframework.execution.preprocessor.CommandPreprocessor;
+import org.geysermc.floodgate.platform.command.CommandUtil;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.geysermc.floodgate.platform.command.CommandUtil;
 
 /**
  * Command preprocessor which decorated incoming {@link cloud.commandframework.context.CommandContext}

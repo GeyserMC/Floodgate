@@ -20,17 +20,32 @@
  * THE SOFTWARE.
  *
  * @author GeyserMC
- * @link https://github.com/GeyserMC/Geyser
+ * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.network;
+package org.geysermc.floodgate.platform.listener;
 
-import org.geysermc.geyser.GeyserImpl;
-import org.geysermc.geyser.session.GeyserSession;
+import java.util.concurrent.CompletableFuture;
 
-public class UpstreamPacketHandler {
+/**
+ * This class is responsible for firing events to the event manager of the platform that is
+ * currently in use.
+ */
+public interface EventSink {
+    /**
+     * Fires the specified event to the event bus asynchronously. This allows Velocity to continue
+     * servicing connections while a plugin handles a potentially long-running operation such as a
+     * database query.
+     *
+     * @param event the event to fire
+     * @return a CompletableFuture representing the posted event
+     */
+    <T> CompletableFuture<T> fire(T event);
 
-    public UpstreamPacketHandler(GeyserImpl geyser, GeyserSession session) {
-
-    }
+    /**
+     * This method will fire the specified event.
+     *
+     * @param event the event to fire
+     */
+    <T> void fireAndForget(T event);
 }

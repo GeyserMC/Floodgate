@@ -28,11 +28,11 @@ package org.geysermc.floodgate.command;
 import cloud.commandframework.Command;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.context.CommandContext;
+import org.geysermc.floodgate.player.UserAudience;
 import net.kyori.adventure.text.Component;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
-import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.util.Constants;
 
 public class TestCommand implements FloodgateCommand {

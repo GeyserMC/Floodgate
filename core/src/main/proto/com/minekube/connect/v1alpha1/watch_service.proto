@@ -1,0 +1,141 @@
+syntax = "proto3";
+
+package minekube.connect.v1alpha1;
+
+import "google/rpc/status.proto";
+
+service WatchService {
+  // Watch watches for session proposals for taking player connections.
+  rpc Watch(stream WatchRequest) returns (stream WatchResponse);
+}
+
+message WatchRequest {
+  // Sending this message rejects a session proposed by the WatchService. This message should be sent to inform
+  // the WatchService that the server will not try to make a take the proposed session. The only purpose of
+  // this message is to provide quicker feedback to the player that he will not be connected with an optional
+  // localized reason. See https://github.com/grpc/grpc/blob/master/src/proto/grpc/status/status.proto.
+  // If the session is not rejected the watcher should establish the connection for the proposed session.
+  // If neither of these actions happen the proposal times out out and the player receives a connection timeout
+  // error indicating that the endpoint is currently unavailable.
+  SessionRejection session_rejection = 1;
+}
+
+message WatchResponse {
+  // The proposed session that intents to connect.
+  Session session = 1;
+}
+
+message SessionRejection {
+  // The id of the proposed session.
+  string id = 1;
+  // The optional reason why the proposed session was rejected.
+  // To specify a user facing localized message refer to
+  // https://github.com/grpc/grpc/blob/master/src/proto/grpc/status/status.proto
+  google.rpc.Status reason = 2;
+}
+
+message Session {
+  // The unique session id.
+  string id = 1;
+  // The address of the TunnelService to establish the player connection.
+  // This allows to establish a direct connection to the TunnelService
+  // that hosts the player connection and maintain the lowest latency.
+  string tunnel_service_addr = 2;
+  // The player of this session that will be connected.
+  //
+  // Note that only the profile name might be available if auth.passthrough is enabled
+  // since the username is sent by the player initially (https://wiki.vg/Protocol#Login_Start).
+  Player player = 3;
+  // The authentication termination of the session connection.
+  // See Authentication for more documentation.
+  Authentication auth = 4;
+}
+
+message Player {
+  // The profile of the player.
+  GameProfile profile = 1;
+  // The optional IP address of the player.
+  // This field may be empty or is a fake address
+  // generated for this particular player.
+  string addr = 2;
+}
+
+message GameProfile {
+  // The Minecraft UUID of the player.
+  string id = 1;
+  // The Minecraft name of the player.
+  string name = 2;
+  // The profile properties that may contain skin data and more.
+  repeated GameProfileProperty properties = 3;
+}
+
+message GameProfileProperty {
+  // The name of this property.
+  string name = 1;
+  // The value of this property
+  string value = 2;
+  // The signature of this property.
+  string signature = 3;
+}
+
+// The authentication details of a session specifies how the connecting player is authenticated.
+//
+// The Minecraft account of every session is authenticated using an external auth service that can confirm
+// a connecting player is who he claims he is.
+//
+// The official Minecraft session server (https://wiki.vg/Protocol_Encryption#Authentication)
+// is the most commonly used API to authenticate online mode players with a real Minecraft account.
+message Authentication {
+  // Whether authentication is terminated by the TunnelService or the client that calls the TunnelService.
+  // A TunnelService client can be the Minecraft server that receives the player connection.
+  //
+  // True means a player connection is in login state and has not yet received the encryption request packet.
+  // Whether and how the authentication is done is the responsibility of the target Minecraft server that
+  // establishes the tunnel to the TunnelService to receive the connecting player.
+  // Players with a pass-through session cannot be rerouted to another server by the TunnelService,
+  // but only by the server that established the tunnel because the connection might be encrypted and not
+  // readable by the TunnelService.
+  //
+  // False means a player authentication is offloaded externally (e.g. by the TunnelService that sends the
+  // player connection) and is not done by the Minecraft server that establishes the tunnel to the TunnelService.
+  // Players without a pass-through session can be rerouted to another server by the TunnelService as well as
+  // by the server that established the tunnel.
+  //
+  //
+  // Summary of Pros and Cons:
+  //
+  // passthrough=false
+  //  + Maximum flexibility: TunnelService can route players between servers on demand
+  //  + Maximum feature support: TunnelService can fully engage with the player (e.g. send messages)
+  //  - Less authenticity: player authentication is offloaded to the trusted TunnelService
+  //  - Less security: TunnelService has full control over the connection io
+  //
+  // passthrough=true
+  //  + Maximum authenticity: player authentication is done locally by the TunnelService client
+  //  + Maximum security: TunnelService cannot spy on the encrypted player connection
+  //  - Less flexibility: TunnelService cannot route a player connection to a different server
+  //  - Less features available: TunnelService only acts as a lightweight reverse proxy with limited features
+  //
+  //
+  // It is a security/authenticity decision whether to accept sessions in non-passthrough
+  // mode if you cannot trust that the TunnelService the player connection origins from.
+  //
+  // This model compares best with a https://en.wikipedia.org/wiki/TLS_termination_proxy.
+  bool passthrough = 1;
+
+  // The session authentication service used to authenticate a Minecraft player.
+  // This field serves for session validation and metrics.
+  //
+  // In the future there might be a managed service that allows cracked players
+  // with consistent GameProfile UUIDs and skins where players don't authenticate
+  // with official Minecraft session server and don't need an official Minecraft
+  // account.
+  //
+  // This feature would invite the whole Minecraft cracked community to play online mode
+  // servers without a premium account and depends on how legal such service offer is since
+  // players would no longer need to pay for an account anymore to play on servers in the
+  // Connect network.
+  //
+  // Example value: "sessionserver.mojang.com"
+  //string auth_service = 2;
+}

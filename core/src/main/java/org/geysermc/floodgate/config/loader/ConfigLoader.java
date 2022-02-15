@@ -25,17 +25,13 @@
 
 package org.geysermc.floodgate.config.loader;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.security.Key;
-import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.config.updater.ConfigUpdater;
-import org.geysermc.floodgate.crypto.FloodgateCipher;
-import org.geysermc.floodgate.crypto.KeyProducer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import lombok.RequiredArgsConstructor;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
 
 @RequiredArgsConstructor
 public final class ConfigLoader {

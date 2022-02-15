@@ -33,6 +33,7 @@ dependencyResolutionManagement {
         maven("https://jitpack.io") {
             content { includeGroupByRegex("com\\.github\\..*") }
         }
+
     }
 }
 
@@ -40,10 +41,14 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
     }
+    repositories {
+        maven("https://plugins.gradle.org/m2/")
+    }
     plugins {
         id("net.kyori.blossom") version "1.2.0"
         id("net.kyori.indra")
         id("net.kyori.indra.git")
+        id("com.google.protobuf") version "0.8.18"
     }
     includeBuild("build-logic")
 }

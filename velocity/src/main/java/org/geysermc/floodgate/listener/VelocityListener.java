@@ -143,9 +143,9 @@ public final class VelocityListener {
         if (player != null) {
             playerCache.invalidate(event.getConnection());
             // The texture properties addition is to fix the February 2 2022 Mojang authentication changes
-            event.setGameProfile(new GameProfile(player.getCorrectUniqueId(),
-                    player.getCorrectUsername(), Collections.singletonList(
-                            new Property("textures", "", ""))));
+            event.setGameProfile(new GameProfile(player.getUniqueId(),
+                    player.getUsername(), Collections.singletonList(
+                    new Property("textures", "", ""))));
         }
     }
 

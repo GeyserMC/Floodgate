@@ -25,8 +25,8 @@
 
 package org.geysermc.floodgate.command;
 
-import lombok.Getter;
 import org.geysermc.floodgate.platform.command.TranslatableMessage;
+import lombok.Getter;
 
 /**
  * Messages (or part of messages) that are used in two or more commands and thus are 'commonly

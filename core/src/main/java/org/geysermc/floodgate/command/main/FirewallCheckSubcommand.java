@@ -29,15 +29,15 @@ import static org.geysermc.floodgate.util.Constants.COLOR_CHAR;
 
 import cloud.commandframework.context.CommandContext;
 import com.google.gson.JsonElement;
+import org.geysermc.floodgate.player.UserAudience;
+import org.geysermc.floodgate.util.HttpUtils;
+import org.geysermc.floodgate.util.HttpUtils.HttpResponse;
+import org.geysermc.floodgate.util.Utils;
 import it.unimi.dsi.fastutil.Pair;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
-import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.util.Constants;
-import org.geysermc.floodgate.util.HttpUtils;
-import org.geysermc.floodgate.util.HttpUtils.HttpResponse;
-import org.geysermc.floodgate.util.Utils;
 
 final class FirewallCheckSubcommand {
     private FirewallCheckSubcommand() {}

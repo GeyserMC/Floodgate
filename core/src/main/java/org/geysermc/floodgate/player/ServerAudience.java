@@ -30,12 +30,11 @@ import net.kyori.adventure.audience.Audience;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.geysermc.floodgate.player.UserAudience.ConsoleAudience;
 
 public interface ServerAudience extends Audience {
     @NonNull Iterable<? extends UserAudience> onlineAudiences();
 
-    @NonNull ConsoleAudience consoleAudience();
+    @NonNull UserAudience.ConsoleAudience consoleAudience();
 
     @NonNegative int onlineCount();
 
