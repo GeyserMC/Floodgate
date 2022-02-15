@@ -25,12 +25,12 @@
 
 package org.geysermc.floodgate.config.loader;
 
+import org.geysermc.floodgate.config.FloodgateConfig;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.geysermc.floodgate.config.FloodgateConfig;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;

@@ -30,6 +30,8 @@ import static org.geysermc.floodgate.util.ReflectionUtils.getFieldOfType;
 import static org.geysermc.floodgate.util.ReflectionUtils.getMethod;
 
 import com.google.common.base.Preconditions;
+import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.util.ReflectionUtils;
 import com.mojang.authlib.GameProfile;
 import io.netty.channel.ChannelHandlerContext;
 import java.lang.reflect.Constructor;

@@ -25,11 +25,11 @@
 
 package org.geysermc.floodgate.addon.packethandler;
 
+import org.geysermc.floodgate.packet.PacketHandlersImpl;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import java.util.List;
 import org.geysermc.floodgate.api.util.TriFunction;
-import org.geysermc.floodgate.packet.PacketHandlersImpl;
 
 public class ChannelOutPacketHandler extends MessageToMessageEncoder<Object> {
     private final PacketHandlersImpl packetHandlers;

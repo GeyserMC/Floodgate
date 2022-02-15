@@ -55,7 +55,7 @@ public final class SpigotSkinApplier implements SkinApplier {
     }
 
     private void applySkin0(FloodgatePlayer floodgatePlayer, SkinData skinData, boolean firstTry) {
-        Player player = Bukkit.getPlayer(floodgatePlayer.getCorrectUniqueId());
+        Player player = Bukkit.getPlayer(floodgatePlayer.getUniqueId());
 
         // player is probably not logged in yet
         if (player == null) {

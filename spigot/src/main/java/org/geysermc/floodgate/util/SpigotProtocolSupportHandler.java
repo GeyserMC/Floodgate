@@ -27,6 +27,7 @@ package org.geysermc.floodgate.util;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import org.geysermc.floodgate.util.ReflectionUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.AttributeKey;
@@ -99,14 +100,14 @@ public class SpigotProtocolSupportHandler implements PacketHandler {
         Object profile = ReflectionUtils.invoke(connection, getLoginProfile);
 
         // set correct uuid and name on ProtocolSupport's end, since we skip the LoginStart
-        ReflectionUtils.invoke(profile, setName, player.getCorrectUsername());
-        ReflectionUtils.invoke(profile, setOriginalName, player.getCorrectUsername());
-        ReflectionUtils.invoke(profile, setUuid, player.getCorrectUniqueId());
-        ReflectionUtils.invoke(profile, setOriginalUuid, player.getCorrectUniqueId());
+        ReflectionUtils.invoke(profile, setName, player.getUsername());
+        ReflectionUtils.invoke(profile, setOriginalName, player.getUsername());
+        ReflectionUtils.invoke(profile, setUuid, player.getUniqueId());
+        ReflectionUtils.invoke(profile, setOriginalUuid, player.getUniqueId());
 
         Object temp = ReflectionUtils.invoke(connection, getNetworkManagerWrapper);
         temp = ReflectionUtils.invoke(temp, getPacketListener);
-        ReflectionUtils.invoke(temp, handleLoginStart, player.getCorrectUsername());
+        ReflectionUtils.invoke(temp, handleLoginStart, player.getUsername());
         return packet;
     }
 }

@@ -27,16 +27,11 @@ package org.geysermc.floodgate.addon.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
-import java.net.InetSocketAddress;
 import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.netty.ChannelWrapper;
 import net.md_5.bungee.netty.HandlerBoss;
-import net.md_5.bungee.protocol.DefinedPacket;
-import net.md_5.bungee.protocol.PacketWrapper;
-import net.md_5.bungee.protocol.packet.Handshake;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.util.ReflectionUtils;
@@ -62,39 +57,39 @@ public class BungeeProxyDataHandler extends CommonDataHandler {
             PacketBlocker blocker) {
         super(handshakeHandler, config, kickMessageAttribute, blocker);
     }
-
-    @Override
-    protected void setNewIp(Channel channel, InetSocketAddress newIp) {
-        HandlerBoss handlerBoss = ctx.pipeline().get(HandlerBoss.class);
-        // InitialHandler extends PacketHandler and implements PendingConnection
-        InitialHandler connection = ReflectionUtils.getCastedValue(handlerBoss, HANDLER);
-
-        ChannelWrapper channelWrapper = ReflectionUtils.getCastedValue(connection, CHANNEL_WRAPPER);
-        channelWrapper.setRemoteAddress(newIp);
-    }
-
-    @Override
-    protected Object setHostname(Object wrapperWithHandshake, String hostname) {
-        PacketWrapper wrapper = (PacketWrapper) wrapperWithHandshake;
-        Handshake handshake = (Handshake) wrapper.packet;
-        handshake.setHost(hostname);
-        return wrapper;
-    }
-
-    @Override
-    public boolean channelRead(Object msg) {
-        if (msg instanceof PacketWrapper) {
-            DefinedPacket packet = ((PacketWrapper) msg).packet;
-
-            // we're only interested in the Handshake packet
-            if (packet instanceof Handshake) {
-                handle(msg, ((Handshake) packet).getHost());
-
-                // otherwise, it'll get read twice. once by the packet queue and once by this method
-                return false;
-            }
-        }
-
-        return true;
-    }
+//
+//    @Override
+//    protected void setNewIp(Channel channel, InetSocketAddress newIp) {
+//        HandlerBoss handlerBoss = ctx.pipeline().get(HandlerBoss.class);
+//        // InitialHandler extends PacketHandler and implements PendingConnection
+//        InitialHandler connection = ReflectionUtils.getCastedValue(handlerBoss, HANDLER);
+//
+//        ChannelWrapper channelWrapper = ReflectionUtils.getCastedValue(connection, CHANNEL_WRAPPER);
+//        channelWrapper.setRemoteAddress(newIp);
+//    }
+//
+//    @Override
+//    protected Object setHostname(Object wrapperWithHandshake, String hostname) {
+//        PacketWrapper wrapper = (PacketWrapper) wrapperWithHandshake;
+//        Handshake handshake = (Handshake) wrapper.packet;
+//        handshake.setHost(hostname);
+//        return wrapper;
+//    }
+//
+//    @Override
+//    public boolean channelRead(Object msg) {
+//        if (msg instanceof PacketWrapper) {
+//            DefinedPacket packet = ((PacketWrapper) msg).packet;
+//
+//            // we're only interested in the Handshake packet
+//            if (packet instanceof Handshake) {
+//                handle(msg, ((Handshake) packet).getHost());
+//
+//                // otherwise, it'll get read twice. once by the packet queue and once by this method
+//                return false;
+//            }
+//        }
+//
+//        return true;
+//    }
 }

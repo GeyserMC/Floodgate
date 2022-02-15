@@ -26,6 +26,8 @@
 package org.geysermc.floodgate.util;
 
 import com.google.inject.Inject;
+import org.geysermc.floodgate.util.LanguageManager;
+import org.geysermc.floodgate.util.Utils;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;

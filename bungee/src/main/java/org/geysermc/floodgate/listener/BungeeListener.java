@@ -46,7 +46,6 @@ import net.md_5.bungee.netty.ChannelWrapper;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.player.FloodgatePlayerImpl;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinData;
 import org.geysermc.floodgate.util.BungeeCommandUtil;
@@ -103,8 +102,8 @@ public final class BungeeListener implements Listener {
         FloodgatePlayer player = channel.attr(playerAttribute).get();
         if (player != null) {
             connection.setOnlineMode(false);
-            connection.setUniqueId(player.getCorrectUniqueId());
-            ReflectionUtils.setValue(connection, PLAYER_NAME, player.getCorrectUsername());
+            connection.setUniqueId(player.getUniqueId());
+            ReflectionUtils.setValue(connection, PLAYER_NAME, player.getUsername());
         }
     }
 
@@ -119,7 +118,7 @@ public final class BungeeListener implements Listener {
             // that Floodgate has done its job
             logger.translatedInfo(
                     "floodgate.ingame.login_name",
-                    player.getCorrectUsername(), uniqueId
+                    player.getUsername(), uniqueId
             );
             languageManager.loadLocale(player.getLanguageCode());
         }

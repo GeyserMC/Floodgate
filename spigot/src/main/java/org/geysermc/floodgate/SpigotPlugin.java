@@ -28,7 +28,6 @@ package org.geysermc.floodgate;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.module.PaperListenerModule;
 import org.geysermc.floodgate.module.ServerCommonModule;
@@ -37,7 +36,6 @@ import org.geysermc.floodgate.module.SpigotCommandModule;
 import org.geysermc.floodgate.module.SpigotListenerModule;
 import org.geysermc.floodgate.module.SpigotPlatformModule;
 import org.geysermc.floodgate.util.ReflectionUtils;
-import org.geysermc.floodgate.util.SpigotHandshakeHandler;
 import org.geysermc.floodgate.util.SpigotProtocolSupportHandler;
 import org.geysermc.floodgate.util.SpigotProtocolSupportListener;
 
@@ -73,8 +71,10 @@ public final class SpigotPlugin extends JavaPlugin {
         );
 
         //todo add proper support for disabling things on shutdown and enabling this on enable
-        injector.getInstance(HandshakeHandlers.class)
-                .addHandshakeHandler(injector.getInstance(SpigotHandshakeHandler.class));
+
+        // TODO disabled until we support intercepting player data forwarding on plugin-side
+//        injector.getInstance(HandshakeHandlers.class)
+//                .addHandshakeHandler(injector.getInstance(SpigotHandshakeHandler.class));
 
         // add ProtocolSupport support (hack)
         if (getServer().getPluginManager().getPlugin("ProtocolSupport") != null) {

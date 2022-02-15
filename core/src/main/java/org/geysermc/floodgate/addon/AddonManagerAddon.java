@@ -26,9 +26,9 @@
 package org.geysermc.floodgate.addon;
 
 import com.google.inject.Inject;
+import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import io.netty.channel.Channel;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
-import org.geysermc.floodgate.inject.CommonPlatformInjector;
 
 public final class AddonManagerAddon implements InjectorAddon {
     @Inject private CommonPlatformInjector injector;

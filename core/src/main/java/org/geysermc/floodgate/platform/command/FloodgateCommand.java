@@ -28,8 +28,8 @@ package org.geysermc.floodgate.platform.command;
 import cloud.commandframework.Command;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.context.CommandContext;
-import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.player.UserAudience;
+import org.geysermc.floodgate.config.FloodgateConfig;
 
 /** The base class for every Floodgate command. */
 public interface FloodgateCommand {

@@ -26,21 +26,14 @@
 package org.geysermc.floodgate.addon.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.geysermc.floodgate.util.ReflectionUtils.getCastedValue;
 import static org.geysermc.floodgate.util.ReflectionUtils.getField;
 import static org.geysermc.floodgate.util.ReflectionUtils.getPrefixedClass;
-import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
 
-import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
-import java.net.InetSocketAddress;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
-import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
-import org.geysermc.floodgate.player.FloodgateHandshakeHandler.ResultType;
 
 public final class VelocityProxyDataHandler extends CommonDataHandler {
     private static final Field HANDSHAKE;
@@ -76,37 +69,37 @@ public final class VelocityProxyDataHandler extends CommonDataHandler {
         super(handshakeHandler, config, kickMessageAttribute, blocker);
         this.logger = logger;
     }
-
-    @Override
-    protected void setNewIp(Channel channel, InetSocketAddress newIp) {
-        setValue(channel.pipeline().get("handler"), REMOTE_ADDRESS, newIp);
-    }
-
-    @Override
-    protected Object setHostname(Object handshakePacket, String hostname) {
-        setValue(handshakePacket, HANDSHAKE_SERVER_ADDRESS, hostname);
-        return handshakePacket;
-    }
-
-    @Override
-    protected boolean shouldRemoveHandler(HandshakeResult result) {
-        if (result.getResultType() == ResultType.SUCCESS) {
-            FloodgatePlayer player = result.getFloodgatePlayer();
-            logger.info("Floodgate player who is logged in as {} {} joined",
-                    player.getCorrectUsername(), player.getCorrectUniqueId());
-        }
-        return super.shouldRemoveHandler(result);
-    }
-
-    @Override
-    public boolean channelRead(Object packet) {
-        // we're only interested in the Handshake packet.
-        // it should be the first packet but you never know
-        if (HANDSHAKE_PACKET.isInstance(packet)) {
-            handle(packet, getCastedValue(packet, HANDSHAKE_SERVER_ADDRESS));
-            // otherwise, it'll get read twice. once by the packet queue and once by this method
-            return false;
-        }
-        return true;
-    }
+//
+//    @Override
+//    protected void setNewIp(Channel channel, InetSocketAddress newIp) {
+//        setValue(channel.pipeline().get("handler"), REMOTE_ADDRESS, newIp);
+//    }
+//
+//    @Override
+//    protected Object setHostname(Object handshakePacket, String hostname) {
+//        setValue(handshakePacket, HANDSHAKE_SERVER_ADDRESS, hostname);
+//        return handshakePacket;
+//    }
+//
+//    @Override
+//    protected boolean shouldRemoveHandler(HandshakeResult result) {
+//        if (result.getResultType() == ResultType.SUCCESS) {
+//            FloodgatePlayer player = result.getFloodgatePlayer();
+//            logger.info("Floodgate player who is logged in as {} {} joined",
+//                    player.getUsername(), player.getUniqueId());
+//        }
+//        return super.shouldRemoveHandler(result);
+//    }
+//
+//    @Override
+//    public boolean channelRead(Object packet) {
+//        // we're only interested in the Handshake packet.
+//        // it should be the first packet but you never know
+//        if (HANDSHAKE_PACKET.isInstance(packet)) {
+//            handle(packet, getCastedValue(packet, HANDSHAKE_SERVER_ADDRESS));
+//            // otherwise, it'll get read twice. once by the packet queue and once by this method
+//            return false;
+//        }
+//        return true;
+//    }
 }

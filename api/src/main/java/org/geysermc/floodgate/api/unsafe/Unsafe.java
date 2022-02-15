@@ -46,6 +46,6 @@ public interface Unsafe {
      * @param packetData the raw packet data
      */
     default void sendPacket(FloodgatePlayer player, int packetId, byte[] packetData) {
-        sendPacket(player.getCorrectUniqueId(), packetId, packetData);
+        sendPacket(player.getUniqueId(), packetId, packetData);
     }
 }

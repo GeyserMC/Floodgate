@@ -26,6 +26,8 @@
 package org.geysermc.floodgate.util;
 
 import com.google.common.base.Joiner;
+import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -39,8 +41,6 @@ import java.util.Properties;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
 
 /**
  * Manages translations for strings in Floodgate

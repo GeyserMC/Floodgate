@@ -35,7 +35,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.player.FloodgatePlayerImpl;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.SpigotCommandUtil;
 
@@ -59,7 +58,7 @@ public final class SpigotListener implements Listener {
             // that Floodgate has done its job
             logger.translatedInfo(
                     "floodgate.ingame.login_name",
-                    player.getCorrectUsername(), player.getCorrectUniqueId()
+                    player.getUsername(), player.getUniqueId()
             );
             languageManager.loadLocale(player.getLanguageCode());
         }

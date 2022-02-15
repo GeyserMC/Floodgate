@@ -25,9 +25,9 @@
 
 package org.geysermc.floodgate.platform.util;
 
-import java.util.Collection;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.command.TranslatableMessage;
+import java.util.Collection;
 
 public interface PlatformUtils {
     /**

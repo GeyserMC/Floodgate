@@ -23,10 +23,15 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.database.config;
+package org.geysermc.floodgate.module;
 
-/**
- * Base class for every database related configuration.
- */
-public interface DatabaseConfig {
+import com.google.inject.AbstractModule;
+import org.geysermc.floodgate.register.WatcherRegister;
+
+public class WatcherModule extends AbstractModule {
+
+    @Override
+    protected void configure() {
+        bind(WatcherRegister.class).asEagerSingleton();
+    }
 }

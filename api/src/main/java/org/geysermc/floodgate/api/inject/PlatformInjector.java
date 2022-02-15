@@ -25,6 +25,8 @@
 
 package org.geysermc.floodgate.api.inject;
 
+import java.net.SocketAddress;
+
 /**
  * The global interface of all the Platform Injectors. The injector can be used for various things.
  * It is used internally for getting Floodgate data out of the handshake packet and for debug mode,
@@ -33,6 +35,12 @@ package org.geysermc.floodgate.api.inject;
  * this.
  */
 public interface PlatformInjector {
+
+    /**
+     * @return
+     */
+    SocketAddress getServerSocketAddress();
+
     /**
      * Injects the server connection. This will allow various addons (like getting the Floodgate
      * data and debug mode) to work.

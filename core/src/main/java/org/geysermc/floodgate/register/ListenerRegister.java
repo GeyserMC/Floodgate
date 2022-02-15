@@ -27,9 +27,9 @@ package org.geysermc.floodgate.register;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 
 @RequiredArgsConstructor(onConstructor = @__(@Inject))
 public final class ListenerRegister<T> {

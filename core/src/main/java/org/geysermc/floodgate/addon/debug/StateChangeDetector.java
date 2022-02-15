@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.addon.debug;
 
+import org.geysermc.floodgate.util.Utils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
@@ -32,7 +33,6 @@ import io.netty.channel.ChannelPipeline;
 import java.nio.charset.StandardCharsets;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.util.Constants;
-import org.geysermc.floodgate.util.Utils;
 
 public class StateChangeDetector {
     private static volatile int pluginMessageToClientId = -1;

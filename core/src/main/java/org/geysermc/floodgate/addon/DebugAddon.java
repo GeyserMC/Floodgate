@@ -27,15 +27,15 @@ package org.geysermc.floodgate.addon;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelPipeline;
 import org.geysermc.floodgate.addon.debug.ChannelInDebugHandler;
 import org.geysermc.floodgate.addon.debug.ChannelOutDebugHandler;
 import org.geysermc.floodgate.addon.debug.StateChangeDetector;
-import org.geysermc.floodgate.api.inject.InjectorAddon;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.util.Utils;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelPipeline;
+import org.geysermc.floodgate.api.inject.InjectorAddon;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
 
 public final class DebugAddon implements InjectorAddon {
     @Inject private FloodgateConfig config;

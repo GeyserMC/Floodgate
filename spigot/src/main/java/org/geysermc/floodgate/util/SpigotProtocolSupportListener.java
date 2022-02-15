@@ -28,6 +28,7 @@ package org.geysermc.floodgate.util;
 import static org.geysermc.floodgate.util.ReflectionUtils.getMethod;
 import static org.geysermc.floodgate.util.ReflectionUtils.getPrefixedClass;
 
+import org.geysermc.floodgate.util.ReflectionUtils;
 import java.lang.reflect.Method;
 import java.util.UUID;
 import org.bukkit.event.Event;

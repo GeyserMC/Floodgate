@@ -25,10 +25,10 @@
 
 package org.geysermc.floodgate.addon.packethandler;
 
+import org.geysermc.floodgate.packet.PacketHandlersImpl;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.geysermc.floodgate.api.util.TriFunction;
-import org.geysermc.floodgate.packet.PacketHandlersImpl;
 
 public class ChannelInPacketHandler extends SimpleChannelInboundHandler<Object> {
     private final PacketHandlersImpl packetHandlers;

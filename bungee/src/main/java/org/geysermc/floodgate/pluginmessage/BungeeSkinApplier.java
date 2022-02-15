@@ -47,12 +47,12 @@ public final class BungeeSkinApplier implements SkinApplier {
     static {
         LOGIN_RESULT = getFieldOfType(InitialHandler.class, LoginResult.class);
     }
-    
+
     private final FloodgateLogger logger;
 
     @Override
     public void applySkin(FloodgatePlayer uuid, SkinData skinData) {
-        ProxiedPlayer player = ProxyServer.getInstance().getPlayer(uuid.getCorrectUniqueId());
+        ProxiedPlayer player = ProxyServer.getInstance().getPlayer(uuid.getUniqueId());
         if (player == null) {
             return;
         }

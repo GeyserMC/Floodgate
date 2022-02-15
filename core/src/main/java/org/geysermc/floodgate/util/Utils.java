@@ -42,7 +42,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
@@ -99,14 +98,6 @@ public class Utils {
 
     public static String getLocale(Locale locale) {
         return locale.getLanguage() + "_" + locale.getCountry();
-    }
-
-    public static UUID getJavaUuid(long xuid) {
-        return new UUID(0, xuid);
-    }
-
-    public static UUID getJavaUuid(String xuid) {
-        return getJavaUuid(Long.parseLong(xuid));
     }
 
     public static boolean isUniquePrefix(String prefix) {
