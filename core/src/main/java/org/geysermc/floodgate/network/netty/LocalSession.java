@@ -120,10 +120,15 @@ public final class LocalSession {
                                         @Override
                                         public void onClose() {
                                             api.setPendingRemove(player);
-                                            // disconnect from server
-                                            channel.disconnect();
                                             tunnelConn.close();
                                             tunnelConn = null;
+
+                                            // disconnect from server
+                                            try {
+                                                channel.close().sync();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
                                         }
                                     }
                             );
