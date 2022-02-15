@@ -29,14 +29,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.name.Named;
-import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
-import org.geysermc.floodgate.config.loader.ConfigLoader;
-import org.geysermc.floodgate.link.PlayerLinkLoader;
-import org.geysermc.floodgate.module.ConfigLoadedModule;
-import org.geysermc.floodgate.module.PostInitializeModule;
-import org.geysermc.floodgate.news.NewsChecker;
-import org.geysermc.floodgate.util.PrefixCheckTask;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -47,6 +39,13 @@ import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
+import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.config.FloodgateConfigHolder;
+import org.geysermc.floodgate.config.loader.ConfigLoader;
+import org.geysermc.floodgate.module.ConfigLoadedModule;
+import org.geysermc.floodgate.module.PostInitializeModule;
+import org.geysermc.floodgate.news.NewsChecker;
+import org.geysermc.floodgate.util.PrefixCheckTask;
 
 public class FloodgatePlatform {
     private static final UUID KEY = UUID.randomUUID();
@@ -95,9 +94,8 @@ public class FloodgatePlatform {
 
         configHolder.set(config);
         guice = guice.createChildInjector(new ConfigLoadedModule(config));
-        PlayerLink link = guice.getInstance(PlayerLinkLoader.class).load();
 
-        InstanceHolder.set(api, link, this.injector, packetHandlers, handshakeHandlers, KEY);
+        InstanceHolder.set(api, this.injector, packetHandlers, handshakeHandlers, KEY);
 
         // todo this was the place where we provided the build number and branch for Geyser dump
 
@@ -139,7 +137,6 @@ public class FloodgatePlatform {
         }
 
         guice.getInstance(NewsChecker.class).shutdown();
-        api.getPlayerLink().stop();
         return true;
     }
 

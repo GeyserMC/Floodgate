@@ -21,6 +21,7 @@ dependencies {
     runtimeOnly("io.grpc", "grpc-netty-shaded", Versions.gRPCVersion)
     implementation("io.grpc", "grpc-protobuf", Versions.gRPCVersion)
     implementation("io.grpc", "grpc-stub", Versions.gRPCVersion)
+    implementation("javax.annotation", "javax.annotation-api", "1.3.2")
 }
 
 // present on all platforms
