@@ -43,6 +43,7 @@ import com.minekube.connect.util.LanguageManager;
 import com.minekube.connect.util.VelocityCommandUtil;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.connection.ConnectionHandshakeEvent;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
@@ -103,7 +104,14 @@ public final class VelocityListener {
     private AttributeKey<String> kickMessageAttribute;
 
     @Subscribe(order = PostOrder.EARLY)
+    public void onHS(ConnectionHandshakeEvent event) {
+        System.out.println(event.toString());
+    }
+
+    @Subscribe(order = PostOrder.EARLY)
     public void onPreLogin(PreLoginEvent event) {
+        System.out.println(event.toString());
+
         FloodgatePlayer player = null;
         String kickMessage;
         try {
@@ -123,7 +131,6 @@ public final class VelocityListener {
             logger.error("Failed get the FloodgatePlayer from the player's channel", exception);
             kickMessage = "Failed to get the FloodgatePlayer from the players's Channel";
         }
-
         if (kickMessage != null) {
             event.setResult(
                     PreLoginEvent.PreLoginComponentResult.denied(Component.text(kickMessage))
@@ -131,6 +138,7 @@ public final class VelocityListener {
             return;
         }
 
+        System.out.println(player);
         if (player != null) {
             event.setResult(PreLoginEvent.PreLoginComponentResult.forceOfflineMode());
             playerCache.put(event.getConnection(), player);

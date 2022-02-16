@@ -119,36 +119,6 @@ public final class SpigotInjector extends CommonPlatformInjector {
         });
     }
 
-    @Override
-    public boolean removeInjection() throws Exception {
-        if (!isInjected()) {
-            return true;
-        }
-
-        // remove injection from clients
-        for (Channel channel : getInjectedClients()) {
-            removeAddonsCall(channel);
-        }
-        getInjectedClients().clear();
-
-        // and change the list back to the original
-        Object serverConnection = getServerConnection();
-        if (serverConnection != null) {
-            Field field = ReflectionUtils.getField(serverConnection.getClass(), injectedFieldName);
-            List<?> list = (List<?>) ReflectionUtils.getValue(serverConnection, field);
-
-            if (list instanceof CustomList) {
-                CustomList customList = (CustomList) list;
-                ReflectionUtils.setValue(serverConnection, field, customList.getOriginalList());
-                customList.clear();
-                customList.addAll(list);
-            }
-        }
-
-        injected = false;
-        return true;
-    }
-
     public Object getServerConnection() throws IllegalAccessException, InvocationTargetException {
         if (serverConnection != null) {
             return serverConnection;

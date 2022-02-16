@@ -90,15 +90,4 @@ public final class VelocityInjector extends CommonPlatformInjector {
         return injected = true;
     }
 
-    @Override
-    public boolean canRemoveInjection() {
-        return false;
-    }
-
-    @Override
-    public boolean removeInjection() {
-        logger.error("Floodgate cannot remove itself from Velocity without a reboot");
-        return false;
-    }
-
 }
