@@ -28,17 +28,13 @@ package com.minekube.connect.network.netty;
 import com.minekube.connect.api.SimpleFloodgateApi;
 import com.minekube.connect.api.player.FloodgatePlayer;
 import com.minekube.connect.player.FloodgatePlayerImpl;
-import com.minekube.connect.tunnel.TunnelConn;
-import com.minekube.connect.tunnel.TunnelConn.Handler;
 import com.minekube.connect.tunnel.Tunneler;
 import com.minekube.connect.watch.SessionProposal;
+import com.minekube.connect.watch.SessionProposal.State;
 import io.grpc.protobuf.StatusProto;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
@@ -49,6 +45,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.time.Duration;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.RequiredArgsConstructor;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.Player;
 import org.jetbrains.annotations.NotNull;
@@ -69,119 +66,69 @@ public final class LocalSession {
     private final SessionProposal sessionProposal;
     private final AttributeKey<FloodgatePlayer> playerAttribute;
 
-    private TunnelConn tunnelConn;
+    private final AtomicBoolean connectOnce = new AtomicBoolean();
 
     public void connect() {
-        if (tunnelConn != null) {
+        if (sessionProposal.getState() != State.ACCEPTED) {
+            throw new IllegalStateException("Session proposal has already been rejected.");
+        }
+        if (!connectOnce.compareAndSet(false, true)) {
             throw new IllegalStateException("Connection has already been connected.");
         }
 
-        if (DEFAULT_EVENT_LOOP_GROUP == null) {
-            DEFAULT_EVENT_LOOP_GROUP = new DefaultEventLoopGroup();
-        }
-
-        Player p = sessionProposal.getSession().getPlayer();
-        FloodgatePlayer player = new FloodgatePlayerImpl(
+        final Player p = sessionProposal.getSession().getPlayer();
+        final FloodgatePlayer player = new FloodgatePlayerImpl(
                 p.getProfile(),
                 UUID.fromString(p.getProfile().getId()),
                 "", // TODO extract from http accept language header
                 p.getAddr()
         );
 
-        LocalSession it = this;
-        try {
-            final Bootstrap bootstrap = new Bootstrap();
-            bootstrap.channel(LocalChannelWithRemoteAddress.class);
-            bootstrap.handler(new ChannelInitializer<LocalChannelWithRemoteAddress>() {
-                        @Override
-                        public void initChannel(@NotNull LocalChannelWithRemoteAddress channel) {
-                            String clientIp = sessionProposal.getSession().getPlayer().getAddr();
-                            if (!clientIp.isEmpty()) {
-                                channel.setSpoofedAddress(new InetSocketAddress(clientIp, 0));
-                            }
-
-                            channel.attr(playerAttribute).set(player);
-
-                            // Start tunnel connection
-                            tunnelConn = tunneler.tunnel(
-                                    sessionProposal.getSession().getTunnelServiceAddr(),
-                                    sessionProposal.getSession().getId(),
-                                    new Handler() {
-                                        @Override
-                                        public void onReceive(byte[] data) {
-                                            System.out.println("Got data " + data.length);
-                                            // forward to downstream server
-                                            channel.writeAndFlush(data);
-                                        }
-
-                                        @Override
-                                        public void onError(Throwable t) {
-                                            it.exceptionCaught(t);
-                                        }
-
-                                        @Override
-                                        public void onClose() {
-                                            api.setPendingRemove(player);
-                                            tunnelConn.close();
-                                            tunnelConn = null;
-
-                                            // disconnect from server
-                                            try {
-                                                if (channel.isOpen()) {
-                                                    channel.close().sync();
-                                                }
-                                            } catch (Exception e) {
-                                                it.exceptionCaught(e);
-                                            }
-                                            // Reject session proposal in case we are still able to.
-                                            sessionProposal.reject(null);
-                                        }
-                                    }
-                            );
-
-                            ChannelPipeline pipeline = channel.pipeline();
-                            pipeline.addLast("connect-tunnel", new ChannelInboundHandlerAdapter() {
-                                @Override
-                                public void channelRead(@NotNull ChannelHandlerContext ctx,
-                                                        @NotNull Object msg) {
-
-                                    if (msg instanceof ByteBuf) {
-                                        ByteBuf buf = (ByteBuf) msg;
-                                        byte[] bytes = ByteBufUtil.getBytes(buf, buf.readerIndex(),
-                                                buf.readableBytes(), false);
-                                        tunnelConn.write(bytes);
-                                    } else {
-                                        ctx.fireChannelRead(msg);
-                                    }
-                                }
-                            });
-                        }
-                    })
-                    .group(DEFAULT_EVENT_LOOP_GROUP)
-                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, CONNECTION_TIMEOUT);
-
-            if (PREFERRED_DIRECT_BYTE_BUF_ALLOCATOR != null) {
-                bootstrap.option(ChannelOption.ALLOCATOR, PREFERRED_DIRECT_BYTE_BUF_ALLOCATOR);
-            }
-
-            bootstrap.remoteAddress(targetAddress).connect().addListener((future) -> {
-                if (!future.isSuccess()) {
-                    exceptionCaught(future.cause());
-                    return;
-                }
-                api.addPlayer(player);
-            });
-        } catch (Throwable t) {
-            exceptionCaught(t);
+        if (DEFAULT_EVENT_LOOP_GROUP == null) {
+            DEFAULT_EVENT_LOOP_GROUP = new DefaultEventLoopGroup();
         }
+
+        final Bootstrap bootstrap = new Bootstrap();
+        bootstrap.channel(LocalChannelWithRemoteAddress.class)
+                .handler(new ChannelInitializer<LocalChannelWithRemoteAddress>() {
+                    @Override
+                    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+                            throws Exception {
+                        LocalSession.this.exceptionCaught(cause);
+                        super.exceptionCaught(ctx, cause);
+                    }
+
+                    @Override
+                    public void initChannel(@NotNull LocalChannelWithRemoteAddress channel) {
+                        String clientIp = sessionProposal.getSession().getPlayer().getAddr();
+                        if (!clientIp.isEmpty()) {
+                            channel.setSpoofedAddress(new InetSocketAddress(clientIp, 0));
+                        }
+
+                        channel.attr(playerAttribute).set(player);
+
+                        ChannelPipeline pipeline = channel.pipeline();
+                        pipeline.addLast("connect-tunnel", new LocalChannelInboundHandler(
+                                api, tunneler, player, sessionProposal));
+                    }
+                })
+                .group(DEFAULT_EVENT_LOOP_GROUP)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, CONNECTION_TIMEOUT);
+
+        if (PREFERRED_DIRECT_BYTE_BUF_ALLOCATOR != null) {
+            bootstrap.option(ChannelOption.ALLOCATOR, PREFERRED_DIRECT_BYTE_BUF_ALLOCATOR);
+        }
+
+        bootstrap.remoteAddress(targetAddress).connect().addListener((future) -> {
+            if (!future.isSuccess()) {
+                exceptionCaught(future.cause());
+                return;
+            }
+            api.addPlayer(player);
+        });
     }
 
     private void exceptionCaught(Throwable cause) {
-        // Close tunnel stream if there is one
-        if (tunnelConn != null) {
-            tunnelConn.close(cause);
-            tunnelConn = null;
-        }
         cause.printStackTrace();
         // Reject session proposal in case we are still able to.
         sessionProposal.reject(StatusProto.fromThrowable(cause));

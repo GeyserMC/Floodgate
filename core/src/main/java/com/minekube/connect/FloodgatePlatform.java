@@ -122,16 +122,6 @@ public class FloodgatePlatform {
     }
 
     public boolean disable() {
-        if (injector != null && injector.canRemoveInjection()) {
-            try {
-                if (!injector.removeInjection()) {
-                    logger.error("Failed to remove the injection!");
-                }
-            } catch (Exception exception) {
-                logger.error("Failed to remove the injection!", exception);
-            }
-        }
-
         guice.getInstance(CommonPlatformInjector.class).shutdown();
         return true;
     }

@@ -96,7 +96,8 @@ public class WatcherRegister {
                     return;
                 }
                 // Try establishing connection
-                System.out.println("Connecting");
+                System.out.println(
+                        "Connecting to local server " + platformInjector.getServerSocketAddress());
                 new LocalSession(api, tunneler,
                         platformInjector.getServerSocketAddress(),
                         event.getSessionProposal(), playerAttribute

@@ -51,25 +51,6 @@ public interface PlatformInjector {
     boolean inject() throws Exception;
 
     /**
-     * Some platforms may not be able to remove their injection process. If so, this method will
-     * return false.
-     *
-     * @return true if it is safe to attempt to remove our injection performed in {@link #inject()}.
-     */
-    default boolean canRemoveInjection() {
-        return true;
-    }
-
-    /**
-     * Removes the injection from the server. Please note that this function should only be used
-     * internally (on plugin shutdown). This method will also remove every added addon.
-     *
-     * @return true if the injection has successfully been removed
-     * @throws Exception if something went wrong while removing the injection
-     */
-    boolean removeInjection() throws Exception;
-
-    /**
      * If the server connection is currently injected.
      *
      * @return true if the server connection is currently injected, returns false otherwise

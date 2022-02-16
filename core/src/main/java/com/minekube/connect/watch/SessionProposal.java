@@ -1,5 +1,6 @@
 package com.minekube.connect.watch;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,7 +13,7 @@ public class SessionProposal {
     private Session session;
     private final Consumer<com.google.rpc.Status> reject;
 
-    @Getter private State state = State.ACCEPTED;
+    private final AtomicReference<State> state = new AtomicReference<>(State.ACCEPTED);
 
     public enum State {
         ACCEPTED,
@@ -25,9 +26,12 @@ public class SessionProposal {
     }
 
     public void reject(com.google.rpc.Status reason) {
-        if (state != State.ACCEPTED) {
-            state = State.REJECTED;
+        if (state.compareAndSet(State.REJECTED, State.ACCEPTED)) {
             reject.accept(reason);
         }
+    }
+
+    public State getState() {
+        return state.get();
     }
 }

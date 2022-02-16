@@ -72,17 +72,6 @@ public final class BungeeInjector extends CommonPlatformInjector {
         }
     }
 
-    @Override
-    public boolean canRemoveInjection() {
-        return false;
-    }
-
-    @Override
-    public boolean removeInjection() {
-        logger.error("Floodgate cannot remove itself from Bungee without a reboot");
-        return false;
-    }
-
     void injectClient(Channel channel, boolean clientToProxy) {
         if (!channel.isOpen()) {
             return;
