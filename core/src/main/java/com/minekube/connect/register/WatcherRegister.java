@@ -60,12 +60,15 @@ public class WatcherRegister {
 
     @Inject
     public void start() {
+        // TODO reconnect retry
         watchClient.watch(new WatcherImpl());
     }
 
     private class WatcherImpl implements Watcher {
         @Override
         public void onProposal(SessionProposal proposal) {
+            System.out.println("Got sp " + proposal.getSession());
+
             if (proposal.getSession().getTunnelServiceAddr().isEmpty()) {
                 logger.info("Got session proposal with empty tunnel service address " +
                         "from WatchService, rejecting it");
@@ -93,6 +96,7 @@ public class WatcherRegister {
                     return;
                 }
                 // Try establishing connection
+                System.out.println("Connecting");
                 new LocalSession(api, tunneler,
                         platformInjector.getServerSocketAddress(),
                         event.getSessionProposal(), playerAttribute

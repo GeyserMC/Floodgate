@@ -30,7 +30,7 @@ provided("io.netty", "netty-codec", Versions.nettyVersion)
 provided("io.netty", "netty-transport-native-unix-common", Versions.nettyVersion)
 
 configure<BlossomExtension> {
-    val constantsFile = "src/main/java/org/geysermc/floodgate/util/Constants.java"
+    val constantsFile = "src/main/java/com/minekube/connect/util/Constants.java"
     replaceToken("\${branch}", branchName(), constantsFile)
     replaceToken("\${buildNumber}", buildNumber(), constantsFile)
 }
