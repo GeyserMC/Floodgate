@@ -105,9 +105,11 @@ public final class LocalSession {
                             // Start tunnel connection
                             tunnelConn = tunneler.tunnel(
                                     sessionProposal.getSession().getTunnelServiceAddr(),
+                                    sessionProposal.getSession().getId(),
                                     new Handler() {
                                         @Override
                                         public void onReceive(byte[] data) {
+                                            System.out.println("Got data " + data.length);
                                             // forward to downstream server
                                             channel.writeAndFlush(data);
                                         }
@@ -125,10 +127,14 @@ public final class LocalSession {
 
                                             // disconnect from server
                                             try {
-                                                channel.close().sync();
+                                                if (channel.isOpen()) {
+                                                    channel.close().sync();
+                                                }
                                             } catch (Exception e) {
-                                                e.printStackTrace();
+                                                it.exceptionCaught(e);
                                             }
+                                            // Reject session proposal in case we are still able to.
+                                            sessionProposal.reject(null);
                                         }
                                     }
                             );
@@ -173,9 +179,10 @@ public final class LocalSession {
     private void exceptionCaught(Throwable cause) {
         // Close tunnel stream if there is one
         if (tunnelConn != null) {
-            tunnelConn.close();
+            tunnelConn.close(cause);
             tunnelConn = null;
         }
+        cause.printStackTrace();
         // Reject session proposal in case we are still able to.
         sessionProposal.reject(StatusProto.fromThrowable(cause));
     }

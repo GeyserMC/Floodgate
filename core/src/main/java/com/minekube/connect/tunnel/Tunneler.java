@@ -5,6 +5,8 @@ import com.google.common.collect.Maps;
 import com.minekube.connect.tunnel.TunnelConn.Handler;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.Metadata;
+import io.grpc.stub.MetadataUtils;
 import io.grpc.stub.StreamObserver;
 import java.io.Closeable;
 import java.util.concurrent.ConcurrentMap;
@@ -27,11 +29,18 @@ public class Tunneler implements Closeable {
         });
     }
 
-    public TunnelConn tunnel(final String tunnelServiceAddr, Handler handler) {
+    public TunnelConn tunnel(final String tunnelServiceAddr, String sessionId, Handler handler) {
         Preconditions.checkArgument(!tunnelServiceAddr.isEmpty(),
                 "tunnelServiceAddr must not be empty");
-        TunnelServiceStub asyncStub = TunnelServiceGrpc.newStub(channel(tunnelServiceAddr));
 
+        Metadata.Key<String> s = Metadata.Key.of("Connect-Session",
+                Metadata.ASCII_STRING_MARSHALLER);
+        Metadata metadata = new Metadata();
+        metadata.put(s, sessionId);
+        TunnelServiceStub asyncStub = TunnelServiceGrpc.newStub(channel(tunnelServiceAddr))
+                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata));
+
+        System.out.println("tunnel");
         StreamObserver<TunnelRequest> writeStream = asyncStub.tunnel(
                 new StreamObserver<TunnelResponse>() {
                     @Override
@@ -58,7 +67,6 @@ public class Tunneler implements Closeable {
             @Override
             public void close(Throwable t) {
                 writeStream.onError(t);
-                writeStream.onCompleted();
             }
 
             @Override
