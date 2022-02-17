@@ -23,22 +23,13 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package com.minekube.connect.network.netty;
+package com.minekube.connect.api.player;
 
-import io.netty.channel.local.LocalChannel;
-import java.net.InetSocketAddress;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-/**
- * Client -> server storing the spoofed remote address.
- */
-public class LocalChannelWithRemoteAddress extends LocalChannel {
-    @Getter
-    @Setter
-    private InetSocketAddress spoofedAddress;
-
-    @Getter
-    @Setter
-    private String myData;
+@Data
+public class GameProfileProperty {
+    private final String name;
+    private final String value;
+    private final String signature;
 }

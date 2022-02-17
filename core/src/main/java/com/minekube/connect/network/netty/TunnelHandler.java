@@ -51,7 +51,7 @@ class TunnelHandler implements Handler {
 
     @Override
     public void onClose() {
-        // disconnect from server
+        // disconnect from downstream server
         try {
             if (downstreamServerConn.isOpen()) {
                 downstreamServerConn.close().sync();

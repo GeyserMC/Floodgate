@@ -39,6 +39,7 @@ import com.google.inject.name.Named;
 import com.minekube.connect.api.ProxyFloodgateApi;
 import com.minekube.connect.api.logger.FloodgateLogger;
 import com.minekube.connect.api.player.FloodgatePlayer;
+import com.minekube.connect.network.netty.ChannelWrapper;
 import com.minekube.connect.util.LanguageManager;
 import com.minekube.connect.util.VelocityCommandUtil;
 import com.velocitypowered.api.event.PostOrder;
@@ -54,10 +55,9 @@ import com.velocitypowered.api.util.GameProfile.Property;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import net.kyori.adventure.text.Component;
+import java.util.stream.Collectors;
 
 public final class VelocityListener {
     private static final Field INITIAL_MINECRAFT_CONNECTION;
@@ -99,10 +99,6 @@ public final class VelocityListener {
     @Named("playerAttribute")
     private AttributeKey<FloodgatePlayer> playerAttribute;
 
-    @Inject
-    @Named("kickMessageAttribute")
-    private AttributeKey<String> kickMessageAttribute;
-
     @Subscribe(order = PostOrder.EARLY)
     public void onHS(ConnectionHandshakeEvent event) {
         System.out.println(event.toString());
@@ -111,11 +107,12 @@ public final class VelocityListener {
     @Subscribe(order = PostOrder.EARLY)
     public void onPreLogin(PreLoginEvent event) {
         System.out.println(event.toString());
+        System.out.println("Remote " + event.getConnection().getRemoteAddress());
 
         FloodgatePlayer player = null;
-        String kickMessage;
         try {
             InboundConnection connection = event.getConnection();
+            System.out.println("a " + connection + " " + connection.getClass());
             if (INITIAL_CONNECTION_DELEGATE != null) {
                 // Velocity 3.1.0 added LoginInboundConnection which is used in the login state,
                 // but that class doesn't have a Channel field. However, it does have
@@ -125,17 +122,14 @@ public final class VelocityListener {
             Object mcConnection = getValue(connection, INITIAL_MINECRAFT_CONNECTION);
             Channel channel = getCastedValue(mcConnection, CHANNEL);
 
+            System.out.println("b " + connection + " " + connection.getClass());
+            System.out.println("c " + mcConnection + " " + mcConnection.getClass());
+            System.out.println("d " + channel + " " + channel.getClass());
+            ChannelWrapper cw = (ChannelWrapper) channel;
+            System.out.println(cw.getWMyData());
             player = channel.attr(playerAttribute).get();
-            kickMessage = channel.attr(kickMessageAttribute).get();
         } catch (Exception exception) {
             logger.error("Failed get the FloodgatePlayer from the player's channel", exception);
-            kickMessage = "Failed to get the FloodgatePlayer from the players's Channel";
-        }
-        if (kickMessage != null) {
-            event.setResult(
-                    PreLoginEvent.PreLoginComponentResult.denied(Component.text(kickMessage))
-            );
-            return;
         }
 
         System.out.println(player);
@@ -147,14 +141,25 @@ public final class VelocityListener {
 
     @Subscribe(order = PostOrder.EARLY)
     public void onGameProfileRequest(GameProfileRequestEvent event) {
+        if (event.isOnlineMode()) {
+            return;
+        }
+//        event.getConnection() TODO player from channel wrapper?
         FloodgatePlayer player = playerCache.getIfPresent(event.getConnection());
         if (player != null) {
             playerCache.invalidate(event.getConnection());
-            // The texture properties addition is to fix the February 2 2022 Mojang authentication changes
-            event.setGameProfile(new GameProfile(player.getUniqueId(),
-                    player.getUsername(), Collections.singletonList(
-                    new Property("textures", "", ""))));
+            // Use the game profile received from WatchService for this connection
+            event.setGameProfile(gameProfileFromPlayer(event.getGameProfile(), player));
         }
+    }
+
+    private GameProfile gameProfileFromPlayer(GameProfile default0, FloodgatePlayer player) {
+        return default0
+                .withId(player.getUniqueId())
+                .withName(player.getUsername())
+                .addProperties(player.getProperties().stream()
+                        .map(p -> new Property(p.getName(), p.getValue(), p.getSignature()))
+                        .collect(Collectors.toList()));
     }
 
     @Subscribe(order = PostOrder.LAST)

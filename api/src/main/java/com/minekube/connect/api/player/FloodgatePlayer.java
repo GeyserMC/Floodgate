@@ -25,6 +25,7 @@
 
 package com.minekube.connect.api.player;
 
+import java.util.Collection;
 import java.util.UUID;
 
 public interface FloodgatePlayer {
@@ -37,6 +38,11 @@ public interface FloodgatePlayer {
      * Returns the Minecraft username of that player.
      */
     String getUsername();
+
+    /**
+     * Returns the game profile properties of that player.
+     */
+    Collection<GameProfileProperty> getProperties();
 
     /**
      * Returns the language code of the player. If it is unknown it returns an empty string.

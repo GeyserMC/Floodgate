@@ -38,7 +38,7 @@ import com.google.inject.name.Named;
 import com.minekube.connect.VelocityPlugin;
 import com.minekube.connect.api.logger.FloodgateLogger;
 import com.minekube.connect.inject.CommonPlatformInjector;
-import com.minekube.connect.inject.velocity.VelocityInjector;
+import com.minekube.connect.inject.velocity.FloodgateVelocityInjector;
 import com.minekube.connect.listener.VelocityEventSink;
 import com.minekube.connect.listener.VelocityListenerRegistration;
 import com.minekube.connect.logger.Slf4jFloodgateLogger;
@@ -120,7 +120,7 @@ public final class VelocityPlatformModule extends AbstractModule {
     @Provides
     @Singleton
     public CommonPlatformInjector platformInjector(ProxyServer server, FloodgateLogger logger) {
-        return new VelocityInjector(server, logger);
+        return new FloodgateVelocityInjector(server, logger);
     }
 
     @Provides

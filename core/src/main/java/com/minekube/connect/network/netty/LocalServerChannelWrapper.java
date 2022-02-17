@@ -37,9 +37,10 @@ public class LocalServerChannelWrapper extends LocalServerChannel {
     protected LocalChannel newLocalChannel(LocalChannel peer) {
         // LocalChannel here should be an instance of LocalChannelWithRemoteAddress, which we can use to set the "remote address" on the other end
         if (peer instanceof LocalChannelWithRemoteAddress) {
-            LocalChannelWrapper channel = new LocalChannelWrapper(this, peer);
-            channel.wrapper().remoteAddress(
-                    ((LocalChannelWithRemoteAddress) peer).getSpoofedAddress());
+            LocalChannelWithRemoteAddress p = ((LocalChannelWithRemoteAddress) peer);
+            LocalChannelWrapper channel = new LocalChannelWrapper(this, p);
+            channel.wrapper().remoteAddress(p.getSpoofedAddress());
+            channel.wrapper().wMyData(p.getMyData());
             return channel;
         }
         return super.newLocalChannel(peer);
