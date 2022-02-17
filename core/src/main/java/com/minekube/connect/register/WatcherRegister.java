@@ -42,6 +42,9 @@ import com.minekube.connect.watch.SessionProposal.State;
 import com.minekube.connect.watch.WatchClient;
 import com.minekube.connect.watch.Watcher;
 import io.netty.util.AttributeKey;
+import java.time.Duration;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Starts watching for session proposals for connecting players.
@@ -60,15 +63,14 @@ public class WatcherRegister {
 
     @Inject
     public void start() {
-        // TODO reconnect retry
         watchClient.watch(new WatcherImpl());
     }
+
+    private final static Duration reconnectAfterErr = Duration.ofSeconds(5);
 
     private class WatcherImpl implements Watcher {
         @Override
         public void onProposal(SessionProposal proposal) {
-            System.out.println("Got sp " + proposal.getSession());
-
             if (proposal.getSession().getTunnelServiceAddr().isEmpty()) {
                 logger.info("Got session proposal with empty tunnel service address " +
                         "from WatchService, rejecting it");
@@ -79,11 +81,16 @@ public class WatcherRegister {
                 return;
             }
 
+            if (logger.isDebug()) { // skipping a lot of proposal.toString operations
+                logger.debug("Received {}", proposal);
+            }
+
             eventSink.fire(new SessionProposeEvent(proposal)).thenAccept(event -> {
                 if (event.getSessionProposal().getState() != State.ACCEPTED) {
                     // rejected by event handler
                     return;
                 }
+
                 // checking the second time, an event handler could have modified it.
                 if (event.getSessionProposal().getSession().getTunnelServiceAddr().isEmpty()) {
                     logger.info("A session proposal event handler emptied the tunnel " +
@@ -96,9 +103,7 @@ public class WatcherRegister {
                     return;
                 }
                 // Try establishing connection
-                System.out.println(
-                        "Connecting to local server " + platformInjector.getServerSocketAddress());
-                new LocalSession(api, tunneler,
+                new LocalSession(logger, api, tunneler,
                         platformInjector.getServerSocketAddress(),
                         event.getSessionProposal(), playerAttribute
                 ).connect();
@@ -107,7 +112,14 @@ public class WatcherRegister {
 
         @Override
         public void onError(Throwable t) {
-            t.printStackTrace();
+            logger.error("Connection error from WatchService: {}", t.getLocalizedMessage());
+            logger.info("Reconnecting in {}s ...", reconnectAfterErr.getSeconds());
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    start();
+                }
+            }, reconnectAfterErr.toMillis());
         }
     }
 

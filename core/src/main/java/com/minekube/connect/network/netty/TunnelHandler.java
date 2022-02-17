@@ -25,7 +25,10 @@
 
 package com.minekube.connect.network.netty;
 
+import com.minekube.connect.api.logger.FloodgateLogger;
 import com.minekube.connect.tunnel.TunnelConn.Handler;
+import io.grpc.Status;
+import io.grpc.Status.Code;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -33,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 class TunnelHandler implements Handler {
+    private final FloodgateLogger logger;
     private final Channel downstreamServerConn; // local server connection
 
     @Override
@@ -45,7 +49,11 @@ class TunnelHandler implements Handler {
     @Override
     public void onError(Throwable t) {
         // error connecting to tunnel service
-        t.printStackTrace();
+        Status status = Status.fromThrowable(t);
+        if (status.getCode() == Code.CANCELLED) {
+            return;
+        }
+        logger.error("Connection error from TunnelService: {}", t.getLocalizedMessage());
     }
 
     @Override

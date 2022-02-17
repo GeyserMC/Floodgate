@@ -34,4 +34,11 @@ public class SessionProposal {
     public State getState() {
         return state.get();
     }
+
+    @Override
+    public String toString() {
+        return "SessionProposal{" +
+                "session=" + session +
+                '}';
+    }
 }

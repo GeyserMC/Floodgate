@@ -26,6 +26,7 @@
 package com.minekube.connect.network.netty;
 
 import com.minekube.connect.api.SimpleFloodgateApi;
+import com.minekube.connect.api.logger.FloodgateLogger;
 import com.minekube.connect.api.player.FloodgatePlayer;
 import com.minekube.connect.tunnel.TunnelConn;
 import com.minekube.connect.tunnel.Tunneler;
@@ -40,6 +41,7 @@ import org.jetbrains.annotations.NotNull;
 
 @RequiredArgsConstructor
 public class LocalChannelInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
+    private final FloodgateLogger logger;
     private final SimpleFloodgateApi api;
     private final Tunneler tunneler;
     private final FloodgatePlayer player;
@@ -61,7 +63,7 @@ public class LocalChannelInboundHandler extends SimpleChannelInboundHandler<Byte
         tunnelConn = tunneler.tunnel(
                 sessionProposal.getSession().getTunnelServiceAddr(),
                 sessionProposal.getSession().getId(),
-                new TunnelHandler(ctx.channel())
+                new TunnelHandler(logger, ctx.channel())
         );
         super.channelActive(ctx);
     }
