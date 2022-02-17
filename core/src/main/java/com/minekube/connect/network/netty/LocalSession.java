@@ -27,6 +27,7 @@ package com.minekube.connect.network.netty;
 
 import com.minekube.connect.api.SimpleFloodgateApi;
 import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.player.Auth;
 import com.minekube.connect.api.player.FloodgatePlayer;
 import com.minekube.connect.api.player.GameProfileProperty;
 import com.minekube.connect.player.FloodgatePlayerImpl;
@@ -43,7 +44,6 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.DefaultEventLoopGroup;
 import io.netty.channel.unix.PreferredDirectByteBufAllocator;
-import io.netty.util.AttributeKey;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.time.Duration;
@@ -55,6 +55,7 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.Player;
+import minekube.connect.v1alpha1.WatchServiceOuterClass.Session;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -73,12 +74,11 @@ public final class LocalSession {
     private final Tunneler tunneler;
     private final SocketAddress targetAddress; // The server we are connecting to
     private final SessionProposal sessionProposal;
-    private final AttributeKey<FloodgatePlayer> playerAttribute;
 
     private final AtomicBoolean connectOnce = new AtomicBoolean();
 
     /**
-     * Every {@link LocalSession} attaches connection context to a {@link Channel} an can be
+     * Every {@link LocalSession} attaches connection context to a {@link Channel} and can be
      * extracted using {@link LocalSession#context(Channel)}.
      */
     @Getter
@@ -105,6 +105,9 @@ public final class LocalSession {
         return Optional.empty();
     }
 
+    /**
+     * See {@link LocalSession#context(Channel)}
+     */
     public static void context(Channel channel, Consumer<Context> ifPresent) {
         context(channel).ifPresent(ifPresent);
     }
@@ -118,7 +121,7 @@ public final class LocalSession {
         }
 
         final Context context = new Context(
-                fromProto(sessionProposal.getSession().getPlayer()),
+                fromProto(sessionProposal.getSession()),
                 createAddress(sessionProposal.getSession().getPlayer().getAddr())
         );
 
@@ -182,8 +185,11 @@ public final class LocalSession {
         }
     }
 
-    private static FloodgatePlayer fromProto(Player p) {
+    private static FloodgatePlayer fromProto(Session s) {
+        Player p = s.getPlayer();
         return new FloodgatePlayerImpl(
+                s.getId(),
+                new Auth(s.getAuth().getPassthrough()),
                 UUID.fromString(p.getProfile().getId()),
                 p.getProfile().getName(),
                 p.getProfile().getPropertiesList().stream()

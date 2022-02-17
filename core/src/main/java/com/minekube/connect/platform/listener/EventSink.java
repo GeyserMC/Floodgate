@@ -43,7 +43,7 @@ public interface EventSink {
     <T> CompletableFuture<T> fire(T event);
 
     /**
-     * This method will fire the specified event.
+     * Posts the specified event to the event bus and discards the result.
      *
      * @param event the event to fire
      */
