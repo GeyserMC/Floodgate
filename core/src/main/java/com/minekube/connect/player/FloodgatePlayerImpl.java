@@ -29,11 +29,11 @@ import com.minekube.connect.api.player.FloodgatePlayer;
 import com.minekube.connect.api.player.GameProfileProperty;
 import java.util.Collection;
 import java.util.UUID;
-import lombok.Getter;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
-@Getter
 @RequiredArgsConstructor
+@Data
 @SuppressWarnings("unchecked")
 public final class FloodgatePlayerImpl implements FloodgatePlayer {
     private final UUID uniqueId;

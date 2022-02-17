@@ -35,6 +35,7 @@ import com.minekube.connect.watch.SessionProposal.State;
 import io.grpc.protobuf.StatusProto;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -45,12 +46,16 @@ import io.netty.util.AttributeKey;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Manages a Minecraft Java session over our LocalChannel implementation.
@@ -70,6 +75,38 @@ public final class LocalSession {
 
     private final AtomicBoolean connectOnce = new AtomicBoolean();
 
+    /**
+     * Every {@link LocalSession} attaches connection context to a {@link Channel} an can be
+     * extracted using {@link LocalSession#context(Channel)}.
+     */
+    @Getter
+    public static class Context {
+        final FloodgatePlayer player;
+        @Nullable InetSocketAddress spoofedAddress; // real client address
+
+        private Context(FloodgatePlayer player, @Nullable InetSocketAddress spoofedAddress) {
+            this.player = player;
+            this.spoofedAddress = spoofedAddress;
+        }
+    }
+
+    /**
+     * Returns connection {@link Context} of a channel if available.
+     *
+     * @param channel the channel
+     * @return the session context of a connection if available
+     */
+    public static Optional<Context> context(Channel channel) {
+        if (channel instanceof ChannelWrapper) {
+            return Optional.of(((ChannelWrapper) channel).getContext());
+        }
+        return Optional.empty();
+    }
+
+    public static void context(Channel channel, Consumer<Context> ifPresent) {
+        context(channel).ifPresent(ifPresent);
+    }
+
     public void connect() {
         if (sessionProposal.getState() != State.ACCEPTED) {
             throw new IllegalStateException("Session proposal has already been rejected.");
@@ -78,18 +115,9 @@ public final class LocalSession {
             throw new IllegalStateException("Connection has already been connected.");
         }
 
-        final Player p = sessionProposal.getSession().getPlayer();
-        final FloodgatePlayer player = new FloodgatePlayerImpl(
-                UUID.fromString(p.getProfile().getId()),
-                p.getProfile().getName(),
-                p.getProfile().getPropertiesList().stream()
-                        .map(property -> new GameProfileProperty(
-                                property.getName(),
-                                property.getValue(),
-                                property.getSignature()))
-                        .collect(Collectors.toList()),
-                "", // TODO extract from http accept language header
-                p.getAddr()
+        final Context context = new Context(
+                fromProto(sessionProposal.getSession().getPlayer()),
+                createAddress(sessionProposal.getSession().getPlayer().getAddr())
         );
 
         if (DEFAULT_EVENT_LOOP_GROUP == null) {
@@ -97,8 +125,8 @@ public final class LocalSession {
         }
 
         final Bootstrap bootstrap = new Bootstrap();
-        bootstrap.channel(LocalChannelWithRemoteAddress.class)
-                .handler(new ChannelInitializer<LocalChannelWithRemoteAddress>() {
+        bootstrap.channel(LocalChannelWithSessionContext.class)
+                .handler(new ChannelInitializer<LocalChannelWithSessionContext>() {
                     @Override
                     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
                             throws Exception {
@@ -107,18 +135,11 @@ public final class LocalSession {
                     }
 
                     @Override
-                    public void initChannel(@NotNull LocalChannelWithRemoteAddress channel) {
-                        channel.setMyData("could be session proposal data data");
-                        String clientIp = sessionProposal.getSession().getPlayer().getAddr();
-                        if (!clientIp.isEmpty()) {
-                            channel.setSpoofedAddress(new InetSocketAddress(clientIp, 0));
-                        }
-
-                        channel.attr(playerAttribute).set(player);
-
+                    public void initChannel(@NotNull LocalChannelWithSessionContext channel) {
+                        channel.setContext(context);
                         ChannelPipeline pipeline = channel.pipeline();
                         pipeline.addLast("connect-tunnel", new LocalChannelInboundHandler(
-                                api, tunneler, player, sessionProposal));
+                                api, tunneler, context.player, sessionProposal));
                     }
                 })
                 .group(DEFAULT_EVENT_LOOP_GROUP)
@@ -128,13 +149,16 @@ public final class LocalSession {
             bootstrap.option(ChannelOption.ALLOCATOR, PREFERRED_DIRECT_BYTE_BUF_ALLOCATOR);
         }
 
-        bootstrap.remoteAddress(targetAddress).connect().addListener((future) -> {
-            if (!future.isSuccess()) {
-                exceptionCaught(future.cause());
-                return;
-            }
-            api.addPlayer(player);
-        });
+        bootstrap
+                .remoteAddress(targetAddress)
+                .connect()
+                .addListener((future) -> {
+                    if (!future.isSuccess()) {
+                        exceptionCaught(future.cause());
+                        return;
+                    }
+                    api.addPlayer(context.player);
+                });
     }
 
     private void exceptionCaught(Throwable cause) {
@@ -152,5 +176,27 @@ public final class LocalSession {
             PREFERRED_DIRECT_BYTE_BUF_ALLOCATOR = new PreferredDirectByteBufAllocator();
             PREFERRED_DIRECT_BYTE_BUF_ALLOCATOR.updateAllocator(ByteBufAllocator.DEFAULT);
         }
+    }
+
+    private static FloodgatePlayer fromProto(Player p) {
+        return new FloodgatePlayerImpl(
+                UUID.fromString(p.getProfile().getId()),
+                p.getProfile().getName(),
+                p.getProfile().getPropertiesList().stream()
+                        .map(property -> new GameProfileProperty(
+                                property.getName(),
+                                property.getValue(),
+                                property.getSignature()))
+                        .collect(Collectors.toList()),
+                "", // TODO extract from http accept language header
+                p.getAddr()
+        );
+    }
+
+    private static InetSocketAddress createAddress(String addr) {
+        if (addr.isEmpty()) {
+            return null;
+        }
+        return new InetSocketAddress(addr, 0);
     }
 }

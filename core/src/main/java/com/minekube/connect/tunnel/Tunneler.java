@@ -10,6 +10,7 @@ import io.grpc.stub.MetadataUtils;
 import io.grpc.stub.StreamObserver;
 import java.io.Closeable;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import minekube.connect.v1alpha1.TunnelServiceGrpc;
 import minekube.connect.v1alpha1.TunnelServiceGrpc.TunnelServiceStub;
 import minekube.connect.v1alpha1.TunnelServiceOuterClass.TunnelRequest;
@@ -40,7 +41,13 @@ public class Tunneler implements Closeable {
         TunnelServiceStub asyncStub = TunnelServiceGrpc.newStub(channel(tunnelServiceAddr))
                 .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata));
 
-        System.out.println("tunnel");
+        AtomicBoolean closeHandlerOnce = new AtomicBoolean();
+        Runnable handlerOnClose = () -> {
+            if (closeHandlerOnce.compareAndSet(false, true)) {
+                handler.onClose();
+            }
+        };
+
         StreamObserver<TunnelRequest> writeStream = asyncStub.tunnel(
                 new StreamObserver<TunnelResponse>() {
                     @Override
@@ -51,11 +58,13 @@ public class Tunneler implements Closeable {
                     @Override
                     public void onError(final Throwable t) {
                         handler.onError(t);
+                        handlerOnClose.run();
                     }
 
                     @Override
                     public void onCompleted() {
-                        handler.onClose();
+                        System.out.println("read completed");
+                        handlerOnClose.run();
                     }
                 });
         return new TunnelConn() {
@@ -66,12 +75,12 @@ public class Tunneler implements Closeable {
 
             @Override
             public void close(Throwable t) {
-                writeStream.onError(t);
-            }
-
-            @Override
-            public void close() {
-                writeStream.onCompleted();
+                if (t == null) {
+                    writeStream.onCompleted();
+                } else {
+                    writeStream.onError(t);
+                }
+                handlerOnClose.run();
             }
         };
     }

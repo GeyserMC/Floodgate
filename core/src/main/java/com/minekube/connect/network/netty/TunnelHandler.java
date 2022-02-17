@@ -37,27 +37,20 @@ class TunnelHandler implements Handler {
 
     @Override
     public void onReceive(byte[] data) {
-        System.out.println(
-                "TunnelService -> Velocty(" + data.length + "): " + new String(data));
+        // TunnelService -> local session server -> downstream server
         ByteBuf buf = Unpooled.wrappedBuffer(data);
-        // forward to downstream server
         downstreamServerConn.writeAndFlush(buf);
     }
 
     @Override
     public void onError(Throwable t) {
+        // error connecting to tunnel service
         t.printStackTrace();
     }
 
     @Override
     public void onClose() {
         // disconnect from downstream server
-        try {
-            if (downstreamServerConn.isOpen()) {
-                downstreamServerConn.close().sync();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        downstreamServerConn.close();
     }
 }

@@ -25,6 +25,7 @@
 
 package com.minekube.connect.network.netty;
 
+import com.minekube.connect.network.netty.LocalSession.Context;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelConfig;
@@ -38,12 +39,16 @@ import io.netty.channel.EventLoop;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import java.net.SocketAddress;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 
 public class ChannelWrapper implements Channel {
     protected final Channel source;
-    private volatile SocketAddress remoteAddress;
-    @Getter private volatile String wMyData;
+
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
+    private volatile Context context;
 
     public ChannelWrapper(Channel channel) {
         this.source = channel;
@@ -56,18 +61,10 @@ public class ChannelWrapper implements Channel {
 
     @Override
     public SocketAddress remoteAddress() {
-        if (remoteAddress == null) {
+        if (context == null || context.getSpoofedAddress() == null) {
             return source.remoteAddress();
         }
-        return remoteAddress;
-    }
-
-    public void remoteAddress(SocketAddress socketAddress) {
-        remoteAddress = socketAddress;
-    }
-
-    public void wMyData(String s) {
-        wMyData = s;
+        return context.getSpoofedAddress();
     }
 
     @Override

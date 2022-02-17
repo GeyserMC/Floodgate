@@ -51,12 +51,13 @@ public class LocalChannelInboundHandler extends SimpleChannelInboundHandler<Byte
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         // Reject session proposal in case we are still able to and connection was stopped very early.
         sessionProposal.reject(StatusProto.fromThrowable(cause));
+        ctx.close();
         super.exceptionCaught(ctx, cause);
     }
 
     @Override
     public void channelActive(@NotNull ChannelHandlerContext ctx) throws Exception {
-        // Start tunnel from downstream server -> upstream tunnel service
+        // Start tunnel from downstream server -> upstream TunnelService
         tunnelConn = tunneler.tunnel(
                 sessionProposal.getSession().getTunnelServiceAddr(),
                 sessionProposal.getSession().getId(),
@@ -67,16 +68,16 @@ public class LocalChannelInboundHandler extends SimpleChannelInboundHandler<Byte
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf buf) {
-        System.out.println("channelRead0 " + buf);
         // Get underlying byte array from buf without copy
         byte[] data = ByteBufUtil.getBytes(buf, buf.readerIndex(), buf.readableBytes(), false);
-        // forward bytes from downstream server -> upstream tunnel service
+        // downstream server -> local session server -> TunnelService
         tunnelConn.write(data);
     }
 
     @Override
     public void channelInactive(@NotNull ChannelHandlerContext ctx) throws Exception {
         api.setPendingRemove(player);
+        tunnelConn.close();
         // Reject session proposal in case we are still able to and connection was stopped very early.
         sessionProposal.reject(null);
         super.channelInactive(ctx);

@@ -25,20 +25,17 @@
 
 package com.minekube.connect.network.netty;
 
+import com.minekube.connect.network.netty.LocalSession.Context;
 import io.netty.channel.local.LocalChannel;
-import java.net.InetSocketAddress;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Client -> server storing the spoofed remote address.
+ * Client -> server storing session context on a channel.
  */
-public class LocalChannelWithRemoteAddress extends LocalChannel {
+public class LocalChannelWithSessionContext extends LocalChannel {
     @Getter
-    @Setter
-    private InetSocketAddress spoofedAddress;
-
-    @Getter
-    @Setter
-    private String myData;
+    @Setter(AccessLevel.PACKAGE)
+    private Context context;
 }

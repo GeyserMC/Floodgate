@@ -30,11 +30,11 @@ import com.google.inject.name.Named;
 import com.minekube.connect.api.ProxyFloodgateApi;
 import com.minekube.connect.api.inject.InjectorAddon;
 import com.minekube.connect.api.logger.FloodgateLogger;
-import com.minekube.connect.api.player.FloodgatePlayer;
 import com.minekube.connect.config.ProxyFloodgateConfig;
+import com.minekube.connect.network.netty.LocalSession;
+import com.minekube.connect.network.netty.LocalSession.Context;
 import com.velocitypowered.api.proxy.ProxyServer;
 import io.netty.channel.Channel;
-import io.netty.util.AttributeKey;
 
 public final class VelocityDataAddon implements InjectorAddon {
     @Inject private ProxyFloodgateConfig config;
@@ -54,14 +54,6 @@ public final class VelocityDataAddon implements InjectorAddon {
     @Named("packetEncoder")
     private String packetEncoder;
 
-    @Inject
-    @Named("kickMessageAttribute")
-    private AttributeKey<String> kickMessageAttribute;
-
-    @Inject
-    @Named("playerAttribute")
-    private AttributeKey<FloodgatePlayer> playerAttribute;
-
     @Override
     public void onInject(Channel channel, boolean toServer) {
         if (toServer) {
@@ -74,8 +66,8 @@ public final class VelocityDataAddon implements InjectorAddon {
             return;
         }
 
-        PacketBlocker blocker = new PacketBlocker();
-        channel.pipeline().addBefore(packetDecoder, "floodgate_packet_blocker", blocker);
+//        PacketBlocker blocker = new PacketBlocker();
+//        channel.pipeline().addBefore(packetDecoder, "floodgate_packet_blocker", blocker);
 
         // The handler is already added so we should add our handler before it
 //        channel.pipeline().addBefore(
@@ -87,10 +79,11 @@ public final class VelocityDataAddon implements InjectorAddon {
 
     @Override
     public void onChannelClosed(Channel channel) {
-        FloodgatePlayer player = channel.attr(playerAttribute).get();
-        if (player != null && api.setPendingRemove(player)) {
-            logger.translatedInfo("floodgate.ingame.disconnect_name", player.getUsername());
-        }
+        LocalSession.context(channel).map(Context::getPlayer).ifPresent(player -> {
+            if (api.setPendingRemove(player)) {
+                logger.translatedInfo("floodgate.ingame.disconnect_name", player.getUsername());
+            }
+        });
     }
 
     @Override
