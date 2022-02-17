@@ -26,6 +26,7 @@
 package com.minekube.connect.network.netty;
 
 import com.minekube.connect.api.SimpleFloodgateApi;
+import com.minekube.connect.api.logger.FloodgateLogger;
 import com.minekube.connect.api.player.FloodgatePlayer;
 import com.minekube.connect.api.player.GameProfileProperty;
 import com.minekube.connect.player.FloodgatePlayerImpl;
@@ -67,6 +68,7 @@ public final class LocalSession {
     private static DefaultEventLoopGroup DEFAULT_EVENT_LOOP_GROUP;
     private static PreferredDirectByteBufAllocator PREFERRED_DIRECT_BYTE_BUF_ALLOCATOR = null;
 
+    private final FloodgateLogger logger;
     private final SimpleFloodgateApi api;
     private final Tunneler tunneler;
     private final SocketAddress targetAddress; // The server we are connecting to
@@ -139,7 +141,7 @@ public final class LocalSession {
                         channel.setContext(context);
                         ChannelPipeline pipeline = channel.pipeline();
                         pipeline.addLast("connect-tunnel", new LocalChannelInboundHandler(
-                                api, tunneler, context.player, sessionProposal));
+                                logger, api, tunneler, context.player, sessionProposal));
                     }
                 })
                 .group(DEFAULT_EVENT_LOOP_GROUP)
@@ -149,6 +151,8 @@ public final class LocalSession {
             bootstrap.option(ChannelOption.ALLOCATOR, PREFERRED_DIRECT_BYTE_BUF_ALLOCATOR);
         }
 
+        logger.debug("Connecting {} to local downstream server {}",
+                context.player.getUsername(), targetAddress);
         bootstrap
                 .remoteAddress(targetAddress)
                 .connect()
