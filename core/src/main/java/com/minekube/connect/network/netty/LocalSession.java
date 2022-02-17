@@ -27,6 +27,7 @@ package com.minekube.connect.network.netty;
 
 import com.minekube.connect.api.SimpleFloodgateApi;
 import com.minekube.connect.api.player.FloodgatePlayer;
+import com.minekube.connect.api.player.GameProfileProperty;
 import com.minekube.connect.player.FloodgatePlayerImpl;
 import com.minekube.connect.tunnel.Tunneler;
 import com.minekube.connect.watch.SessionProposal;
@@ -46,6 +47,7 @@ import java.net.SocketAddress;
 import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.Player;
 import org.jetbrains.annotations.NotNull;
@@ -78,8 +80,14 @@ public final class LocalSession {
 
         final Player p = sessionProposal.getSession().getPlayer();
         final FloodgatePlayer player = new FloodgatePlayerImpl(
-                p.getProfile(),
                 UUID.fromString(p.getProfile().getId()),
+                p.getProfile().getName(),
+                p.getProfile().getPropertiesList().stream()
+                        .map(property -> new GameProfileProperty(
+                                property.getName(),
+                                property.getValue(),
+                                property.getSignature()))
+                        .collect(Collectors.toList()),
                 "", // TODO extract from http accept language header
                 p.getAddr()
         );
@@ -100,6 +108,7 @@ public final class LocalSession {
 
                     @Override
                     public void initChannel(@NotNull LocalChannelWithRemoteAddress channel) {
+                        channel.setMyData("could be session proposal data data");
                         String clientIp = sessionProposal.getSession().getPlayer().getAddr();
                         if (!clientIp.isEmpty()) {
                             channel.setSpoofedAddress(new InetSocketAddress(clientIp, 0));

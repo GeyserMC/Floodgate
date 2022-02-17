@@ -142,6 +142,7 @@ public final class SpigotDataHandler extends CommonDataHandler {
 //            GameProfile gameProfile = new GameProfile(
 //                    player.getUniqueId(), player.getUsername()
 //            );
+    // TODO robin: try if we can reflectively set PropertyMap of gameProfile here already
 //            setValue(packetListener, ClassNames.LOGIN_PROFILE, gameProfile);
 //
 //            // we have to fake the offline player (login) cycle

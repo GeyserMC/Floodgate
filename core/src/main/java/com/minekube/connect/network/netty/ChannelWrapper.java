@@ -38,10 +38,12 @@ import io.netty.channel.EventLoop;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import java.net.SocketAddress;
+import lombok.Getter;
 
 public class ChannelWrapper implements Channel {
     protected final Channel source;
     private volatile SocketAddress remoteAddress;
+    @Getter private volatile String wMyData;
 
     public ChannelWrapper(Channel channel) {
         this.source = channel;
@@ -62,6 +64,10 @@ public class ChannelWrapper implements Channel {
 
     public void remoteAddress(SocketAddress socketAddress) {
         remoteAddress = socketAddress;
+    }
+
+    public void wMyData(String s) {
+        wMyData = s;
     }
 
     @Override

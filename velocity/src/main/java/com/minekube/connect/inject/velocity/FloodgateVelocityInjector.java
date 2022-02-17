@@ -26,15 +26,23 @@
 package com.minekube.connect.inject.velocity;
 
 import static com.minekube.connect.util.ReflectionUtils.castedInvoke;
+import static com.minekube.connect.util.ReflectionUtils.getCastedValue;
 import static com.minekube.connect.util.ReflectionUtils.getMethod;
 import static com.minekube.connect.util.ReflectionUtils.getValue;
 import static com.minekube.connect.util.ReflectionUtils.invoke;
 
 import com.minekube.connect.api.logger.FloodgateLogger;
 import com.minekube.connect.inject.CommonPlatformInjector;
+import com.minekube.connect.network.netty.LocalServerChannelWrapper;
 import com.velocitypowered.api.proxy.ProxyServer;
+import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.WriteBufferWaterMark;
+import io.netty.channel.local.LocalAddress;
 import java.lang.reflect.Method;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -64,25 +72,41 @@ public final class FloodgateVelocityInjector extends CommonPlatformInjector {
         invoke(serverInitializerHolder, serverSetter,
                 new VelocityChannelInitializer(this, serverInitializer, false));
 
-        // Proxy <-> Server TODO REMOVE
-        Object backendInitializerHolder = getValue(connectionManager, "backendChannelInitializer");
-        ChannelInitializer backendInitializer = castedInvoke(backendInitializerHolder, "get");
+        // Proxy <-> Server
+//        Object backendInitializerHolder = getValue(connectionManager, "backendChannelInitializer");
+//        ChannelInitializer backendInitializer = castedInvoke(backendInitializerHolder, "get");
+//
+//        Method backendSetter = getMethod(backendInitializerHolder, "set", ChannelInitializer.class);
+//        invoke(backendInitializerHolder, backendSetter,
+//                new VelocityChannelInitializer(this, backendInitializer, true));
 
-        Method backendSetter = getMethod(backendInitializerHolder, "set", ChannelInitializer.class);
-        invoke(backendInitializerHolder, backendSetter,
-                new VelocityChannelInitializer(this, backendInitializer, true));
+        // Start of logic from GeyserMC
+        // https://github.com/GeyserMC/Geyser/blob/31fd57a58d19829071859ef292fee706873d31fb/bootstrap/velocity/src/main/java/org/geysermc/geyser/platform/velocity/GeyserVelocityInjector.java#L59
+
+        // Is set on Velocity's end for listening to Java connections
+        // required on ours or else the initial world load process won't finish sometimes
+        WriteBufferWaterMark serverWriteMark = getCastedValue(connectionManager,
+                "SERVER_WRITE_MARK");
+
+        EventLoopGroup bossGroup = castedInvoke(connectionManager, "getBossGroup");
+        EventLoopGroup workerGroup = getCastedValue(connectionManager, "workerGroup");
+
+        ChannelFuture channelFuture = (new ServerBootstrap()
+                .channel(LocalServerChannelWrapper.class)
+                .childHandler(serverInitializer)
+                .group(bossGroup, workerGroup) // Cannot be DefaultEventLoopGroup
+                .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK,
+                        serverWriteMark) // Required or else rare network freezes can occur
+                .localAddress(LocalAddress.ANY))
+                .bind()
+                .syncUninterruptibly();
+
+        this.localChannel = channelFuture;
+        this.serverSocketAddress = channelFuture.channel().localAddress();
+
+        // End of logic from GeyserMC
+
         return injected = true;
-    }
-
-    @Override
-    public boolean canRemoveInjection() {
-        return false;
-    }
-
-    @Override
-    public boolean removeInjection() {
-        logger.error("Floodgate cannot remove itself from Bungee without a reboot");
-        return false;
     }
 
     @RequiredArgsConstructor
