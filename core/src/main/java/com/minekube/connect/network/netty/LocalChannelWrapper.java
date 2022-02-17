@@ -28,7 +28,6 @@ package com.minekube.connect.network.netty;
 import io.netty.channel.DefaultChannelPipeline;
 import io.netty.channel.local.LocalChannel;
 import io.netty.channel.local.LocalServerChannel;
-import java.net.InetSocketAddress;
 
 public class LocalChannelWrapper extends LocalChannel {
     private final ChannelWrapper wrapper;
@@ -44,12 +43,11 @@ public class LocalChannelWrapper extends LocalChannel {
 
     public LocalChannelWrapper(LocalServerChannel parent, LocalChannel peer) {
         super(parent, peer);
-        if (tempWrapper != null) {
-            this.wrapper = tempWrapper;
-        } else {
+        if (tempWrapper == null) {
             this.wrapper = new ChannelWrapper(this);
+        } else {
+            this.wrapper = tempWrapper;
         }
-        wrapper.remoteAddress(new InetSocketAddress(0));
     }
 
     public ChannelWrapper wrapper() {

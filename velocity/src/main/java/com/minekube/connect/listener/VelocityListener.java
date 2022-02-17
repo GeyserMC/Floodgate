@@ -39,7 +39,7 @@ import com.google.inject.name.Named;
 import com.minekube.connect.api.ProxyFloodgateApi;
 import com.minekube.connect.api.logger.FloodgateLogger;
 import com.minekube.connect.api.player.FloodgatePlayer;
-import com.minekube.connect.network.netty.ChannelWrapper;
+import com.minekube.connect.network.netty.LocalSession;
 import com.minekube.connect.util.LanguageManager;
 import com.minekube.connect.util.VelocityCommandUtil;
 import com.velocitypowered.api.event.PostOrder;
@@ -106,10 +106,6 @@ public final class VelocityListener {
 
     @Subscribe(order = PostOrder.EARLY)
     public void onPreLogin(PreLoginEvent event) {
-        System.out.println(event.toString());
-        System.out.println("Remote " + event.getConnection().getRemoteAddress());
-
-        FloodgatePlayer player = null;
         try {
             InboundConnection connection = event.getConnection();
             System.out.println("a " + connection + " " + connection.getClass());
@@ -122,20 +118,12 @@ public final class VelocityListener {
             Object mcConnection = getValue(connection, INITIAL_MINECRAFT_CONNECTION);
             Channel channel = getCastedValue(mcConnection, CHANNEL);
 
-            System.out.println("b " + connection + " " + connection.getClass());
-            System.out.println("c " + mcConnection + " " + mcConnection.getClass());
-            System.out.println("d " + channel + " " + channel.getClass());
-            ChannelWrapper cw = (ChannelWrapper) channel;
-            System.out.println(cw.getWMyData());
-            player = channel.attr(playerAttribute).get();
+            LocalSession.context(channel, ctx -> {
+                event.setResult(PreLoginEvent.PreLoginComponentResult.forceOfflineMode());
+                playerCache.put(event.getConnection(), ctx.getPlayer());
+            });
         } catch (Exception exception) {
             logger.error("Failed get the FloodgatePlayer from the player's channel", exception);
-        }
-
-        System.out.println(player);
-        if (player != null) {
-            event.setResult(PreLoginEvent.PreLoginComponentResult.forceOfflineMode());
-            playerCache.put(event.getConnection(), player);
         }
     }
 

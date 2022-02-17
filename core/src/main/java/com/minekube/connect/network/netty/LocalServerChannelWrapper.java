@@ -35,12 +35,12 @@ import io.netty.channel.local.LocalServerChannel;
 public class LocalServerChannelWrapper extends LocalServerChannel {
     @Override
     protected LocalChannel newLocalChannel(LocalChannel peer) {
-        // LocalChannel here should be an instance of LocalChannelWithRemoteAddress, which we can use to set the "remote address" on the other end
-        if (peer instanceof LocalChannelWithRemoteAddress) {
-            LocalChannelWithRemoteAddress p = ((LocalChannelWithRemoteAddress) peer);
-            LocalChannelWrapper channel = new LocalChannelWrapper(this, p);
-            channel.wrapper().remoteAddress(p.getSpoofedAddress());
-            channel.wrapper().wMyData(p.getMyData());
+        // LocalChannel here should be an instance of LocalChannelWithSessionContext,
+        // which we can use to set the "remote address" on the other end
+        // and access related session data from the channel
+        if (peer instanceof LocalChannelWithSessionContext) {
+            LocalChannelWrapper channel = new LocalChannelWrapper(this, peer);
+            channel.wrapper().setContext(((LocalChannelWithSessionContext) peer).getContext());
             return channel;
         }
         return super.newLocalChannel(peer);

@@ -30,7 +30,6 @@ import com.google.inject.Singleton;
 import com.google.inject.multibindings.ProvidesIntoSet;
 import com.minekube.connect.addon.AddonManagerAddon;
 import com.minekube.connect.addon.DebugAddon;
-import com.minekube.connect.addon.PacketHandlerAddon;
 import com.minekube.connect.addon.data.VelocityDataAddon;
 import com.minekube.connect.api.inject.InjectorAddon;
 import com.minekube.connect.register.AddonRegister;
@@ -59,9 +58,9 @@ public final class VelocityAddonModule extends AbstractModule {
         return new DebugAddon();
     }
 
-    @Singleton
-    @ProvidesIntoSet
-    public InjectorAddon packetHandlerAddon() {
-        return new PacketHandlerAddon();
-    }
+//    @Singleton
+//    @ProvidesIntoSet
+//    public InjectorAddon packetHandlerAddon() {
+//        return new PacketHandlerAddon();
+//    }
 }

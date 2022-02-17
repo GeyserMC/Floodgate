@@ -1,10 +1,9 @@
 package com.minekube.connect.tunnel;
 
 import com.google.protobuf.ByteString;
-import java.io.Closeable;
 import minekube.connect.v1alpha1.TunnelServiceOuterClass.TunnelRequest;
 
-public abstract class TunnelConn implements Closeable {
+public abstract class TunnelConn {
 
     public interface Handler {
         void onReceive(byte[] data);
@@ -27,6 +26,7 @@ public abstract class TunnelConn implements Closeable {
 
     public abstract void close(Throwable t);
 
-    @Override
-    public abstract void close();
+    public void close() {
+        close(null);
+    }
 }
