@@ -26,13 +26,11 @@
 package com.minekube.connect.register;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
 import com.minekube.connect.api.SimpleFloodgateApi;
 import com.minekube.connect.api.inject.PlatformInjector;
 import com.minekube.connect.api.logger.FloodgateLogger;
-import com.minekube.connect.api.player.FloodgatePlayer;
 import com.minekube.connect.event.SessionProposeEvent;
 import com.minekube.connect.network.netty.LocalSession;
 import com.minekube.connect.platform.listener.EventSink;
@@ -41,7 +39,6 @@ import com.minekube.connect.watch.SessionProposal;
 import com.minekube.connect.watch.SessionProposal.State;
 import com.minekube.connect.watch.WatchClient;
 import com.minekube.connect.watch.Watcher;
-import io.netty.util.AttributeKey;
 import java.time.Duration;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -58,15 +55,9 @@ public class WatcherRegister {
     @Inject private SimpleFloodgateApi api;
 
     @Inject
-    @Named("playerAttribute")
-    private AttributeKey<FloodgatePlayer> playerAttribute;
-
-    @Inject
     public void start() {
         watchClient.watch(new WatcherImpl());
     }
-
-    private final static Duration reconnectAfterErr = Duration.ofSeconds(5);
 
     private class WatcherImpl implements Watcher {
         @Override
@@ -105,7 +96,7 @@ public class WatcherRegister {
                 // Try establishing connection
                 new LocalSession(logger, api, tunneler,
                         platformInjector.getServerSocketAddress(),
-                        event.getSessionProposal(), playerAttribute
+                        event.getSessionProposal()
                 ).connect();
             });
         }
@@ -113,14 +104,15 @@ public class WatcherRegister {
         @Override
         public void onError(Throwable t) {
             logger.error("Connection error from WatchService: {}", t.getLocalizedMessage());
-            logger.info("Reconnecting in {}s ...", reconnectAfterErr.getSeconds());
+            logger.info("Reconnecting in {}s ...", RECONNECT_AFTER_ERR.getSeconds());
             new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
                     start();
                 }
-            }, reconnectAfterErr.toMillis());
+            }, RECONNECT_AFTER_ERR.toMillis());
         }
     }
 
+    private final static Duration RECONNECT_AFTER_ERR = Duration.ofSeconds(5);
 }

@@ -23,25 +23,15 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package com.minekube.connect.player;
+package com.minekube.connect.api.player;
 
-import com.minekube.connect.api.player.Auth;
-import com.minekube.connect.api.player.FloodgatePlayer;
-import com.minekube.connect.api.player.GameProfileProperty;
-import java.util.Collection;
-import java.util.UUID;
+
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
+/**
+ * @see <a href="https://github.com/minekube/connect/blob/784222fbc1c0201297f67cbdc209728c6aeeba2c/api/minekube/connect/v1alpha1/watch_service.proto#L88">Proto</a>
+ */
 @Data
-@SuppressWarnings("unchecked")
-public final class FloodgatePlayerImpl implements FloodgatePlayer {
-    private final String sessionId;
-    private final Auth auth;
-    private final UUID uniqueId;
-    private final String username;
-    private final Collection<GameProfileProperty> properties;
-    private final String languageCode;
-    private final String ip;
+public class Auth {
+    private final boolean passthrough;
 }

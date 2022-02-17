@@ -35,7 +35,6 @@ import static com.minekube.connect.util.ReflectionUtils.getValue;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.minekube.connect.api.ProxyFloodgateApi;
 import com.minekube.connect.api.logger.FloodgateLogger;
 import com.minekube.connect.api.player.FloodgatePlayer;
@@ -44,7 +43,6 @@ import com.minekube.connect.util.LanguageManager;
 import com.minekube.connect.util.VelocityCommandUtil;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.connection.ConnectionHandshakeEvent;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
@@ -53,7 +51,6 @@ import com.velocitypowered.api.proxy.InboundConnection;
 import com.velocitypowered.api.util.GameProfile;
 import com.velocitypowered.api.util.GameProfile.Property;
 import io.netty.channel.Channel;
-import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -95,20 +92,10 @@ public final class VelocityListener {
     @Inject private LanguageManager languageManager;
     @Inject private FloodgateLogger logger;
 
-    @Inject
-    @Named("playerAttribute")
-    private AttributeKey<FloodgatePlayer> playerAttribute;
-
-    @Subscribe(order = PostOrder.EARLY)
-    public void onHS(ConnectionHandshakeEvent event) {
-        System.out.println(event.toString());
-    }
-
     @Subscribe(order = PostOrder.EARLY)
     public void onPreLogin(PreLoginEvent event) {
         try {
             InboundConnection connection = event.getConnection();
-            System.out.println("a " + connection + " " + connection.getClass());
             if (INITIAL_CONNECTION_DELEGATE != null) {
                 // Velocity 3.1.0 added LoginInboundConnection which is used in the login state,
                 // but that class doesn't have a Channel field. However, it does have
@@ -119,8 +106,11 @@ public final class VelocityListener {
             Channel channel = getCastedValue(mcConnection, CHANNEL);
 
             LocalSession.context(channel, ctx -> {
-                event.setResult(PreLoginEvent.PreLoginComponentResult.forceOfflineMode());
-                playerCache.put(event.getConnection(), ctx.getPlayer());
+                if (!ctx.getPlayer().getAuth().isPassthrough()) {
+                    // Means the TunnelService has already authenticated the player
+                    event.setResult(PreLoginEvent.PreLoginComponentResult.forceOfflineMode());
+                    playerCache.put(event.getConnection(), ctx.getPlayer());
+                }
             });
         } catch (Exception exception) {
             logger.error("Failed get the FloodgatePlayer from the player's channel", exception);
@@ -132,7 +122,6 @@ public final class VelocityListener {
         if (event.isOnlineMode()) {
             return;
         }
-//        event.getConnection() TODO player from channel wrapper?
         FloodgatePlayer player = playerCache.getIfPresent(event.getConnection());
         if (player != null) {
             playerCache.invalidate(event.getConnection());
@@ -141,8 +130,8 @@ public final class VelocityListener {
         }
     }
 
-    private GameProfile gameProfileFromPlayer(GameProfile default0, FloodgatePlayer player) {
-        return default0
+    private GameProfile gameProfileFromPlayer(GameProfile base, FloodgatePlayer player) {
+        return base
                 .withId(player.getUniqueId())
                 .withName(player.getUsername())
                 .addProperties(player.getProperties().stream()

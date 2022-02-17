@@ -50,6 +50,16 @@ public interface FloodgatePlayer {
     String getLanguageCode();
 
     /**
+     * Returns the session id sent by Connect WatchService.
+     */
+    String getSessionId();
+
+    /**
+     * Returns the authentication mode of the player connection.
+     */
+    Auth getAuth();
+
+    /**
      * Casts the FloodgatePlayer instance to a class that extends FloodgatePlayer.
      *
      * @param <T> The instance to cast to.
