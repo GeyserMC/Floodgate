@@ -31,9 +31,7 @@ import com.google.rpc.Status;
 import com.minekube.connect.api.SimpleFloodgateApi;
 import com.minekube.connect.api.inject.PlatformInjector;
 import com.minekube.connect.api.logger.FloodgateLogger;
-import com.minekube.connect.event.SessionProposeEvent;
 import com.minekube.connect.network.netty.LocalSession;
-import com.minekube.connect.platform.listener.EventSink;
 import com.minekube.connect.tunnel.Tunneler;
 import com.minekube.connect.watch.SessionProposal;
 import com.minekube.connect.watch.SessionProposal.State;
@@ -50,7 +48,6 @@ public class WatcherRegister {
     @Inject private WatchClient watchClient;
     @Inject private Tunneler tunneler;
     @Inject private PlatformInjector platformInjector;
-    @Inject private EventSink eventSink;
     @Inject private FloodgateLogger logger;
     @Inject private SimpleFloodgateApi api;
 
@@ -76,29 +73,27 @@ public class WatcherRegister {
                 logger.debug("Received {}", proposal);
             }
 
-            eventSink.fire(new SessionProposeEvent(proposal)).thenAccept(event -> {
-                if (event.getSessionProposal().getState() != State.ACCEPTED) {
-                    // rejected by event handler
-                    return;
-                }
+            if (proposal.getState() != State.ACCEPTED) {
+                // rejected by event handler
+                return;
+            }
 
-                // checking the second time, an event handler could have modified it.
-                if (event.getSessionProposal().getSession().getTunnelServiceAddr().isEmpty()) {
-                    logger.info("A session proposal event handler emptied the tunnel " +
-                            "service address, rejecting it");
-                    event.getSessionProposal().reject(Status.newBuilder()
-                            .setCode(Code.INTERNAL_VALUE)
-                            .setMessage("an internal event handler made " +
-                                    "the session proposal invalid")
-                            .build());
-                    return;
-                }
-                // Try establishing connection
-                new LocalSession(logger, api, tunneler,
-                        platformInjector.getServerSocketAddress(),
-                        event.getSessionProposal()
-                ).connect();
-            });
+            // checking the second time, an event handler could have modified it.
+            if (proposal.getSession().getTunnelServiceAddr().isEmpty()) {
+                logger.info("A session proposal event handler emptied the tunnel " +
+                        "service address, rejecting it");
+                proposal.reject(Status.newBuilder()
+                        .setCode(Code.INTERNAL_VALUE)
+                        .setMessage("an internal event handler made " +
+                                "the session proposal invalid")
+                        .build());
+                return;
+            }
+            // Try establishing connection
+            new LocalSession(logger, api, tunneler,
+                    platformInjector.getServerSocketAddress(),
+                    proposal
+            ).connect();
         }
 
         @Override

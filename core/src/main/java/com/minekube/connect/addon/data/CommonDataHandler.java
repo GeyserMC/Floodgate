@@ -25,37 +25,51 @@
 
 package com.minekube.connect.addon.data;
 
+import com.google.common.collect.Queues;
 import com.minekube.connect.config.FloodgateConfig;
+import com.minekube.connect.player.FloodgateHandshakeHandler;
+import com.minekube.connect.player.FloodgateHandshakeHandler.HandshakeResult;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.AttributeKey;
+import java.util.Queue;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
+    protected final FloodgateHandshakeHandler handshakeHandler;
     protected final FloodgateConfig config;
     protected final AttributeKey<String> kickMessageAttribute;
     protected final PacketBlocker blocker;
 
-//    protected final Queue<Object> packetQueue = Queues.newConcurrentLinkedQueue();
-//    protected Object handshakePacket;
-//    protected ChannelHandlerContext ctx;
-//
-//    protected abstract Object setHostname(Object handshakePacket, String hostname);
-//
-//    protected abstract boolean channelRead(Object packet) throws Exception;
+    protected final Queue<Object> packetQueue = Queues.newConcurrentLinkedQueue();
+    protected Object handshakePacket;
+    protected ChannelHandlerContext ctx;
 
-//    protected boolean shouldRemoveHandler(HandshakeResult result) {
-//        return true;
-//    }
-//
-//    protected boolean shouldCallFireRead(Object queuedPacket) {
-//        return true;
-//    }
+//    protected abstract void setNewIp(Channel channel, InetSocketAddress newIp);
 
-//    protected void handle(Object handshakePacket, String hostname) {
-//        this.handshakePacket = handshakePacket;
+    protected abstract Object setHostname(Object handshakePacket, String hostname);
+
+    protected abstract boolean channelRead(Object packet) throws Exception;
+
+    protected boolean shouldRemoveHandler(HandshakeResult result) {
+        return true;
+    }
+
+    protected boolean shouldCallFireRead(Object queuedPacket) {
+        return true;
+    }
+
+    protected void handle(Object handshakePacket, String hostname) {
+        // TODO if in online mode: just perform login cycle with spoofedUUID
+        // TODO if in bungee mode: update handshake packet hostname to bungee player data from session
+        // TODO if in velocity mode: update send login plugin message packet with encrypted velocity forwarding data using secret from paper ocnfig
+        this.handshakePacket = handshakePacket;
 //        HostnameSeparationResult separation = handshakeHandler.separateHostname(hostname);
-//
+
+        // if in bungee mode: update handshake packet hostname to bungee player data from session
+
 //        if (separation.floodgateData() == null) {
 //            // not a Floodgate player, make sure to resend the cancelled handshake packet
 //            disablePacketQueue(true);
@@ -70,11 +84,11 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
 //            ));
 //            return;
 //        }
-//
-//        blocker.enable();
-//
-//        Channel channel = ctx.channel();
-//
+
+        blocker.enable();
+
+        Channel channel = ctx.channel();
+
 //        handshakeHandler
 //                .handle(channel, separation.floodgateData(), separation.hostnameRemainder())
 //                .thenApply(result -> {
@@ -116,66 +130,68 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
 //                    disablePacketQueue(shouldRemove);
 //                    return shouldRemove;
 //                });
-//    }
+        shouldRemoveHandler(null);
+        disablePacketQueue(true);
+    }
 
-//    protected void disablePacketQueue(boolean removeSelf) {
-//        if (handshakePacket != null && shouldCallFireRead(handshakePacket)) {
-//            ctx.fireChannelRead(handshakePacket);
-//        }
-//
-//        Object queuedPacket;
-//        while ((queuedPacket = packetQueue.poll()) != null) {
-//            if (shouldCallFireRead(queuedPacket)) {
-//                ctx.fireChannelRead(queuedPacket);
-//            }
-//        }
-//        if (removeSelf) {
-//            removeSelf();
-//        }
-//        blocker.disable();
-//    }
-//
-//    protected void removeSelf() {
-//        ctx.pipeline().remove(this);
-//    }
-//
-//    protected final void setKickMessage(String message) {
-//        ctx.channel().attr(kickMessageAttribute).set(message);
-//    }
-//
-//    protected final String getKickMessage() {
-//        return ctx.channel().attr(kickMessageAttribute).get();
-//    }
-//
-//    @Override
-//    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-//        super.handlerAdded(ctx);
-//        this.ctx = ctx;
-//    }
-//
-//    @Override
-//    public void channelRead(ChannelHandlerContext ctx, Object packet) {
-//        // prevent other packets from being handled while we handle the handshake packet
+    protected void disablePacketQueue(boolean removeSelf) {
+        if (handshakePacket != null && shouldCallFireRead(handshakePacket)) {
+            ctx.fireChannelRead(handshakePacket);
+        }
+
+        Object queuedPacket;
+        while ((queuedPacket = packetQueue.poll()) != null) {
+            if (shouldCallFireRead(queuedPacket)) {
+                ctx.fireChannelRead(queuedPacket);
+            }
+        }
+        if (removeSelf) {
+            removeSelf();
+        }
+        blocker.disable();
+    }
+
+    protected void removeSelf() {
+        ctx.pipeline().remove(this);
+    }
+
+    protected final void setKickMessage(String message) {
+        ctx.channel().attr(kickMessageAttribute).set(message);
+    }
+
+    protected final String getKickMessage() { // TODO remove?
+        return ctx.channel().attr(kickMessageAttribute).get();
+    }
+
+    @Override
+    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+        super.handlerAdded(ctx);
+        this.ctx = ctx;
+    }
+
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object packet) {
+        // prevent other packets from being handled while we handle the handshake packet
 //        if (!packetQueue.isEmpty()) {
 //            packetQueue.add(packet);
 //            return;
 //        }
-//
-//        try {
-//            if (channelRead(packet)) {
-//                ctx.fireChannelRead(packet);
-//            }
-//        } catch (Exception exception) {
-//            exception.printStackTrace();
-//            ctx.close();
-//        }
-//    }
-//
-//    @Override
-//    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-//        super.exceptionCaught(ctx, cause);
-//        if (config.isDebug()) {
-//            cause.printStackTrace();
-//        }
-//    }
+
+        try {
+            if (channelRead(packet)) {
+                ctx.fireChannelRead(packet);
+            }
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            ctx.close();
+        }
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        super.exceptionCaught(ctx, cause);
+        if (config.isDebug()) {
+            cause.printStackTrace();
+        }
+    }
 }

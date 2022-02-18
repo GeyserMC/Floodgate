@@ -31,7 +31,6 @@ import static com.minekube.connect.util.ReflectionUtils.getMethod;
 import static com.minekube.connect.util.ReflectionUtils.getValue;
 import static com.minekube.connect.util.ReflectionUtils.invoke;
 
-import com.minekube.connect.api.logger.FloodgateLogger;
 import com.minekube.connect.inject.CommonPlatformInjector;
 import com.minekube.connect.network.netty.LocalServerChannelWrapper;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -48,9 +47,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public final class FloodgateVelocityInjector extends CommonPlatformInjector {
+public final class VelocityInjector extends CommonPlatformInjector {
     private final ProxyServer server;
-    private final FloodgateLogger logger;
 
     @Getter private boolean injected;
 
@@ -118,7 +116,7 @@ public final class FloodgateVelocityInjector extends CommonPlatformInjector {
             initChannel = getMethod(ChannelInitializer.class, "initChannel", Channel.class);
         }
 
-        private final FloodgateVelocityInjector injector;
+        private final VelocityInjector injector;
         private final ChannelInitializer original;
         private final boolean proxyToServer;
 

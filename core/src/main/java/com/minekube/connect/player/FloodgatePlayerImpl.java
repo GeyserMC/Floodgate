@@ -28,7 +28,7 @@ package com.minekube.connect.player;
 import com.minekube.connect.api.player.Auth;
 import com.minekube.connect.api.player.FloodgatePlayer;
 import com.minekube.connect.api.player.GameProfileProperty;
-import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +41,7 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
     private final Auth auth;
     private final UUID uniqueId;
     private final String username;
-    private final Collection<GameProfileProperty> properties;
+    private final List<GameProfileProperty> properties;
     private final String languageCode;
     private final String ip;
 }

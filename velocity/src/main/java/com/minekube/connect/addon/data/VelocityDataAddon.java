@@ -56,15 +56,15 @@ public final class VelocityDataAddon implements InjectorAddon {
 
     @Override
     public void onInject(Channel channel, boolean toServer) {
-        if (toServer) {
-            if (config.isSendFloodgateData()) {
-                channel.pipeline().addAfter(
-                        packetEncoder, "floodgate_data_handler",
-                        new VelocityServerDataHandler(api, proxy)
-                );
-            }
-            return;
-        }
+//        if (toServer) {
+//            if (config.isSendFloodgateData()) {
+//                channel.pipeline().addAfter(
+//                        packetEncoder, "floodgate_data_handler",
+//                        new VelocityServerDataHandler(api, proxy)
+//                );
+//            }
+//            return;
+//        }
 
 //        PacketBlocker blocker = new PacketBlocker();
 //        channel.pipeline().addBefore(packetDecoder, "floodgate_packet_blocker", blocker);

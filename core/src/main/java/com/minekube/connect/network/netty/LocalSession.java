@@ -102,6 +102,9 @@ public final class LocalSession {
         if (channel instanceof ChannelWrapper) {
             return Optional.of(((ChannelWrapper) channel).getContext());
         }
+        if (channel instanceof LocalChannelWrapper) {
+            return Optional.of(((LocalChannelWrapper) channel).wrapper().getContext());
+        }
         return Optional.empty();
     }
 

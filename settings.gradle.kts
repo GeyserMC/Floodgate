@@ -3,7 +3,7 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        // Geyser, Cumulus etc.
+        // Geyser, Cumulus etc. TODO remove
         maven("https://repo.opencollab.dev/maven-releases") {
             mavenContent { releasesOnly() }
         }
@@ -29,6 +29,10 @@ dependencyResolutionManagement {
         }
 
         mavenCentral()
+
+        maven("https://repo.viaversion.com") {
+            name = "viaversion-repo"
+        }
 
         maven("https://jitpack.io") {
             content { includeGroupByRegex("com\\.github\\..*") }

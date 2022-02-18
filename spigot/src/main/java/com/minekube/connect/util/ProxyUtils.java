@@ -55,7 +55,7 @@ public final class ProxyUtils {
         return isBungeeData() || isVelocitySupport();
     }
 
-    private static boolean isBungeeData() {
+    public static boolean isBungeeData() {
         return ReflectionUtils.getCastedValue(null, IS_BUNGEE_DATA);
     }
 

@@ -35,6 +35,7 @@ object Versions {
     const val cloudVersion = "1.5.0"
     const val adventureApiVersion = "4.9.1"
     const val adventurePlatformVersion = "4.0.0"
+    const val viaVersionVersion = "4.0.0"
     const val gRPCVersion = "1.44.0"
     const val protocVersion = "3.19.4"
 
