@@ -30,8 +30,9 @@ import com.google.inject.name.Named;
 import com.minekube.connect.api.SimpleFloodgateApi;
 import com.minekube.connect.api.inject.InjectorAddon;
 import com.minekube.connect.api.logger.FloodgateLogger;
-import com.minekube.connect.api.player.FloodgatePlayer;
 import com.minekube.connect.config.FloodgateConfig;
+import com.minekube.connect.network.netty.LocalSession;
+import com.minekube.connect.player.FloodgateHandshakeHandler;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 
@@ -47,27 +48,35 @@ public final class SpigotDataAddon implements InjectorAddon {
 
     @Inject
     @Named("kickMessageAttribute")
-    private AttributeKey<String> kickMessageAttribute;
-
-    @Inject
-    @Named("playerAttribute")
-    private AttributeKey<FloodgatePlayer> playerAttribute;
+    private AttributeKey<String> kickMessageAttribute; // TODO remove put into session context?
 
     @Override
     public void onInject(Channel channel, boolean toServer) {
-        // we have to add the packet blocker in the data handler, otherwise ProtocolSupport breaks
-        channel.pipeline().addBefore(
-                packetHandlerName, "floodgate_data_handler",
-                new SpigotDataHandler(handshakeHandler, config, kickMessageAttribute)
-        );
+        // At this point channel must be a local session
+        LocalSession.context(channel, ctx -> {
+            // we have to add the packet blocker in the data handler, otherwise ProtocolSupport breaks
+            channel.pipeline().addBefore(
+                    packetHandlerName, "floodgate_data_handler",
+                    new SpigotDataHandler(ctx,
+                            packetHandlerName,
+                            handshakeHandler,
+                            config,
+                            kickMessageAttribute)
+            );
+        });
     }
 
     @Override
     public void onChannelClosed(Channel channel) {
-        FloodgatePlayer player = channel.attr(playerAttribute).get();
-        if (player != null && api.setPendingRemove(player)) {
-            logger.translatedInfo("floodgate.ingame.disconnect_name", player.getUsername());
-        }
+        System.out.println("server side player channel closed");
+        LocalSession.context(channel, ctx -> {
+            // TODO test if we get this message
+            System.out.println("and got local session context! NICE!!!");
+            if (api.setPendingRemove(ctx.getPlayer())) {
+                logger.translatedInfo("floodgate.ingame.disconnect_name",
+                        ctx.getPlayer().getUsername());
+            }
+        });
     }
 
     @Override

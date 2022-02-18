@@ -26,11 +26,16 @@
 package com.minekube.connect.addon.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.minekube.connect.util.ReflectionUtils.getCastedValue;
 import static com.minekube.connect.util.ReflectionUtils.getField;
 import static com.minekube.connect.util.ReflectionUtils.getPrefixedClass;
+import static com.minekube.connect.util.ReflectionUtils.setValue;
 
 import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.player.FloodgatePlayer;
 import com.minekube.connect.config.FloodgateConfig;
+import com.minekube.connect.player.FloodgateHandshakeHandler.HandshakeResult;
+import com.minekube.connect.player.FloodgateHandshakeHandler.ResultType;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
 
@@ -64,40 +69,41 @@ public final class VelocityProxyDataHandler extends CommonDataHandler {
             PacketBlocker blocker,
             AttributeKey<String> kickMessageAttribute,
             FloodgateLogger logger) {
-        super(config, kickMessageAttribute, blocker);
+        super(null, config, kickMessageAttribute, blocker);
         this.logger = logger;
     }
-//
+
+    //
 //    @Override
 //    protected void setNewIp(Channel channel, InetSocketAddress newIp) {
 //        setValue(channel.pipeline().get("handler"), REMOTE_ADDRESS, newIp);
 //    }
 //
-//    @Override
-//    protected Object setHostname(Object handshakePacket, String hostname) {
-//        setValue(handshakePacket, HANDSHAKE_SERVER_ADDRESS, hostname);
-//        return handshakePacket;
-//    }
-//
-//    @Override
-//    protected boolean shouldRemoveHandler(HandshakeResult result) {
-//        if (result.getResultType() == ResultType.SUCCESS) {
-//            FloodgatePlayer player = result.getFloodgatePlayer();
-//            logger.info("Floodgate player who is logged in as {} {} joined",
-//                    player.getUsername(), player.getUniqueId());
-//        }
-//        return super.shouldRemoveHandler(result);
-//    }
-//
-//    @Override
-//    public boolean channelRead(Object packet) {
-//        // we're only interested in the Handshake packet.
-//        // it should be the first packet but you never know
-//        if (HANDSHAKE_PACKET.isInstance(packet)) {
-//            handle(packet, getCastedValue(packet, HANDSHAKE_SERVER_ADDRESS));
-//            // otherwise, it'll get read twice. once by the packet queue and once by this method
-//            return false;
-//        }
-//        return true;
-//    }
+    @Override
+    protected Object setHostname(Object handshakePacket, String hostname) {
+        setValue(handshakePacket, HANDSHAKE_SERVER_ADDRESS, hostname);
+        return handshakePacket;
+    }
+
+    @Override
+    protected boolean shouldRemoveHandler(HandshakeResult result) {
+        if (result.getResultType() == ResultType.SUCCESS) {
+            FloodgatePlayer player = result.getFloodgatePlayer();
+            logger.info("Floodgate player who is logged in as {} {} joined",
+                    player.getUsername(), player.getUniqueId());
+        }
+        return super.shouldRemoveHandler(result);
+    }
+
+    @Override
+    public boolean channelRead(Object packet) {
+        // we're only interested in the Handshake packet.
+        // it should be the first packet but you never know
+        if (HANDSHAKE_PACKET.isInstance(packet)) {
+            handle(packet, getCastedValue(packet, HANDSHAKE_SERVER_ADDRESS));
+            // otherwise, it'll get read twice. once by the packet queue and once by this method
+            return false;
+        }
+        return true;
+    }
 }

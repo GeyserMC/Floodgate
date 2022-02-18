@@ -25,6 +25,8 @@
 
 package com.minekube.connect.module;
 
+import static com.minekube.connect.util.ReflectionUtils.getClassSilently;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -44,6 +46,7 @@ import com.minekube.connect.util.LanguageManager;
 import com.minekube.connect.util.SpigotCommandUtil;
 import com.minekube.connect.util.SpigotVersionSpecificMethods;
 import lombok.RequiredArgsConstructor;
+import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -90,8 +93,20 @@ public final class SpigotPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public CommonPlatformInjector platformInjector() {
-        return new SpigotInjector();
+    public CommonPlatformInjector platformInjector(FloodgateLogger logger) {
+        final String VIAVERSION_DOWNLOAD_URL = "https://ci.viaversion.com/job/ViaVersion/";
+        boolean isViaVersion = Bukkit.getPluginManager().getPlugin("ViaVersion") != null;
+        if (isViaVersion) {
+            // Ensure that we have the latest 4.0.0 changes and not an older ViaVersion version
+            if (getClassSilently("com.viaversion.viaversion.api.ViaManager") == null) {
+                logger.warn("The plugin version of ViaVersion is too old, " +
+                                "please install the latest release from {}",
+                        VIAVERSION_DOWNLOAD_URL);
+                isViaVersion = false;
+            }
+        }
+
+        return new SpigotInjector(logger, isViaVersion);
     }
 
     @Provides

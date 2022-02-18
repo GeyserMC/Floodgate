@@ -38,7 +38,7 @@ import org.bukkit.event.Listener;
 public final class PaperProfileListener implements Listener {
     @Inject private SimpleFloodgateApi api;
 
-    @EventHandler
+    @EventHandler // TODO robin: remove or replace with session proposal player props
     public void onFill(PreFillProfileEvent event) {
         UUID id = event.getPlayerProfile().getId();
         // back when this event got added the PlayerProfile class didn't have the

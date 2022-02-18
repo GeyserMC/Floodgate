@@ -27,6 +27,7 @@ package com.minekube.connect;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.minekube.connect.api.handshake.HandshakeHandlers;
 import com.minekube.connect.api.logger.FloodgateLogger;
 import com.minekube.connect.module.PaperListenerModule;
 import com.minekube.connect.module.ServerCommonModule;
@@ -34,7 +35,9 @@ import com.minekube.connect.module.SpigotAddonModule;
 import com.minekube.connect.module.SpigotCommandModule;
 import com.minekube.connect.module.SpigotListenerModule;
 import com.minekube.connect.module.SpigotPlatformModule;
+import com.minekube.connect.module.WatcherModule;
 import com.minekube.connect.util.ReflectionUtils;
+import com.minekube.connect.util.SpigotHandshakeHandler;
 import com.minekube.connect.util.SpigotProtocolSupportHandler;
 import com.minekube.connect.util.SpigotProtocolSupportListener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -64,6 +67,7 @@ public final class SpigotPlugin extends JavaPlugin {
                 "com.destroystokyo.paper.event.profile.PreFillProfileEvent") != null;
 
         platform.enable(
+                new WatcherModule(),
                 new SpigotCommandModule(this),
                 new SpigotAddonModule(),
                 (usePaperListener ? new PaperListenerModule() : new SpigotListenerModule())
@@ -71,9 +75,8 @@ public final class SpigotPlugin extends JavaPlugin {
 
         //todo add proper support for disabling things on shutdown and enabling this on enable
 
-        // TODO disabled until we support intercepting player data forwarding on plugin-side
-//        injector.getInstance(HandshakeHandlers.class)
-//                .addHandshakeHandler(injector.getInstance(SpigotHandshakeHandler.class));
+        injector.getInstance(HandshakeHandlers.class)
+                .addHandshakeHandler(injector.getInstance(SpigotHandshakeHandler.class));
 
         // add ProtocolSupport support (hack)
         if (getServer().getPluginManager().getPlugin("ProtocolSupport") != null) {
