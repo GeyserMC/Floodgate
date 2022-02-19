@@ -26,6 +26,7 @@
 package com.minekube.connect.addon.data;
 
 import static com.minekube.connect.util.ReflectionUtils.getCastedValue;
+import static com.minekube.connect.util.ReflectionUtils.getValue;
 import static com.minekube.connect.util.ReflectionUtils.setValue;
 
 import com.google.gson.Gson;
@@ -35,9 +36,20 @@ import com.minekube.connect.player.FloodgateHandshakeHandler;
 import com.minekube.connect.player.FloodgateHandshakeHandler.HandshakeResult;
 import com.minekube.connect.util.ClassNames;
 import com.minekube.connect.util.ProxyUtils;
+import com.minekube.connect.util.Utils;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
+import io.netty.channel.ChannelPromise;
 import io.netty.util.AttributeKey;
 import java.net.InetSocketAddress;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.function.UnaryOperator;
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 public final class SpigotDataHandler extends CommonDataHandler {
     private final Context sessionCtx;
@@ -63,7 +75,7 @@ public final class SpigotDataHandler extends CommonDataHandler {
 //        setValue(networkManager, ClassNames.SOCKET_ADDRESS, newIp);
 //    }
 
-    @Override
+    //    @Override
     protected Object setHostname(Object handshakePacket, String hostname) {
         setValue(handshakePacket, ClassNames.HANDSHAKE_HOST, hostname);
         return handshakePacket;
@@ -71,10 +83,10 @@ public final class SpigotDataHandler extends CommonDataHandler {
 
     @Override
     protected boolean shouldRemoveHandler(HandshakeResult result) {
-        if (getKickMessage() != null) {
-            // we also have to keep this handler if we want to kick then with a disconnect message
-            return false;
-        }
+//        if (getKickMessage() != null) {
+//            // we also have to keep this handler if we want to kick then with a disconnect message
+//            return false;
+//        }
 
         // The server will do all the work if BungeeCord/Velocity mode is enabled
         if (!proxyData) {
@@ -104,34 +116,87 @@ public final class SpigotDataHandler extends CommonDataHandler {
 
     // TODO catch server -> client: "velocity:player_info" login plugin message packet
     // take createVelocityForwardingData code from velocity
-    // and send player data response 
+    // and send player data response
+    //
+//    JavaPlugin javaPlugin;
+//            javaPlugin.getServer().getMessenger().dispatchIncomingMessage();
+//            javaPlugin.getServer().sendPluginMessage();
 
     @Override
     public boolean channelRead(Object packet) throws Exception {
         if (ClassNames.HANDSHAKE_PACKET.isInstance(packet)) {
+            System.out.println("bungee=" + ProxyUtils.isBungeeData());
+            System.out.println("velocity=" + ProxyUtils.isVelocitySupport());
             if (ProxyUtils.isBungeeData()) {
+                // Server has bungee enabled and expects to receive player data in hostname of handshake packet
+                // Let's modify the hostname, and we are done!
                 String hostname = getCastedValue(packet, ClassNames.HANDSHAKE_HOST);
-                setHostname(packet, createLegacyForwardingAddress(hostname));
+                setHostname(packet, createBungeeForwardingAddress(hostname));
                 removeSelf();
                 return true;
             }
 
-            return true;
+            if (ProxyUtils.isVelocitySupport()) {
+                // ProtocolSupport would break if we added this during the creation of this handler
+                ctx.pipeline().addAfter("splitter", "floodgate_packet_blocker", blocker);
+                blocker.enable();
+                removeSelf();
+                System.out.println("velocity mode");
+                ctx.pipeline().addAfter("encoder", "test",
+                        new ChannelOutboundHandlerAdapter() {
+                            @Override
+                            public void write(ChannelHandlerContext ctx, Object msg,
+                                              ChannelPromise promise) throws Exception {
+                                System.out.println(msg.getClass());
+                                if (!ClassNames.PLUGIN_MESSAGE_OUT_PACKET.isInstance(msg)) {
+                                    return;
+                                }
+                                // Send velocity mode player data as plugin message response
 
-//            // ProtocolSupport would break if we added this during the creation of this handler
-//            ctx.pipeline().addAfter("splitter", "floodgate_packet_blocker", blocker);
+                                System.out.println("write " + msg.getClass() + " " + msg);
+                                System.out.println(
+                                        getValue(msg, ClassNames.PLUGIN_MESSAGE_OUT_ID));
+                                System.out.println(
+                                        getValue(msg, ClassNames.PLUGIN_MESSAGE_OUT_CHANNEL));
+
+                                Object channel = getValue(msg, ClassNames.PLUGIN_MESSAGE_OUT_ID);
+                                ByteBuf data = createVelocityForwardingData(
+                                        ProxyUtils.velocitySecretKey());
+                                Object serializer = ClassNames.PACKET_DATA_SERIALIZER_CONSTRUCTOR.newInstance(
+                                        data);
+                                Object response = ClassNames.PLUGIN_MESSAGE_IN_CONSTRUCTOR.newInstance(
+                                        channel, serializer);
+
+                                System.out.println(
+                                        "response " + response.getClass() + " " + response);
+
+                                ctx.pipeline().remove(this);
+                                ctx.fireChannelRead(response);
+                                blocker.disable();
+//                                ctx.write(response);
+//                                ctx.channel().writeAndFlush(response);
+//                                disablePacketQueue(true);
+
+                            }
+
+                        });
+                return true;
+            }
+
+            return false;
+
 //
 //            networkManager = ctx.channel().pipeline().get(packetHandlerName);
 //
-//            // Server has bungee enabled and expects to receive player data in hostname of handshake packet
-//            // Let's modify the hostname and pass it on.
 //
 //            handle(packet, getCastedValue(packet, ClassNames.HANDSHAKE_HOST));
 //            // otherwise, it'll get read twice. once by the packet queue and once by this method
 //            return false;
         }
-
-        return !checkAndHandleLogin(packet);
+//        packetQueue.add(packet);
+//        return false;
+        return true;
+//        return !checkAndHandleLogin(packet);
     }
 
     private boolean checkAndHandleLogin(Object packet) throws Exception {
@@ -210,8 +275,8 @@ public final class SpigotDataHandler extends CommonDataHandler {
 
     private static final Gson GSON = new Gson();
 
-    // take from https://github.com/PaperMC/Velocity/blob/2586210ca67f2510eb4f91bf7567643f8a26ee7b/proxy/src/main/java/com/velocitypowered/proxy/connection/backend/VelocityServerConnection.java#L126
-    private String createLegacyForwardingAddress(String virtualHost) {
+    // source https://github.com/PaperMC/Velocity/blob/2586210ca67f2510eb4f91bf7567643f8a26ee7b/proxy/src/main/java/com/velocitypowered/proxy/connection/backend/VelocityServerConnection.java#L126
+    private String createBungeeForwardingAddress(String virtualHost) {
         // BungeeCord IP forwarding is simply a special injection after the "address" in the handshake,
         // separated by \0 (the null byte). In order, you send the original host, the player's IP, their
         // UUID (undashed), and if you are in online-mode, their login properties (from Mojang).
@@ -233,6 +298,34 @@ public final class SpigotDataHandler extends CommonDataHandler {
             return addr;
         } else {
             return addr.substring(0, ipv6ScopeIdx);
+        }
+    }
+
+    // source https://github.com/PaperMC/Velocity/blob/b2800087d81a4f883284f11a3674c1330eedaee1/proxy/src/main/java/com/velocitypowered/proxy/connection/backend/LoginSessionHandler.java#L165
+    private ByteBuf createVelocityForwardingData(byte[] hmacSecret) {
+        ByteBuf forwarded = Unpooled.buffer(2048);
+        try {
+
+            Utils.writeVarInt(forwarded, 1); // velocity forwarding version
+            Utils.writeString(forwarded, getPlayerRemoteAddressAsString());
+            Utils.writeUuid(forwarded, sessionCtx.getPlayer().getUniqueId());
+            Utils.writeString(forwarded, sessionCtx.getPlayer().getUsername());
+            Utils.writeProperties(forwarded, sessionCtx.getPlayer().getProperties());
+
+            SecretKey key = new SecretKeySpec(hmacSecret, "HmacSHA256");
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(key);
+            mac.update(forwarded.array(), forwarded.arrayOffset(), forwarded.readableBytes());
+            byte[] sig = mac.doFinal();
+
+            return Unpooled.wrappedBuffer(Unpooled.wrappedBuffer(sig), forwarded);
+        } catch (InvalidKeyException e) {
+            forwarded.release();
+            throw new RuntimeException("Unable to authenticate data", e);
+        } catch (NoSuchAlgorithmException e) {
+            // Should never happen
+            forwarded.release();
+            throw new AssertionError(e);
         }
     }
 }

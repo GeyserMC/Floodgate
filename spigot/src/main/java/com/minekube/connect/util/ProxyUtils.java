@@ -34,6 +34,7 @@ import java.lang.reflect.Field;
 public final class ProxyUtils {
     private static final Field IS_BUNGEE_DATA;
     private static final Field IS_MODERN_FORWARDING;
+    private static final Field VELOCITY_SECRET_KEY;
 
     static {
         Class<?> spigotConfig = ReflectionUtils.getClass("org.spigotmc.SpigotConfig");
@@ -41,14 +42,18 @@ public final class ProxyUtils {
         checkNotNull(IS_BUNGEE_DATA, "bungee field cannot be null. Are you using CraftBukkit?");
 
         Field velocitySupport;
+        Field velocitySecretKey;
         try {
             Class<?> paperConfig = Class.forName("com.destroystokyo.paper.PaperConfig");
             velocitySupport = getField(paperConfig, "velocitySupport");
+            velocitySecretKey = getField(paperConfig, "velocitySecretKey");
         } catch (ClassNotFoundException e) {
             // We're not on a platform that has modern forwarding
             velocitySupport = null; // NOPMD - there's really not a better way around this unless you want to use an optional
+            velocitySecretKey = null; // NOPMD
         }
         IS_MODERN_FORWARDING = velocitySupport;
+        VELOCITY_SECRET_KEY = velocitySecretKey;
     }
 
     public static boolean isProxyData() {
@@ -59,11 +64,14 @@ public final class ProxyUtils {
         return ReflectionUtils.getCastedValue(null, IS_BUNGEE_DATA);
     }
 
-    private static boolean isVelocitySupport() {
+    public static boolean isVelocitySupport() {
         if (IS_MODERN_FORWARDING == null) {
             return false;
         }
-
         return ReflectionUtils.getCastedValue(null, IS_MODERN_FORWARDING);
+    }
+
+    public static byte[] velocitySecretKey() {
+        return ReflectionUtils.getCastedValue(null, VELOCITY_SECRET_KEY);
     }
 }

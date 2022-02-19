@@ -63,6 +63,43 @@ public final class SpigotDataAddon implements InjectorAddon {
                             config,
                             kickMessageAttribute)
             );
+            channel.pipeline().names().forEach(System.out::println);
+//            channel.pipeline().addFirst(
+//                    new ChannelOutboundHandlerAdapter() {
+//                        @Override
+//                        public void write(ChannelHandlerContext ctx, Object msg,
+//                                          ChannelPromise promise) throws Exception {
+//
+//                            System.out.println("write " + msg.getClass() + " " + msg);
+//                            super.write(ctx, msg, promise);
+//                        }
+//
+//                    });
+//            if (ProxyUtils.isVelocitySupport()) {
+//                System.out.println("handle velocity");
+//
+//                channel.pipeline().addAfter("encoder", "floodgate_velocity_data",
+//                        new ChannelOutboundHandlerAdapter() {
+//                            @Override
+//                            public void write(ChannelHandlerContext ctx, Object msg,
+//                                              ChannelPromise promise) throws Exception {
+//
+//                                System.out.println(msg.getClass());
+//                                if (ClassNames.PLUGIN_MESSAGE_OUT_PACKET.isInstance(msg)) {
+//                                    System.out.println("server -> client: velocity login request");
+//                                    System.out.println(
+//                                            getValue(msg, ClassNames.PLUGIN_MESSAGE_OUT_ID));
+//                                    System.out.println(
+//                                            getValue(msg, ClassNames.PLUGIN_MESSAGE_OUT_CHANNEL));
+//                                }
+//
+//                                System.out.println("write " + msg.getClass() + " " + msg);
+//                                super.write(ctx, msg, promise);
+//                            }
+//
+//                        });
+//
+//            }
         });
     }
 
