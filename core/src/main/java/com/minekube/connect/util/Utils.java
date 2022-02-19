@@ -25,7 +25,9 @@
 
 package com.minekube.connect.util;
 
+import com.minekube.connect.api.player.GameProfileProperty;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
 import java.io.BufferedReader;
@@ -42,6 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
@@ -121,6 +124,92 @@ public class Utils {
             }
         } while ((current & 0x80) != 0);
         return out;
+    }
+
+
+    /**
+     * Writes a Minecraft-style VarInt to the specified {@code buf}.
+     *
+     * @param buf   the buffer to read from
+     * @param value the integer to write
+     */
+    // source https://github.com/PaperMC/Velocity/blob/b2800087d81a4f883284f11a3674c1330eedaee1/proxy/src/main/java/com/velocitypowered/proxy/protocol/ProtocolUtils.java#L122
+    public static void writeVarInt(ByteBuf buf, int value) {
+        // Peel the one and two byte count cases explicitly as they are the most common VarInt sizes
+        // that the proxy will write, to improve inlining.
+        if ((value & (0xFFFFFFFF << 7)) == 0) {
+            buf.writeByte(value);
+        } else if ((value & (0xFFFFFFFF << 14)) == 0) {
+            int w = (value & 0x7F | 0x80) << 8 | (value >>> 7);
+            buf.writeShort(w);
+        } else {
+            writeVarIntFull(buf, value);
+        }
+    }
+
+    // source https://github.com/PaperMC/Velocity/blob/b2800087d81a4f883284f11a3674c1330eedaee1/proxy/src/main/java/com/velocitypowered/proxy/protocol/ProtocolUtils.java#L135
+    private static void writeVarIntFull(ByteBuf buf, int value) {
+        // See https://steinborn.me/posts/performance/how-fast-can-you-write-a-varint/
+        if ((value & (0xFFFFFFFF << 7)) == 0) {
+            buf.writeByte(value);
+        } else if ((value & (0xFFFFFFFF << 14)) == 0) {
+            int w = (value & 0x7F | 0x80) << 8 | (value >>> 7);
+            buf.writeShort(w);
+        } else if ((value & (0xFFFFFFFF << 21)) == 0) {
+            int w = (value & 0x7F | 0x80) << 16 | ((value >>> 7) & 0x7F | 0x80) << 8 |
+                    (value >>> 14);
+            buf.writeMedium(w);
+        } else if ((value & (0xFFFFFFFF << 28)) == 0) {
+            int w = (value & 0x7F | 0x80) << 24 | (((value >>> 7) & 0x7F | 0x80) << 16)
+                    | ((value >>> 14) & 0x7F | 0x80) << 8 | (value >>> 21);
+            buf.writeInt(w);
+        } else {
+            int w = (value & 0x7F | 0x80) << 24 | ((value >>> 7) & 0x7F | 0x80) << 16
+                    | ((value >>> 14) & 0x7F | 0x80) << 8 | ((value >>> 21) & 0x7F | 0x80);
+            buf.writeInt(w);
+            buf.writeByte(value >>> 28);
+        }
+    }
+
+    /**
+     * Writes the specified {@code str} to the {@code buf} with a VarInt prefix.
+     *
+     * @param buf the buffer to write to
+     * @param str the string to write
+     */
+    // source https://github.com/PaperMC/Velocity/blob/b2800087d81a4f883284f11a3674c1330eedaee1/proxy/src/main/java/com/velocitypowered/proxy/protocol/ProtocolUtils.java#L206
+    public static void writeString(ByteBuf buf, CharSequence str) {
+        int size = ByteBufUtil.utf8Bytes(str);
+        writeVarInt(buf, size);
+        buf.writeCharSequence(str, StandardCharsets.UTF_8);
+    }
+
+    // source https://github.com/PaperMC/Velocity/blob/b2800087d81a4f883284f11a3674c1330eedaee1/proxy/src/main/java/com/velocitypowered/proxy/protocol/ProtocolUtils.java#L266
+    public static void writeUuid(ByteBuf buf, UUID uuid) {
+        buf.writeLong(uuid.getMostSignificantBits());
+        buf.writeLong(uuid.getLeastSignificantBits());
+    }
+
+    /**
+     * Writes a list of {@link com.velocitypowered.api.util.GameProfile.Property} to the buffer.
+     *
+     * @param buf        the buffer to write to
+     * @param properties the properties to serialize
+     */
+    // source https://github.com/PaperMC/Velocity/blob/b2800087d81a4f883284f11a3674c1330eedaee1/proxy/src/main/java/com/velocitypowered/proxy/protocol/ProtocolUtils.java#L357
+    public static void writeProperties(ByteBuf buf, List<GameProfileProperty> properties) {
+        writeVarInt(buf, properties.size());
+        for (GameProfileProperty property : properties) {
+            writeString(buf, property.getName());
+            writeString(buf, property.getValue());
+            String signature = property.getSignature();
+            if (signature != null && !signature.isEmpty()) {
+                buf.writeBoolean(true);
+                writeString(buf, signature);
+            } else {
+                buf.writeBoolean(false);
+            }
+        }
     }
 
     public static String getStackTrace(Throwable throwable) {

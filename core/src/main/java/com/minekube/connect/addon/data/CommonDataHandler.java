@@ -44,12 +44,12 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
     protected final PacketBlocker blocker;
 
     protected final Queue<Object> packetQueue = Queues.newConcurrentLinkedQueue();
-    protected Object handshakePacket;
+    //    protected Object handshakePacket;
     protected ChannelHandlerContext ctx;
 
 //    protected abstract void setNewIp(Channel channel, InetSocketAddress newIp);
 
-    protected abstract Object setHostname(Object handshakePacket, String hostname);
+//    protected abstract Object setHostname(Object handshakePacket, String hostname);
 
     protected abstract boolean channelRead(Object packet) throws Exception;
 
@@ -65,7 +65,7 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
         // TODO if in online mode: just perform login cycle with spoofedUUID
         // TODO if in bungee mode: update handshake packet hostname to bungee player data from session
         // TODO if in velocity mode: update send login plugin message packet with encrypted velocity forwarding data using secret from paper ocnfig
-        this.handshakePacket = handshakePacket;
+//        this.handshakePacket = handshakePacket;
 //        HostnameSeparationResult separation = handshakeHandler.separateHostname(hostname);
 
         // if in bungee mode: update handshake packet hostname to bungee player data from session
@@ -135,9 +135,9 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
     }
 
     protected void disablePacketQueue(boolean removeSelf) {
-        if (handshakePacket != null && shouldCallFireRead(handshakePacket)) {
-            ctx.fireChannelRead(handshakePacket);
-        }
+//        if (handshakePacket != null && shouldCallFireRead(handshakePacket)) {
+//            ctx.fireChannelRead(handshakePacket);
+//        }
 
         Object queuedPacket;
         while ((queuedPacket = packetQueue.poll()) != null) {
