@@ -31,7 +31,6 @@ import static com.minekube.connect.util.ReflectionUtils.getMethod;
 
 import com.google.common.base.Preconditions;
 import com.mojang.authlib.GameProfile;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -47,23 +46,15 @@ public class ClassNames {
     public static final Class<?> MINECRAFT_SERVER;
     public static final Class<?> SERVER_CONNECTION;
     public static final Class<?> HANDSHAKE_PACKET;
-    public static final Class<?> MINECRAFT_KEY;
-    public static final Class<?> PLUGIN_MESSAGE_OUT_PACKET;
-    public static final Class<?> PLUGIN_MESSAGE_IN_PACKET;
-    public static final Class<?> PACKET_DATA_SERIALIZER;
     public static final Class<?> LOGIN_START_PACKET;
     public static final Class<?> LOGIN_LISTENER;
     public static final Class<?> LOGIN_HANDLER;
 
     public static final Constructor<OfflinePlayer> CRAFT_OFFLINE_PLAYER_CONSTRUCTOR;
     public static final Constructor<?> LOGIN_HANDLER_CONSTRUCTOR;
-    public static final Constructor<?> PACKET_DATA_SERIALIZER_CONSTRUCTOR;
-    public static final Constructor<?> PLUGIN_MESSAGE_IN_CONSTRUCTOR;
 
     public static final Field SOCKET_ADDRESS;
     public static final Field HANDSHAKE_HOST;
-    public static final Field PLUGIN_MESSAGE_OUT_ID;
-    public static final Field PLUGIN_MESSAGE_OUT_CHANNEL;
     public static final Field VELOCITY_LOGIN_MESSAGE_ID;
     public static final Field LOGIN_PROFILE;
     public static final Field PACKET_LISTENER;
@@ -121,36 +112,6 @@ public class ClassNames {
 
         HANDSHAKE_HOST = getFieldOfType(HANDSHAKE_PACKET, String.class);
         checkNotNull(HANDSHAKE_HOST, "Handshake host");
-
-        MINECRAFT_KEY = getClassOrFallBack(
-                "net.minecraft.resources.MinecraftKey",
-                nmsPackage + "MinecraftKey"
-        );
-
-        PLUGIN_MESSAGE_OUT_PACKET = getClassOrFallBack(
-                "net.minecraft.network.protocol.login.PacketLoginOutCustomPayload",
-                nmsPackage + "PacketLoginOutCustomPayload"
-        );
-
-        PLUGIN_MESSAGE_OUT_ID = getFieldOfType(PLUGIN_MESSAGE_OUT_PACKET, int.class);
-        checkNotNull(PLUGIN_MESSAGE_OUT_ID, "Plugin message out id");
-        PLUGIN_MESSAGE_OUT_CHANNEL = getFieldOfType(PLUGIN_MESSAGE_OUT_PACKET, MINECRAFT_KEY);
-        checkNotNull(PLUGIN_MESSAGE_OUT_CHANNEL, "Plugin message out channel");
-
-        PLUGIN_MESSAGE_IN_PACKET = getClassOrFallBack(
-                "net.minecraft.network.protocol.login.PacketLoginInCustomPayload",
-                nmsPackage + "PacketLoginInCustomPayload"
-        );
-        PACKET_DATA_SERIALIZER = getClassOrFallBack(
-                "net.minecraft.network.PacketDataSerializer",
-                nmsPackage + "PacketDataSerializer"
-        );
-        PACKET_DATA_SERIALIZER_CONSTRUCTOR =
-                ReflectionUtils.getConstructor(PACKET_DATA_SERIALIZER, true, ByteBuf.class);
-
-        PLUGIN_MESSAGE_IN_CONSTRUCTOR =
-                ReflectionUtils.getConstructor(PLUGIN_MESSAGE_IN_PACKET, true, int.class,
-                        PACKET_DATA_SERIALIZER);
 
         LOGIN_START_PACKET = getClassOrFallBack(
                 "net.minecraft.network.protocol.login.PacketLoginInStart",
