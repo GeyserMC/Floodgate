@@ -32,6 +32,7 @@ import com.minekube.connect.network.netty.LocalSession;
 import com.minekube.connect.util.ClassNames;
 import com.minekube.connect.util.ReflectionUtils;
 import com.viaversion.viaversion.bukkit.handlers.BukkitChannelInitializer;
+import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -41,6 +42,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.DefaultEventLoopGroup;
 import io.netty.channel.local.LocalAddress;
+import io.netty.channel.local.LocalChannel;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -50,6 +52,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 @RequiredArgsConstructor
 public final class SpigotInjector extends CommonPlatformInjector {
@@ -65,7 +68,6 @@ public final class SpigotInjector extends CommonPlatformInjector {
     private CustomList allServerChannels;
 
     private Object serverConnection;
-    private String injectedFieldName;
 
     @Getter private boolean injected;
 
@@ -89,7 +91,6 @@ public final class SpigotInjector extends CommonPlatformInjector {
                         continue;
                     }
 
-                    injectedFieldName = field.getName();
                     CustomList newList = new CustomList((List<?>) field.get(serverConnection)) {
                         @Override
                         public void onAdd(Object object) {
@@ -131,7 +132,7 @@ public final class SpigotInjector extends CommonPlatformInjector {
                 super.channelRead(ctx, msg);
 
                 Channel channel = (Channel) msg;
-                // only need to inject if is a tunneled session & auth passthrough disabled
+                // only need to inject if is a local session & auth passthrough is disabled
                 LocalSession.context(channel)
                         .filter(context -> !context.getPlayer().getAuth().isPassthrough())
                         .ifPresent(
@@ -229,30 +230,17 @@ public final class SpigotInjector extends CommonPlatformInjector {
                 }
                 break;
             } catch (Exception e) {
-                logger.debug("The handler " + name +
-                        " isn't a ChannelInitializer. THIS ERROR IS SAFE TO IGNORE!");
-                e.printStackTrace();
+                if (logger.isDebug()) {
+                    logger.debug("The handler " + name +
+                            " isn't a ChannelInitializer. THIS ERROR IS SAFE TO IGNORE!");
+                    e.printStackTrace();
+                }
             }
         }
         if (childHandler == null) {
             throw new RuntimeException();
         }
         return childHandler;
-    }
-
-    /**
-     * Work around an odd bug where the first connection might not initialize all channel handlers
-     * on the main pipeline - send a dummy status request down that acts as the first connection,
-     * then. For the future, if someone wants to properly fix this - as of December 28, 2021, it
-     * happens on 1.16.5/1.17.1/1.18.1 EXCEPT Spigot 1.16.5
-     */
-    private void workAroundWeirdBug() {
-        // TODO robin: do
-//        LocalSession session = new LocalSession(
-//                bootstrap.getGeyserConfig().getRemote().getAddress(),
-//                bootstrap.getGeyserConfig().getRemote().getPort(), this.serverSocketAddress,
-//                InetAddress.getLoopbackAddress().getHostAddress(), new MinecraftProtocol());
-//        session.connect();
     }
 
     @Override
@@ -264,5 +252,39 @@ public final class SpigotInjector extends CommonPlatformInjector {
         super.shutdown();
     }
 
+    /**
+     * Work around an odd bug where the first connection might not initialize all channel handlers
+     * on the main pipeline - connecting down as the first connection fixes this. For the future, if
+     * someone wants to properly fix this - as of December 28, 2021, it happens on
+     * 1.16.5/1.17.1/1.18.1 EXCEPT Spigot 1.16.5
+     */
+    private void workAroundWeirdBug() {
+        // connect to local server and close
+        connectAndClose(); // that's enough
+    }
+
     // End of logic from GeyserMC
+
+    private void connectAndClose() {
+        new Bootstrap()
+                .remoteAddress(serverSocketAddress)
+                .channel(LocalChannel.class)
+                .handler(new ChannelInitializer<Channel>() {
+                    @Override
+                    protected void initChannel(@NotNull Channel ch) {
+                        ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
+                            @Override
+                            public void channelActive(@NotNull ChannelHandlerContext ctx) {
+                                ctx.close();
+                            }
+                        });
+                    }
+                })
+                .group(new DefaultEventLoopGroup(0,
+                        new DefaultThreadFactory("Geyser Spigot workAroundWeirdBug thread",
+                                Thread.MAX_PRIORITY)))
+                .connect()
+                .syncUninterruptibly();
+    }
+
 }
