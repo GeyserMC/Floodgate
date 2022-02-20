@@ -25,6 +25,7 @@
 
 package com.minekube.connect.util;
 
+import static com.minekube.connect.util.ReflectionUtils.getField;
 import static com.minekube.connect.util.ReflectionUtils.getFieldOfType;
 import static com.minekube.connect.util.ReflectionUtils.getMethod;
 
@@ -63,6 +64,7 @@ public class ClassNames {
     public static final Field HANDSHAKE_HOST;
     public static final Field PLUGIN_MESSAGE_OUT_ID;
     public static final Field PLUGIN_MESSAGE_OUT_CHANNEL;
+    public static final Field VELOCITY_LOGIN_MESSAGE_ID;
     public static final Field LOGIN_PROFILE;
     public static final Field PACKET_LISTENER;
 
@@ -171,6 +173,8 @@ public class ClassNames {
                 "exceptionCaught",
                 ChannelHandlerContext.class, Throwable.class
         );
+
+        VELOCITY_LOGIN_MESSAGE_ID = getField(LOGIN_LISTENER, "velocityLoginMessageId");
 
         // there are multiple no-arg void methods
         INIT_UUID = getMethod(LOGIN_LISTENER, "initUUID");

@@ -37,7 +37,7 @@ public final class MessageFormatter {
 
         String[] args = new String[arguments.length];
         for (int i = 0; i < arguments.length; i++) {
-            args[i] = arguments[i].toString();
+            args[i] = String.valueOf(arguments[i]);
         }
 
         int previousIndex = -1;
