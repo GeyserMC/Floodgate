@@ -99,7 +99,7 @@ public final class BungeeListener implements Listener {
                     "floodgate.ingame.login_name",
                     player.getUsername(), uniqueId
             );
-            languageManager.loadLocale(player.getLanguageCode());
+            languageManager.loadLocale(player.getLanguageTag());
         }
     }
 

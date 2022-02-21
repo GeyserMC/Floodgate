@@ -30,7 +30,8 @@ import com.minekube.connect.api.SimpleFloodgateApi;
 import com.minekube.connect.api.logger.FloodgateLogger;
 import com.minekube.connect.api.player.Auth;
 import com.minekube.connect.api.player.FloodgatePlayer;
-import com.minekube.connect.api.player.GameProfileProperty;
+import com.minekube.connect.api.player.GameProfile;
+import com.minekube.connect.api.player.GameProfile.Property;
 import com.minekube.connect.player.FloodgatePlayerImpl;
 import com.minekube.connect.tunnel.Tunneler;
 import com.minekube.connect.watch.SessionProposal;
@@ -189,17 +190,20 @@ public final class LocalSession {
         Player p = s.getPlayer();
         return new FloodgatePlayerImpl(
                 s.getId(),
-                new Auth(s.getAuth().getPassthrough()),
-                UUID.fromString(p.getProfile().getId()),
-                p.getProfile().getName(),
-                p.getProfile().getPropertiesList().stream()
-                        .map(property -> new GameProfileProperty(
-                                property.getName(),
-                                property.getValue(),
-                                property.getSignature()))
-                        .collect(Collectors.toList()),
-                "", // TODO extract from http accept language header
-                p.getAddr()
+                new GameProfile(
+                        p.getProfile().getName(),
+                        UUID.fromString(p.getProfile().getId()),
+                        p.getProfile().getPropertiesList().stream()
+                                .map(property -> new Property(
+                                        property.getName(),
+                                        property.getValue(),
+                                        property.getSignature()))
+                                .collect(Collectors.toList())
+                ),
+                new Auth(
+                        s.getAuth().getPassthrough()
+                ),
+                "" // TODO extract from http accept language header
         );
     }
 

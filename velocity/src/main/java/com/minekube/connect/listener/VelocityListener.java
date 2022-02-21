@@ -134,7 +134,7 @@ public final class VelocityListener {
         return base
                 .withId(player.getUniqueId())
                 .withName(player.getUsername())
-                .addProperties(player.getProperties().stream()
+                .addProperties(player.getGameProfile().getProperties().stream()
                         .map(p -> new Property(p.getName(), p.getValue(), p.getSignature()))
                         .collect(Collectors.toList()));
     }
@@ -144,7 +144,7 @@ public final class VelocityListener {
         if (event.getResult().isAllowed()) {
             FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
             if (player != null) {
-                languageManager.loadLocale(player.getLanguageCode());
+                languageManager.loadLocale(player.getLanguageTag());
             }
         }
     }
