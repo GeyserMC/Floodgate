@@ -67,10 +67,10 @@ public final class SpigotPlugin extends JavaPlugin {
                 "com.destroystokyo.paper.event.profile.PreFillProfileEvent") != null;
 
         platform.enable(
-                new WatcherModule(),
                 new SpigotCommandModule(this),
                 new SpigotAddonModule(),
-                (usePaperListener ? new PaperListenerModule() : new SpigotListenerModule())
+                (usePaperListener ? new PaperListenerModule() : new SpigotListenerModule()),
+                new WatcherModule()
         );
 
         //todo add proper support for disabling things on shutdown and enabling this on enable

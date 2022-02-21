@@ -61,7 +61,7 @@ public class ChannelWrapper implements Channel {
 
     @Override
     public SocketAddress remoteAddress() {
-        if (context == null || context.getSpoofedAddress() == null) {
+        if (context == null) {
             return source.remoteAddress();
         }
         return context.getSpoofedAddress();

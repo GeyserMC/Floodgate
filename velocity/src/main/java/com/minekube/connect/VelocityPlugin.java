@@ -62,10 +62,10 @@ public final class VelocityPlugin {
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
         platform.enable(
-                new WatcherModule(),
                 new CommandModule(),
-                new VelocityListenerModule()
-//                new VelocityAddonModule()
+                new VelocityListenerModule(),
+//                new VelocityAddonModule(), - don't need proxy-side data injection
+                new WatcherModule()
         );
     }
 }

@@ -185,7 +185,9 @@ public final class LanguageManager {
         // try and get the key from the default locale
         if (formatString == null) {
             properties = localeMappings.get(defaultLocale);
-            formatString = properties.getProperty(key);
+            if (properties != null) {
+                formatString = properties.getProperty(key);
+            }
         }
 
         // key wasn't found

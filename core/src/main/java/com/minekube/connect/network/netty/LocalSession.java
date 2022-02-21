@@ -25,6 +25,7 @@
 
 package com.minekube.connect.network.netty;
 
+import com.google.common.base.Preconditions;
 import com.minekube.connect.api.SimpleFloodgateApi;
 import com.minekube.connect.api.logger.FloodgateLogger;
 import com.minekube.connect.api.player.Auth;
@@ -52,12 +53,12 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.Player;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.Session;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Manages a Minecraft Java session over our LocalChannel implementation.
@@ -81,15 +82,11 @@ public final class LocalSession {
      * Every {@link LocalSession} attaches connection context to a {@link Channel} and can be
      * extracted using {@link LocalSession#context(Channel)}.
      */
+    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     @Getter
     public static class Context {
-        final FloodgatePlayer player;
-        @Nullable InetSocketAddress spoofedAddress; // real client address
-
-        private Context(FloodgatePlayer player, @Nullable InetSocketAddress spoofedAddress) {
-            this.player = player;
-            this.spoofedAddress = spoofedAddress;
-        }
+        final @NotNull FloodgatePlayer player;
+        final @NotNull InetSocketAddress spoofedAddress; // real client address
     }
 
     /**
@@ -207,9 +204,11 @@ public final class LocalSession {
     }
 
     private static InetSocketAddress createAddress(String addr) {
-        if (addr.isEmpty()) {
-            return null;
-        }
-        return new InetSocketAddress(addr, 0);
+        Preconditions.checkNotNull(addr, "player address must not be null");
+        Preconditions.checkArgument(!addr.isEmpty(), "player address must not be empty");
+        InetSocketAddress address = new InetSocketAddress(addr, 0);
+        Preconditions.checkArgument(!address.isUnresolved(),
+                "invalid player address (must not contain a port): %s", addr);
+        return address;
     }
 }

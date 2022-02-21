@@ -23,13 +23,11 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package com.minekube.connect.floodgate;
+package com.minekube.connect;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.minekube.connect.FloodgatePlatform;
 import com.minekube.connect.api.logger.FloodgateLogger;
-import com.minekube.connect.module.BungeeAddonModule;
 import com.minekube.connect.module.BungeeListenerModule;
 import com.minekube.connect.module.BungeePlatformModule;
 import com.minekube.connect.module.CommandModule;
@@ -51,7 +49,7 @@ public final class BungeePlugin extends Plugin {
                 new BungeePlatformModule(this)
         );
 
-        // Bungeecord doesn't have a build-in function to disable plugins,
+        // BungeeCord doesn't have a build-in function to disable plugins,
         // so there is no need to have a custom Platform class like Spigot
         platform = injector.getInstance(FloodgatePlatform.class);
 
@@ -65,7 +63,7 @@ public final class BungeePlugin extends Plugin {
         platform.enable(
                 new CommandModule(),
                 new BungeeListenerModule(),
-                new BungeeAddonModule(),
+//                new BungeeAddonModule(), - don't need proxy-side data injection
                 new WatcherModule()
         );
     }

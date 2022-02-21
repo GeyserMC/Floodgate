@@ -53,7 +53,12 @@ class TunnelHandler implements Handler {
         if (status.getCode() == Code.CANCELLED) {
             return;
         }
-        logger.error("Connection error from TunnelService: {}", t.getLocalizedMessage());
+        logger.error("Connection error with TunnelService: " +
+                        t.getLocalizedMessage() + (
+                        t.getCause() == null ? ""
+                                : " (cause: " + t.getCause().getLocalizedMessage() + ")"
+                )
+        );
     }
 
     @Override
