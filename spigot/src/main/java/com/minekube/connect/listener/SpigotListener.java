@@ -60,7 +60,7 @@ public final class SpigotListener implements Listener {
                     "floodgate.ingame.login_name",
                     player.getUsername(), player.getUniqueId()
             );
-            languageManager.loadLocale(player.getLanguageCode());
+            languageManager.loadLocale(player.getLanguageTag());
         }
     }
 

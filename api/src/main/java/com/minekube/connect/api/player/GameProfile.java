@@ -25,11 +25,20 @@
 
 package com.minekube.connect.api.player;
 
+import java.util.List;
+import java.util.UUID;
 import lombok.Data;
 
 @Data
-public class GameProfileProperty {
-    private final String name;
-    private final String value;
-    private final String signature;
+public class GameProfile {
+    private final String username;
+    private final UUID uniqueId;
+    private final List<Property> properties;
+
+    @Data
+    public static class Property {
+        private final String name;
+        private final String value;
+        private final String signature;
+    }
 }

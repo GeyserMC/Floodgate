@@ -135,7 +135,8 @@ public final class SpigotDataHandler extends CommonDataHandler {
                 .append('\0')
                 .append(sessionCtx.getPlayer().getUniqueId().toString().replaceAll("-", ""))
                 .append('\0');
-        GSON.toJson(UnaryOperator.identity().apply(sessionCtx.getPlayer().getProperties()), data);
+        GSON.toJson(UnaryOperator.identity().apply(
+                sessionCtx.getPlayer().getGameProfile().getProperties()), data);
         return data.toString();
     }
 

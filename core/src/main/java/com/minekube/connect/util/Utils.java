@@ -25,7 +25,7 @@
 
 package com.minekube.connect.util;
 
-import com.minekube.connect.api.player.GameProfileProperty;
+import com.minekube.connect.api.player.GameProfile.Property;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandler;
@@ -197,9 +197,9 @@ public class Utils {
      * @param properties the properties to serialize
      */
     // source https://github.com/PaperMC/Velocity/blob/b2800087d81a4f883284f11a3674c1330eedaee1/proxy/src/main/java/com/velocitypowered/proxy/protocol/ProtocolUtils.java#L357
-    public static void writeProperties(ByteBuf buf, List<GameProfileProperty> properties) {
+    public static void writeProperties(ByteBuf buf, List<Property> properties) {
         writeVarInt(buf, properties.size());
-        for (GameProfileProperty property : properties) {
+        for (Property property : properties) {
             writeString(buf, property.getName());
             writeString(buf, property.getValue());
             String signature = property.getSignature();

@@ -25,7 +25,6 @@
 
 package com.minekube.connect.api.player;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface FloodgatePlayer {
@@ -40,14 +39,14 @@ public interface FloodgatePlayer {
     String getUsername();
 
     /**
-     * Returns the game profile properties of that player.
+     * Returns the game profile of that player.
      */
-    List<GameProfileProperty> getProperties();
+    GameProfile getGameProfile();
 
     /**
-     * Returns the language code of the player. If it is unknown it returns an empty string.
+     * Returns the language tag of the player. If it is unknown it returns an empty string.
      */
-    String getLanguageCode();
+    String getLanguageTag();
 
     /**
      * Returns the session id sent by Connect WatchService.
