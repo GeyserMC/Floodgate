@@ -26,7 +26,7 @@
 package com.minekube.connect.listener;
 
 import com.google.inject.Inject;
-import com.minekube.connect.floodgate.BungeePlugin;
+import com.minekube.connect.BungeePlugin;
 import com.minekube.connect.platform.listener.ListenerRegistration;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ProxyServer;

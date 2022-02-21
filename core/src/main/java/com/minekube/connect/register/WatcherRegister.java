@@ -68,27 +68,24 @@ public class WatcherRegister {
                         .build());
                 return;
             }
+            if (proposal.getSession().getPlayer().getAddr().isEmpty()) {
+                logger.info("Got session proposal with empty player address " +
+                        "from WatchService, rejecting it");
+                proposal.reject(Status.newBuilder()
+                        .setCode(Code.INVALID_ARGUMENT_VALUE)
+                        .setMessage("player address must not be empty")
+                        .build());
+                return;
+            }
 
             if (logger.isDebug()) { // skipping a lot of proposal.toString operations
                 logger.debug("Received {}", proposal);
             }
 
             if (proposal.getState() != State.ACCEPTED) {
-                // rejected by event handler
                 return;
             }
 
-            // checking the second time, an event handler could have modified it.
-            if (proposal.getSession().getTunnelServiceAddr().isEmpty()) {
-                logger.info("A session proposal event handler emptied the tunnel " +
-                        "service address, rejecting it");
-                proposal.reject(Status.newBuilder()
-                        .setCode(Code.INTERNAL_VALUE)
-                        .setMessage("an internal event handler made " +
-                                "the session proposal invalid")
-                        .build());
-                return;
-            }
             // Try establishing connection
             new LocalSession(logger, api, tunneler,
                     platformInjector.getServerSocketAddress(),
@@ -98,7 +95,12 @@ public class WatcherRegister {
 
         @Override
         public void onError(Throwable t) {
-            logger.error("Connection error from WatchService: {}", t.getLocalizedMessage());
+            logger.error("Connection error with WatchService: " +
+                            t.getLocalizedMessage() + (
+                            t.getCause() == null ? ""
+                                    : " (cause: " + t.getCause().getLocalizedMessage() + ")"
+                    )
+            );
             logger.info("Reconnecting in {}s ...", RECONNECT_AFTER_ERR.getSeconds());
             new Timer().schedule(new TimerTask() {
                 @Override

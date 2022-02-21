@@ -32,7 +32,6 @@ import com.google.inject.multibindings.ProvidesIntoSet;
 import com.minekube.connect.listener.BungeeListener;
 import com.minekube.connect.register.ListenerRegister;
 import net.md_5.bungee.api.plugin.Listener;
-import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 
 public final class BungeeListenerModule extends AbstractModule {
     @Override
@@ -46,9 +45,4 @@ public final class BungeeListenerModule extends AbstractModule {
         return new BungeeListener();
     }
 
-    @Singleton
-    @ProvidesIntoSet
-    public Listener pluginMessageListener(PluginMessageUtils handler) {
-        return (Listener) handler; // Plugin message handler is also the listener
-    }
 }

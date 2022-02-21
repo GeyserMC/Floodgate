@@ -28,23 +28,19 @@ package com.minekube.connect.listener;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.minekube.connect.api.ProxyFloodgateApi;
 import com.minekube.connect.api.logger.FloodgateLogger;
 import com.minekube.connect.api.player.FloodgatePlayer;
-import com.minekube.connect.skin.SkinApplier;
-import com.minekube.connect.skin.SkinData;
+import com.minekube.connect.network.netty.LocalSession;
 import com.minekube.connect.util.BungeeCommandUtil;
 import com.minekube.connect.util.LanguageManager;
 import com.minekube.connect.util.ReflectionUtils;
 import io.netty.channel.Channel;
-import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
 import java.util.UUID;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
-import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.connection.InitialHandler;
@@ -69,15 +65,6 @@ public final class BungeeListener implements Listener {
     @Inject private ProxyFloodgateApi api;
     @Inject private LanguageManager languageManager;
     @Inject private FloodgateLogger logger;
-    @Inject private SkinApplier skinApplier;
-
-    @Inject
-    @Named("playerAttribute")
-    private AttributeKey<FloodgatePlayer> playerAttribute;
-
-    @Inject
-    @Named("kickMessageAttribute")
-    private AttributeKey<String> kickMessageAttribute;
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPreLogin(PreLoginEvent event) {
@@ -91,20 +78,12 @@ public final class BungeeListener implements Listener {
         ChannelWrapper wrapper = ReflectionUtils.getCastedValue(connection, CHANNEL_WRAPPER);
         Channel channel = wrapper.getHandle();
 
-        // check if the player has to be kicked
-        String kickReason = channel.attr(kickMessageAttribute).get();
-        if (kickReason != null) {
-            event.setCancelled(true);
-            event.setCancelReason(kickReason);
-            return;
-        }
-
-        FloodgatePlayer player = channel.attr(playerAttribute).get();
-        if (player != null) {
+        LocalSession.context(channel, ctx -> {
             connection.setOnlineMode(false);
-            connection.setUniqueId(player.getUniqueId());
-            ReflectionUtils.setValue(connection, PLAYER_NAME, player.getUsername());
-        }
+            connection.setUniqueId(ctx.getPlayer().getUniqueId());
+            ReflectionUtils.setValue(connection, PLAYER_NAME, ctx.getPlayer().getUsername());
+            // TODO robin: what about profile properties? (but why is skin already showing)
+        });
     }
 
     @EventHandler
@@ -124,14 +103,14 @@ public final class BungeeListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onPostLogin(PostLoginEvent event) {
-        // To fix the February 2 2022 Mojang authentication changes
-        FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
-        if (player != null) {
-            skinApplier.applySkin(player, new SkinData("", ""));
-        }
-    }
+//    @EventHandler(priority = EventPriority.LOWEST)
+//    public void onPostLogin(PostLoginEvent event) {
+    // To fix the February 2 2022 Mojang authentication changes
+//        FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
+//        if (player != null) {
+//            skinApplier.applySkin(player, new SkinData("", ""));
+//        }
+//    }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerDisconnect(PlayerDisconnectEvent event) {
