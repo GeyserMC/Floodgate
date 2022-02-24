@@ -47,6 +47,10 @@ public class BungeeDataAddon implements InjectorAddon {
     private String packetHandler;
 
     @Inject
+    @Named("packetDecoder")
+    private String packetDecoder;
+
+    @Inject
     @Named("packetEncoder")
     private String packetEncoder;
 
@@ -69,9 +73,13 @@ public class BungeeDataAddon implements InjectorAddon {
             }
             return;
         }
+
+        PacketBlocker blocker = new PacketBlocker();
+        channel.pipeline().addBefore(packetDecoder, "floodgate_packet_blocker", blocker);
+
         channel.pipeline().addBefore(
                 packetHandler, "floodgate_data_handler",
-                new BungeeProxyDataHandler(config, handshakeHandler, kickMessageAttribute)
+                new BungeeProxyDataHandler(handshakeHandler, config, kickMessageAttribute, blocker)
         );
     }
 

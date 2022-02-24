@@ -25,22 +25,22 @@
 
 package org.geysermc.floodgate.player;
 
+import static org.geysermc.floodgate.player.FloodgateHandshakeHandler.ResultType.INVALID_DATA_LENGTH;
+import static org.geysermc.floodgate.player.FloodgateHandshakeHandler.ResultType.NOT_FLOODGATE_DATA;
 import static org.geysermc.floodgate.util.BedrockData.EXPECTED_LENGTH;
 
 import com.google.common.base.Charsets;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
+import it.unimi.dsi.fastutil.Pair;
+import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import java.net.InetSocketAddress;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.addon.data.HandshakeDataImpl;
 import org.geysermc.floodgate.addon.data.HandshakeHandlersImpl;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
@@ -51,22 +51,12 @@ import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.skin.SkinUploadManager;
-import org.geysermc.floodgate.time.TimeSyncer;
 import org.geysermc.floodgate.util.BedrockData;
-import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.InvalidFormatException;
 import org.geysermc.floodgate.util.LinkedPlayer;
-import org.geysermc.floodgate.util.TimeSyncerHolder;
 import org.geysermc.floodgate.util.Utils;
 
-@RequiredArgsConstructor
 public final class FloodgateHandshakeHandler {
-    private final Cache<String, Long> handleCache =
-            CacheBuilder.newBuilder()
-                    .maximumSize(500)
-                    .expireAfterWrite(10, TimeUnit.SECONDS)
-                    .build();
-
     private final HandshakeHandlersImpl handshakeHandlers;
     private final SimpleFloodgateApi api;
     private final FloodgateCipher cipher;
@@ -75,90 +65,143 @@ public final class FloodgateHandshakeHandler {
     private final AttributeKey<FloodgatePlayer> playerAttribute;
     private final FloodgateLogger logger;
 
-    public HandshakeResult handle(Channel channel, @NonNull String originalHostname) {
-        String[] split = originalHostname.split("\0");
-        String data = null;
+    public FloodgateHandshakeHandler(
+            HandshakeHandlersImpl handshakeHandlers,
+            SimpleFloodgateApi api,
+            FloodgateCipher cipher,
+            FloodgateConfigHolder configHolder,
+            SkinUploadManager skinUploadManager,
+            AttributeKey<FloodgatePlayer> playerAttribute,
+            FloodgateLogger logger) {
+
+        this.handshakeHandlers = handshakeHandlers;
+        this.api = api;
+        this.cipher = cipher;
+        this.configHolder = configHolder;
+        this.skinUploadManager = skinUploadManager;
+        this.playerAttribute = playerAttribute;
+        this.logger = logger;
+    }
+
+    /**
+     * Separates the Floodgate data from the hostname
+     *
+     * @param hostname the string to look in
+     * @return The first string is the Floodgate data (or null if there isn't) and the second string
+     * is the hostname without the Floodgate.
+     */
+    public HostnameSeparationResult separateHostname(@NonNull String hostname) {
+        String[] hostnameItems = hostname.split("\0");
+        String floodgateData = null;
+        int dataVersion = -1;
 
         StringBuilder hostnameBuilder = new StringBuilder();
-        for (String value : split) {
-            if (data == null && FloodgateCipher.hasHeader(value)) {
-                data = value;
+        for (String value : hostnameItems) {
+            int version = FloodgateCipher.version(value);
+            if (floodgateData == null && version != -1) {
+                floodgateData = value;
+                dataVersion = version;
                 continue;
             }
             hostnameBuilder.append(value).append('\0');
         }
         // hostname now doesn't have Floodgate data anymore if it had
-        String hostname = hostnameBuilder.toString();
+        return new HostnameSeparationResult(floodgateData, dataVersion, hostnameBuilder.toString());
+    }
 
-        if (data == null) {
+    public CompletableFuture<HandshakeResult> handle(
+            @NonNull Channel channel,
+            @NonNull String floodgateDataString,
+            @NonNull String hostname) {
+
+        byte[] floodgateData = floodgateDataString.getBytes(Charsets.UTF_8);
+
+        return CompletableFuture.supplyAsync(() -> {
+
+            String decrypted;
+            try {
+                // the actual decryption of the data
+                decrypted = cipher.decryptToString(floodgateData);
+            } catch (InvalidFormatException e) {
+                // when the Floodgate format couldn't be found
+                throw callHandlerAndReturnResult(
+                        NOT_FLOODGATE_DATA,
+                        channel, null, hostname
+                );
+            } catch (Exception e) {
+                // all the other exceptions are caused by invalid/tempered Floodgate data
+                if (configHolder.get().isDebug()) {
+                    e.printStackTrace();
+                }
+
+                throw callHandlerAndReturnResult(
+                        ResultType.DECRYPT_ERROR,
+                        channel, null, hostname
+                );
+            }
+
+            try {
+                BedrockData bedrockData = BedrockData.fromString(decrypted);
+
+                if (bedrockData.getDataLength() != EXPECTED_LENGTH) {
+                    throw callHandlerAndReturnResult(
+                            INVALID_DATA_LENGTH,
+                            channel, bedrockData, hostname
+                    );
+                }
+
+                // we'll use the LinkedPlayer provided by Bungee or Velocity (if they included one)
+                if (bedrockData.hasPlayerLink()) {
+                    throw handlePart2(channel, hostname, bedrockData, bedrockData.getLinkedPlayer());
+                }
+                //todo add option to not check for links when the data comes from a proxy
+
+                // let's check if there is a link
+                return bedrockData;
+
+            } catch (Exception exception) {
+                if (exception instanceof HandshakeResult) {
+                    throw (HandshakeResult) exception;
+                }
+                exception.printStackTrace();
+
+                throw callHandlerAndReturnResult(
+                        ResultType.EXCEPTION,
+                        channel, null, hostname
+                );
+            }
+        }).thenCompose(this::fetchLinkedPlayer).handle((result, error) -> {
+            if (error == null) {
+                return handlePart2(channel, hostname, result.left(), result.right());
+            }
+
+            if (error instanceof CompletionException) {
+                if (error.getCause() == null) {
+                    error.printStackTrace();
+                }
+                error = error.getCause();
+            }
+
+            if (error instanceof HandshakeResult) {
+                return (HandshakeResult) error;
+            }
+
+            error.printStackTrace();
+
             return callHandlerAndReturnResult(
-                    ResultType.NOT_FLOODGATE_DATA,
-                    channel, null, hostname);
-        }
+                    ResultType.EXCEPTION,
+                    channel, null, hostname
+            );
+        });
+    }
+
+    private HandshakeResult handlePart2(
+            Channel channel,
+            String hostname,
+            BedrockData bedrockData,
+            LinkedPlayer linkedPlayer) {
 
         try {
-            byte[] floodgateData = data.getBytes(Charsets.UTF_8);
-
-            // actual decryption
-            String decrypted = cipher.decryptToString(floodgateData);
-            BedrockData bedrockData = BedrockData.fromString(decrypted);
-
-            if (bedrockData.getDataLength() != EXPECTED_LENGTH) {
-                return callHandlerAndReturnResult(
-                        ResultType.INVALID_DATA_LENGTH,
-                        channel, bedrockData, hostname);
-            }
-
-            // timestamp checks
-
-            TimeSyncer timeSyncer = TimeSyncerHolder.get();
-
-            if (!timeSyncer.hasUsefulOffset()) {
-                logger.warn("We couldn't make sure that your system clock is accurate. " +
-                        "This can cause issues with logging in.");
-            }
-
-            // the time syncer is accurate, but we have to account for some minor differences
-            final int errorMargin = 150; // 150ms
-
-            long timeDifference = timeSyncer.getRealMillis() - bedrockData.getTimestamp();
-            if (timeDifference > 6000 + errorMargin || timeDifference < -errorMargin) {
-                if (Constants.DEBUG_MODE || logger.isDebug()) {
-                    logger.info("Current time: " + System.currentTimeMillis());
-                    logger.info("Stored time: " + bedrockData.getTimestamp());
-                    logger.info("Time offset: " + timeSyncer.getTimeOffset());
-                }
-                return callHandlerAndReturnResult(
-                        ResultType.TIMESTAMP_DENIED,
-                        channel, bedrockData, hostname);
-            }
-
-            Long cachedTimestamp = handleCache.getIfPresent(bedrockData.getXuid());
-            if (cachedTimestamp != null) {
-                // the cached timestamp should be older than the received timestamp
-                // and it should also not be possible to reuse the handshake
-                long diff = bedrockData.getTimestamp() - cachedTimestamp;
-                if (diff == 0 || diff < 0 && -diff > errorMargin) {
-                    return callHandlerAndReturnResult(
-                            ResultType.TIMESTAMP_DENIED,
-                            channel, bedrockData, hostname);
-                }
-            }
-
-            handleCache.put(bedrockData.getXuid(), bedrockData.getTimestamp());
-
-
-            LinkedPlayer linkedPlayer;
-
-            // we'll use the LinkedPlayer provided by Bungee or Velocity (if they included one)
-            if (bedrockData.hasPlayerLink()) {
-                linkedPlayer = bedrockData.getLinkedPlayer();
-            } else {
-                // every implementation (Bukkit, Bungee and Velocity) run this constructor async,
-                // so we should be fine doing this synchronised.
-                linkedPlayer = fetchLinkedPlayer(Utils.getJavaUuid(bedrockData.getXuid()));
-            }
-
             HandshakeData handshakeData = new HandshakeDataImpl(
                     channel, true, bedrockData.clone(), configHolder.get(),
                     linkedPlayer != null ? linkedPlayer.clone() : null, hostname);
@@ -174,10 +217,7 @@ public final class FloodgateHandshakeHandler {
                         bedrockData.getVerifyCode());
             }
 
-            correctHostname(handshakeData);
-
-            FloodgatePlayer player =
-                    FloodgatePlayerImpl.from(bedrockData, handshakeData);
+            FloodgatePlayer player = FloodgatePlayerImpl.from(bedrockData, handshakeData);
 
             api.addPlayer(player.getJavaUniqueId(), player);
 
@@ -188,28 +228,9 @@ public final class FloodgateHandshakeHandler {
             player.addProperty(PropertyKey.SOCKET_ADDRESS, socketAddress);
 
             return new HandshakeResult(ResultType.SUCCESS, handshakeData, bedrockData, player);
-
-        } catch (InvalidFormatException formatException) {
-            // only header exceptions should return 'not floodgate data',
-            // all the other format exceptions are because of invalid/tempered Floodgate data
-            if (formatException.isHeader()) {
-                return callHandlerAndReturnResult(
-                        ResultType.NOT_FLOODGATE_DATA,
-                        channel, null, hostname);
-            }
-
-            formatException.printStackTrace();
-
-            return callHandlerAndReturnResult(
-                    ResultType.EXCEPTION,
-                    channel, null, hostname);
-
         } catch (Exception exception) {
             exception.printStackTrace();
-
-            return callHandlerAndReturnResult(
-                    ResultType.EXCEPTION,
-                    channel, null, hostname);
+            return callHandlerAndReturnResult(ResultType.EXCEPTION, channel, null, hostname);
         }
     }
 
@@ -223,54 +244,36 @@ public final class FloodgateHandshakeHandler {
                 bedrockData, configHolder.get(), null, hostname);
         handshakeHandlers.callHandshakeHandlers(handshakeData);
 
-        if (bedrockData != null) {
-            correctHostname(handshakeData);
-        }
-
         return new HandshakeResult(resultType, handshakeData, bedrockData, null);
     }
 
-    private void correctHostname(HandshakeData handshakeData) {
-        BedrockData bedrockData = handshakeData.getBedrockData();
-        UUID correctUuid = handshakeData.getCorrectUniqueId();
-
-        // replace the ip and uuid with the Bedrock client IP and an uuid based of the xuid
-        String[] split = handshakeData.getHostname().split("\0");
-        if (split.length >= 3) {
-            if (logger.isDebug()) {
-                logger.info("Replacing hostname arg1 '{}' with '{}' and arg2 '{}' with '{}'",
-                        split[1], bedrockData.getIp(), split[2], correctUuid.toString());
-            }
-            split[1] = bedrockData.getIp();
-            split[2] = correctUuid.toString();
-        }
-        handshakeData.setHostname(String.join("\0", split));
-    }
-
-    private LinkedPlayer fetchLinkedPlayer(UUID javaUniqueId) {
+    private CompletableFuture<Pair<BedrockData, LinkedPlayer>> fetchLinkedPlayer(BedrockData data) {
         if (!api.getPlayerLink().isEnabled()) {
-            return null;
+            return CompletableFuture.completedFuture(new ObjectObjectImmutablePair<>(data, null));
         }
-
-        try {
-            return api.getPlayerLink().getLinkedPlayer(javaUniqueId).get();
-        } catch (InterruptedException | ExecutionException exception) {
-            exception.printStackTrace();
-            return null;
-        }
+        return api.getPlayerLink().getLinkedPlayer(Utils.getJavaUuid(data.getXuid()))
+                .thenApply(link -> new ObjectObjectImmutablePair<>(data, link))
+                .handle((result, error) -> {
+                    if (error != null) {
+                        logger.error("The player linking implementation returned an error",
+                                error.getCause());
+                        return new ObjectObjectImmutablePair<>(data, null);
+                    }
+                    return result;
+                });
     }
 
     public enum ResultType {
         EXCEPTION,
         NOT_FLOODGATE_DATA,
+        DECRYPT_ERROR,
         INVALID_DATA_LENGTH,
-        TIMESTAMP_DENIED,
         SUCCESS
     }
 
-    @Getter
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
-    public static class HandshakeResult {
+    @Getter
+    public static class HandshakeResult extends IllegalStateException {
         private final ResultType resultType;
         private final HandshakeData handshakeData;
         private final BedrockData bedrockData;

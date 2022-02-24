@@ -25,7 +25,6 @@
 
 package org.geysermc.floodgate.pluginmessage;
 
-import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
@@ -34,6 +33,7 @@ import org.bukkit.entity.Player;
 import org.geysermc.floodgate.SpigotPlugin;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.skin.SkinApplier;
+import org.geysermc.floodgate.skin.SkinData;
 import org.geysermc.floodgate.util.ClassNames;
 import org.geysermc.floodgate.util.ReflectionUtils;
 import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
@@ -50,18 +50,18 @@ public final class SpigotSkinApplier implements SkinApplier {
     }
 
     @Override
-    public void applySkin(FloodgatePlayer floodgatePlayer, JsonObject skinResult) {
-        applySkin0(floodgatePlayer, skinResult, true);
+    public void applySkin(FloodgatePlayer floodgatePlayer, SkinData skinData) {
+        applySkin0(floodgatePlayer, skinData, true);
     }
 
-    private void applySkin0(FloodgatePlayer floodgatePlayer, JsonObject result, boolean firstTry) {
+    private void applySkin0(FloodgatePlayer floodgatePlayer, SkinData skinData, boolean firstTry) {
         Player player = Bukkit.getPlayer(floodgatePlayer.getCorrectUniqueId());
 
         // player is probably not logged in yet
         if (player == null) {
             if (firstTry) {
                 Bukkit.getScheduler().runTaskLater(plugin,
-                        () -> applySkin0(floodgatePlayer, result, false),
+                        () -> applySkin0(floodgatePlayer, skinData, false),
                         10 * 1000);
             }
             return;
@@ -76,10 +76,7 @@ public final class SpigotSkinApplier implements SkinApplier {
         PropertyMap properties = profile.getProperties();
 
         properties.removeAll("textures");
-        Property property = new Property(
-                "textures",
-                result.get("value").getAsString(),
-                result.get("signature").getAsString());
+        Property property = new Property("textures", skinData.getValue(), skinData.getSignature());
         properties.put("textures", property);
 
         // By running as a task, we don't run into async issues

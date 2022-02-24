@@ -34,11 +34,9 @@ import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.addon.data.HandshakeHandlersImpl;
 import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.api.InstanceHolder;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
-import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
@@ -186,8 +184,6 @@ public class CommonModule extends AbstractModule {
             CommandUtil commandUtil,
             FloodgateLogger logger,
             GitProperties properties) {
-        // will be loaded after enabling, so we can use the link instance in InstanceHolder
-        PlayerLink link = InstanceHolder.getPlayerLink();
 
         String branch = properties.getProperty("git.branch");
         String build = properties.getProperty("git.build.number");
@@ -195,7 +191,7 @@ public class CommonModule extends AbstractModule {
         if (build != null) {
             buildNumber = Integer.parseInt(build);
         }
-        return new NewsChecker(link, commandUtil, logger, branch, buildNumber);
+        return new NewsChecker(commandUtil, logger, branch, buildNumber);
     }
 
     @Provides

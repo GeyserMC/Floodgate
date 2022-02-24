@@ -28,6 +28,7 @@ package org.geysermc.floodgate.pluginmessage;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.ServerConnection;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.Connection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -95,5 +96,20 @@ public final class BungeePluginMessageUtils extends PluginMessageUtils implement
     private void logKick(Connection source, String reason) {
         logger.error(reason + " Closing connection");
         source.disconnect(new TextComponent(reason));
+    }
+
+    @Override
+    public boolean sendMessage(UUID player, boolean toServer, String channel, byte[] data) {
+        ProxiedPlayer proxiedPlayer = ProxyServer.getInstance().getPlayer(player);
+        if (proxiedPlayer == null) {
+            return false;
+        }
+
+        if (toServer) {
+            proxiedPlayer.getServer().sendData(channel, data);
+        } else {
+            proxiedPlayer.sendData(channel, data);
+        }
+        return true;
     }
 }

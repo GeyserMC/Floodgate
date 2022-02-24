@@ -35,8 +35,8 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.news.data.AnnouncementData;
 import org.geysermc.floodgate.news.data.BuildSpecificData;
 import org.geysermc.floodgate.news.data.CheckAfterData;
 import org.geysermc.floodgate.platform.command.CommandUtil;
@@ -47,7 +47,6 @@ import org.geysermc.floodgate.util.Permissions;
 
 public class NewsChecker {
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
-    private final PlayerLink link;
     private final CommandUtil commandUtil;
     private final FloodgateLogger logger;
 
@@ -57,13 +56,7 @@ public class NewsChecker {
 
     private boolean firstCheck;
 
-    public NewsChecker(
-            PlayerLink link,
-            CommandUtil commandUtil,
-            FloodgateLogger logger,
-            String branch,
-            int build) {
-        this.link = link;
+    public NewsChecker(CommandUtil commandUtil, FloodgateLogger logger, String branch, int build) {
         this.commandUtil = commandUtil;
         this.logger = logger;
         this.branch = branch;
@@ -79,12 +72,17 @@ public class NewsChecker {
     }
 
     private void checkNews() {
+        // todo also check news for the downloaded database types
+
         HttpResponse<JsonArray> response =
-                HttpUtils.getSilent(Constants.NEWS_OVERVIEW_URL, JsonArray.class);
+                HttpUtils.getSilent(
+                        Constants.NEWS_OVERVIEW_URL + Constants.NEWS_PROJECT_NAME,
+                        JsonArray.class);
+
         JsonArray array = response.getResponse();
 
         // silent mode doesn't throw exceptions, so array will be null on failure
-        if (array == null) {
+        if (array == null || !response.isCodeOk()) {
             return;
         }
 
@@ -167,28 +165,26 @@ public class NewsChecker {
             return;
         }
 
-        if (!item.isGlobal() && !Constants.NEWS_PROJECT_NAME.equals(item.getProject())) {
-            // only non-integrated database types have a name
-            if (link.getName() == null) {
-                return;
-            }
-
-            String fullDatabaseName = Constants.NEWS_PROJECT_NAME + '/' + link.getName();
-            if (!fullDatabaseName.equals(item.getProject())) {
-                return;
-            }
+        switch (item.getType()) {
+            case ANNOUNCEMENT:
+                if (!item.getDataAs(AnnouncementData.class).isAffected(Constants.NEWS_PROJECT_NAME)) {
+                    return;
+                }
+                break;
+            case BUILD_SPECIFIC:
+                if (!item.getDataAs(BuildSpecificData.class).isAffected(branch, build)) {
+                    return;
+                }
+                break;
+            case CHECK_AFTER:
+                long checkAfter = item.getDataAs(CheckAfterData.class).getCheckAfter();
+                long delayMs = System.currentTimeMillis() - checkAfter;
+                schedule(delayMs > 0 ? delayMs : 0);
+                break;
+            case CONFIG_SPECIFIC:
+                //todo
+                break;
         }
-
-        if (item.getType() == NewsType.BUILD_SPECIFIC) {
-            if (!item.getDataAs(BuildSpecificData.class).isAffected(branch, build)) {
-                return;
-            }
-        } else if (item.getType() == NewsType.CHECK_AFTER) {
-            long checkAfter = item.getDataAs(CheckAfterData.class).getCheckAfter();
-            long delayMs = System.currentTimeMillis() - checkAfter;
-            schedule(delayMs > 0 ? delayMs : 0);
-        }
-
         activeNewsItems.put(item.getId(), item);
         activateNews(item);
     }

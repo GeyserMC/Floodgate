@@ -72,9 +72,13 @@ public abstract class VelocityUserAudience implements UserAudience, ForwardingAu
     }
 
     @Override
-    public void sendMessage(@NonNull Identity source, @NonNull Component message,
-                            @NonNull MessageType type) {
-        this.source.sendMessage(source, message, type);
+    public void sendMessage(
+            @NonNull Identity source,
+            @NonNull Component message,
+            @NonNull MessageType type) {
+        // apparently the console doesn't implement sendMessage with MessageType,
+        // so we'll just ignore it
+        this.source.sendMessage(source, message);
     }
 
     @Override
@@ -111,9 +115,13 @@ public abstract class VelocityUserAudience implements UserAudience, ForwardingAu
             implements PlayerAudience {
         private final boolean online;
 
-        public VelocityPlayerAudience(UUID uuid, String username, String locale,
-                                      CommandSource source, boolean online,
-                                      CommandUtil commandUtil) {
+        public VelocityPlayerAudience(
+                UUID uuid,
+                String username,
+                String locale,
+                CommandSource source,
+                boolean online,
+                CommandUtil commandUtil) {
             super(uuid, username, locale, source, commandUtil);
             this.online = online;
         }

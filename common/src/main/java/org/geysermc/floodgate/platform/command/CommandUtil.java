@@ -31,6 +31,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.player.UserAudienceArgument.PlayerType;
+import org.geysermc.floodgate.util.Utils;
 
 /**
  * An interface used across all Floodgate platforms to simple stuff in commands like kicking players
@@ -105,6 +106,19 @@ public interface CommandUtil {
      * Defaults to false when this platform doesn't support whitelisting.
      */
     default boolean whitelistPlayer(String xuid, String username) {
+        UUID uuid = Utils.getJavaUuid(xuid);
+        return whitelistPlayer(uuid, username);
+    }
+
+    /**
+     * Whitelist the given Bedrock player.
+     *
+     * @param uuid     the UUID of the username to be whitelisted
+     * @param username the username to be whitelisted
+     * @return true if the player has been whitelisted, false if the player was already whitelisted.
+     * Defaults to false when this platform doesn't support whitelisting.
+     */
+    default boolean whitelistPlayer(UUID uuid, String username) {
         return false;
     }
 
@@ -117,6 +131,19 @@ public interface CommandUtil {
      * whitelisted. Defaults to false when this platform doesn't support whitelisting.
      */
     default boolean removePlayerFromWhitelist(String xuid, String username) {
+        UUID uuid = Utils.getJavaUuid(xuid);
+        return removePlayerFromWhitelist(uuid, username);
+    }
+
+    /**
+     * Removes the given Bedrock player from the whitelist.
+     *
+     * @param uuid     the UUID of the username to be removed from the whitelist
+     * @param username the username to be removed from the whitelist
+     * @return true if the player has been removed from the whitelist, false if the player wasn't
+     * whitelisted. Defaults to false when this platform doesn't support whitelisting.
+     */
+    default boolean removePlayerFromWhitelist(UUID uuid, String username) {
         return false;
     }
 }

@@ -29,136 +29,161 @@ import static org.geysermc.floodgate.util.ReflectionUtils.getCastedValue;
 import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
 
 import com.mojang.authlib.GameProfile;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.Channel;
+import io.netty.util.AttributeKey;
 import java.net.InetSocketAddress;
-import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.api.handshake.HandshakeData;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
-import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.ClassNames;
-import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.ProxyUtils;
 
-@RequiredArgsConstructor
-public final class SpigotDataHandler extends ChannelInboundHandlerAdapter {
-    private final FloodgateConfig config;
-    private final FloodgateHandshakeHandler handshakeHandler;
-    private final FloodgateLogger logger;
+public final class SpigotDataHandler extends CommonDataHandler {
     private Object networkManager;
     private FloodgatePlayer player;
+    private boolean proxyData;
 
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object packet) throws Exception {
-        boolean isHandshake = ClassNames.HANDSHAKE_PACKET.isInstance(packet);
-        boolean isLogin = ClassNames.LOGIN_START_PACKET.isInstance(packet);
-
-        boolean bungeeData = false;
-
-        try {
-            if (isHandshake) {
-                networkManager = ctx.channel().pipeline().get("packet_handler");
-
-                String handshakeValue = getCastedValue(packet, ClassNames.HANDSHAKE_HOST);
-                HandshakeResult result = handshakeHandler.handle(ctx.channel(), handshakeValue);
-                HandshakeData handshakeData = result.getHandshakeData();
-
-                setValue(packet, ClassNames.HANDSHAKE_HOST, handshakeData.getHostname());
-
-                InetSocketAddress newIp = result.getNewIp(ctx.channel());
-                if (newIp != null) {
-                    setValue(networkManager, ClassNames.SOCKET_ADDRESS, newIp);
-                    //todo the socket address will be overridden when bungeeData is true
-                }
-
-                if (handshakeData.getDisconnectReason() != null) {
-                    ctx.close(); //todo disconnect with message
-                    return;
-                }
-
-                //todo use kickMessageAttribute and let this be common logic
-
-                switch (result.getResultType()) {
-                    case SUCCESS:
-                        break;
-                    case EXCEPTION:
-                        logger.info(config.getDisconnect().getInvalidKey());
-                        ctx.close();
-                        return;
-                    case INVALID_DATA_LENGTH:
-                        int dataLength = result.getBedrockData().getDataLength();
-                        logger.info(
-                                config.getDisconnect().getInvalidArgumentsLength(),
-                                BedrockData.EXPECTED_LENGTH, dataLength
-                        );
-                        ctx.close();
-                        return;
-                    case TIMESTAMP_DENIED:
-                        logger.info(Constants.TIMESTAMP_DENIED_MESSAGE);
-                        ctx.close();
-                        return;
-                    default: // only continue when SUCCESS
-                        return;
-                }
-
-                player = result.getFloodgatePlayer();
-                bungeeData = ProxyUtils.isProxyData();
-
-                if (!bungeeData) {
-                    // Use a spoofedUUID for initUUID (just like Bungeecord)
-                    setValue(networkManager, "spoofedUUID", player.getCorrectUniqueId());
-                }
-            } else if (isLogin) {
-                // we have to fake the offline player (login) cycle
-                Object loginListener = ClassNames.PACKET_LISTENER.get(networkManager);
-
-                // check if the server is actually in the Login state
-                if (!ClassNames.LOGIN_LISTENER.isInstance(loginListener)) {
-                    // player is not in the login state, abort
-                    return;
-                }
-
-                // set the player his GameProfile, we can't change the username without this
-                GameProfile gameProfile = new GameProfile(
-                        player.getCorrectUniqueId(), player.getCorrectUsername()
-                );
-                setValue(loginListener, ClassNames.LOGIN_PROFILE, gameProfile);
-
-                // just like on Spigot:
-
-                // LoginListener#initUUID
-                // new LoginHandler().fireEvents();
-
-                // and the tick of LoginListener will do the rest
-
-                ClassNames.INIT_UUID.invoke(loginListener);
-
-                Object loginHandler =
-                        ClassNames.LOGIN_HANDLER_CONSTRUCTOR.newInstance(loginListener);
-                ClassNames.FIRE_LOGIN_EVENTS.invoke(loginHandler);
-            }
-        } finally {
-            // don't let the packet through if the packet is the login packet
-            if (!isLogin) {
-                ctx.fireChannelRead(packet);
-            }
-
-            if (isHandshake && bungeeData || isLogin || player == null) {
-                // We're done
-                ctx.pipeline().remove(this);
-            }
-        }
+    public SpigotDataHandler(
+            FloodgateHandshakeHandler handshakeHandler,
+            FloodgateConfig config,
+            AttributeKey<String> kickMessageAttribute) {
+        super(handshakeHandler, config, kickMessageAttribute, new PacketBlocker());
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        super.exceptionCaught(ctx, cause);
-        if (config.isDebug()) {
-            cause.printStackTrace();
+    protected void setNewIp(Channel channel, InetSocketAddress newIp) {
+        setValue(networkManager, ClassNames.SOCKET_ADDRESS, newIp);
+    }
+
+    @Override
+    protected Object setHostname(Object handshakePacket, String hostname) {
+        setValue(handshakePacket, ClassNames.HANDSHAKE_HOST, hostname);
+        return handshakePacket;
+    }
+
+    @Override
+    protected boolean shouldRemoveHandler(HandshakeResult result) {
+        player = result.getFloodgatePlayer();
+
+        if (getKickMessage() != null) {
+            // we also have to keep this handler if we want to kick then with a disconnect message
+            return false;
+        } else if (player == null) {
+            // player is not a Floodgate player
+            return true;
+        }
+
+        // the server will do all the work if BungeeCord mode is enabled,
+        // otherwise we have to help the server.
+        proxyData = ProxyUtils.isProxyData();
+
+        if (!proxyData) {
+            // Use a spoofedUUID for initUUID (just like Bungeecord)
+            setValue(networkManager, "spoofedUUID", player.getCorrectUniqueId());
+        }
+
+        // we can only remove the handler if the data is proxy data and username validation doesn't
+        // exist. Otherwise, we need to wait and disable it.
+        return proxyData && ClassNames.PAPER_DISABLE_USERNAME_VALIDATION == null;
+    }
+
+    @Override
+    protected boolean shouldCallFireRead(Object queuedPacket) {
+        // we have to ignore the 'login start' packet,
+        // otherwise the server will ask the user to login
+        try {
+            if (checkAndHandleLogin(queuedPacket)) {
+                return false;
+            }
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean channelRead(Object packet) throws Exception {
+        if (ClassNames.HANDSHAKE_PACKET.isInstance(packet)) {
+            // ProtocolSupport would break if we added this during the creation of this handler
+            ctx.pipeline().addAfter("splitter", "floodgate_packet_blocker", blocker);
+
+            networkManager = ctx.channel().pipeline().get("packet_handler");
+
+            handle(packet, getCastedValue(packet, ClassNames.HANDSHAKE_HOST));
+            // otherwise, it'll get read twice. once by the packet queue and once by this method
+            return false;
+        }
+
+        return !checkAndHandleLogin(packet);
+    }
+
+    private boolean checkAndHandleLogin(Object packet) throws Exception {
+        if (ClassNames.LOGIN_START_PACKET.isInstance(packet)) {
+            Object packetListener = ClassNames.PACKET_LISTENER.get(networkManager);
+
+            String kickMessage = getKickMessage();
+            if (kickMessage != null) {
+                disconnect(packetListener, kickMessage);
+                return true;
+            }
+
+            // check if the server is actually in the Login state
+            if (!ClassNames.LOGIN_LISTENER.isInstance(packetListener)) {
+                // player is not in the login state, abort
+
+                // I would've liked to close the channel for security reasons, but our big friend
+                // ProtocolSupport, who likes to break things, doesn't work otherwise
+                ctx.pipeline().remove(this);
+                return true;
+            }
+
+            if (ClassNames.PAPER_DISABLE_USERNAME_VALIDATION != null) {
+                // ensure that Paper will not be checking
+                setValue(packetListener, ClassNames.PAPER_DISABLE_USERNAME_VALIDATION, true);
+                if (proxyData) {
+                    // the server will handle the rest if we have proxy data
+                    ctx.pipeline().remove(this);
+                    return false;
+                }
+            }
+
+            // set the player his GameProfile, we can't change the username without this
+            GameProfile gameProfile = new GameProfile(
+                    player.getCorrectUniqueId(), player.getCorrectUsername()
+            );
+            setValue(packetListener, ClassNames.LOGIN_PROFILE, gameProfile);
+
+            // we have to fake the offline player (login) cycle
+            // just like on Spigot:
+
+            // LoginListener#initUUID
+            // new LoginHandler().fireEvents();
+
+            // and the tick of LoginListener will do the rest
+
+            ClassNames.INIT_UUID.invoke(packetListener);
+
+            Object loginHandler =
+                    ClassNames.LOGIN_HANDLER_CONSTRUCTOR.newInstance(packetListener);
+            ClassNames.FIRE_LOGIN_EVENTS.invoke(loginHandler);
+
+            ctx.pipeline().remove(this);
+            return true;
+        }
+        return false;
+    }
+
+    private void disconnect(Object packetListener, String kickMessage) throws Exception {
+        // both versions close the channel for us
+        if (ClassNames.LOGIN_LISTENER.isInstance(packetListener)) {
+            ClassNames.LOGIN_DISCONNECT.invoke(packetListener, kickMessage);
+        } else {
+            // ProtocolSupport for example has their own PacketLoginInListener implementation
+            ClassNames.NETWORK_EXCEPTION_CAUGHT.invoke(
+                    networkManager,
+                    ctx, new IllegalStateException(kickMessage)
+            );
         }
     }
 }

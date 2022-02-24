@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,27 +23,24 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.util;
+package org.geysermc.floodgate.module;
 
-import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.util.GameProfile.Property;
-import java.util.ArrayList;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.skin.SkinData;
+import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.ProvidesIntoSet;
+import org.bukkit.event.Listener;
+import org.geysermc.floodgate.listener.PaperProfileListener;
+import org.geysermc.floodgate.register.ListenerRegister;
 
-@RequiredArgsConstructor
-public class VelocitySkinApplier implements SkinApplier {
-    private final ProxyServer server;
-
+public class PaperListenerModule extends SpigotListenerModule {
     @Override
-    public void applySkin(FloodgatePlayer floodgatePlayer, SkinData skinData) {
-        server.getPlayer(floodgatePlayer.getCorrectUniqueId()).ifPresent(player -> {
-            List<Property> properties = new ArrayList<>(player.getGameProfileProperties());
-            properties.add(new Property("textures", skinData.getValue(), skinData.getSignature()));
-            player.setGameProfileProperties(properties);
-        });
+    protected void configure() {
+        bind(new TypeLiteral<ListenerRegister<Listener>>() {}).asEagerSingleton();
+    }
+
+    @Singleton
+    @ProvidesIntoSet
+    public Listener paperProfileListener() {
+        return new PaperProfileListener();
     }
 }

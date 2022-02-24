@@ -26,6 +26,7 @@
 package org.geysermc.floodgate.api;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.Collection;
 import java.util.HashMap;
@@ -41,6 +42,7 @@ import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.player.FloodgatePlayerImpl;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.pluginmessage.channel.FormChannel;
+import org.geysermc.floodgate.pluginmessage.channel.TransferChannel;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.HttpUtils;
 import org.geysermc.floodgate.util.Utils;
@@ -110,6 +112,13 @@ public class SimpleFloodgateApi implements FloodgateApi {
     }
 
     @Override
+    public boolean transferPlayer(UUID uuid, String address, int port) {
+        return pluginMessageManager
+                .getChannel(TransferChannel.class)
+                .sendTransfer(uuid, address, port);
+    }
+
+    @Override
     public CompletableFuture<Long> getXuidFor(String gamertag) {
         if (gamertag == null || gamertag.isEmpty() || gamertag.length() > 16) {
             return Utils.failedFuture(new IllegalStateException("Received an invalid gamertag"));
@@ -118,18 +127,13 @@ public class SimpleFloodgateApi implements FloodgateApi {
         return HttpUtils.asyncGet(Constants.GET_XUID_URL + gamertag)
                 .thenApply(result -> {
                     JsonObject response = result.getResponse();
-                    boolean success = response.get("success").getAsBoolean();
 
-                    if (!success) {
+                    if (!result.isCodeOk()) {
                         throw new IllegalStateException(response.get("message").getAsString());
                     }
 
-                    JsonObject data = response.getAsJsonObject("data");
-                    if (data.size() == 0) {
-                        return null;
-                    }
-
-                    return data.get("xuid").getAsLong();
+                    JsonElement xuid = response.get("xuid");
+                    return xuid != null ? xuid.getAsLong() : null;
                 });
     }
 
@@ -138,18 +142,13 @@ public class SimpleFloodgateApi implements FloodgateApi {
         return HttpUtils.asyncGet(Constants.GET_GAMERTAG_URL + xuid)
                 .thenApply(result -> {
                     JsonObject response = result.getResponse();
-                    boolean success = response.get("success").getAsBoolean();
 
-                    if (!success) {
+                    if (!result.isCodeOk()) {
                         throw new IllegalStateException(response.get("message").getAsString());
                     }
 
-                    JsonObject data = response.getAsJsonObject("data");
-                    if (data.size() == 0) {
-                        return null;
-                    }
-
-                    return data.get("gamertag").getAsString();
+                    JsonElement gamertag = response.get("gamertag");
+                    return gamertag != null ? gamertag.getAsString() : null;
                 });
     }
 

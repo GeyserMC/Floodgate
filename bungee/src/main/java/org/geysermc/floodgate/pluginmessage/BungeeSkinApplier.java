@@ -25,7 +25,10 @@
 
 package org.geysermc.floodgate.pluginmessage;
 
-import com.google.gson.JsonObject;
+import static org.geysermc.floodgate.util.ReflectionUtils.getFieldOfType;
+import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
+
+import java.lang.reflect.Field;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -35,13 +38,20 @@ import net.md_5.bungee.connection.LoginResult.Property;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.skin.SkinApplier;
+import org.geysermc.floodgate.skin.SkinData;
 
 @RequiredArgsConstructor
 public final class BungeeSkinApplier implements SkinApplier {
+    private static final Field LOGIN_RESULT;
+
+    static {
+        LOGIN_RESULT = getFieldOfType(InitialHandler.class, LoginResult.class);
+    }
+    
     private final FloodgateLogger logger;
 
     @Override
-    public void applySkin(FloodgatePlayer uuid, JsonObject skinResult) {
+    public void applySkin(FloodgatePlayer uuid, SkinData skinData) {
         ProxiedPlayer player = ProxyServer.getInstance().getPlayer(uuid.getCorrectUniqueId());
         if (player == null) {
             return;
@@ -61,13 +71,10 @@ public final class BungeeSkinApplier implements SkinApplier {
         if (loginResult == null) {
             // id and name are unused and properties will be overridden
             loginResult = new LoginResult(null, null, null);
+            setValue(handler, LOGIN_RESULT, loginResult);
         }
 
-        Property property = new Property(
-                "textures",
-                skinResult.get("value").getAsString(),
-                skinResult.get("signature").getAsString()
-        );
+        Property property = new Property("textures", skinData.getValue(), skinData.getSignature());
 
         loginResult.setProperties(new Property[]{property});
     }

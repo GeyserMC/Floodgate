@@ -23,27 +23,29 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.util;
+package org.geysermc.floodgate.player;
 
-import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.util.GameProfile.Property;
-import java.util.ArrayList;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.skin.SkinData;
+public class HostnameSeparationResult {
+    private final String floodgateData;
+    private final int headerVersion;
+    private final String hostnameRemainder;
 
-@RequiredArgsConstructor
-public class VelocitySkinApplier implements SkinApplier {
-    private final ProxyServer server;
+    public HostnameSeparationResult(
+            String floodgateData, int headerVersion, String hostnameRemainder) {
+        this.floodgateData = floodgateData;
+        this.headerVersion = headerVersion;
+        this.hostnameRemainder = hostnameRemainder;
+    }
 
-    @Override
-    public void applySkin(FloodgatePlayer floodgatePlayer, SkinData skinData) {
-        server.getPlayer(floodgatePlayer.getCorrectUniqueId()).ifPresent(player -> {
-            List<Property> properties = new ArrayList<>(player.getGameProfileProperties());
-            properties.add(new Property("textures", skinData.getValue(), skinData.getSignature()));
-            player.setGameProfileProperties(properties);
-        });
+    public String floodgateData() {
+        return floodgateData;
+    }
+
+    public int headerVersion() {
+        return headerVersion;
+    }
+
+    public String hostnameRemainder() {
+        return hostnameRemainder;
     }
 }

@@ -37,6 +37,7 @@ import net.md_5.bungee.ServerConnector;
 import net.md_5.bungee.UserConnection;
 import net.md_5.bungee.netty.ChannelWrapper;
 import net.md_5.bungee.netty.HandlerBoss;
+import net.md_5.bungee.netty.PacketHandler;
 import net.md_5.bungee.protocol.packet.Handshake;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
@@ -67,13 +68,19 @@ public class BungeeServerDataHandler extends ChannelOutboundHandlerAdapter {
     private final AttributeKey<FloodgatePlayer> playerAttribute;
 
     @Override
-    public void write(ChannelHandlerContext ctx, Object packet, ChannelPromise promise)
-            throws Exception {
+    public void write(ChannelHandlerContext ctx, Object packet, ChannelPromise promise) {
         if (packet instanceof Handshake) {
             // get the Proxy <-> Player channel from the Proxy <-> Server channel
             HandlerBoss handlerBoss = ctx.pipeline().get(HandlerBoss.class);
-            ServerConnector connector = ReflectionUtils.getCastedValue(handlerBoss, HANDLER);
-            UserConnection connection = ReflectionUtils.getCastedValue(connector, USER_CONNECTION);
+            PacketHandler handler = ReflectionUtils.getCastedValue(handlerBoss, HANDLER);
+            if (!(handler instanceof ServerConnector)) {
+                // May be an instance of PingHandler - we don't need to deal with that
+                ctx.pipeline().remove(this);
+                ctx.write(packet, promise);
+                return;
+            }
+
+            UserConnection connection = ReflectionUtils.getCastedValue(handler, USER_CONNECTION);
             ChannelWrapper wrapper = ReflectionUtils.getCastedValue(connection, CHANNEL_WRAPPER);
 
             FloodgatePlayer player = wrapper.getHandle().attr(playerAttribute).get();
@@ -87,8 +94,15 @@ public class BungeeServerDataHandler extends ChannelOutboundHandlerAdapter {
 
                 // our data goes before all the other data
                 int addressFinished = address.indexOf('\0');
-                String originalAddress = address.substring(0, addressFinished);
-                String remaining = address.substring(addressFinished);
+                String originalAddress;
+                String remaining;
+                if (addressFinished != -1) {
+                    originalAddress = address.substring(0, addressFinished);
+                    remaining = address.substring(addressFinished);
+                } else {
+                    originalAddress = address;
+                    remaining = "";
+                }
 
                 handshake.setHost(originalAddress + '\0' + encryptedData + remaining);
                 // Bungeecord will add his data after our data

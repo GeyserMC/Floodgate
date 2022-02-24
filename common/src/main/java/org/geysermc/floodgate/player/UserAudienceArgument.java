@@ -95,10 +95,38 @@ public final class UserAudienceArgument extends CommandArgument<UserAudience, Us
                 final @NonNull Queue<@NonNull String> inputQueue) {
             CommandUtil commandUtil = commandContext.get("CommandUtil");
 
-            final String input = inputQueue.peek();
+            String input = inputQueue.poll();
             if (input == null || input.length() < 3) {
                 return ArgumentParseResult.failure(
                         new NullPointerException("Expected player name/UUID"));
+            }
+
+            if (input.startsWith("\"")) {
+                if (input.endsWith("\"")) {
+                    // Remove quotes from both sides of this string
+                    input = input.substring(1);
+                    input = input.substring(0, input.length() - 1);
+                } else {
+                    // Multi-line
+                    StringBuilder builder = new StringBuilder(input);
+                    while (!inputQueue.isEmpty()) {
+                        String string = inputQueue.remove();
+                        builder.append(' ').append(string);
+                        if (string.endsWith("\"")) {
+                            break;
+                        }
+                    }
+
+                    if (builder.lastIndexOf("\"") != builder.length() - 1) {
+                        return ArgumentParseResult.failure(
+                                new InvalidPlayerIdentifierException("Malformed string provided; " +
+                                        "no end quotes found!"));
+                    }
+
+                    builder.deleteCharAt(0);
+                    builder.deleteCharAt(builder.length() - 1);
+                    input = builder.toString();
+                }
             }
 
             UserAudience userAudience;
@@ -142,7 +170,6 @@ public final class UserAudienceArgument extends CommandArgument<UserAudience, Us
                         new InvalidPlayerIdentifierException("Invalid player '" + input + "'"));
             }
 
-            inputQueue.remove();
             return ArgumentParseResult.success(userAudience);
         }
 

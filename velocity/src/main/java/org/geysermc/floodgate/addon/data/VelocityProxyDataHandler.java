@@ -31,22 +31,18 @@ import static org.geysermc.floodgate.util.ReflectionUtils.getField;
 import static org.geysermc.floodgate.util.ReflectionUtils.getPrefixedClass;
 import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
-import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.config.ProxyFloodgateConfig;
+import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
-import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.player.FloodgateHandshakeHandler.ResultType;
 
-@RequiredArgsConstructor
-public final class VelocityProxyDataHandler extends ChannelInboundHandlerAdapter {
+public final class VelocityProxyDataHandler extends CommonDataHandler {
     private static final Field HANDSHAKE;
     private static final Class<?> HANDSHAKE_PACKET;
     private static final Field HANDSHAKE_SERVER_ADDRESS;
@@ -69,63 +65,48 @@ public final class VelocityProxyDataHandler extends ChannelInboundHandlerAdapter
         REMOTE_ADDRESS = getField(minecraftConnection, "remoteAddress");
     }
 
-    private final ProxyFloodgateConfig config;
-    private final FloodgateHandshakeHandler handshakeHandler;
-    private final AttributeKey<String> kickMessageAttribute;
     private final FloodgateLogger logger;
 
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        // we're only interested in the Handshake packet.
-        // it should be the first packet but you never know
-        if (HANDSHAKE_PACKET.isInstance(msg)) {
-            handleClientToProxy(ctx, msg);
-            ctx.pipeline().remove(this);
-        }
-
-        ctx.fireChannelRead(msg);
+    public VelocityProxyDataHandler(
+            FloodgateConfig config,
+            FloodgateHandshakeHandler handshakeHandler,
+            PacketBlocker blocker,
+            AttributeKey<String> kickMessageAttribute,
+            FloodgateLogger logger) {
+        super(handshakeHandler, config, kickMessageAttribute, blocker);
+        this.logger = logger;
     }
 
-    private void handleClientToProxy(ChannelHandlerContext ctx, Object packet) {
-        String address = getCastedValue(packet, HANDSHAKE_SERVER_ADDRESS);
+    @Override
+    protected void setNewIp(Channel channel, InetSocketAddress newIp) {
+        setValue(channel.pipeline().get("handler"), REMOTE_ADDRESS, newIp);
+    }
 
-        HandshakeResult result = handshakeHandler.handle(ctx.channel(), address);
-        HandshakeData handshakeData = result.getHandshakeData();
+    @Override
+    protected Object setHostname(Object handshakePacket, String hostname) {
+        setValue(handshakePacket, HANDSHAKE_SERVER_ADDRESS, hostname);
+        return handshakePacket;
+    }
 
-        InetSocketAddress newIp = result.getNewIp(ctx.channel());
-        if (newIp != null) {
-            Object connection = ctx.pipeline().get("handler");
-            setValue(connection, REMOTE_ADDRESS, newIp);
+    @Override
+    protected boolean shouldRemoveHandler(HandshakeResult result) {
+        if (result.getResultType() == ResultType.SUCCESS) {
+            FloodgatePlayer player = result.getFloodgatePlayer();
+            logger.info("Floodgate player who is logged in as {} {} joined",
+                    player.getCorrectUsername(), player.getCorrectUniqueId());
         }
+        return super.shouldRemoveHandler(result);
+    }
 
-        if (handshakeData.getDisconnectReason() != null) {
-            ctx.channel().attr(kickMessageAttribute).set(handshakeData.getDisconnectReason());
-            return;
+    @Override
+    public boolean channelRead(Object packet) {
+        // we're only interested in the Handshake packet.
+        // it should be the first packet but you never know
+        if (HANDSHAKE_PACKET.isInstance(packet)) {
+            handle(packet, getCastedValue(packet, HANDSHAKE_SERVER_ADDRESS));
+            // otherwise, it'll get read twice. once by the packet queue and once by this method
+            return false;
         }
-
-        switch (result.getResultType()) {
-            case SUCCESS:
-                break;
-            case EXCEPTION:
-                ctx.channel().attr(kickMessageAttribute)
-                        .set(config.getDisconnect().getInvalidKey());
-                return;
-            case INVALID_DATA_LENGTH:
-                ctx.channel().attr(kickMessageAttribute)
-                        .set(config.getDisconnect().getInvalidArgumentsLength());
-                return;
-            case TIMESTAMP_DENIED:
-                ctx.channel().attr(kickMessageAttribute).set(Constants.TIMESTAMP_DENIED_MESSAGE);
-                return;
-            default: // only continue when SUCCESS
-                return;
-        }
-
-        FloodgatePlayer player = result.getFloodgatePlayer();
-
-        setValue(packet, HANDSHAKE_SERVER_ADDRESS, handshakeData.getHostname());
-
-        logger.info("Floodgate player who is logged in as {} {} joined",
-                player.getCorrectUsername(), player.getCorrectUniqueId());
+        return true;
     }
 }

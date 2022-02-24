@@ -25,8 +25,6 @@
 
 package org.geysermc.floodgate.database;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -39,6 +37,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.api.link.LinkRequest;
 import org.geysermc.floodgate.api.link.LinkRequestResult;
@@ -50,6 +50,7 @@ public class SqliteDatabase extends CommonPlayerLink {
     private final Map<String, LinkRequest> activeLinkRequests = new HashMap<>();
     private Connection connection;
 
+    /* These are DELIBERATELY javax imports so Guice relocations can't break it */
     @Inject
     @Named("dataDirectory")
     private Path dataDirectory;
@@ -59,7 +60,7 @@ public class SqliteDatabase extends CommonPlayerLink {
         Path databasePath = dataDirectory.resolve("linked-players.db");
         try {
             Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath.toString());
+            connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath);
             try (Statement statement = connection.createStatement()) {
                 statement.executeUpdate(
                         "create table if not exists LinkedPlayers (bedrockId string, javaUniqueId string, javaUsername string)"

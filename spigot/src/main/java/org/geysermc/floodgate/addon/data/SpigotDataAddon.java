@@ -47,14 +47,19 @@ public final class SpigotDataAddon implements InjectorAddon {
     private String packetHandlerName;
 
     @Inject
+    @Named("kickMessageAttribute")
+    private AttributeKey<String> kickMessageAttribute;
+
+    @Inject
     @Named("playerAttribute")
     private AttributeKey<FloodgatePlayer> playerAttribute;
 
     @Override
     public void onInject(Channel channel, boolean toServer) {
+        // we have to add the packet blocker in the data handler, otherwise ProtocolSupport breaks
         channel.pipeline().addBefore(
                 packetHandlerName, "floodgate_data_handler",
-                new SpigotDataHandler(config, handshakeHandler, logger)
+                new SpigotDataHandler(handshakeHandler, config, kickMessageAttribute)
         );
     }
 

@@ -95,6 +95,8 @@ public interface FloodgateApi {
 
     boolean sendForm(UUID uuid, FormBuilder<?, ?> formBuilder);
 
+    boolean transferPlayer(UUID uuid, String address, int port);
+
     /**
      * Get the xuid of the user that has the given gamertag.
      *

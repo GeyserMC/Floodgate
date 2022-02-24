@@ -26,8 +26,10 @@
 package org.geysermc.floodgate.listener;
 
 import static org.geysermc.floodgate.util.ReflectionUtils.getCastedValue;
+import static org.geysermc.floodgate.util.ReflectionUtils.getField;
 import static org.geysermc.floodgate.util.ReflectionUtils.getFieldOfType;
 import static org.geysermc.floodgate.util.ReflectionUtils.getPrefixedClass;
+import static org.geysermc.floodgate.util.ReflectionUtils.getPrefixedClassSilently;
 import static org.geysermc.floodgate.util.ReflectionUtils.getValue;
 
 import com.google.common.cache.Cache;
@@ -42,10 +44,12 @@ import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.player.GameProfileRequestEvent;
 import com.velocitypowered.api.proxy.InboundConnection;
 import com.velocitypowered.api.util.GameProfile;
+import com.velocitypowered.api.util.GameProfile.Property;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import net.kyori.adventure.text.Component;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
@@ -56,13 +60,27 @@ import org.geysermc.floodgate.util.VelocityCommandUtil;
 
 public final class VelocityListener {
     private static final Field INITIAL_MINECRAFT_CONNECTION;
+    private static final Field INITIAL_CONNECTION_DELEGATE;
     private static final Field CHANNEL;
 
     static {
         Class<?> initialConnection = getPrefixedClass("connection.client.InitialInboundConnection");
-
         Class<?> minecraftConnection = getPrefixedClass("connection.MinecraftConnection");
         INITIAL_MINECRAFT_CONNECTION = getFieldOfType(initialConnection, minecraftConnection);
+
+        // Since Velocity 3.1.0
+        Class<?> loginInboundConnection =
+                getPrefixedClassSilently("connection.client.LoginInboundConnection");
+        if (loginInboundConnection != null) {
+            INITIAL_CONNECTION_DELEGATE = getField(loginInboundConnection, "delegate");
+            Objects.requireNonNull(
+                    INITIAL_CONNECTION_DELEGATE,
+                    "initial inbound connection delegate cannot be null"
+            );
+        } else {
+            INITIAL_CONNECTION_DELEGATE = null;
+        }
+
         CHANNEL = getFieldOfType(minecraftConnection, Channel.class);
     }
 
@@ -89,7 +107,14 @@ public final class VelocityListener {
         FloodgatePlayer player = null;
         String kickMessage;
         try {
-            Object mcConnection = getValue(event.getConnection(), INITIAL_MINECRAFT_CONNECTION);
+            InboundConnection connection = event.getConnection();
+            if (INITIAL_CONNECTION_DELEGATE != null) {
+                // Velocity 3.1.0 added LoginInboundConnection which is used in the login state,
+                // but that class doesn't have a Channel field. However, it does have
+                // InitialInboundConnection as a field
+                connection = getCastedValue(connection, INITIAL_CONNECTION_DELEGATE);
+            }
+            Object mcConnection = getValue(connection, INITIAL_MINECRAFT_CONNECTION);
             Channel channel = getCastedValue(mcConnection, CHANNEL);
 
             player = channel.attr(playerAttribute).get();
@@ -117,8 +142,10 @@ public final class VelocityListener {
         FloodgatePlayer player = playerCache.getIfPresent(event.getConnection());
         if (player != null) {
             playerCache.invalidate(event.getConnection());
-            event.setGameProfile(new GameProfile(
-                    player.getCorrectUniqueId(), player.getCorrectUsername(), new ArrayList<>()));
+            // The texture properties addition is to fix the February 2 2022 Mojang authentication changes
+            event.setGameProfile(new GameProfile(player.getCorrectUniqueId(),
+                    player.getCorrectUsername(), Collections.singletonList(
+                            new Property("textures", "", ""))));
         }
     }
 

@@ -26,6 +26,7 @@
 package org.geysermc.floodgate.util;
 
 public enum Permissions {
+    COMMAND_MAIN("floodgate.command.floodgate"),
     COMMAND_LINK("floodgate.command.linkaccount"),
     COMMAND_UNLINK("floodgate.command.unlinkaccount"),
     COMMAND_WHITELIST("floodgate.command.fwhitelist"),

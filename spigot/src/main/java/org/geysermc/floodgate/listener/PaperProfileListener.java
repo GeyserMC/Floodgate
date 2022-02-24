@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,22 +23,32 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.util;
+package org.geysermc.floodgate.listener;
 
-import org.geysermc.floodgate.time.TimeSyncer;
+import com.destroystokyo.paper.event.profile.PreFillProfileEvent;
+import com.destroystokyo.paper.profile.ProfileProperty;
+import com.google.inject.Inject;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.geysermc.floodgate.api.SimpleFloodgateApi;
 
-public final class TimeSyncerHolder {
-    private static TimeSyncer timeSyncer;
+public final class PaperProfileListener implements Listener {
+    @Inject private SimpleFloodgateApi api;
 
-    public static void init() {
-        timeSyncer = new TimeSyncer(Constants.NTP_SERVER);
-    }
+    @EventHandler
+    public void onFill(PreFillProfileEvent event) {
+        UUID id = event.getPlayerProfile().getId();
+        if (!this.api.isFloodgatePlayer(id) ||
+                event.getPlayerProfile().getProperties().stream().anyMatch(
+                        prop -> "textures".equals(prop.getName()))) {
+            return;
+        }
 
-    public static void set(TimeSyncer syncer) {
-        timeSyncer = syncer;
-    }
-
-    public static TimeSyncer get() {
-        return timeSyncer;
+        Set<ProfileProperty> properties = new HashSet<>(event.getPlayerProfile().getProperties());
+        properties.add(new ProfileProperty("textures", "", ""));
+        event.setProperties(properties);
     }
 }

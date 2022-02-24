@@ -36,7 +36,7 @@ public class PropertyKey {
             new PropertyKey("socket_address", false, false);
 
     /**
-     * Skin Uploaded returns a JsonObject containing the value and signature of the Skin
+     * Skin Uploaded returns a SkinData object containing the value and signature of the Skin
      */
     public static final PropertyKey SKIN_UPLOADED =
             new PropertyKey("skin_uploaded", false, false);

@@ -59,6 +59,15 @@ public final class ReflectionUtils {
         return getClass(prefix + "." + className);
     }
 
+    @Nullable
+    public static Class<?> getPrefixedClassSilently(String className) {
+        try {
+            return Class.forName(prefix + "." + className);
+        } catch (ClassNotFoundException ignored) {
+            return null;
+        }
+    }
+
     /**
      * Get the class from a class name. Calling this method is equal to calling {@link
      * Class#forName(String)} where String is the class name.<br> This method will return null when
@@ -78,6 +87,12 @@ public final class ReflectionUtils {
         }
     }
 
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public static <T> Class<T> getCastedClass(String className) {
+        return (Class<T>) getClass(className);
+    }
+
     public static Class<?> getClassSilently(String className) {
         try {
             return Class.forName(className);
@@ -95,16 +110,23 @@ public final class ReflectionUtils {
     }
 
     @Nullable
-    public static Constructor<?> getConstructor(Class<?> clazz, Class<?>... parameters) {
+    public static <T> Constructor<T> getConstructor(Class<T> clazz, boolean declared, Class<?>... parameters) {
         try {
-            return clazz.getConstructor(parameters);
+            Constructor<T> constructor;
+            if (declared) {
+                constructor = clazz.getDeclaredConstructor(parameters);
+            } else {
+                constructor = clazz.getConstructor(parameters);
+            }
+            makeAccessible(constructor);
+            return constructor;
         } catch (NoSuchMethodException e) {
             return null;
         }
     }
 
     @Nullable
-    public static Object newInstance(Constructor<?> constructor, Object... parameters) {
+    public static <T> T newInstance(Constructor<T> constructor, Object... parameters) {
         try {
             return constructor.newInstance(parameters);
         } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
@@ -485,7 +507,9 @@ public final class ReflectionUtils {
      * @return the accessibleObject
      */
     public static <T extends AccessibleObject> T makeAccessible(T accessibleObject) {
-        accessibleObject.setAccessible(true);
+        if (!accessibleObject.isAccessible()) {
+            accessibleObject.setAccessible(true);
+        }
         return accessibleObject;
     }
 }

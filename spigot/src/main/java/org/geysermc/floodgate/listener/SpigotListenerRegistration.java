@@ -38,6 +38,10 @@ public final class SpigotListenerRegistration implements ListenerRegistration<Li
 
     @Override
     public void register(Listener listener) {
+        if (listener == null) {
+            return;
+        }
+
         Bukkit.getServer().getPluginManager().registerEvents(listener, plugin);
     }
 }

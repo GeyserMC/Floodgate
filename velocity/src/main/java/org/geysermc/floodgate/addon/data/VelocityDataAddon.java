@@ -49,6 +49,10 @@ public final class VelocityDataAddon implements InjectorAddon {
     private String packetHandler;
 
     @Inject
+    @Named("packetDecoder")
+    private String packetDecoder;
+
+    @Inject
     @Named("packetEncoder")
     private String packetEncoder;
 
@@ -71,10 +75,14 @@ public final class VelocityDataAddon implements InjectorAddon {
             }
             return;
         }
+
+        PacketBlocker blocker = new PacketBlocker();
+        channel.pipeline().addBefore(packetDecoder, "floodgate_packet_blocker", blocker);
+
         // The handler is already added so we should add our handler before it
         channel.pipeline().addBefore(
                 packetHandler, "floodgate_data_handler",
-                new VelocityProxyDataHandler(config, handshakeHandler, kickMessageAttribute, logger)
+                new VelocityProxyDataHandler(config, handshakeHandler, blocker, kickMessageAttribute, logger)
         );
     }
 

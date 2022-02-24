@@ -106,12 +106,21 @@ public interface FloodgatePlayer {
      */
     LinkedPlayer getLinkedPlayer();
 
+    /**
+     * Returns true if the player is linked to a Java account
+     */
+    boolean isLinked();
+
     default boolean sendForm(Form form) {
         return FloodgateApi.getInstance().sendForm(getCorrectUniqueId(), form);
     }
 
     default boolean sendForm(FormBuilder<?, ?> formBuilder) {
         return sendForm(formBuilder.build());
+    }
+
+    default boolean transfer(String address, int port) {
+        return FloodgateApi.getInstance().transferPlayer(getCorrectUniqueId(), address, port);
     }
 
     boolean hasProperty(PropertyKey key);

@@ -33,7 +33,7 @@ import org.bukkit.event.Listener;
 import org.geysermc.floodgate.listener.SpigotListener;
 import org.geysermc.floodgate.register.ListenerRegister;
 
-public final class SpigotListenerModule extends AbstractModule {
+public class SpigotListenerModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(new TypeLiteral<ListenerRegister<Listener>>() {}).asEagerSingleton();

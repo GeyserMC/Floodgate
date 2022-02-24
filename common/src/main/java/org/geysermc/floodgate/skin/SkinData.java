@@ -23,27 +23,25 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.util;
+package org.geysermc.floodgate.skin;
 
-import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.util.GameProfile.Property;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.gson.JsonObject;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.skin.SkinData;
 
+@Getter
 @RequiredArgsConstructor
-public class VelocitySkinApplier implements SkinApplier {
-    private final ProxyServer server;
+public class SkinData {
+    private final String value;
+    private final String signature;
 
-    @Override
-    public void applySkin(FloodgatePlayer floodgatePlayer, SkinData skinData) {
-        server.getPlayer(floodgatePlayer.getCorrectUniqueId()).ifPresent(player -> {
-            List<Property> properties = new ArrayList<>(player.getGameProfileProperties());
-            properties.add(new Property("textures", skinData.getValue(), skinData.getSignature()));
-            player.setGameProfileProperties(properties);
-        });
+    public static SkinData from(JsonObject data) {
+        if (data.has("signature") && !data.get("signature").isJsonNull()) {
+            return new SkinData(
+                    data.get("value").getAsString(),
+                    data.get("signature").getAsString()
+            );
+        }
+        return new SkinData(data.get("value").getAsString(), null);
     }
 }
