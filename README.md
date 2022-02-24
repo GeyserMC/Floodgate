@@ -11,4 +11,4 @@ Hybrid mode plugin to allow for connections from [Geyser](https://github.com/Gey
 
 Geyser is an open collaboration project by [CubeCraft Games](https://cubecraft.net).
 
-See the [Floodgate](https://wiki.geysermc.org/floodgate/) section in the GeyserMC Wiki for more info about the what Floodgate is, how you setup Floodgate and known issues/caveats. Additionally, it includes a more in-depth look into how Floodgate works and the Floodgate API.
+See the [Floodgate](https://wiki.geysermc.org/floodgate/) section in the GeyserMC Wiki for more info about what Floodgate is, how you setup Floodgate and known issues/caveats. Additionally, it includes a more in-depth look into how Floodgate works and the Floodgate API.
