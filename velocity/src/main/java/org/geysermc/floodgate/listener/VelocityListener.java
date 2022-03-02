@@ -55,6 +55,7 @@ import net.kyori.adventure.text.Component;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.VelocityCommandUtil;
 
@@ -90,6 +91,7 @@ public final class VelocityListener {
                     .expireAfterAccess(20, TimeUnit.SECONDS)
                     .build();
 
+    @Inject private ProxyFloodgateConfig config;
     @Inject private ProxyFloodgateApi api;
     @Inject private LanguageManager languageManager;
     @Inject private FloodgateLogger logger;
@@ -143,9 +145,13 @@ public final class VelocityListener {
         if (player != null) {
             playerCache.invalidate(event.getConnection());
             // The texture properties addition is to fix the February 2 2022 Mojang authentication changes
-            event.setGameProfile(new GameProfile(player.getCorrectUniqueId(),
-                    player.getCorrectUsername(), Collections.singletonList(
-                            new Property("textures", "", ""))));
+            if (!config.isSendFloodgateData() && !player.isLinked()) {
+                event.setGameProfile(new GameProfile(
+                        player.getCorrectUniqueId(),
+                        player.getCorrectUsername(),
+                        Collections.singletonList(new Property("textures", "", ""))
+                ));
+            }
         }
     }
 
