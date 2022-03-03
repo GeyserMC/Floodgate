@@ -26,13 +26,12 @@
 package com.minekube.connect.util;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.minekube.connect.api.packet.PacketHandler;
 import com.minekube.connect.api.packet.PacketHandlers;
-import com.minekube.connect.api.player.FloodgatePlayer;
+import com.minekube.connect.network.netty.LocalSession;
+import com.minekube.connect.network.netty.LocalSession.Context;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.util.AttributeKey;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
@@ -80,33 +79,27 @@ public class SpigotProtocolSupportHandler implements PacketHandler {
     }
 
     @Inject
-    @Named("playerAttribute")
-    private AttributeKey<FloodgatePlayer> playerAttribute;
-
-    @Inject
     public void register(PacketHandlers packetHandlers) {
         packetHandlers.register(this, ClassNames.LOGIN_START_PACKET);
     }
 
     @Override
     public Object handle(ChannelHandlerContext ctx, Object packet, boolean serverbound) {
-        FloodgatePlayer player = ctx.channel().attr(playerAttribute).get();
-        if (player == null) {
-            return packet;
-        }
+        LocalSession.context(ctx.channel()).map(Context::getPlayer).ifPresent(player -> {
+            Object connection = ReflectionUtils.invoke(null, getFromChannel, ctx.channel());
+            Object profile = ReflectionUtils.invoke(connection, getLoginProfile);
 
-        Object connection = ReflectionUtils.invoke(null, getFromChannel, ctx.channel());
-        Object profile = ReflectionUtils.invoke(connection, getLoginProfile);
+            // set correct uuid and name on ProtocolSupport's end, since we skip the LoginStart
+            ReflectionUtils.invoke(profile, setName, player.getUsername());
+            ReflectionUtils.invoke(profile, setOriginalName, player.getUsername());
+            ReflectionUtils.invoke(profile, setUuid, player.getUniqueId());
+            ReflectionUtils.invoke(profile, setOriginalUuid, player.getUniqueId());
 
-        // set correct uuid and name on ProtocolSupport's end, since we skip the LoginStart
-        ReflectionUtils.invoke(profile, setName, player.getUsername());
-        ReflectionUtils.invoke(profile, setOriginalName, player.getUsername());
-        ReflectionUtils.invoke(profile, setUuid, player.getUniqueId());
-        ReflectionUtils.invoke(profile, setOriginalUuid, player.getUniqueId());
+            Object temp = ReflectionUtils.invoke(connection, getNetworkManagerWrapper);
+            temp = ReflectionUtils.invoke(temp, getPacketListener);
+            ReflectionUtils.invoke(temp, handleLoginStart, player.getUsername());
+        });
 
-        Object temp = ReflectionUtils.invoke(connection, getNetworkManagerWrapper);
-        temp = ReflectionUtils.invoke(temp, getPacketListener);
-        ReflectionUtils.invoke(temp, handleLoginStart, player.getUsername());
         return packet;
     }
 }

@@ -36,7 +36,6 @@ import com.minekube.connect.api.handshake.HandshakeHandlers;
 import com.minekube.connect.api.inject.PlatformInjector;
 import com.minekube.connect.api.logger.FloodgateLogger;
 import com.minekube.connect.api.packet.PacketHandlers;
-import com.minekube.connect.api.player.FloodgatePlayer;
 import com.minekube.connect.config.FloodgateConfig;
 import com.minekube.connect.config.FloodgateConfigHolder;
 import com.minekube.connect.config.loader.ConfigLoader;
@@ -46,7 +45,6 @@ import com.minekube.connect.config.updater.ConfigUpdater;
 import com.minekube.connect.inject.CommonPlatformInjector;
 import com.minekube.connect.packet.PacketHandlersImpl;
 import com.minekube.connect.util.LanguageManager;
-import io.netty.util.AttributeKey;
 import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
 
@@ -114,19 +112,5 @@ public class CommonModule extends AbstractModule {
     @Singleton
     public HandshakeHandlersImpl handshakeHandlers() {
         return new HandshakeHandlersImpl();
-    }
-    
-    @Provides
-    @Singleton
-    @Named("kickMessageAttribute")
-    public AttributeKey<String> kickMessageAttribute() {
-        return AttributeKey.valueOf("floodgate-kick-message");
-    }
-
-    @Provides
-    @Singleton
-    @Named("playerAttribute")
-    public AttributeKey<FloodgatePlayer> playerAttribute() {
-        return AttributeKey.valueOf("floodgate-player");
     }
 }
