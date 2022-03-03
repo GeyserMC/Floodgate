@@ -30,6 +30,14 @@ import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 
+fun Project.fullVersion(): String {
+    var version = version.toString()
+    if (version.endsWith("-SNAPSHOT")) {
+        version += " (b${buildNumberAsString()}-${lastCommitHash()}}"
+    }
+    return version
+}
+
 fun Project.lastCommitHash(): String? =
     the<IndraGitExtension>().commit()?.name?.substring(0, 7)
 
@@ -40,6 +48,9 @@ fun Project.branchName(): String =
 
 fun Project.buildNumber(): Int =
     Integer.parseInt(System.getProperty("BUILD_NUMBER", "-1"))
+
+fun Project.buildNumberAsString(): String =
+    buildNumber().takeIf { it != -1 }?.toString() ?: "??"
 
 fun Project.relocate(pattern: String) {
     tasks.named<ShadowJar>("shadowJar") {
