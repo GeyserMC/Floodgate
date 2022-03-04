@@ -26,37 +26,12 @@
 package com.minekube.connect.module;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
 import com.minekube.connect.register.WatcherRegister;
-import com.minekube.connect.watch.WatchClient;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import io.grpc.Metadata;
-import io.grpc.stub.MetadataUtils;
 
 public class WatcherModule extends AbstractModule {
 
     @Override
     protected void configure() {
         bind(WatcherRegister.class).asEagerSingleton();
-    }
-
-    @Provides
-    @Singleton
-    public WatchClient watchClient() {
-        // TODO pass metadata somewhere
-        Metadata.Key<String> ep = Metadata.Key.of("Connect-Endpoint",
-                Metadata.ASCII_STRING_MARSHALLER);
-        Metadata metadata = new Metadata();
-        metadata.put(ep, "server1");
-
-        // TODO shutdown gracefully
-        ManagedChannel managedChannel = ManagedChannelBuilder
-                .forTarget("localhost:8443")
-                .usePlaintext()
-                .intercept(MetadataUtils.newAttachHeadersInterceptor(metadata))
-                .build();
-        return new WatchClient(managedChannel);
     }
 }

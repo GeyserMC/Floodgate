@@ -25,46 +25,48 @@
 
 package com.minekube.connect.tunnel;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.inject.Inject;
 import com.minekube.connect.tunnel.TunnelConn.Handler;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import io.grpc.Metadata;
-import io.grpc.stub.MetadataUtils;
-import io.grpc.stub.StreamObserver;
 import java.io.Closeable;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
-import minekube.connect.v1alpha1.TunnelServiceGrpc;
-import minekube.connect.v1alpha1.TunnelServiceGrpc.TunnelServiceStub;
-import minekube.connect.v1alpha1.TunnelServiceOuterClass.TunnelRequest;
-import minekube.connect.v1alpha1.TunnelServiceOuterClass.TunnelResponse;
+import java.util.stream.Stream;
+import okhttp3.Call;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
+import okio.ByteString;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class Tunneler implements Closeable {
 
-    private final ConcurrentMap<String, ManagedChannel> channelsByAddr = Maps.newConcurrentMap();
+    private final OkHttpClient httpClient;
 
-    public ManagedChannel channel(String tunnelServiceAddr) {
-        return channelsByAddr.computeIfAbsent(tunnelServiceAddr, addr -> {
-            ManagedChannelBuilder<?> builder = ManagedChannelBuilder.forTarget(addr);
-            if (!addr.startsWith("https://")) {
-                builder.usePlaintext();
-            }
-            return builder.build();
-        });
+    @Inject
+    public Tunneler(OkHttpClient httpClient) {
+        this.httpClient = httpClient;
     }
 
-    public TunnelConn tunnel(final String tunnelServiceAddr, String sessionId, Handler handler) {
-        Preconditions.checkArgument(!tunnelServiceAddr.isEmpty(),
-                "tunnelServiceAddr must not be empty");
+    private static final String SESSION_HEADER = "Connect-Session";
 
-        Metadata.Key<String> s = Metadata.Key.of("Connect-Session",
-                Metadata.ASCII_STRING_MARSHALLER);
-        Metadata metadata = new Metadata();
-        metadata.put(s, sessionId);
-        TunnelServiceStub asyncStub = TunnelServiceGrpc.newStub(channel(tunnelServiceAddr))
-                .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata));
+    public TunnelConn tunnel(final String tunnelServiceAddr, String sessionId, Handler handler) {
+        checkNotNull(tunnelServiceAddr, "tunnelServiceAddr must not be null");
+        checkNotNull(sessionId, "sessionId must not be null");
+        checkNotNull(handler, "handler must not be null");
+        checkArgument(!tunnelServiceAddr.isEmpty(),
+                "tunnelServiceAddr must not be empty");
+        checkArgument(!sessionId.isEmpty(), "sessionId must not be empty");
+
+        Request request = new Request.Builder()
+                .url(tunnelServiceAddr) // TODO default env var
+                .addHeader(SESSION_HEADER, sessionId)
+                .build();
 
         AtomicBoolean closeHandlerOnce = new AtomicBoolean();
         Runnable handlerOnClose = () -> {
@@ -73,37 +75,47 @@ public class Tunneler implements Closeable {
             }
         };
 
-        StreamObserver<TunnelRequest> writeStream = asyncStub.tunnel(
-                new StreamObserver<TunnelResponse>() {
-                    @Override
-                    public void onNext(final TunnelResponse value) {
-                        handler.onReceive(value.getData().toByteArray());
-                    }
+        WebSocket ws = httpClient.newWebSocket(request, new WebSocketListener() {
+            @Override
+            public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
+                handlerOnClose.run();
+            }
 
-                    @Override
-                    public void onError(final Throwable t) {
-                        handler.onError(t);
-                        handlerOnClose.run();
-                    }
+            @Override
+            public void onClosing(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
+                webSocket.close(1000, null);
+            }
 
-                    @Override
-                    public void onCompleted() {
-                        System.out.println("read completed");
-                        handlerOnClose.run();
-                    }
-                });
+            @Override
+            public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable t,
+                                  @Nullable Response response) {
+                handler.onError(t);
+                handlerOnClose.run();
+            }
+
+            @Override
+            public void onMessage(@NotNull WebSocket webSocket, @NotNull ByteString bytes) {
+                handler.onReceive(bytes.toByteArray());
+            }
+
+            @Override
+            public void onOpen(@NotNull WebSocket webSocket, @NotNull Response response) {
+                // TODO log connected(?)
+            }
+        });
+
         return new TunnelConn() {
             @Override
-            public void write(TunnelRequest req) {
-                writeStream.onNext(req);
+            public void write(byte[] data) {
+                ws.send(ByteString.of(data));
             }
 
             @Override
             public void close(Throwable t) {
                 if (t == null) {
-                    writeStream.onCompleted();
+                    ws.close(1000, "tunnel closed clientside");
                 } else {
-                    writeStream.onError(t);
+                    ws.close(1002, t.getLocalizedMessage());
                 }
                 handlerOnClose.run();
             }
@@ -111,11 +123,12 @@ public class Tunneler implements Closeable {
     }
 
     @Override
-    public void close() {
-        // disconnects all tunneled players instantaneously
-        channelsByAddr.forEach((addr, channel) -> {
-            channel.shutdownNow();
-            channelsByAddr.remove(addr);
-        });
+    public void close() { // todo call on plugin shutdown
+        // closes all requests to tunnel services,
+        // disconnects tunneled players instantaneously
+        Stream.of(httpClient.dispatcher().runningCalls(), httpClient.dispatcher().queuedCalls())
+                .flatMap(Collection::stream)
+                .filter(call -> call.request().header(SESSION_HEADER) != null)
+                .forEach(Call::cancel);
     }
 }

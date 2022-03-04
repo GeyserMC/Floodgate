@@ -25,9 +25,6 @@
 
 package com.minekube.connect.tunnel;
 
-import com.google.protobuf.ByteString;
-import minekube.connect.v1alpha1.TunnelServiceOuterClass.TunnelRequest;
-
 public abstract class TunnelConn {
 
     public interface Handler {
@@ -39,15 +36,7 @@ public abstract class TunnelConn {
         }
     }
 
-    public abstract void write(TunnelRequest req);
-
-    public void write(byte[] data) {
-        write(ByteString.copyFrom(data));
-    }
-
-    public void write(ByteString data) {
-        write(TunnelRequest.newBuilder().setData(data).build());
-    }
+    public abstract void write(byte[] data);
 
     public abstract void close(Throwable t);
 

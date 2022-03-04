@@ -18,6 +18,7 @@ dependencies {
     api("cloud.commandframework", "cloud-core", Versions.cloudVersion)
     api("org.yaml", "snakeyaml", Versions.snakeyamlVersion)
 
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
     runtimeOnly("io.grpc", "grpc-netty-shaded", Versions.gRPCVersion)
     implementation("io.grpc", "grpc-protobuf", Versions.gRPCVersion)
     implementation("io.grpc", "grpc-stub", Versions.gRPCVersion)

@@ -25,6 +25,7 @@
 
 package com.minekube.connect.module;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -46,7 +47,11 @@ import com.minekube.connect.inject.CommonPlatformInjector;
 import com.minekube.connect.packet.PacketHandlersImpl;
 import com.minekube.connect.util.LanguageManager;
 import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
+import okhttp3.ConnectionPool;
+import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
 
 @RequiredArgsConstructor
 public class CommonModule extends AbstractModule {
@@ -112,5 +117,19 @@ public class CommonModule extends AbstractModule {
     @Singleton
     public HandshakeHandlersImpl handshakeHandlers() {
         return new HandshakeHandlersImpl();
+    }
+
+    @Provides
+    @Singleton
+    public OkHttpClient okHttpClient() {
+        return new OkHttpClient.Builder()
+                .protocols(ImmutableList.of(Protocol.HTTP_1_1, Protocol.HTTP_2))
+                .connectionPool(new ConnectionPool(100, 5, TimeUnit.MINUTES))
+                .addInterceptor(chain -> chain.proceed(chain.request()
+//                        .newBuilder()
+//                        .addHeader() // TODO add common client metadata to every request
+//                        .build()
+                ))
+                .build();
     }
 }
