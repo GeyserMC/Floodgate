@@ -64,17 +64,8 @@ public final class ConfigUpdater {
         int version = 0; // pre-rewrite is the default config version
 
         Object versionElement = config.get("config-version");
-        // only rewrite configs have a config-version
         if (versionElement == null) {
-            logger.warn("We've detected a pre-rewrite config file, please note that Floodgate " +
-                    "doesn't not work properly if you don't update your Floodgate key used on " +
-                    "all your servers (including Geyser). We'll try to update your Floodgate " +
-                    "config now and we'll also generate a new Floodgate key for you, but if " +
-                    "you're running a network or if you're running a Spigot server with " +
-                    "Geyser Standalone please update as you'll no longer be able to connect.");
-            renames.put("enabled", "enable");
-            renames.put("allowed", "allow-linking");
-
+            logger.warn("Please update your config and include the config-version.");
         } else {
             // get (and verify) the config version
             checkArgument(
@@ -92,12 +83,6 @@ public final class ConfigUpdater {
         // config is already up-to-date
         if (version == CONFIG_VERSION) {
             return;
-        }
-
-        if (version < CONFIG_VERSION) {
-            // renamed 'use-global-linking' to 'enable-global-linking'
-            // and added 'enable-own-linking'
-            renames.put("enable-global-linking", "use-global-linking");
         }
 
         try {

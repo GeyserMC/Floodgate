@@ -144,6 +144,6 @@ public final class BungeePlatformModule extends AbstractModule {
     @Provides
     @Named("implementationName")
     public String implementationName() {
-        return "Bungeecord";
+        return "BungeeCord";
     }
 }

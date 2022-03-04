@@ -25,135 +25,22 @@
 
 package com.minekube.connect.config.loader;
 
-import static com.minekube.connect.util.MessageFormatter.format;
-
 import com.minekube.connect.util.Utils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 
 public class DefaultConfigHandler {
-    public void createDefaultConfig(String defaultConfigLocation, Path configPath) throws IOException {
+    public void createDefaultConfig(String defaultConfigLocation, Path configPath)
+            throws IOException {
         List<String> configLines = loadDefaultConfig(defaultConfigLocation);
 
         // writing the new config file
         Files.write(configPath, configLines);
     }
 
-    public List<String> loadDefaultConfig(String defaultConfigLocation)
-            throws IOException {
-        List<String> lines = Utils.readAllLines(defaultConfigLocation);
-
-        List<String> configLines = new ArrayList<>();
-        String parentConfig = null;
-        List<String> parentLines = null;
-
-        int lastInsertLine = -1;
-        int tempAddAfter = -1;
-
-        for (String line : lines) {
-            // >>(space) or >>|
-            if (line.startsWith(">>")) {
-                if (line.length() >= 3) {
-
-                    // define parent file
-                    if (line.charAt(2) == ' ') {
-                        if (tempAddAfter != -1) {
-                            throw new IllegalStateException(
-                                    "Cannot define new parent without closing the current section");
-                        }
-                        parentConfig = line.substring(3);
-                        parentLines = null;
-                        lastInsertLine = -1;
-                        continue;
-                    }
-
-                    // define start / end of insert section
-                    if (line.charAt(2) == '|') {
-                        // end section
-                        if (line.length() == 3) {
-                            if (tempAddAfter == -1) {
-                                throw new IllegalStateException("Cannot close an unclosed section");
-                            }
-                            lastInsertLine = tempAddAfter;
-                            tempAddAfter = -1;
-                            continue;
-                        }
-
-                        // start insert section
-                        if (parentConfig == null) {
-                            throw new IllegalStateException(
-                                    "Cannot start insert section without providing a parent");
-                        }
-
-                        if (tempAddAfter != -1) {
-                            throw new IllegalStateException(
-                                    "Cannot start section with an unclosed section");
-                        }
-
-                        // note that addAfter starts counting from 1
-                        int addAfter = Integer.parseInt(line.substring(4)) - 1;
-                        if (lastInsertLine > -1 && addAfter < lastInsertLine) {
-                            throw new IllegalStateException(format(
-                                    "Cannot add the same lines twice {} {}",
-                                    addAfter, lastInsertLine
-                            ));
-                        }
-
-                        // as you can see by this implementation
-                        // we don't support parent files in parent files
-
-                        if (lastInsertLine == -1) {
-                            parentLines = Utils.readAllLines(parentConfig);
-
-                            for (int i = 0; i <= addAfter; i++) {
-                                configLines.add(parentLines.get(i));
-                            }
-                        } else {
-                            for (int i = lastInsertLine; i <= addAfter; i++) {
-                                configLines.add(parentLines.get(i));
-                            }
-                        }
-
-                        tempAddAfter = addAfter;
-                        continue;
-                    }
-
-                    if (line.charAt(2) == '*') {
-                        if (parentConfig == null) {
-                            throw new IllegalStateException(
-                                    "Cannot write rest of the parent without providing a parent");
-                        }
-
-                        if (tempAddAfter != -1) {
-                            throw new IllegalStateException(
-                                    "Cannot write rest of the parent config while an insert section is still open");
-                        }
-
-                        if (lastInsertLine == -1) {
-                            parentLines = Utils.readAllLines(parentConfig);
-                            configLines.addAll(parentLines);
-                            continue;
-                        }
-
-                        // the lastInsertLine has already been printed, so we won't print it twice
-                        for (int i = lastInsertLine + 1; i < parentLines.size(); i++) {
-                            configLines.add(parentLines.get(i));
-                        }
-                        continue;
-                    }
-
-                    throw new IllegalStateException(
-                            "The use of >>" + line.charAt(2) + " is unknown");
-                }
-                throw new IllegalStateException("Unable do something with just >>");
-            }
-            // everything else: comments and key/value lines will be added
-            configLines.add(line);
-        }
-
-        return configLines;
+    public List<String> loadDefaultConfig(String defaultConfigLocation) throws IOException {
+        return Utils.readAllLines(defaultConfigLocation);
     }
 }

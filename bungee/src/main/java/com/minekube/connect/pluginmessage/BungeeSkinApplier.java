@@ -61,7 +61,7 @@ public final class BungeeSkinApplier implements SkinApplier {
         try {
             handler = (InitialHandler) player.getPendingConnection();
         } catch (Exception exception) {
-            logger.error("Incompatible Bungeecord fork detected", exception);
+            logger.error("Incompatible BungeeCord fork detected", exception);
             return;
         }
 

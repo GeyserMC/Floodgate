@@ -1,9 +1,9 @@
->> config.yml
->>| 16
-# Should the proxy send the bedrock player data to the servers it is connecting to?
-# This requires Floodgate to be installed on the servers.
-# You'll get kicked if you don't use the plugin. The default value is false because of it
-send-floodgate-data: false
+# The endpoint name of this server/proxy instance registered on startup with the Connect network.
+# Default is a random string. Uncomment to specify your own endpoint name.
+#endpoint:
 
->>|
->>*
+# The default locale for Floodgate. By default, Floodgate uses the system locale
+#default-locale: en_US
+
+# Do not change this
+config-version: 1
