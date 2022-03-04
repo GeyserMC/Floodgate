@@ -75,6 +75,19 @@ public final class SpigotDataHandler extends CommonDataHandler {
             Object networkManager = ctx.channel().pipeline().get(packetHandlerName);
             Object packetListener = ClassNames.PACKET_LISTENER.get(networkManager);
 
+            // Use spoofedUUID for initUUID (just like BungeeCord)
+            // (Also we need to set spoofedUUID before our ProtocolSupport hack triggers PlayerProfileCompleteEvent
+            // that does this https://github.com/ProtocolSupport/ProtocolSupport/blob/aed01898d769701d07a3a66ad55b8524d9937e55/src/protocolsupport/protocol/packet/handler/AbstractLoginListener.java#L192)
+            setValue(networkManager, "spoofedUUID", sessionCtx.getPlayer().getUniqueId());
+
+            // Seems that the skin is already showing without setting spoofedProfile (not sure why)
+//            setValue(networkManager, "spoofedProfile", sessionCtx.getPlayer().getGameProfile()
+//                    .getProperties().stream()
+//                    .map(prop -> new Property(prop.getName(), prop.getValue(),
+//                            prop.getSignature().isEmpty() ? null : prop.getSignature()))
+//                    .toArray(Property[]::new)
+//            );
+
             // check if the server is actually in the Login state
             if (!ClassNames.LOGIN_LISTENER.isInstance(packetListener)) {
                 // player is not in the login state, abort
@@ -102,10 +115,6 @@ public final class SpigotDataHandler extends CommonDataHandler {
 
             // We have to fake the offline player (login) cycle
             // just like on Spigot:
-
-            // Use spoofedUUID for initUUID (just like Bungeecord)
-            setValue(networkManager, "spoofedUUID", sessionCtx.getPlayer().getUniqueId());
-            // TODO also set spoofedProfile? (but why are skins already showing?!)
 
             // LoginListener#initUUID
             ClassNames.INIT_UUID.invoke(packetListener);
