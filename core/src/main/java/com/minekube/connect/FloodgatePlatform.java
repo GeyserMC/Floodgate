@@ -33,7 +33,7 @@ import com.minekube.connect.api.FloodgateApi;
 import com.minekube.connect.api.InstanceHolder;
 import com.minekube.connect.api.handshake.HandshakeHandlers;
 import com.minekube.connect.api.inject.PlatformInjector;
-import com.minekube.connect.api.logger.ConnectLogger;
+import com.minekube.connect.api.logger.FloodgateLogger;
 import com.minekube.connect.api.packet.PacketHandlers;
 import com.minekube.connect.config.FloodgateConfig;
 import com.minekube.connect.config.FloodgateConfigHolder;
@@ -51,7 +51,7 @@ public class FloodgatePlatform {
     private final FloodgateApi api;
     private final PlatformInjector injector;
 
-    private final ConnectLogger logger;
+    private final FloodgateLogger logger;
 
     private FloodgateConfig config;
     private Injector guice;
@@ -60,7 +60,7 @@ public class FloodgatePlatform {
     public FloodgatePlatform(
             FloodgateApi api,
             PlatformInjector platformInjector,
-            ConnectLogger logger,
+            FloodgateLogger logger,
             Injector guice) {
 
         this.api = api;
