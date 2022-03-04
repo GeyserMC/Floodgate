@@ -1,5 +1,5 @@
 var authlibVersion = "1.5.21"
-var guavaVersion = "21.0"
+var guavaVersion = "31.1-jre"
 var gsonVersion = "2.8.5"
 
 dependencies {
