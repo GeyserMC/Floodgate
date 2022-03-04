@@ -40,6 +40,7 @@ import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -230,5 +231,17 @@ public class Utils {
         CompletableFuture<U> future = new CompletableFuture<>();
         future.completeExceptionally(ex);
         return future;
+    }
+
+
+    private static final String AZ_LOWER = "abcdefghijklmnopqrstuvwxyz";
+    private static final SecureRandom rnd = new SecureRandom();
+
+    public static String randomString(int len) {
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++) {
+            sb.append(AZ_LOWER.charAt(rnd.nextInt(AZ_LOWER.length())));
+        }
+        return sb.toString();
     }
 }

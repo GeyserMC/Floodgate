@@ -27,6 +27,7 @@ package com.minekube.connect.watch;
 
 import com.google.inject.Inject;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.minekube.connect.config.FloodgateConfig;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.SessionRejection;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.WatchRequest;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.WatchResponse;
@@ -42,19 +43,21 @@ import org.jetbrains.annotations.Nullable;
 public class WatchClient {
     private static final String ENDPOINT_HEADER = "Connect-Endpoint";
     private static final String WATCH_URL = System.getenv().getOrDefault(
-            "CONNECT_WATCH_URL", "ws://connect.minekube.net/watch");
+            "CONNECT_WATCH_URL", "wss://connect.minekube.net/watch");
 
     private final OkHttpClient httpClient;
+    private final FloodgateConfig config;
 
     @Inject
-    public WatchClient(OkHttpClient httpClient) {
+    public WatchClient(OkHttpClient httpClient, FloodgateConfig config) {
         this.httpClient = httpClient;
+        this.config = config;
     }
 
     public void watch(Watcher watcher) {
         Request request = new Request.Builder()
-                .url(WATCH_URL) // TODO default env var
-                .addHeader(ENDPOINT_HEADER, "server1") // TODO configurable endpoint name
+                .url(WATCH_URL)
+                .addHeader(ENDPOINT_HEADER, config.getEndpoint())
                 .build();
 
         httpClient.newWebSocket(request, new WebSocketListener() {

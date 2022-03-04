@@ -25,6 +25,7 @@
 
 package com.minekube.connect.config;
 
+import com.minekube.connect.util.Utils;
 import lombok.Getter;
 
 /**
@@ -37,6 +38,12 @@ public class FloodgateConfig {
 
     private boolean debug;
     private int configVersion;
+
+    /**
+     * The endpoint name of this instance that is registered when calling the watch service for
+     * listening for sessions for this endpoint.
+     */
+    private String endpoint = Utils.randomString(6); // default to random name
 
     public boolean isProxy() {
         return this instanceof ProxyFloodgateConfig;
