@@ -29,6 +29,7 @@ import static com.minekube.connect.util.ReflectionUtils.getCastedValue;
 import static com.minekube.connect.util.ReflectionUtils.setValue;
 
 import com.google.gson.Gson;
+import com.minekube.connect.SpigotPlugin;
 import com.minekube.connect.config.FloodgateConfig;
 import com.minekube.connect.network.netty.LocalSession.Context;
 import com.minekube.connect.util.ClassNames;
@@ -66,7 +67,9 @@ public final class SpigotDataHandler extends CommonDataHandler {
                         ClassNames.HANDSHAKE_HOST,
                         createBungeeForwardingAddress(hostname));
 
-                removeSelf();
+                if (!SpigotPlugin.isProtocolSupport()) { // if we don't check this the player would be kicked with "unexpected hello packet"
+                    removeSelf();
+                }
                 return true;
             }
             return true; // next is LOGIN_START_PACKET

@@ -40,6 +40,7 @@ import com.minekube.connect.util.ReflectionUtils;
 import com.minekube.connect.util.SpigotHandshakeHandler;
 import com.minekube.connect.util.SpigotProtocolSupportHandler;
 import com.minekube.connect.util.SpigotProtocolSupportListener;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class SpigotPlugin extends JavaPlugin {
@@ -79,10 +80,14 @@ public final class SpigotPlugin extends JavaPlugin {
                 .addHandshakeHandler(injector.getInstance(SpigotHandshakeHandler.class));
 
         // add ProtocolSupport support (hack)
-        if (getServer().getPluginManager().getPlugin("ProtocolSupport") != null) {
+        if (isProtocolSupport()) {
             injector.getInstance(SpigotProtocolSupportHandler.class);
             SpigotProtocolSupportListener.registerHack(this);
         }
+    }
+
+    public static boolean isProtocolSupport() {
+        return Bukkit.getServer().getPluginManager().getPlugin("ProtocolSupport") != null;
     }
 
     @Override
