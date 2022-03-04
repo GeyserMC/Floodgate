@@ -25,14 +25,14 @@
 
 package com.minekube.connect.addon.data;
 
-import com.minekube.connect.config.FloodgateConfig;
+import com.minekube.connect.config.ConnectConfig;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
-    protected final FloodgateConfig config;
+    protected final ConnectConfig config;
     protected ChannelHandlerContext ctx;
 
     protected abstract boolean channelRead(Object packet) throws Exception;

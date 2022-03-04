@@ -25,8 +25,8 @@
 
 package com.minekube.connect.util;
 
-import com.minekube.connect.api.FloodgateApi;
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.ConnectApi;
+import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.platform.command.CommandUtil;
 import com.minekube.connect.platform.command.TranslatableMessage;
 import com.minekube.connect.player.UserAudience;
@@ -54,11 +54,11 @@ public final class SpigotCommandUtil implements CommandUtil {
     private static UserAudience console;
 
     private final Server server;
-    private final FloodgateApi api;
+    private final ConnectApi api;
     private final SpigotVersionSpecificMethods versionSpecificMethods;
 
     private final JavaPlugin plugin;
-    private final FloodgateLogger logger;
+    private final ConnectLogger logger;
     private final LanguageManager manager;
 
     @Override

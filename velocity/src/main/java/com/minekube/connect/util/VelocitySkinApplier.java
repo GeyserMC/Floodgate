@@ -25,7 +25,7 @@
 
 package com.minekube.connect.util;
 
-import com.minekube.connect.api.player.FloodgatePlayer;
+import com.minekube.connect.api.player.ConnectPlayer;
 import com.minekube.connect.skin.SkinApplier;
 import com.minekube.connect.skin.SkinData;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -39,8 +39,8 @@ public class VelocitySkinApplier implements SkinApplier {
     private final ProxyServer server;
 
     @Override
-    public void applySkin(FloodgatePlayer floodgatePlayer, SkinData skinData) {
-        server.getPlayer(floodgatePlayer.getUniqueId()).ifPresent(player -> {
+    public void applySkin(ConnectPlayer connectPlayer, SkinData skinData) {
+        server.getPlayer(connectPlayer.getUniqueId()).ifPresent(player -> {
             List<Property> properties = new ArrayList<>(player.getGameProfileProperties());
             properties.add(new Property("textures", skinData.getValue(), skinData.getSignature()));
             player.setGameProfileProperties(properties);

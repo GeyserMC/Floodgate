@@ -31,5 +31,5 @@ import lombok.Getter;
  * The Floodgate configuration used by proxy platforms, currently Velocity and BungeeCord.
  */
 @Getter
-public final class ProxyFloodgateConfig extends FloodgateConfig {
+public final class ProxyConnectConfig extends ConnectConfig {
 }

@@ -28,11 +28,11 @@ package com.minekube.connect.module;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.minekube.connect.api.ProxyFloodgateApi;
-import com.minekube.connect.api.SimpleFloodgateApi;
-import com.minekube.connect.api.logger.FloodgateLogger;
-import com.minekube.connect.config.FloodgateConfig;
-import com.minekube.connect.config.ProxyFloodgateConfig;
+import com.minekube.connect.api.ProxyConnectApi;
+import com.minekube.connect.api.SimpleConnectApi;
+import com.minekube.connect.api.logger.ConnectLogger;
+import com.minekube.connect.config.ConnectConfig;
+import com.minekube.connect.config.ProxyConnectConfig;
 import java.nio.file.Path;
 
 public final class ProxyCommonModule extends CommonModule {
@@ -43,21 +43,21 @@ public final class ProxyCommonModule extends CommonModule {
     @Override
     protected void configure() {
         super.configure();
-        bind(SimpleFloodgateApi.class).to(ProxyFloodgateApi.class);
+        bind(SimpleConnectApi.class).to(ProxyConnectApi.class);
     }
 
     @Provides
     @Singleton
     @Named("configClass")
-    public Class<? extends FloodgateConfig> floodgateConfigClass() {
-        return ProxyFloodgateConfig.class;
+    public Class<? extends ConnectConfig> floodgateConfigClass() {
+        return ProxyConnectConfig.class;
     }
 
     @Provides
     @Singleton
-    public ProxyFloodgateApi proxyFloodgateApi(
-            FloodgateLogger logger
+    public ProxyConnectApi proxyFloodgateApi(
+            ConnectLogger logger
     ) {
-        return new ProxyFloodgateApi(logger);
+        return new ProxyConnectApi(logger);
     }
 }

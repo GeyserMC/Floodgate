@@ -28,8 +28,8 @@ package com.minekube.connect.command;
 import cloud.commandframework.Command;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.context.CommandContext;
-import com.minekube.connect.api.FloodgateApi;
-import com.minekube.connect.config.FloodgateConfig;
+import com.minekube.connect.api.ConnectApi;
+import com.minekube.connect.config.ConnectConfig;
 import com.minekube.connect.platform.command.FloodgateCommand;
 import com.minekube.connect.player.UserAudience;
 import com.minekube.connect.util.Constants;
@@ -46,12 +46,12 @@ public class TestCommand implements FloodgateCommand {
 
     @Override
     public void execute(CommandContext<UserAudience> context) {
-        int players = FloodgateApi.getInstance().getPlayers().size();
+        int players = ConnectApi.getInstance().getPlayers().size();
         context.getSender().sendMessage(Component.text(players));
     }
 
     @Override
-    public boolean shouldRegister(FloodgateConfig config) {
+    public boolean shouldRegister(ConnectConfig config) {
         return Constants.DEBUG_MODE;
     }
 }

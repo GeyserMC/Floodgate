@@ -25,7 +25,7 @@
 
 package com.minekube.connect.network.netty;
 
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.tunnel.TunnelConn.Handler;
 import io.grpc.Status;
 import io.grpc.Status.Code;
@@ -36,7 +36,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 class TunnelHandler implements Handler {
-    private final FloodgateLogger logger;
+    private final ConnectLogger logger;
     private final Channel downstreamServerConn; // local server connection
 
     @Override

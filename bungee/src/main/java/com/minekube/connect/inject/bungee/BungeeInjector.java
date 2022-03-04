@@ -25,7 +25,7 @@
 
 package com.minekube.connect.inject.bungee;
 
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.inject.CommonPlatformInjector;
 import com.minekube.connect.network.netty.LocalServerChannelWrapper;
 import com.minekube.connect.network.netty.LocalSession;
@@ -59,7 +59,7 @@ import net.md_5.bungee.protocol.Varint21LengthFieldPrepender;
 public final class BungeeInjector extends CommonPlatformInjector implements Listener {
     private static final String BUNGEE_INIT = "floodgate-bungee-init";
 
-    private final FloodgateLogger logger;
+    private final ConnectLogger logger;
     private final ProxyServer proxy;
     private final Plugin plugin;
     @Getter private boolean injected;

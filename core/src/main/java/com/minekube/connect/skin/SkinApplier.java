@@ -25,8 +25,8 @@
 
 package com.minekube.connect.skin;
 
-import com.minekube.connect.api.player.FloodgatePlayer;
+import com.minekube.connect.api.player.ConnectPlayer;
 
 public interface SkinApplier {
-    void applySkin(FloodgatePlayer floodgatePlayer, SkinData skinData);
+    void applySkin(ConnectPlayer connectPlayer, SkinData skinData);
 }

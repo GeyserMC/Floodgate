@@ -31,13 +31,13 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.minekube.connect.addon.data.HandshakeHandlersImpl;
-import com.minekube.connect.api.FloodgateApi;
-import com.minekube.connect.api.SimpleFloodgateApi;
+import com.minekube.connect.api.ConnectApi;
+import com.minekube.connect.api.SimpleConnectApi;
 import com.minekube.connect.api.handshake.HandshakeHandlers;
 import com.minekube.connect.api.inject.PlatformInjector;
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.api.packet.PacketHandlers;
-import com.minekube.connect.config.FloodgateConfig;
+import com.minekube.connect.config.ConnectConfig;
 import com.minekube.connect.config.FloodgateConfigHolder;
 import com.minekube.connect.config.loader.ConfigLoader;
 import com.minekube.connect.config.loader.DefaultConfigHandler;
@@ -59,7 +59,7 @@ public class CommonModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(FloodgateApi.class).to(SimpleFloodgateApi.class);
+        bind(ConnectApi.class).to(SimpleConnectApi.class);
         bind(PlatformInjector.class).to(CommonPlatformInjector.class);
         bind(HandshakeHandlers.class).to(HandshakeHandlersImpl.class);
 
@@ -83,10 +83,10 @@ public class CommonModule extends AbstractModule {
     @Provides
     @Singleton
     public ConfigLoader configLoader(
-            @Named("configClass") Class<? extends FloodgateConfig> configClass,
+            @Named("configClass") Class<? extends ConnectConfig> configClass,
             DefaultConfigHandler defaultConfigHandler,
             ConfigUpdater configUpdater,
-            FloodgateLogger logger) {
+            ConnectLogger logger) {
         return new ConfigLoader(dataDirectory, configClass, defaultConfigHandler, configUpdater,
                 logger);
     }
@@ -101,7 +101,7 @@ public class CommonModule extends AbstractModule {
     @Singleton
     public ConfigUpdater configUpdater(
             ConfigFileUpdater configFileUpdater,
-            FloodgateLogger logger) {
+            ConnectLogger logger) {
         return new ConfigUpdater(dataDirectory, configFileUpdater, logger);
     }
 
@@ -109,7 +109,7 @@ public class CommonModule extends AbstractModule {
     @Singleton
     public LanguageManager languageLoader(
             FloodgateConfigHolder configHolder,
-            FloodgateLogger logger) {
+            ConnectLogger logger) {
         return new LanguageManager(configHolder, logger);
     }
 

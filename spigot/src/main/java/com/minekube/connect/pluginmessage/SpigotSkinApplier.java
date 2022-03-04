@@ -26,7 +26,7 @@
 package com.minekube.connect.pluginmessage;
 
 import com.minekube.connect.SpigotPlugin;
-import com.minekube.connect.api.player.FloodgatePlayer;
+import com.minekube.connect.api.player.ConnectPlayer;
 import com.minekube.connect.skin.SkinApplier;
 import com.minekube.connect.skin.SkinData;
 import com.minekube.connect.util.ClassNames;
@@ -50,18 +50,18 @@ public final class SpigotSkinApplier implements SkinApplier {
     }
 
     @Override
-    public void applySkin(FloodgatePlayer floodgatePlayer, SkinData skinData) {
-        applySkin0(floodgatePlayer, skinData, true);
+    public void applySkin(ConnectPlayer connectPlayer, SkinData skinData) {
+        applySkin0(connectPlayer, skinData, true);
     }
 
-    private void applySkin0(FloodgatePlayer floodgatePlayer, SkinData skinData, boolean firstTry) {
-        Player player = Bukkit.getPlayer(floodgatePlayer.getUniqueId());
+    private void applySkin0(ConnectPlayer connectPlayer, SkinData skinData, boolean firstTry) {
+        Player player = Bukkit.getPlayer(connectPlayer.getUniqueId());
 
         // player is probably not logged in yet
         if (player == null) {
             if (firstTry) {
                 Bukkit.getScheduler().runTaskLater(plugin,
-                        () -> applySkin0(floodgatePlayer, skinData, false),
+                        () -> applySkin0(connectPlayer, skinData, false),
                         10 * 1000);
             }
             return;

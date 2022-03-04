@@ -33,7 +33,7 @@ import com.google.inject.Singleton;
 import com.minekube.connect.SpigotPlugin;
 import com.minekube.connect.command.util.Permission;
 import com.minekube.connect.platform.command.CommandUtil;
-import com.minekube.connect.player.FloodgateCommandPreprocessor;
+import com.minekube.connect.player.ConnectCommandPreprocessor;
 import com.minekube.connect.player.UserAudience;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -62,7 +62,7 @@ public final class SpigotCommandModule extends CommandModule {
                 commandUtil::getAudience,
                 audience -> (CommandSender) audience.source()
         );
-        commandManager.registerCommandPreProcessor(new FloodgateCommandPreprocessor<>(commandUtil));
+        commandManager.registerCommandPreProcessor(new ConnectCommandPreprocessor<>(commandUtil));
         return commandManager;
     }
 

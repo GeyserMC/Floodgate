@@ -26,9 +26,9 @@
 package com.minekube.connect.listener;
 
 import com.google.inject.Inject;
-import com.minekube.connect.api.SimpleFloodgateApi;
-import com.minekube.connect.api.logger.FloodgateLogger;
-import com.minekube.connect.api.player.FloodgatePlayer;
+import com.minekube.connect.api.SimpleConnectApi;
+import com.minekube.connect.api.logger.ConnectLogger;
+import com.minekube.connect.api.player.ConnectPlayer;
 import com.minekube.connect.util.LanguageManager;
 import com.minekube.connect.util.SpigotCommandUtil;
 import java.util.UUID;
@@ -39,9 +39,9 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public final class SpigotListener implements Listener {
-    @Inject private SimpleFloodgateApi api;
+    @Inject private SimpleConnectApi api;
     @Inject private LanguageManager languageManager;
-    @Inject private FloodgateLogger logger;
+    @Inject private ConnectLogger logger;
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerLogin(PlayerLoginEvent event) {
@@ -52,7 +52,7 @@ public final class SpigotListener implements Listener {
 
         // if there was another player with the same uuid online,
         // he would've been disconnected by now
-        FloodgatePlayer player = api.getPlayer(uniqueId);
+        ConnectPlayer player = api.getPlayer(uniqueId);
         if (player != null) {
             //todo we should probably move this log message earlier in the process, so that we know
             // that Floodgate has done its job

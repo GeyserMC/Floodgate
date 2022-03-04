@@ -28,8 +28,8 @@ package com.minekube.connect.pluginmessage;
 import static com.minekube.connect.util.ReflectionUtils.getFieldOfType;
 import static com.minekube.connect.util.ReflectionUtils.setValue;
 
-import com.minekube.connect.api.logger.FloodgateLogger;
-import com.minekube.connect.api.player.FloodgatePlayer;
+import com.minekube.connect.api.logger.ConnectLogger;
+import com.minekube.connect.api.player.ConnectPlayer;
 import com.minekube.connect.skin.SkinApplier;
 import com.minekube.connect.skin.SkinData;
 import java.lang.reflect.Field;
@@ -48,10 +48,10 @@ public final class BungeeSkinApplier implements SkinApplier {
         LOGIN_RESULT = getFieldOfType(InitialHandler.class, LoginResult.class);
     }
 
-    private final FloodgateLogger logger;
+    private final ConnectLogger logger;
 
     @Override
-    public void applySkin(FloodgatePlayer uuid, SkinData skinData) {
+    public void applySkin(ConnectPlayer uuid, SkinData skinData) {
         ProxiedPlayer player = ProxyServer.getInstance().getPlayer(uuid.getUniqueId());
         if (player == null) {
             return;

@@ -32,7 +32,7 @@ public final class UnsafeFloodgateApi implements Unsafe {
 
     UnsafeFloodgateApi() {
         StackTraceElement element = Thread.currentThread().getStackTrace()[2];
-        if (!SimpleFloodgateApi.class.getName().equals(element.getClassName())) {
+        if (!SimpleConnectApi.class.getName().equals(element.getClassName())) {
             throw new IllegalStateException("Use the Floodgate api to get an instance");
         }
     }

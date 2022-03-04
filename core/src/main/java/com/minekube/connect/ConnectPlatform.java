@@ -29,13 +29,13 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.name.Named;
-import com.minekube.connect.api.FloodgateApi;
+import com.minekube.connect.api.ConnectApi;
 import com.minekube.connect.api.InstanceHolder;
 import com.minekube.connect.api.handshake.HandshakeHandlers;
 import com.minekube.connect.api.inject.PlatformInjector;
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.api.packet.PacketHandlers;
-import com.minekube.connect.config.FloodgateConfig;
+import com.minekube.connect.config.ConnectConfig;
 import com.minekube.connect.config.FloodgateConfigHolder;
 import com.minekube.connect.config.loader.ConfigLoader;
 import com.minekube.connect.inject.CommonPlatformInjector;
@@ -46,21 +46,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 
-public class FloodgatePlatform {
+public class ConnectPlatform {
     private static final UUID KEY = UUID.randomUUID();
-    private final FloodgateApi api;
+    private final ConnectApi api;
     private final PlatformInjector injector;
 
-    private final FloodgateLogger logger;
+    private final ConnectLogger logger;
 
-    private FloodgateConfig config;
+    private ConnectConfig config;
     private Injector guice;
 
     @Inject
-    public FloodgatePlatform(
-            FloodgateApi api,
+    public ConnectPlatform(
+            ConnectApi api,
             PlatformInjector platformInjector,
-            FloodgateLogger logger,
+            ConnectLogger logger,
             Injector guice) {
 
         this.api = api;

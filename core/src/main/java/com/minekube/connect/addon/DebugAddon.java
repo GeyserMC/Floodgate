@@ -31,15 +31,15 @@ import com.minekube.connect.addon.debug.ChannelInDebugHandler;
 import com.minekube.connect.addon.debug.ChannelOutDebugHandler;
 import com.minekube.connect.addon.debug.StateChangeDetector;
 import com.minekube.connect.api.inject.InjectorAddon;
-import com.minekube.connect.api.logger.FloodgateLogger;
-import com.minekube.connect.config.FloodgateConfig;
+import com.minekube.connect.api.logger.ConnectLogger;
+import com.minekube.connect.config.ConnectConfig;
 import com.minekube.connect.util.Utils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 
 public final class DebugAddon implements InjectorAddon {
-    @Inject private FloodgateConfig config;
-    @Inject private FloodgateLogger logger;
+    @Inject private ConnectConfig config;
+    @Inject private ConnectLogger logger;
 
     @Inject
     @Named("implementationName")

@@ -35,9 +35,9 @@ import static com.minekube.connect.util.ReflectionUtils.getValue;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.inject.Inject;
-import com.minekube.connect.api.ProxyFloodgateApi;
-import com.minekube.connect.api.logger.FloodgateLogger;
-import com.minekube.connect.api.player.FloodgatePlayer;
+import com.minekube.connect.api.ProxyConnectApi;
+import com.minekube.connect.api.logger.ConnectLogger;
+import com.minekube.connect.api.player.ConnectPlayer;
 import com.minekube.connect.network.netty.LocalSession;
 import com.minekube.connect.util.LanguageManager;
 import com.minekube.connect.util.VelocityCommandUtil;
@@ -82,15 +82,15 @@ public final class VelocityListener {
         CHANNEL = getFieldOfType(minecraftConnection, Channel.class);
     }
 
-    private final Cache<InboundConnection, FloodgatePlayer> playerCache =
+    private final Cache<InboundConnection, ConnectPlayer> playerCache =
             CacheBuilder.newBuilder()
                     .maximumSize(500)
                     .expireAfterAccess(20, TimeUnit.SECONDS)
                     .build();
 
-    @Inject private ProxyFloodgateApi api;
+    @Inject private ProxyConnectApi api;
     @Inject private LanguageManager languageManager;
-    @Inject private FloodgateLogger logger;
+    @Inject private ConnectLogger logger;
 
     @Subscribe(order = PostOrder.EARLY)
     public void onPreLogin(PreLoginEvent event) {
@@ -113,7 +113,7 @@ public final class VelocityListener {
                 }
             });
         } catch (Exception exception) {
-            logger.error("Failed get the FloodgatePlayer from the player's channel", exception);
+            logger.error("Failed get the ConnectPlayer from the player's channel", exception);
         }
     }
 
@@ -122,7 +122,7 @@ public final class VelocityListener {
         if (event.isOnlineMode()) {
             return;
         }
-        FloodgatePlayer player = playerCache.getIfPresent(event.getConnection());
+        ConnectPlayer player = playerCache.getIfPresent(event.getConnection());
         if (player != null) {
             playerCache.invalidate(event.getConnection());
             // Use the game profile received from WatchService for this connection
@@ -130,7 +130,7 @@ public final class VelocityListener {
         }
     }
 
-    private GameProfile gameProfileFromPlayer(GameProfile base, FloodgatePlayer player) {
+    private GameProfile gameProfileFromPlayer(GameProfile base, ConnectPlayer player) {
         return base
                 .withId(player.getUniqueId())
                 .withName(player.getUsername())
@@ -142,7 +142,7 @@ public final class VelocityListener {
     @Subscribe(order = PostOrder.LAST)
     public void onLogin(LoginEvent event) {
         if (event.getResult().isAllowed()) {
-            FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
+            ConnectPlayer player = api.getPlayer(event.getPlayer().getUniqueId());
             if (player != null) {
                 languageManager.loadLocale(player.getLanguageTag());
             }

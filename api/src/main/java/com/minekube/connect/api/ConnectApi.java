@@ -23,27 +23,46 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package com.minekube.connect.player;
+package com.minekube.connect.api;
 
-import cloud.commandframework.execution.preprocessor.CommandPreprocessingContext;
-import cloud.commandframework.execution.preprocessor.CommandPreprocessor;
-import com.minekube.connect.platform.command.CommandUtil;
-import lombok.RequiredArgsConstructor;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import com.minekube.connect.api.player.ConnectPlayer;
+import com.minekube.connect.api.unsafe.Unsafe;
+import java.util.Collection;
+import java.util.UUID;
 
-/**
- * Command preprocessor which decorated incoming {@link cloud.commandframework.context.CommandContext}
- * with Floodgate specific objects
- *
- * @param <C> Command sender type
- * @since 2.0
- */
-@RequiredArgsConstructor
-public final class FloodgateCommandPreprocessor<C> implements CommandPreprocessor<C> {
-    private final CommandUtil commandUtil;
-
-    @Override
-    public void accept(@NonNull CommandPreprocessingContext<C> context) {
-        context.getCommandContext().store("CommandUtil", commandUtil);
+public interface ConnectApi {
+    /**
+     * Returns the Floodgate API instance.
+     */
+    static ConnectApi getInstance() {
+        return InstanceHolder.getApi();
     }
+
+    /**
+     * Returns all the online Floodgate players.
+     */
+    Collection<ConnectPlayer> getPlayers();
+
+    /**
+     * Returns the number of Floodgate players who are currently online.
+     */
+    int getPlayerCount();
+
+    /**
+     * Method to determine if the given <b>online</b> player is a bedrock player
+     *
+     * @param uuid The uuid of the <b>online</b> player
+     * @return true if the given <b>online</b> player is tunneled by Connect
+     */
+    boolean isFloodgatePlayer(UUID uuid);
+
+    /**
+     * Get info about the given player.
+     *
+     * @param uuid the uuid of the <b>online</b> player
+     * @return ConnectPlayer if the given uuid is a player tunneled by Connect
+     */
+    ConnectPlayer getPlayer(UUID uuid);
+
+    Unsafe unsafe();
 }

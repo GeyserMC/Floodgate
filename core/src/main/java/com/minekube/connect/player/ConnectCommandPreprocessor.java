@@ -23,30 +23,27 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package com.minekube.connect.config;
+package com.minekube.connect.player;
 
-import com.minekube.connect.util.Utils;
-import lombok.Getter;
+import cloud.commandframework.execution.preprocessor.CommandPreprocessingContext;
+import cloud.commandframework.execution.preprocessor.CommandPreprocessor;
+import com.minekube.connect.platform.command.CommandUtil;
+import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
- * The global Floodgate configuration file used in every platform. Some platforms have their own
- * addition to the global configuration like {@link ProxyFloodgateConfig} for the proxies.
+ * Command preprocessor which decorated incoming {@link cloud.commandframework.context.CommandContext}
+ * with Floodgate specific objects
+ *
+ * @param <C> Command sender type
+ * @since 2.0
  */
-@Getter
-public class FloodgateConfig {
-    private String defaultLocale;
+@RequiredArgsConstructor
+public final class ConnectCommandPreprocessor<C> implements CommandPreprocessor<C> {
+    private final CommandUtil commandUtil;
 
-    private boolean debug;
-    private int configVersion;
-
-    /**
-     * The endpoint name of this instance that is registered when calling the watch service for
-     * listening for sessions for this endpoint.
-     */
-    private String endpoint = Utils.randomString(6); // default to random name
-
-    public boolean isProxy() {
-        return this instanceof ProxyFloodgateConfig;
+    @Override
+    public void accept(@NonNull CommandPreprocessingContext<C> context) {
+        context.getCommandContext().store("CommandUtil", commandUtil);
     }
-
 }

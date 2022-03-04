@@ -27,7 +27,7 @@ package com.minekube.connect;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.module.CommandModule;
 import com.minekube.connect.module.ProxyCommonModule;
 import com.minekube.connect.module.VelocityListenerModule;
@@ -40,7 +40,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import java.nio.file.Path;
 
 public final class VelocityPlugin {
-    private final FloodgatePlatform platform;
+    private final ConnectPlatform platform;
 
     @Inject
     public VelocityPlugin(@DataDirectory Path dataDirectory, Injector guice) {
@@ -52,11 +52,11 @@ public final class VelocityPlugin {
                 new VelocityPlatformModule(guice)
         );
 
-        platform = injector.getInstance(FloodgatePlatform.class);
+        platform = injector.getInstance(ConnectPlatform.class);
 
         long endCtm = System.currentTimeMillis();
-        injector.getInstance(FloodgateLogger.class)
-                .translatedInfo("floodgate.core.finish", endCtm - ctm);
+        injector.getInstance(ConnectLogger.class)
+                .translatedInfo("connect.core.finish", endCtm - ctm);
     }
 
     @Subscribe

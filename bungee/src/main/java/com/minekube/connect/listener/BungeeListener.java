@@ -28,9 +28,9 @@ package com.minekube.connect.listener;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.Inject;
-import com.minekube.connect.api.ProxyFloodgateApi;
-import com.minekube.connect.api.logger.FloodgateLogger;
-import com.minekube.connect.api.player.FloodgatePlayer;
+import com.minekube.connect.api.ProxyConnectApi;
+import com.minekube.connect.api.logger.ConnectLogger;
+import com.minekube.connect.api.player.ConnectPlayer;
 import com.minekube.connect.network.netty.LocalSession;
 import com.minekube.connect.util.BungeeCommandUtil;
 import com.minekube.connect.util.LanguageManager;
@@ -62,9 +62,9 @@ public final class BungeeListener implements Listener {
         checkNotNull(PLAYER_NAME, "Initial name field cannot be null");
     }
 
-    @Inject private ProxyFloodgateApi api;
+    @Inject private ProxyConnectApi api;
     @Inject private LanguageManager languageManager;
-    @Inject private FloodgateLogger logger;
+    @Inject private ConnectLogger logger;
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPreLogin(PreLoginEvent event) {
@@ -91,7 +91,7 @@ public final class BungeeListener implements Listener {
         // if there was another player with the same uuid / name online,
         // he has been disconnected by now
         UUID uniqueId = event.getConnection().getUniqueId();
-        FloodgatePlayer player = api.getPlayer(uniqueId);
+        ConnectPlayer player = api.getPlayer(uniqueId);
         if (player != null) {
             //todo we should probably move this log message earlier in the process, so that we know
             // that Floodgate has done its job
@@ -106,7 +106,7 @@ public final class BungeeListener implements Listener {
 //    @EventHandler(priority = EventPriority.LOWEST)
 //    public void onPostLogin(PostLoginEvent event) {
     // To fix the February 2 2022 Mojang authentication changes
-//        FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
+//        ConnectPlayer player = api.getPlayer(event.getPlayer().getUniqueId());
 //        if (player != null) {
 //            skinApplier.applySkin(player, new SkinData("", ""));
 //        }

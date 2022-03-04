@@ -33,15 +33,15 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.minekube.connect.BungeePlugin;
-import com.minekube.connect.api.FloodgateApi;
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.ConnectApi;
+import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.inject.CommonPlatformInjector;
 import com.minekube.connect.inject.bungee.BungeeInjector;
 import com.minekube.connect.listener.BungeeListenerRegistration;
-import com.minekube.connect.logger.JavaUtilFloodgateLogger;
+import com.minekube.connect.logger.JavaUtilConnectLogger;
 import com.minekube.connect.platform.command.CommandUtil;
 import com.minekube.connect.platform.listener.ListenerRegistration;
-import com.minekube.connect.player.FloodgateCommandPreprocessor;
+import com.minekube.connect.player.ConnectCommandPreprocessor;
 import com.minekube.connect.player.UserAudience;
 import com.minekube.connect.pluginmessage.BungeeSkinApplier;
 import com.minekube.connect.skin.SkinApplier;
@@ -70,8 +70,8 @@ public final class BungeePlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public FloodgateLogger floodgateLogger(LanguageManager languageManager) {
-        return new JavaUtilFloodgateLogger(plugin.getLogger(), languageManager);
+    public ConnectLogger floodgateLogger(LanguageManager languageManager) {
+        return new JavaUtilConnectLogger(plugin.getLogger(), languageManager);
     }
 
     /*
@@ -87,15 +87,15 @@ public final class BungeePlatformModule extends AbstractModule {
                 commandUtil::getAudience,
                 audience -> (CommandSender) audience.source()
         );
-        commandManager.registerCommandPreProcessor(new FloodgateCommandPreprocessor<>(commandUtil));
+        commandManager.registerCommandPreProcessor(new ConnectCommandPreprocessor<>(commandUtil));
         return commandManager;
     }
 
     @Provides
     @Singleton
     public CommandUtil commandUtil(
-            FloodgateApi api,
-            FloodgateLogger logger,
+            ConnectApi api,
+            ConnectLogger logger,
             LanguageManager languageManager) {
         return new BungeeCommandUtil(plugin.getProxy(), api, logger, languageManager);
     }
@@ -108,7 +108,7 @@ public final class BungeePlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public SkinApplier skinApplier(FloodgateLogger logger) {
+    public SkinApplier skinApplier(ConnectLogger logger) {
         return new BungeeSkinApplier(logger);
     }
 
@@ -118,7 +118,7 @@ public final class BungeePlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public CommonPlatformInjector platformInjector(FloodgateLogger logger, ProxyServer proxy,
+    public CommonPlatformInjector platformInjector(ConnectLogger logger, ProxyServer proxy,
                                                    Plugin plugin) {
         return new BungeeInjector(logger, proxy, plugin);
     }

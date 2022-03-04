@@ -28,18 +28,18 @@ package com.minekube.connect;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import com.minekube.connect.api.FloodgateApi;
+import com.minekube.connect.api.ConnectApi;
 import com.minekube.connect.api.inject.PlatformInjector;
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.logger.ConnectLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class SpigotPlatform extends FloodgatePlatform {
+public final class SpigotPlatform extends ConnectPlatform {
     @Inject private JavaPlugin plugin;
 
     @Inject
-    public SpigotPlatform(FloodgateApi api, PlatformInjector platformInjector,
-                          FloodgateLogger logger, Injector injector) {
+    public SpigotPlatform(ConnectApi api, PlatformInjector platformInjector,
+                          ConnectLogger logger, Injector injector) {
         super(api, platformInjector, logger, injector);
     }
 

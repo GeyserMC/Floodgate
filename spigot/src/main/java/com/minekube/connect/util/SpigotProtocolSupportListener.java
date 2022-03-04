@@ -28,7 +28,7 @@ package com.minekube.connect.util;
 import static com.minekube.connect.util.ReflectionUtils.getMethod;
 import static com.minekube.connect.util.ReflectionUtils.getPrefixedClass;
 
-import com.minekube.connect.api.FloodgateApi;
+import com.minekube.connect.api.ConnectApi;
 import java.lang.reflect.Method;
 import java.util.UUID;
 import org.bukkit.event.Event;
@@ -69,7 +69,7 @@ public final class SpigotProtocolSupportListener {
                         return;
                     }
 
-                    if (FloodgateApi.getInstance().isFloodgatePlayer(uuid)) {
+                    if (ConnectApi.getInstance().isFloodgatePlayer(uuid)) {
                         // otherwise ProtocolSupport attempts to connect with online mode
                         ReflectionUtils.invoke(event, setOnlineMode, false);
                     }

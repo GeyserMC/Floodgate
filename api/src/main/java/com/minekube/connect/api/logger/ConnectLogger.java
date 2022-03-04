@@ -25,7 +25,7 @@
 
 package com.minekube.connect.api.logger;
 
-public interface FloodgateLogger {
+public interface ConnectLogger {
     String LOGGER_NAME = "Floodgate";
 
     /**

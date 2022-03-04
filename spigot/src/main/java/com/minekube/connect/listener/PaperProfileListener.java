@@ -28,7 +28,7 @@ package com.minekube.connect.listener;
 import com.destroystokyo.paper.event.profile.PreFillProfileEvent;
 import com.destroystokyo.paper.profile.ProfileProperty;
 import com.google.inject.Inject;
-import com.minekube.connect.api.SimpleFloodgateApi;
+import com.minekube.connect.api.SimpleConnectApi;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -36,7 +36,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 public final class PaperProfileListener implements Listener {
-    @Inject private SimpleFloodgateApi api;
+    @Inject private SimpleConnectApi api;
 
     @EventHandler // TODO robin: remove or replace with session proposal player props
     public void onFill(PreFillProfileEvent event) {

@@ -25,7 +25,7 @@
 
 package com.minekube.connect.api.unsafe;
 
-import com.minekube.connect.api.player.FloodgatePlayer;
+import com.minekube.connect.api.player.ConnectPlayer;
 import java.util.UUID;
 
 public interface Unsafe {
@@ -45,7 +45,7 @@ public interface Unsafe {
      * @param packetId   the id of the packet to send
      * @param packetData the raw packet data
      */
-    default void sendPacket(FloodgatePlayer player, int packetId, byte[] packetData) {
+    default void sendPacket(ConnectPlayer player, int packetId, byte[] packetData) {
         sendPacket(player.getUniqueId(), packetId, packetData);
     }
 }

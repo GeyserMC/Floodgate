@@ -28,7 +28,7 @@ package com.minekube.connect.platform.command;
 import cloud.commandframework.Command;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.context.CommandContext;
-import com.minekube.connect.config.FloodgateConfig;
+import com.minekube.connect.config.ConnectConfig;
 import com.minekube.connect.player.UserAudience;
 
 /**
@@ -56,7 +56,7 @@ public interface FloodgateCommand {
      * @param config the config to check if a command should be added
      * @return true if it should be added
      */
-    default boolean shouldRegister(FloodgateConfig config) {
+    default boolean shouldRegister(ConnectConfig config) {
         return true;
     }
 }

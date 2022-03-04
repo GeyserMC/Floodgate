@@ -25,7 +25,7 @@
 
 package com.minekube.connect.inject.spigot;
 
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.inject.CommonPlatformInjector;
 import com.minekube.connect.network.netty.LocalServerChannelWrapper;
 import com.minekube.connect.network.netty.LocalSession;
@@ -56,7 +56,7 @@ import org.jetbrains.annotations.NotNull;
 
 @RequiredArgsConstructor
 public final class SpigotInjector extends CommonPlatformInjector {
-    private final FloodgateLogger logger;
+    private final ConnectLogger logger;
     /**
      * Used to determine if ViaVersion is set up to a state where Connect players will fail at
      * joining if injection is enabled

@@ -30,7 +30,7 @@ import static com.minekube.connect.util.ReflectionUtils.setValue;
 
 import com.google.gson.Gson;
 import com.minekube.connect.SpigotPlugin;
-import com.minekube.connect.config.FloodgateConfig;
+import com.minekube.connect.config.ConnectConfig;
 import com.minekube.connect.network.netty.LocalSession.Context;
 import com.minekube.connect.util.ClassNames;
 import com.minekube.connect.util.ProxyUtils;
@@ -45,7 +45,7 @@ public final class SpigotDataHandler extends CommonDataHandler {
     public SpigotDataHandler(
             Context sessionCtx,
             String packetHandlerName,
-            FloodgateConfig config) {
+            ConnectConfig config) {
         super(config);
         this.sessionCtx = sessionCtx;
         this.packetHandlerName = packetHandlerName;

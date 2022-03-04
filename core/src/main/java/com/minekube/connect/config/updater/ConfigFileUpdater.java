@@ -27,7 +27,7 @@ package com.minekube.connect.config.updater;
 
 import com.google.common.base.Ascii;
 import com.google.inject.Inject;
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.config.loader.DefaultConfigHandler;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class ConfigFileUpdater {
-    @Inject private FloodgateLogger logger;
+    @Inject private ConnectLogger logger;
     @Inject private DefaultConfigHandler defaultConfigHandler;
 
     /**

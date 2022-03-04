@@ -25,7 +25,7 @@
 
 package com.minekube.connect.addon.debug;
 
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.logger.ConnectLogger;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -35,7 +35,7 @@ import io.netty.handler.codec.MessageToByteEncoder;
 @Sharable
 public final class ChannelOutDebugHandler extends MessageToByteEncoder<ByteBuf> {
     private final String direction;
-    private final FloodgateLogger logger;
+    private final ConnectLogger logger;
 
     private final boolean toServer;
     private final StateChangeDetector changeDetector;
@@ -44,7 +44,7 @@ public final class ChannelOutDebugHandler extends MessageToByteEncoder<ByteBuf> 
             String implementationType,
             boolean toServer,
             StateChangeDetector changeDetector,
-            FloodgateLogger logger) {
+            ConnectLogger logger) {
         this.direction = implementationType + (toServer ? " -> Server" : " -> Player");
         this.logger = logger;
         this.toServer = toServer;

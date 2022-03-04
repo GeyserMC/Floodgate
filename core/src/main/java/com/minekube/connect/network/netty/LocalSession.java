@@ -26,13 +26,13 @@
 package com.minekube.connect.network.netty;
 
 import com.google.common.base.Preconditions;
-import com.minekube.connect.api.SimpleFloodgateApi;
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.SimpleConnectApi;
+import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.api.player.Auth;
-import com.minekube.connect.api.player.FloodgatePlayer;
+import com.minekube.connect.api.player.ConnectPlayer;
 import com.minekube.connect.api.player.GameProfile;
 import com.minekube.connect.api.player.GameProfile.Property;
-import com.minekube.connect.player.FloodgatePlayerImpl;
+import com.minekube.connect.player.ConnectPlayerImpl;
 import com.minekube.connect.tunnel.Tunneler;
 import com.minekube.connect.watch.SessionProposal;
 import com.minekube.connect.watch.SessionProposal.State;
@@ -71,23 +71,33 @@ public final class LocalSession {
     private static DefaultEventLoopGroup DEFAULT_EVENT_LOOP_GROUP;
     private static PreferredDirectByteBufAllocator PREFERRED_DIRECT_BYTE_BUF_ALLOCATOR = null;
 
-    private final FloodgateLogger logger;
-    private final SimpleFloodgateApi api;
+    private final ConnectLogger logger;
+    private final SimpleConnectApi api;
     private final Tunneler tunneler;
     private final SocketAddress targetAddress; // The server we are connecting to
     private final SessionProposal sessionProposal;
 
     private final AtomicBoolean connectOnce = new AtomicBoolean();
 
-    /**
-     * Every {@link LocalSession} attaches connection context to a {@link Channel} and can be
-     * extracted using {@link LocalSession#context(Channel)}.
-     */
-    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-    @Getter
-    public static class Context {
-        final @NotNull FloodgatePlayer player;
-        final @NotNull InetSocketAddress spoofedAddress; // real client address
+    private static ConnectPlayer fromProto(Session s) {
+        Player p = s.getPlayer();
+        return new ConnectPlayerImpl(
+                s.getId(),
+                new GameProfile(
+                        p.getProfile().getName(),
+                        UUID.fromString(p.getProfile().getId()),
+                        p.getProfile().getPropertiesList().stream()
+                                .map(property -> new Property(
+                                        property.getName(),
+                                        property.getValue(),
+                                        property.getSignature()))
+                                .collect(Collectors.toList())
+                ),
+                new Auth(
+                        s.getAuth().getPassthrough()
+                ),
+                "" // TODO extract from http accept language header
+        );
     }
 
     /**
@@ -186,25 +196,15 @@ public final class LocalSession {
         }
     }
 
-    private static FloodgatePlayer fromProto(Session s) {
-        Player p = s.getPlayer();
-        return new FloodgatePlayerImpl(
-                s.getId(),
-                new GameProfile(
-                        p.getProfile().getName(),
-                        UUID.fromString(p.getProfile().getId()),
-                        p.getProfile().getPropertiesList().stream()
-                                .map(property -> new Property(
-                                        property.getName(),
-                                        property.getValue(),
-                                        property.getSignature()))
-                                .collect(Collectors.toList())
-                ),
-                new Auth(
-                        s.getAuth().getPassthrough()
-                ),
-                "" // TODO extract from http accept language header
-        );
+    /**
+     * Every {@link LocalSession} attaches connection context to a {@link Channel} and can be
+     * extracted using {@link LocalSession#context(Channel)}.
+     */
+    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+    @Getter
+    public static class Context {
+        final @NotNull ConnectPlayer player;
+        final @NotNull InetSocketAddress spoofedAddress; // real client address
     }
 
     private static InetSocketAddress createAddress(String addr) {

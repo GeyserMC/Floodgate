@@ -29,7 +29,7 @@ import cloud.commandframework.CommandManager;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.minekube.connect.config.FloodgateConfig;
+import com.minekube.connect.config.ConnectConfig;
 import com.minekube.connect.platform.command.FloodgateCommand;
 import com.minekube.connect.player.UserAudience;
 import java.util.Set;
@@ -41,13 +41,13 @@ import java.util.Set;
  */
 public final class CommandRegister {
     private final CommandManager<UserAudience> commandManager;
-    private final FloodgateConfig config;
+    private final ConnectConfig config;
     private final Injector guice;
 
     @Inject
     public CommandRegister(Injector guice) {
         this.commandManager = guice.getInstance(new Key<CommandManager<UserAudience>>() {});
-        this.config = guice.getInstance(FloodgateConfig.class);
+        this.config = guice.getInstance(ConnectConfig.class);
         this.guice = guice;
     }
 

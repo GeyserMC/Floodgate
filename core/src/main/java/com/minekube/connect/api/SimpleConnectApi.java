@@ -29,8 +29,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.minekube.connect.api.logger.FloodgateLogger;
-import com.minekube.connect.api.player.FloodgatePlayer;
+import com.minekube.connect.api.logger.ConnectLogger;
+import com.minekube.connect.api.player.ConnectPlayer;
 import com.minekube.connect.api.unsafe.Unsafe;
 import java.util.Collection;
 import java.util.Map;
@@ -39,17 +39,17 @@ import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class SimpleFloodgateApi implements FloodgateApi {
-    private final Map<UUID, FloodgatePlayer> players = Maps.newConcurrentMap();
-    private final Cache<UUID, FloodgatePlayer> pendingRemove =
+public class SimpleConnectApi implements ConnectApi {
+    private final Map<UUID, ConnectPlayer> players = Maps.newConcurrentMap();
+    private final Cache<UUID, ConnectPlayer> pendingRemove =
             CacheBuilder.newBuilder()
                     .expireAfterWrite(20, TimeUnit.SECONDS)
                     .build();
 
-    private final FloodgateLogger logger;
+    private final ConnectLogger logger;
 
     @Override
-    public Collection<FloodgatePlayer> getPlayers() {
+    public Collection<ConnectPlayer> getPlayers() {
         return ImmutableSet.copyOf(players.values());
     }
 
@@ -64,8 +64,8 @@ public class SimpleFloodgateApi implements FloodgateApi {
     }
 
     @Override
-    public FloodgatePlayer getPlayer(UUID uuid) {
-        FloodgatePlayer player = players.get(uuid);
+    public ConnectPlayer getPlayer(UUID uuid) {
+        ConnectPlayer player = players.get(uuid);
         if (player != null) {
             return player;
         }
@@ -83,7 +83,7 @@ public class SimpleFloodgateApi implements FloodgateApi {
         return new UnsafeFloodgateApi();
     }
 
-    public FloodgatePlayer addPlayer(FloodgatePlayer player) {
+    public ConnectPlayer addPlayer(ConnectPlayer player) {
         return players.put(player.getUniqueId(), player);
     }
 
@@ -91,7 +91,7 @@ public class SimpleFloodgateApi implements FloodgateApi {
      * This method is invoked when the player is no longer on the server, but the related platform-
      * dependant event hasn't fired yet
      */
-    public boolean setPendingRemove(FloodgatePlayer player) {
+    public boolean setPendingRemove(ConnectPlayer player) {
         pendingRemove.put(player.getUniqueId(), player);
         return players.remove(player.getUniqueId(), player);
     }
@@ -101,7 +101,7 @@ public class SimpleFloodgateApi implements FloodgateApi {
         players.remove(uuid);
     }
 
-    private FloodgatePlayer getPendingRemovePlayer(UUID uuid) {
+    private ConnectPlayer getPendingRemovePlayer(UUID uuid) {
         return pendingRemove.getIfPresent(uuid);
     }
 }

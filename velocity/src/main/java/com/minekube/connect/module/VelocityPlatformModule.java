@@ -36,14 +36,14 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.minekube.connect.VelocityPlugin;
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.inject.CommonPlatformInjector;
 import com.minekube.connect.inject.velocity.VelocityInjector;
 import com.minekube.connect.listener.VelocityListenerRegistration;
-import com.minekube.connect.logger.Slf4jFloodgateLogger;
+import com.minekube.connect.logger.Slf4JConnectLogger;
 import com.minekube.connect.platform.command.CommandUtil;
 import com.minekube.connect.platform.listener.ListenerRegistration;
-import com.minekube.connect.player.FloodgateCommandPreprocessor;
+import com.minekube.connect.player.ConnectCommandPreprocessor;
 import com.minekube.connect.player.UserAudience;
 import com.minekube.connect.skin.SkinApplier;
 import com.minekube.connect.util.LanguageManager;
@@ -79,13 +79,13 @@ public final class VelocityPlatformModule extends AbstractModule {
 
         bind(new Key<CommandManager<UserAudience>>() {}).toInstance(commandManager);
 
-        commandManager.registerCommandPreProcessor(new FloodgateCommandPreprocessor<>(commandUtil));
+        commandManager.registerCommandPreProcessor(new ConnectCommandPreprocessor<>(commandUtil));
     }
 
     @Provides
     @Singleton
-    public FloodgateLogger floodgateLogger(Logger logger, LanguageManager languageManager) {
-        return new Slf4jFloodgateLogger(logger, languageManager);
+    public ConnectLogger logger(Logger logger, LanguageManager languageManager) {
+        return new Slf4JConnectLogger(logger, languageManager);
     }
 
     /*

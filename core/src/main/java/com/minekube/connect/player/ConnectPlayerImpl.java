@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
+ * Copyright (c) 2021-2022 Minekube. https://minekube.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,35 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *
- * @author GeyserMC
- * @link https://github.com/GeyserMC/Floodgate
+ * @author Minekube
+ * @link https://github.com/minekube/connect-java
  */
 
-package com.minekube.connect.module;
+package com.minekube.connect.player;
 
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import com.minekube.connect.api.SimpleConnectApi;
-import com.minekube.connect.api.logger.ConnectLogger;
-import com.minekube.connect.config.ConnectConfig;
-import java.nio.file.Path;
+import com.minekube.connect.api.player.Auth;
+import com.minekube.connect.api.player.ConnectPlayer;
+import com.minekube.connect.api.player.GameProfile;
+import java.util.UUID;
+import lombok.Data;
 
-public final class ServerCommonModule extends CommonModule {
-    public ServerCommonModule(Path dataDirectory) {
-        super(dataDirectory);
+@Data
+public final class ConnectPlayerImpl implements ConnectPlayer {
+    private final String sessionId;
+    private final GameProfile gameProfile;
+    private final Auth auth;
+    private final String languageTag;
+
+    @Override
+    public UUID getUniqueId() {
+        return gameProfile.getUniqueId();
     }
 
-    @Provides
-    @Singleton
-    @Named("configClass")
-    public Class<? extends ConnectConfig> floodgateConfigClass() {
-        return ConnectConfig.class;
-    }
-
-    @Provides
-    @Singleton
-    public SimpleConnectApi floodgateApi(ConnectLogger logger) {
-        return new SimpleConnectApi(logger);
+    @Override
+    public String getUsername() {
+        return gameProfile.getUsername();
     }
 }

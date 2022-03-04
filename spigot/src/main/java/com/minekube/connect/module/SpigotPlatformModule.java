@@ -32,12 +32,12 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.minekube.connect.SpigotPlugin;
-import com.minekube.connect.api.FloodgateApi;
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.ConnectApi;
+import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.inject.CommonPlatformInjector;
 import com.minekube.connect.inject.spigot.SpigotInjector;
 import com.minekube.connect.listener.SpigotListenerRegistration;
-import com.minekube.connect.logger.JavaUtilFloodgateLogger;
+import com.minekube.connect.logger.JavaUtilConnectLogger;
 import com.minekube.connect.platform.command.CommandUtil;
 import com.minekube.connect.platform.listener.ListenerRegistration;
 import com.minekube.connect.pluginmessage.SpigotSkinApplier;
@@ -62,8 +62,8 @@ public final class SpigotPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public FloodgateLogger floodgateLogger(LanguageManager languageManager) {
-        return new JavaUtilFloodgateLogger(plugin.getLogger(), languageManager);
+    public ConnectLogger floodgateLogger(LanguageManager languageManager) {
+        return new JavaUtilConnectLogger(plugin.getLogger(), languageManager);
     }
 
     /*
@@ -73,9 +73,9 @@ public final class SpigotPlatformModule extends AbstractModule {
     @Provides
     @Singleton
     public CommandUtil commandUtil(
-            FloodgateApi api,
+            ConnectApi api,
             SpigotVersionSpecificMethods versionSpecificMethods,
-            FloodgateLogger logger,
+            ConnectLogger logger,
             LanguageManager languageManager) {
         return new SpigotCommandUtil(plugin.getServer(), api, versionSpecificMethods, plugin,
                 logger, languageManager);
@@ -93,7 +93,7 @@ public final class SpigotPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public CommonPlatformInjector platformInjector(FloodgateLogger logger) {
+    public CommonPlatformInjector platformInjector(ConnectLogger logger) {
         final String VIAVERSION_DOWNLOAD_URL = "https://ci.viaversion.com/job/ViaVersion/";
         boolean isViaVersion = Bukkit.getPluginManager().getPlugin("ViaVersion") != null;
         if (isViaVersion) {

@@ -27,17 +27,17 @@ package com.minekube.connect.addon.data;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.minekube.connect.api.SimpleFloodgateApi;
+import com.minekube.connect.api.SimpleConnectApi;
 import com.minekube.connect.api.inject.InjectorAddon;
-import com.minekube.connect.api.logger.FloodgateLogger;
-import com.minekube.connect.config.FloodgateConfig;
+import com.minekube.connect.api.logger.ConnectLogger;
+import com.minekube.connect.config.ConnectConfig;
 import com.minekube.connect.network.netty.LocalSession;
 import io.netty.channel.Channel;
 
 public final class SpigotDataAddon implements InjectorAddon {
-    @Inject private FloodgateConfig config;
-    @Inject private SimpleFloodgateApi api;
-    @Inject private FloodgateLogger logger;
+    @Inject private ConnectConfig config;
+    @Inject private SimpleConnectApi api;
+    @Inject private ConnectLogger logger;
 
     @Inject
     @Named("packetHandler")
@@ -64,7 +64,7 @@ public final class SpigotDataAddon implements InjectorAddon {
             // TODO test if we get this message
             System.out.println("and got local session context! NICE!!!");
             if (api.setPendingRemove(ctx.getPlayer())) {
-                logger.translatedInfo("floodgate.ingame.disconnect_name",
+                logger.translatedInfo("connect.ingame.disconnect_name",
                         ctx.getPlayer().getUsername());
             }
         });

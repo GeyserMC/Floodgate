@@ -26,7 +26,7 @@
 package com.minekube.connect.player;
 
 import com.minekube.connect.api.handshake.HandshakeData;
-import com.minekube.connect.api.player.FloodgatePlayer;
+import com.minekube.connect.api.player.ConnectPlayer;
 import io.netty.channel.Channel;
 import java.net.InetSocketAddress;
 import lombok.AccessLevel;
@@ -36,19 +36,19 @@ import org.geysermc.floodgate.util.BedrockData;
 
 public class FloodgateHandshakeHandler {
     //    private final HandshakeHandlersImpl handshakeHandlers;
-//    private final SimpleFloodgateApi api;
+//    private final SimpleConnectApi api;
 //    private final FloodgateCipher cipher;
 //    private final FloodgateConfigHolder configHolder;
-//    private final AttributeKey<FloodgatePlayer> playerAttribute;
-//    private final FloodgateLogger logger;
+//    private final AttributeKey<ConnectPlayer> playerAttribute;
+//    private final ConnectLogger logger;
 //
 //    public FloodgateHandshakeHandler(
 //            HandshakeHandlersImpl handshakeHandlers,
-//            SimpleFloodgateApi api,
+//            SimpleConnectApi api,
 //            FloodgateCipher cipher,
 //            FloodgateConfigHolder configHolder,
-//            AttributeKey<FloodgatePlayer> playerAttribute,
-//            FloodgateLogger logger) {
+//            AttributeKey<ConnectPlayer> playerAttribute,
+//            ConnectLogger logger) {
 //
 //        this.handshakeHandlers = handshakeHandlers;
 //        this.api = api;
@@ -267,11 +267,11 @@ public class FloodgateHandshakeHandler {
         private final ResultType resultType;
         private final HandshakeData handshakeData;
         private final BedrockData bedrockData;
-        private final FloodgatePlayer floodgatePlayer;
+        private final ConnectPlayer connectPlayer;
 
         public InetSocketAddress getNewIp(Channel channel) {
-            if (floodgatePlayer != null) {
-//                return floodgatePlayer.getProperty(PropertyKey.SOCKET_ADDRESS);
+            if (connectPlayer != null) {
+//                return connectPlayer.getProperty(PropertyKey.SOCKET_ADDRESS);
             }
             if (handshakeData.getIp() != null) {
                 int port = ((InetSocketAddress) channel.remoteAddress()).getPort();

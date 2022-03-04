@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Minekube. https://minekube.com
+ * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,32 +19,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *
- * @author Minekube
- * @link https://github.com/minekube/connect-java
+ * @author GeyserMC
+ * @link https://github.com/GeyserMC/Floodgate
  */
 
-package com.minekube.connect.player;
+package com.minekube.connect.api;
 
-import com.minekube.connect.api.player.Auth;
-import com.minekube.connect.api.player.FloodgatePlayer;
-import com.minekube.connect.api.player.GameProfile;
-import java.util.UUID;
-import lombok.Data;
+import com.minekube.connect.api.logger.ConnectLogger;
 
-@Data
-public final class FloodgatePlayerImpl implements FloodgatePlayer {
-    private final String sessionId;
-    private final GameProfile gameProfile;
-    private final Auth auth;
-    private final String languageTag;
+public final class ProxyConnectApi extends SimpleConnectApi {
 
-    @Override
-    public UUID getUniqueId() {
-        return gameProfile.getUniqueId();
+    public ProxyConnectApi(ConnectLogger logger) {
+        super(logger);
     }
 
-    @Override
-    public String getUsername() {
-        return gameProfile.getUsername();
-    }
 }

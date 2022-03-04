@@ -27,7 +27,7 @@ package com.minekube.connect.watch;
 
 import com.google.inject.Inject;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.minekube.connect.config.FloodgateConfig;
+import com.minekube.connect.config.ConnectConfig;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.SessionRejection;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.WatchRequest;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.WatchResponse;
@@ -46,10 +46,10 @@ public class WatchClient {
             "CONNECT_WATCH_URL", "wss://connect.minekube.net/watch");
 
     private final OkHttpClient httpClient;
-    private final FloodgateConfig config;
+    private final ConnectConfig config;
 
     @Inject
-    public WatchClient(OkHttpClient httpClient, FloodgateConfig config) {
+    public WatchClient(OkHttpClient httpClient, ConnectConfig config) {
         this.httpClient = httpClient;
         this.config = config;
     }

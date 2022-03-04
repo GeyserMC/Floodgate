@@ -32,7 +32,7 @@ import java.util.UUID;
 import lombok.Getter;
 
 public final class InstanceHolder {
-    @Getter private static FloodgateApi api;
+    @Getter private static ConnectApi api;
 
     @Getter private static PlatformInjector injector;
     @Getter private static PacketHandlers packetHandlers;
@@ -40,7 +40,7 @@ public final class InstanceHolder {
     private static UUID storedKey;
 
     public static boolean set(
-            FloodgateApi floodgateApi,
+            ConnectApi connectApi,
             PlatformInjector platformInjector,
             PacketHandlers packetHandlers,
             HandshakeHandlers handshakeHandlers,
@@ -54,7 +54,7 @@ public final class InstanceHolder {
             storedKey = key;
         }
 
-        api = floodgateApi;
+        api = connectApi;
         injector = platformInjector;
         InstanceHolder.packetHandlers = packetHandlers;
         InstanceHolder.handshakeHandlers = handshakeHandlers;
@@ -62,7 +62,7 @@ public final class InstanceHolder {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends FloodgateApi> T castApi(Class<T> cast) {
+    public static <T extends ConnectApi> T castApi(Class<T> cast) {
         return (T) api;
     }
 }

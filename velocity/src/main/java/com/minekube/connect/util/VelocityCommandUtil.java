@@ -26,8 +26,8 @@
 package com.minekube.connect.util;
 
 import com.google.inject.Inject;
-import com.minekube.connect.api.FloodgateApi;
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.ConnectApi;
+import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.platform.command.CommandUtil;
 import com.minekube.connect.platform.command.TranslatableMessage;
 import com.minekube.connect.player.UserAudience;
@@ -52,8 +52,8 @@ public final class VelocityCommandUtil implements CommandUtil {
     private static UserAudience console;
 
     @Inject private ProxyServer server;
-    @Inject private FloodgateApi api;
-    @Inject private FloodgateLogger logger;
+    @Inject private ConnectApi api;
+    @Inject private ConnectLogger logger;
     @Inject private LanguageManager manager;
 
     @Override

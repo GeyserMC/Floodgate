@@ -25,7 +25,7 @@
 
 package com.minekube.connect.addon.debug;
 
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.util.Constants;
 import com.minekube.connect.util.Utils;
 import io.netty.buffer.ByteBuf;
@@ -39,7 +39,7 @@ public class StateChangeDetector {
     private static volatile int pluginMessageToServerId = -1;
 
     private final Channel channel;
-    private final FloodgateLogger logger;
+    private final ConnectLogger logger;
     private final String packetEncoderName;
     private final String packetDecoderName;
 
@@ -50,7 +50,7 @@ public class StateChangeDetector {
             Channel channel,
             String packetEncoderName,
             String packetDecoderName,
-            FloodgateLogger logger) {
+            ConnectLogger logger) {
         this.channel = channel;
         this.packetEncoderName = packetEncoderName;
         this.packetDecoderName = packetDecoderName;

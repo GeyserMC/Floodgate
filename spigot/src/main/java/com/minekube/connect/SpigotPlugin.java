@@ -28,7 +28,7 @@ package com.minekube.connect;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.minekube.connect.api.handshake.HandshakeHandlers;
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.module.PaperListenerModule;
 import com.minekube.connect.module.ServerCommonModule;
 import com.minekube.connect.module.SpigotAddonModule;
@@ -58,8 +58,8 @@ public final class SpigotPlugin extends JavaPlugin {
         platform = injector.getInstance(SpigotPlatform.class);
 
         long endCtm = System.currentTimeMillis();
-        injector.getInstance(FloodgateLogger.class)
-                .translatedInfo("floodgate.core.finish", endCtm - ctm);
+        injector.getInstance(ConnectLogger.class)
+                .translatedInfo("connect.core.finish", endCtm - ctm);
     }
 
     @Override

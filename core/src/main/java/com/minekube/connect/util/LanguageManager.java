@@ -26,8 +26,8 @@
 package com.minekube.connect.util;
 
 import com.google.common.base.Joiner;
-import com.minekube.connect.api.logger.FloodgateLogger;
-import com.minekube.connect.config.FloodgateConfig;
+import com.minekube.connect.api.logger.ConnectLogger;
+import com.minekube.connect.config.ConnectConfig;
 import com.minekube.connect.config.FloodgateConfigHolder;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -49,7 +49,7 @@ import lombok.RequiredArgsConstructor;
 public final class LanguageManager {
     private final Map<String, Properties> localeMappings = new HashMap<>();
     private final FloodgateConfigHolder configHolder;
-    private final FloodgateLogger logger;
+    private final ConnectLogger logger;
 
     /**
      * The locale used in console and as a fallback
@@ -83,7 +83,7 @@ public final class LanguageManager {
             logger.error("Failed to load the fallback language. This will likely cause errors!");
         }
 
-        FloodgateConfig config = configHolder.get();
+        ConnectConfig config = configHolder.get();
         if (config == null) {
             // :thonk:
             return;

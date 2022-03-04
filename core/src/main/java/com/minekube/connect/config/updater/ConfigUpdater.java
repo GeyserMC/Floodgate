@@ -28,7 +28,7 @@ package com.minekube.connect.config.updater;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.minekube.connect.util.MessageFormatter.format;
 
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.config.loader.ConfigLoader;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -44,7 +44,7 @@ public final class ConfigUpdater {
     private static final int CONFIG_VERSION = 1;
     private final Path dataFolder;
     private final ConfigFileUpdater fileUpdater;
-    private final FloodgateLogger logger;
+    private final ConnectLogger logger;
 
     public void update(ConfigLoader loader, String defaultConfigLocation) {
         Path configLocation = dataFolder.resolve("config.yml");

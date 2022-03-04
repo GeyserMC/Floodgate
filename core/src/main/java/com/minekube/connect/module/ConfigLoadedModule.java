@@ -28,24 +28,24 @@ package com.minekube.connect.module;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.minekube.connect.config.ConnectConfig;
+import com.minekube.connect.config.ProxyConnectConfig;
 import lombok.RequiredArgsConstructor;
-import com.minekube.connect.config.FloodgateConfig;
-import com.minekube.connect.config.ProxyFloodgateConfig;
 
 @RequiredArgsConstructor
 public final class ConfigLoadedModule extends AbstractModule {
-    private final FloodgateConfig config;
+    private final ConnectConfig config;
 
     @Override
     protected void configure() {
-        if (config instanceof ProxyFloodgateConfig) {
-            bind(ProxyFloodgateConfig.class).toInstance((ProxyFloodgateConfig) config);
+        if (config instanceof ProxyConnectConfig) {
+            bind(ProxyConnectConfig.class).toInstance((ProxyConnectConfig) config);
         }
     }
 
     @Provides
     @Singleton
-    public FloodgateConfig floodgateConfig() {
+    public ConnectConfig floodgateConfig() {
         return config;
     }
 }

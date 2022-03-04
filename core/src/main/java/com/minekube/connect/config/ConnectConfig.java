@@ -23,14 +23,30 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package com.minekube.connect.api;
+package com.minekube.connect.config;
 
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.util.Utils;
+import lombok.Getter;
 
-public final class ProxyFloodgateApi extends SimpleFloodgateApi {
+/**
+ * The global Floodgate configuration file used in every platform. Some platforms have their own
+ * addition to the global configuration like {@link ProxyConnectConfig} for the proxies.
+ */
+@Getter
+public class ConnectConfig {
+    private String defaultLocale;
 
-    public ProxyFloodgateApi(FloodgateLogger logger) {
-        super(logger);
+    private boolean debug;
+    private int configVersion;
+
+    /**
+     * The endpoint name of this instance that is registered when calling the watch service for
+     * listening for sessions for this endpoint.
+     */
+    private final String endpoint = Utils.randomString(6); // default to random name
+
+    public boolean isProxy() {
+        return this instanceof ProxyConnectConfig;
     }
 
 }

@@ -25,7 +25,7 @@
 
 package com.minekube.connect.config.loader;
 
-import com.minekube.connect.config.FloodgateConfig;
+import com.minekube.connect.config.ConnectConfig;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -50,7 +50,7 @@ public class ConfigInitializer {
             @Override
             protected Map<String, Property> getPropertiesMap(Class<?> type, BeanAccess bAccess) {
                 Map<String, Property> properties = new LinkedHashMap<>();
-                getPropertiesFromClass(type, FloodgateConfig.class, properties);
+                getPropertiesFromClass(type, ConnectConfig.class, properties);
                 return properties;
             }
 
@@ -101,7 +101,7 @@ public class ConfigInitializer {
         YAML = new Yaml(constructor);
     }
 
-    public static <T extends FloodgateConfig> T initializeFrom(
+    public static <T extends ConnectConfig> T initializeFrom(
             InputStream dataStream,
             Class<T> configClass) {
         return YAML.loadAs(dataStream, configClass);

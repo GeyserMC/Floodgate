@@ -28,9 +28,9 @@ package com.minekube.connect.register;
 import com.google.inject.Inject;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
-import com.minekube.connect.api.SimpleFloodgateApi;
+import com.minekube.connect.api.SimpleConnectApi;
 import com.minekube.connect.api.inject.PlatformInjector;
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.network.netty.LocalSession;
 import com.minekube.connect.tunnel.Tunneler;
 import com.minekube.connect.watch.SessionProposal;
@@ -48,8 +48,8 @@ public class WatcherRegister {
     @Inject private WatchClient watchClient;
     @Inject private Tunneler tunneler;
     @Inject private PlatformInjector platformInjector;
-    @Inject private FloodgateLogger logger;
-    @Inject private SimpleFloodgateApi api;
+    @Inject private ConnectLogger logger;
+    @Inject private SimpleConnectApi api;
 
     @Inject
     public void start() {

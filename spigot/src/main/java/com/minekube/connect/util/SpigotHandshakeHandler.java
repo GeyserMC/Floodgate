@@ -28,13 +28,13 @@ package com.minekube.connect.util;
 import com.google.inject.Inject;
 import com.minekube.connect.api.handshake.HandshakeData;
 import com.minekube.connect.api.handshake.HandshakeHandler;
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.logger.ConnectLogger;
 import java.util.UUID;
 import org.geysermc.floodgate.util.BedrockData;
 
 public class SpigotHandshakeHandler implements HandshakeHandler {
     @Inject
-    private FloodgateLogger logger;
+    private ConnectLogger logger;
 
     @Override
     public void handle(HandshakeData data) {

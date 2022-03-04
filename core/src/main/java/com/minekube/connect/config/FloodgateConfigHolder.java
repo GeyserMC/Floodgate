@@ -28,30 +28,30 @@ package com.minekube.connect.config;
 import org.geysermc.floodgate.util.FloodgateInfoHolder;
 
 public class FloodgateConfigHolder {
-    private FloodgateConfig config;
+    private ConnectConfig config;
 
     public boolean has() {
         return config != null;
     }
 
     public boolean isProxy() {
-        return config instanceof ProxyFloodgateConfig;
+        return config instanceof ProxyConnectConfig;
     }
 
-    public FloodgateConfig get() {
+    public ConnectConfig get() {
         return config;
     }
 
-    public ProxyFloodgateConfig getAsProxy() {
+    public ProxyConnectConfig getAsProxy() {
         return getAs();
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends FloodgateConfig> T getAs() {
+    public <T extends ConnectConfig> T getAs() {
         return (T) config;
     }
 
-    public void set(FloodgateConfig config) {
+    public void set(ConnectConfig config) {
         this.config = config;
         // for Geyser dump
         FloodgateInfoHolder.setConfig(config);

@@ -27,36 +27,36 @@ package com.minekube.connect.logger;
 
 import static com.minekube.connect.util.MessageFormatter.format;
 
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.util.LanguageManager;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.slf4j.Logger;
 
 @RequiredArgsConstructor
-public final class JavaUtilFloodgateLogger implements FloodgateLogger {
+public final class Slf4JConnectLogger implements ConnectLogger {
     private final Logger logger;
     private final LanguageManager languageManager;
-    private Level originLevel;
 
     @Override
     public void error(String message, Object... args) {
-        logger.severe(format(message, args));
+        logger.error(message, args);
     }
 
     @Override
     public void error(String message, Throwable throwable, Object... args) {
-        logger.log(Level.SEVERE, format(message, args), throwable);
+        logger.error(format(message, args), throwable);
     }
 
     @Override
     public void warn(String message, Object... args) {
-        logger.warning(format(message, args));
+        logger.warn(message, args);
     }
 
     @Override
     public void info(String message, Object... args) {
-        logger.info(format(message, args));
+        logger.info(message, args);
     }
 
     @Override
@@ -66,29 +66,30 @@ public final class JavaUtilFloodgateLogger implements FloodgateLogger {
 
     @Override
     public void debug(String message, Object... args) {
-        logger.fine(format(message, args));
+        logger.debug(message, args);
     }
 
     @Override
     public void trace(String message, Object... args) {
-        logger.finer(format(message, args));
+        logger.trace(message, args);
     }
 
     @Override
     public void enableDebug() {
-        originLevel = logger.getLevel();
-        logger.setLevel(Level.ALL);
+        if (!logger.isDebugEnabled()) {
+            Configurator.setLevel(logger.getName(), Level.DEBUG);
+        }
     }
 
     @Override
     public void disableDebug() {
-        if (originLevel != null) {
-            logger.setLevel(originLevel);
+        if (logger.isDebugEnabled()) {
+            Configurator.setLevel(logger.getName(), Level.INFO);
         }
     }
 
     @Override
     public boolean isDebug() {
-        return logger.getLevel() == Level.ALL;
+        return logger.isDebugEnabled();
     }
 }

@@ -27,7 +27,7 @@ package com.minekube.connect;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.minekube.connect.api.logger.FloodgateLogger;
+import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.module.BungeeListenerModule;
 import com.minekube.connect.module.BungeePlatformModule;
 import com.minekube.connect.module.CommandModule;
@@ -37,7 +37,7 @@ import com.minekube.connect.util.ReflectionUtils;
 import net.md_5.bungee.api.plugin.Plugin;
 
 public final class BungeePlugin extends Plugin {
-    private FloodgatePlatform platform;
+    private ConnectPlatform platform;
 
     @Override
     public void onLoad() {
@@ -51,11 +51,11 @@ public final class BungeePlugin extends Plugin {
 
         // BungeeCord doesn't have a build-in function to disable plugins,
         // so there is no need to have a custom Platform class like Spigot
-        platform = injector.getInstance(FloodgatePlatform.class);
+        platform = injector.getInstance(ConnectPlatform.class);
 
         long endCtm = System.currentTimeMillis();
-        injector.getInstance(FloodgateLogger.class)
-                .translatedInfo("floodgate.core.finish", endCtm - ctm);
+        injector.getInstance(ConnectLogger.class)
+                .translatedInfo("connect.core.finish", endCtm - ctm);
     }
 
     @Override

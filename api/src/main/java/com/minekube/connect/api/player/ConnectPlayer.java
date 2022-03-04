@@ -27,7 +27,7 @@ package com.minekube.connect.api.player;
 
 import java.util.UUID;
 
-public interface FloodgatePlayer {
+public interface ConnectPlayer {
     /**
      * Returns the Minecraft uuid of that player.
      */
@@ -59,13 +59,13 @@ public interface FloodgatePlayer {
     Auth getAuth();
 
     /**
-     * Casts the FloodgatePlayer instance to a class that extends FloodgatePlayer.
+     * Casts the ConnectPlayer instance to a class that extends ConnectPlayer.
      *
      * @param <T> The instance to cast to.
-     * @return The FloodgatePlayer casted to the given class
+     * @return The ConnectPlayer casted to the given class
      * @throws ClassCastException when it can't cast the instance to the given class
      */
-    default <T extends FloodgatePlayer> T as(Class<T> clazz) {
+    default <T extends ConnectPlayer> T as(Class<T> clazz) {
         return clazz.cast(this);
     }
 }
