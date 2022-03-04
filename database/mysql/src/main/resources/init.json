@@ -1,4 +1,0 @@
-{
-  "mainClass": "org.geysermc.floodgate.database.MysqlDatabase",
-  "config": "mysql.yml"
-}

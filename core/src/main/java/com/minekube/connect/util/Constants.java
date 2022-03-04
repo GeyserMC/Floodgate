@@ -34,32 +34,9 @@ public final class Constants {
     public static final boolean DEBUG_MODE = false;
     public static final boolean PRINT_ALL_PACKETS = false;
 
-    public static final String DATABASE_NAME_FORMAT = "^floodgate-[a-zA-Z0-9_]{0,16}-database.jar$";
-
 
     private static final String API_BASE_URL = "s://api.geysermc.org";
     public static final String HEALTH_URL = "http" + API_BASE_URL + "/health";
-
-    public static final String WEBSOCKET_URL = "ws" + API_BASE_URL + "/ws";
-    public static final String GET_XUID_URL = "http" + API_BASE_URL + "/v2/xbox/xuid/";
-    public static final String GET_GAMERTAG_URL = "http" + API_BASE_URL + "/v2/xbox/gamertag/";
-    public static final String NEWS_OVERVIEW_URL = "http" + API_BASE_URL + "/v2/news/";
-    public static final String GET_BEDROCK_LINK = "http" + API_BASE_URL + "/v2/link/bedrock/";
-
-    public static final String LINK_INFO_URL = "https://link.geysermc.org/";
-
-    public static final String NEWS_PROJECT_NAME = "floodgate";
-
-
-    public static final String NTP_SERVER = "time.cloudflare.com";
-    public static final String INTERNAL_ERROR_MESSAGE =
-            "An internal error happened while handling Floodgate data." + 
-            " Try logging in again or contact a server administrator if the issue persists.";
-    public static final String UNSUPPORTED_DATA_VERSION =
-            "Received an unsupported Floodgate data version." +
-            " This Floodgate version is made for data version %s, received %s." +
-            " Make sure that Floodgate is up-to-date.";
-
 
     public static final int HANDSHAKE_PACKET_ID = 0;
     public static final int LOGIN_SUCCESS_PACKET_ID = 2;

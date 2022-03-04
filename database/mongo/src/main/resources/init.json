@@ -1,4 +1,0 @@
-{
-  "mainClass": "org.geysermc.floodgate.database.MongoDbDatabase",
-  "config": "mongo.yml"
-}
