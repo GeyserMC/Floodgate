@@ -25,30 +25,98 @@
 
 package org.geysermc.floodgate.platform.command;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.player.UserAudience;
-import org.geysermc.floodgate.player.UserAudienceArgument.PlayerType;
+import org.geysermc.floodgate.player.audience.ProfileAudience;
+import org.geysermc.floodgate.player.audience.ProfileAudienceArgument.PlayerType;
+import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.Utils;
 
 /**
  * An interface used across all Floodgate platforms to simple stuff in commands like kicking players
  * and sending player messages independent of the Floodgate platform implementation.
  */
-public interface CommandUtil {
-    @NonNull UserAudience getAudience(final @NonNull Object source);
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+public abstract class CommandUtil {
+    protected final LanguageManager manager;
+    protected final FloodgateApi api;
 
-    @Nullable UserAudience getAudienceByUuid(final @NonNull UUID uuid);
+    public abstract @NonNull UserAudience getUserAudience(@NonNull Object source);
 
-    @NonNull UserAudience getOfflineAudienceByUuid(final @NonNull UUID uuid);
+    /**
+     * Get a ProfileAudience from a source. The source should be a platform-specific player instance
+     * when the player is online, and the username / uuid of the requested player when offline.
+     *
+     * @param source       source to create a ProfileAudience from
+     * @param allowOffline if offline players are allowed
+     * @return a ProfileAudience unless allowOffline is false and the player isn't online
+     */
+    public @Nullable ProfileAudience getProfileAudience(
+            @NonNull Object source,
+            boolean allowOffline) {
+        Objects.requireNonNull(source);
 
-    @Nullable UserAudience getAudienceByUsername(final @NonNull String username);
+        if (source instanceof UUID) {
+            return allowOffline ? new ProfileAudience((UUID) source, null) : null;
+        } else if (source instanceof String) {
+            return allowOffline ? new ProfileAudience(null, (String) source) : null;
+        } else {
+            return new ProfileAudience(getUuidFromSource(source), getUsernameFromSource(source));
+        }
+    }
 
-    @NonNull UserAudience getOfflineAudienceByUsername(final @NonNull String username);
+    protected abstract String getUsernameFromSource(@NonNull Object source);
+    protected abstract UUID getUuidFromSource(@NonNull Object source);
 
-    @NonNull Collection<String> getOnlineUsernames(final @NonNull PlayerType limitTo);
+    protected abstract Collection<?> getOnlinePlayers();
+
+    public @NonNull Collection<String> getOnlineUsernames(@NonNull PlayerType limitTo) {
+        Collection<?> players = getOnlinePlayers();
+
+        Collection<String> usernames = new ArrayList<>();
+        switch (limitTo) {
+            case ALL_PLAYERS:
+                for (Object player : players) {
+                    usernames.add(getUsernameFromSource(player));
+                }
+                break;
+            case ONLY_JAVA:
+                for (Object player : players) {
+                    if (!api.isFloodgatePlayer(getUuidFromSource(player))) {
+                        usernames.add(getUsernameFromSource(player));
+                    }
+                }
+                break;
+            case ONLY_BEDROCK:
+                for (Object player : players) {
+                    if (api.isFloodgatePlayer(getUuidFromSource(player))) {
+                        usernames.add(getUsernameFromSource(player));
+                    }
+                }
+                break;
+            default:
+                throw new IllegalStateException("Unknown PlayerType");
+        }
+        return usernames;
+    }
+
+    /**
+     *
+     * @param uuid
+     * @return
+     */
+    public abstract Object getPlayerByUuid(@NonNull UUID uuid);
+
+    public abstract Object getPlayerByUsername(@NonNull String username);
 
     /**
      * Checks if the given player has the given permission.
@@ -57,7 +125,7 @@ public interface CommandUtil {
      * @param permission the permission to check
      * @return true or false depending on if the player has the permission
      */
-    boolean hasPermission(Object player, String permission);
+    public abstract boolean hasPermission(Object player, String permission);
 
     /**
      * Get all online players with the given permission.
@@ -65,17 +133,15 @@ public interface CommandUtil {
      * @param permission the permission to check
      * @return a list of online players that have the given permission
      */
-    Collection<Object> getOnlinePlayersWithPermission(String permission);
-
-    /**
-     * Send a message to the specified target, no matter what platform Floodgate is running on.
-     *
-     * @param target  the player that should receive the message
-     * @param message the command message
-     * @param locale  the locale of the player
-     * @param args    the arguments
-     */
-    void sendMessage(Object target, String locale, TranslatableMessage message, Object... args);
+    public Collection<Object> getOnlinePlayersWithPermission(String permission) {
+        List<Object> players = new ArrayList<>();
+        for (Object player : getOnlinePlayers()) {
+            if (hasPermission(player, permission)) {
+                players.add(player);
+            }
+        }
+        return players;
+    }
 
     /**
      * Sends a raw message to the specified target, no matter what platform Floodgate is running
@@ -84,18 +150,19 @@ public interface CommandUtil {
      * @param target  the player that should receive the message
      * @param message the message
      */
-    void sendMessage(Object target, String message);
+    public abstract void sendMessage(Object target, String message);
 
     /**
-     * Same as {@link CommandUtil#sendMessage(Object, String, TranslatableMessage, Object...)}
-     * except it kicks the player using the given message as the kick reason.
+     * Kicks the given player using the given message as the kick reason.
      *
      * @param player  the player that should be kicked
      * @param message the command message
-     * @param locale  the locale of the player
-     * @param args    the arguments
      */
-    void kickPlayer(Object player, String locale, TranslatableMessage message, Object... args);
+    public abstract void kickPlayer(Object player, String message);
+
+    public String translateMessage(String locale, TranslatableMessage message, Object... args) {
+        return message.translateMessage(manager, locale, args);
+    }
 
     /**
      * Whitelist the given Bedrock player.
@@ -105,7 +172,7 @@ public interface CommandUtil {
      * @return true if the player has been whitelisted, false if the player was already whitelisted.
      * Defaults to false when this platform doesn't support whitelisting.
      */
-    default boolean whitelistPlayer(String xuid, String username) {
+    public boolean whitelistPlayer(String xuid, String username) {
         UUID uuid = Utils.getJavaUuid(xuid);
         return whitelistPlayer(uuid, username);
     }
@@ -118,7 +185,7 @@ public interface CommandUtil {
      * @return true if the player has been whitelisted, false if the player was already whitelisted.
      * Defaults to false when this platform doesn't support whitelisting.
      */
-    default boolean whitelistPlayer(UUID uuid, String username) {
+    public boolean whitelistPlayer(UUID uuid, String username) {
         return false;
     }
 
@@ -130,7 +197,7 @@ public interface CommandUtil {
      * @return true if the player has been removed from the whitelist, false if the player wasn't
      * whitelisted. Defaults to false when this platform doesn't support whitelisting.
      */
-    default boolean removePlayerFromWhitelist(String xuid, String username) {
+    public boolean removePlayerFromWhitelist(String xuid, String username) {
         UUID uuid = Utils.getJavaUuid(xuid);
         return removePlayerFromWhitelist(uuid, username);
     }
@@ -143,7 +210,7 @@ public interface CommandUtil {
      * @return true if the player has been removed from the whitelist, false if the player wasn't
      * whitelisted. Defaults to false when this platform doesn't support whitelisting.
      */
-    default boolean removePlayerFromWhitelist(UUID uuid, String username) {
+    public boolean removePlayerFromWhitelist(UUID uuid, String username) {
         return false;
     }
 }

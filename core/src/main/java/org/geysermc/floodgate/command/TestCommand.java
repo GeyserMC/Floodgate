@@ -28,7 +28,6 @@ package org.geysermc.floodgate.command;
 import cloud.commandframework.Command;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.context.CommandContext;
-import net.kyori.adventure.text.Component;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
@@ -47,7 +46,7 @@ public class TestCommand implements FloodgateCommand {
     @Override
     public void execute(CommandContext<UserAudience> context) {
         int players = FloodgateApi.getInstance().getPlayers().size();
-        context.getSender().sendMessage(Component.text(players));
+        context.getSender().sendMessage(String.valueOf(players));
     }
 
     @Override

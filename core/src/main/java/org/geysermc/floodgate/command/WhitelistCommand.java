@@ -38,17 +38,18 @@ import java.util.UUID;
 import lombok.Getter;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.command.util.Permission;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.player.UserAudience;
-import org.geysermc.floodgate.player.UserAudienceArgument;
-import org.geysermc.floodgate.player.UserAudienceArgument.PlayerType;
+import org.geysermc.floodgate.player.audience.ProfileAudience;
+import org.geysermc.floodgate.player.audience.ProfileAudienceArgument;
+import org.geysermc.floodgate.player.audience.ProfileAudienceArgument.PlayerType;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.HttpUtils;
-import org.geysermc.floodgate.command.util.Permission;
 
 public class WhitelistCommand implements FloodgateCommand {
     @Inject private FloodgateConfig config;
@@ -62,21 +63,21 @@ public class WhitelistCommand implements FloodgateCommand {
 
         commandManager.command(builder
                 .literal("add", "a")
-                .argument(UserAudienceArgument.of("player", true, true, PlayerType.ONLY_BEDROCK))
+                .argument(ProfileAudienceArgument.of("player", true, true, PlayerType.ONLY_BEDROCK))
                 .handler(context -> performCommand(context, true)));
 
         return builder
                 .literal("remove", "r")
-                .argument(UserAudienceArgument.of("player", true, true, PlayerType.ONLY_BEDROCK))
+                .argument(ProfileAudienceArgument.of("player", true, true, PlayerType.ONLY_BEDROCK))
                 .handler(context -> performCommand(context, false))
                 .build();
     }
 
     public void performCommand(CommandContext<UserAudience> context, boolean add) {
         UserAudience sender = context.getSender();
-        UserAudience player = context.get("player");
-        UUID uuid = player.uuid();
-        String name = player.username();
+        ProfileAudience profile = context.get("player");
+        UUID uuid = profile.uuid();
+        String name = profile.username();
 
         if (name == null && uuid == null) {
             sender.sendMessage(Message.UNEXPECTED_ERROR);

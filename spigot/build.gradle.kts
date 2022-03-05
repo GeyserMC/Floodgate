@@ -7,10 +7,7 @@ dependencies {
 
     // hack to make pre 1.12 work
     implementation("com.google.guava", "guava", guavaVersion)
-
     implementation("cloud.commandframework", "cloud-bukkit", Versions.cloudVersion)
-    implementation("net.kyori", "adventure-text-serializer-legacy", Versions.adventureApiVersion)
-    implementation("net.kyori", "adventure-text-serializer-gson", Versions.adventureApiVersion)
 }
 
 relocate("com.google.inject")

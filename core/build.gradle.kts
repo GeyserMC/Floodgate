@@ -11,7 +11,6 @@ dependencies {
     api("com.nukkitx.fastutil", "fastutil-short-object-maps", Versions.fastutilVersion)
     api("com.nukkitx.fastutil", "fastutil-int-object-maps", Versions.fastutilVersion)
     api("org.java-websocket", "Java-WebSocket", Versions.javaWebsocketVersion)
-    api("net.kyori", "adventure-api", Versions.adventureApiVersion)
     api("cloud.commandframework", "cloud-core", Versions.cloudVersion)
     api("org.yaml", "snakeyaml", Versions.snakeyamlVersion)
 }

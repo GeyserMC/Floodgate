@@ -83,7 +83,7 @@ public final class BungeePlatformModule extends AbstractModule {
         CommandManager<UserAudience> commandManager = new BungeeCommandManager<>(
                 plugin,
                 CommandExecutionCoordinator.simpleCoordinator(),
-                commandUtil::getAudience,
+                commandUtil::getUserAudience,
                 audience -> (CommandSender) audience.source()
         );
         commandManager.registerCommandPreProcessor(new FloodgateCommandPreprocessor<>(commandUtil));
@@ -92,11 +92,8 @@ public final class BungeePlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public CommandUtil commandUtil(
-            FloodgateApi api,
-            FloodgateLogger logger,
-            LanguageManager languageManager) {
-        return new BungeeCommandUtil(plugin.getProxy(), api, logger, languageManager);
+    public CommandUtil commandUtil(FloodgateApi api, LanguageManager languageManager) {
+        return new BungeeCommandUtil(languageManager, plugin.getProxy(), api);
     }
 
     @Provides

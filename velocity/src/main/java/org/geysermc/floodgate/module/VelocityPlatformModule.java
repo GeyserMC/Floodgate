@@ -66,25 +66,24 @@ public final class VelocityPlatformModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        VelocityCommandUtil commandUtil = new VelocityCommandUtil();
-        requestInjection(commandUtil);
-
         bind(CommandUtil.class).to(VelocityCommandUtil.class);
-        bind(VelocityCommandUtil.class).toInstance(commandUtil);
+    }
 
+    @Provides
+    @Singleton
+    public CommandManager<UserAudience> commandManager(CommandUtil commandUtil) {
         Injector child = guice.createChildInjector(new CloudInjectionModule<>(
                 UserAudience.class,
                 CommandExecutionCoordinator.simpleCoordinator(),
-                commandUtil::getAudience,
+                commandUtil::getUserAudience,
                 audience -> (CommandSource) audience.source()
         ));
 
         CommandManager<UserAudience> commandManager =
                 child.getInstance(new Key<VelocityCommandManager<UserAudience>>() {});
 
-        bind(new Key<CommandManager<UserAudience>>() {}).toInstance(commandManager);
-
         commandManager.registerCommandPreProcessor(new FloodgateCommandPreprocessor<>(commandUtil));
+        return commandManager;
     }
 
     @Provides
@@ -99,8 +98,9 @@ public final class VelocityPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public ListenerRegistration<Object> listenerRegistration(EventManager eventManager,
-                                                             VelocityPlugin plugin) {
+    public ListenerRegistration<Object> listenerRegistration(
+            EventManager eventManager,
+            VelocityPlugin plugin) {
         return new VelocityListenerRegistration(eventManager, plugin);
     }
 
