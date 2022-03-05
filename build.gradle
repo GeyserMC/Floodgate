@@ -35,13 +35,14 @@ dependencies {
     shadow("org.geysermc.floodgate:common:${project.mod_version}") {
         exclude group: 'com.google.guava', module: "guava"
         exclude group: 'com.google.code.gson', module: "gson"
+        exclude group: 'net.kyori', module: '*' // Let Adventure-Platform provide its desired Adventure version
     }
 
     include(modImplementation('cloud.commandframework:cloud-fabric:1.5.0') {
         because "Commands library implementation for Fabric"
     })
 
-    include(modImplementation('net.kyori:adventure-platform-fabric:5.0.0') {
+    include(modImplementation('net.kyori:adventure-platform-fabric:5.2.0') {
         because "Chat library implementation for Fabric that includes methods for communicating with the server"
         // Thanks to zml for this fix
         // The package modifies Brigadier which causes a LinkageError at runtime if included
