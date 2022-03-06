@@ -11,12 +11,12 @@ pipeline {
         stage ('Build') {
             steps {
                 sh 'git submodule update --init --recursive'
-                rtGradleRun {
+                rtGradleRun(
                     usesPlugin: true,
                     tool: 'Gradle 7',
                     buildFile: 'build.gradle.kts',
                     tasks: 'clean build',
-                }
+                )
             }
             post {
                 success {
