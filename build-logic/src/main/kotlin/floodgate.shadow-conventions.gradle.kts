@@ -33,7 +33,11 @@ tasks {
 }
 
 publishing {
-    publications.named<MavenPublication>("mavenJava") {
+    publications.create<MavenPublication>("mavenJava") {
+        groupId = project.group as String
+        artifactId = "floodgate-" + project.name
+        version = project.version as String
+
         artifact(tasks["shadowJar"])
         artifact(tasks["sourcesJar"])
     }
@@ -42,7 +46,7 @@ publishing {
 artifactory {
     publish {
         repository {
-            setRepoKey("maven-snapshots")
+            setRepoKey(if (isSnapshot()) "maven-snapshots" else "maven-releases")
             setMavenCompatible(true)
         }
         defaults {
