@@ -20,8 +20,6 @@ val platforms = setOf(
 
 //todo re-add pmd and organisation/license/sdcm/issuemanagement stuff
 
-val api: Project = projects.api.dependencyProject
-
 subprojects {
 //    apply(plugin = "com.github.spotbugs")
 
@@ -47,7 +45,6 @@ subprojects {
     } else {
         when (this) {
             in platforms -> plugins.apply("floodgate.shadow-conventions")
-            api -> plugins.apply("floodgate.shadow-conventions")
             else -> plugins.apply("floodgate.base-conventions")
         }
     }

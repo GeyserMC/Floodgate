@@ -11,11 +11,18 @@ pipeline {
         stage ('Build') {
             steps {
                 sh 'git submodule update --init --recursive'
-                sh './gradlew clean build'
+                rtGradleRun {
+                    usesPlugin: true,
+                    tool: 'Gradle 7',
+                    buildFile: 'build.gradle.kts',
+                    tasks: 'clean build',
+                }
             }
             post {
                 success {
-                    archiveArtifacts artifacts: '**/build/libs/floodgate-*.jar', fingerprint: true
+                    archiveArtifacts artifacts: '**/build/libs/floodgate-*.jar',
+                        excludes: '**/floodgate-parent-*.jar',
+                        fingerprint: true
                 }
             }
         }
@@ -45,7 +52,7 @@ pipeline {
                         rootDir: "",
                         useWrapper: true,
                         buildFile: 'build.gradle.kts',
-                        tasks: 'build artifactoryPublish',
+                        tasks: 'artifactoryPublish',
                         deployerId: "GRADLE_DEPLOYER",
                         resolverId: "GRADLE_RESOLVER"
                 )

@@ -4,6 +4,7 @@ plugins {
     id("floodgate.base-conventions")
     id("com.github.johnrengelman.shadow")
     id("com.jfrog.artifactory")
+    id("maven-publish")
 }
 
 tasks {
