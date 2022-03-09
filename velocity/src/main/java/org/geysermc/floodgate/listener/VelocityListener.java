@@ -143,14 +143,17 @@ public final class VelocityListener {
         FloodgatePlayer player = playerCache.getIfPresent(event.getConnection());
         if (player != null) {
             playerCache.invalidate(event.getConnection());
+
+            GameProfile profile = new GameProfile(
+                    player.getCorrectUniqueId(),
+                    player.getCorrectUsername(),
+                    Collections.emptyList()
+            );
             // The texture properties addition is to fix the February 2 2022 Mojang authentication changes
             if (!config.isSendFloodgateData() && !player.isLinked()) {
-                event.setGameProfile(new GameProfile(
-                        player.getCorrectUniqueId(),
-                        player.getCorrectUsername(),
-                        Collections.singletonList(new Property("textures", "", ""))
-                ));
+                profile = profile.addProperty(new Property("textures", "", ""));
             }
+            event.setGameProfile(profile);
         }
     }
 
