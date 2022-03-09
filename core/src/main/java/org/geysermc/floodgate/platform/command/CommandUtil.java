@@ -25,6 +25,9 @@
 
 package org.geysermc.floodgate.platform.command;
 
+import static org.geysermc.floodgate.platform.util.PlatformUtils.PlayerType.ALL_PLAYERS;
+import static org.geysermc.floodgate.platform.util.PlatformUtils.PlayerType.ONLY_BEDROCK;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -35,9 +38,9 @@ import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.floodgate.platform.util.PlatformUtils.PlayerType;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.player.audience.ProfileAudience;
-import org.geysermc.floodgate.player.audience.ProfileAudienceArgument.PlayerType;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.Utils;
 
@@ -116,7 +119,24 @@ public abstract class CommandUtil {
      */
     public abstract Object getPlayerByUuid(@NonNull UUID uuid);
 
+    public Object getPlayerByUuid(@NonNull UUID uuid, PlayerType limitTo) {
+        return applyPlayerTypeFilter(getPlayerByUuid(uuid), limitTo, uuid);
+    }
+
     public abstract Object getPlayerByUsername(@NonNull String username);
+
+    public Object getPlayerByUsername(@NonNull String username, PlayerType limitTo) {
+        return applyPlayerTypeFilter(getPlayerByUsername(username), limitTo, username);
+    }
+
+    protected Object applyPlayerTypeFilter(Object player, PlayerType filter, Object fallback) {
+        if (filter == ALL_PLAYERS || player instanceof String || player instanceof UUID) {
+            return player;
+        }
+        return (filter == ONLY_BEDROCK) == api.isFloodgatePlayer(getUuidFromSource(player))
+                ? player
+                : fallback;
+    }
 
     /**
      * Checks if the given player has the given permission.

@@ -37,6 +37,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.platform.command.CommandUtil;
+import org.geysermc.floodgate.platform.util.PlatformUtils.PlayerType;
 import org.geysermc.floodgate.player.UserAudience;
 
 public class ProfileAudienceArgument extends CommandArgument<UserAudience, ProfileAudience> {
@@ -76,12 +77,6 @@ public class ProfileAudienceArgument extends CommandArgument<UserAudience, Profi
         return of(name, false, allowOffline, PlayerType.ALL_PLAYERS);
     }
 
-    public enum PlayerType {
-        ALL_PLAYERS,
-        ONLY_BEDROCK,
-        ONLY_JAVA
-    }
-
     @RequiredArgsConstructor
     public static final class ProfileAudienceParser
             implements ArgumentParser<UserAudience, ProfileAudience> {
@@ -94,7 +89,6 @@ public class ProfileAudienceArgument extends CommandArgument<UserAudience, Profi
         public @NonNull ArgumentParseResult<ProfileAudience> parse(
                 @NonNull CommandContext<@NonNull UserAudience> commandContext,
                 @NonNull Queue<@NonNull String> inputQueue) {
-            //todo we don't use the limitTo in the getProfile methods
             CommandUtil commandUtil = commandContext.get("CommandUtil");
 
             String input = inputQueue.poll();
@@ -148,7 +142,7 @@ public class ProfileAudienceArgument extends CommandArgument<UserAudience, Profi
 
                 try {
                     // We only want to make sure the UUID is valid here.
-                    Object player = commandUtil.getPlayerByUuid(UUID.fromString(input));
+                    Object player = commandUtil.getPlayerByUuid(UUID.fromString(input), limitTo);
                     profileAudience = commandUtil.getProfileAudience(player, allowOffline);
                 } catch (final IllegalArgumentException ignored) {
                     return ArgumentParseResult.failure(
@@ -156,7 +150,7 @@ public class ProfileAudienceArgument extends CommandArgument<UserAudience, Profi
                 }
             } else {
                 // This is a username.
-                Object player = commandUtil.getPlayerByUsername(input);
+                Object player = commandUtil.getPlayerByUsername(input, limitTo);
                 profileAudience = commandUtil.getProfileAudience(player, allowOffline);
             }
 
