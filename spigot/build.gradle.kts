@@ -5,9 +5,9 @@ var gsonVersion = "2.8.5"
 dependencies {
     api(projects.core)
 
+    implementation("cloud.commandframework", "cloud-bukkit", Versions.cloudVersion)
     // hack to make pre 1.12 work
     implementation("com.google.guava", "guava", guavaVersion)
-    implementation("cloud.commandframework", "cloud-bukkit", Versions.cloudVersion)
 }
 
 relocate("com.google.inject")

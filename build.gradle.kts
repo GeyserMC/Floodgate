@@ -44,7 +44,7 @@ subprojects {
         plugins.apply("floodgate.database-conventions")
     } else {
         when (this) {
-            in platforms -> plugins.apply("floodgate.shadow-conventions")
+            in platforms -> plugins.apply("floodgate.publish-conventions")
             else -> plugins.apply("floodgate.base-conventions")
         }
     }

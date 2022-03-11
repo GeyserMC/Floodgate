@@ -36,7 +36,7 @@ fun Project.isSnapshot(): Boolean =
 fun Project.fullVersion(): String {
     var version = version.toString()
     if (version.endsWith("-SNAPSHOT")) {
-        version += " (b${buildNumberAsString()}-${lastCommitHash()}}"
+        version += " (b${buildNumberAsString()}-${lastCommitHash()})"
     }
     return version
 }
