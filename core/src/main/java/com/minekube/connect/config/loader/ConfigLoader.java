@@ -28,17 +28,17 @@ package com.minekube.connect.config.loader;
 import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.config.ConnectConfig;
 import com.minekube.connect.config.ProxyConnectConfig;
-import com.minekube.connect.config.updater.ConfigUpdater;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
 public final class ConfigLoader {
     private final Path dataFolder;
     private final Class<? extends ConnectConfig> configClass;
     private final DefaultConfigHandler configCreator;
-    private final ConfigUpdater updater;
 
     private final ConnectLogger logger;
 
@@ -63,11 +63,6 @@ public final class ConfigLoader {
 
         T configInstance;
         try {
-            // check and update if the config is outdated
-            if (!newConfig) {
-                updater.update(this, defaultConfigName);
-            }
-
             ConnectConfig config = ConfigInitializer.initializeFrom(
                     Files.newInputStream(configPath), configClass);
 

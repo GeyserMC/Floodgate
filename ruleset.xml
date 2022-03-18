@@ -10,10 +10,6 @@
 
   <!-- UnusedPrivateMethod -->
   <exclude-pattern>.*/CommonPlayerLink.*</exclude-pattern>
-  <!-- NullAssignment -->
-  <exclude-pattern>.*/DefaultConfigHandler.*</exclude-pattern>
-  <!-- NullAssignment -->
-  <exclude-pattern>.*/ConfigFileUpdater.*</exclude-pattern>
   <!-- RedundantFieldInitializer -->
   <exclude-pattern>.*/FloodgateConfig.*</exclude-pattern>
   <!-- CloseResource, there is no shutdown event and it has to load classes on the fly -->

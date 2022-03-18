@@ -40,7 +40,6 @@ import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.api.player.ConnectPlayer;
 import com.minekube.connect.network.netty.LocalSession;
 import com.minekube.connect.util.LanguageManager;
-import com.minekube.connect.util.VelocityCommandUtil;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
@@ -152,7 +151,5 @@ public final class VelocityListener {
     @Subscribe(order = PostOrder.LAST)
     public void onDisconnect(DisconnectEvent event) {
         api.playerRemoved(event.getPlayer().getUniqueId());
-
-        VelocityCommandUtil.AUDIENCE_CACHE.remove(event.getPlayer().getUniqueId()); //todo
     }
 }

@@ -27,7 +27,6 @@ package com.minekube.connect.platform.util;
 
 import com.minekube.connect.platform.command.CommandUtil;
 import com.minekube.connect.platform.command.TranslatableMessage;
-import java.util.Collection;
 
 public interface PlatformUtils {
     /**
@@ -51,11 +50,4 @@ public interface PlatformUtils {
      */
     void kickPlayer(Object player, String locale, TranslatableMessage message, Object... args);
 
-    Collection<String> getOnlineUsernames(PlayerType limitTo);
-
-    enum PlayerType {
-        ALL_PLAYERS,
-        ONLY_BEDROCK,
-        ONLY_JAVA
-    }
 }

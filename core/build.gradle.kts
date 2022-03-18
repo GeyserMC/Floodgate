@@ -4,6 +4,7 @@ import net.kyori.blossom.BlossomExtension
 plugins {
     idea // used to let Intellij recognize protobuf generated sources
     id("net.kyori.blossom")
+    id("floodgate.shadow-conventions")
     id("com.google.protobuf")
 }
 
@@ -14,9 +15,9 @@ dependencies {
     api("com.nukkitx.fastutil", "fastutil-short-object-maps", Versions.fastutilVersion)
     api("com.nukkitx.fastutil", "fastutil-int-object-maps", Versions.fastutilVersion)
     api("org.java-websocket", "Java-WebSocket", Versions.javaWebsocketVersion)
-    api("net.kyori", "adventure-api", Versions.adventureApiVersion)
     api("cloud.commandframework", "cloud-core", Versions.cloudVersion)
     api("org.yaml", "snakeyaml", Versions.snakeyamlVersion)
+    api("org.bstats", "bstats-base", Versions.bstatsVersion)
 
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
     runtimeOnly("io.grpc", "grpc-netty-shaded", Versions.gRPCVersion)
@@ -29,6 +30,8 @@ dependencies {
 provided("io.netty", "netty-transport", Versions.nettyVersion)
 provided("io.netty", "netty-codec", Versions.nettyVersion)
 provided("io.netty", "netty-transport-native-unix-common", Versions.nettyVersion)
+
+relocate("org.bstats")
 
 configure<BlossomExtension> {
     val constantsFile = "src/main/java/com/minekube/connect/util/Constants.java"

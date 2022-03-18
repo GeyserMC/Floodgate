@@ -30,10 +30,13 @@ import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 
+fun Project.isSnapshot(): Boolean =
+    version.toString().endsWith("-SNAPSHOT")
+
 fun Project.fullVersion(): String {
     var version = version.toString()
     if (version.endsWith("-SNAPSHOT")) {
-        version += " (b${buildNumberAsString()}-${lastCommitHash()}}"
+        version += " (b${buildNumberAsString()}-${lastCommitHash()})"
     }
     return version
 }

@@ -52,7 +52,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 @RequiredArgsConstructor
 public final class SpigotInjector extends CommonPlatformInjector {
@@ -271,10 +271,10 @@ public final class SpigotInjector extends CommonPlatformInjector {
                 .channel(LocalChannel.class)
                 .handler(new ChannelInitializer<Channel>() {
                     @Override
-                    protected void initChannel(@NotNull Channel ch) {
+                    protected void initChannel(@NonNull Channel ch) {
                         ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
                             @Override
-                            public void channelActive(@NotNull ChannelHandlerContext ctx) {
+                            public void channelActive(@NonNull ChannelHandlerContext ctx) {
                                 ctx.close();
                             }
                         });

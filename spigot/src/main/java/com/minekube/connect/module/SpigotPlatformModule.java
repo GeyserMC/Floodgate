@@ -75,10 +75,9 @@ public final class SpigotPlatformModule extends AbstractModule {
     public CommandUtil commandUtil(
             ConnectApi api,
             SpigotVersionSpecificMethods versionSpecificMethods,
-            ConnectLogger logger,
             LanguageManager languageManager) {
-        return new SpigotCommandUtil(plugin.getServer(), api, versionSpecificMethods, plugin,
-                logger, languageManager);
+        return new SpigotCommandUtil(
+                languageManager, plugin.getServer(), api, versionSpecificMethods, plugin);
     }
 
     @Provides

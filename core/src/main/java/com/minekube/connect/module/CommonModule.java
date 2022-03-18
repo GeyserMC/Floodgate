@@ -41,8 +41,6 @@ import com.minekube.connect.config.ConnectConfig;
 import com.minekube.connect.config.FloodgateConfigHolder;
 import com.minekube.connect.config.loader.ConfigLoader;
 import com.minekube.connect.config.loader.DefaultConfigHandler;
-import com.minekube.connect.config.updater.ConfigFileUpdater;
-import com.minekube.connect.config.updater.ConfigUpdater;
 import com.minekube.connect.inject.CommonPlatformInjector;
 import com.minekube.connect.packet.PacketHandlersImpl;
 import com.minekube.connect.util.LanguageManager;
@@ -85,24 +83,14 @@ public class CommonModule extends AbstractModule {
     public ConfigLoader configLoader(
             @Named("configClass") Class<? extends ConnectConfig> configClass,
             DefaultConfigHandler defaultConfigHandler,
-            ConfigUpdater configUpdater,
             ConnectLogger logger) {
-        return new ConfigLoader(dataDirectory, configClass, defaultConfigHandler, configUpdater,
-                logger);
+        return new ConfigLoader(dataDirectory, configClass, defaultConfigHandler, logger);
     }
 
     @Provides
     @Singleton
     public DefaultConfigHandler defaultConfigCreator() {
         return new DefaultConfigHandler();
-    }
-
-    @Provides
-    @Singleton
-    public ConfigUpdater configUpdater(
-            ConfigFileUpdater configFileUpdater,
-            ConnectLogger logger) {
-        return new ConfigUpdater(dataDirectory, configFileUpdater, logger);
     }
 
     @Provides

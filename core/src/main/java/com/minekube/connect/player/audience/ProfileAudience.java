@@ -23,22 +23,21 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package com.minekube.connect.player;
+package com.minekube.connect.player.audience;
 
 import java.util.UUID;
-import net.kyori.adventure.audience.Audience;
-import org.checkerframework.checker.index.qual.NonNegative;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public interface ServerAudience extends Audience {
-    @NonNull Iterable<? extends UserAudience> onlineAudiences();
+@Getter
+@Accessors(fluent = true)
+public final class ProfileAudience {
+    private final @Nullable UUID uuid;
+    private final @Nullable String username;
 
-    UserAudience.@NonNull ConsoleAudience consoleAudience();
-
-    @NonNegative int onlineCount();
-
-    @Nullable UserAudience audienceOf(final @NonNull UUID uuid);
-
-    @Nullable UserAudience audienceOf(final @NonNull String username);
+    public ProfileAudience(@Nullable UUID uuid, @Nullable String username) {
+        this.uuid = uuid;
+        this.username = username;
+    }
 }
