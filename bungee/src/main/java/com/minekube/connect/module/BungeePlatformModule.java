@@ -84,7 +84,7 @@ public final class BungeePlatformModule extends AbstractModule {
         CommandManager<UserAudience> commandManager = new BungeeCommandManager<>(
                 plugin,
                 CommandExecutionCoordinator.simpleCoordinator(),
-                commandUtil::getAudience,
+                commandUtil::getUserAudience,
                 audience -> (CommandSender) audience.source()
         );
         commandManager.registerCommandPreProcessor(new ConnectCommandPreprocessor<>(commandUtil));
@@ -93,11 +93,8 @@ public final class BungeePlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public CommandUtil commandUtil(
-            ConnectApi api,
-            ConnectLogger logger,
-            LanguageManager languageManager) {
-        return new BungeeCommandUtil(plugin.getProxy(), api, logger, languageManager);
+    public CommandUtil commandUtil(ConnectApi api, LanguageManager languageManager) {
+        return new BungeeCommandUtil(languageManager, plugin.getProxy(), api);
     }
 
     @Provides

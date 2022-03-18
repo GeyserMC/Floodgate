@@ -59,7 +59,7 @@ public final class SpigotCommandModule extends CommandModule {
         CommandManager<UserAudience> commandManager = new BukkitCommandManager<>(
                 plugin,
                 CommandExecutionCoordinator.simpleCoordinator(),
-                commandUtil::getAudience,
+                commandUtil::getUserAudience,
                 audience -> (CommandSender) audience.source()
         );
         commandManager.registerCommandPreProcessor(new ConnectCommandPreprocessor<>(commandUtil));

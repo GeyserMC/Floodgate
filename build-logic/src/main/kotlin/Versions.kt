@@ -33,11 +33,12 @@ object Versions {
     const val nettyVersion = "4.1.49.Final"
     const val snakeyamlVersion = "1.28"
     const val cloudVersion = "1.5.0"
-    const val adventureApiVersion = "4.9.1"
+    const val adventureApiVersion = "4.10.0"
     const val adventurePlatformVersion = "4.0.0"
     const val viaVersionVersion = "4.0.0"
     const val gRPCVersion = "1.44.0"
     const val protocVersion = "3.19.4"
+    const val bstatsVersion = "3.0.0"
 
     const val javaWebsocketVersion = "1.5.2"
 

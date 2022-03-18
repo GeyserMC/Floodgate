@@ -32,7 +32,6 @@ import com.minekube.connect.api.ProxyConnectApi;
 import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.api.player.ConnectPlayer;
 import com.minekube.connect.network.netty.LocalSession;
-import com.minekube.connect.util.BungeeCommandUtil;
 import com.minekube.connect.util.LanguageManager;
 import com.minekube.connect.util.ReflectionUtils;
 import io.netty.channel.Channel;
@@ -115,7 +114,5 @@ public final class BungeeListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerDisconnect(PlayerDisconnectEvent event) {
         api.playerRemoved(event.getPlayer().getUniqueId());
-
-        BungeeCommandUtil.AUDIENCE_CACHE.remove(event.getPlayer().getUniqueId()); //todo
     }
 }

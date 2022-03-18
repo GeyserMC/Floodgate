@@ -33,7 +33,6 @@ import com.minekube.connect.config.ConnectConfig;
 import com.minekube.connect.platform.command.FloodgateCommand;
 import com.minekube.connect.player.UserAudience;
 import com.minekube.connect.util.Constants;
-import net.kyori.adventure.text.Component;
 
 public class TestCommand implements FloodgateCommand {
     @Override
@@ -47,7 +46,7 @@ public class TestCommand implements FloodgateCommand {
     @Override
     public void execute(CommandContext<UserAudience> context) {
         int players = ConnectApi.getInstance().getPlayers().size();
-        context.getSender().sendMessage(Component.text(players));
+        context.getSender().sendMessage(String.valueOf(players));
     }
 
     @Override
