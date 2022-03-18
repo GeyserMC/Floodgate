@@ -23,23 +23,20 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.player;
+package org.geysermc.floodgate.player.audience;
 
 import java.util.UUID;
-import net.kyori.adventure.audience.Audience;
-import org.checkerframework.checker.index.qual.NonNegative;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.geysermc.floodgate.player.UserAudience.ConsoleAudience;
 
-public interface ServerAudience extends Audience {
-    @NonNull Iterable<? extends UserAudience> onlineAudiences();
+@Getter @Accessors(fluent = true)
+public final class ProfileAudience {
+    private final @Nullable UUID uuid;
+    private final @Nullable String username;
 
-    @NonNull ConsoleAudience consoleAudience();
-
-    @NonNegative int onlineCount();
-
-    @Nullable UserAudience audienceOf(final @NonNull UUID uuid);
-
-    @Nullable UserAudience audienceOf(final @NonNull String username);
+    public ProfileAudience(@Nullable UUID uuid, @Nullable String username) {
+        this.uuid = uuid;
+        this.username = username;
+    }
 }

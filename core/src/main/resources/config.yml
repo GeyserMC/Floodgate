@@ -58,5 +58,9 @@ player-link:
   # you have limited internet access.
   enable-global-linking: true
 
+metrics:
+  enabled: true
+  uuid: ${metrics.uuid}
+
 # Do not change this
-config-version: 2
+config-version: 3

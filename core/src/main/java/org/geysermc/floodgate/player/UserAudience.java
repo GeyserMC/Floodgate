@@ -25,52 +25,80 @@
 
 package org.geysermc.floodgate.player;
 
+import java.util.Objects;
 import java.util.UUID;
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.audience.MessageType;
-import net.kyori.adventure.identity.Identified;
-import net.kyori.adventure.identity.Identity;
-import net.kyori.adventure.text.Component;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.command.TranslatableMessage;
 
-public interface UserAudience extends Identified, Identity, Audience {
-    @Override
-    @NonNull UUID uuid();
+@Getter @Accessors(fluent = true)
+public class UserAudience {
+    private final @NonNull UUID uuid;
+    private final @NonNull String username;
+    private final @NonNull String locale;
+    private final @NonNull Object source;
+    private final @NonNull CommandUtil commandUtil;
 
-    @NonNull String username();
-
-    @NonNull String locale();
-
-    @NonNull Object source();
-
-    boolean hasPermission(@NonNull final String permission);
-
-    @Override
-    void sendMessage(final @NonNull Identity source,
-                     final @NonNull Component message,
-                     final @NonNull MessageType type);
-
-    void sendMessage(TranslatableMessage message, Object... args);
-
-    default void sendMessage(String message) {
-        sendMessage(Component.text(message));
+    public UserAudience(
+            @NonNull UUID uuid,
+            @NonNull String username,
+            @NonNull String locale,
+            @NonNull Object source,
+            @NonNull CommandUtil commandUtil) {
+        this.uuid = Objects.requireNonNull(uuid);
+        this.username = username;
+        this.locale = Objects.requireNonNull(locale);
+        this.source = Objects.requireNonNull(source);
+        this.commandUtil = Objects.requireNonNull(commandUtil);
     }
 
-    void disconnect(@NonNull final Component reason);
-
-    void disconnect(TranslatableMessage message, Object... args);
-
-    @Override
-    default @NonNull Identity identity() {
-        return this;
+    public boolean hasPermission(@NonNull String permission) {
+        return commandUtil.hasPermission(source(), permission);
     }
 
-    interface PlayerAudience extends UserAudience {
-        boolean online();
+    public void sendMessage(String message) {
+        commandUtil.sendMessage(source(), message);
     }
 
-    interface ConsoleAudience extends UserAudience {
+    public void sendMessage(TranslatableMessage message, Object... args) {
+        sendMessage(translateMessage(message, args));
+    }
 
+    public void disconnect(@NonNull String reason) {
+        commandUtil.kickPlayer(source(), reason);
+    }
+
+    public void disconnect(TranslatableMessage message, Object... args) {
+        disconnect(translateMessage(message, args));
+    }
+
+    public String translateMessage(TranslatableMessage message, Object... args) {
+        return commandUtil.translateMessage(locale(), message, args);
+    }
+
+    @Getter @Accessors(fluent = true)
+    public static class PlayerAudience extends UserAudience {
+        private final boolean online;
+
+        public PlayerAudience(
+                @NonNull UUID uuid,
+                @NonNull String username,
+                @NonNull String locale,
+                @NonNull Object source,
+                @NonNull CommandUtil commandUtil,
+                boolean online) {
+            super(uuid, username, locale, source, commandUtil);
+
+            this.online = online;
+        }
+    }
+
+    @Getter @Accessors(fluent = true)
+    public static class ConsoleAudience extends UserAudience {
+        public ConsoleAudience(@NonNull Object source, @NonNull CommandUtil commandUtil) {
+            super(new UUID(0, 0), "CONSOLE", "en_us", source, commandUtil);
+        }
     }
 }

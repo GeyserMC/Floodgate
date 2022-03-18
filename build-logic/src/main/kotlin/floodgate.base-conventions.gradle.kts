@@ -2,6 +2,7 @@ plugins {
     `java-library`
     `maven-publish`
 //    id("net.ltgt.errorprone")
+    id("net.kyori.indra.git")
 }
 
 dependencies {
@@ -14,7 +15,7 @@ tasks {
             expand(
                 "id" to "floodgate",
                 "name" to "floodgate",
-                "version" to project.version,
+                "version" to fullVersion(),
                 "description" to project.description,
                 "url" to "https://geysermc.org",
                 "author" to "GeyserMC"
@@ -31,12 +32,4 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 
     withSourcesJar()
-}
-
-publishing {
-    publications.create<MavenPublication>("mavenJava") {
-        groupId = project.group as String
-        artifactId = "floodgate-" + project.name
-        version = project.version as String
-    }
 }

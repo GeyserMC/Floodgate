@@ -1,5 +1,5 @@
 plugins {
-    id("floodgate.shadow-conventions")
+    id("floodgate.publish-conventions")
 }
 
 tasks {

@@ -4,10 +4,7 @@ var guavaVersion = "21.0"
 
 dependencies {
     api(projects.core)
-
     implementation("cloud.commandframework", "cloud-bungee", Versions.cloudVersion)
-    implementation("net.kyori", "adventure-text-serializer-gson", Versions.adventureApiVersion)
-    implementation("net.kyori", "adventure-text-serializer-bungeecord", Versions.adventurePlatformVersion)
 }
 
 relocate("com.google.inject")

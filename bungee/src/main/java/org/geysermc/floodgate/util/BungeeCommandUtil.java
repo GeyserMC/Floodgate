@@ -25,42 +25,29 @@
 
 package org.geysermc.floodgate.util;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandUtil;
-import org.geysermc.floodgate.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.player.UserAudience;
-import org.geysermc.floodgate.player.UserAudienceArgument.PlayerType;
-import org.geysermc.floodgate.util.BungeeUserAudience.BungeeConsoleAudience;
-import org.geysermc.floodgate.util.BungeeUserAudience.BungeePlayerAudience;
+import org.geysermc.floodgate.player.UserAudience.ConsoleAudience;
+import org.geysermc.floodgate.player.UserAudience.PlayerAudience;
 
-@RequiredArgsConstructor
-public final class BungeeCommandUtil implements CommandUtil {
-    public static final @NonNull Map<UUID, UserAudience> AUDIENCE_CACHE = new HashMap<>();
-    private static UserAudience console;
-
+public final class BungeeCommandUtil extends CommandUtil {
     private final ProxyServer server;
-    private final FloodgateApi api;
+    private UserAudience console;
 
-    private final FloodgateLogger logger;
-    private final LanguageManager manager;
+    public BungeeCommandUtil(LanguageManager manager, ProxyServer server, FloodgateApi api) {
+        super(manager, api);
+        this.server = server;
+    }
 
     @Override
-    public @NonNull UserAudience getAudience(@NonNull Object sourceObj) {
+    public @NonNull UserAudience getUserAudience(@NonNull Object sourceObj) {
         if (!(sourceObj instanceof CommandSender)) {
             throw new IllegalArgumentException("Can only work with CommandSource!");
         }
@@ -70,7 +57,7 @@ public final class BungeeCommandUtil implements CommandUtil {
             if (console != null) {
                 return console;
             }
-            return console = new BungeeConsoleAudience(source, this);
+            return console = new ConsoleAudience(source, this);
         }
 
         ProxiedPlayer player = (ProxiedPlayer) source;
@@ -78,82 +65,39 @@ public final class BungeeCommandUtil implements CommandUtil {
         String username = player.getName();
         String locale = Utils.getLocale(player.getLocale());
 
-        return AUDIENCE_CACHE.computeIfAbsent(uuid,
-                $ -> new BungeePlayerAudience(uuid, username, locale, source, true, this));
+        return new PlayerAudience(uuid, username, locale, source, this, true);
     }
 
     @Override
-    public @Nullable UserAudience getAudienceByUsername(@NonNull String username) {
-        ProxiedPlayer player = server.getPlayer(username);
-        return player != null ? getAudience(player) : null;
+    protected String getUsernameFromSource(@NonNull Object source) {
+        return ((ProxiedPlayer) source).getName();
     }
 
     @Override
-    public @NonNull UserAudience getOfflineAudienceByUsername(@NonNull String username) {
-        return new BungeePlayerAudience(null, username, null, null, false, this);
+    protected UUID getUuidFromSource(@NonNull Object source) {
+        return ((ProxiedPlayer) source).getUniqueId();
     }
 
     @Override
-    public @Nullable UserAudience getAudienceByUuid(@NonNull UUID uuid) {
+    protected Collection<?> getOnlinePlayers() {
+        return server.getPlayers();
+    }
+
+    @Override
+    public Object getPlayerByUuid(@NonNull UUID uuid) {
         ProxiedPlayer player = server.getPlayer(uuid);
-        return player != null ? getAudience(player) : null;
+        return player != null ? player : uuid;
     }
 
     @Override
-    public @NonNull UserAudience getOfflineAudienceByUuid(@NonNull UUID uuid) {
-        return new BungeePlayerAudience(uuid, null, null, null, false, this);
-    }
-
-    @Override
-    public @NonNull Collection<String> getOnlineUsernames(@NonNull PlayerType limitTo) {
-        Collection<ProxiedPlayer> players = server.getPlayers();
-
-        Collection<String> usernames = new ArrayList<>();
-        switch (limitTo) {
-            case ALL_PLAYERS:
-                for (ProxiedPlayer player : players) {
-                    usernames.add(player.getName());
-                }
-                break;
-            case ONLY_JAVA:
-                for (ProxiedPlayer player : players) {
-                    if (!api.isFloodgatePlayer(player.getUniqueId())) {
-                        usernames.add(player.getName());
-                    }
-                }
-                break;
-            case ONLY_BEDROCK:
-                for (ProxiedPlayer player : players) {
-                    if (api.isFloodgatePlayer(player.getUniqueId())) {
-                        usernames.add(player.getName());
-                    }
-                }
-                break;
-            default:
-                throw new IllegalStateException("Unknown PlayerType");
-        }
-        return usernames;
+    public Object getPlayerByUsername(@NonNull String username) {
+        ProxiedPlayer player = server.getPlayer(username);
+        return player != null ? player : username;
     }
 
     @Override
     public boolean hasPermission(Object player, String permission) {
-        return cast(player).hasPermission(permission);
-    }
-
-    @Override
-    public Collection<Object> getOnlinePlayersWithPermission(String permission) {
-        List<Object> players = new ArrayList<>();
-        for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
-            if (hasPermission(player, permission)) {
-                players.add(player);
-            }
-        }
-        return players;
-    }
-
-    @Override
-    public void sendMessage(Object target, String locale, TranslatableMessage message, Object... args) {
-        ((CommandSender) target).sendMessage(translateAndTransform(locale, message, args));
+        return ((CommandSender) player).hasPermission(permission);
     }
 
     @Override
@@ -162,23 +106,10 @@ public final class BungeeCommandUtil implements CommandUtil {
     }
 
     @Override
-    public void kickPlayer(Object player, String locale, TranslatableMessage message, Object... args) {
-        cast(player).disconnect(translateAndTransform(locale, message, args));
-    }
-
-    public BaseComponent[] translateAndTransform(
-            String locale,
-            TranslatableMessage message,
-            Object... args) {
-        return TextComponent.fromLegacyText(message.translateMessage(manager, locale, args));
-    }
-
-    protected ProxiedPlayer cast(Object player) {
-        try {
-            return (ProxiedPlayer) player;
-        } catch (ClassCastException exception) {
-            logger.error("Failed to cast {} to ProxiedPlayer", player.getClass().getName());
-            throw exception;
+    public void kickPlayer(Object player, String message) {
+        // can also be a console
+        if (player instanceof ProxiedPlayer) {
+            ((ProxiedPlayer) player).disconnect(message);
         }
     }
 }
