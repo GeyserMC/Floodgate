@@ -36,6 +36,7 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
+import org.geysermc.floodgate.pluginmessage.PluginMessageChannels;
 
 public class FormChannel implements PluginMessageChannel {
     private final Short2ObjectMap<Form> storedForms = new Short2ObjectOpenHashMap<>();
@@ -47,7 +48,7 @@ public class FormChannel implements PluginMessageChannel {
 
     @Override
     public String getIdentifier() {
-        return "floodgate:form";
+        return PluginMessageChannels.FORM;
     }
 
     @Override

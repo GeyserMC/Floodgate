@@ -28,6 +28,7 @@ package org.geysermc.floodgate.pluginmessage;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.Messenger;
+import org.bukkit.plugin.messaging.PluginMessageListenerRegistration;
 
 @RequiredArgsConstructor
 public class SpigotPluginMessageRegistration implements PluginMessageRegistration {
@@ -37,13 +38,15 @@ public class SpigotPluginMessageRegistration implements PluginMessageRegistratio
     public void register(PluginMessageChannel channel) {
         Messenger messenger = plugin.getServer().getMessenger();
 
-        messenger.registerIncomingPluginChannel(
+        PluginMessageListenerRegistration registration = messenger.registerIncomingPluginChannel(
                 plugin,
                 channel.getIdentifier(),
                 (channel1, player, message) ->
                         channel.handleServerCall(message, player.getUniqueId(), player.getName()));
 
-        //todo actually do something with the result, lol
+        if (!registration.isValid()) {
+            throw new IllegalStateException("Failed to register incoming plugin channel: " + channel.getIdentifier());
+        }
 
         messenger.registerOutgoingPluginChannel(plugin, channel.getIdentifier());
     }

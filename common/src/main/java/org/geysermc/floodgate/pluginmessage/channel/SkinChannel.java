@@ -35,6 +35,7 @@ import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
+import org.geysermc.floodgate.pluginmessage.PluginMessageChannels;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinData;
 
@@ -45,7 +46,7 @@ public class SkinChannel implements PluginMessageChannel {
 
     @Override
     public String getIdentifier() {
-        return "floodgate:skin";
+        return PluginMessageChannels.SKIN;
     }
 
     @Override
