@@ -34,6 +34,7 @@ import java.util.UUID;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
 public final class PaperProfileListener implements Listener {
     @Inject private SimpleFloodgateApi api;
@@ -41,9 +42,19 @@ public final class PaperProfileListener implements Listener {
     @EventHandler
     public void onFill(PreFillProfileEvent event) {
         UUID id = event.getPlayerProfile().getId();
-        if (!this.api.isFloodgatePlayer(id) ||
-                event.getPlayerProfile().getProperties().stream().anyMatch(
-                        prop -> "textures".equals(prop.getName()))) {
+        if (id == null) {
+            return;
+        }
+
+        FloodgatePlayer player = api.getPlayer(id);
+        if (player == null || player.isLinked()) {
+            return;
+        }
+
+        // back when this event got added the PlayerProfile class didn't have the
+        // hasProperty / hasTextures methods
+        if (event.getPlayerProfile().getProperties().stream().anyMatch(
+                prop -> "textures".equals(prop.getName()))) {
             return;
         }
 
