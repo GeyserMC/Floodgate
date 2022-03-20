@@ -30,13 +30,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
+import org.geysermc.floodgate.pluginmessage.PluginMessageChannels;
 
 public class TransferChannel implements PluginMessageChannel {
     @Inject private PluginMessageUtils pluginMessageUtils;
 
     @Override
     public String getIdentifier() {
-        return "floodgate:transfer";
+        return PluginMessageChannels.TRANSFER;
     }
 
     @Override
