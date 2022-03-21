@@ -23,26 +23,26 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.platform.util;
+package org.geysermc.floodgate.util;
 
-import lombok.RequiredArgsConstructor;
+import org.bukkit.Bukkit;
+import org.geysermc.floodgate.platform.util.PlatformUtils;
 
-@RequiredArgsConstructor
-public abstract class PlatformUtils {
-    /**
-     * Returns the authentication type used on the platform
-     */
-    public abstract AuthType authType();
+public class SpigotPlatformUtils extends PlatformUtils {
+    @Override
+    @SuppressWarnings("ConstantConditions")
+    public AuthType authType() {
+        if (Bukkit.getOnlineMode()) {
+            return AuthType.ONLINE;
+        }
 
-    /**
-     * Returns the Minecraft version the server is based on (or the most recent supported version
-     * for proxy platforms)
-     */
-    public abstract String minecraftVersion();
+        boolean bungeeEnabled = ReflectionUtils.getCastedValue(null, ClassNames.BUNGEE);
+        return bungeeEnabled ? AuthType.PROXIED : AuthType.OFFLINE;
+    }
 
-    public enum AuthType {
-        ONLINE,
-        PROXIED,
-        OFFLINE
+    @Override
+    public String minecraftVersion() {
+        Object instance = ReflectionUtils.invokeStatic(ClassNames.MINECRAFT_SERVER, "getServer");
+        return ReflectionUtils.castedInvoke(instance, ClassNames.GET_VERSION);
     }
 }

@@ -44,7 +44,7 @@ import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.platform.command.TranslatableMessage;
-import org.geysermc.floodgate.platform.util.PlatformUtils.PlayerType;
+import org.geysermc.floodgate.platform.util.PlayerType;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.player.audience.ProfileAudience;
 import org.geysermc.floodgate.player.audience.ProfileAudienceArgument;

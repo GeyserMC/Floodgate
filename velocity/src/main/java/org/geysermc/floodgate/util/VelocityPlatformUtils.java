@@ -23,26 +23,24 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.platform.util;
+package org.geysermc.floodgate.util;
 
-import lombok.RequiredArgsConstructor;
+import com.google.inject.Inject;
+import com.velocitypowered.api.network.ProtocolVersion;
+import com.velocitypowered.api.proxy.ProxyServer;
+import org.geysermc.floodgate.platform.util.PlatformUtils;
 
-@RequiredArgsConstructor
-public abstract class PlatformUtils {
-    /**
-     * Returns the authentication type used on the platform
-     */
-    public abstract AuthType authType();
+public final class VelocityPlatformUtils extends PlatformUtils {
+    @Inject
+    private ProxyServer server;
 
-    /**
-     * Returns the Minecraft version the server is based on (or the most recent supported version
-     * for proxy platforms)
-     */
-    public abstract String minecraftVersion();
+    @Override
+    public AuthType authType() {
+        return server.getConfiguration().isOnlineMode() ? AuthType.ONLINE : AuthType.OFFLINE;
+    }
 
-    public enum AuthType {
-        ONLINE,
-        PROXIED,
-        OFFLINE
+    @Override
+    public String minecraftVersion() {
+        return ProtocolVersion.MAXIMUM_VERSION.getMostRecentSupportedVersion();
     }
 }

@@ -26,6 +26,7 @@ relocate("org.bstats")
 
 configure<BlossomExtension> {
     val constantsFile = "src/main/java/org/geysermc/floodgate/util/Constants.java"
+    replaceToken("\${floodgateVersion}", fullVersion(), constantsFile)
     replaceToken("\${branch}", branchName(), constantsFile)
     replaceToken("\${buildNumber}", buildNumber(), constantsFile)
 }

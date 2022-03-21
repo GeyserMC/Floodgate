@@ -25,8 +25,8 @@
 
 package org.geysermc.floodgate.platform.command;
 
-import static org.geysermc.floodgate.platform.util.PlatformUtils.PlayerType.ALL_PLAYERS;
-import static org.geysermc.floodgate.platform.util.PlatformUtils.PlayerType.ONLY_BEDROCK;
+import static org.geysermc.floodgate.platform.util.PlayerType.ALL_PLAYERS;
+import static org.geysermc.floodgate.platform.util.PlayerType.ONLY_BEDROCK;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,7 +38,7 @@ import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.platform.util.PlatformUtils.PlayerType;
+import org.geysermc.floodgate.platform.util.PlayerType;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.player.audience.ProfileAudience;
 import org.geysermc.floodgate.util.LanguageManager;

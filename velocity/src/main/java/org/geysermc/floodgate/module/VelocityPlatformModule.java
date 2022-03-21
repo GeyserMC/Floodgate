@@ -48,6 +48,7 @@ import org.geysermc.floodgate.logger.Slf4jFloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
+import org.geysermc.floodgate.platform.util.PlatformUtils;
 import org.geysermc.floodgate.player.FloodgateCommandPreprocessor;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
@@ -57,6 +58,7 @@ import org.geysermc.floodgate.pluginmessage.VelocityPluginMessageUtils;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.VelocityCommandUtil;
+import org.geysermc.floodgate.util.VelocityPlatformUtils;
 import org.geysermc.floodgate.util.VelocitySkinApplier;
 import org.slf4j.Logger;
 
@@ -67,6 +69,7 @@ public final class VelocityPlatformModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(CommandUtil.class).to(VelocityCommandUtil.class);
+        bind(PlatformUtils.class).to(VelocityPlatformUtils.class);
     }
 
     @Provides

@@ -40,13 +40,14 @@ import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
+import org.geysermc.floodgate.config.ConfigLoader;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
-import org.geysermc.floodgate.config.loader.ConfigLoader;
 import org.geysermc.floodgate.link.PlayerLinkLoader;
 import org.geysermc.floodgate.module.ConfigLoadedModule;
 import org.geysermc.floodgate.module.PostInitializeModule;
 import org.geysermc.floodgate.news.NewsChecker;
+import org.geysermc.floodgate.util.Metrics;
 import org.geysermc.floodgate.util.PrefixCheckTask;
 
 public class FloodgatePlatform {
@@ -122,6 +123,8 @@ public class FloodgatePlatform {
         this.guice = guice.createChildInjector(new PostInitializeModule(postInitializeModules));
 
         PrefixCheckTask.checkAndExecuteDelayed(config, logger);
+
+        guice.getInstance(Metrics.class);
 
         return true;
     }

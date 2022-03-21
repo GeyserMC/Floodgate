@@ -58,6 +58,7 @@ public class ClassNames {
     public static final Field HANDSHAKE_HOST;
     public static final Field LOGIN_PROFILE;
     public static final Field PACKET_LISTENER;
+
     @Nullable
     public static final Field PAPER_DISABLE_USERNAME_VALIDATION;
 
@@ -66,6 +67,10 @@ public class ClassNames {
     public static final Method NETWORK_EXCEPTION_CAUGHT;
     public static final Method INIT_UUID;
     public static final Method FIRE_LOGIN_EVENTS;
+
+    public static final Class<?> SPIGOT_CONFIG;
+    public static final Field BUNGEE;
+    public static final Method GET_VERSION;
 
     static {
         String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
@@ -162,12 +167,24 @@ public class ClassNames {
         FIRE_LOGIN_EVENTS = getMethod(LOGIN_HANDLER, "fireEvents");
         checkNotNull(FIRE_LOGIN_EVENTS, "fireEvents from LoginHandler");
 
+
         PAPER_DISABLE_USERNAME_VALIDATION = getField(LOGIN_LISTENER,
                 "iKnowThisMayNotBeTheBestIdeaButPleaseDisableUsernameValidation");
+
         if (Constants.DEBUG_MODE) {
             System.out.println("Paper disable username validation field exists? " +
                     (PAPER_DISABLE_USERNAME_VALIDATION != null));
         }
+
+        // SpigotPlatformUtils
+        SPIGOT_CONFIG = ReflectionUtils.getClass("org.spigotmc.SpigotConfig");
+        checkNotNull(SPIGOT_CONFIG, "Spigot config");
+
+        BUNGEE = ReflectionUtils.getField(SPIGOT_CONFIG, "bungee");
+        checkNotNull(BUNGEE, "Bungee field");
+
+        GET_VERSION = ReflectionUtils.getMethod(MINECRAFT_SERVER, "getVersion");
+        checkNotNull(GET_VERSION, "Minecraft server version");
     }
 
     private static Class<?> getClassOrFallBack(String className, String fallbackName) {

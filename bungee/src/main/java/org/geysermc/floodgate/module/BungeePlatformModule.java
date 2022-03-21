@@ -46,6 +46,7 @@ import org.geysermc.floodgate.logger.JavaUtilFloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
+import org.geysermc.floodgate.platform.util.PlatformUtils;
 import org.geysermc.floodgate.player.FloodgateCommandPreprocessor;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.pluginmessage.BungeePluginMessageRegistration;
@@ -55,11 +56,17 @@ import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.pluginmessage.PluginMessageRegistration;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.util.BungeeCommandUtil;
+import org.geysermc.floodgate.util.BungeePlatformUtils;
 import org.geysermc.floodgate.util.LanguageManager;
 
 @RequiredArgsConstructor
 public final class BungeePlatformModule extends AbstractModule {
     private final BungeePlugin plugin;
+
+    @Override
+    protected void configure() {
+        bind(PlatformUtils.class).to(BungeePlatformUtils.class);
+    }
 
     @Provides
     @Singleton

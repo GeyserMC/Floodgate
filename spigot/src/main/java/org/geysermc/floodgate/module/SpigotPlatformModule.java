@@ -42,6 +42,7 @@ import org.geysermc.floodgate.logger.JavaUtilFloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
+import org.geysermc.floodgate.platform.util.PlatformUtils;
 import org.geysermc.floodgate.pluginmessage.PluginMessageRegistration;
 import org.geysermc.floodgate.pluginmessage.SpigotPluginMessageRegistration;
 import org.geysermc.floodgate.pluginmessage.SpigotPluginMessageUtils;
@@ -49,11 +50,17 @@ import org.geysermc.floodgate.pluginmessage.SpigotSkinApplier;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.SpigotCommandUtil;
+import org.geysermc.floodgate.util.SpigotPlatformUtils;
 import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
 
 @RequiredArgsConstructor
 public final class SpigotPlatformModule extends AbstractModule {
     private final SpigotPlugin plugin;
+
+    @Override
+    protected void configure() {
+        bind(PlatformUtils.class).to(SpigotPlatformUtils.class);
+    }
 
     @Provides
     @Singleton

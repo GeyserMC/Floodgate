@@ -37,7 +37,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.platform.command.CommandUtil;
-import org.geysermc.floodgate.platform.util.PlatformUtils.PlayerType;
+import org.geysermc.floodgate.platform.util.PlayerType;
 import org.geysermc.floodgate.player.UserAudience;
 
 public class ProfileAudienceArgument extends CommandArgument<UserAudience, ProfileAudience> {

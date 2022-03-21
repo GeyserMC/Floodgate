@@ -29,11 +29,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.Key;
-import java.util.UUID;
 import lombok.Getter;
 import org.geysermc.configutils.loader.callback.CallbackResult;
 import org.geysermc.configutils.loader.callback.GenericPostInitializeCallback;
-import org.geysermc.floodgate.config.loader.ConfigLoader;
 
 /**
  * The global Floodgate configuration file used in every platform. Some platforms have their own
@@ -99,6 +97,6 @@ public class FloodgateConfig implements GenericPostInitializeCallback<ConfigLoad
     @Getter
     public static class MetricsConfig {
         private boolean enabled;
-        private UUID uuid;
+        private String uuid;
     }
 }
