@@ -30,19 +30,15 @@ import org.geysermc.floodgate.platform.util.PlatformUtils;
 
 public class SpigotPlatformUtils extends PlatformUtils {
     @Override
-    @SuppressWarnings("ConstantConditions")
     public AuthType authType() {
         if (Bukkit.getOnlineMode()) {
             return AuthType.ONLINE;
         }
-
-        boolean bungeeEnabled = ReflectionUtils.getCastedValue(null, ClassNames.BUNGEE);
-        return bungeeEnabled ? AuthType.PROXIED : AuthType.OFFLINE;
+        return ProxyUtils.isProxyData() ? AuthType.PROXIED : AuthType.OFFLINE;
     }
 
     @Override
     public String minecraftVersion() {
-        Object instance = ReflectionUtils.invokeStatic(ClassNames.MINECRAFT_SERVER, "getServer");
-        return ReflectionUtils.castedInvoke(instance, ClassNames.GET_VERSION);
+        return Bukkit.getServer().getVersion().split("\\(MC: ")[1].split("\\)")[0];
     }
 }

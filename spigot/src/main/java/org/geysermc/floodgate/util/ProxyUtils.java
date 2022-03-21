@@ -25,45 +25,22 @@
 
 package org.geysermc.floodgate.util;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.geysermc.floodgate.util.ReflectionUtils.getField;
-
-import java.lang.reflect.Field;
-
 @SuppressWarnings("ConstantConditions")
 public final class ProxyUtils {
-    private static final Field IS_BUNGEE_DATA;
-    private static final Field IS_MODERN_FORWARDING;
-
-    static {
-        Class<?> spigotConfig = ReflectionUtils.getClass("org.spigotmc.SpigotConfig");
-        IS_BUNGEE_DATA = getField(spigotConfig, "bungee");
-        checkNotNull(IS_BUNGEE_DATA, "bungee field cannot be null. Are you using CraftBukkit?");
-
-        Field velocitySupport;
-        try {
-            Class<?> paperConfig = Class.forName("com.destroystokyo.paper.PaperConfig");
-            velocitySupport = getField(paperConfig, "velocitySupport");
-        } catch (ClassNotFoundException e) {
-            // We're not on a platform that has modern forwarding
-            velocitySupport = null; // NOPMD - there's really not a better way around this unless you want to use an optional
-        }
-        IS_MODERN_FORWARDING = velocitySupport;
-    }
 
     public static boolean isProxyData() {
         return isBungeeData() || isVelocitySupport();
     }
 
     private static boolean isBungeeData() {
-        return ReflectionUtils.getCastedValue(null, IS_BUNGEE_DATA);
+        return ReflectionUtils.getCastedValue(null, ClassNames.BUNGEE);
     }
 
     private static boolean isVelocitySupport() {
-        if (IS_MODERN_FORWARDING == null) {
+        if (ClassNames.PAPER_VELOCITY_SUPPORT == null) {
             return false;
         }
 
-        return ReflectionUtils.getCastedValue(null, IS_MODERN_FORWARDING);
+        return ReflectionUtils.getCastedValue(null, ClassNames.PAPER_VELOCITY_SUPPORT);
     }
 }

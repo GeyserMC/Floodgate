@@ -59,8 +59,8 @@ public class ClassNames {
     public static final Field LOGIN_PROFILE;
     public static final Field PACKET_LISTENER;
 
-    @Nullable
-    public static final Field PAPER_DISABLE_USERNAME_VALIDATION;
+    @Nullable public static final Field PAPER_DISABLE_USERNAME_VALIDATION;
+    @Nullable public static final Field PAPER_VELOCITY_SUPPORT;
 
     public static final Method GET_PROFILE_METHOD;
     public static final Method LOGIN_DISCONNECT;
@@ -68,9 +68,7 @@ public class ClassNames {
     public static final Method INIT_UUID;
     public static final Method FIRE_LOGIN_EVENTS;
 
-    public static final Class<?> SPIGOT_CONFIG;
     public static final Field BUNGEE;
-    public static final Method GET_VERSION;
 
     static {
         String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
@@ -80,7 +78,7 @@ public class ClassNames {
         // SpigotSkinApplier
         Class<?> craftPlayerClass = ReflectionUtils.getClass(
                 "org.bukkit.craftbukkit." + version + ".entity.CraftPlayer");
-        GET_PROFILE_METHOD = ReflectionUtils.getMethod(craftPlayerClass, "getProfile");
+        GET_PROFILE_METHOD = getMethod(craftPlayerClass, "getProfile");
         checkNotNull(GET_PROFILE_METHOD, "Get profile method");
 
         String nmsPackage = SPIGOT_MAPPING_PREFIX + '.';
@@ -176,15 +174,18 @@ public class ClassNames {
                     (PAPER_DISABLE_USERNAME_VALIDATION != null));
         }
 
-        // SpigotPlatformUtils
-        SPIGOT_CONFIG = ReflectionUtils.getClass("org.spigotmc.SpigotConfig");
-        checkNotNull(SPIGOT_CONFIG, "Spigot config");
+        // ProxyUtils
+        Class<?> spigotConfig = ReflectionUtils.getClass("org.spigotmc.SpigotConfig");
+        checkNotNull(spigotConfig, "Spigot config");
 
-        BUNGEE = ReflectionUtils.getField(SPIGOT_CONFIG, "bungee");
+        BUNGEE = getField(spigotConfig, "bungee");
         checkNotNull(BUNGEE, "Bungee field");
 
-        GET_VERSION = ReflectionUtils.getMethod(MINECRAFT_SERVER, "getVersion");
-        checkNotNull(GET_VERSION, "Minecraft server version");
+        Class<?> paperConfig = ReflectionUtils.getClassSilently(
+                "com.destroystokyo.paper.PaperConfig");
+
+        PAPER_VELOCITY_SUPPORT =
+                paperConfig == null ? null : getField(paperConfig, "velocitySupport");
     }
 
     private static Class<?> getClassOrFallBack(String className, String fallbackName) {
