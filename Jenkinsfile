@@ -39,14 +39,15 @@ pipeline {
                         )
                         rtGradleResolver(
                                 id: "GRADLE_RESOLVER",
-                                serverId: "opencollab-artifactory",
+                                serverId: "opencollab-artifactory"
                         )
-                        rtGradleRun (
-                                usesPlugin: false,
+                        rtGradleRun(
+                                usesPlugin: true,
                                 tool: 'Gradle 7',
                                 rootDir: "",
-                                buildFile: 'build.gradle',
-                                tasks: 'build artifactoryPublish',
+                                useWrapper: true,
+                                buildFile: 'build.gradle.kts',
+                                tasks: 'artifactoryPublish',
                                 deployerId: "GRADLE_DEPLOYER",
                                 resolverId: "GRADLE_RESOLVER"
                         )
