@@ -1,6 +1,5 @@
 dependencies {
-    api("org.geysermc", "common", Versions.geyserVersion)
-//    api("org.geysermc.cumulus", "cumulus", Versions.cumulusVersion)
+    api("com.google.code.gson", "gson", Versions.gsonVersion)
 
     compileOnly("io.netty", "netty-transport", Versions.nettyVersion)
 }

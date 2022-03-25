@@ -31,16 +31,16 @@ import com.google.inject.Module;
 import com.google.inject.name.Named;
 import com.minekube.connect.api.ConnectApi;
 import com.minekube.connect.api.InstanceHolder;
-import com.minekube.connect.api.handshake.HandshakeHandlers;
 import com.minekube.connect.api.inject.PlatformInjector;
 import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.api.packet.PacketHandlers;
+import com.minekube.connect.config.ConfigHolder;
 import com.minekube.connect.config.ConnectConfig;
-import com.minekube.connect.config.FloodgateConfigHolder;
 import com.minekube.connect.config.loader.ConfigLoader;
 import com.minekube.connect.inject.CommonPlatformInjector;
 import com.minekube.connect.module.ConfigLoadedModule;
 import com.minekube.connect.module.PostInitializeModule;
+import com.minekube.connect.register.WatcherRegister;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -73,10 +73,8 @@ public class ConnectPlatform {
     public void init(
             @Named("dataDirectory") Path dataDirectory,
             ConfigLoader configLoader,
-            FloodgateConfigHolder configHolder,
-            PacketHandlers packetHandlers,
-            HandshakeHandlers handshakeHandlers
-    ) {
+            ConfigHolder configHolder,
+            PacketHandlers packetHandlers) {
 
         if (!Files.isDirectory(dataDirectory)) {
             try {
@@ -95,7 +93,7 @@ public class ConnectPlatform {
         configHolder.set(config);
         guice = guice.createChildInjector(new ConfigLoadedModule(config));
 
-        InstanceHolder.set(api, this.injector, packetHandlers, handshakeHandlers, KEY);
+        InstanceHolder.set(api, this.injector, packetHandlers, KEY);
 
         // todo this was the place where we provided the build number and branch for Geyser dump
 
@@ -124,6 +122,7 @@ public class ConnectPlatform {
 
     public boolean disable() {
         guice.getInstance(CommonPlatformInjector.class).shutdown();
+        guice.getInstance(WatcherRegister.class).stop();
         return true;
     }
 

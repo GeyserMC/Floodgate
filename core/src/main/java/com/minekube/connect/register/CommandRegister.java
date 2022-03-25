@@ -30,7 +30,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.minekube.connect.config.ConnectConfig;
-import com.minekube.connect.platform.command.FloodgateCommand;
+import com.minekube.connect.platform.command.ConnectCommand;
 import com.minekube.connect.player.UserAudience;
 import java.util.Set;
 
@@ -52,8 +52,8 @@ public final class CommandRegister {
     }
 
     @Inject
-    public void registerCommands(Set<FloodgateCommand> foundCommands) {
-        for (FloodgateCommand command : foundCommands) {
+    public void registerCommands(Set<ConnectCommand> foundCommands) {
+        for (ConnectCommand command : foundCommands) {
             guice.injectMembers(command);
             if (command.shouldRegister(config)) {
                 commandManager.command(command.buildCommand(commandManager));

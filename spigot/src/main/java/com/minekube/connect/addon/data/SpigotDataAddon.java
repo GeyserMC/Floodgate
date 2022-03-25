@@ -49,7 +49,7 @@ public final class SpigotDataAddon implements InjectorAddon {
         LocalSession.context(channel, ctx -> {
             // we have to add the packet blocker in the data handler, otherwise ProtocolSupport breaks
             channel.pipeline().addBefore(
-                    packetHandlerName, "floodgate_data_handler",
+                    packetHandlerName, "connect_data_handler",
                     new SpigotDataHandler(ctx,
                             packetHandlerName,
                             config)

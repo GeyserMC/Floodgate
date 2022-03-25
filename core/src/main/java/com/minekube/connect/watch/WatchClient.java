@@ -55,13 +55,13 @@ public class WatchClient {
         this.config = config;
     }
 
-    public void watch(Watcher watcher) {
+    public WebSocket watch(Watcher watcher) {
         Request request = new Request.Builder()
                 .url(WATCH_URL)
                 .addHeader(ENDPOINT_HEADER, config.getEndpoint())
                 .build();
 
-        httpClient.newWebSocket(request, new WebSocketListener() {
+        return httpClient.newWebSocket(request, new WebSocketListener() {
             @Override
             public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
                 watcher.onCompleted();

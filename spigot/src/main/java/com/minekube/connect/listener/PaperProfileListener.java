@@ -43,7 +43,7 @@ public final class PaperProfileListener implements Listener {
         UUID id = event.getPlayerProfile().getId();
         // back when this event got added the PlayerProfile class didn't have the
         // hasProperty / hasTextures methods
-        if (id == null || !this.api.isFloodgatePlayer(id) ||
+        if (id == null || !this.api.isConnectPlayer(id) ||
                 event.getPlayerProfile().getProperties().stream().anyMatch(
                         prop -> "textures".equals(prop.getName()))) {
             return;

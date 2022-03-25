@@ -28,19 +28,20 @@ package com.minekube.connect.command.main;
 import static com.minekube.connect.util.Constants.COLOR_CHAR;
 
 import cloud.commandframework.context.CommandContext;
+import cloud.commandframework.types.tuples.Pair;
 import com.google.gson.JsonElement;
 import com.minekube.connect.player.UserAudience;
+import com.minekube.connect.util.Constants;
 import com.minekube.connect.util.HttpUtils;
 import com.minekube.connect.util.HttpUtils.HttpResponse;
 import com.minekube.connect.util.Utils;
-import it.unimi.dsi.fastutil.Pair;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
-import com.minekube.connect.util.Constants;
 
 final class FirewallCheckSubcommand {
-    private FirewallCheckSubcommand() {}
+    private FirewallCheckSubcommand() {
+    }
 
     static void executeFirewall(CommandContext<UserAudience> context) {
         UserAudience sender = context.getSender();
@@ -49,7 +50,7 @@ final class FirewallCheckSubcommand {
         ).whenComplete((response, $) ->
                 sender.sendMessage(String.format(
                         COLOR_CHAR + "eThe checks have finished. %s/%s were successful",
-                        response.left(), response.left() + response.right()
+                        response.getFirst(), response.getFirst() + response.getSecond()
                 ))
         );
     }

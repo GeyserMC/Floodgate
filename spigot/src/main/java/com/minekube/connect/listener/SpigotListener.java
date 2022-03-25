@@ -54,7 +54,7 @@ public final class SpigotListener implements Listener {
         ConnectPlayer player = api.getPlayer(uniqueId);
         if (player != null) {
             //todo we should probably move this log message earlier in the process, so that we know
-            // that Floodgate has done its job
+            // that Connect has done its job
             logger.translatedInfo(
                     "connect.ingame.login_name",
                     player.getUsername(), player.getUniqueId()

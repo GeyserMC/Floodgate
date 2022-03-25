@@ -67,7 +67,7 @@ public final class BungeeSkinApplier implements SkinApplier {
 
         LoginResult loginResult = handler.getLoginProfile();
         // expected to be null since LoginResult is the data from hasJoined,
-        // which Floodgate players don't have
+        // which Connect players don't have
         if (loginResult == null) {
             // id and name are unused and properties will be overridden
             loginResult = new LoginResult(null, null, null);

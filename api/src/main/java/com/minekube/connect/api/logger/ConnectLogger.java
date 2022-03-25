@@ -26,7 +26,7 @@
 package com.minekube.connect.api.logger;
 
 public interface ConnectLogger {
-    String LOGGER_NAME = "Floodgate";
+    String LOGGER_NAME = "Connect";
 
     /**
      * Logs an error message to the console, with 0 or more arguments.
@@ -80,12 +80,12 @@ public interface ConnectLogger {
     void trace(String message, Object... args);
 
     /**
-     * Enables debug mode for the Floodgate logger.
+     * Enables debug mode for the logger.
      */
     void enableDebug();
 
     /**
-     * Disables debug mode for the Floodgate logger. Debug messages can still be sent after running
+     * Disables debug mode for the logger. Debug messages can still be sent after running
      * this method, but they will be hidden from the console.
      */
     void disableDebug();

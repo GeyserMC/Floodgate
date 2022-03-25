@@ -83,7 +83,7 @@ public class ConfigInitializer {
             }
 
             private String getCorrectName(String name) {
-                // convert sendFloodgateData to send-floodgate-data,
+                // convert sendFloodgateData to send-connect-data,
                 // which is the style of writing config fields
                 StringBuilder propertyBuilder = new StringBuilder();
                 for (int i = 0; i < name.length(); i++) {

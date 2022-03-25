@@ -31,7 +31,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.api.player.ConnectPlayer;
-import com.minekube.connect.api.unsafe.Unsafe;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
@@ -59,7 +58,7 @@ public class SimpleConnectApi implements ConnectApi {
     }
 
     @Override
-    public boolean isFloodgatePlayer(UUID uuid) {
+    public boolean isConnectPlayer(UUID uuid) {
         return getPlayer(uuid) != null;
     }
 
@@ -72,15 +71,6 @@ public class SimpleConnectApi implements ConnectApi {
 
         // and don't forget the pending remove players
         return getPendingRemovePlayer(uuid);
-    }
-
-    @Override
-    public final Unsafe unsafe() {
-        String callerClass = Thread.currentThread().getStackTrace()[2].getClassName();
-        logger.warn("A plugin is trying to access an unsafe part of the Floodgate api!" +
-                " The use of this api can result in client crashes if used incorrectly." +
-                " Caller: " + callerClass);
-        return new UnsafeFloodgateApi();
     }
 
     public ConnectPlayer addPlayer(ConnectPlayer player) {

@@ -33,7 +33,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Command preprocessor which decorated incoming {@link cloud.commandframework.context.CommandContext}
- * with Floodgate specific objects
+ * with Connect specific objects
  *
  * @param <C> Command sender type
  * @since 2.0

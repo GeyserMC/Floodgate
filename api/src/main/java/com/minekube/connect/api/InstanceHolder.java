@@ -25,7 +25,6 @@
 
 package com.minekube.connect.api;
 
-import com.minekube.connect.api.handshake.HandshakeHandlers;
 import com.minekube.connect.api.inject.PlatformInjector;
 import com.minekube.connect.api.packet.PacketHandlers;
 import java.util.UUID;
@@ -36,14 +35,12 @@ public final class InstanceHolder {
 
     @Getter private static PlatformInjector injector;
     @Getter private static PacketHandlers packetHandlers;
-    @Getter private static HandshakeHandlers handshakeHandlers;
     private static UUID storedKey;
 
     public static boolean set(
             ConnectApi connectApi,
             PlatformInjector platformInjector,
             PacketHandlers packetHandlers,
-            HandshakeHandlers handshakeHandlers,
             UUID key) {
 
         if (storedKey != null) {
@@ -57,7 +54,6 @@ public final class InstanceHolder {
         api = connectApi;
         injector = platformInjector;
         InstanceHolder.packetHandlers = packetHandlers;
-        InstanceHolder.handshakeHandlers = handshakeHandlers;
         return true;
     }
 

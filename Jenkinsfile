@@ -20,8 +20,8 @@ pipeline {
             }
             post {
                 success {
-                    archiveArtifacts artifacts: '**/build/libs/floodgate-*.jar',
-                        excludes: '**/floodgate-parent-*.jar',
+                    archiveArtifacts artifacts: '**/build/libs/connect-*.jar',
+                        excludes: '**/connect-parent-*.jar',
                         fingerprint: true
                 }
             }
@@ -97,14 +97,14 @@ pipeline {
                 env.changes = message
             }
             deleteDir()
-            withCredentials([string(credentialsId: 'geyser-discord-webhook', variable: 'DISCORD_WEBHOOK')]) {
+            withCredentials([string(credentialsId: 'minekube-discord-webhook', variable: 'DISCORD_WEBHOOK')]) {
                 discordSend description: "**Build:** [${currentBuild.id}](${env.BUILD_URL})\n**Status:** [${currentBuild.currentResult}](${env.BUILD_URL})\n${changes}\n\n[**Artifacts on Jenkins**](https://ci.opencollab.dev/job/GeyserMC/job/Floodgate)", footer: 'Open Collaboration Jenkins', link: env.BUILD_URL, successful: currentBuild.resultIsBetterOrEqualTo('SUCCESS'), title: "${env.JOB_NAME} #${currentBuild.id}", webhookURL: DISCORD_WEBHOOK
             }
         }
         success {
             script {
                 if (env.BRANCH_NAME == 'master') {
-                    build propagate: false, wait: false, job: 'GeyserMC/Floodgate-Fabric/master', parameters: [booleanParam(name: 'SKIP_DISCORD', value: true)]
+                    build propagate: false, wait: false, job: 'GeyserMC/Connect-Fabric/master', parameters: [booleanParam(name: 'SKIP_DISCORD', value: true)]
                 }
             }
         }

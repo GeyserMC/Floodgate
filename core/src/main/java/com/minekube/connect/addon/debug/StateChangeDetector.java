@@ -115,8 +115,8 @@ public class StateChangeDetector {
         ChannelHandler outDebug = pipeline.remove(ChannelOutDebugHandler.class);
         ChannelHandler inDebug = pipeline.remove(ChannelInDebugHandler.class);
 
-        pipeline.addBefore(packetEncoderName, "floodgate_debug_out", outDebug);
-        pipeline.addBefore(packetDecoderName, "floodgate_debug_in", inDebug);
+        pipeline.addBefore(packetEncoderName, "connect_debug_out", outDebug);
+        pipeline.addBefore(packetDecoderName, "connect_debug_in", inDebug);
     }
 
     public boolean shouldPrintPacket(ByteBuf packet, boolean clientbound) {

@@ -30,7 +30,7 @@ import com.google.inject.Singleton;
 import com.google.inject.multibindings.ProvidesIntoSet;
 import com.minekube.connect.command.TestCommand;
 import com.minekube.connect.command.main.MainCommand;
-import com.minekube.connect.platform.command.FloodgateCommand;
+import com.minekube.connect.platform.command.ConnectCommand;
 import com.minekube.connect.register.CommandRegister;
 
 public class CommandModule extends AbstractModule {
@@ -41,13 +41,13 @@ public class CommandModule extends AbstractModule {
 
     @Singleton
     @ProvidesIntoSet
-    public FloodgateCommand testCommand() {
+    public ConnectCommand testCommand() {
         return new TestCommand();
     }
 
     @Singleton
     @ProvidesIntoSet
-    public FloodgateCommand mainCommand() {
+    public ConnectCommand mainCommand() {
         return new MainCommand();
     }
 }

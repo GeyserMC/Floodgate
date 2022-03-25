@@ -49,10 +49,10 @@ public class PacketHandlerAddon implements InjectorAddon {
     @Override
     public void onInject(Channel channel, boolean toServer) {
         channel.pipeline().addAfter(
-                packetEncoder, "floodgate_phaddon_out",
+                packetEncoder, "connect_phaddon_out",
                 new ChannelOutPacketHandler(packetHandlers, toServer)
         ).addAfter(
-                packetDecoder, "floodgate_phaddon_in",
+                packetDecoder, "connect_phaddon_in",
                 new ChannelInPacketHandler(packetHandlers, toServer)
         );
     }
@@ -61,8 +61,8 @@ public class PacketHandlerAddon implements InjectorAddon {
     public void onRemoveInject(Channel channel) {
         ChannelPipeline pipeline = channel.pipeline();
 
-        Utils.removeHandler(pipeline, "floodgate_phaddon_out");
-        Utils.removeHandler(pipeline, "floodgate_phaddon_in");
+        Utils.removeHandler(pipeline, "connect_phaddon_out");
+        Utils.removeHandler(pipeline, "connect_phaddon_in");
     }
 
     @Override

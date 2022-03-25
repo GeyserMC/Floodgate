@@ -27,7 +27,6 @@ package com.minekube.connect;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.minekube.connect.api.handshake.HandshakeHandlers;
 import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.module.PaperListenerModule;
 import com.minekube.connect.module.ServerCommonModule;
@@ -37,7 +36,6 @@ import com.minekube.connect.module.SpigotListenerModule;
 import com.minekube.connect.module.SpigotPlatformModule;
 import com.minekube.connect.module.WatcherModule;
 import com.minekube.connect.util.ReflectionUtils;
-import com.minekube.connect.util.SpigotHandshakeHandler;
 import com.minekube.connect.util.SpigotProtocolSupportHandler;
 import com.minekube.connect.util.SpigotProtocolSupportListener;
 import org.bukkit.Bukkit;
@@ -75,9 +73,6 @@ public final class SpigotPlugin extends JavaPlugin {
         );
 
         //todo add proper support for disabling things on shutdown and enabling this on enable
-
-        injector.getInstance(HandshakeHandlers.class)
-                .addHandshakeHandler(injector.getInstance(SpigotHandshakeHandler.class));
 
         // add ProtocolSupport support (hack)
         if (isProtocolSupport()) {

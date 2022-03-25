@@ -57,7 +57,7 @@ import net.md_5.bungee.protocol.Varint21LengthFieldPrepender;
 
 @RequiredArgsConstructor
 public final class BungeeInjector extends CommonPlatformInjector implements Listener {
-    private static final String BUNGEE_INIT = "floodgate-bungee-init";
+    private static final String BUNGEE_INIT = "connect-bungee-init";
 
     private final ConnectLogger logger;
     private final ProxyServer proxy;

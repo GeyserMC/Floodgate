@@ -29,8 +29,8 @@ import com.minekube.connect.util.Utils;
 import lombok.Getter;
 
 /**
- * The global Floodgate configuration file used in every platform. Some platforms have their own
- * addition to the global configuration like {@link ProxyConnectConfig} for the proxies.
+ * The global configuration file used in every platform. Some platforms have their own addition to
+ * the global configuration like {@link ProxyConnectConfig} for the proxies.
  */
 @Getter
 public class ConnectConfig {

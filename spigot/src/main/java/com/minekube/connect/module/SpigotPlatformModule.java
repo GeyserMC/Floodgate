@@ -62,7 +62,7 @@ public final class SpigotPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public ConnectLogger floodgateLogger(LanguageManager languageManager) {
+    public ConnectLogger logger(LanguageManager languageManager) {
         return new JavaUtilConnectLogger(plugin.getLogger(), languageManager);
     }
 

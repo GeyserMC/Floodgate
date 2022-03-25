@@ -41,13 +41,13 @@ public final class ServerCommonModule extends CommonModule {
     @Provides
     @Singleton
     @Named("configClass")
-    public Class<? extends ConnectConfig> floodgateConfigClass() {
+    public Class<? extends ConnectConfig> configClass() {
         return ConnectConfig.class;
     }
 
     @Provides
     @Singleton
-    public SimpleConnectApi floodgateApi(ConnectLogger logger) {
+    public SimpleConnectApi api(ConnectLogger logger) {
         return new SimpleConnectApi(logger);
     }
 }

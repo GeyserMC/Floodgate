@@ -28,7 +28,7 @@ package com.minekube.connect.config;
 import lombok.Getter;
 
 /**
- * The Floodgate configuration used by proxy platforms, currently Velocity and BungeeCord.
+ * The configuration used by proxy platforms, currently Velocity and BungeeCord.
  */
 @Getter
 public final class ProxyConnectConfig extends ConnectConfig {

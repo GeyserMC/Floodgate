@@ -51,7 +51,7 @@ public class HttpUtils {
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
 
     private static final Gson GSON = new Gson();
-    private static final String USER_AGENT = "GeyserMC/Floodgate";
+    private static final String USER_AGENT = "Minekube/Connect";
 
     public static CompletableFuture<DefaultHttpResponse> asyncGet(String urlString) {
         return CompletableFuture.supplyAsync(() -> get(urlString), EXECUTOR_SERVICE);

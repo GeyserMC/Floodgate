@@ -69,7 +69,7 @@ public final class SpigotProtocolSupportListener {
                         return;
                     }
 
-                    if (ConnectApi.getInstance().isFloodgatePlayer(uuid)) {
+                    if (ConnectApi.getInstance().isConnectPlayer(uuid)) {
                         // otherwise ProtocolSupport attempts to connect with online mode
                         ReflectionUtils.invoke(event, setOnlineMode, false);
                     }

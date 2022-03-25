@@ -57,7 +57,7 @@ pluginManagement {
     includeBuild("build-logic")
 }
 
-rootProject.name = "floodgate-parent"
+rootProject.name = "connect-parent"
 
 include(":api")
 include(":core")

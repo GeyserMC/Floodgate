@@ -31,11 +31,11 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import java.util.Queue;
 
 /**
- * In Floodgate the PacketBlocker is used to temporarily prevent packets from being decoded. A
- * similar system is used to prevent packets from being handled while Floodgate is processing the
- * login. The old system blocked the thread which was processing the Floodgate login, but that
- * doesn't only block the packets for that specific user, it's shared between multiple users causing
- * them to lag or sometimes timeout.
+ * PacketBlocker is used to temporarily prevent packets from being decoded. A similar system is used
+ * to prevent packets from being handled while Connect is processing the login. The old system
+ * blocked the thread which was processing the Connect login, but that doesn't only block the
+ * packets for that specific user, it's shared between multiple users causing them to lag or
+ * sometimes timeout.
  * <br>
  * The reason why we prevent packets from being handled is because keeping the packet order is
  * important. That is also the reason why we prevent packets from being decoded during that time.

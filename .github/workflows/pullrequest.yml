@@ -25,18 +25,18 @@ jobs:
         if: success()
         with:
           name: Floodgate Bungee
-          path: bungee/build/libs/floodgate-bungee.jar
+          path: bungee/build/libs/connect-bungee.jar
 
       - name: Archive artifacts (Floodgate Spigot)
         uses: actions/upload-artifact@v2
         if: success()
         with:
           name: Floodgate Spigot
-          path: spigot/build/libs/floodgate-spigot.jar
+          path: spigot/build/libs/connect-spigot.jar
 
       - name: Archive artifacts (Floodgate Velocity)
         uses: actions/upload-artifact@v2
         if: success()
         with:
           name: Floodgate Velocity
-          path: velocity/build/libs/floodgate-velocity.jar
+          path: velocity/build/libs/connect-velocity.jar

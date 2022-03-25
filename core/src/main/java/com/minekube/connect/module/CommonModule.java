@@ -33,15 +33,13 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.minekube.connect.addon.data.HandshakeHandlersImpl;
 import com.minekube.connect.api.ConnectApi;
 import com.minekube.connect.api.SimpleConnectApi;
-import com.minekube.connect.api.handshake.HandshakeHandlers;
 import com.minekube.connect.api.inject.PlatformInjector;
 import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.api.packet.PacketHandlers;
+import com.minekube.connect.config.ConfigHolder;
 import com.minekube.connect.config.ConnectConfig;
-import com.minekube.connect.config.FloodgateConfigHolder;
 import com.minekube.connect.config.loader.ConfigLoader;
 import com.minekube.connect.config.loader.DefaultConfigHandler;
 import com.minekube.connect.inject.CommonPlatformInjector;
@@ -67,7 +65,6 @@ public class CommonModule extends AbstractModule {
     protected void configure() {
         bind(ConnectApi.class).to(SimpleConnectApi.class);
         bind(PlatformInjector.class).to(CommonPlatformInjector.class);
-        bind(HandshakeHandlers.class).to(HandshakeHandlersImpl.class);
 
         bind(PacketHandlers.class).to(PacketHandlersImpl.class);
         bind(PacketHandlersImpl.class).asEagerSingleton();
@@ -82,8 +79,8 @@ public class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public FloodgateConfigHolder configHolder() {
-        return new FloodgateConfigHolder();
+    public ConfigHolder configHolder() {
+        return new ConfigHolder();
     }
 
     @Provides
@@ -104,15 +101,9 @@ public class CommonModule extends AbstractModule {
     @Provides
     @Singleton
     public LanguageManager languageLoader(
-            FloodgateConfigHolder configHolder,
+            ConfigHolder configHolder,
             ConnectLogger logger) {
         return new LanguageManager(configHolder, logger);
-    }
-
-    @Provides
-    @Singleton
-    public HandshakeHandlersImpl handshakeHandlers() {
-        return new HandshakeHandlersImpl();
     }
 
     @Provides

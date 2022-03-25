@@ -62,10 +62,10 @@ public final class DebugAddon implements InjectorAddon {
         );
 
         channel.pipeline().addBefore(
-                packetEncoder, "floodgate_debug_out",
+                packetEncoder, "connect_debug_out",
                 new ChannelOutDebugHandler(implementationName, toServer, changeDetector, logger)
         ).addBefore(
-                packetDecoder, "floodgate_debug_in",
+                packetDecoder, "connect_debug_in",
                 new ChannelInDebugHandler(implementationName, toServer, changeDetector, logger)
         );
     }
@@ -74,8 +74,8 @@ public final class DebugAddon implements InjectorAddon {
     public void onRemoveInject(Channel channel) {
         ChannelPipeline pipeline = channel.pipeline();
 
-        Utils.removeHandler(pipeline, "floodgate_debug_out");
-        Utils.removeHandler(pipeline, "floodgate_debug_in");
+        Utils.removeHandler(pipeline, "connect_debug_out");
+        Utils.removeHandler(pipeline, "connect_debug_in");
     }
 
     @Override

@@ -33,13 +33,13 @@ import cloud.commandframework.Command.Builder;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.context.CommandContext;
 import com.minekube.connect.command.util.Permission;
-import com.minekube.connect.platform.command.FloodgateCommand;
+import com.minekube.connect.platform.command.ConnectCommand;
 import com.minekube.connect.player.UserAudience;
 import java.util.Locale;
 import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 
-public final class MainCommand implements FloodgateCommand {
+public final class MainCommand implements ConnectCommand {
     @Override
     public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
         Builder<UserAudience> builder = commandManager.commandBuilder(

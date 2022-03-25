@@ -70,7 +70,7 @@ public final class BungeePlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public ConnectLogger floodgateLogger(LanguageManager languageManager) {
+    public ConnectLogger logger(LanguageManager languageManager) {
         return new JavaUtilConnectLogger(plugin.getLogger(), languageManager);
     }
 

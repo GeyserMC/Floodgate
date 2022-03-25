@@ -49,13 +49,13 @@ public final class ProxyCommonModule extends CommonModule {
     @Provides
     @Singleton
     @Named("configClass")
-    public Class<? extends ConnectConfig> floodgateConfigClass() {
+    public Class<? extends ConnectConfig> configClass() {
         return ProxyConnectConfig.class;
     }
 
     @Provides
     @Singleton
-    public ProxyConnectApi proxyFloodgateApi(
+    public ProxyConnectApi proxyApi(
             ConnectLogger logger
     ) {
         return new ProxyConnectApi(logger);

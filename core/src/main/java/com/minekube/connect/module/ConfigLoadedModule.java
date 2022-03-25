@@ -45,7 +45,7 @@ public final class ConfigLoadedModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public ConnectConfig floodgateConfig() {
+    public ConnectConfig config() {
         return config;
     }
 }

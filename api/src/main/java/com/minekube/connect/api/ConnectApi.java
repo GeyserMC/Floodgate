@@ -26,25 +26,24 @@
 package com.minekube.connect.api;
 
 import com.minekube.connect.api.player.ConnectPlayer;
-import com.minekube.connect.api.unsafe.Unsafe;
 import java.util.Collection;
 import java.util.UUID;
 
 public interface ConnectApi {
     /**
-     * Returns the Floodgate API instance.
+     * Returns the Connect API instance.
      */
     static ConnectApi getInstance() {
         return InstanceHolder.getApi();
     }
 
     /**
-     * Returns all the online Floodgate players.
+     * Returns all the online Connect players.
      */
     Collection<ConnectPlayer> getPlayers();
 
     /**
-     * Returns the number of Floodgate players who are currently online.
+     * Returns the number of Connect players who are currently online.
      */
     int getPlayerCount();
 
@@ -54,7 +53,7 @@ public interface ConnectApi {
      * @param uuid The uuid of the <b>online</b> player
      * @return true if the given <b>online</b> player is tunneled by Connect
      */
-    boolean isFloodgatePlayer(UUID uuid);
+    boolean isConnectPlayer(UUID uuid);
 
     /**
      * Get info about the given player.
@@ -63,6 +62,4 @@ public interface ConnectApi {
      * @return ConnectPlayer if the given uuid is a player tunneled by Connect
      */
     ConnectPlayer getPlayer(UUID uuid);
-
-    Unsafe unsafe();
 }

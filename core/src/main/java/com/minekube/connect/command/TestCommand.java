@@ -30,14 +30,14 @@ import cloud.commandframework.CommandManager;
 import cloud.commandframework.context.CommandContext;
 import com.minekube.connect.api.ConnectApi;
 import com.minekube.connect.config.ConnectConfig;
-import com.minekube.connect.platform.command.FloodgateCommand;
+import com.minekube.connect.platform.command.ConnectCommand;
 import com.minekube.connect.player.UserAudience;
 import com.minekube.connect.util.Constants;
 
-public class TestCommand implements FloodgateCommand {
+public class TestCommand implements ConnectCommand {
     @Override
     public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
-        return commandManager.commandBuilder("floodgate-test")
+        return commandManager.commandBuilder("connect-test")
                 .senderType(UserAudience.class)
                 .handler(this::execute)
                 .build();

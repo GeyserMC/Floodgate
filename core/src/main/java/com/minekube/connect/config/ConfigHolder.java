@@ -23,29 +23,33 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package com.minekube.connect.api.handshake;
+package com.minekube.connect.config;
 
-public interface HandshakeHandlers {
-    /**
-     * Register a custom handshake handler. This can be used to check and edit the player during the
-     * handshake handling.
-     *
-     * @param handshakeHandler the handshake handler to register
-     * @return a random (unique) int to identify this handshake handler or -1 if null
-     */
-    int addHandshakeHandler(HandshakeHandler handshakeHandler);
+public class ConfigHolder {
+    private ConnectConfig config;
 
-    /**
-     * Removes a custom handshake handler by id.
-     *
-     * @param handshakeHandlerId the id of the handshake handler to remove
-     */
-    void removeHandshakeHandler(int handshakeHandlerId);
+    public boolean has() {
+        return config != null;
+    }
 
-    /**
-     * Remove a custom handshake handler by instance.
-     *
-     * @param handshakeHandler the instance to remove
-     */
-    void removeHandshakeHandler(Class<? extends HandshakeHandler> handshakeHandler);
+    public boolean isProxy() {
+        return config instanceof ProxyConnectConfig;
+    }
+
+    public ConnectConfig get() {
+        return config;
+    }
+
+    public ProxyConnectConfig getAsProxy() {
+        return getAs();
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends ConnectConfig> T getAs() {
+        return (T) config;
+    }
+
+    public void set(ConnectConfig config) {
+        this.config = config;
+    }
 }

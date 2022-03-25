@@ -23,29 +23,40 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package com.minekube.connect.player;
+package com.minekube.connect.platform.command;
 
-public class HostnameSeparationResult {
-    private final String floodgateData;
-    private final int headerVersion;
-    private final String hostnameRemainder;
+import cloud.commandframework.Command;
+import cloud.commandframework.CommandManager;
+import cloud.commandframework.context.CommandContext;
+import com.minekube.connect.config.ConnectConfig;
+import com.minekube.connect.player.UserAudience;
 
-    public HostnameSeparationResult(
-            String floodgateData, int headerVersion, String hostnameRemainder) {
-        this.floodgateData = floodgateData;
-        this.headerVersion = headerVersion;
-        this.hostnameRemainder = hostnameRemainder;
-    }
+/**
+ * The base class for every Connect command.
+ */
+public interface ConnectCommand {
+    /**
+     * Called by the CommandRegister when it wants you to build the command which he can add.
+     *
+     * @param commandManager the manager to create a command
+     * @return the command to register
+     */
+    Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager);
 
-    public String floodgateData() {
-        return floodgateData;
-    }
+    /**
+     * Called when the command created in {@link #buildCommand(CommandManager)} is executed.
+     *
+     * @param context the context of the executed command
+     */
+    void execute(CommandContext<UserAudience> context);
 
-    public int headerVersion() {
-        return headerVersion;
-    }
-
-    public String hostnameRemainder() {
-        return hostnameRemainder;
+    /**
+     * Called by the CommandRegister to check if the command should be added given the config.
+     *
+     * @param config the config to check if a command should be added
+     * @return true if it should be added
+     */
+    default boolean shouldRegister(ConnectConfig config) {
+        return true;
     }
 }

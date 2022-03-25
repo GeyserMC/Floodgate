@@ -29,13 +29,13 @@ import static com.minekube.connect.command.util.PermissionDefault.OP;
 import static com.minekube.connect.command.util.PermissionDefault.TRUE;
 
 public enum Permission {
-    COMMAND_MAIN("floodgate.command.floodgate", TRUE),
+    COMMAND_MAIN("connect.command.floodgate", TRUE),
     COMMAND_MAIN_FIREWALL(COMMAND_MAIN, "firewall", OP),
-    COMMAND_LINK("floodgate.command.linkaccount", TRUE),
-    COMMAND_UNLINK("floodgate.command.unlinkaccount", TRUE),
-    COMMAND_WHITELIST("floodgate.command.fwhitelist", OP),
+    COMMAND_LINK("connect.command.linkaccount", TRUE),
+    COMMAND_UNLINK("connect.command.unlinkaccount", TRUE),
+    COMMAND_WHITELIST("connect.command.fwhitelist", OP),
 
-    NEWS_RECEIVE("floodgate.news.receive", OP);
+    NEWS_RECEIVE("connect.news.receive", OP);
 
     private final String permission;
     private final PermissionDefault defaultValue;
