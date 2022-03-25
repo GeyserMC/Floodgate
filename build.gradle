@@ -35,6 +35,7 @@ dependencies {
     shadow("org.geysermc.floodgate:common:${project.mod_version}") {
         exclude group: 'com.google.guava', module: "guava"
         exclude group: 'com.google.code.gson', module: "gson"
+        exclude group: 'org.slf4j', module: "slf4j-api"
         exclude group: 'net.kyori', module: '*' // Let Adventure-Platform provide its desired Adventure version
     }
 
