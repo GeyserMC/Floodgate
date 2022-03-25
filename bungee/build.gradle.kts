@@ -8,6 +8,7 @@ dependencies {
 }
 
 relocate("com.google.inject")
+relocate("com.google.protobuf")
 relocate("net.kyori")
 relocate("cloud.commandframework")
 // used in cloud

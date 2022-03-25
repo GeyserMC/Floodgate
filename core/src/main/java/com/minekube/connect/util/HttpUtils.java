@@ -25,6 +25,7 @@
 
 package com.minekube.connect.util;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.InputStream;
@@ -34,9 +35,13 @@ import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import okhttp3.ConnectionPool;
+import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -175,5 +180,18 @@ public class HttpUtils {
         DefaultHttpResponse(int httpCode, JsonObject response) {
             super(httpCode, response);
         }
+    }
+
+
+    public static OkHttpClient defaultOkHttpClient() {
+        return new OkHttpClient.Builder()
+                .protocols(ImmutableList.of(Protocol.HTTP_1_1, Protocol.HTTP_2))
+                .connectionPool(new ConnectionPool(100, 5, TimeUnit.MINUTES))
+                .addInterceptor(chain -> chain.proceed(chain.request()
+//                        .newBuilder()
+//                        .addHeader() // TODO add common client metadata to every request
+//                        .build()
+                ))
+                .build();
     }
 }

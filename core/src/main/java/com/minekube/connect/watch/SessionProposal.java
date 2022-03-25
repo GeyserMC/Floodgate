@@ -51,7 +51,7 @@ public class SessionProposal {
     }
 
     public void reject(com.google.rpc.Status reason) {
-        if (state.compareAndSet(State.REJECTED, State.ACCEPTED)) {
+        if (state.compareAndSet(State.ACCEPTED, State.REJECTED)) {
             reject.accept(reason);
         }
     }

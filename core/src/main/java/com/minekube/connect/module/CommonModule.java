@@ -25,7 +25,10 @@
 
 package com.minekube.connect.module;
 
-import com.google.common.collect.ImmutableList;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -43,13 +46,18 @@ import com.minekube.connect.config.loader.ConfigLoader;
 import com.minekube.connect.config.loader.DefaultConfigHandler;
 import com.minekube.connect.inject.CommonPlatformInjector;
 import com.minekube.connect.packet.PacketHandlersImpl;
+import com.minekube.connect.util.HttpUtils;
 import com.minekube.connect.util.LanguageManager;
+import com.minekube.connect.util.Utils;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.TimeUnit;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
-import okhttp3.Protocol;
 
 @RequiredArgsConstructor
 public class CommonModule extends AbstractModule {
@@ -109,15 +117,52 @@ public class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public OkHttpClient okHttpClient() {
-        return new OkHttpClient.Builder()
-                .protocols(ImmutableList.of(Protocol.HTTP_1_1, Protocol.HTTP_2))
-                .connectionPool(new ConnectionPool(100, 5, TimeUnit.MINUTES))
-                .addInterceptor(chain -> chain.proceed(chain.request()
-//                        .newBuilder()
-//                        .addHeader() // TODO add common client metadata to every request
-//                        .build()
-                ))
+    public OkHttpClient okHttpClient() throws IOException {
+        Path tokenFile = dataDirectory.resolve("token.json");
+
+        Optional<String> token = Token.load(tokenFile);
+        if (!token.isPresent()) {
+            // Generate and save new token
+            String t = Token.generate();
+            Token.save(tokenFile, t);
+            token = Optional.of(t);
+        }
+        final String apiToken = token.get();
+
+        return HttpUtils.defaultOkHttpClient().newBuilder()
+                .addInterceptor(chain -> chain.proceed(chain.request().newBuilder()
+                        // Add authorization token to every request
+                        .addHeader("Authorization", "Bearer " + apiToken)
+                        .build()))
                 .build();
     }
+
+    @RequiredArgsConstructor
+    private static class Token {
+        @SerializedName("token") final String token;
+
+        static Optional<String> load(Path tokenFile) throws IOException {
+            if (Files.exists(tokenFile)) {
+                // Read existing token file
+                try (Reader reader = Files.newBufferedReader(tokenFile)) {
+                    return Optional.ofNullable(new Gson().fromJson(reader, Token.class))
+                            .map(t -> t.token);
+                }
+            }
+            return Optional.empty();
+        }
+
+        static void save(Path tokenFile, String token) throws IOException {
+            checkNotNull(tokenFile);
+            checkNotNull(token);
+            try (Writer writer = new FileWriter(tokenFile.toFile())) {
+                new Gson().toJson(new Token(token), writer);
+            }
+        }
+
+        static String generate() {
+            return "T-" + Utils.randomSecureString(20);
+        }
+    }
 }
+

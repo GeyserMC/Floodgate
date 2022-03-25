@@ -11,6 +11,7 @@ dependencies {
 }
 
 relocate("com.google.inject")
+relocate("com.google.protobuf")
 relocate("net.kyori")
 relocate("cloud.commandframework")
 relocate("io.leangen.geantyref") // used in cloud

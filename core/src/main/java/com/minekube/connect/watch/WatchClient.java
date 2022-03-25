@@ -29,6 +29,7 @@ import com.google.inject.Inject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.minekube.connect.config.ConnectConfig;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.SessionRejection;
+import minekube.connect.v1alpha1.WatchServiceOuterClass.SessionRejection.Builder;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.WatchRequest;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.WatchResponse;
 import okhttp3.OkHttpClient;
@@ -43,7 +44,7 @@ import org.jetbrains.annotations.Nullable;
 public class WatchClient {
     private static final String ENDPOINT_HEADER = "Connect-Endpoint";
     private static final String WATCH_URL = System.getenv().getOrDefault(
-            "CONNECT_WATCH_URL", "wss://connect.minekube.net/watch");
+            "CONNECT_WATCH_URL", "wss://connect-watch.minekube.net");
 
     private final OkHttpClient httpClient;
     private final ConnectConfig config;
@@ -90,15 +91,18 @@ public class WatchClient {
 
                 SessionProposal prop = new SessionProposal(
                         res.getSession(),
-                        reason -> webSocket.send(ByteString.of(WatchRequest.newBuilder()
-                                .setSessionRejection(
-                                        SessionRejection.newBuilder()
-                                                .setId(res.getSession().getId())
-                                                .setReason(reason)
-                                                .build())
-                                .build()
-                                .toByteArray()
-                        ))
+                        reason -> {
+                            Builder rejection = SessionRejection.newBuilder()
+                                    .setId(res.getSession().getId());
+                            if (reason != null) {
+                                rejection.setReason(reason);
+                            }
+                            webSocket.send(ByteString.of(WatchRequest.newBuilder()
+                                    .setSessionRejection(rejection)
+                                    .build()
+                                    .toByteArray()
+                            ));
+                        }
                 );
                 watcher.onProposal(prop);
             }

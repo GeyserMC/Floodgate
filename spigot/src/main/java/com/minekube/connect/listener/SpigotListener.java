@@ -56,7 +56,7 @@ public final class SpigotListener implements Listener {
             //todo we should probably move this log message earlier in the process, so that we know
             // that Floodgate has done its job
             logger.translatedInfo(
-                    "floodgate.ingame.login_name",
+                    "connect.ingame.login_name",
                     player.getUsername(), player.getUniqueId()
             );
             languageManager.loadLocale(player.getLanguageTag());

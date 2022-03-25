@@ -5,3 +5,4 @@ author: ${author}
 website: ${url}
 main: com.minekube.connect.SpigotPlugin
 api-version: 1.13
+softdepend: [ProtocolSupport]

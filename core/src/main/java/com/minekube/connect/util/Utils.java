@@ -42,6 +42,8 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Base64.Encoder;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
@@ -238,5 +240,12 @@ public class Utils {
             sb.append(AZ_LOWER.charAt(rnd.nextInt(AZ_LOWER.length())));
         }
         return sb.toString();
+    }
+
+    public static String randomSecureString(int length) {
+        byte[] bytes = new byte[length];
+        rnd.nextBytes(bytes);
+        Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+        return encoder.encodeToString(bytes);
     }
 }
