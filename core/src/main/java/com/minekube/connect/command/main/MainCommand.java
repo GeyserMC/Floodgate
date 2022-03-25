@@ -43,8 +43,8 @@ public final class MainCommand implements ConnectCommand {
     @Override
     public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
         Builder<UserAudience> builder = commandManager.commandBuilder(
-                        "floodgate",
-                        ArgumentDescription.of("A set of Floodgate related actions in one command"))
+                        "connect",
+                        ArgumentDescription.of("A set of Minekube-Connect related actions in one command"))
                 .senderType(UserAudience.class)
                 .permission(Permission.COMMAND_MAIN.get())
                 .handler(this::execute);
@@ -57,7 +57,7 @@ public final class MainCommand implements ConnectCommand {
             );
         }
 
-        // also register /floodgate itself
+        // also register /connect itself
         return builder.build();
     }
 

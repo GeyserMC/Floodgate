@@ -8,9 +8,9 @@ plugins {
 
 allprojects {
     group = "com.minekube.connect"
-    version = "2.1.1-SNAPSHOT"
+    version = "0.1.0-SNAPSHOT"
     description =
-        "Allows Bedrock players to join Java edition servers while keeping the server in online mode"
+        "Allows players to through the Connect network while also supporting online mode server, bungee or velocity mode"
 }
 
 val platforms = setOf(
