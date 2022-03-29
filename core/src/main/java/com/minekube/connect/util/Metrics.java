@@ -34,7 +34,7 @@ public final class Metrics {
 
         metricsBase = new MetricsBase(
                 "server-implementation",
-                metricsConfig.getId(),
+                metricsConfig.getUuid(),
                 Constants.METRICS_ID,
                 !metricsConfig.isDisabled(),
                 this::appendPlatformData,

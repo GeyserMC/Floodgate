@@ -60,6 +60,6 @@ public class ConnectConfig {
         /**
          * The unique id that should be consistent for a server/proxy.
          */
-        private String id;
+        private String uuid;
     }
 }

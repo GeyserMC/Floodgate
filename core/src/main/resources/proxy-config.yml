@@ -12,7 +12,7 @@ metrics:
   # If metrics should be disabled.
   disabled: false
   # The unique id that should be consistent for a server/proxy.
-  id: ${metrics.id}
+  uuid: ${metrics.uuid}
 
 # Do not change this
 config-version: 1

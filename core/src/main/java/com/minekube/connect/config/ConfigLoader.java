@@ -26,6 +26,11 @@
 package com.minekube.connect.config;
 
 import com.minekube.connect.api.logger.ConnectLogger;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 import lombok.Getter;
@@ -50,7 +55,7 @@ public final class ConfigLoader {
             templateFile = "proxy-" + templateFile;
         }
 
-        //todo old Floodgate logged a message when version = 0 and it generated a new key.
+        //todo old Connect logged a message when version = 0 and it generated a new key.
         // Might be nice to allow you to run a function for a specific version.
 
         // it would also be nice to have sections in versionBuilder so that you don't have to
@@ -63,12 +68,24 @@ public final class ConfigLoader {
                         .templateReader(ResourceTemplateReader.of(getClass()))
                         .template(templateFile)
                         .changes(Changes.builder()
+                                .version(1, Changes.versionBuilder())
                                 .build())
                         .definePlaceholder("metrics.uuid", UUID::randomUUID)
                         .postInitializeCallbackArgument(this)
+                        .saveConfigAutomatically(true)
                         .build();
 
         try {
+            // temporary placeholder fix
+            File config = new File(dataFolder.toFile(), "config.yml");
+            if (config.exists()) {
+                fixPlaceholderIssue(config.toPath());
+            } else {
+                utilities.executeOn(configClass); // create config
+            }
+
+            fixPlaceholderIssue(config.toPath()); // apply fix
+
             return (T) utilities.executeOn(configClass);
         } catch (Throwable throwable) {
             throw new RuntimeException(
@@ -76,5 +93,12 @@ public final class ConfigLoader {
                     throwable
             );
         }
+    }
+
+    private static void fixPlaceholderIssue(Path path) throws IOException {
+        Charset charset = StandardCharsets.UTF_8;
+        String content = new String(Files.readAllBytes(path), charset)
+                .replace("${metrics.uuid}", UUID.randomUUID().toString());
+        Files.write(path, content.getBytes(charset));
     }
 }
