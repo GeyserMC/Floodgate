@@ -43,11 +43,13 @@ import com.minekube.connect.listener.VelocityListenerRegistration;
 import com.minekube.connect.logger.Slf4JConnectLogger;
 import com.minekube.connect.platform.command.CommandUtil;
 import com.minekube.connect.platform.listener.ListenerRegistration;
+import com.minekube.connect.platform.util.PlatformUtils;
 import com.minekube.connect.player.ConnectCommandPreprocessor;
 import com.minekube.connect.player.UserAudience;
 import com.minekube.connect.skin.SkinApplier;
 import com.minekube.connect.util.LanguageManager;
 import com.minekube.connect.util.VelocityCommandUtil;
+import com.minekube.connect.util.VelocityPlatformUtils;
 import com.minekube.connect.util.VelocitySkinApplier;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.event.EventManager;
@@ -62,6 +64,7 @@ public final class VelocityPlatformModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(CommandUtil.class).to(VelocityCommandUtil.class);
+        bind(PlatformUtils.class).to(VelocityPlatformUtils.class);
     }
 
     @Provides
@@ -134,8 +137,8 @@ public final class VelocityPlatformModule extends AbstractModule {
     }
 
     @Provides
-    @Named("implementationName")
-    public String implementationName() {
+    @Named("platformName")
+    public String platformName() {
         return "Velocity";
     }
 }

@@ -3,7 +3,7 @@
   "name": "${name}",
   "version": "${version}",
   "description": "${description}",
-  "url": "$url}",
+  "url": "${url}",
   "authors": [
     "${author}"
   ],

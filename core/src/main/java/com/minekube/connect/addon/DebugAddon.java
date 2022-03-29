@@ -42,8 +42,8 @@ public final class DebugAddon implements InjectorAddon {
     @Inject private ConnectLogger logger;
 
     @Inject
-    @Named("implementationName")
-    private String implementationName;
+    @Named("platformName")
+    private String platformName;
 
     @Inject
     @Named("packetEncoder")
@@ -63,10 +63,10 @@ public final class DebugAddon implements InjectorAddon {
 
         channel.pipeline().addBefore(
                 packetEncoder, "connect_debug_out",
-                new ChannelOutDebugHandler(implementationName, toServer, changeDetector, logger)
+                new ChannelOutDebugHandler(platformName, toServer, changeDetector, logger)
         ).addBefore(
                 packetDecoder, "connect_debug_in",
-                new ChannelInDebugHandler(implementationName, toServer, changeDetector, logger)
+                new ChannelInDebugHandler(platformName, toServer, changeDetector, logger)
         );
     }
 

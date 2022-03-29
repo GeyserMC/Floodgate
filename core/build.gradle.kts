@@ -10,6 +10,7 @@ plugins {
 
 dependencies {
     api(projects.api)
+    api("org.geysermc.configutils", "configutils", Versions.configUtilsVersion)
 
     api("com.google.inject", "guice", Versions.guiceVersion)
     api("cloud.commandframework", "cloud-core", Versions.cloudVersion)
@@ -32,6 +33,7 @@ relocate("org.bstats")
 
 configure<BlossomExtension> {
     val constantsFile = "src/main/java/com/minekube/connect/util/Constants.java"
+    replaceToken("\${connectVersion}", fullVersion(), constantsFile)
     replaceToken("\${branch}", branchName(), constantsFile)
     replaceToken("\${buildNumber}", buildNumber(), constantsFile)
 }

@@ -36,6 +36,8 @@ import lombok.Getter;
 public class ConnectConfig {
     private String defaultLocale;
 
+    private MetricsConfig metrics;
+
     private boolean debug;
     private int configVersion;
 
@@ -49,4 +51,15 @@ public class ConnectConfig {
         return this instanceof ProxyConnectConfig;
     }
 
+    @Getter
+    public static class MetricsConfig {
+        /**
+         * If metrics should be disabled.
+         */
+        private boolean disabled;
+        /**
+         * The unique id that should be consistent for a server/proxy.
+         */
+        private String id;
+    }
 }

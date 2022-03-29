@@ -40,10 +40,12 @@ import com.minekube.connect.listener.SpigotListenerRegistration;
 import com.minekube.connect.logger.JavaUtilConnectLogger;
 import com.minekube.connect.platform.command.CommandUtil;
 import com.minekube.connect.platform.listener.ListenerRegistration;
+import com.minekube.connect.platform.util.PlatformUtils;
 import com.minekube.connect.pluginmessage.SpigotSkinApplier;
 import com.minekube.connect.skin.SkinApplier;
 import com.minekube.connect.util.LanguageManager;
 import com.minekube.connect.util.SpigotCommandUtil;
+import com.minekube.connect.util.SpigotPlatformUtils;
 import com.minekube.connect.util.SpigotVersionSpecificMethods;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
@@ -53,6 +55,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 @RequiredArgsConstructor
 public final class SpigotPlatformModule extends AbstractModule {
     private final SpigotPlugin plugin;
+
+    @Override
+    protected void configure() {
+        bind(PlatformUtils.class).to(SpigotPlatformUtils.class);
+    }
 
     @Provides
     @Singleton
@@ -127,8 +134,8 @@ public final class SpigotPlatformModule extends AbstractModule {
     }
 
     @Provides
-    @Named("implementationName")
-    public String implementationName() {
+    @Named("platformName")
+    public String platformName() {
         return "Spigot";
     }
 

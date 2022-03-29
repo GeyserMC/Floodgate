@@ -26,8 +26,10 @@
 package com.minekube.connect.util;
 
 public final class Constants {
+    public static final String VERSION = "${connectVersion}";
     public static final int BUILD_NUMBER = Integer.parseInt("${buildNumber}");
     public static final String GIT_BRANCH = "${branch}";
+    public static final int METRICS_ID = 14794;
 
     public static final char COLOR_CHAR = '§';
 

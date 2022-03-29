@@ -10,7 +10,7 @@ allprojects {
     group = "com.minekube.connect"
     version = "0.1.0-SNAPSHOT"
     description =
-        "Allows players to through the Connect network while also supporting online mode server, bungee or velocity mode"
+        "Connects the server/proxy to the global Connect network to reach more players while also supporting online mode server, bungee or velocity mode. Visit https://minekube.com/connect"
 }
 
 val platforms = setOf(

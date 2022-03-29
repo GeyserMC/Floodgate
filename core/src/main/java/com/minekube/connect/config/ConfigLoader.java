@@ -23,62 +23,58 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package com.minekube.connect.config.loader;
+package com.minekube.connect.config;
 
 import com.minekube.connect.api.logger.ConnectLogger;
-import com.minekube.connect.config.ConnectConfig;
-import com.minekube.connect.config.ProxyConnectConfig;
-import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.geysermc.configutils.ConfigUtilities;
+import org.geysermc.configutils.file.codec.PathFileCodec;
+import org.geysermc.configutils.file.template.ResourceTemplateReader;
+import org.geysermc.configutils.updater.change.Changes;
 
 @Getter
 @RequiredArgsConstructor
 public final class ConfigLoader {
     private final Path dataFolder;
     private final Class<? extends ConnectConfig> configClass;
-    private final DefaultConfigHandler configCreator;
 
     private final ConnectLogger logger;
 
     @SuppressWarnings("unchecked")
     public <T extends ConnectConfig> T load() {
-        Path configPath = dataFolder.resolve("config.yml");
-
-        String defaultConfigName = "config.yml";
-        boolean proxy = ProxyConnectConfig.class.isAssignableFrom(configClass);
-        if (proxy) {
-            defaultConfigName = "proxy-" + defaultConfigName;
+        String templateFile = "config.yml";
+        if (ProxyConnectConfig.class.isAssignableFrom(configClass)) {
+            templateFile = "proxy-" + templateFile;
         }
 
-        boolean newConfig = !Files.exists(configPath);
-        if (newConfig) {
-            try {
-                configCreator.createDefaultConfig(defaultConfigName, configPath);
-            } catch (Exception exception) {
-                logger.error("Error while creating config", exception);
-            }
-        }
+        //todo old Floodgate logged a message when version = 0 and it generated a new key.
+        // Might be nice to allow you to run a function for a specific version.
 
-        T configInstance;
+        // it would also be nice to have sections in versionBuilder so that you don't have to
+        // provide the path all the time
+
+        ConfigUtilities utilities =
+                ConfigUtilities.builder()
+                        .fileCodec(PathFileCodec.of(dataFolder))
+                        .configFile("config.yml")
+                        .templateReader(ResourceTemplateReader.of(getClass()))
+                        .template(templateFile)
+                        .changes(Changes.builder()
+                                .build())
+                        .definePlaceholder("metrics.uuid", UUID::randomUUID)
+                        .postInitializeCallbackArgument(this)
+                        .build();
+
         try {
-            ConnectConfig config = ConfigInitializer.initializeFrom(
-                    Files.newInputStream(configPath), configClass);
-
-            try {
-                configInstance = (T) config;
-            } catch (ClassCastException exception) {
-                logger.error("Failed to cast config file to required class.", exception);
-                throw new RuntimeException(exception);
-            }
-        } catch (Exception exception) {
-            logger.error("Error while loading config", exception);
+            return (T) utilities.executeOn(configClass);
+        } catch (Throwable throwable) {
             throw new RuntimeException(
-                    "Failed to load the config! Try to delete the config file", exception);
+                    "Failed to load the config! Try to delete the config file if this error persists",
+                    throwable
+            );
         }
-
-        return configInstance;
     }
-
 }

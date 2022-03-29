@@ -39,9 +39,8 @@ import com.minekube.connect.api.inject.PlatformInjector;
 import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.api.packet.PacketHandlers;
 import com.minekube.connect.config.ConfigHolder;
+import com.minekube.connect.config.ConfigLoader;
 import com.minekube.connect.config.ConnectConfig;
-import com.minekube.connect.config.loader.ConfigLoader;
-import com.minekube.connect.config.loader.DefaultConfigHandler;
 import com.minekube.connect.inject.CommonPlatformInjector;
 import com.minekube.connect.packet.PacketHandlersImpl;
 import com.minekube.connect.util.HttpUtils;
@@ -87,15 +86,8 @@ public class CommonModule extends AbstractModule {
     @Singleton
     public ConfigLoader configLoader(
             @Named("configClass") Class<? extends ConnectConfig> configClass,
-            DefaultConfigHandler defaultConfigHandler,
             ConnectLogger logger) {
-        return new ConfigLoader(dataDirectory, configClass, defaultConfigHandler, logger);
-    }
-
-    @Provides
-    @Singleton
-    public DefaultConfigHandler defaultConfigCreator() {
-        return new DefaultConfigHandler();
+        return new ConfigLoader(dataDirectory, configClass, logger);
     }
 
     @Provides

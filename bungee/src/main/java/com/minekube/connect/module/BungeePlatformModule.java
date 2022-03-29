@@ -41,11 +41,13 @@ import com.minekube.connect.listener.BungeeListenerRegistration;
 import com.minekube.connect.logger.JavaUtilConnectLogger;
 import com.minekube.connect.platform.command.CommandUtil;
 import com.minekube.connect.platform.listener.ListenerRegistration;
+import com.minekube.connect.platform.util.PlatformUtils;
 import com.minekube.connect.player.ConnectCommandPreprocessor;
 import com.minekube.connect.player.UserAudience;
 import com.minekube.connect.pluginmessage.BungeeSkinApplier;
 import com.minekube.connect.skin.SkinApplier;
 import com.minekube.connect.util.BungeeCommandUtil;
+import com.minekube.connect.util.BungeePlatformUtils;
 import com.minekube.connect.util.LanguageManager;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.CommandSender;
@@ -59,6 +61,7 @@ public final class BungeePlatformModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        bind(PlatformUtils.class).to(BungeePlatformUtils.class);
         bind(ProxyServer.class).toInstance(plugin.getProxy());
     }
 
@@ -139,8 +142,8 @@ public final class BungeePlatformModule extends AbstractModule {
     }
 
     @Provides
-    @Named("implementationName")
-    public String implementationName() {
+    @Named("platformName")
+    public String platformName() {
         return "BungeeCord";
     }
 }
