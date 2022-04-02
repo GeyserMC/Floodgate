@@ -45,9 +45,9 @@ fun Project.lastCommitHash(): String? =
 // retrieved from https://wiki.jenkins-ci.org/display/JENKINS/Building+a+software+project
 // some properties might be specific to Jenkins
 fun Project.branchName(): String =
-    System.getProperty("GIT_BRANCH", "local/dev")
+    System.getenv("GIT_BRANCH") ?: "local/dev"
 fun Project.buildNumber(): Int =
-    Integer.parseInt(System.getProperty("BUILD_NUMBER", "-1"))
+    Integer.parseInt(System.getenv("BUILD_NUMBER") ?: "-1")
 
 fun Project.buildNumberAsString(): String =
     buildNumber().takeIf { it != -1 }?.toString() ?: "??"
