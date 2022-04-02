@@ -33,7 +33,7 @@ public final class ProxyUtils {
     }
 
     private static boolean isBungeeData() {
-        return ReflectionUtils.getCastedValue(null, ClassNames.BUNGEE);
+        return ReflectionUtils.castedStaticValue(ClassNames.BUNGEE);
     }
 
     private static boolean isVelocitySupport() {
@@ -41,6 +41,6 @@ public final class ProxyUtils {
             return false;
         }
 
-        return ReflectionUtils.getCastedValue(null, ClassNames.PAPER_VELOCITY_SUPPORT);
+        return ReflectionUtils.castedStaticValue(ClassNames.PAPER_VELOCITY_SUPPORT);
     }
 }

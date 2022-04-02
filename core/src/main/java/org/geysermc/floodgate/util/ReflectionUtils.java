@@ -269,6 +269,11 @@ public final class ReflectionUtils {
         return (T) getValue(instance, getField(instance.getClass(), fieldName));
     }
 
+    @Nullable
+    public static <T> T castedStaticValue(Field field) {
+        return getCastedValue(null, field);
+    }
+
     /**
      * Set the value of a field. This method make the field accessible and then sets the value.<br>
      * This method doesn't throw an exception when failed, but it'll log the error to the console.

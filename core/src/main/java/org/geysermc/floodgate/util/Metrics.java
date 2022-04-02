@@ -96,7 +96,11 @@ public final class Metrics {
                 new SimplePie("floodgate_version", () -> Constants.VERSION)
         );
 
-        metricsBase.addCustomChart(new SimplePie("platform", () -> implementationName));
+        metricsBase.addCustomChart(
+                new DrilldownPie("platform", () -> Collections.singletonMap(
+                        implementationName,
+                        Collections.singletonMap(platformUtils.serverImplementationName(), 1)
+                )));
 
         metricsBase.addCustomChart(
                 new DrilldownPie("minecraft_version", () -> {

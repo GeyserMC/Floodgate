@@ -40,6 +40,8 @@ public abstract class PlatformUtils {
      */
     public abstract String minecraftVersion();
 
+    public abstract String serverImplementationName();
+
     public enum AuthType {
         ONLINE,
         PROXIED,
