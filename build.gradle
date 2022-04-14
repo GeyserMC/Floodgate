@@ -60,9 +60,6 @@ repositories {
     maven {
         url = 'https://oss.sonatype.org/content/repositories/snapshots'
     }
-    maven {
-        url = "https://repo.incendo.org/content/repositories/releases"
-    }
     // Standard OpenCollab repositories
     maven {
         name = 'opencollab-release-repo'
