@@ -21,10 +21,7 @@ pipeline {
             post {
                 success {
                     archiveArtifacts artifacts: '**/build/libs/floodgate-*.jar',
-                        excludes:
-                          '**/floodgate-parent-*.jar',
-                          '**/floodgate-api-*.jar',
-                          '**/floodgate-core-*.jar'
+                        excludes: '**/floodgate-parent-*.jar,**/floodgate-api-*.jar,**/floodgate-core-*.jar',
                         fingerprint: true
                 }
             }
