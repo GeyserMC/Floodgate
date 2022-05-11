@@ -12,13 +12,14 @@ allprojects {
     description = "Allows Bedrock players to join Java edition servers while keeping the server in online mode"
 }
 
-val platforms = setOf(
+val deployProjects = setOf(
+    projects.api,
+    // for future Floodgate integration + Fabric
+    projects.core,
     projects.bungee,
     projects.spigot,
     projects.velocity
 ).map { it.dependencyProject }
-
-projects.api.dependencyProject.plugins.apply("floodgate.publish-conventions")
 
 //todo re-add pmd and organisation/license/sdcm/issuemanagement stuff
 
@@ -44,10 +45,10 @@ subprojects {
     if (relativePath.startsWith("database" + File.separator)) {
         group = rootProject.group as String + ".database"
         plugins.apply("floodgate.database-conventions")
-    } else {
-        when (this) {
-            in platforms -> plugins.apply("floodgate.publish-conventions")
-            else -> plugins.apply("floodgate.base-conventions")
-        }
+    }
+
+    when (this) {
+        in deployProjects -> plugins.apply("floodgate.publish-conventions")
+        else -> plugins.apply("floodgate.base-conventions")
     }
 }

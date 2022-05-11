@@ -2,7 +2,6 @@ import net.kyori.blossom.BlossomExtension
 
 plugins {
     id("net.kyori.blossom")
-    id("floodgate.shadow-conventions")
 }
 
 dependencies {
