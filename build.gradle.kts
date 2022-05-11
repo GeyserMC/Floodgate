@@ -18,6 +18,8 @@ val platforms = setOf(
     projects.velocity
 ).map { it.dependencyProject }
 
+projects.api.dependencyProject.plugins.apply("floodgate.publish-conventions")
+
 //todo re-add pmd and organisation/license/sdcm/issuemanagement stuff
 
 subprojects {
