@@ -40,6 +40,7 @@ import com.mongodb.client.model.UpdateOptions;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -336,12 +337,7 @@ public class MongoDbDatabase extends CommonPlayerLink {
     }
 
     public boolean collectionNotExists(final String collectionName) {
-        try (MongoCursor<String> collectionNames = database.listCollectionNames().cursor()) {
-            if (collectionNames.hasNext() && collectionNames.next().equals(collectionName)) {
-                return false;
-            }
-        }
-        return true;
+        return !database.listCollectionNames().into(new ArrayList<>()).contains(collectionName);
     }
 
 }
