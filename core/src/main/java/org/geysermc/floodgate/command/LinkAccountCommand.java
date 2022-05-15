@@ -46,6 +46,7 @@ import org.geysermc.floodgate.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.player.UserAudience.PlayerAudience;
+import org.geysermc.floodgate.player.audience.ProfileAudience;
 import org.geysermc.floodgate.player.audience.ProfileAudienceArgument;
 import org.geysermc.floodgate.util.Constants;
 
@@ -136,7 +137,7 @@ public final class LinkAccountCommand implements FloodgateCommand {
             return;
         }
 
-        UserAudience targetUser = context.get("player");
+        ProfileAudience targetUser = context.get("player");
         String targetName = targetUser.username();
 
         link.createLinkRequest(sender.uuid(), sender.username(), targetName)
