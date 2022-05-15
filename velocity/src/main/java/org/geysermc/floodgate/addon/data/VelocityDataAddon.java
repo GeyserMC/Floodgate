@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -89,7 +89,7 @@ public final class VelocityDataAddon implements InjectorAddon {
     @Override
     public void onChannelClosed(Channel channel) {
         FloodgatePlayer player = channel.attr(playerAttribute).get();
-        if (player != null && api.removePlayer(player)) {
+        if (player != null && api.setPendingRemove(player)) {
             logger.translatedInfo("floodgate.ingame.disconnect_name", player.getUsername());
         }
     }

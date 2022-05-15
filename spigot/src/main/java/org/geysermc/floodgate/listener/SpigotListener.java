@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,9 +35,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.player.FloodgatePlayerImpl;
 import org.geysermc.floodgate.util.LanguageManager;
-import org.geysermc.floodgate.util.SpigotCommandUtil;
 
 public final class SpigotListener implements Listener {
     @Inject private SimpleFloodgateApi api;
@@ -55,7 +53,8 @@ public final class SpigotListener implements Listener {
         // he would've been disconnected by now
         FloodgatePlayer player = api.getPlayer(uniqueId);
         if (player != null) {
-            player.as(FloodgatePlayerImpl.class).setLogin(false);
+            //todo we should probably move this log message earlier in the process, so that we know
+            // that Floodgate has done its job
             logger.translatedInfo(
                     "floodgate.ingame.login_name",
                     player.getCorrectUsername(), player.getCorrectUniqueId()
@@ -66,6 +65,6 @@ public final class SpigotListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
-        SpigotCommandUtil.AUDIENCE_CACHE.remove(event.getPlayer().getUniqueId()); //todo
+        api.playerRemoved(event.getPlayer().getUniqueId());
     }
 }

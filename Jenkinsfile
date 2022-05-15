@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools {
-        maven 'Maven 3'
+        gradle 'Gradle 7'
         jdk 'Java 8'
     }
     options {
@@ -11,11 +11,18 @@ pipeline {
         stage ('Build') {
             steps {
                 sh 'git submodule update --init --recursive'
-                sh 'mvn clean package'
+                rtGradleRun(
+                    usesPlugin: true,
+                    tool: 'Gradle 7',
+                    buildFile: 'build.gradle.kts',
+                    tasks: 'clean build',
+                )
             }
             post {
                 success {
-                    archiveArtifacts artifacts: '**/target/floodgate-*.jar', excludes: "**/target/floodgate-common.jar", fingerprint: true
+                    archiveArtifacts artifacts: '**/build/libs/floodgate-*.jar',
+                        excludes: '**/floodgate-parent-*.jar,**/floodgate-api.jar,**/floodgate-core.jar',
+                        fingerprint: true
                 }
             }
         }
@@ -24,28 +31,30 @@ pipeline {
             when {
                 anyOf {
                     branch "master"
-                    branch "dev/2.0"
+                    branch "dev/2.1.1"
                 }
             }
 
             steps {
-                rtMavenDeployer(
-                        id: "maven-deployer",
+                rtGradleDeployer(
+                        id: "GRADLE_DEPLOYER",
                         serverId: "opencollab-artifactory",
                         releaseRepo: "maven-releases",
                         snapshotRepo: "maven-snapshots"
                 )
-                rtMavenResolver(
-                        id: "maven-resolver",
-                        serverId: "opencollab-artifactory",
-                        releaseRepo: "maven-deploy-release",
-                        snapshotRepo: "maven-deploy-snapshot"
+                rtGradleResolver(
+                        id: "GRADLE_RESOLVER",
+                        serverId: "opencollab-artifactory"
                 )
-                rtMavenRun(
-                        pom: 'pom.xml',
-                        goals: 'source:jar install -DskipTests',
-                        deployerId: "maven-deployer",
-                        resolverId: "maven-resolver"
+                rtGradleRun(
+                        usesPlugin: true,
+                        tool: 'Gradle 7',
+                        rootDir: "",
+                        useWrapper: true,
+                        buildFile: 'build.gradle.kts',
+                        tasks: 'artifactoryPublish',
+                        deployerId: "GRADLE_DEPLOYER",
+                        resolverId: "GRADLE_RESOLVER"
                 )
                 rtPublishBuildInfo(
                         serverId: "opencollab-artifactory"

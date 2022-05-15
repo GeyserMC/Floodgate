@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,6 +48,7 @@ import org.geysermc.floodgate.logger.Slf4jFloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
+import org.geysermc.floodgate.platform.util.PlatformUtils;
 import org.geysermc.floodgate.player.FloodgateCommandPreprocessor;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
@@ -57,6 +58,7 @@ import org.geysermc.floodgate.pluginmessage.VelocityPluginMessageUtils;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.VelocityCommandUtil;
+import org.geysermc.floodgate.util.VelocityPlatformUtils;
 import org.geysermc.floodgate.util.VelocitySkinApplier;
 import org.slf4j.Logger;
 
@@ -66,25 +68,25 @@ public final class VelocityPlatformModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        VelocityCommandUtil commandUtil = new VelocityCommandUtil();
-        requestInjection(commandUtil);
-
         bind(CommandUtil.class).to(VelocityCommandUtil.class);
-        bind(VelocityCommandUtil.class).toInstance(commandUtil);
+        bind(PlatformUtils.class).to(VelocityPlatformUtils.class);
+    }
 
+    @Provides
+    @Singleton
+    public CommandManager<UserAudience> commandManager(CommandUtil commandUtil) {
         Injector child = guice.createChildInjector(new CloudInjectionModule<>(
                 UserAudience.class,
                 CommandExecutionCoordinator.simpleCoordinator(),
-                commandUtil::getAudience,
+                commandUtil::getUserAudience,
                 audience -> (CommandSource) audience.source()
         ));
 
         CommandManager<UserAudience> commandManager =
                 child.getInstance(new Key<VelocityCommandManager<UserAudience>>() {});
 
-        bind(new Key<CommandManager<UserAudience>>() {}).toInstance(commandManager);
-
         commandManager.registerCommandPreProcessor(new FloodgateCommandPreprocessor<>(commandUtil));
+        return commandManager;
     }
 
     @Provides
@@ -99,8 +101,9 @@ public final class VelocityPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public ListenerRegistration<Object> listenerRegistration(EventManager eventManager,
-                                                             VelocityPlugin plugin) {
+    public ListenerRegistration<Object> listenerRegistration(
+            EventManager eventManager,
+            VelocityPlugin plugin) {
         return new VelocityListenerRegistration(eventManager, plugin);
     }
 

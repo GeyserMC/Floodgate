@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -63,18 +63,15 @@ public final class SpigotPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        boolean usePaperListener = ReflectionUtils.getClassSilently(
+                "com.destroystokyo.paper.event.profile.PreFillProfileEvent") != null;
+
         platform.enable(
                 new SpigotCommandModule(this),
                 new SpigotAddonModule(),
-                new PluginMessageModule()
+                new PluginMessageModule(),
+                (usePaperListener ? new PaperListenerModule() : new SpigotListenerModule())
         );
-
-        if (ReflectionUtils.getClassSilently(
-                "com.destroystokyo.paper.event.profile.PreFillProfileEvent") != null) {
-            platform.enable(new PaperListenerModule());
-        } else {
-            platform.enable(new SpigotListenerModule());
-        }
 
         //todo add proper support for disabling things on shutdown and enabling this on enable
         injector.getInstance(HandshakeHandlers.class)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,8 +32,12 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.permissions.PermissionDefault;
+import org.bukkit.plugin.PluginManager;
 import org.geysermc.floodgate.SpigotPlugin;
+import org.geysermc.floodgate.command.util.Permission;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.player.FloodgateCommandPreprocessor;
 import org.geysermc.floodgate.player.UserAudience;
@@ -42,6 +46,12 @@ import org.geysermc.floodgate.player.UserAudience;
 public final class SpigotCommandModule extends CommandModule {
     private final SpigotPlugin plugin;
 
+    @Override
+    protected void configure() {
+        super.configure();
+        registerPermissions();
+    }
+
     @Provides
     @Singleton
     @SneakyThrows
@@ -49,10 +59,26 @@ public final class SpigotCommandModule extends CommandModule {
         CommandManager<UserAudience> commandManager = new BukkitCommandManager<>(
                 plugin,
                 CommandExecutionCoordinator.simpleCoordinator(),
-                commandUtil::getAudience,
+                commandUtil::getUserAudience,
                 audience -> (CommandSender) audience.source()
         );
         commandManager.registerCommandPreProcessor(new FloodgateCommandPreprocessor<>(commandUtil));
         return commandManager;
+    }
+
+    private void registerPermissions() {
+        PluginManager manager = Bukkit.getPluginManager();
+        for (Permission permission : Permission.values()) {
+            if (manager.getPermission(permission.get()) != null) {
+                continue;
+            }
+
+            PermissionDefault defaultValue =
+                    PermissionDefault.getByName(permission.defaultValue().name());
+
+            manager.addPermission(new org.bukkit.permissions.Permission(
+                    permission.get(), defaultValue
+            ));
+        }
     }
 }

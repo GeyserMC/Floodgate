@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,35 +29,29 @@ import com.google.inject.Inject;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandUtil;
-import org.geysermc.floodgate.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.player.UserAudience;
-import org.geysermc.floodgate.player.UserAudienceArgument.PlayerType;
-import org.geysermc.floodgate.player.VelocityUserAudience.VelocityConsoleAudience;
-import org.geysermc.floodgate.player.VelocityUserAudience.VelocityPlayerAudience;
+import org.geysermc.floodgate.player.UserAudience.ConsoleAudience;
+import org.geysermc.floodgate.player.UserAudience.PlayerAudience;
 
-public final class VelocityCommandUtil implements CommandUtil {
-    public static final @NonNull Map<UUID, UserAudience> AUDIENCE_CACHE = new HashMap<>();
+public final class VelocityCommandUtil extends CommandUtil {
     private static UserAudience console;
 
     @Inject private ProxyServer server;
-    @Inject private FloodgateApi api;
-    @Inject private FloodgateLogger logger;
-    @Inject private LanguageManager manager;
+
+    @Inject
+    public VelocityCommandUtil(LanguageManager manager, FloodgateApi api) {
+        super(manager, api);
+    }
 
     @Override
-    public @NonNull UserAudience getAudience(@NonNull Object sourceObj) {
+    public @NonNull UserAudience getUserAudience(@NonNull Object sourceObj) {
         if (!(sourceObj instanceof CommandSource)) {
             throw new IllegalArgumentException("Can only work with CommandSource!");
         }
@@ -67,7 +61,7 @@ public final class VelocityCommandUtil implements CommandUtil {
             if (console != null) {
                 return console;
             }
-            return console = new VelocityConsoleAudience(source, this);
+            return console = new ConsoleAudience(source, this);
         }
 
         Player player = (Player) source;
@@ -75,84 +69,39 @@ public final class VelocityCommandUtil implements CommandUtil {
         String username = player.getUsername();
         String locale = Utils.getLocale(player.getPlayerSettings().getLocale());
 
-        return AUDIENCE_CACHE.computeIfAbsent(uuid,
-                $ -> new VelocityPlayerAudience(uuid, username, locale, source, true, this));
+        return new PlayerAudience(uuid, username, locale, source, this, true);
     }
 
     @Override
-    public @Nullable UserAudience getAudienceByUsername(@NonNull String username) {
-        return server.getPlayer(username)
-                .map(this::getAudience)
-                .orElse(null);
+    protected String getUsernameFromSource(@NonNull Object source) {
+        return ((Player) source).getUsername();
     }
 
     @Override
-    public @NonNull UserAudience getOfflineAudienceByUsername(@NonNull String username) {
-        return new VelocityPlayerAudience(null, username, null, null, false, this);
+    protected UUID getUuidFromSource(@NonNull Object source) {
+        return ((Player) source).getUniqueId();
     }
 
     @Override
-    public @Nullable UserAudience getAudienceByUuid(@NonNull UUID uuid) {
-        return server.getPlayer(uuid)
-                .map(this::getAudience)
-                .orElse(null);
+    protected Collection<?> getOnlinePlayers() {
+        return server.getAllPlayers();
     }
 
     @Override
-    public @NonNull UserAudience getOfflineAudienceByUuid(@NonNull UUID uuid) {
-        return new VelocityPlayerAudience(uuid, null, null, null, false, this);
+    public Object getPlayerByUuid(@NonNull UUID uuid) {
+        Optional<Player> player = server.getPlayer(uuid);
+        return player.isPresent() ? player.get() : uuid;
     }
 
     @Override
-    public @NonNull Collection<String> getOnlineUsernames(@NonNull PlayerType limitTo) {
-        Collection<Player> players = server.getAllPlayers();
-
-        Collection<String> usernames = new ArrayList<>();
-        switch (limitTo) {
-            case ALL_PLAYERS:
-                for (Player player : players) {
-                    usernames.add(player.getUsername());
-                }
-                break;
-            case ONLY_JAVA:
-                for (Player player : players) {
-                    if (!api.isFloodgatePlayer(player.getUniqueId())) {
-                        usernames.add(player.getUsername());
-                    }
-                }
-                break;
-            case ONLY_BEDROCK:
-                for (Player player : players) {
-                    if (api.isFloodgatePlayer(player.getUniqueId())) {
-                        usernames.add(player.getUsername());
-                    }
-                }
-                break;
-            default:
-                throw new IllegalStateException("Unknown PlayerType");
-        }
-        return usernames;
+    public Object getPlayerByUsername(@NonNull String username) {
+        Optional<Player> player = server.getPlayer(username);
+        return player.isPresent() ? player.get() : username;
     }
 
     @Override
     public boolean hasPermission(Object player, String permission) {
-        return cast(player).hasPermission(permission);
-    }
-
-    @Override
-    public Collection<Object> getOnlinePlayersWithPermission(String permission) {
-        List<Object> players = new ArrayList<>();
-        for (Player player : server.getAllPlayers()) {
-            if (hasPermission(player, permission)) {
-                players.add(player);
-            }
-        }
-        return players;
-    }
-
-    @Override
-    public void sendMessage(Object target, String locale, TranslatableMessage message, Object... args) {
-        ((CommandSource) target).sendMessage(translateAndTransform(locale, message, args));
+        return ((CommandSource) player).hasPermission(permission);
     }
 
     @Override
@@ -161,23 +110,9 @@ public final class VelocityCommandUtil implements CommandUtil {
     }
 
     @Override
-    public void kickPlayer(Object player, String locale, TranslatableMessage message, Object... args) {
-        cast(player).disconnect(translateAndTransform(locale, message, args));
-    }
-
-    public Component translateAndTransform(
-            String locale,
-            TranslatableMessage message,
-            Object... args) {
-        return Component.text(message.translateMessage(manager, locale, args));
-    }
-
-    protected Player cast(Object instance) {
-        try {
-            return (Player) instance;
-        } catch (ClassCastException exception) {
-            logger.error("Failed to cast {} to Player", instance.getClass().getName());
-            throw exception;
+    public void kickPlayer(Object player, String message) {
+        if (player instanceof Player) {
+            ((Player) player).disconnect(Component.text(message));
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -55,8 +55,8 @@ import net.kyori.adventure.text.Component;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.util.LanguageManager;
-import org.geysermc.floodgate.util.VelocityCommandUtil;
 
 public final class VelocityListener {
     private static final Field INITIAL_MINECRAFT_CONNECTION;
@@ -90,6 +90,7 @@ public final class VelocityListener {
                     .expireAfterAccess(20, TimeUnit.SECONDS)
                     .build();
 
+    @Inject private ProxyFloodgateConfig config;
     @Inject private ProxyFloodgateApi api;
     @Inject private LanguageManager languageManager;
     @Inject private FloodgateLogger logger;
@@ -142,10 +143,17 @@ public final class VelocityListener {
         FloodgatePlayer player = playerCache.getIfPresent(event.getConnection());
         if (player != null) {
             playerCache.invalidate(event.getConnection());
+
+            GameProfile profile = new GameProfile(
+                    player.getCorrectUniqueId(),
+                    player.getCorrectUsername(),
+                    Collections.emptyList()
+            );
             // The texture properties addition is to fix the February 2 2022 Mojang authentication changes
-            event.setGameProfile(new GameProfile(player.getCorrectUniqueId(),
-                    player.getCorrectUsername(), Collections.singletonList(
-                            new Property("textures", "", ""))));
+            if (!config.isSendFloodgateData() && !player.isLinked()) {
+                profile = profile.addProperty(new Property("textures", "", ""));
+            }
+            event.setGameProfile(profile);
         }
     }
 
@@ -161,6 +169,6 @@ public final class VelocityListener {
 
     @Subscribe(order = PostOrder.LAST)
     public void onDisconnect(DisconnectEvent event) {
-        VelocityCommandUtil.AUDIENCE_CACHE.remove(event.getPlayer().getUniqueId()); //todo
+        api.playerRemoved(event.getPlayer().getUniqueId());
     }
 }

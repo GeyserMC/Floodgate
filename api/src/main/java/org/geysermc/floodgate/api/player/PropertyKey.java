@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -51,7 +51,7 @@ public class PropertyKey {
         this.removable = removable;
     }
 
-    public Result isAddAllowed(Object obj) { //todo use for add and remove
+    public Result isAddAllowed(Object obj) {
         if (obj instanceof PropertyKey) {
             PropertyKey propertyKey = (PropertyKey) obj;
 

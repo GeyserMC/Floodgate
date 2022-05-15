@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,10 +46,9 @@ import net.md_5.bungee.netty.ChannelWrapper;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.player.FloodgatePlayerImpl;
+import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinData;
-import org.geysermc.floodgate.util.BungeeCommandUtil;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
@@ -67,6 +66,7 @@ public final class BungeeListener implements Listener {
         checkNotNull(PLAYER_NAME, "Initial name field cannot be null");
     }
 
+    @Inject private ProxyFloodgateConfig config;
     @Inject private ProxyFloodgateApi api;
     @Inject private LanguageManager languageManager;
     @Inject private FloodgateLogger logger;
@@ -115,7 +115,8 @@ public final class BungeeListener implements Listener {
         UUID uniqueId = event.getConnection().getUniqueId();
         FloodgatePlayer player = api.getPlayer(uniqueId);
         if (player != null) {
-            player.as(FloodgatePlayerImpl.class).setLogin(false);
+            //todo we should probably move this log message earlier in the process, so that we know
+            // that Floodgate has done its job
             logger.translatedInfo(
                     "floodgate.ingame.login_name",
                     player.getCorrectUsername(), uniqueId
@@ -127,14 +128,16 @@ public final class BungeeListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPostLogin(PostLoginEvent event) {
         // To fix the February 2 2022 Mojang authentication changes
-        FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
-        if (player != null) {
-            skinApplier.applySkin(player, new SkinData("", ""));
+        if (!config.isSendFloodgateData()) {
+            FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
+            if (player != null && !player.isLinked()) {
+                skinApplier.applySkin(player, new SkinData("", ""));
+            }
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerDisconnect(PlayerDisconnectEvent event) {
-        BungeeCommandUtil.AUDIENCE_CACHE.remove(event.getPlayer().getUniqueId()); //todo
+        api.playerRemoved(event.getPlayer().getUniqueId());
     }
 }

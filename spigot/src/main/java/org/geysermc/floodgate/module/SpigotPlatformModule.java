@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,6 +42,7 @@ import org.geysermc.floodgate.logger.JavaUtilFloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
+import org.geysermc.floodgate.platform.util.PlatformUtils;
 import org.geysermc.floodgate.pluginmessage.PluginMessageRegistration;
 import org.geysermc.floodgate.pluginmessage.SpigotPluginMessageRegistration;
 import org.geysermc.floodgate.pluginmessage.SpigotPluginMessageUtils;
@@ -49,11 +50,17 @@ import org.geysermc.floodgate.pluginmessage.SpigotSkinApplier;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.SpigotCommandUtil;
+import org.geysermc.floodgate.util.SpigotPlatformUtils;
 import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
 
 @RequiredArgsConstructor
 public final class SpigotPlatformModule extends AbstractModule {
     private final SpigotPlugin plugin;
+
+    @Override
+    protected void configure() {
+        bind(PlatformUtils.class).to(SpigotPlatformUtils.class);
+    }
 
     @Provides
     @Singleton
@@ -76,10 +83,9 @@ public final class SpigotPlatformModule extends AbstractModule {
     public CommandUtil commandUtil(
             FloodgateApi api,
             SpigotVersionSpecificMethods versionSpecificMethods,
-            FloodgateLogger logger,
             LanguageManager languageManager) {
-        return new SpigotCommandUtil(plugin.getServer(), api, versionSpecificMethods, plugin,
-                logger, languageManager);
+        return new SpigotCommandUtil(
+                languageManager, plugin.getServer(), api, versionSpecificMethods, plugin);
     }
 
     @Provides

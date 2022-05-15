@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,7 @@ public interface InjectorAddon {
      * used for third party things.
      *
      * @param channel  the channel that the injector is injecting
-     * @param toServer if the the connection is between a proxy and a server
+     * @param toServer if the connection is between a proxy and a server
      */
     void onInject(Channel channel, boolean toServer);
 
@@ -43,7 +43,7 @@ public interface InjectorAddon {
      * closed connection (if it is injected), so it'll also run this method for closed connections
      * between a server and the proxy (when Floodgate is running on a proxy).
      *
-     * @param channel the channel that the injecor injected
+     * @param channel the channel that the injector injected
      */
     default void onChannelClosed(Channel channel) {
     }
