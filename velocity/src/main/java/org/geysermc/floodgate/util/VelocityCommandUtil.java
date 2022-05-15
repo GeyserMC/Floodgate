@@ -90,13 +90,13 @@ public final class VelocityCommandUtil extends CommandUtil {
     @Override
     public Object getPlayerByUuid(@NonNull UUID uuid) {
         Optional<Player> player = server.getPlayer(uuid);
-        return player.isPresent() ? player : uuid;
+        return player.isPresent() ? player.get() : uuid;
     }
 
     @Override
     public Object getPlayerByUsername(@NonNull String username) {
         Optional<Player> player = server.getPlayer(username);
-        return player.isPresent() ? player : username;
+        return player.isPresent() ? player.get() : username;
     }
 
     @Override
