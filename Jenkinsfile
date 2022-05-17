@@ -24,38 +24,6 @@ pipeline {
                 }
             }
         }
-
-        stage ('Deploy') {
-                    when {
-                        branch "master"
-                    }
-
-                    steps {
-                        rtGradleDeployer(
-                                id: "GRADLE_DEPLOYER",
-                                serverId: "opencollab-artifactory",
-                                releaseRepo: "maven-releases",
-                                snapshotRepo: "maven-snapshots"
-                        )
-                        rtGradleResolver(
-                                id: "GRADLE_RESOLVER",
-                                serverId: "opencollab-artifactory"
-                        )
-                        rtGradleRun(
-                                usesPlugin: true,
-                                tool: 'Gradle 7',
-                                rootDir: "",
-                                useWrapper: true,
-                                buildFile: 'build.gradle',
-                                tasks: 'artifactoryPublish',
-                                deployerId: "GRADLE_DEPLOYER",
-                                resolverId: "GRADLE_RESOLVER"
-                        )
-                        rtPublishBuildInfo(
-                                serverId: "opencollab-artifactory"
-                        )
-                    }
-                }
     }
 
     post {
