@@ -46,7 +46,7 @@ pipeline {
                                 tool: 'Gradle 7',
                                 rootDir: "",
                                 useWrapper: true,
-                                buildFile: 'build.gradle.kts',
+                                buildFile: 'build.gradle',
                                 tasks: 'artifactoryPublish',
                                 deployerId: "GRADLE_DEPLOYER",
                                 resolverId: "GRADLE_RESOLVER"
