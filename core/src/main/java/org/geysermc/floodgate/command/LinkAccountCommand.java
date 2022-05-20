@@ -97,7 +97,7 @@ public final class LinkAccountCommand implements FloodgateCommand {
                 return;
             }
 
-            UserAudience targetUser = context.get("player");
+            ProfileAudience targetUser = context.get("player");
             String targetName = targetUser.username();
             String code = context.get("code");
 
