@@ -90,6 +90,10 @@ public final class LinkAccountCommand implements FloodgateCommand {
             return;
         }
 
+        ProfileAudience targetUser = context.get("player");
+        // allowUuid is false so username cannot be null
+        String targetName = targetUser.username();
+
         // when the player is a Bedrock player
         if (api.isFloodgatePlayer(sender.uuid())) {
             if (!context.contains("code")) {
@@ -97,8 +101,6 @@ public final class LinkAccountCommand implements FloodgateCommand {
                 return;
             }
 
-            UserAudience targetUser = context.get("player");
-            String targetName = targetUser.username();
             String code = context.get("code");
 
             link.verifyLinkRequest(sender.uuid(), targetName, sender.username(), code)
@@ -136,9 +138,6 @@ public final class LinkAccountCommand implements FloodgateCommand {
             sender.sendMessage(Message.JAVA_USAGE);
             return;
         }
-
-        ProfileAudience targetUser = context.get("player");
-        String targetName = targetUser.username();
 
         link.createLinkRequest(sender.uuid(), sender.username(), targetName)
                 .whenComplete((result, throwable) -> {

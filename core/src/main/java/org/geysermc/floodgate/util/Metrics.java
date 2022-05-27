@@ -81,8 +81,8 @@ public final class Metrics {
                     String categoryName = category + " - " + (category + 4);
 
                     return Collections.singletonMap(
-                            categoryName,
-                            Collections.singletonMap(implementationName, 1)
+                            implementationName,
+                            Collections.singletonMap(categoryName, 1)
                     );
                 })
         );
@@ -106,8 +106,8 @@ public final class Metrics {
                 new DrilldownPie("minecraft_version", () -> {
                     // e.g.: 1.16.5 => (Spigot, 1)
                     return Collections.singletonMap(
-                            platformUtils.minecraftVersion(),
-                            Collections.singletonMap(implementationName, 1)
+                            implementationName,
+                            Collections.singletonMap(platformUtils.minecraftVersion(), 1)
                     );
                 })
         );
