@@ -25,37 +25,26 @@
 
 package org.geysermc.floodgate.platform.util;
 
-import java.util.Collection;
-import org.geysermc.floodgate.platform.command.CommandUtil;
-import org.geysermc.floodgate.platform.command.TranslatableMessage;
+import lombok.RequiredArgsConstructor;
 
-public interface PlatformUtils {
+@RequiredArgsConstructor
+public abstract class PlatformUtils {
     /**
-     * Send a message to the specified player, no matter what platform Floodgate is running on.
-     *
-     * @param player  the player to send the message to
-     * @param message the command message
-     * @param locale  the locale of the player
-     * @param args    the arguments
+     * Returns the authentication type used on the platform
      */
-    void sendMessage(Object player, String locale, TranslatableMessage message, Object... args);
+    public abstract AuthType authType();
 
     /**
-     * Same as {@link CommandUtil#sendMessage(Object, String, TranslatableMessage, Object...)} except it
-     * kicks the player.
-     *
-     * @param player  the player to send the message to
-     * @param message the command message
-     * @param locale  the locale of the player
-     * @param args    the arguments
+     * Returns the Minecraft version the server is based on (or the most recent supported version
+     * for proxy platforms)
      */
-    void kickPlayer(Object player, String locale, TranslatableMessage message, Object... args);
+    public abstract String minecraftVersion();
 
-    Collection<String> getOnlineUsernames(PlayerType limitTo);
+    public abstract String serverImplementationName();
 
-    enum PlayerType {
-        ALL_PLAYERS,
-        ONLY_BEDROCK,
-        ONLY_JAVA
+    public enum AuthType {
+        ONLINE,
+        PROXIED,
+        OFFLINE
     }
 }

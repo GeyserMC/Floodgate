@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.player;
+package org.geysermc.floodgate.player.audience;
 
 import cloud.commandframework.arguments.CommandArgument;
 import cloud.commandframework.arguments.parser.ArgumentParseResult;
@@ -37,62 +37,58 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.platform.command.CommandUtil;
+import org.geysermc.floodgate.platform.util.PlayerType;
+import org.geysermc.floodgate.player.UserAudience;
 
-public final class UserAudienceArgument extends CommandArgument<UserAudience, UserAudience> {
-    private UserAudienceArgument(final @NonNull String name, final UserAudienceParser parser) {
-        super(true, name, parser, UserAudience.class);
+public class ProfileAudienceArgument extends CommandArgument<UserAudience, ProfileAudience> {
+    private ProfileAudienceArgument(@NonNull String name, ProfileAudienceParser parser) {
+        super(true, name, parser, ProfileAudience.class);
     }
 
-    public static UserAudienceArgument of(
-            final String name,
-            final boolean allowUuid,
-            final boolean allowOffline,
-            final PlayerType limitTo) {
-        return new UserAudienceArgument(name,
-                new UserAudienceParser(allowUuid, allowOffline, limitTo));
+    public static ProfileAudienceArgument of(
+            String name,
+            boolean allowUuid,
+            boolean allowOffline,
+            PlayerType limitTo) {
+        return new ProfileAudienceArgument(name,
+                new ProfileAudienceParser(allowUuid, allowOffline, limitTo));
     }
 
-    public static UserAudienceArgument of(
-            final String name,
-            final boolean allowOffline,
-            final PlayerType limitTo) {
+    public static ProfileAudienceArgument of(
+            String name,
+            boolean allowOffline,
+            PlayerType limitTo) {
         return of(name, false, allowOffline, limitTo);
     }
 
-    public static UserAudienceArgument ofOnline(final String name, final PlayerType limitTo) {
+    public static ProfileAudienceArgument ofOnline(String name, PlayerType limitTo) {
         return of(name, false, false, limitTo);
     }
 
-    public static UserAudienceArgument ofOnline(final String name, final boolean allowUuid) {
+    public static ProfileAudienceArgument ofOnline(String name, boolean allowUuid) {
         return of(name, allowUuid, false, PlayerType.ALL_PLAYERS);
     }
 
-    public static CommandArgument<UserAudience, UserAudience> ofOnline(final String name) {
+    public static CommandArgument<UserAudience, ProfileAudience> ofOnline(String name) {
         return of(name, false, false, PlayerType.ALL_PLAYERS);
     }
 
-    public static UserAudienceArgument of(final String name, final boolean allowOffline) {
+    public static ProfileAudienceArgument of(String name, boolean allowOffline) {
         return of(name, false, allowOffline, PlayerType.ALL_PLAYERS);
     }
 
-    public enum PlayerType {
-        ALL_PLAYERS,
-        ONLY_BEDROCK,
-        ONLY_JAVA
-    }
-
     @RequiredArgsConstructor
-    public static final class UserAudienceParser
-            implements ArgumentParser<UserAudience, UserAudience> {
+    public static final class ProfileAudienceParser
+            implements ArgumentParser<UserAudience, ProfileAudience> {
 
         private final boolean allowUuid;
         private final boolean allowOffline;
         private final PlayerType limitTo;
 
         @Override
-        public @NonNull ArgumentParseResult<UserAudience> parse(
-                final @NonNull CommandContext<@NonNull UserAudience> commandContext,
-                final @NonNull Queue<@NonNull String> inputQueue) {
+        public @NonNull ArgumentParseResult<ProfileAudience> parse(
+                @NonNull CommandContext<@NonNull UserAudience> commandContext,
+                @NonNull Queue<@NonNull String> inputQueue) {
             CommandUtil commandUtil = commandContext.get("CommandUtil");
 
             String input = inputQueue.poll();
@@ -111,7 +107,7 @@ public final class UserAudienceArgument extends CommandArgument<UserAudience, Us
                     StringBuilder builder = new StringBuilder(input);
                     while (!inputQueue.isEmpty()) {
                         String string = inputQueue.remove();
-                        builder.append(" ").append(string);
+                        builder.append(' ').append(string);
                         if (string.endsWith("\"")) {
                             break;
                         }
@@ -129,7 +125,7 @@ public final class UserAudienceArgument extends CommandArgument<UserAudience, Us
                 }
             }
 
-            UserAudience userAudience;
+            ProfileAudience profileAudience;
 
             if (input.length() > 16) {
                 // This must be a UUID.
@@ -146,46 +142,39 @@ public final class UserAudienceArgument extends CommandArgument<UserAudience, Us
 
                 try {
                     // We only want to make sure the UUID is valid here.
-                    final UUID uuid = UUID.fromString(input);
-                    userAudience = commandUtil.getAudienceByUuid(uuid);
-
-                    if (userAudience == null && allowOffline) {
-                        userAudience = commandUtil.getOfflineAudienceByUuid(uuid);
-                    }
+                    Object player = commandUtil.getPlayerByUuid(UUID.fromString(input), limitTo);
+                    profileAudience = commandUtil.getProfileAudience(player, allowOffline);
                 } catch (final IllegalArgumentException ignored) {
                     return ArgumentParseResult.failure(
                             new InvalidPlayerIdentifierException("Invalid UUID '" + input + "'"));
                 }
             } else {
                 // This is a username.
-                userAudience = commandUtil.getAudienceByUsername(input);
-
-                if (userAudience == null && allowOffline) {
-                    userAudience = commandUtil.getOfflineAudienceByUsername(input);
-                }
+                Object player = commandUtil.getPlayerByUsername(input, limitTo);
+                profileAudience = commandUtil.getProfileAudience(player, allowOffline);
             }
 
-            if (userAudience == null) {
+            if (profileAudience == null) {
                 return ArgumentParseResult.failure(
                         new InvalidPlayerIdentifierException("Invalid player '" + input + "'"));
             }
 
-            return ArgumentParseResult.success(userAudience);
+            return ArgumentParseResult.success(profileAudience);
         }
 
         @Override
         public @NonNull List<String> suggestions(
-                final @NonNull CommandContext<UserAudience> commandContext,
-                final @NonNull String input) {
-            final CommandUtil commandUtil = commandContext.get("CommandUtil");
-            final String trimmedInput = input.trim();
+                @NonNull CommandContext<UserAudience> commandContext,
+                @NonNull String input) {
+            CommandUtil commandUtil = commandContext.get("CommandUtil");
+            String trimmedInput = input.trim();
 
             if (trimmedInput.isEmpty()) {
                 return ImmutableList.copyOf(commandUtil.getOnlineUsernames(limitTo));
             }
 
-            final String lowercaseInput = input.toLowerCase(Locale.ROOT);
-            final ImmutableList.Builder<String> builder = ImmutableList.builder();
+            String lowercaseInput = input.toLowerCase(Locale.ROOT);
+            ImmutableList.Builder<String> builder = ImmutableList.builder();
 
             for (final String player : commandUtil.getOnlineUsernames(limitTo)) {
                 if (player.toLowerCase(Locale.ROOT).startsWith(lowercaseInput)) {
@@ -205,7 +194,7 @@ public final class UserAudienceArgument extends CommandArgument<UserAudience, Us
     public static final class InvalidPlayerIdentifierException extends IllegalArgumentException {
         private static final long serialVersionUID = -6500019324607183855L;
 
-        public InvalidPlayerIdentifierException(final @NonNull String message) {
+        public InvalidPlayerIdentifierException(@NonNull String message) {
             super(message);
         }
 

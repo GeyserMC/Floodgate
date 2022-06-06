@@ -40,13 +40,14 @@ import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
+import org.geysermc.floodgate.config.ConfigLoader;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
-import org.geysermc.floodgate.config.loader.ConfigLoader;
 import org.geysermc.floodgate.link.PlayerLinkLoader;
 import org.geysermc.floodgate.module.ConfigLoadedModule;
 import org.geysermc.floodgate.module.PostInitializeModule;
 import org.geysermc.floodgate.news.NewsChecker;
+import org.geysermc.floodgate.util.Metrics;
 import org.geysermc.floodgate.util.PrefixCheckTask;
 
 public class FloodgatePlatform {
@@ -100,8 +101,6 @@ public class FloodgatePlatform {
 
         InstanceHolder.set(api, link, this.injector, packetHandlers, handshakeHandlers, KEY);
 
-        // todo provide build number and branch for Geyser dump
-
         guice.getInstance(NewsChecker.class).start();
     }
 
@@ -125,6 +124,8 @@ public class FloodgatePlatform {
 
         PrefixCheckTask.checkAndExecuteDelayed(config, logger);
 
+        guice.getInstance(Metrics.class);
+
         return true;
     }
 
@@ -139,6 +140,7 @@ public class FloodgatePlatform {
             }
         }
 
+        guice.getInstance(NewsChecker.class).shutdown();
         api.getPlayerLink().stop();
         return true;
     }

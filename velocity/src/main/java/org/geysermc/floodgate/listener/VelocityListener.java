@@ -44,18 +44,19 @@ import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.player.GameProfileRequestEvent;
 import com.velocitypowered.api.proxy.InboundConnection;
 import com.velocitypowered.api.util.GameProfile;
+import com.velocitypowered.api.util.GameProfile.Property;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import net.kyori.adventure.text.Component;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.util.LanguageManager;
-import org.geysermc.floodgate.util.VelocityCommandUtil;
 
 public final class VelocityListener {
     private static final Field INITIAL_MINECRAFT_CONNECTION;
@@ -89,6 +90,7 @@ public final class VelocityListener {
                     .expireAfterAccess(20, TimeUnit.SECONDS)
                     .build();
 
+    @Inject private ProxyFloodgateConfig config;
     @Inject private ProxyFloodgateApi api;
     @Inject private LanguageManager languageManager;
     @Inject private FloodgateLogger logger;
@@ -141,8 +143,17 @@ public final class VelocityListener {
         FloodgatePlayer player = playerCache.getIfPresent(event.getConnection());
         if (player != null) {
             playerCache.invalidate(event.getConnection());
-            event.setGameProfile(new GameProfile(
-                    player.getCorrectUniqueId(), player.getCorrectUsername(), new ArrayList<>()));
+
+            GameProfile profile = new GameProfile(
+                    player.getCorrectUniqueId(),
+                    player.getCorrectUsername(),
+                    Collections.emptyList()
+            );
+            // The texture properties addition is to fix the February 2 2022 Mojang authentication changes
+            if (!config.isSendFloodgateData() && !player.isLinked()) {
+                profile = profile.addProperty(new Property("textures", "", ""));
+            }
+            event.setGameProfile(profile);
         }
     }
 
@@ -159,7 +170,5 @@ public final class VelocityListener {
     @Subscribe(order = PostOrder.LAST)
     public void onDisconnect(DisconnectEvent event) {
         api.playerRemoved(event.getPlayer().getUniqueId());
-
-        VelocityCommandUtil.AUDIENCE_CACHE.remove(event.getPlayer().getUniqueId()); //todo
     }
 }

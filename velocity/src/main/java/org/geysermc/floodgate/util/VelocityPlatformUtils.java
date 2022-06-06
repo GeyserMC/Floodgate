@@ -25,21 +25,27 @@
 
 package org.geysermc.floodgate.util;
 
-public enum Permissions {
-    COMMAND_MAIN("floodgate.command.floodgate"),
-    COMMAND_LINK("floodgate.command.linkaccount"),
-    COMMAND_UNLINK("floodgate.command.unlinkaccount"),
-    COMMAND_WHITELIST("floodgate.command.fwhitelist"),
+import com.google.inject.Inject;
+import com.velocitypowered.api.network.ProtocolVersion;
+import com.velocitypowered.api.proxy.ProxyServer;
+import org.geysermc.floodgate.platform.util.PlatformUtils;
 
-    NEWS_RECEIVE("floodgate.news.receive");
+public final class VelocityPlatformUtils extends PlatformUtils {
+    @Inject
+    private ProxyServer server;
 
-    private final String permission;
-
-    Permissions(String permission) {
-        this.permission = permission;
+    @Override
+    public AuthType authType() {
+        return server.getConfiguration().isOnlineMode() ? AuthType.ONLINE : AuthType.OFFLINE;
     }
 
-    public String get() {
-        return permission;
+    @Override
+    public String minecraftVersion() {
+        return ProtocolVersion.MAXIMUM_VERSION.getMostRecentSupportedVersion();
+    }
+
+    @Override
+    public String serverImplementationName() {
+        return server.getVersion().getName();
     }
 }

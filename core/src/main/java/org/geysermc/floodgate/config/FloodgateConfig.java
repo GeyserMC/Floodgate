@@ -25,15 +25,20 @@
 
 package org.geysermc.floodgate.config;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.Key;
 import lombok.Getter;
+import org.geysermc.configutils.loader.callback.CallbackResult;
+import org.geysermc.configutils.loader.callback.GenericPostInitializeCallback;
 
 /**
  * The global Floodgate configuration file used in every platform. Some platforms have their own
  * addition to the global configuration like {@link ProxyFloodgateConfig} for the proxies.
  */
 @Getter
-public class FloodgateConfig {
+public class FloodgateConfig implements GenericPostInitializeCallback<ConfigLoader> {
     private String keyFileName;
     private String usernamePrefix;
     private boolean replaceSpaces;
@@ -42,20 +47,34 @@ public class FloodgateConfig {
 
     private DisconnectMessages disconnect;
     private PlayerLinkConfig playerLink;
+    private MetricsConfig metrics;
 
     private boolean debug;
     private int configVersion;
 
     private Key key;
 
-    public void setKey(Key key) {
-        if (this.key == null) {
-            this.key = key;
-        }
-    }
-
     public boolean isProxy() {
         return this instanceof ProxyFloodgateConfig;
+    }
+
+    @Override
+    public CallbackResult postInitialize(ConfigLoader loader) {
+        Path keyPath = loader.getDataFolder().resolve(getKeyFileName());
+
+        // don't assume that the key always exists with the existence of a config
+        if (!Files.exists(keyPath)) {
+            loader.generateKey(keyPath);
+        }
+
+        try {
+            Key floodgateKey = loader.getKeyProducer().produceFrom(keyPath);
+            loader.getCipher().init(floodgateKey);
+            key = floodgateKey;
+        } catch (IOException exception) {
+            return CallbackResult.failed(exception.getMessage());
+        }
+        return CallbackResult.ok();
     }
 
     @Getter
@@ -68,10 +87,16 @@ public class FloodgateConfig {
     public static class PlayerLinkConfig {
         private boolean enabled;
         private boolean requireLink;
-        private boolean enableOwnLinking = false;
+        private boolean enableOwnLinking;
         private boolean allowed;
         private long linkCodeTimeout;
         private String type;
         private boolean enableGlobalLinking;
+    }
+
+    @Getter
+    public static class MetricsConfig {
+        private boolean enabled;
+        private String uuid;
     }
 }

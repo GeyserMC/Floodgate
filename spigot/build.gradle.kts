@@ -5,12 +5,9 @@ var gsonVersion = "2.8.5"
 dependencies {
     api(projects.core)
 
+    implementation("cloud.commandframework", "cloud-bukkit", Versions.cloudVersion)
     // hack to make pre 1.12 work
     implementation("com.google.guava", "guava", guavaVersion)
-
-    implementation("cloud.commandframework", "cloud-bukkit", Versions.cloudVersion)
-    implementation("net.kyori", "adventure-text-serializer-legacy", Versions.adventureApiVersion)
-    implementation("net.kyori", "adventure-text-serializer-gson", Versions.adventureApiVersion)
 }
 
 relocate("com.google.inject")
@@ -24,7 +21,7 @@ relocate("com.google.guava")
 relocate("it.unimi")
 
 // these dependencies are already present on the platform
-provided("org.spigotmc", "spigot-api", Versions.spigotVersion)
+provided("com.destroystokyo.paper", "paper-api", Versions.spigotVersion)
 provided("com.mojang", "authlib", authlibVersion)
 provided("io.netty", "netty-transport", Versions.nettyVersion)
 provided("io.netty", "netty-codec", Versions.nettyVersion)

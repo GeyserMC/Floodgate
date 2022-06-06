@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.util;
 
+import static org.geysermc.floodgate.util.ReflectionUtils.getField;
 import static org.geysermc.floodgate.util.ReflectionUtils.getFieldOfType;
 import static org.geysermc.floodgate.util.ReflectionUtils.getMethod;
 
@@ -37,6 +38,7 @@ import java.lang.reflect.Method;
 import java.net.SocketAddress;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @SuppressWarnings("PMD.SystemPrintln")
 public class ClassNames {
@@ -57,11 +59,16 @@ public class ClassNames {
     public static final Field LOGIN_PROFILE;
     public static final Field PACKET_LISTENER;
 
+    @Nullable public static final Field PAPER_DISABLE_USERNAME_VALIDATION;
+    @Nullable public static final Field PAPER_VELOCITY_SUPPORT;
+
     public static final Method GET_PROFILE_METHOD;
     public static final Method LOGIN_DISCONNECT;
     public static final Method NETWORK_EXCEPTION_CAUGHT;
     public static final Method INIT_UUID;
     public static final Method FIRE_LOGIN_EVENTS;
+
+    public static final Field BUNGEE;
 
     static {
         String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
@@ -71,7 +78,7 @@ public class ClassNames {
         // SpigotSkinApplier
         Class<?> craftPlayerClass = ReflectionUtils.getClass(
                 "org.bukkit.craftbukkit." + version + ".entity.CraftPlayer");
-        GET_PROFILE_METHOD = ReflectionUtils.getMethod(craftPlayerClass, "getProfile");
+        GET_PROFILE_METHOD = getMethod(craftPlayerClass, "getProfile");
         checkNotNull(GET_PROFILE_METHOD, "Get profile method");
 
         String nmsPackage = SPIGOT_MAPPING_PREFIX + '.';
@@ -157,6 +164,28 @@ public class ClassNames {
 
         FIRE_LOGIN_EVENTS = getMethod(LOGIN_HANDLER, "fireEvents");
         checkNotNull(FIRE_LOGIN_EVENTS, "fireEvents from LoginHandler");
+
+
+        PAPER_DISABLE_USERNAME_VALIDATION = getField(LOGIN_LISTENER,
+                "iKnowThisMayNotBeTheBestIdeaButPleaseDisableUsernameValidation");
+
+        if (Constants.DEBUG_MODE) {
+            System.out.println("Paper disable username validation field exists? " +
+                    (PAPER_DISABLE_USERNAME_VALIDATION != null));
+        }
+
+        // ProxyUtils
+        Class<?> spigotConfig = ReflectionUtils.getClass("org.spigotmc.SpigotConfig");
+        checkNotNull(spigotConfig, "Spigot config");
+
+        BUNGEE = getField(spigotConfig, "bungee");
+        checkNotNull(BUNGEE, "Bungee field");
+
+        Class<?> paperConfig = ReflectionUtils.getClassSilently(
+                "com.destroystokyo.paper.PaperConfig");
+
+        PAPER_VELOCITY_SUPPORT =
+                paperConfig == null ? null : getField(paperConfig, "velocitySupport");
     }
 
     private static Class<?> getClassOrFallBack(String className, String fallbackName) {

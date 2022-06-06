@@ -3,6 +3,7 @@ plugins {
     id("floodgate.build-logic")
 //    id("com.github.spotbugs") version "4.8.0" apply false
     id("io.freefair.lombok") version "6.3.0" apply false
+//    checkstyle
 }
 
 allprojects {
@@ -11,7 +12,10 @@ allprojects {
     description = "Allows Bedrock players to join Java edition servers while keeping the server in online mode"
 }
 
-val platforms = setOf(
+val deployProjects = setOf(
+    projects.api,
+    // for future Floodgate integration + Fabric
+    projects.core,
     projects.bungee,
     projects.spigot,
     projects.velocity
@@ -19,28 +23,32 @@ val platforms = setOf(
 
 //todo re-add pmd and organisation/license/sdcm/issuemanagement stuff
 
-val api: Project = projects.api.dependencyProject
-
 subprojects {
-//    apply(plugin = "pmd")
 //    apply(plugin = "com.github.spotbugs")
 
     apply {
         plugin("java-library")
+//        plugin("checkstyle")
         plugin("io.freefair.lombok")
         plugin("floodgate.build-logic")
     }
+
+//    checkstyle {
+//        toolVersion = "9.3"
+//        configFile = rootProject.projectDir.resolve("checkstyle.xml")
+//        maxErrors = 0
+//        maxWarnings = 0
+//    }
 
     val relativePath = projectDir.relativeTo(rootProject.projectDir).path
 
     if (relativePath.startsWith("database" + File.separator)) {
         group = rootProject.group as String + ".database"
         plugins.apply("floodgate.database-conventions")
-    } else {
-        when (this) {
-            in platforms -> plugins.apply("floodgate.shadow-conventions")
-            api -> plugins.apply("floodgate.shadow-conventions")
-            else -> plugins.apply("floodgate.base-conventions")
-        }
+    }
+
+    when (this) {
+        in deployProjects -> plugins.apply("floodgate.publish-conventions")
+        else -> plugins.apply("floodgate.base-conventions")
     }
 }

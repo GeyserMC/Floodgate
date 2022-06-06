@@ -5,7 +5,7 @@ var guavaVersion = "25.1-jre"
 
 dependencies {
     api(projects.core)
-    api("cloud.commandframework", "cloud-velocity", Versions.cloudVersion)
+    implementation("cloud.commandframework", "cloud-velocity", Versions.cloudVersion)
 }
 
 relocate("cloud.commandframework")
@@ -14,7 +14,6 @@ relocate("io.leangen.geantyref")
 
 
 // these dependencies are already present on the platform
-provided("net.kyori", "adventure-api", Versions.adventureApiVersion, 0b100)
 provided("com.google.code.gson", "gson", gsonVersion)
 provided("com.google.guava", "guava", guavaVersion)
 provided("com.google.inject", "guice", Versions.guiceVersion)

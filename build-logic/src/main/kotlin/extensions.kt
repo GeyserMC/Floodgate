@@ -23,12 +23,21 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.kyori.indra.git.IndraGitExtension
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ProjectDependency
-import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
+
+fun Project.isSnapshot(): Boolean =
+    version.toString().endsWith("-SNAPSHOT")
+
+fun Project.fullVersion(): String {
+    var version = version.toString()
+    if (version.endsWith("-SNAPSHOT")) {
+        version += " (b${buildNumberAsString()}-${lastCommitHash()})"
+    }
+    return version
+}
 
 fun Project.lastCommitHash(): String? =
     the<IndraGitExtension>().commit()?.name?.substring(0, 7)
@@ -36,17 +45,15 @@ fun Project.lastCommitHash(): String? =
 // retrieved from https://wiki.jenkins-ci.org/display/JENKINS/Building+a+software+project
 // some properties might be specific to Jenkins
 fun Project.branchName(): String =
-    System.getProperty("GIT_BRANCH", "local/dev")
+    System.getenv("GIT_BRANCH") ?: "local/dev"
 fun Project.buildNumber(): Int =
-    Integer.parseInt(System.getProperty("BUILD_NUMBER", "-1"))
+    Integer.parseInt(System.getenv("BUILD_NUMBER") ?: "-1")
 
-fun Project.relocate(pattern: String) {
-    tasks.named<ShadowJar>("shadowJar") {
-        relocate(pattern, "org.geysermc.floodgate.shaded.$pattern")
-    }
-}
+fun Project.buildNumberAsString(): String =
+    buildNumber().takeIf { it != -1 }?.toString() ?: "??"
 
 val providedDependencies = mutableMapOf<String, MutableSet<String>>()
+val relocatedPackages = mutableMapOf<String, MutableSet<String>>()
 
 fun Project.provided(pattern: String, name: String, version: String, excludedOn: Int = 0b110) {
     providedDependencies.getOrPut(project.name) { mutableSetOf() }
@@ -58,6 +65,11 @@ fun Project.provided(pattern: String, name: String, version: String, excludedOn:
 
 fun Project.provided(dependency: ProjectDependency) =
     provided(dependency.group!!, dependency.name, dependency.version!!)
+
+
+fun Project.relocate(pattern: String) =
+    relocatedPackages.getOrPut(project.name) { mutableSetOf() }
+        .add(pattern)
 
 private fun calcExclusion(section: String, bit: Int, excludedOn: Int): String =
     if (excludedOn and bit > 0) section else ""

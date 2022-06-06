@@ -82,7 +82,7 @@ public final class VelocityInjector extends CommonPlatformInjector {
 
     @Override
     public boolean removeInjection() {
-        logger.error("Floodgate cannot remove itself from Bungee without a reboot");
+        logger.error("Floodgate cannot remove itself from Velocity without a reboot");
         return false;
     }
 

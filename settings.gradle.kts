@@ -3,6 +3,8 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+//        mavenLocal()
+
         // Geyser, Cumulus etc.
         maven("https://repo.opencollab.dev/maven-releases") {
             mavenContent { releasesOnly() }
@@ -42,8 +44,6 @@ pluginManagement {
     }
     plugins {
         id("net.kyori.blossom") version "1.2.0"
-        id("net.kyori.indra")
-        id("net.kyori.indra.git")
     }
     includeBuild("build-logic")
 }
@@ -57,5 +57,7 @@ include(":spigot")
 include(":velocity")
 include(":sqlite")
 include(":mysql")
+include(":mongo")
 project(":sqlite").projectDir = file("database/sqlite")
 project(":mysql").projectDir = file("database/mysql")
+project(":mongo").projectDir = file("database/mongo")

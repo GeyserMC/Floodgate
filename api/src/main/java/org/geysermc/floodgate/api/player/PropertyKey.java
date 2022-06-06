@@ -51,7 +51,7 @@ public class PropertyKey {
         this.removable = removable;
     }
 
-    public Result isAddAllowed(Object obj) { //todo use for add and remove
+    public Result isAddAllowed(Object obj) {
         if (obj instanceof PropertyKey) {
             PropertyKey propertyKey = (PropertyKey) obj;
 

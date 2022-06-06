@@ -35,9 +35,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.player.FloodgatePlayerImpl;
 import org.geysermc.floodgate.util.LanguageManager;
-import org.geysermc.floodgate.util.SpigotCommandUtil;
 
 public final class SpigotListener implements Listener {
     @Inject private SimpleFloodgateApi api;
@@ -68,7 +66,5 @@ public final class SpigotListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
         api.playerRemoved(event.getPlayer().getUniqueId());
-
-        SpigotCommandUtil.AUDIENCE_CACHE.remove(event.getPlayer().getUniqueId()); //todo
     }
 }

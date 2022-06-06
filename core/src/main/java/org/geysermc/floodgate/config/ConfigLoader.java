@@ -23,26 +23,27 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.config.loader;
+package org.geysermc.floodgate.config;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.Key;
+import java.util.UUID;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.geysermc.configutils.ConfigUtilities;
+import org.geysermc.configutils.file.codec.PathFileCodec;
+import org.geysermc.configutils.file.template.ResourceTemplateReader;
+import org.geysermc.configutils.updater.change.Changes;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.config.ProxyFloodgateConfig;
-import org.geysermc.floodgate.config.updater.ConfigUpdater;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.crypto.KeyProducer;
 
+@Getter
 @RequiredArgsConstructor
 public final class ConfigLoader {
     private final Path dataFolder;
     private final Class<? extends FloodgateConfig> configClass;
-    private final DefaultConfigHandler configCreator;
-    private final ConfigUpdater updater;
 
     private final KeyProducer keyProducer;
     private final FloodgateCipher cipher;
@@ -51,61 +52,42 @@ public final class ConfigLoader {
 
     @SuppressWarnings("unchecked")
     public <T extends FloodgateConfig> T load() {
-        Path configPath = dataFolder.resolve("config.yml");
-
-        String defaultConfigName = "config.yml";
-        boolean proxy = ProxyFloodgateConfig.class.isAssignableFrom(configClass);
-        if (proxy) {
-            defaultConfigName = "proxy-" + defaultConfigName;
+        String templateFile = "config.yml";
+        if (ProxyFloodgateConfig.class.isAssignableFrom(configClass)) {
+            templateFile = "proxy-" + templateFile;
         }
 
-        boolean newConfig = !Files.exists(configPath);
-        if (newConfig) {
-            try {
-                configCreator.createDefaultConfig(defaultConfigName, configPath);
-            } catch (Exception exception) {
-                logger.error("Error while creating config", exception);
-            }
-        }
+        //todo old Floodgate logged a message when version = 0 and it generated a new key.
+        // Might be nice to allow you to run a function for a specific version.
 
-        T configInstance;
+        // it would also be nice to have sections in versionBuilder so that you don't have to
+        // provide the path all the time
+
+        ConfigUtilities utilities =
+                ConfigUtilities.builder()
+                        .fileCodec(PathFileCodec.of(dataFolder))
+                        .configFile("config.yml")
+                        .templateReader(ResourceTemplateReader.of(getClass()))
+                        .template(templateFile)
+                        .changes(Changes.builder()
+                                .version(1, Changes.versionBuilder()
+                                        .keyRenamed("player-link.enable", "player-link.enabled")
+                                        .keyRenamed("player-link.allow-linking", "player-link.allowed"))
+                                .version(2, Changes.versionBuilder()
+                                        .keyRenamed("player-link.use-global-linking", "player-link.enable-global-linking"))
+                                .build())
+                        .definePlaceholder("metrics.uuid", UUID::randomUUID)
+                        .postInitializeCallbackArgument(this)
+                        .build();
+
         try {
-            // check and update if the config is outdated
-            if (!newConfig) {
-                updater.update(this, defaultConfigName);
-            }
-
-            FloodgateConfig config = ConfigInitializer.initializeFrom(
-                    Files.newInputStream(configPath), configClass);
-
-            try {
-                configInstance = (T) config;
-            } catch (ClassCastException exception) {
-                logger.error("Failed to cast config file to required class.", exception);
-                throw new RuntimeException(exception);
-            }
-        } catch (Exception exception) {
-            logger.error("Error while loading config", exception);
+            return (T) utilities.executeOn(configClass);
+        } catch (Throwable throwable) {
             throw new RuntimeException(
-                    "Failed to load the config! Try to delete the config file", exception);
+                    "Failed to load the config! Try to delete the config file if this error persists",
+                    throwable
+            );
         }
-
-        Path keyPath = dataFolder.resolve(configInstance.getKeyFileName());
-        // don't assume that the key always exists with the existence of a config
-        if (!Files.exists(keyPath)) {
-            generateKey(keyPath);
-        }
-
-        try {
-            Key key = keyProducer.produceFrom(keyPath);
-            cipher.init(key);
-            configInstance.setKey(key);
-        } catch (IOException exception) {
-            logger.error("Error while reading the key", exception);
-            throw new RuntimeException("Failed to read the key!", exception);
-        }
-
-        return configInstance;
     }
 
     public void generateKey(Path keyPath) {

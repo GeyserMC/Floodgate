@@ -59,7 +59,7 @@ public final class BungeeInjector extends CommonPlatformInjector {
             // (Instead of just replacing the ChannelInitializer which is only called for
             // player <-> proxy)
             BungeeCustomPrepender customPrepender = new BungeeCustomPrepender(
-                    this, ReflectionUtils.getCastedValue(null, framePrepender)
+                    this, ReflectionUtils.castedStaticValue(framePrepender)
             );
 
             BungeeReflectionUtils.setFieldValue(null, framePrepender, customPrepender);

@@ -40,12 +40,9 @@ import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.config.ConfigLoader;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
-import org.geysermc.floodgate.config.loader.ConfigLoader;
-import org.geysermc.floodgate.config.loader.DefaultConfigHandler;
-import org.geysermc.floodgate.config.updater.ConfigFileUpdater;
-import org.geysermc.floodgate.config.updater.ConfigUpdater;
 import org.geysermc.floodgate.crypto.AesCipher;
 import org.geysermc.floodgate.crypto.AesKeyProducer;
 import org.geysermc.floodgate.crypto.Base64Topping;
@@ -105,27 +102,10 @@ public class CommonModule extends AbstractModule {
     @Singleton
     public ConfigLoader configLoader(
             @Named("configClass") Class<? extends FloodgateConfig> configClass,
-            DefaultConfigHandler defaultConfigHandler,
-            ConfigUpdater configUpdater,
             KeyProducer producer,
             FloodgateCipher cipher,
             FloodgateLogger logger) {
-        return new ConfigLoader(dataDirectory, configClass, defaultConfigHandler, configUpdater,
-                producer, cipher, logger);
-    }
-
-    @Provides
-    @Singleton
-    public DefaultConfigHandler defaultConfigCreator() {
-        return new DefaultConfigHandler();
-    }
-
-    @Provides
-    @Singleton
-    public ConfigUpdater configUpdater(
-            ConfigFileUpdater configFileUpdater,
-            FloodgateLogger logger) {
-        return new ConfigUpdater(dataDirectory, configFileUpdater, logger);
+        return new ConfigLoader(dataDirectory, configClass, producer, cipher, logger);
     }
 
     @Provides

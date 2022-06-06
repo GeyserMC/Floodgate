@@ -35,20 +35,20 @@ import cloud.commandframework.context.CommandContext;
 import com.google.inject.Inject;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import net.kyori.adventure.text.Component;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.link.LinkRequestResult;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.command.util.Permission;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.link.GlobalPlayerLinking;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.player.UserAudience.PlayerAudience;
-import org.geysermc.floodgate.player.UserAudienceArgument;
+import org.geysermc.floodgate.player.audience.ProfileAudience;
+import org.geysermc.floodgate.player.audience.ProfileAudienceArgument;
 import org.geysermc.floodgate.util.Constants;
-import org.geysermc.floodgate.util.Permissions;
 
 @NoArgsConstructor
 public final class LinkAccountCommand implements FloodgateCommand {
@@ -60,8 +60,8 @@ public final class LinkAccountCommand implements FloodgateCommand {
         return commandManager.commandBuilder("linkaccount",
                 ArgumentDescription.of("Link your Java account with your Bedrock account"))
                 .senderType(PlayerAudience.class)
-                .permission(Permissions.COMMAND_LINK.get())
-                .argument(UserAudienceArgument.of("player", true))
+                .permission(Permission.COMMAND_LINK.get())
+                .argument(ProfileAudienceArgument.of("player", true))
                 .argument(StringArgument.optional("code"))
                 .handler(this::execute)
                 .build();
@@ -90,6 +90,10 @@ public final class LinkAccountCommand implements FloodgateCommand {
             return;
         }
 
+        ProfileAudience targetUser = context.get("player");
+        // allowUuid is false so username cannot be null
+        String targetName = targetUser.username();
+
         // when the player is a Bedrock player
         if (api.isFloodgatePlayer(sender.uuid())) {
             if (!context.contains("code")) {
@@ -97,8 +101,6 @@ public final class LinkAccountCommand implements FloodgateCommand {
                 return;
             }
 
-            UserAudience targetUser = context.get("player");
-            String targetName = targetUser.username();
             String code = context.get("code");
 
             link.verifyLinkRequest(sender.uuid(), targetName, sender.username(), code)
@@ -125,7 +127,7 @@ public final class LinkAccountCommand implements FloodgateCommand {
                                 sender.disconnect(Message.LINK_REQUEST_COMPLETED, targetName);
                                 break;
                             default:
-                                sender.disconnect(Component.text("Invalid account linking result"));
+                                sender.disconnect("Invalid account linking result");
                                 break;
                         }
                     });
@@ -136,9 +138,6 @@ public final class LinkAccountCommand implements FloodgateCommand {
             sender.sendMessage(Message.JAVA_USAGE);
             return;
         }
-
-        UserAudience targetUser = context.get("player");
-        String targetName = targetUser.username();
 
         link.createLinkRequest(sender.uuid(), sender.username(), targetName)
                 .whenComplete((result, throwable) -> {

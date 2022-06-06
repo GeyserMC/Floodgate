@@ -36,6 +36,7 @@ import java.util.UUID;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
+import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.connection.InitialHandler;
@@ -45,8 +46,9 @@ import net.md_5.bungee.netty.ChannelWrapper;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.player.FloodgatePlayerImpl;
-import org.geysermc.floodgate.util.BungeeCommandUtil;
+import org.geysermc.floodgate.config.ProxyFloodgateConfig;
+import org.geysermc.floodgate.skin.SkinApplier;
+import org.geysermc.floodgate.skin.SkinData;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
@@ -64,9 +66,11 @@ public final class BungeeListener implements Listener {
         checkNotNull(PLAYER_NAME, "Initial name field cannot be null");
     }
 
+    @Inject private ProxyFloodgateConfig config;
     @Inject private ProxyFloodgateApi api;
     @Inject private LanguageManager languageManager;
     @Inject private FloodgateLogger logger;
+    @Inject private SkinApplier skinApplier;
 
     @Inject
     @Named("playerAttribute")
@@ -121,10 +125,19 @@ public final class BungeeListener implements Listener {
         }
     }
 
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPostLogin(PostLoginEvent event) {
+        // To fix the February 2 2022 Mojang authentication changes
+        if (!config.isSendFloodgateData()) {
+            FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
+            if (player != null && !player.isLinked()) {
+                skinApplier.applySkin(player, new SkinData("", ""));
+            }
+        }
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerDisconnect(PlayerDisconnectEvent event) {
         api.playerRemoved(event.getPlayer().getUniqueId());
-
-        BungeeCommandUtil.AUDIENCE_CACHE.remove(event.getPlayer().getUniqueId()); //todo
     }
 }
