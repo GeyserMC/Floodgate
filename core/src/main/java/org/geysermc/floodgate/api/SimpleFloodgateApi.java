@@ -38,7 +38,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.cumulus.form.Form;
-import org.geysermc.cumulus.util.FormBuilder;
+import org.geysermc.cumulus.form.util.FormBuilder;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.unsafe.Unsafe;
@@ -122,6 +122,16 @@ public class SimpleFloodgateApi implements FloodgateApi {
 
     @Override
     public boolean sendForm(UUID uuid, FormBuilder<?, ?, ?> formBuilder) {
+        return sendForm(uuid, formBuilder.build());
+    }
+
+    @Override
+    public boolean sendForm(UUID uuid, org.geysermc.cumulus.Form<?> form) {
+        return sendForm(uuid, form.newForm());
+    }
+
+    @Override
+    public boolean sendForm(UUID uuid, org.geysermc.cumulus.util.FormBuilder<?, ?> formBuilder) {
         return sendForm(uuid, formBuilder.build());
     }
 

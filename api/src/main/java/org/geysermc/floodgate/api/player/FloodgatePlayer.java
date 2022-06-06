@@ -27,7 +27,7 @@ package org.geysermc.floodgate.api.player;
 
 import java.util.UUID;
 import org.geysermc.cumulus.form.Form;
-import org.geysermc.cumulus.util.FormBuilder;
+import org.geysermc.cumulus.form.util.FormBuilder;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.util.DeviceOs;
 import org.geysermc.floodgate.util.InputMode;
@@ -49,14 +49,16 @@ public interface FloodgatePlayer {
     UUID getJavaUniqueId();
 
     /**
-     * Returns the uuid that the server will use as uuid of that player. Will return {@link
-     * #getJavaUniqueId()} when not linked or {@link LinkedPlayer#getJavaUniqueId()} when linked.
+     * Returns the uuid that the server will use as uuid of that player. Will return
+     * {@link #getJavaUniqueId()} when not linked or {@link LinkedPlayer#getJavaUniqueId()} when
+     * linked.
      */
     UUID getCorrectUniqueId();
 
     /**
-     * Returns the username the server will as username for that player. Will return {@link
-     * #getJavaUsername()} when not linked or {@link LinkedPlayer#getJavaUsername()} when linked.
+     * Returns the username the server will as username for that player. Will return
+     * {@link #getJavaUsername()} when not linked or {@link LinkedPlayer#getJavaUsername()} when
+     * linked.
      */
     String getCorrectUsername();
 
@@ -116,6 +118,24 @@ public interface FloodgatePlayer {
     }
 
     default boolean sendForm(FormBuilder<?, ?, ?> formBuilder) {
+        return sendForm(formBuilder.build());
+    }
+
+    /**
+     * @deprecated since Cumulus 1.1 and will be removed when Cumulus 2.0 releases. Please use the
+     * new form classes instead.
+     */
+    @Deprecated
+    default boolean sendForm(org.geysermc.cumulus.Form<?> form) {
+        return sendForm(form.newForm());
+    }
+
+    /**
+     * @deprecated since Cumulus 1.1 and will be removed when Cumulus 2.0 releases. Please use the
+     * new form classes instead.
+     */
+    @Deprecated
+    default boolean sendForm(org.geysermc.cumulus.util.FormBuilder<?, ?> formBuilder) {
         return sendForm(formBuilder.build());
     }
 

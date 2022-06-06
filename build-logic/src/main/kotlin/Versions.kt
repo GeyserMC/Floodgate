@@ -24,10 +24,10 @@
  */
 
 object Versions {
-    const val geyserVersion = "2.0.1-cumulus-SNAPSHOT"
+    const val geyserVersion = "2.0.3-cumulus-SNAPSHOT"
     const val cumulusVersion = "1.1-SNAPSHOT"
     const val configUtilsVersion = "1.0-SNAPSHOT"
-    const valspigotVersion = "1.13-R0.1-SNAPSHOT"
+    const val spigotVersion = "1.13-R0.1-SNAPSHOT"
     const val fastutilVersion = "8.5.3"
     const val lombokVersion = "1.18.20"
     const val guiceVersion = "5.0.1"
