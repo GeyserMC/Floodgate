@@ -18,10 +18,10 @@ tasks {
         val sJar: ShadowJar = this
 
         doFirst {
-            providedDependencies[project.name]?.forEach { string ->
+            providedDependencies[project.name]?.forEach { (name, notation) ->
                 sJar.dependencies {
-                    println("Excluding $string from ${project.name}")
-                    exclude(dependency(string))
+                    println("Excluding $name from ${project.name}")
+                    exclude(dependency(notation))
                 }
             }
 

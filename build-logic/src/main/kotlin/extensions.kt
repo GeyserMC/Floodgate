@@ -52,19 +52,23 @@ fun Project.buildNumber(): Int =
 fun Project.buildNumberAsString(): String =
     buildNumber().takeIf { it != -1 }?.toString() ?: "??"
 
-val providedDependencies = mutableMapOf<String, MutableSet<String>>()
+val providedDependencies = mutableMapOf<String, MutableSet<Pair<String, Any>>>()
 val relocatedPackages = mutableMapOf<String, MutableSet<String>>()
 
 fun Project.provided(pattern: String, name: String, version: String, excludedOn: Int = 0b110) {
-    providedDependencies.getOrPut(project.name) { mutableSetOf() }
-        .add("${calcExclusion(pattern, 0b100, excludedOn)}:" +
-                "${calcExclusion(name, 0b10, excludedOn)}:" +
-                calcExclusion(version, 0b1, excludedOn))
+    val format = "${calcExclusion(pattern, 0b100, excludedOn)}:" +
+            "${calcExclusion(name, 0b10, excludedOn)}:" +
+            calcExclusion(version, 0b1, excludedOn)
+
+    providedDependencies.getOrPut(project.name) { mutableSetOf() }.add(Pair(format, format))
     dependencies.add("compileOnlyApi", "$pattern:$name:$version")
 }
 
-fun Project.provided(dependency: ProjectDependency) =
-    provided(dependency.group!!, dependency.name, dependency.version!!)
+fun Project.provided(dependency: ProjectDependency) {
+    providedDependencies.getOrPut(project.name) { mutableSetOf() }
+        .add(Pair(dependency.group + ":" + dependency.name, dependency))
+    dependencies.add("compileOnlyApi", dependency)
+}
 
 
 fun Project.relocate(pattern: String) =
