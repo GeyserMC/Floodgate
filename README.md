@@ -1,11 +1,12 @@
-# Floodgate
+# Floodgate For Proxies With Geyser
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Build Status](https://ci.opencollab.dev/job/GeyserMC/job/Floodgate/job/master/badge/icon)](https://ci.opencollab.dev/job/GeyserMC/job/Floodgate/job/master/)
-[![Discord](https://img.shields.io/discord/613163671870242838.svg?color=%237289da&label=discord)](http://discord.geysermc.org/)
-[![HitCount](https://hits.dwyl.com/GeyserMC/Floodgate.svg)](http://hits.dwyl.com/GeyserMC/Floodgate)
+[![Build Status](https://ci.projectg.dev/job/Floodgate/job/master/badge/icon)](https://ci.projectg.dev/job/Floodgate/job/master/)
+[![Discord](https://img.shields.io/discord/853331530004299807?color=7289da&label=discord&logo=discord&logoColor=white)](https://discord.gg/M2SvqCu4e9)  
+[Download](https://ci.projectg.dev/job/Floodgate/job/master/)
 
-[Download](https://ci.opencollab.dev/job/GeyserMC/job/Floodgate/job/master/)
+
+#### This is a fork of [Floodgate](https://github.com/GeyserMC/Floodgate) with components that are also included in Geyser, stripped out. This prevents [errors](https://github.com/GeyserMC/Floodgate/issues/178) that are caused by usage of the Floodgate API when both Geyser and Floodgate are installed on BungeeCord or Velocity. This only needs to be installed when a plugin is using the Floodgate API.
 
 Hybrid mode plugin to allow for connections from [Geyser](https://github.com/GeyserMC/Geyser) to join online mode servers.
 

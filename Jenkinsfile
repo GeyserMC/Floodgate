@@ -1,8 +1,8 @@
 pipeline {
     agent any
     tools {
-        gradle 'Gradle 7'
-        jdk 'Java 8'
+        gradle 'gradle'
+        jdk 'Jdk8'
     }
     options {
         buildDiscarder(logRotator(artifactNumToKeepStr: '5'))
@@ -24,41 +24,6 @@ pipeline {
                         excludes: '**/floodgate-parent-*.jar,**/floodgate-api.jar,**/floodgate-core.jar',
                         fingerprint: true
                 }
-            }
-        }
-
-        stage ('Deploy') {
-            when {
-                anyOf {
-                    branch "master"
-                    branch "development"
-                }
-            }
-
-            steps {
-                rtGradleDeployer(
-                        id: "GRADLE_DEPLOYER",
-                        serverId: "opencollab-artifactory",
-                        releaseRepo: "maven-releases",
-                        snapshotRepo: "maven-snapshots"
-                )
-                rtGradleResolver(
-                        id: "GRADLE_RESOLVER",
-                        serverId: "opencollab-artifactory"
-                )
-                rtGradleRun(
-                        usesPlugin: true,
-                        tool: 'Gradle 7',
-                        rootDir: "",
-                        useWrapper: true,
-                        buildFile: 'build.gradle.kts',
-                        tasks: 'artifactoryPublish',
-                        deployerId: "GRADLE_DEPLOYER",
-                        resolverId: "GRADLE_RESOLVER"
-                )
-                rtPublishBuildInfo(
-                        serverId: "opencollab-artifactory"
-                )
             }
         }
     }
@@ -97,16 +62,7 @@ pipeline {
                 env.changes = message
             }
             deleteDir()
-            withCredentials([string(credentialsId: 'geyser-discord-webhook', variable: 'DISCORD_WEBHOOK')]) {
-                discordSend description: "**Build:** [${currentBuild.id}](${env.BUILD_URL})\n**Status:** [${currentBuild.currentResult}](${env.BUILD_URL})\n${changes}\n\n[**Artifacts on Jenkins**](https://ci.opencollab.dev/job/GeyserMC/job/Floodgate)", footer: 'Open Collaboration Jenkins', link: env.BUILD_URL, successful: currentBuild.resultIsBetterOrEqualTo('SUCCESS'), title: "${env.JOB_NAME} #${currentBuild.id}", webhookURL: DISCORD_WEBHOOK
-            }
-        }
-        success {
-            script {
-                if (env.BRANCH_NAME == 'master') {
-                    build propagate: false, wait: false, job: 'GeyserMC/Floodgate-Fabric/master', parameters: [booleanParam(name: 'SKIP_DISCORD', value: true)]
-                }
-            }
+            discordSend description: "**Build:** [${currentBuild.id}](${env.BUILD_URL})\n**Status:** [${currentBuild.currentResult}](${env.BUILD_URL})\n${changes}\n\n[**Artifacts on Jenkins**](https://ci.projectg.dev/job/CrossplatForms/)", footer: 'ProjectG', link: env.BUILD_URL, successful: currentBuild.resultIsBetterOrEqualTo('SUCCESS'), result: currentBuild.currentResult, title: "${env.JOB_NAME}", webhookURL: "${env.DISCORD_WEBHOOK}"
         }
     }
 }

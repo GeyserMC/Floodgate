@@ -27,3 +27,7 @@ provided("io.netty", "netty-transport", Versions.nettyVersion)
 provided("io.netty", "netty-codec", Versions.nettyVersion)
 provided("com.google.code.gson", "gson", gsonVersion)
 provided("org.yaml", "snakeyaml", Versions.snakeyamlVersion)
+
+// PROJECT-G: Override these dependencies present in Geyser
+provided("org.geysermc", "common", Versions.geyserVersion)
+provided("org.geysermc.cumulus", "cumulus", Versions.cumulusVersion)

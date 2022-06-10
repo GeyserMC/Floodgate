@@ -18,3 +18,7 @@ provided("com.github.SpigotMC.BungeeCord", "bungeecord-proxy", bungeeCommit)
 provided("com.google.code.gson", "gson", gsonVersion)
 provided("com.google.guava", "guava", guavaVersion)
 provided("org.yaml", "snakeyaml", Versions.snakeyamlVersion)
+
+// PROJECT-G: Override these dependencies present in Geyser
+provided("org.geysermc", "common", Versions.geyserVersion)
+provided("org.geysermc.cumulus", "cumulus", Versions.cumulusVersion)

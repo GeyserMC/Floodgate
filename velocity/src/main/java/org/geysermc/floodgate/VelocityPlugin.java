@@ -39,12 +39,16 @@ import org.geysermc.floodgate.module.VelocityAddonModule;
 import org.geysermc.floodgate.module.VelocityListenerModule;
 import org.geysermc.floodgate.module.VelocityPlatformModule;
 import org.geysermc.floodgate.util.ReflectionUtils;
+import org.slf4j.Logger;
 
 public final class VelocityPlugin {
     private final FloodgatePlatform platform;
 
     @Inject
     public VelocityPlugin(@DataDirectory Path dataDirectory, Injector guice) {
+        // PROJECTG
+        guice.getInstance(Logger.class).warn("This is a fork of Floodgate by ProjectG that allows using the Floodgate API on BungeeCord and Velocity when Geyser is also installed. Geyser is required for this to work.");
+
         ReflectionUtils.setPrefix("com.velocitypowered.proxy");
 
         long ctm = System.currentTimeMillis();
