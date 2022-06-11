@@ -26,6 +26,7 @@
 package org.geysermc.floodgate.pluginmessage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.geysermc.floodgate.util.ReflectionUtils.getConstructor;
 import static org.geysermc.floodgate.util.ReflectionUtils.getFieldOfType;
 import static org.geysermc.floodgate.util.ReflectionUtils.getMethodByName;
 
@@ -46,6 +47,7 @@ import org.geysermc.floodgate.util.ReflectionUtils;
 
 @RequiredArgsConstructor
 public final class BungeeSkinApplier implements SkinApplier {
+    private static final Constructor<?> LOGIN_RESULT_CONSTRUCTOR;
     private static final Field LOGIN_RESULT_FIELD;
     private static final Method SET_PROPERTIES_METHOD;
 
@@ -53,14 +55,19 @@ public final class BungeeSkinApplier implements SkinApplier {
     private static final Constructor<?> PROPERTY_CONSTRUCTOR;
 
     static {
+        PROPERTY_CLASS = ReflectionUtils.getClassOrFallbackPrefixed(
+                "protocol.Property", "connection.LoginResult$Property"
+        );
+
+        LOGIN_RESULT_CONSTRUCTOR = getConstructor(
+                LoginResult.class, true,
+                String.class, String.class, Array.newInstance(PROPERTY_CLASS, 0).getClass()
+        );
+
         LOGIN_RESULT_FIELD = getFieldOfType(InitialHandler.class, LoginResult.class);
         checkNotNull(LOGIN_RESULT_FIELD, "LoginResult field cannot be null");
 
         SET_PROPERTIES_METHOD = getMethodByName(LoginResult.class, "setProperties", true);
-
-        PROPERTY_CLASS = ReflectionUtils.getClassOrFallbackPrefixed(
-                "protocol.Property", "connection.LoginResult.Property"
-        );
 
         PROPERTY_CONSTRUCTOR = ReflectionUtils.getConstructor(
                 PROPERTY_CLASS, true,
@@ -91,7 +98,9 @@ public final class BungeeSkinApplier implements SkinApplier {
         // which Floodgate players don't have
         if (loginResult == null) {
             // id and name are unused and properties will be overridden
-            loginResult = new LoginResult(null, null, null);
+            loginResult = (LoginResult) ReflectionUtils.newInstance(
+                    LOGIN_RESULT_CONSTRUCTOR, null, null, null
+            );
             ReflectionUtils.setValue(handler, LOGIN_RESULT_FIELD, loginResult);
         }
 
