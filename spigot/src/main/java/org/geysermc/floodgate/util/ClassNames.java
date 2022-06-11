@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.util;
 
+import static org.geysermc.floodgate.util.ReflectionUtils.getClassOrFallback;
 import static org.geysermc.floodgate.util.ReflectionUtils.getField;
 import static org.geysermc.floodgate.util.ReflectionUtils.getFieldOfType;
 import static org.geysermc.floodgate.util.ReflectionUtils.getMethod;
@@ -85,12 +86,12 @@ public class ClassNames {
 
 
         // SpigotInjector
-        MINECRAFT_SERVER = getClassOrFallBack(
+        MINECRAFT_SERVER = getClassOrFallback(
                 "net.minecraft.server.MinecraftServer",
                 nmsPackage + "MinecraftServer"
         );
 
-        SERVER_CONNECTION = getClassOrFallBack(
+        SERVER_CONNECTION = getClassOrFallback(
                 "net.minecraft.server.network.ServerConnection",
                 nmsPackage + "ServerConnection"
         );
@@ -105,14 +106,14 @@ public class ClassNames {
                 craftOfflinePlayerClass, true, craftServerClass, GameProfile.class);
 
         // SpigotDataHandler
-        Class<?> networkManager = getClassOrFallBack(
+        Class<?> networkManager = getClassOrFallback(
                 "net.minecraft.network.NetworkManager",
                 nmsPackage + "NetworkManager"
         );
 
         SOCKET_ADDRESS = getFieldOfType(networkManager, SocketAddress.class, false);
 
-        HANDSHAKE_PACKET = getClassOrFallBack(
+        HANDSHAKE_PACKET = getClassOrFallback(
                 "net.minecraft.network.protocol.handshake.PacketHandshakingInSetProtocol",
                 nmsPackage + "PacketHandshakingInSetProtocol"
         );
@@ -120,12 +121,12 @@ public class ClassNames {
         HANDSHAKE_HOST = getFieldOfType(HANDSHAKE_PACKET, String.class);
         checkNotNull(HANDSHAKE_HOST, "Handshake host");
 
-        LOGIN_START_PACKET = getClassOrFallBack(
+        LOGIN_START_PACKET = getClassOrFallback(
                 "net.minecraft.network.protocol.login.PacketLoginInStart",
                 nmsPackage + "PacketLoginInStart"
         );
 
-        LOGIN_LISTENER = getClassOrFallBack(
+        LOGIN_LISTENER = getClassOrFallback(
                 "net.minecraft.server.network.LoginListener",
                 nmsPackage + "LoginListener"
         );
@@ -146,14 +147,14 @@ public class ClassNames {
         INIT_UUID = getMethod(LOGIN_LISTENER, "initUUID");
         checkNotNull(INIT_UUID, "initUUID from LoginListener");
 
-        Class<?> packetListenerClass = getClassOrFallBack(
+        Class<?> packetListenerClass = getClassOrFallback(
                 "net.minecraft.network.PacketListener",
                 nmsPackage + "PacketListener"
         );
         PACKET_LISTENER = getFieldOfType(networkManager, packetListenerClass);
         checkNotNull(PACKET_LISTENER, "Packet listener");
 
-        LOGIN_HANDLER = getClassOrFallBack(
+        LOGIN_HANDLER = getClassOrFallback(
                 "net.minecraft.server.network.LoginListener$LoginHandler",
                 nmsPackage + "LoginListener$LoginHandler"
         );
@@ -186,25 +187,6 @@ public class ClassNames {
 
         PAPER_VELOCITY_SUPPORT =
                 paperConfig == null ? null : getField(paperConfig, "velocitySupport");
-    }
-
-    private static Class<?> getClassOrFallBack(String className, String fallbackName) {
-        Class<?> clazz = ReflectionUtils.getClassSilently(className);
-
-        if (clazz != null) {
-            if (Constants.DEBUG_MODE) {
-                System.out.println("Found class (primary): " + clazz.getName());
-            }
-            return clazz;
-        }
-
-        // do throw an exception when both classes couldn't be found
-        clazz = ReflectionUtils.getClassOrThrow(fallbackName);
-        if (Constants.DEBUG_MODE) {
-            System.out.println("Found class (fallback): " + clazz.getName());
-        }
-
-        return clazz;
     }
 
     private static void checkNotNull(Object toCheck, String objectName) {

@@ -29,7 +29,6 @@ object Versions {
     const val configUtilsVersion = "1.0-SNAPSHOT"
     const val spigotVersion = "1.13-R0.1-SNAPSHOT"
     const val fastutilVersion = "8.5.3"
-    const val lombokVersion = "1.18.20"
     const val guiceVersion = "5.0.1"
     const val nettyVersion = "4.1.49.Final"
     const val snakeyamlVersion = "1.28"

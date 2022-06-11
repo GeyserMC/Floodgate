@@ -46,6 +46,10 @@ public final class ReflectionUtils {
     @Setter
     private static String prefix;
 
+    private static String applyPrefix(String className) {
+        return prefix + "." + className;
+    }
+
     /**
      * Get a class that is prefixed with the prefix provided in {@link #setPrefix(String)}. Calling
      * this method is equal to calling {@link #getClass(String)} with <i>prefix</i>.<i>classname</i>
@@ -56,13 +60,13 @@ public final class ReflectionUtils {
      */
     @Nullable
     public static Class<?> getPrefixedClass(String className) {
-        return getClass(prefix + "." + className);
+        return getClass(applyPrefix(className));
     }
 
     @Nullable
     public static Class<?> getPrefixedClassSilently(String className) {
         try {
-            return Class.forName(prefix + "." + className);
+            return Class.forName(applyPrefix(className));
         } catch (ClassNotFoundException ignored) {
             return null;
         }
@@ -107,6 +111,28 @@ public final class ReflectionUtils {
         } catch (ClassNotFoundException exception) {
             throw new IllegalStateException(exception);
         }
+    }
+
+    public static Class<?> getClassOrFallbackPrefixed(String className, String fallbackClassName) {
+        return getClassOrFallback(applyPrefix(className), applyPrefix(fallbackClassName));
+    }
+
+    public static Class<?> getClassOrFallback(String className, String fallbackClassName) {
+        Class<?> clazz = getClassSilently(className);
+
+        if (clazz != null) {
+            if (Constants.DEBUG_MODE) {
+                System.out.println("Found class (primary): " + clazz.getName());
+            }
+            return clazz;
+        }
+
+        // do throw an exception when both classes couldn't be found
+        clazz = ReflectionUtils.getClassOrThrow(fallbackClassName);
+        if (Constants.DEBUG_MODE) {
+            System.out.println("Found class (fallback): " + clazz.getName());
+        }
+        return clazz;
     }
 
     @Nullable
