@@ -169,7 +169,7 @@ public final class ReflectionUtils {
      *
      * @param clazz     the class name to get the field from
      * @param fieldName the name of the field
-     * @param declared  if the field is declared or public.
+     * @param declared  if the field is declared.
      * @return the field if found, otherwise null
      */
     @Nullable
@@ -206,7 +206,7 @@ public final class ReflectionUtils {
      *
      * @param clazz     the class to search the field from
      * @param fieldType the type of the field
-     * @param declared  if the field is declared or public
+     * @param declared  if the field is declared
      * @return the field if it has been found, otherwise null
      */
     @Nullable
@@ -342,7 +342,7 @@ public final class ReflectionUtils {
      *
      * @param clazz     the class to get the method from
      * @param method    the name of the method to find
-     * @param declared  if the the method is declared or public
+     * @param declared  if the the method is declared
      * @param arguments the classes of the method arguments
      * @return the requested method if it has been found, otherwise null
      */
@@ -427,7 +427,7 @@ public final class ReflectionUtils {
      *
      * @param clazz      the class to search the method in
      * @param methodName the name of the method
-     * @param declared   if the method is declared or public
+     * @param declared   if the method is declared
      * @return the method if it has been found, otherwise null
      */
     @Nullable
@@ -446,7 +446,7 @@ public final class ReflectionUtils {
      *
      * @param clazz     the class to search the method in
      * @param paramType the type of one of the method parameters
-     * @param declared  if the method is declared or public
+     * @param declared  if the method is declared
      * @return the method if it has been found, otherwise null
      */
     @Nullable
