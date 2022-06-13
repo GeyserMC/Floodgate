@@ -25,7 +25,6 @@
 
 package org.geysermc.floodgate.util;
 
-@SuppressWarnings("ConstantConditions")
 public final class ProxyUtils {
 
     public static boolean isProxyData() {
@@ -33,7 +32,7 @@ public final class ProxyUtils {
     }
 
     private static boolean isBungeeData() {
-        return ReflectionUtils.castedStaticValue(ClassNames.BUNGEE);
+        return ReflectionUtils.castedStaticBooleanValue(ClassNames.BUNGEE);
     }
 
     private static boolean isVelocitySupport() {
@@ -41,6 +40,6 @@ public final class ProxyUtils {
             return false;
         }
 
-        return ReflectionUtils.castedStaticValue(ClassNames.PAPER_VELOCITY_SUPPORT);
+        return ClassNames.PAPER_VELOCITY_SUPPORT.getAsBoolean();
     }
 }

@@ -256,6 +256,25 @@ public final class ReflectionUtils {
     }
 
     /**
+     * Get the value of a boolean field. This method first makes the field accessible and then gets
+     * the value.<br> This method will return false instead of throwing an exception, but it'll log
+     * the stacktrace to the console.
+     *
+     * @param instance the instance to get the value from
+     * @param field    the field to get the value from
+     * @return the value when succeeded, otherwise null
+     */
+    public static boolean getBooleanValue(Object instance, Field field) {
+        makeAccessible(field);
+        try {
+            return field.getBoolean(instance);
+        } catch (IllegalArgumentException | IllegalAccessException exception) {
+            exception.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
      * Get the value of the given field by finding the field and then get the value of it.
      *
      * @param instance  the instance of the object
@@ -298,6 +317,16 @@ public final class ReflectionUtils {
     @Nullable
     public static <T> T castedStaticValue(Field field) {
         return getCastedValue(null, field);
+    }
+
+    public static boolean castedStaticBooleanValue(Field field) {
+        makeAccessible(field);
+        try {
+            return field.getBoolean(null);
+        } catch (IllegalArgumentException | IllegalAccessException exception) {
+            exception.printStackTrace();
+            return false;
+        }
     }
 
     /**
