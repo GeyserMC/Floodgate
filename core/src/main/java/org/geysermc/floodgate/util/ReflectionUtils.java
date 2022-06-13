@@ -46,6 +46,10 @@ public final class ReflectionUtils {
     @Setter
     private static String prefix;
 
+    private static String applyPrefix(String className) {
+        return prefix + "." + className;
+    }
+
     /**
      * Get a class that is prefixed with the prefix provided in {@link #setPrefix(String)}. Calling
      * this method is equal to calling {@link #getClass(String)} with <i>prefix</i>.<i>classname</i>
@@ -56,13 +60,13 @@ public final class ReflectionUtils {
      */
     @Nullable
     public static Class<?> getPrefixedClass(String className) {
-        return getClass(prefix + "." + className);
+        return getClass(applyPrefix(className));
     }
 
     @Nullable
     public static Class<?> getPrefixedClassSilently(String className) {
         try {
-            return Class.forName(prefix + "." + className);
+            return Class.forName(applyPrefix(className));
         } catch (ClassNotFoundException ignored) {
             return null;
         }
@@ -109,6 +113,28 @@ public final class ReflectionUtils {
         }
     }
 
+    public static Class<?> getClassOrFallbackPrefixed(String className, String fallbackClassName) {
+        return getClassOrFallback(applyPrefix(className), applyPrefix(fallbackClassName));
+    }
+
+    public static Class<?> getClassOrFallback(String className, String fallbackClassName) {
+        Class<?> clazz = getClassSilently(className);
+
+        if (clazz != null) {
+            if (Constants.DEBUG_MODE) {
+                System.out.println("Found class (primary): " + clazz.getName());
+            }
+            return clazz;
+        }
+
+        // do throw an exception when both classes couldn't be found
+        clazz = ReflectionUtils.getClassOrThrow(fallbackClassName);
+        if (Constants.DEBUG_MODE) {
+            System.out.println("Found class (fallback): " + clazz.getName());
+        }
+        return clazz;
+    }
+
     @Nullable
     public static <T> Constructor<T> getConstructor(Class<T> clazz, boolean declared, Class<?>... parameters) {
         try {
@@ -143,7 +169,7 @@ public final class ReflectionUtils {
      *
      * @param clazz     the class name to get the field from
      * @param fieldName the name of the field
-     * @param declared  if the field is declared or public.
+     * @param declared  if the field is declared.
      * @return the field if found, otherwise null
      */
     @Nullable
@@ -180,7 +206,7 @@ public final class ReflectionUtils {
      *
      * @param clazz     the class to search the field from
      * @param fieldType the type of the field
-     * @param declared  if the field is declared or public
+     * @param declared  if the field is declared
      * @return the field if it has been found, otherwise null
      */
     @Nullable
@@ -316,7 +342,7 @@ public final class ReflectionUtils {
      *
      * @param clazz     the class to get the method from
      * @param method    the name of the method to find
-     * @param declared  if the the method is declared or public
+     * @param declared  if the the method is declared
      * @param arguments the classes of the method arguments
      * @return the requested method if it has been found, otherwise null
      */
@@ -401,7 +427,7 @@ public final class ReflectionUtils {
      *
      * @param clazz      the class to search the method in
      * @param methodName the name of the method
-     * @param declared   if the method is declared or public
+     * @param declared   if the method is declared
      * @return the method if it has been found, otherwise null
      */
     @Nullable
@@ -420,7 +446,7 @@ public final class ReflectionUtils {
      *
      * @param clazz     the class to search the method in
      * @param paramType the type of one of the method parameters
-     * @param declared  if the method is declared or public
+     * @param declared  if the method is declared
      * @return the method if it has been found, otherwise null
      */
     @Nullable

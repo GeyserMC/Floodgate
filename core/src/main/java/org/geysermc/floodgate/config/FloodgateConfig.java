@@ -40,7 +40,7 @@ import org.geysermc.configutils.loader.callback.GenericPostInitializeCallback;
 @Getter
 public class FloodgateConfig implements GenericPostInitializeCallback<ConfigLoader> {
     private String keyFileName;
-    private String usernamePrefix;
+    private String usernamePrefix = "";
     private boolean replaceSpaces;
 
     private String defaultLocale;
