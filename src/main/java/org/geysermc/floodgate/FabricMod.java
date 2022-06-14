@@ -6,11 +6,11 @@ import com.google.inject.Injector;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.module.*;
 import org.geysermc.floodgate.pluginmessage.FabricSkinApplier;
 import org.geysermc.floodgate.util.FabricCommandUtil;
+import org.geysermc.floodgate.util.FabricPlatformUtils;
 
 public class FabricMod implements ModInitializer {
     @Override
@@ -29,12 +29,11 @@ public class FabricMod implements ModInitializer {
         ServerLifecycleEvents.SERVER_STARTED.register((server) -> {
             long ctm = System.currentTimeMillis();
 
-            FabricServerAudiences adventure = FabricServerAudiences.of(server);
-
             // Stupid hack, see the class for more information
             // This can probably be Guice-i-fied but that is beyond me
-            FabricCommandUtil.setLaterVariables(server, adventure);
+            FabricCommandUtil.setServer(server);
             FabricSkinApplier.setServer(server);
+            FabricPlatformUtils.setServer(server);
 
             platform.enable(
                             new FabricAddonModule(),

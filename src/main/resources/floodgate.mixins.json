@@ -4,10 +4,11 @@
   "package": "org.geysermc.floodgate.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "ChunkMapMixin",
+    "ClientIntentionPacketMixin",
     "ConnectionMixin",
-    "ServerLoginPacketListenerImplMixin",
     "ServerConnectionListenerMixin",
-    "ClientIntentionPacketMixin"
+    "ServerLoginPacketListenerImplMixin"
   ],
   "injectors": {
     "defaultRequire": 1

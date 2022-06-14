@@ -2,7 +2,7 @@ import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
     id 'com.github.johnrengelman.shadow' version '7.0.0'
-    id 'fabric-loom' version '0.10-SNAPSHOT'
+    id 'fabric-loom' version '0.12-SNAPSHOT'
     id 'java'
     id 'maven-publish'
 }
@@ -14,8 +14,8 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
-minecraft {
-    accessWidener = file("src/main/resources/floodgate.accesswidener")
+loom {
+    accessWidenerPath = file("src/main/resources/floodgate.accesswidener")
 }
 
 dependencies {
@@ -31,19 +31,20 @@ dependencies {
     // You may need to force-disable transitiveness on them.
 
     // Base Floodgate
-    implementation("org.geysermc.floodgate:common:${project.mod_version}")
-    shadow("org.geysermc.floodgate:common:${project.mod_version}") {
+    implementation("org.geysermc.floodgate:core:${project.mod_version}")
+    shadow("org.geysermc.floodgate:core:${project.mod_version}") {
         exclude group: 'com.google.guava', module: "guava"
         exclude group: 'com.google.code.gson', module: "gson"
         exclude group: 'org.slf4j', module: "slf4j-api"
         exclude group: 'net.kyori', module: '*' // Let Adventure-Platform provide its desired Adventure version
+        exclude group: 'it.unimi.dsi.fastutil', module: "*"
     }
 
-    include(modImplementation('cloud.commandframework:cloud-fabric:1.5.0') {
+    include(modImplementation('cloud.commandframework:cloud-fabric:1.7.0-SNAPSHOT') {
         because "Commands library implementation for Fabric"
     })
 
-    include(modImplementation('net.kyori:adventure-platform-fabric:5.2.1') {
+    include(modImplementation('net.kyori:adventure-platform-fabric:5.4.0-SNAPSHOT') {
         because "Chat library implementation for Fabric that includes methods for communicating with the server"
         // Thanks to zml for this fix
         // The package modifies Brigadier which causes a LinkageError at runtime if included
@@ -59,6 +60,12 @@ repositories {
     //mavenLocal()
     maven {
         url = 'https://oss.sonatype.org/content/repositories/snapshots'
+    }
+    // specifically for adventure-platform-fabric:5.4.0-SNAPSHOT
+    maven {
+        name = "sonatype-oss-snapshots1"
+        url = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+        mavenContent { snapshotsOnly() }
     }
     // Standard OpenCollab repositories
     maven {
@@ -96,29 +103,14 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 }
 
 shadowJar {
-//    dependencies {
-//        exclude('net.fabricmc:.*')
-//        //include(dependency('org.geysermc.floodgate:.*'))
-//        //include(dependency("org.geysermc.cumulus:.*"))
-//        //include(dependency('org.geysermc:.*'))
-//        exclude '/mappings/*'
-//    }
     configurations = [project.configurations.shadow]
-    //dependencies {
-        //exclude(dependency('cloud.commandframework:cloud-fabric:.*'))
-        //exclude(dependency('net.kyori:adventure-platform-fabric:.*'))
-    //}
-
-    //relocate 'net.kyori', 'org.geysermc.floodgate.relocations.kyori'
-    //relocate 'cloud.commandframework', 'org.geysermc.floodgate.relocations.cloud'
-    relocate 'it.unimi.dsi.fastutil', 'org.geysermc.floodgate.relocations.fastutil'
 }
 
 task remappedShadowJar(type: RemapJarTask) {
     dependsOn tasks.shadowJar
-    input = tasks.shadowJar.archivePath
+    input = tasks.shadowJar.archiveFile
     addNestedDependencies = true
-    remapAccessWidener = true // Required for our access widener changes to go into effect and not crash on startup
+    //remapAccessWidener = true // Required for our access widener changes to go into effect and not crash on startup
     archiveName = "floodgate-fabric.jar"
 }
 

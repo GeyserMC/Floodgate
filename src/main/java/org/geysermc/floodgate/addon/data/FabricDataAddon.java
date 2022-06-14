@@ -41,7 +41,7 @@ public final class FabricDataAddon implements InjectorAddon {
     @Override
     public void onChannelClosed(Channel channel) {
         FloodgatePlayer player = channel.attr(playerAttribute).get();
-        if (player != null && api.removePlayer(player)) {
+        if (player != null && api.setPendingRemove(player)) {
             logger.translatedInfo("floodgate.ingame.disconnect_name", player.getCorrectUsername());
         }
     }

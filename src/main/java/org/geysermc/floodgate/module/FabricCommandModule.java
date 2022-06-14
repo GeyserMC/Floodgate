@@ -19,7 +19,7 @@ public final class FabricCommandModule extends CommandModule {
     public CommandManager<UserAudience> commandManager(CommandUtil commandUtil) {
         FabricCommandManager<UserAudience, CommandSourceStack> commandManager = new FabricServerCommandManager<>(
                 CommandExecutionCoordinator.simpleCoordinator(),
-                commandUtil::getAudience,
+                commandUtil::getUserAudience,
                 audience -> (CommandSourceStack) audience.source()
         );
         commandManager.registerCommandPreProcessor(new FloodgateCommandPreprocessor<>(commandUtil));

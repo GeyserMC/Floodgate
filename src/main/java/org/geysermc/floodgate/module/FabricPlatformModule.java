@@ -5,6 +5,7 @@ import org.geysermc.floodgate.listener.FabricEventListener;
 import org.geysermc.floodgate.listener.FabricEventRegistration;
 import org.geysermc.floodgate.logger.Log4jFloodgateLogger;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
+import org.geysermc.floodgate.platform.util.PlatformUtils;
 import org.geysermc.floodgate.pluginmessage.FabricSkinApplier;
 import org.geysermc.floodgate.util.FabricCommandUtil;
 import com.google.inject.AbstractModule;
@@ -18,10 +19,16 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.skin.SkinApplier;
+import org.geysermc.floodgate.util.FabricPlatformUtils;
 import org.geysermc.floodgate.util.LanguageManager;
 
 @RequiredArgsConstructor
 public final class FabricPlatformModule extends AbstractModule {
+
+    @Override
+    protected void configure() {
+        bind(PlatformUtils.class).to(FabricPlatformUtils.class);
+    }
 
     @Provides
     @Singleton
@@ -35,7 +42,7 @@ public final class FabricPlatformModule extends AbstractModule {
             FloodgateApi api,
             FloodgateLogger logger,
             LanguageManager languageManager) {
-        return new FabricCommandUtil(api, logger, languageManager);
+        return new FabricCommandUtil(languageManager, api, logger);
     }
 
     @Provides
