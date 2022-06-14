@@ -25,10 +25,15 @@
 
 package org.geysermc.floodgate.util;
 
+import static org.geysermc.floodgate.util.ReflectionUtils.castedStaticBooleanValue;
+import static org.geysermc.floodgate.util.ReflectionUtils.getBooleanValue;
 import static org.geysermc.floodgate.util.ReflectionUtils.getClassOrFallback;
+import static org.geysermc.floodgate.util.ReflectionUtils.getClassSilently;
 import static org.geysermc.floodgate.util.ReflectionUtils.getField;
 import static org.geysermc.floodgate.util.ReflectionUtils.getFieldOfType;
 import static org.geysermc.floodgate.util.ReflectionUtils.getMethod;
+import static org.geysermc.floodgate.util.ReflectionUtils.getValue;
+import static org.geysermc.floodgate.util.ReflectionUtils.invoke;
 
 import com.google.common.base.Preconditions;
 import com.mojang.authlib.GameProfile;
@@ -37,6 +42,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.SocketAddress;
+import java.util.function.BooleanSupplier;
+import javax.annotation.CheckForNull;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -61,7 +68,7 @@ public class ClassNames {
     public static final Field PACKET_LISTENER;
 
     @Nullable public static final Field PAPER_DISABLE_USERNAME_VALIDATION;
-    @Nullable public static final Field PAPER_VELOCITY_SUPPORT;
+    @Nullable public static final BooleanSupplier PAPER_VELOCITY_SUPPORT;
 
     public static final Method GET_PROFILE_METHOD;
     public static final Method LOGIN_DISCONNECT;
@@ -182,14 +189,41 @@ public class ClassNames {
         BUNGEE = getField(spigotConfig, "bungee");
         checkNotNull(BUNGEE, "Bungee field");
 
-        Class<?> paperConfig = ReflectionUtils.getClassSilently(
-                "com.destroystokyo.paper.PaperConfig");
+        Class<?> paperConfigNew = getClassSilently(
+                "io.papermc.paper.configuration.GlobalConfiguration");
+        if (paperConfigNew != null) {
+            // 1.19 and later
+            Method paperConfigGet = checkNotNull(getMethod(paperConfigNew, "get"),
+                    "GlobalConfiguration get");
+            Field paperConfigProxies = checkNotNull(getField(paperConfigNew, "proxies"),
+                    "Proxies field");
+            Field paperConfigVelocity = checkNotNull(
+                    getField(paperConfigProxies.getType(), "velocity"),
+                    "velocity field");
+            Field paperVelocityEnabled = checkNotNull(
+                    getField(paperConfigVelocity.getType(), "enabled"),
+                    "Velocity enabled field");
+            PAPER_VELOCITY_SUPPORT = () -> {
+                Object paperConfigInstance = invoke(null, paperConfigGet);
+                Object proxiesInstance = getValue(paperConfigInstance, paperConfigProxies);
+                Object velocityInstance = getValue(proxiesInstance, paperConfigVelocity);
+                return getBooleanValue(velocityInstance, paperVelocityEnabled);
+            };
+        } else {
+            // Pre-1.19
+            Class<?> paperConfig = getClassSilently(
+                    "com.destroystokyo.paper.PaperConfig");
 
-        PAPER_VELOCITY_SUPPORT =
-                paperConfig == null ? null : getField(paperConfig, "velocitySupport");
+            if (paperConfig != null) {
+                Field velocitySupport = getField(paperConfig, "velocitySupport");
+                PAPER_VELOCITY_SUPPORT = () -> castedStaticBooleanValue(velocitySupport);
+            } else {
+                PAPER_VELOCITY_SUPPORT = null;
+            }
+        }
     }
 
-    private static void checkNotNull(Object toCheck, String objectName) {
-        Preconditions.checkNotNull(toCheck, objectName + " cannot be null");
+    private static <T> T checkNotNull(@CheckForNull T toCheck, @CheckForNull String objectName) {
+        return Preconditions.checkNotNull(toCheck, objectName + " cannot be null");
     }
 }
