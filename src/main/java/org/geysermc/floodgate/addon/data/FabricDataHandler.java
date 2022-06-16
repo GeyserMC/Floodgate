@@ -1,12 +1,15 @@
 package org.geysermc.floodgate.addon.data;
 
+import com.mojang.logging.LogUtils;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
+import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+import org.geysermc.floodgate.MinecraftServerHolder;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.mixin.ConnectionMixin;
 import org.geysermc.floodgate.mixin.ClientIntentionPacketMixin;
@@ -17,10 +20,13 @@ import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
+import org.slf4j.Logger;
 
 import java.net.InetSocketAddress;
 
 public final class FabricDataHandler extends CommonDataHandler {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     private final FloodgateLogger logger;
     private Connection networkManager;
     private FloodgatePlayer player;
@@ -95,8 +101,27 @@ public final class FabricDataHandler extends CommonDataHandler {
 
             GameProfile gameProfile = new GameProfile(player.getCorrectUniqueId(), player.getCorrectUsername());
 
-            ((ServerLoginPacketListenerSetter) networkManager.getPacketListener()).setGameProfile(gameProfile);
-            ((ServerLoginPacketListenerSetter) networkManager.getPacketListener()).setLoginState();
+            if (player.isLinked() && player.getCorrectUniqueId().version() == 4) {
+                Thread texturesThread = new Thread("Bedrock Linked Player Texture Download") {
+                    @Override
+                    public void run() {
+                        try {
+                            MinecraftServerHolder.get().getSessionService()
+                                    .fillProfileProperties(gameProfile, true);
+                        } catch (Exception e) {
+                            LOGGER.error("Unable to get Bedrock linked player textures for " + gameProfile.getName(), e);
+                        }
+                        ((ServerLoginPacketListenerSetter) networkManager.getPacketListener())
+                                .setGameProfile(gameProfile);
+                        ((ServerLoginPacketListenerSetter) networkManager.getPacketListener()).setLoginState();
+                    }
+                };
+                texturesThread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
+                texturesThread.start();
+            } else {
+                ((ServerLoginPacketListenerSetter) networkManager.getPacketListener()).setGameProfile(gameProfile);
+                ((ServerLoginPacketListenerSetter) networkManager.getPacketListener()).setLoginState();
+            }
 
             ctx.pipeline().remove(this);
             return true;

@@ -110,7 +110,6 @@ task remappedShadowJar(type: RemapJarTask) {
     dependsOn tasks.shadowJar
     input = tasks.shadowJar.archiveFile
     addNestedDependencies = true
-    //remapAccessWidener = true // Required for our access widener changes to go into effect and not crash on startup
     archiveName = "floodgate-fabric.jar"
 }
 

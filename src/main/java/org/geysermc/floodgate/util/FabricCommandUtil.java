@@ -4,11 +4,11 @@ import com.mojang.authlib.GameProfile;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.UserWhiteListEntry;
 import net.minecraft.world.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.floodgate.MinecraftServerHolder;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandUtil;
@@ -17,10 +17,6 @@ import org.geysermc.floodgate.player.UserAudience;
 import java.util.*;
 
 public final class FabricCommandUtil extends CommandUtil {
-    // Static because commands *need* to be initialized before the server is available
-    // Otherwise it would be a class variable
-    private static MinecraftServer SERVER;
-
     private final FloodgateLogger logger;
     private UserAudience console;
 
@@ -58,19 +54,19 @@ public final class FabricCommandUtil extends CommandUtil {
 
     @Override
     public Object getPlayerByUuid(@NonNull UUID uuid) {
-        ServerPlayer player = SERVER.getPlayerList().getPlayer(uuid);
+        ServerPlayer player = MinecraftServerHolder.get().getPlayerList().getPlayer(uuid);
         return player != null ? player : uuid;
     }
 
     @Override
     public Object getPlayerByUsername(@NonNull String username) {
-        ServerPlayer player = SERVER.getPlayerList().getPlayerByName(username);
+        ServerPlayer player = MinecraftServerHolder.get().getPlayerList().getPlayerByName(username);
         return player != null ? player : username;
     }
 
     @Override
     protected Collection<?> getOnlinePlayers() {
-        return SERVER.getPlayerList().getPlayers();
+        return MinecraftServerHolder.get().getPlayerList().getPlayers();
     }
 
     @Override
@@ -82,7 +78,7 @@ public final class FabricCommandUtil extends CommandUtil {
     public void sendMessage(Object target, String message) {
         CommandSourceStack commandSource = (CommandSourceStack) target;
         if (commandSource.getEntity() instanceof ServerPlayer) {
-            SERVER.execute(() -> ((ServerPlayer) commandSource.getEntity())
+            MinecraftServerHolder.get().execute(() -> ((ServerPlayer) commandSource.getEntity())
                     .displayClientMessage(Component.literal(message), false));
         } else {
             // Console?
@@ -100,18 +96,14 @@ public final class FabricCommandUtil extends CommandUtil {
     @Override
     public boolean whitelistPlayer(UUID uuid, String username) {
         GameProfile profile = new GameProfile(uuid, username);
-        SERVER.getPlayerList().getWhiteList().add(new UserWhiteListEntry(profile));
+        MinecraftServerHolder.get().getPlayerList().getWhiteList().add(new UserWhiteListEntry(profile));
         return true;
     }
 
     @Override
     public boolean removePlayerFromWhitelist(UUID uuid, String username) {
         GameProfile profile = new GameProfile(uuid, username);
-        SERVER.getPlayerList().getWhiteList().remove(profile);
+        MinecraftServerHolder.get().getPlayerList().getWhiteList().remove(profile);
         return true;
-    }
-
-    public static void setServer(MinecraftServer server) {
-        SERVER = server;
     }
 }

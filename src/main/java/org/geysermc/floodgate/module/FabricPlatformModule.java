@@ -6,7 +6,9 @@ import org.geysermc.floodgate.listener.FabricEventRegistration;
 import org.geysermc.floodgate.logger.Log4jFloodgateLogger;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 import org.geysermc.floodgate.platform.util.PlatformUtils;
+import org.geysermc.floodgate.pluginmessage.FabricPluginMessageRegistration;
 import org.geysermc.floodgate.pluginmessage.FabricSkinApplier;
+import org.geysermc.floodgate.pluginmessage.PluginMessageRegistration;
 import org.geysermc.floodgate.util.FabricCommandUtil;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -83,6 +85,12 @@ public final class FabricPlatformModule extends AbstractModule {
     @Named("implementationName")
     public String implementationName() {
         return "Fabric";
+    }
+
+    @Provides
+    @Singleton
+    public PluginMessageRegistration pluginMessageRegister() {
+        return new FabricPluginMessageRegistration();
     }
 
     @Provides

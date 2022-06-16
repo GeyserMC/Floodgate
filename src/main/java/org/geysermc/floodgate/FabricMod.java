@@ -8,9 +8,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.module.*;
-import org.geysermc.floodgate.pluginmessage.FabricSkinApplier;
-import org.geysermc.floodgate.util.FabricCommandUtil;
-import org.geysermc.floodgate.util.FabricPlatformUtils;
 
 public class FabricMod implements ModInitializer {
     @Override
@@ -31,9 +28,7 @@ public class FabricMod implements ModInitializer {
 
             // Stupid hack, see the class for more information
             // This can probably be Guice-i-fied but that is beyond me
-            FabricCommandUtil.setServer(server);
-            FabricSkinApplier.setServer(server);
-            FabricPlatformUtils.setServer(server);
+            MinecraftServerHolder.set(server);
 
             platform.enable(
                             new FabricAddonModule(),
