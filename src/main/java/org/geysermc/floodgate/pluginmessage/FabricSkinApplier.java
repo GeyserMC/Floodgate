@@ -17,7 +17,6 @@ public final class FabricSkinApplier implements SkinApplier {
     @Override
     public void applySkin(FloodgatePlayer floodgatePlayer, SkinData skinData) {
         MinecraftServerHolder.get().execute(() -> {
-            System.out.println("Refreshing skins for " + floodgatePlayer);
             ServerPlayer bedrockPlayer = MinecraftServerHolder.get().getPlayerList()
                     .getPlayer(floodgatePlayer.getCorrectUniqueId());
             if (bedrockPlayer == null) {
@@ -33,9 +32,6 @@ public final class FabricSkinApplier implements SkinApplier {
 
             ChunkMap tracker = ((ServerLevel) bedrockPlayer.level).getChunkSource().chunkMap;
             ChunkMap.TrackedEntity entry = ((ChunkMapMixin) tracker).getEntityMap().get(bedrockPlayer.getId());
-
-            System.out.println("eeeee");
-
             // Skin is applied - now it's time to refresh the player for everyone.
             for (ServerPlayer otherPlayer : MinecraftServerHolder.get().getPlayerList().getPlayers()) {
                 boolean samePlayer = otherPlayer == bedrockPlayer;
@@ -51,7 +47,6 @@ public final class FabricSkinApplier implements SkinApplier {
                 }
 
                 if (bedrockPlayer.level == otherPlayer.level) {
-                    System.out.println("Updating entry");
                     entry.updatePlayer(otherPlayer);
                 }
             }
