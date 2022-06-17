@@ -216,7 +216,9 @@ public class ClassNames {
 
             if (paperConfig != null) {
                 Field velocitySupport = getField(paperConfig, "velocitySupport");
-                PAPER_VELOCITY_SUPPORT = () -> castedStaticBooleanValue(velocitySupport);
+                // velocitySupport field is null pre-1.13
+                PAPER_VELOCITY_SUPPORT = velocitySupport != null ?
+                        () -> castedStaticBooleanValue(velocitySupport) : null;
             } else {
                 PAPER_VELOCITY_SUPPORT = null;
             }
