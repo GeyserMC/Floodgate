@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
+import net.engio.mbassy.bus.common.PubSubSupport;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.InstanceHolder;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
@@ -43,6 +44,7 @@ import org.geysermc.floodgate.api.packet.PacketHandlers;
 import org.geysermc.floodgate.config.ConfigLoader;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.FloodgateConfigHolder;
+import org.geysermc.floodgate.event.ShutdownEvent;
 import org.geysermc.floodgate.link.PlayerLinkLoader;
 import org.geysermc.floodgate.module.ConfigLoadedModule;
 import org.geysermc.floodgate.module.PostInitializeModule;
@@ -130,6 +132,8 @@ public class FloodgatePlatform {
     }
 
     public boolean disable() {
+        guice.getInstance(PubSubSupport.class).publish(new ShutdownEvent());
+
         if (injector != null && injector.canRemoveInjection()) {
             try {
                 if (!injector.removeInjection()) {
@@ -139,9 +143,6 @@ public class FloodgatePlatform {
                 logger.error("Failed to remove the injection!", exception);
             }
         }
-
-        guice.getInstance(NewsChecker.class).shutdown();
-        api.getPlayerLink().stop();
         return true;
     }
 

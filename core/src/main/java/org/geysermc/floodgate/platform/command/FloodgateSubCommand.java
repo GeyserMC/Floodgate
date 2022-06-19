@@ -23,20 +23,18 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-object Versions {
-    const val geyserVersion = "2.0.4-SNAPSHOT"
-    const val cumulusVersion = "1.1"
-    const val configUtilsVersion = "1.0-SNAPSHOT"
-    const val spigotVersion = "1.13-R0.1-SNAPSHOT"
-    const val fastutilVersion = "8.5.3"
-    const val guiceVersion = "5.0.1"
-    const val nettyVersion = "4.1.49.Final"
-    const val snakeyamlVersion = "1.28"
-    const val cloudVersion = "1.5.0"
-    const val bstatsVersion = "3.0.0"
-    const val mbassadorVersion = "1.3.2"
+package org.geysermc.floodgate.platform.command;
 
-    const val javaWebsocketVersion = "1.5.2"
+import cloud.commandframework.context.CommandContext;
+import org.geysermc.floodgate.command.util.Permission;
+import org.geysermc.floodgate.player.UserAudience;
 
-    const val checkerQual = "3.19.0"
+public abstract class FloodgateSubCommand {
+    public abstract String name();
+
+    public abstract String description();
+
+    public abstract Permission permission();
+
+    public abstract void execute(CommandContext<UserAudience> context);
 }

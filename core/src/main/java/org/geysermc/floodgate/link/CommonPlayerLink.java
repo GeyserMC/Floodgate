@@ -34,6 +34,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import lombok.AccessLevel;
 import lombok.Getter;
+import net.engio.mbassy.listener.Handler;
+import net.engio.mbassy.listener.Listener;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.link.LinkRequest;
 import org.geysermc.floodgate.api.link.PlayerLink;
@@ -41,8 +43,10 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.database.config.DatabaseConfig;
 import org.geysermc.floodgate.database.config.DatabaseConfigLoader;
+import org.geysermc.floodgate.event.ShutdownEvent;
 import org.geysermc.floodgate.util.InjectorHolder;
 
+@Listener
 public abstract class CommonPlayerLink implements PlayerLink {
     @Getter(AccessLevel.PROTECTED)
     private final ExecutorService executorService = Executors.newFixedThreadPool(11);
@@ -101,5 +105,10 @@ public abstract class CommonPlayerLink implements PlayerLink {
     @Override
     public void stop() {
         executorService.shutdown();
+    }
+
+    @Handler
+    public void onShutdown(ShutdownEvent ignored) {
+        stop();
     }
 }

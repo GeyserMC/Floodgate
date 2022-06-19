@@ -37,34 +37,38 @@ import java.util.concurrent.Executors;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.engio.mbassy.listener.Handler;
+import net.engio.mbassy.listener.Listener;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.geysermc.floodgate.event.ShutdownEvent;
 
 // resources are properly closed and ignoring the original stack trace is intended
 @SuppressWarnings({"PMD.CloseResource", "PMD.PreserveStackTrace"})
-public class HttpUtils {
-    private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
-
-    private static final Gson GSON = new Gson();
+@Listener
+public class HttpClient {
     private static final String USER_AGENT = "GeyserMC/Floodgate";
 
-    public static CompletableFuture<DefaultHttpResponse> asyncGet(String urlString) {
-        return CompletableFuture.supplyAsync(() -> get(urlString), EXECUTOR_SERVICE);
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final Gson gson = new Gson();
+
+    public CompletableFuture<DefaultHttpResponse> asyncGet(String urlString) {
+        return CompletableFuture.supplyAsync(() -> get(urlString), executorService);
     }
 
-    public static DefaultHttpResponse get(String urlString) {
+    public DefaultHttpResponse get(String urlString) {
         return readDefaultResponse(request(urlString));
     }
 
-    public static <T> HttpResponse<T> get(String urlString, Class<T> clazz) {
+    public <T> HttpResponse<T> get(String urlString, Class<T> clazz) {
         return readResponse(request(urlString), clazz);
     }
 
-    public static <T> HttpResponse<T> getSilent(String urlString, Class<T> clazz) {
+    public <T> HttpResponse<T> getSilent(String urlString, Class<T> clazz) {
         return readResponseSilent(request(urlString), clazz);
     }
 
-    private static HttpURLConnection request(String urlString) {
+    private HttpURLConnection request(String urlString) {
         HttpURLConnection connection;
 
         try {
@@ -88,7 +92,7 @@ public class HttpUtils {
     }
 
     @NonNull
-    private static <T> HttpResponse<T> readResponse(HttpURLConnection connection, Class<T> clazz) {
+    private <T> HttpResponse<T> readResponse(HttpURLConnection connection, Class<T> clazz) {
         InputStreamReader streamReader = createReader(connection);
         if (streamReader == null) {
             return new HttpResponse<>(-1, null);
@@ -96,7 +100,7 @@ public class HttpUtils {
 
         try {
             int responseCode = connection.getResponseCode();
-            T response = GSON.fromJson(streamReader, clazz);
+            T response = gson.fromJson(streamReader, clazz);
             return new HttpResponse<>(responseCode, response);
         } catch (Exception ignored) {
             return new HttpResponse<>(-1, null);
@@ -109,9 +113,7 @@ public class HttpUtils {
     }
 
     @NonNull
-    private static <T> HttpResponse<T> readResponseSilent(
-            HttpURLConnection connection,
-            Class<T> clazz) {
+    private <T> HttpResponse<T> readResponseSilent(HttpURLConnection connection, Class<T> clazz) {
         try {
             return readResponse(connection, clazz);
         } catch (Exception ignored) {
@@ -120,7 +122,7 @@ public class HttpUtils {
     }
 
     @NonNull
-    private static DefaultHttpResponse readDefaultResponse(HttpURLConnection connection) {
+    private DefaultHttpResponse readDefaultResponse(HttpURLConnection connection) {
         InputStreamReader streamReader = createReader(connection);
         if (streamReader == null) {
             return new DefaultHttpResponse(-1, null);
@@ -128,7 +130,7 @@ public class HttpUtils {
 
         try {
             int responseCode = connection.getResponseCode();
-            JsonObject response = GSON.fromJson(streamReader, JsonObject.class);
+            JsonObject response = gson.fromJson(streamReader, JsonObject.class);
             return new DefaultHttpResponse(responseCode, response);
         } catch (Exception exception) {
             throw new RuntimeException("Failed to read response", exception);
@@ -141,7 +143,7 @@ public class HttpUtils {
     }
 
     @Nullable
-    private static InputStreamReader createReader(HttpURLConnection connection) {
+    private InputStreamReader createReader(HttpURLConnection connection) {
         InputStream stream;
         try {
             stream = connection.getInputStream();
@@ -158,6 +160,11 @@ public class HttpUtils {
             return new InputStreamReader(stream);
         }
         return null;
+    }
+
+    @Handler
+    public void onShutdown(ShutdownEvent ignored) {
+        executorService.shutdown();
     }
 
     @Getter

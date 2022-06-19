@@ -28,10 +28,17 @@ package org.geysermc.floodgate.module;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
+import com.google.inject.spi.InjectionListener;
+import com.google.inject.spi.TypeEncounter;
+import com.google.inject.spi.TypeListener;
 import io.netty.util.AttributeKey;
 import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
+import net.engio.mbassy.bus.MBassador;
+import net.engio.mbassy.bus.common.PubSubSupport;
+import net.engio.mbassy.bus.error.IPublicationErrorHandler.ConsoleLogger;
 import org.geysermc.floodgate.addon.data.HandshakeHandlersImpl;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
@@ -48,29 +55,46 @@ import org.geysermc.floodgate.crypto.AesKeyProducer;
 import org.geysermc.floodgate.crypto.Base64Topping;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.crypto.KeyProducer;
+import org.geysermc.floodgate.event.util.ListenerAnnotationMatcher;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.news.NewsChecker;
 import org.geysermc.floodgate.packet.PacketHandlersImpl;
-import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinUploadManager;
 import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.util.HttpClient;
 import org.geysermc.floodgate.util.LanguageManager;
 
 @RequiredArgsConstructor
 public class CommonModule extends AbstractModule {
+    private final PubSubSupport<Object> eventBus = new MBassador<>(new ConsoleLogger(true));
     private final Path dataDirectory;
 
     @Override
     protected void configure() {
+        bind(PubSubSupport.class).toInstance(eventBus);
+        // register every class that has the Listener annotation
+        bindListener(new ListenerAnnotationMatcher(), new TypeListener() {
+            @Override
+            public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
+                encounter.register((InjectionListener<I>) eventBus::subscribe);
+            }
+        });
+
+        bind(HttpClient.class).in(Singleton.class);
+
         bind(FloodgateApi.class).to(SimpleFloodgateApi.class);
         bind(PlatformInjector.class).to(CommonPlatformInjector.class);
+
         bind(HandshakeHandlers.class).to(HandshakeHandlersImpl.class);
+        bind(HandshakeHandlersImpl.class).in(Singleton.class);
 
         bind(PacketHandlers.class).to(PacketHandlersImpl.class);
         bind(PacketHandlersImpl.class).asEagerSingleton();
+
+        bind(NewsChecker.class).in(Singleton.class);
     }
 
     @Provides
@@ -118,12 +142,6 @@ public class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public HandshakeHandlersImpl handshakeHandlers() {
-        return new HandshakeHandlersImpl();
-    }
-
-    @Provides
-    @Singleton
     public FloodgateHandshakeHandler handshakeHandler(
             HandshakeHandlersImpl handshakeHandlers,
             SimpleFloodgateApi api,
@@ -154,8 +172,16 @@ public class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public NewsChecker newsChecker(CommandUtil commandUtil, FloodgateLogger logger) {
-        return new NewsChecker(commandUtil, logger, Constants.GIT_BRANCH, Constants.BUILD_NUMBER);
+    @Named("gitBranch")
+    public String gitBranch() {
+        return Constants.GIT_BRANCH;
+    }
+
+    @Provides
+    @Singleton
+    @Named("buildNumber")
+    public int buildNumber() {
+        return Constants.BUILD_NUMBER;
     }
 
     @Provides
