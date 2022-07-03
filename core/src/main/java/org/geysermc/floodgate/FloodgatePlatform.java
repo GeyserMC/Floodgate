@@ -28,10 +28,6 @@ package org.geysermc.floodgate;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import com.google.inject.name.Named;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.UUID;
 import net.engio.mbassy.bus.common.PubSubSupport;
 import org.geysermc.floodgate.api.FloodgateApi;
@@ -41,12 +37,9 @@ import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
-import org.geysermc.floodgate.config.ConfigLoader;
 import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.event.ShutdownEvent;
 import org.geysermc.floodgate.link.PlayerLinkLoader;
-import org.geysermc.floodgate.module.ConfigLoadedModule;
 import org.geysermc.floodgate.module.PostInitializeModule;
 import org.geysermc.floodgate.news.NewsChecker;
 import org.geysermc.floodgate.util.Metrics;
@@ -54,51 +47,16 @@ import org.geysermc.floodgate.util.PrefixCheckTask;
 
 public class FloodgatePlatform {
     private static final UUID KEY = UUID.randomUUID();
-    private final FloodgateApi api;
-    private final PlatformInjector injector;
+    @Inject private FloodgateApi api;
+    @Inject private PlatformInjector injector;
 
-    private final FloodgateLogger logger;
+    @Inject private FloodgateLogger logger;
 
-    private FloodgateConfig config;
-    private Injector guice;
-
-    @Inject
-    public FloodgatePlatform(
-            FloodgateApi api,
-            PlatformInjector platformInjector,
-            FloodgateLogger logger,
-            Injector guice) {
-
-        this.api = api;
-        this.injector = platformInjector;
-        this.logger = logger;
-        this.guice = guice;
-    }
+    @Inject private FloodgateConfig config;
+    @Inject private Injector guice;
 
     @Inject
-    public void init(
-            @Named("dataDirectory") Path dataDirectory,
-            ConfigLoader configLoader,
-            FloodgateConfigHolder configHolder,
-            PacketHandlers packetHandlers,
-            HandshakeHandlers handshakeHandlers) {
-
-        if (!Files.isDirectory(dataDirectory)) {
-            try {
-                Files.createDirectory(dataDirectory);
-            } catch (IOException exception) {
-                logger.error("Failed to create the data folder", exception);
-                throw new RuntimeException("Failed to create the data folder", exception);
-            }
-        }
-
-        config = configLoader.load();
-        if (config.isDebug()) {
-            logger.enableDebug();
-        }
-
-        configHolder.set(config);
-        guice = guice.createChildInjector(new ConfigLoadedModule(config));
+    public void init(PacketHandlers packetHandlers, HandshakeHandlers handshakeHandlers) {
         PlayerLink link = guice.getInstance(PlayerLinkLoader.class).load();
 
         InstanceHolder.set(api, link, this.injector, packetHandlers, handshakeHandlers, KEY);
@@ -131,7 +89,7 @@ public class FloodgatePlatform {
         return true;
     }
 
-    public boolean disable() {
+    public void disable() {
         guice.getInstance(PubSubSupport.class).publish(new ShutdownEvent());
 
         if (injector != null && injector.canRemoveInjection()) {
@@ -143,7 +101,6 @@ public class FloodgatePlatform {
                 logger.error("Failed to remove the injection!", exception);
             }
         }
-        return true;
     }
 
     public boolean isProxy() {

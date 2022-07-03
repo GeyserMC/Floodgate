@@ -42,7 +42,7 @@ import org.geysermc.cumulus.form.util.FormBuilder;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.unsafe.Unsafe;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
+import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.pluginmessage.channel.FormChannel;
 import org.geysermc.floodgate.pluginmessage.channel.TransferChannel;
@@ -58,13 +58,13 @@ public class SimpleFloodgateApi implements FloodgateApi {
                     .build();
 
     @Inject private PluginMessageManager pluginMessageManager;
-    @Inject private FloodgateConfigHolder configHolder;
+    @Inject private FloodgateConfig config;
     @Inject private HttpClient httpClient;
     @Inject private FloodgateLogger logger;
 
     @Override
     public String getPlayerPrefix() {
-        return configHolder.get().getUsernamePrefix();
+        return config.getUsernamePrefix();
     }
 
     @Override

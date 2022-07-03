@@ -26,22 +26,12 @@
 package org.geysermc.floodgate;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Module;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.api.inject.PlatformInjector;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 
 public final class SpigotPlatform extends FloodgatePlatform {
     @Inject private JavaPlugin plugin;
-
-    @Inject
-    public SpigotPlatform(FloodgateApi api, PlatformInjector platformInjector,
-                          FloodgateLogger logger, Injector injector) {
-        super(api, platformInjector, logger, injector);
-    }
 
     @Override
     public boolean enable(Module... postInitializeModules) {

@@ -27,17 +27,23 @@ package org.geysermc.floodgate.logger;
 
 import static org.geysermc.floodgate.util.MessageFormatter.format;
 
+import com.google.inject.Inject;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.util.LanguageManager;
 
-@RequiredArgsConstructor
 public final class JavaUtilFloodgateLogger implements FloodgateLogger {
-    private final Logger logger;
-    private final LanguageManager languageManager;
-    private Level originLevel;
+    @Inject private Logger logger;
+    @Inject private LanguageManager languageManager;
+
+    @Inject
+    private void init(FloodgateConfig config) {
+        if (config.isDebug()) {
+            logger.setLevel(Level.ALL);
+        }
+    }
 
     @Override
     public void error(String message, Object... args) {
@@ -72,19 +78,6 @@ public final class JavaUtilFloodgateLogger implements FloodgateLogger {
     @Override
     public void trace(String message, Object... args) {
         logger.finer(format(message, args));
-    }
-
-    @Override
-    public void enableDebug() {
-        originLevel = logger.getLevel();
-        logger.setLevel(Level.ALL);
-    }
-
-    @Override
-    public void disableDebug() {
-        if (originLevel != null) {
-            logger.setLevel(originLevel);
-        }
     }
 
     @Override

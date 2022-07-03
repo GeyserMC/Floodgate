@@ -23,37 +23,32 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.config;
+package org.geysermc.floodgate.platform.command;
 
-import org.geysermc.floodgate.util.FloodgateInfoHolder;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
-public class FloodgateConfigHolder {
-    private FloodgateConfig config;
+public abstract class SubCommands {
+    private final Set<Class<? extends FloodgateSubCommand>> toRegister = new HashSet<>();
+    private Set<FloodgateSubCommand> subCommands;
 
-    public boolean has() {
-        return config != null;
+    public void defineSubCommand(Class<? extends FloodgateSubCommand> subCommandClass) {
+        toRegister.add(subCommandClass);
     }
 
-    public boolean isProxy() {
-        return config instanceof ProxyFloodgateConfig;
+    @Inject
+    public void registerSubCommands(Injector injector) {
+        Set<FloodgateSubCommand> subCommandSet = new HashSet<>();
+        for (Class<? extends FloodgateSubCommand> subCommand : toRegister) {
+            subCommandSet.add(injector.getInstance(subCommand));
+        }
+        subCommands = Collections.unmodifiableSet(subCommandSet);
     }
 
-    public FloodgateConfig get() {
-        return config;
-    }
-
-    public ProxyFloodgateConfig getAsProxy() {
-        return getAs();
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T extends FloodgateConfig> T getAs() {
-        return (T) config;
-    }
-
-    public void set(FloodgateConfig config) {
-        this.config = config;
-        // for Geyser dump
-        FloodgateInfoHolder.setConfig(config);
+    protected Set<FloodgateSubCommand> subCommands() {
+        return subCommands;
     }
 }

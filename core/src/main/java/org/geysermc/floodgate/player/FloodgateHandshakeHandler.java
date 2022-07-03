@@ -48,7 +48,7 @@ import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.player.PropertyKey;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
+import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.skin.SkinUploadManager;
 import org.geysermc.floodgate.util.BedrockData;
@@ -60,7 +60,7 @@ public final class FloodgateHandshakeHandler {
     private final HandshakeHandlersImpl handshakeHandlers;
     private final SimpleFloodgateApi api;
     private final FloodgateCipher cipher;
-    private final FloodgateConfigHolder configHolder;
+    private final FloodgateConfig config;
     private final SkinUploadManager skinUploadManager;
     private final AttributeKey<FloodgatePlayer> playerAttribute;
     private final FloodgateLogger logger;
@@ -69,7 +69,7 @@ public final class FloodgateHandshakeHandler {
             HandshakeHandlersImpl handshakeHandlers,
             SimpleFloodgateApi api,
             FloodgateCipher cipher,
-            FloodgateConfigHolder configHolder,
+            FloodgateConfig config,
             SkinUploadManager skinUploadManager,
             AttributeKey<FloodgatePlayer> playerAttribute,
             FloodgateLogger logger) {
@@ -77,7 +77,7 @@ public final class FloodgateHandshakeHandler {
         this.handshakeHandlers = handshakeHandlers;
         this.api = api;
         this.cipher = cipher;
-        this.configHolder = configHolder;
+        this.config = config;
         this.skinUploadManager = skinUploadManager;
         this.playerAttribute = playerAttribute;
         this.logger = logger;
@@ -134,7 +134,7 @@ public final class FloodgateHandshakeHandler {
                 );
             } catch (Exception e) {
                 // all the other exceptions are caused by invalid/tempered Floodgate data
-                if (configHolder.get().isDebug()) {
+                if (config.isDebug()) {
                     e.printStackTrace();
                 }
 
@@ -207,10 +207,10 @@ public final class FloodgateHandshakeHandler {
 
         try {
             HandshakeData handshakeData = new HandshakeDataImpl(
-                    channel, true, bedrockData.clone(), configHolder.get(),
+                    channel, true, bedrockData.clone(), config,
                     linkedPlayer != null ? linkedPlayer.clone() : null, hostname);
 
-            if (configHolder.get().getPlayerLink().isRequireLink() && linkedPlayer == null) {
+            if (config.getPlayerLink().isRequireLink() && linkedPlayer == null) {
                 handshakeData.setDisconnectReason("floodgate.core.not_linked");
             }
 
@@ -245,7 +245,7 @@ public final class FloodgateHandshakeHandler {
             String hostname) {
 
         HandshakeData handshakeData = new HandshakeDataImpl(channel, bedrockData != null,
-                bedrockData, configHolder.get(), null, hostname);
+                bedrockData, config, null, hostname);
         handshakeHandlers.callHandshakeHandlers(handshakeData);
 
         return new HandshakeResult(resultType, handshakeData, bedrockData, null);

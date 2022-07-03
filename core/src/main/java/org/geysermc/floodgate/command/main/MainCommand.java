@@ -32,23 +32,16 @@ import cloud.commandframework.Command;
 import cloud.commandframework.Command.Builder;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.context.CommandContext;
-import com.google.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import org.geysermc.floodgate.command.util.Permission;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.platform.command.FloodgateSubCommand;
+import org.geysermc.floodgate.platform.command.SubCommands;
 import org.geysermc.floodgate.player.UserAudience;
 
-public final class MainCommand implements FloodgateCommand {
-    private final List<FloodgateSubCommand> subCommands = new ArrayList<>();
-
-    @Inject
-    public void createSubCommands(FirewallCheckSubcommand firewallCheckSubcommand) {
-        //todo move subcommand logic to a separate class
-        subCommands.clear();
-        subCommands.add(firewallCheckSubcommand);
+public final class MainCommand extends SubCommands implements FloodgateCommand {
+    public MainCommand() {
+        defineSubCommand(FirewallCheckSubcommand.class);
     }
 
     @Override
@@ -60,7 +53,7 @@ public final class MainCommand implements FloodgateCommand {
                 .permission(Permission.COMMAND_MAIN.get())
                 .handler(this::execute);
 
-        for (FloodgateSubCommand subCommand : subCommands) {
+        for (FloodgateSubCommand subCommand : subCommands()) {
             commandManager.command(builder
                     .literal(subCommand.name().toLowerCase(Locale.ROOT), subCommand.description())
                     .permission(subCommand.permission().get())
@@ -76,7 +69,7 @@ public final class MainCommand implements FloodgateCommand {
     public void execute(CommandContext<UserAudience> context) {
         StringBuilder helpMessage = new StringBuilder("Available subcommands are:\n");
 
-        for (FloodgateSubCommand subCommand : subCommands) {
+        for (FloodgateSubCommand subCommand : subCommands()) {
             if (context.getSender().hasPermission(subCommand.permission().get())) {
                 helpMessage.append('\n').append(COLOR_CHAR).append('b')
                         .append(subCommand.name().toLowerCase(Locale.ROOT))

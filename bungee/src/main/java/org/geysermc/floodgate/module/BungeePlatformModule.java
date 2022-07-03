@@ -66,18 +66,13 @@ public final class BungeePlatformModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(PlatformUtils.class).to(BungeePlatformUtils.class);
+        bind(FloodgateLogger.class).to(JavaUtilFloodgateLogger.class);
     }
 
     @Provides
     @Singleton
     public Plugin bungeePlugin() {
         return plugin;
-    }
-
-    @Provides
-    @Singleton
-    public FloodgateLogger floodgateLogger(LanguageManager languageManager) {
-        return new JavaUtilFloodgateLogger(plugin.getLogger(), languageManager);
     }
 
     /*

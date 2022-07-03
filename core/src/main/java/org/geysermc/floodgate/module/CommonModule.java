@@ -49,7 +49,6 @@ import org.geysermc.floodgate.api.packet.PacketHandlers;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ConfigLoader;
 import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.crypto.AesCipher;
 import org.geysermc.floodgate.crypto.AesKeyProducer;
 import org.geysermc.floodgate.crypto.Base64Topping;
@@ -65,7 +64,6 @@ import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinUploadManager;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.HttpClient;
-import org.geysermc.floodgate.util.LanguageManager;
 
 @RequiredArgsConstructor
 public class CommonModule extends AbstractModule {
@@ -99,6 +97,12 @@ public class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
+    public FloodgateConfig floodgateConfig(ConfigLoader configLoader) {
+        return configLoader.load();
+    }
+
+    @Provides
+    @Singleton
     public KeyProducer keyProducer() {
         return new AesKeyProducer();
     }
@@ -118,26 +122,11 @@ public class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public FloodgateConfigHolder configHolder() {
-        return new FloodgateConfigHolder();
-    }
-
-    @Provides
-    @Singleton
     public ConfigLoader configLoader(
             @Named("configClass") Class<? extends FloodgateConfig> configClass,
             KeyProducer producer,
-            FloodgateCipher cipher,
-            FloodgateLogger logger) {
-        return new ConfigLoader(dataDirectory, configClass, producer, cipher, logger);
-    }
-
-    @Provides
-    @Singleton
-    public LanguageManager languageLoader(
-            FloodgateConfigHolder configHolder,
-            FloodgateLogger logger) {
-        return new LanguageManager(configHolder, logger);
+            FloodgateCipher cipher) {
+        return new ConfigLoader(dataDirectory, configClass, producer, cipher);
     }
 
     @Provides
@@ -146,12 +135,12 @@ public class CommonModule extends AbstractModule {
             HandshakeHandlersImpl handshakeHandlers,
             SimpleFloodgateApi api,
             FloodgateCipher cipher,
-            FloodgateConfigHolder configHolder,
+            FloodgateConfig config,
             SkinUploadManager skinUploadManager,
             @Named("playerAttribute") AttributeKey<FloodgatePlayer> playerAttribute,
             FloodgateLogger logger) {
 
-        return new FloodgateHandshakeHandler(handshakeHandlers, api, cipher, configHolder,
+        return new FloodgateHandshakeHandler(handshakeHandlers, api, cipher, config,
                 skinUploadManager, playerAttribute, logger);
     }
 

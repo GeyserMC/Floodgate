@@ -49,6 +49,12 @@ public final class ProxyCommonModule extends CommonModule {
 
     @Provides
     @Singleton
+    public ProxyFloodgateConfig proxyFloodgateConfig(FloodgateConfig config) {
+        return (ProxyFloodgateConfig) config;
+    }
+
+    @Provides
+    @Singleton
     @Named("configClass")
     public Class<? extends FloodgateConfig> floodgateConfigClass() {
         return ProxyFloodgateConfig.class;

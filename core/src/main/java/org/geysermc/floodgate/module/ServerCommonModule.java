@@ -39,6 +39,7 @@ public final class ServerCommonModule extends CommonModule {
 
     @Override
     protected void configure() {
+        super.configure();
         bind(SimpleFloodgateApi.class).in(Singleton.class);
     }
 

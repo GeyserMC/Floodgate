@@ -60,18 +60,13 @@ public final class SpigotPlatformModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(PlatformUtils.class).to(SpigotPlatformUtils.class);
+        bind(FloodgateLogger.class).to(JavaUtilFloodgateLogger.class);
     }
 
     @Provides
     @Singleton
     public JavaPlugin javaPlugin() {
         return plugin;
-    }
-
-    @Provides
-    @Singleton
-    public FloodgateLogger floodgateLogger(LanguageManager languageManager) {
-        return new JavaUtilFloodgateLogger(plugin.getLogger(), languageManager);
     }
 
     /*
