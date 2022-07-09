@@ -31,7 +31,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -51,54 +50,56 @@ public final class SpigotInjector extends CommonPlatformInjector {
 
     @Override
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    public boolean inject() throws Exception {
+    public void inject() throws Exception {
         if (isInjected()) {
-            return true;
+            return;
         }
 
-        if (getServerConnection() != null) {
-            for (Field field : serverConnection.getClass().getDeclaredFields()) {
-                if (field.getType() == List.class) {
-                    field.setAccessible(true);
+        Object serverConnection = getServerConnection();
+        if (serverConnection == null) {
+            throw new RuntimeException("Unable to find server connection");
+        }
 
-                    ParameterizedType parameterType = ((ParameterizedType) field.getGenericType());
-                    Type listType = parameterType.getActualTypeArguments()[0];
+        for (Field field : serverConnection.getClass().getDeclaredFields()) {
+            if (field.getType() == List.class) {
+                field.setAccessible(true);
 
-                    // the list we search has ChannelFuture as type
-                    if (listType != ChannelFuture.class) {
-                        continue;
-                    }
+                ParameterizedType parameterType = ((ParameterizedType) field.getGenericType());
+                Type listType = parameterType.getActualTypeArguments()[0];
 
-                    injectedFieldName = field.getName();
-                    List<?> newList = new CustomList((List<?>) field.get(serverConnection)) {
-                        @Override
-                        public void onAdd(Object object) {
-                            try {
-                                injectClient((ChannelFuture) object);
-                            } catch (Exception exception) {
-                                exception.printStackTrace();
-                            }
-                        }
-                    };
-
-                    // inject existing
-                    synchronized (newList) {
-                        for (Object object : newList) {
-                            try {
-                                injectClient((ChannelFuture) object);
-                            } catch (Exception exception) {
-                                exception.printStackTrace();
-                            }
-                        }
-                    }
-
-                    field.set(serverConnection, newList);
-                    injected = true;
-                    return true;
+                // the list we search has ChannelFuture as type
+                if (listType != ChannelFuture.class) {
+                    continue;
                 }
+
+                injectedFieldName = field.getName();
+                List<?> newList = new CustomList((List<?>) field.get(serverConnection)) {
+                    @Override
+                    public void onAdd(Object object) {
+                        try {
+                            injectClient((ChannelFuture) object);
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
+                        }
+                    }
+                };
+
+                // inject existing
+                synchronized (newList) {
+                    for (Object object : newList) {
+                        try {
+                            injectClient((ChannelFuture) object);
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
+                        }
+                    }
+                }
+
+                field.set(serverConnection, newList);
+                injected = true;
+                return;
             }
         }
-        return false;
     }
 
     public void injectClient(ChannelFuture future) {
@@ -120,9 +121,9 @@ public final class SpigotInjector extends CommonPlatformInjector {
     }
 
     @Override
-    public boolean removeInjection() throws Exception {
+    public void removeInjection() {
         if (!isInjected()) {
-            return true;
+            return;
         }
 
         // remove injection from clients
@@ -146,10 +147,9 @@ public final class SpigotInjector extends CommonPlatformInjector {
         }
 
         injected = false;
-        return true;
     }
 
-    public Object getServerConnection() throws IllegalAccessException, InvocationTargetException {
+    public Object getServerConnection() {
         if (serverConnection != null) {
             return serverConnection;
         }
@@ -158,14 +158,11 @@ public final class SpigotInjector extends CommonPlatformInjector {
         // method by CraftBukkit to get the instance of the MinecraftServer
         Object minecraftServerInstance = ReflectionUtils.invokeStatic(minecraftServer, "getServer");
 
-        for (Method method : minecraftServer.getDeclaredMethods()) {
-            if (ClassNames.SERVER_CONNECTION.equals(method.getReturnType())) {
-                // making sure that it's a getter
-                if (method.getParameterTypes().length == 0) {
-                    serverConnection = method.invoke(minecraftServerInstance);
-                }
-            }
-        }
+        Method method = ReflectionUtils.getMethodThatReturns(
+                minecraftServer, ClassNames.SERVER_CONNECTION, true
+        );
+
+        serverConnection = ReflectionUtils.invoke(minecraftServerInstance, method);
 
         return serverConnection;
     }

@@ -49,27 +49,21 @@ public final class BungeeInjector extends CommonPlatformInjector {
     @Getter private boolean injected;
 
     @Override
-    public boolean inject() {
-        try {
-            // Can everyone just switch to Velocity please :)
+    public void inject() {
+        // Can everyone just switch to Velocity please :)
 
-            Field framePrepender = ReflectionUtils.getField(PipelineUtils.class, "framePrepender");
+        Field framePrepender = ReflectionUtils.getField(PipelineUtils.class, "framePrepender");
 
-            // Required in order to inject into both Geyser <-> proxy AND proxy <-> server
-            // (Instead of just replacing the ChannelInitializer which is only called for
-            // player <-> proxy)
-            BungeeCustomPrepender customPrepender = new BungeeCustomPrepender(
-                    this, ReflectionUtils.castedStaticValue(framePrepender)
-            );
+        // Required in order to inject into both Geyser <-> proxy AND proxy <-> server
+        // (Instead of just replacing the ChannelInitializer which is only called for
+        // player <-> proxy)
+        BungeeCustomPrepender customPrepender = new BungeeCustomPrepender(
+                this, ReflectionUtils.castedStaticValue(framePrepender)
+        );
 
-            BungeeReflectionUtils.setFieldValue(null, framePrepender, customPrepender);
+        BungeeReflectionUtils.setFieldValue(null, framePrepender, customPrepender);
 
-            injected = true;
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+        injected = true;
     }
 
     @Override
@@ -78,9 +72,9 @@ public final class BungeeInjector extends CommonPlatformInjector {
     }
 
     @Override
-    public boolean removeInjection() {
-        logger.error("Floodgate cannot remove itself from Bungee without a reboot");
-        return false;
+    public void removeInjection() {
+        throw new IllegalStateException(
+                "Floodgate cannot remove itself from Bungee without a reboot");
     }
 
     void injectClient(Channel channel, boolean clientToProxy) {

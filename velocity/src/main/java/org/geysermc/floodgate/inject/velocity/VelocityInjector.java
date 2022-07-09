@@ -36,21 +36,19 @@ import io.netty.channel.ChannelInitializer;
 import java.lang.reflect.Method;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 
 @RequiredArgsConstructor
 public final class VelocityInjector extends CommonPlatformInjector {
     private final ProxyServer server;
-    private final FloodgateLogger logger;
 
     @Getter private boolean injected;
 
     @Override
     @SuppressWarnings("rawtypes")
-    public boolean inject() {
+    public void inject() {
         if (isInjected()) {
-            return true;
+            return;
         }
 
         Object connectionManager = getValue(server, "cm");
@@ -72,7 +70,8 @@ public final class VelocityInjector extends CommonPlatformInjector {
         Method backendSetter = getMethod(backendInitializerHolder, "set", ChannelInitializer.class);
         invoke(backendInitializerHolder, backendSetter,
                 new VelocityChannelInitializer(this, backendInitializer, true));
-        return injected = true;
+
+        injected = true;
     }
 
     @Override
@@ -81,9 +80,9 @@ public final class VelocityInjector extends CommonPlatformInjector {
     }
 
     @Override
-    public boolean removeInjection() {
-        logger.error("Floodgate cannot remove itself from Velocity without a reboot");
-        return false;
+    public void removeInjection() {
+        throw new IllegalStateException(
+                "Floodgate cannot remove itself from Velocity without a reboot");
     }
 
     @RequiredArgsConstructor

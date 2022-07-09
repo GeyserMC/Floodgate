@@ -424,7 +424,7 @@ public final class ReflectionUtils {
     }
 
     @Nullable
-    public static Method getMethod(
+    public static Method getMethodThatReturns(
             Class<?> clazz,
             Class<?> returnType,
             boolean declared,

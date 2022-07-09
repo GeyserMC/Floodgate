@@ -64,20 +64,15 @@ public class FloodgatePlatform {
         guice.getInstance(NewsChecker.class).start();
     }
 
-    public boolean enable(Module... postInitializeModules) {
+    public void enable(Module... postInitializeModules) throws RuntimeException {
         if (injector == null) {
-            logger.error("Failed to find the platform injector!");
-            return false;
+            throw new RuntimeException("Failed to find the platform injector!");
         }
 
         try {
-            if (!injector.inject()) {
-                logger.error("Failed to inject the packet listener!");
-                return false;
-            }
+            injector.inject();
         } catch (Exception exception) {
-            logger.error("Failed to inject the packet listener!", exception);
-            return false;
+            throw new RuntimeException("Failed to inject the packet listener!", exception);
         }
 
         this.guice = guice.createChildInjector(new PostInitializeModule(postInitializeModules));
@@ -85,8 +80,6 @@ public class FloodgatePlatform {
         PrefixCheckTask.checkAndExecuteDelayed(config, logger);
 
         guice.getInstance(Metrics.class);
-
-        return true;
     }
 
     public void disable() {
@@ -94,11 +87,9 @@ public class FloodgatePlatform {
 
         if (injector != null && injector.canRemoveInjection()) {
             try {
-                if (!injector.removeInjection()) {
-                    logger.error("Failed to remove the injection!");
-                }
+                injector.removeInjection();
             } catch (Exception exception) {
-                logger.error("Failed to remove the injection!", exception);
+                throw new RuntimeException("Failed to remove the injection!", exception);
             }
         }
     }
