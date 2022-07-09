@@ -28,6 +28,7 @@ package org.geysermc.floodgate.pluginmessage;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import java.util.Collection;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.geysermc.floodgate.SpigotPlugin;
@@ -74,6 +75,12 @@ public final class SpigotSkinApplier implements SkinApplier {
         }
 
         PropertyMap properties = profile.getProperties();
+
+        Collection<Property> textures = properties.get("textures");
+
+        if (!textures.isEmpty() && textures.stream().noneMatch(p -> p.getValue().isEmpty())) {
+            return;
+        }
 
         properties.removeAll("textures");
         Property property = new Property("textures", skinData.getValue(), skinData.getSignature());

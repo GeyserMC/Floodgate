@@ -28,5 +28,14 @@ package org.geysermc.floodgate.skin;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
 public interface SkinApplier {
+    /**
+     * Apply a skin to a {@link FloodgatePlayer player}
+     * <p>
+     * Only applies skin to player that has a default skin
+     * </p>
+     *
+     * @param floodgatePlayer player to apply skin to
+     * @param skinData data for skin to apply to player
+     */
     void applySkin(FloodgatePlayer floodgatePlayer, SkinData skinData);
 }

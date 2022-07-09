@@ -34,11 +34,15 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.connection.LoginResult;
+import net.md_5.bungee.protocol.Property;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.skin.SkinApplier;
@@ -102,6 +106,14 @@ public final class BungeeSkinApplier implements SkinApplier {
                     LOGIN_RESULT_CONSTRUCTOR, null, null, null
             );
             ReflectionUtils.setValue(handler, LOGIN_RESULT_FIELD, loginResult);
+        }
+
+        List<Property> textures = Arrays.stream(loginResult.getProperties())
+                .filter(p -> p.getName().equals("textures"))
+                .collect(Collectors.toList());
+
+        if (!textures.isEmpty() && textures.stream().noneMatch(p -> p.getValue().isEmpty())) {
+            return;
         }
 
         Object property = ReflectionUtils.newInstance(
