@@ -114,7 +114,7 @@ final class SkinUploadSocket extends WebSocketClient {
                                 player.getCorrectUsername());
                         return;
                     }
-                    if (!player.isLinked()) {
+                    if (!player.isLinked() && !applier.hasSkin(player)) {
                         SkinData skinData = SkinData.from(message.getAsJsonObject("data"));
                         player.addProperty(PropertyKey.SKIN_UPLOADED, skinData);
                         applier.applySkin(player, skinData);

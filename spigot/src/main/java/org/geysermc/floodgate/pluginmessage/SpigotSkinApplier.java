@@ -25,10 +25,13 @@
 
 package org.geysermc.floodgate.pluginmessage;
 
+import com.destroystokyo.paper.profile.ProfileProperty;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.geysermc.floodgate.SpigotPlugin;
@@ -55,6 +58,22 @@ public final class SpigotSkinApplier implements SkinApplier {
         applySkin0(floodgatePlayer, skinData, true);
     }
 
+    @Override
+    public boolean hasSkin(FloodgatePlayer floodgatePlayer) {
+        Player player = Bukkit.getPlayer(floodgatePlayer.getCorrectUniqueId());
+
+        if (player == null) {
+            return false;
+        }
+
+        List<ProfileProperty> textures = player.getPlayerProfile().getProperties()
+                .stream()
+                .filter(p -> p.getName().equals("textures"))
+                .collect(Collectors.toList());
+
+        return !textures.isEmpty() && textures.stream().noneMatch(p -> p.getValue().isEmpty());
+    }
+
     private void applySkin0(FloodgatePlayer floodgatePlayer, SkinData skinData, boolean firstTry) {
         Player player = Bukkit.getPlayer(floodgatePlayer.getCorrectUniqueId());
 
@@ -62,7 +81,11 @@ public final class SpigotSkinApplier implements SkinApplier {
         if (player == null) {
             if (firstTry) {
                 Bukkit.getScheduler().runTaskLater(plugin,
-                        () -> applySkin0(floodgatePlayer, skinData, false),
+                        () -> {
+                            if (hasSkin(floodgatePlayer)) {
+                                applySkin0(floodgatePlayer, skinData, false);
+                            }
+                        },
                         10 * 1000);
             }
             return;
@@ -75,12 +98,6 @@ public final class SpigotSkinApplier implements SkinApplier {
         }
 
         PropertyMap properties = profile.getProperties();
-
-        Collection<Property> textures = properties.get("textures");
-
-        if (!textures.isEmpty() && textures.stream().noneMatch(p -> p.getValue().isEmpty())) {
-            return;
-        }
 
         properties.removeAll("textures");
         Property property = new Property("textures", skinData.getValue(), skinData.getSignature());

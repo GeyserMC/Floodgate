@@ -36,6 +36,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ProxyServer;
@@ -89,15 +90,12 @@ public final class BungeeSkinApplier implements SkinApplier {
             return;
         }
 
-        InitialHandler handler;
-        try {
-            handler = (InitialHandler) player.getPendingConnection();
-        } catch (Exception exception) {
-            logger.error("Incompatible Bungeecord fork detected", exception);
+        Optional<InitialHandler> handler = getHandler(player);
+        if (!handler.isPresent()) {
             return;
         }
 
-        LoginResult loginResult = handler.getLoginProfile();
+        LoginResult loginResult = handler.get().getLoginProfile();
         // expected to be null since LoginResult is the data from hasJoined,
         // which Floodgate players don't have
         if (loginResult == null) {
@@ -105,15 +103,7 @@ public final class BungeeSkinApplier implements SkinApplier {
             loginResult = (LoginResult) ReflectionUtils.newInstance(
                     LOGIN_RESULT_CONSTRUCTOR, null, null, null
             );
-            ReflectionUtils.setValue(handler, LOGIN_RESULT_FIELD, loginResult);
-        }
-
-        List<Property> textures = Arrays.stream(loginResult.getProperties())
-                .filter(p -> p.getName().equals("textures"))
-                .collect(Collectors.toList());
-
-        if (!textures.isEmpty() && textures.stream().noneMatch(p -> p.getValue().isEmpty())) {
-            return;
+            ReflectionUtils.setValue(handler.get(), LOGIN_RESULT_FIELD, loginResult);
         }
 
         Object property = ReflectionUtils.newInstance(
@@ -125,5 +115,38 @@ public final class BungeeSkinApplier implements SkinApplier {
         Array.set(propertyArray, 0, property);
 
         ReflectionUtils.invoke(loginResult, SET_PROPERTIES_METHOD, propertyArray);
+    }
+
+    @Override
+    public boolean hasSkin(FloodgatePlayer fPlayer) {
+        ProxiedPlayer player = ProxyServer.getInstance().getPlayer(fPlayer.getCorrectUniqueId());
+        if (player == null) {
+            return false;
+        }
+
+        Optional<InitialHandler> handler = getHandler(player);
+        if (!handler.isPresent()) {
+            return false;
+        }
+
+        LoginResult loginResult = handler.get().getLoginProfile();
+        if (loginResult == null) {
+            return false;
+        }
+
+        List<Property> textures = Arrays.stream(loginResult.getProperties())
+                .filter(p -> p.getName().equals("textures"))
+                .collect(Collectors.toList());
+
+        return !textures.isEmpty() && textures.stream().noneMatch(p -> p.getValue().isEmpty());
+    }
+
+    private Optional<InitialHandler> getHandler(ProxiedPlayer player) {
+        try {
+            return Optional.of((InitialHandler) player.getPendingConnection());
+        } catch (Exception exception) {
+            logger.error("Incompatible Bungeecord fork detected", exception);
+            return Optional.empty();
+        }
     }
 }

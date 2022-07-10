@@ -130,7 +130,7 @@ public final class BungeeListener implements Listener {
         // To fix the February 2 2022 Mojang authentication changes
         if (!config.isSendFloodgateData()) {
             FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
-            if (player != null && !player.isLinked()) {
+            if (player != null && !player.isLinked() && !skinApplier.hasSkin(player)) {
                 skinApplier.applySkin(player, new SkinData("", ""));
             }
         }
