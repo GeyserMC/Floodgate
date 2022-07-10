@@ -95,7 +95,7 @@ public final class SpigotSkinApplier implements SkinApplier {
                                 applySkin0(floodgatePlayer, skinData, false);
                             }
                         },
-                        10 * 1000);
+                        10 * 20);
             }
             return;
         }
