@@ -34,10 +34,8 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -90,12 +88,12 @@ public final class BungeeSkinApplier implements SkinApplier {
             return;
         }
 
-        Optional<InitialHandler> handler = getHandler(player);
-        if (!handler.isPresent()) {
+        InitialHandler handler = getHandler(player);
+        if (handler == null) {
             return;
         }
 
-        LoginResult loginResult = handler.get().getLoginProfile();
+        LoginResult loginResult = handler.getLoginProfile();
         // expected to be null since LoginResult is the data from hasJoined,
         // which Floodgate players don't have
         if (loginResult == null) {
@@ -103,7 +101,7 @@ public final class BungeeSkinApplier implements SkinApplier {
             loginResult = (LoginResult) ReflectionUtils.newInstance(
                     LOGIN_RESULT_CONSTRUCTOR, null, null, null
             );
-            ReflectionUtils.setValue(handler.get(), LOGIN_RESULT_FIELD, loginResult);
+            ReflectionUtils.setValue(handler, LOGIN_RESULT_FIELD, loginResult);
         }
 
         Object property = ReflectionUtils.newInstance(
@@ -124,29 +122,40 @@ public final class BungeeSkinApplier implements SkinApplier {
             return false;
         }
 
-        Optional<InitialHandler> handler = getHandler(player);
-        if (!handler.isPresent()) {
+        InitialHandler handler = getHandler(player);
+        if (handler == null) {
             return false;
         }
 
-        LoginResult loginResult = handler.get().getLoginProfile();
+        LoginResult loginResult = handler.getLoginProfile();
         if (loginResult == null) {
             return false;
         }
 
-        List<Property> textures = Arrays.stream(loginResult.getProperties())
-                .filter(p -> p.getName().equals("textures"))
-                .collect(Collectors.toList());
+        List<Property> textures = new ArrayList<>();
+        for (Property property : loginResult.getProperties()) {
+            if (property.getName().equals("textures")) {
+                textures.add(property);
+            }
+        }
 
-        return !textures.isEmpty() && textures.stream().noneMatch(p -> p.getValue().isEmpty());
+        if (textures.isEmpty()) {
+            return false;
+        }
+        for (Property p : textures) {
+            if (p.getValue().isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    private Optional<InitialHandler> getHandler(ProxiedPlayer player) {
+    private InitialHandler getHandler(ProxiedPlayer player) {
         try {
-            return Optional.of((InitialHandler) player.getPendingConnection());
+            return (InitialHandler) player.getPendingConnection();
         } catch (Exception exception) {
             logger.error("Incompatible Bungeecord fork detected", exception);
-            return Optional.empty();
+            return null;
         }
     }
 }

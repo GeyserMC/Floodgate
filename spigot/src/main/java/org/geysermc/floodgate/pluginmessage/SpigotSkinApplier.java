@@ -29,9 +29,8 @@ import com.destroystokyo.paper.profile.ProfileProperty;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.geysermc.floodgate.SpigotPlugin;
@@ -66,12 +65,22 @@ public final class SpigotSkinApplier implements SkinApplier {
             return false;
         }
 
-        List<ProfileProperty> textures = player.getPlayerProfile().getProperties()
-                .stream()
-                .filter(p -> p.getName().equals("textures"))
-                .collect(Collectors.toList());
+        List<ProfileProperty> textures = new ArrayList<>();
+        for (ProfileProperty profileProperty : player.getPlayerProfile().getProperties()) {
+            if (profileProperty.getName().equals("textures")) {
+                textures.add(profileProperty);
+            }
+        }
 
-        return !textures.isEmpty() && textures.stream().noneMatch(p -> p.getValue().isEmpty());
+        if (textures.isEmpty()) {
+            return false;
+        }
+        for (ProfileProperty p : textures) {
+            if (p.getValue().isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void applySkin0(FloodgatePlayer floodgatePlayer, SkinData skinData, boolean firstTry) {

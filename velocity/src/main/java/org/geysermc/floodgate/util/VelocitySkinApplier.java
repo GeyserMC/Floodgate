@@ -29,10 +29,8 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.util.GameProfile.Property;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.skin.SkinApplier;
@@ -53,15 +51,27 @@ public class VelocitySkinApplier implements SkinApplier {
 
     @Override
     public boolean hasSkin(FloodgatePlayer floodgatePlayer) {
-        Optional<Player> player = server.getPlayer(floodgatePlayer.getCorrectUniqueId());
+        Player player = server.getPlayer(floodgatePlayer.getCorrectUniqueId()).orElse(null);
 
-        if (!player.isPresent())
+        if (player == null) {
             return false;
+        }
 
-        List<Property> textures = player.get().getGameProfileProperties().stream()
-                .filter(p -> p.getName().equals("textures"))
-                .collect(Collectors.toList());
+        List<Property> textures = new ArrayList<>();
+        for (Property property : player.getGameProfileProperties()) {
+            if (property.getName().equals("textures")) {
+                textures.add(property);
+            }
+        }
 
-        return !textures.isEmpty() && textures.stream().noneMatch(p -> p.getValue().isEmpty());
+        if (textures.isEmpty()) {
+            return false;
+        }
+        for (Property p : textures) {
+            if (p.getValue().isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 }
