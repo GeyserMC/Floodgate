@@ -28,6 +28,7 @@ package org.geysermc.floodgate.api.player;
 import lombok.Getter;
 
 @Getter
+@Deprecated
 public class PropertyKey {
     /**
      * Socket Address returns the InetSocketAddress of the Bedrock player

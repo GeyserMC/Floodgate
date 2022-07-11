@@ -143,20 +143,28 @@ public interface FloodgatePlayer {
         return FloodgateApi.getInstance().transferPlayer(getCorrectUniqueId(), address, port);
     }
 
+    @Deprecated
     boolean hasProperty(PropertyKey key);
 
+    @Deprecated
     boolean hasProperty(String key);
 
+    @Deprecated
     <T> T getProperty(PropertyKey key);
 
+    @Deprecated
     <T> T getProperty(String key);
 
+    @Deprecated
     <T> T removeProperty(PropertyKey key);
 
+    @Deprecated
     <T> T removeProperty(String key);
 
+    @Deprecated
     <T> T addProperty(PropertyKey key, Object value);
 
+    @Deprecated
     <T> T addProperty(String key, Object value);
 
     /**

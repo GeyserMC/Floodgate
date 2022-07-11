@@ -37,6 +37,7 @@ import org.geysermc.floodgate.util.LinkedPlayer;
  * server. Note that at the time I'm writing this that the HandshakeData is created after requesting
  * the player link. So the link is present here, if applicable.
  */
+@Deprecated
 public interface HandshakeData {
     /**
      * Returns the Channel holding the connection between the client and the server.
