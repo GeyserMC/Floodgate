@@ -28,18 +28,10 @@ package org.geysermc.floodgate.util;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.Reader;
 import java.io.StringWriter;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.UUID;
@@ -47,7 +39,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 public class Utils {
-    private static final Pattern NON_UNIQUE_PREFIX = Pattern.compile("^[a-zA-Z0-9_]{0,16}$");
+    private static final Pattern NON_UNIQUE_PREFIX = Pattern.compile("^\\w{0,16}$");
     private static final Pattern DATABASE_NAME = Pattern.compile(Constants.DATABASE_NAME_FORMAT);
 
     /**
@@ -66,33 +58,21 @@ public class Utils {
         }
     }
 
-    public static List<String> readAllLines(String resourcePath) throws IOException {
-        InputStream stream = Utils.class.getClassLoader().getResourceAsStream(resourcePath);
-        try (BufferedReader reader = newBufferedReader(stream, StandardCharsets.UTF_8)) {
-            List<String> result = new ArrayList<>();
-            for (; ; ) {
-                String line = reader.readLine();
-                if (line == null) {
-                    break;
-                }
-                result.add(line);
-            }
-            return result;
-        }
-    }
-
-    public static BufferedReader newBufferedReader(InputStream inputStream, Charset charset) {
-        CharsetDecoder decoder = charset.newDecoder();
-        Reader reader = new InputStreamReader(inputStream, decoder);
-        return new BufferedReader(reader);
-    }
-
+    /**
+     * Reads a properties resource file
+     * @param resourceFile the resource file to read
+     * @return the properties file if the resource exists, otherwise null
+     * @throws AssertionError if something went wrong while readin the resource file
+     */
     public static Properties readProperties(String resourceFile) {
         Properties properties = new Properties();
         try (InputStream is = Utils.class.getClassLoader().getResourceAsStream(resourceFile)) {
+            if (is == null) {
+                return null;
+            }
             properties.load(is);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new AssertionError("Failed to read properties file", e);
         }
         return properties;
     }

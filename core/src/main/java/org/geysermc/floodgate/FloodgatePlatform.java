@@ -35,22 +35,20 @@ import org.geysermc.floodgate.api.InstanceHolder;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.link.PlayerLink;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.event.PostEnableEvent;
 import org.geysermc.floodgate.event.ShutdownEvent;
 import org.geysermc.floodgate.link.PlayerLinkLoader;
 import org.geysermc.floodgate.module.PostInitializeModule;
 import org.geysermc.floodgate.news.NewsChecker;
 import org.geysermc.floodgate.util.Metrics;
-import org.geysermc.floodgate.util.PrefixCheckTask;
+import org.geysermc.floodgate.util.PostEnableMessages;
 
 public class FloodgatePlatform {
     private static final UUID KEY = UUID.randomUUID();
     @Inject private FloodgateApi api;
     @Inject private PlatformInjector injector;
-
-    @Inject private FloodgateLogger logger;
 
     @Inject private FloodgateConfig config;
     @Inject private Injector guice;
@@ -77,9 +75,11 @@ public class FloodgatePlatform {
 
         this.guice = guice.createChildInjector(new PostInitializeModule(postInitializeModules));
 
-        PrefixCheckTask.checkAndExecuteDelayed(config, logger);
-
+        //todo add some kind of auto-load, as this looks kinda weird
+        guice.getInstance(PostEnableMessages.class);
         guice.getInstance(Metrics.class);
+
+        guice.getInstance(PubSubSupport.class).publish(new PostEnableEvent());
     }
 
     public void disable() {

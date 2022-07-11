@@ -52,7 +52,9 @@ public class FloodgateConfig implements GenericPostInitializeCallback<ConfigLoad
     private boolean debug;
     private int configVersion;
 
+
     private Key key;
+    private String rawUsernamePrefix;
 
     public boolean isProxy() {
         return this instanceof ProxyFloodgateConfig;
@@ -60,7 +62,7 @@ public class FloodgateConfig implements GenericPostInitializeCallback<ConfigLoad
 
     @Override
     public CallbackResult postInitialize(ConfigLoader loader) {
-        Path keyPath = loader.getDataFolder().resolve(getKeyFileName());
+        Path keyPath = loader.getDataDirectory().resolve(getKeyFileName());
 
         // don't assume that the key always exists with the existence of a config
         if (!Files.exists(keyPath)) {
@@ -74,6 +76,14 @@ public class FloodgateConfig implements GenericPostInitializeCallback<ConfigLoad
         } catch (IOException exception) {
             return CallbackResult.failed(exception.getMessage());
         }
+
+        rawUsernamePrefix = usernamePrefix;
+
+        // Java usernames can't be longer than 16 chars
+        if (usernamePrefix.length() >= 16) {
+            usernamePrefix = ".";
+        }
+
         return CallbackResult.ok();
     }
 

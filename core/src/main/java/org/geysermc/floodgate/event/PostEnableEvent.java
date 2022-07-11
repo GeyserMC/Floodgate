@@ -23,35 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.api.link;
+package org.geysermc.floodgate.event;
 
-/**
- * This enum has all the available result types of both creating a player link request and
- * validating it.
- */
-public enum LinkRequestResult {
-    /**
-     * An unknown error encountered while creating / verifying the link request.
-     */
-    UNKNOWN_ERROR,
-    /**
-     * The specified bedrock username is already linked to a Java account.
-     */
-    ALREADY_LINKED,
-    /**
-     * The Bedrock player verified the request too late. The request has been expired.
-     */
-    REQUEST_EXPIRED,
-    /**
-     * The Java player hasn't requested a link to this Bedrock account.
-     */
-    NO_LINK_REQUESTED,
-    /**
-     * The entered code is invalid.
-     */
-    INVALID_CODE,
-    /**
-     * The link request has been verified successfully!
-     */
-    LINK_COMPLETED
+public class PostEnableEvent {
 }

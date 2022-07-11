@@ -28,11 +28,7 @@ package org.geysermc.floodgate.util;
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Locale;
@@ -117,21 +113,11 @@ public final class LanguageManager {
             return true;
         }
 
-        InputStream localeStream = LanguageManager.class.getClassLoader().getResourceAsStream(
-                "languages/texts/" + formatLocale + ".properties");
+        Properties properties =
+                Utils.readProperties("languages/texts/" + formatLocale + ".properties");
 
-        // load the locale
-        if (localeStream != null) {
-            Properties localeProp = new Properties();
-
-            try (Reader reader = new InputStreamReader(localeStream, StandardCharsets.UTF_8)) {
-                localeProp.load(reader);
-            } catch (Exception e) {
-                throw new AssertionError("Failed to load Floodgate locale", e);
-            }
-
-            // insert the locale into the mappings
-            localeMappings.put(formatLocale, localeProp);
+        if (properties != null) {
+            localeMappings.put(formatLocale, properties);
             return true;
         }
 

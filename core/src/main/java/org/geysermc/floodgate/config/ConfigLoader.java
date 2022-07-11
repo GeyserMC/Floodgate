@@ -41,7 +41,7 @@ import org.geysermc.floodgate.crypto.KeyProducer;
 @Getter
 @RequiredArgsConstructor
 public final class ConfigLoader {
-    private final Path dataFolder;
+    private final Path dataDirectory;
     private final Class<? extends FloodgateConfig> configClass;
 
     private final KeyProducer keyProducer;
@@ -62,7 +62,7 @@ public final class ConfigLoader {
 
         ConfigUtilities utilities =
                 ConfigUtilities.builder()
-                        .fileCodec(PathFileCodec.of(dataFolder))
+                        .fileCodec(PathFileCodec.of(dataDirectory))
                         .configFile("config.yml")
                         .templateReader(ResourceTemplateReader.of(getClass()))
                         .template(templateFile)
