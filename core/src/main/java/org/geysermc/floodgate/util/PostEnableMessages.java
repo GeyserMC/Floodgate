@@ -34,6 +34,7 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.event.PostEnableEvent;
 
+@AutoBind
 @Listener
 public final class PostEnableMessages {
     private final List<String> messages = new ArrayList<>();

@@ -44,6 +44,7 @@ import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
+import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
@@ -56,7 +57,7 @@ import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.crypto.KeyProducer;
 import org.geysermc.floodgate.event.util.ListenerAnnotationMatcher;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
-import org.geysermc.floodgate.news.NewsChecker;
+import org.geysermc.floodgate.link.PlayerLinkLoader;
 import org.geysermc.floodgate.packet.PacketHandlersImpl;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
@@ -92,13 +93,19 @@ public class CommonModule extends AbstractModule {
         bind(PacketHandlers.class).to(PacketHandlersImpl.class);
         bind(PacketHandlersImpl.class).asEagerSingleton();
 
-        bind(NewsChecker.class).in(Singleton.class);
+        install(new AutoBindModule());
     }
 
     @Provides
     @Singleton
     public FloodgateConfig floodgateConfig(ConfigLoader configLoader) {
         return configLoader.load();
+    }
+
+    @Provides
+    @Singleton
+    public PlayerLink playerLink(PlayerLinkLoader linkLoader) {
+        return linkLoader.load();
     }
 
     @Provides

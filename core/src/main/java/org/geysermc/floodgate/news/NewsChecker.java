@@ -46,10 +46,12 @@ import org.geysermc.floodgate.news.data.AnnouncementData;
 import org.geysermc.floodgate.news.data.BuildSpecificData;
 import org.geysermc.floodgate.news.data.CheckAfterData;
 import org.geysermc.floodgate.platform.command.CommandUtil;
+import org.geysermc.floodgate.util.AutoBind;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.HttpClient;
 import org.geysermc.floodgate.util.HttpClient.HttpResponse;
 
+@AutoBind
 @Listener
 public class NewsChecker {
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
@@ -71,6 +73,7 @@ public class NewsChecker {
 
     private boolean firstCheck;
 
+    @Inject
     public void start() {
         executorService.scheduleWithFixedDelay(this::checkNews, 0, 30, TimeUnit.MINUTES);
     }

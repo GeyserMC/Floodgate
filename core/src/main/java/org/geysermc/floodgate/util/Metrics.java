@@ -44,6 +44,7 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.FloodgateConfig.MetricsConfig;
 import org.geysermc.floodgate.platform.util.PlatformUtils;
 
+@AutoBind
 public final class Metrics {
     private final MetricsBase metricsBase;
 
