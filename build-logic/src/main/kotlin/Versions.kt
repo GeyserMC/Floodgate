@@ -24,8 +24,8 @@
  */
 
 object Versions {
-    const val geyserVersion = "2.0.4-SNAPSHOT"
-    const val cumulusVersion = "1.1"
+    const val geyserVersion = "2.0.7-SNAPSHOT"
+    const val cumulusVersion = "1.1.1"
     const val configUtilsVersion = "1.0-SNAPSHOT"
     const val spigotVersion = "1.13-R0.1-SNAPSHOT"
     const val fastutilVersion = "8.5.3"
