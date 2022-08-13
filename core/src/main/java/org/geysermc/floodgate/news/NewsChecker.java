@@ -37,8 +37,8 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import net.engio.mbassy.listener.Handler;
-import net.engio.mbassy.listener.Listener;
+import org.geysermc.event.Listener;
+import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.command.util.Permission;
 import org.geysermc.floodgate.event.ShutdownEvent;
@@ -206,7 +206,7 @@ public class NewsChecker {
         executorService.shutdown();
     }
 
-    @Handler
+    @Subscribe
     public void onShutdown(ShutdownEvent ignored) {
         shutdown();
     }

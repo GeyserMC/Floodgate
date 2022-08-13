@@ -37,10 +37,10 @@ import java.util.concurrent.Executors;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import net.engio.mbassy.listener.Handler;
-import net.engio.mbassy.listener.Listener;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.geysermc.event.Listener;
+import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.floodgate.event.ShutdownEvent;
 
 // resources are properly closed and ignoring the original stack trace is intended
@@ -162,7 +162,7 @@ public class HttpClient {
         return null;
     }
 
-    @Handler
+    @Subscribe
     public void onShutdown(ShutdownEvent ignored) {
         executorService.shutdown();
     }

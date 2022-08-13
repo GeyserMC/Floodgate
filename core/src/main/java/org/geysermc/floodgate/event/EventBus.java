@@ -23,20 +23,31 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-object Versions {
-    const val geyserVersion = "2.0.4-SNAPSHOT"
-    const val cumulusVersion = "1.1"
-    const val eventsVersion = "1.0-SNAPSHOT"
-    const val configUtilsVersion = "1.0-SNAPSHOT"
-    const val spigotVersion = "1.13-R0.1-SNAPSHOT"
-    const val fastutilVersion = "8.5.3"
-    const val guiceVersion = "5.1.0"
-    const val nettyVersion = "4.1.49.Final"
-    const val snakeyamlVersion = "1.28"
-    const val cloudVersion = "1.5.0"
-    const val bstatsVersion = "3.0.0"
+package org.geysermc.floodgate.event;
 
-    const val javaWebsocketVersion = "1.5.2"
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import org.geysermc.event.bus.impl.EventBusImpl;
+import org.geysermc.event.subscribe.Subscribe;
+import org.geysermc.event.subscribe.Subscriber;
 
-    const val checkerQual = "3.19.0"
+@SuppressWarnings("unchecked")
+public final class EventBus extends EventBusImpl<Object, EventSubscriber<?>> {
+    @Override
+    protected <H, T, B extends Subscriber<T>> B makeSubscription(
+            Class<T> eventClass,
+            Subscribe subscribe,
+            H listener,
+            BiConsumer<H, T> handler) {
+        return (B) new EventSubscriber<>(
+                eventClass, subscribe.postOrder(), subscribe.ignoreCancelled(), listener, handler
+        );
+    }
+
+    @Override
+    protected <T, B extends Subscriber<T>> B makeSubscription(
+            Class<T> eventClass,
+            Consumer<T> handler) {
+        return (B) new EventSubscriber<>(eventClass, handler);
+    }
 }

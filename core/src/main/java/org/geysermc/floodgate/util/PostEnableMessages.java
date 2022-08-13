@@ -28,8 +28,8 @@ package org.geysermc.floodgate.util;
 import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
-import net.engio.mbassy.listener.Handler;
-import net.engio.mbassy.listener.Listener;
+import org.geysermc.event.Listener;
+import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.event.PostEnableEvent;
@@ -90,7 +90,7 @@ public final class PostEnableMessages {
         }
     }
 
-    @Handler
+    @Subscribe
     public void onPostEnable(PostEnableEvent ignored) {
         new Thread(() -> {
             // normally proxies don't have a lot of plugins, so proxies don't need to sleep as long

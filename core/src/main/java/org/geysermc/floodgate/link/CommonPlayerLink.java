@@ -34,8 +34,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import lombok.AccessLevel;
 import lombok.Getter;
-import net.engio.mbassy.listener.Handler;
-import net.engio.mbassy.listener.Listener;
+import org.geysermc.event.Listener;
+import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.link.LinkRequest;
 import org.geysermc.floodgate.api.link.PlayerLink;
@@ -107,7 +107,7 @@ public abstract class CommonPlayerLink implements PlayerLink {
         executorService.shutdown();
     }
 
-    @Handler
+    @Subscribe
     public void onShutdown(ShutdownEvent ignored) {
         stop();
     }

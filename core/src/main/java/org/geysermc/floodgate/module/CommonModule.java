@@ -36,9 +36,6 @@ import com.google.inject.spi.TypeListener;
 import io.netty.util.AttributeKey;
 import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
-import net.engio.mbassy.bus.MBassador;
-import net.engio.mbassy.bus.common.PubSubSupport;
-import net.engio.mbassy.bus.error.IPublicationErrorHandler.ConsoleLogger;
 import org.geysermc.floodgate.addon.data.HandshakeHandlersImpl;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
@@ -54,6 +51,7 @@ import org.geysermc.floodgate.crypto.AesKeyProducer;
 import org.geysermc.floodgate.crypto.Base64Topping;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.crypto.KeyProducer;
+import org.geysermc.floodgate.event.EventBus;
 import org.geysermc.floodgate.event.util.ListenerAnnotationMatcher;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.news.NewsChecker;
@@ -67,17 +65,17 @@ import org.geysermc.floodgate.util.HttpClient;
 
 @RequiredArgsConstructor
 public class CommonModule extends AbstractModule {
-    private final PubSubSupport<Object> eventBus = new MBassador<>(new ConsoleLogger(true));
+    private final EventBus eventBus = new EventBus();
     private final Path dataDirectory;
 
     @Override
     protected void configure() {
-        bind(PubSubSupport.class).toInstance(eventBus);
+        bind(EventBus.class).toInstance(eventBus);
         // register every class that has the Listener annotation
         bindListener(new ListenerAnnotationMatcher(), new TypeListener() {
             @Override
             public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
-                encounter.register((InjectionListener<I>) eventBus::subscribe);
+                encounter.register((InjectionListener<I>) eventBus::register);
             }
         });
 
