@@ -32,6 +32,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.google.inject.name.Names;
+import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Listener;
@@ -66,6 +68,7 @@ public final class BungeePlatformModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(PlatformUtils.class).to(BungeePlatformUtils.class);
+        bind(Logger.class).annotatedWith(Names.named("logger")).toInstance(plugin.getLogger());
         bind(FloodgateLogger.class).to(JavaUtilFloodgateLogger.class);
     }
 

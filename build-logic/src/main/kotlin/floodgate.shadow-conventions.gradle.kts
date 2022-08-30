@@ -31,6 +31,11 @@ tasks {
             // for example Velocity, the relocation will be gone for Velocity)
             addRelocations(project, sJar)
         }
+
+        val destinationDir = System.getenv("DESTINATION_DIRECTORY");
+        if (destinationDir != null) {
+            destinationDirectory.set(file(destinationDir))
+        }
     }
     named("build") {
         dependsOn(shadowJar)

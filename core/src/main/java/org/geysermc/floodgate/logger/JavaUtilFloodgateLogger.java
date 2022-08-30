@@ -28,18 +28,24 @@ package org.geysermc.floodgate.logger;
 import static org.geysermc.floodgate.util.MessageFormatter.format;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.util.LanguageManager;
 
+@Singleton
 public final class JavaUtilFloodgateLogger implements FloodgateLogger {
-    @Inject private Logger logger;
-    @Inject private LanguageManager languageManager;
+    @Inject
+    @Named("logger")
+    private Logger logger;
+    private LanguageManager languageManager;
 
     @Inject
-    private void init(FloodgateConfig config) {
+    private void init(LanguageManager languageManager, FloodgateConfig config) {
+        this.languageManager = languageManager;
         if (config.isDebug()) {
             logger.setLevel(Level.ALL);
         }

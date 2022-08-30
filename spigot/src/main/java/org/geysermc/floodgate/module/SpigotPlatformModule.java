@@ -29,6 +29,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.google.inject.name.Names;
+import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -60,6 +62,7 @@ public final class SpigotPlatformModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(PlatformUtils.class).to(SpigotPlatformUtils.class);
+        bind(Logger.class).annotatedWith(Names.named("logger")).toInstance(plugin.getLogger());
         bind(FloodgateLogger.class).to(JavaUtilFloodgateLogger.class);
     }
 
