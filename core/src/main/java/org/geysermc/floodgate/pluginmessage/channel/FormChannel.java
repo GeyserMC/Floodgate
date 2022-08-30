@@ -56,13 +56,10 @@ public class FormChannel implements PluginMessageChannel {
     @Override
     public Result handleProxyCall(
             byte[] data,
-            UUID targetUuid,
-            String targetUsername,
-            Identity targetIdentity,
             UUID sourceUuid,
             String sourceUsername,
-            Identity sourceIdentity) {
-
+            Identity sourceIdentity
+    ) {
         if (sourceIdentity == Identity.SERVER) {
             // send it to the client
             return Result.forward();
@@ -89,7 +86,7 @@ public class FormChannel implements PluginMessageChannel {
     }
 
     @Override
-    public Result handleServerCall(byte[] data, UUID targetUuid, String targetUsername) {
+    public Result handleServerCall(byte[] data, UUID playerUuid, String playerUsername) {
         callResponseConsumer(data);
         return Result.handled();
     }

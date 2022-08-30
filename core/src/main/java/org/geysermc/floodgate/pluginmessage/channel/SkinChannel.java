@@ -51,16 +51,13 @@ public class SkinChannel implements PluginMessageChannel {
     @Override
     public Result handleProxyCall(
             byte[] data,
-            UUID targetUuid,
-            String targetUsername,
-            Identity targetIdentity,
             UUID sourceUuid,
             String sourceUsername,
-            Identity sourceIdentity) {
-
+            Identity sourceIdentity
+    ) {
         // we can only get skins from Geyser (client)
         if (sourceIdentity == Identity.PLAYER) {
-            Result result = handleServerCall(data, targetUuid, targetUsername);
+            Result result = handleServerCall(data, sourceUuid, sourceUsername);
             // aka translate 'handled' into 'forward' when send-floodgate-data is enabled
             if (!result.isAllowed() && result.getReason() == null) {
                 if (config.isProxy() && ((ProxyFloodgateConfig) config).isSendFloodgateData()) {
@@ -78,8 +75,8 @@ public class SkinChannel implements PluginMessageChannel {
     }
 
     @Override
-    public Result handleServerCall(byte[] data, UUID targetUuid, String targetUsername) {
-        FloodgatePlayer floodgatePlayer = api.getPlayer(targetUuid);
+    public Result handleServerCall(byte[] data, UUID playerUuid, String playerUsername) {
+        FloodgatePlayer floodgatePlayer = api.getPlayer(playerUuid);
         if (floodgatePlayer == null) {
             return Result.kick("Player sent skins data for a non-Floodgate player");
         }
