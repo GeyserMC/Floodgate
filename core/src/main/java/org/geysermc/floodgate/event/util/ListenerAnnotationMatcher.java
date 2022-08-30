@@ -27,7 +27,7 @@ package org.geysermc.floodgate.event.util;
 
 import com.google.inject.TypeLiteral;
 import com.google.inject.matcher.AbstractMatcher;
-import net.engio.mbassy.listener.Listener;
+import org.geysermc.event.Listener;
 
 public class ListenerAnnotationMatcher extends AbstractMatcher<TypeLiteral<?>> {
     @Override

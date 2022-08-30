@@ -18,7 +18,6 @@ dependencies {
     api("cloud.commandframework", "cloud-core", Versions.cloudVersion)
     api("org.yaml", "snakeyaml", Versions.snakeyamlVersion)
     api("org.bstats", "bstats-base", Versions.bstatsVersion)
-    api("net.engio", "mbassador", Versions.mbassadorVersion)
 }
 
 // present on all platforms

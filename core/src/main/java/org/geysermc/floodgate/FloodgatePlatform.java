@@ -29,7 +29,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import java.util.UUID;
-import net.engio.mbassy.bus.common.PubSubSupport;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.InstanceHolder;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
@@ -37,6 +36,7 @@ import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.event.EventBus;
 import org.geysermc.floodgate.event.PostEnableEvent;
 import org.geysermc.floodgate.event.ShutdownEvent;
 import org.geysermc.floodgate.module.PostInitializeModule;
@@ -70,11 +70,11 @@ public class FloodgatePlatform {
 
         this.guice = guice.createChildInjector(new PostInitializeModule(postInitializeModules));
 
-        guice.getInstance(PubSubSupport.class).publish(new PostEnableEvent());
+        guice.getInstance(EventBus.class).fire(new PostEnableEvent());
     }
 
     public void disable() {
-        guice.getInstance(PubSubSupport.class).publish(new ShutdownEvent());
+        guice.getInstance(EventBus.class).fire(new ShutdownEvent());
 
         if (injector != null && injector.canRemoveInjection()) {
             try {
