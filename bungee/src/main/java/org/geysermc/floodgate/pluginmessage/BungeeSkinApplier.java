@@ -39,6 +39,7 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.connection.LoginResult;
+import net.md_5.bungee.protocol.Property;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.skin.SkinApplier;
@@ -85,11 +86,8 @@ public final class BungeeSkinApplier implements SkinApplier {
             return;
         }
 
-        InitialHandler handler;
-        try {
-            handler = (InitialHandler) player.getPendingConnection();
-        } catch (Exception exception) {
-            logger.error("Incompatible Bungeecord fork detected", exception);
+        InitialHandler handler = getHandler(player);
+        if (handler == null) {
             return;
         }
 
@@ -113,5 +111,41 @@ public final class BungeeSkinApplier implements SkinApplier {
         Array.set(propertyArray, 0, property);
 
         ReflectionUtils.invoke(loginResult, SET_PROPERTIES_METHOD, propertyArray);
+    }
+
+    @Override
+    public boolean hasSkin(FloodgatePlayer fPlayer) {
+        ProxiedPlayer player = ProxyServer.getInstance().getPlayer(fPlayer.getCorrectUniqueId());
+        if (player == null) {
+            return false;
+        }
+
+        InitialHandler handler = getHandler(player);
+        if (handler == null) {
+            return false;
+        }
+
+        LoginResult loginResult = handler.getLoginProfile();
+        if (loginResult == null) {
+            return false;
+        }
+
+        for (Property property : loginResult.getProperties()) {
+            if (property.getName().equals("textures")) {
+                if (!property.getValue().isEmpty()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private InitialHandler getHandler(ProxiedPlayer player) {
+        try {
+            return (InitialHandler) player.getPendingConnection();
+        } catch (Exception exception) {
+            logger.error("Incompatible Bungeecord fork detected", exception);
+            return null;
+        }
     }
 }

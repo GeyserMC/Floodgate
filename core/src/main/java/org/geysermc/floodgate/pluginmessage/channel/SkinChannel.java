@@ -89,7 +89,7 @@ public class SkinChannel implements PluginMessageChannel {
             return Result.kick("Got invalid skin data");
         }
 
-        if (floodgatePlayer.isLinked()) {
+        if (floodgatePlayer.isLinked() || skinApplier.hasSkin(floodgatePlayer)) {
             return Result.handled();
         }
 

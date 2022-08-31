@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.pluginmessage;
 
+import com.destroystokyo.paper.profile.ProfileProperty;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
@@ -54,6 +55,24 @@ public final class SpigotSkinApplier implements SkinApplier {
         applySkin0(floodgatePlayer, skinData, true);
     }
 
+    @Override
+    public boolean hasSkin(FloodgatePlayer floodgatePlayer) {
+        Player player = Bukkit.getPlayer(floodgatePlayer.getCorrectUniqueId());
+
+        if (player == null) {
+            return false;
+        }
+
+        for (ProfileProperty property : player.getPlayerProfile().getProperties()) {
+            if (property.getName().equals("textures")) {
+                if (!property.getValue().isEmpty()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private void applySkin0(FloodgatePlayer floodgatePlayer, SkinData skinData, boolean firstTry) {
         Player player = Bukkit.getPlayer(floodgatePlayer.getCorrectUniqueId());
 
@@ -61,8 +80,12 @@ public final class SpigotSkinApplier implements SkinApplier {
         if (player == null) {
             if (firstTry) {
                 Bukkit.getScheduler().runTaskLater(plugin,
-                        () -> applySkin0(floodgatePlayer, skinData, false),
-                        10 * 1000);
+                        () -> {
+                            if (hasSkin(floodgatePlayer)) {
+                                applySkin0(floodgatePlayer, skinData, false);
+                            }
+                        },
+                        10 * 20);
             }
             return;
         }

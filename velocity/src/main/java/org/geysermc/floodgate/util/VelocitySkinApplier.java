@@ -25,10 +25,12 @@
 
 package org.geysermc.floodgate.util;
 
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.util.GameProfile.Property;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.skin.SkinApplier;
@@ -45,5 +47,21 @@ public class VelocitySkinApplier implements SkinApplier {
             properties.add(new Property("textures", skinData.getValue(), skinData.getSignature()));
             player.setGameProfileProperties(properties);
         });
+    }
+
+    @Override
+    public boolean hasSkin(FloodgatePlayer floodgatePlayer) {
+        Optional<Player> player = server.getPlayer(floodgatePlayer.getCorrectUniqueId());
+
+        if (player.isPresent()) {
+            for (Property property : player.get().getGameProfileProperties()) {
+                if (property.getName().equals("textures")) {
+                    if (!property.getValue().isEmpty()) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }
