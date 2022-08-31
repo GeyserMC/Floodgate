@@ -30,12 +30,16 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
 import io.netty.util.AttributeKey;
 import java.nio.file.Path;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
+import org.geysermc.event.PostOrder;
 import org.geysermc.floodgate.addon.data.HandshakeHandlersImpl;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
@@ -53,6 +57,7 @@ import org.geysermc.floodgate.crypto.Base64Topping;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.crypto.KeyProducer;
 import org.geysermc.floodgate.event.EventBus;
+import org.geysermc.floodgate.event.ShutdownEvent;
 import org.geysermc.floodgate.event.util.ListenerAnnotationMatcher;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.link.PlayerLinkHolder;
@@ -79,6 +84,10 @@ public class CommonModule extends AbstractModule {
                 encounter.register((InjectionListener<I>) eventBus::register);
             }
         });
+
+        ExecutorService commonPool = Executors.newCachedThreadPool();
+        eventBus.subscribe(ShutdownEvent.class, ignored -> commonPool.shutdown(), PostOrder.LAST);
+        bind(ExecutorService.class).annotatedWith(Names.named("commonPool")).toInstance(commonPool);
 
         bind(HttpClient.class).in(Singleton.class);
 

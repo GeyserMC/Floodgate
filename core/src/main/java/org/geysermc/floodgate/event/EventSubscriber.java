@@ -27,12 +27,17 @@ package org.geysermc.floodgate.event;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.event.PostOrder;
 import org.geysermc.event.subscribe.impl.SubscriberImpl;
 
 public final class EventSubscriber<E> extends SubscriberImpl<E> {
-    EventSubscriber(Class<E> eventClass, Consumer<E> handler) {
-        super(eventClass, handler);
+    EventSubscriber(
+            @NonNull Class<E> eventClass,
+            @NonNull Consumer<E> handler,
+            @NonNull PostOrder postOrder
+    ) {
+        super(eventClass, handler, postOrder);
     }
 
     <H> EventSubscriber(
@@ -40,7 +45,8 @@ public final class EventSubscriber<E> extends SubscriberImpl<E> {
             PostOrder postOrder,
             boolean ignoreCancelled,
             H handlerInstance,
-            BiConsumer<H, E> handler) {
+            BiConsumer<H, E> handler
+    ) {
         super(eventClass, postOrder, ignoreCancelled, handlerInstance, handler);
     }
 }

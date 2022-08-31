@@ -27,30 +27,31 @@ package org.geysermc.floodgate.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.geysermc.event.Listener;
-import org.geysermc.event.subscribe.Subscribe;
-import org.geysermc.floodgate.event.ShutdownEvent;
 
 // resources are properly closed and ignoring the original stack trace is intended
 @SuppressWarnings({"PMD.CloseResource", "PMD.PreserveStackTrace"})
-@Listener
+@Singleton
 public class HttpClient {
     private static final String USER_AGENT = "GeyserMC/Floodgate";
 
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final Gson gson = new Gson();
+    @Inject
+    @Named("commonPool")
+    private ExecutorService executorService;
 
     public CompletableFuture<DefaultHttpResponse> asyncGet(String urlString) {
         return CompletableFuture.supplyAsync(() -> get(urlString), executorService);
@@ -160,11 +161,6 @@ public class HttpClient {
             return new InputStreamReader(stream);
         }
         return null;
-    }
-
-    @Subscribe
-    public void onShutdown(ShutdownEvent ignored) {
-        executorService.shutdown();
     }
 
     @Getter

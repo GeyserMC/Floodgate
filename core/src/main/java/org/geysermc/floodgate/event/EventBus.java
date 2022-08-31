@@ -27,6 +27,8 @@ package org.geysermc.floodgate.event;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.event.PostOrder;
 import org.geysermc.event.bus.impl.EventBusImpl;
 import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.event.subscribe.Subscriber;
@@ -35,10 +37,11 @@ import org.geysermc.event.subscribe.Subscriber;
 public final class EventBus extends EventBusImpl<Object, EventSubscriber<?>> {
     @Override
     protected <H, T, B extends Subscriber<T>> B makeSubscription(
-            Class<T> eventClass,
-            Subscribe subscribe,
-            H listener,
-            BiConsumer<H, T> handler) {
+            @NonNull Class<T> eventClass,
+            @NonNull Subscribe subscribe,
+            @NonNull H listener,
+            @NonNull BiConsumer<H, T> handler
+    ) {
         return (B) new EventSubscriber<>(
                 eventClass, subscribe.postOrder(), subscribe.ignoreCancelled(), listener, handler
         );
@@ -46,8 +49,10 @@ public final class EventBus extends EventBusImpl<Object, EventSubscriber<?>> {
 
     @Override
     protected <T, B extends Subscriber<T>> B makeSubscription(
-            Class<T> eventClass,
-            Consumer<T> handler) {
-        return (B) new EventSubscriber<>(eventClass, handler);
+            @NonNull Class<T> eventClass,
+            @NonNull Consumer<T> handler,
+            @NonNull PostOrder postOrder
+    ) {
+        return (B) new EventSubscriber<>(eventClass, handler, postOrder);
     }
 }

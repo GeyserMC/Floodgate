@@ -49,7 +49,7 @@ import org.geysermc.floodgate.util.InjectorHolder;
 @Listener
 public abstract class CommonPlayerLink implements PlayerLink {
     @Getter(AccessLevel.PROTECTED)
-    private final ExecutorService executorService = Executors.newFixedThreadPool(11);
+    private final ExecutorService executorService = Executors.newCachedThreadPool();
 
     @Getter private boolean enabled;
     @Getter private boolean allowLinking;
