@@ -26,13 +26,13 @@
 package org.geysermc.floodgate.util;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.inject.Named;
 import org.bstats.MetricsBase;
 import org.bstats.charts.DrilldownPie;
 import org.bstats.charts.SimplePie;

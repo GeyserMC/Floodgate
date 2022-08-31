@@ -14,7 +14,19 @@ dependencyResolutionManagement {
         }
 
         // Paper, Velocity
-        maven("https://papermc.io/repo/repository/maven-public")
+//        maven("https://repo.papermc.io/repository/maven-releases") {
+//            mavenContent { releasesOnly() }
+//        }
+//        maven("https://repo.papermc.io/repository/maven-snapshots") {
+//            mavenContent { snapshotsOnly() }
+//        }
+        maven("https://repo.papermc.io/repository/maven-public") {
+            content {
+                includeGroupByRegex(
+                    "(io\\.papermc\\..*|com\\.destroystokyo\\..*|com\\.velocitypowered)"
+                )
+            }
+        }
         // Spigot
         maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots") {
             mavenContent { snapshotsOnly() }

@@ -55,7 +55,7 @@ import org.geysermc.floodgate.crypto.KeyProducer;
 import org.geysermc.floodgate.event.EventBus;
 import org.geysermc.floodgate.event.util.ListenerAnnotationMatcher;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
-import org.geysermc.floodgate.link.PlayerLinkLoader;
+import org.geysermc.floodgate.link.PlayerLinkHolder;
 import org.geysermc.floodgate.packet.PacketHandlersImpl;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
@@ -102,7 +102,7 @@ public class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public PlayerLink playerLink(PlayerLinkLoader linkLoader) {
+    public PlayerLink playerLink(PlayerLinkHolder linkLoader) {
         return linkLoader.load();
     }
 
