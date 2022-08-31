@@ -34,8 +34,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -132,22 +130,14 @@ public final class BungeeSkinApplier implements SkinApplier {
             return false;
         }
 
-        List<Property> textures = new ArrayList<>();
         for (Property property : loginResult.getProperties()) {
             if (property.getName().equals("textures")) {
-                textures.add(property);
+                if (!property.getValue().isEmpty()) {
+                    return true;
+                }
             }
         }
-
-        if (textures.isEmpty()) {
-            return false;
-        }
-        for (Property p : textures) {
-            if (p.getValue().isEmpty()) {
-                return false;
-            }
-        }
-        return true;
+        return false;
     }
 
     private InitialHandler getHandler(ProxiedPlayer player) {

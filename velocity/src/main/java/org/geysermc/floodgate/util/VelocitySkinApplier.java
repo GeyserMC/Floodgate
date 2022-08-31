@@ -51,27 +51,17 @@ public class VelocitySkinApplier implements SkinApplier {
 
     @Override
     public boolean hasSkin(FloodgatePlayer floodgatePlayer) {
-        Player player = server.getPlayer(floodgatePlayer.getCorrectUniqueId()).orElse(null);
+        Optional<Player> player = server.getPlayer(floodgatePlayer.getCorrectUniqueId());
 
-        if (player == null) {
-            return false;
-        }
-
-        List<Property> textures = new ArrayList<>();
-        for (Property property : player.getGameProfileProperties()) {
-            if (property.getName().equals("textures")) {
-                textures.add(property);
+        if (player.isPresent()) {
+            for (Property property : player.get().getGameProfileProperties()) {
+                if (property.getName().equals("textures")) {
+                    if (!property.getValue().isEmpty()) {
+                        return true;
+                    }
+                }
             }
         }
-
-        if (textures.isEmpty()) {
-            return false;
-        }
-        for (Property p : textures) {
-            if (p.getValue().isEmpty()) {
-                return false;
-            }
-        }
-        return true;
+        return false;
     }
 }
