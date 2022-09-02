@@ -25,30 +25,41 @@
 
 package org.geysermc.floodgate;
 
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.java.JavaPlugin;
+import com.google.inject.Inject;
+import com.google.inject.Module;
+import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import java.nio.file.Path;
+import org.geysermc.floodgate.module.CommandModule;
+import org.geysermc.floodgate.module.PluginMessageModule;
+import org.geysermc.floodgate.module.ProxyCommonModule;
+import org.geysermc.floodgate.module.VelocityAddonModule;
+import org.geysermc.floodgate.module.VelocityListenerModule;
+import org.geysermc.floodgate.module.VelocityPlatformModule;
+import org.geysermc.floodgate.util.ReflectionUtils;
 
-public final class SpigotPlugin extends JavaPlugin {
-    private FloodgatePlatform platform;
+public class VelocityPlatform extends FloodgatePlatform {
+    @Inject
+    private @DataDirectory Path dataDirectory;
 
-    @Override
-    public void onLoad() {
-        platform = new SpigotPlatform(this);
-        platform.load();
+    public VelocityPlatform() {
+        ReflectionUtils.setPrefix("com.velocitypowered.proxy");
     }
 
     @Override
-    public void onEnable() {
-        try {
-            platform.enable();
-        } catch (Exception exception) {
-            Bukkit.getPluginManager().disablePlugin(this);
-            throw exception;
-        }
+    protected Module[] loadStageModules() {
+        return new Module[]{
+                new ProxyCommonModule(dataDirectory),
+                new VelocityPlatformModule(getGuice())
+        };
     }
 
     @Override
-    public void onDisable() {
-        platform.disable();
+    protected Module[] postEnableStageModules() {
+        return new Module[]{
+                new CommandModule(),
+                new VelocityListenerModule(),
+                new VelocityAddonModule(),
+                new PluginMessageModule()
+        };
     }
 }

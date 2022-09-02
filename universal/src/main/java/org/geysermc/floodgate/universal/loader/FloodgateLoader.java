@@ -23,20 +23,35 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.module;
+package org.geysermc.floodgate.universal.loader;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Module;
-import lombok.RequiredArgsConstructor;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Path;
+import org.geysermc.floodgate.universal.util.Constants;
 
-@RequiredArgsConstructor
-public final class PostInitializeModule extends AbstractModule {
-    private final Module[] postInitializeModules;
+public class FloodgateLoader {
+  public static final class LoadResult {
+    public final URLClassLoader classLoader;
+    public final Class<?> pluginClass;
 
-    @Override
-    protected void configure() {
-        for (Module module : postInitializeModules) {
-            install(module);
-        }
+    public LoadResult(URLClassLoader classLoader, Class<?> pluginClass) {
+      this.classLoader = classLoader;
+      this.pluginClass = pluginClass;
     }
+  }
+
+  public static LoadResult load(Path dataDirectory, String platformName) throws Exception {
+    URL pluginUrl = Constants.cachedPluginPath(dataDirectory, platformName).toUri().toURL();
+
+    URLClassLoader loader = new URLClassLoader(
+        new URL[]{pluginUrl},
+        FloodgateLoader.class.getClassLoader()
+    );
+
+    String mainClassName = Character.toUpperCase(platformName.charAt(0)) +
+        platformName.substring(1) + "Platform";
+
+    return new LoadResult(loader, loader.loadClass("org.geysermc.floodgate." + mainClassName));
+  }
 }

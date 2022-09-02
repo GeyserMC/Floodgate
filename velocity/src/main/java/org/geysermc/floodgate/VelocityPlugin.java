@@ -30,45 +30,19 @@ import com.google.inject.Injector;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
-import com.velocitypowered.api.plugin.annotation.DataDirectory;
-import java.nio.file.Path;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.module.CommandModule;
-import org.geysermc.floodgate.module.PluginMessageModule;
-import org.geysermc.floodgate.module.ProxyCommonModule;
-import org.geysermc.floodgate.module.VelocityAddonModule;
-import org.geysermc.floodgate.module.VelocityListenerModule;
-import org.geysermc.floodgate.module.VelocityPlatformModule;
-import org.geysermc.floodgate.util.ReflectionUtils;
 
 public final class VelocityPlugin {
-    private final FloodgatePlatform platform;
+    private final VelocityPlatform platform;
 
     @Inject
-    public VelocityPlugin(@DataDirectory Path dataDirectory, Injector guice) {
-        ReflectionUtils.setPrefix("com.velocitypowered.proxy");
-
-        long ctm = System.currentTimeMillis();
-        Injector injector = guice.createChildInjector(
-                new ProxyCommonModule(dataDirectory),
-                new VelocityPlatformModule(guice)
-        );
-
-        platform = injector.getInstance(FloodgatePlatform.class);
-
-        long endCtm = System.currentTimeMillis();
-        injector.getInstance(FloodgateLogger.class)
-                .translatedInfo("floodgate.core.finish", endCtm - ctm);
+    public VelocityPlugin(Injector guice) {
+        platform = guice.getInstance(VelocityPlatform.class);
+        platform.load();
     }
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
-        platform.enable(
-                new CommandModule(),
-                new VelocityListenerModule(),
-                new VelocityAddonModule(),
-                new PluginMessageModule()
-        );
+        platform.enable();
     }
 
     @Subscribe

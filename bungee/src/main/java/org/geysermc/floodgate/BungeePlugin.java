@@ -25,48 +25,20 @@
 
 package org.geysermc.floodgate;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import net.md_5.bungee.api.plugin.Plugin;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.module.BungeeAddonModule;
-import org.geysermc.floodgate.module.BungeeListenerModule;
-import org.geysermc.floodgate.module.BungeePlatformModule;
-import org.geysermc.floodgate.module.CommandModule;
-import org.geysermc.floodgate.module.PluginMessageModule;
-import org.geysermc.floodgate.module.ProxyCommonModule;
-import org.geysermc.floodgate.util.ReflectionUtils;
 
 public final class BungeePlugin extends Plugin {
-    private FloodgatePlatform platform;
+    private BungeePlatform platform;
 
     @Override
     public void onLoad() {
-        ReflectionUtils.setPrefix("net.md_5.bungee");
-
-        long ctm = System.currentTimeMillis();
-        Injector injector = Guice.createInjector(
-                new ProxyCommonModule(getDataFolder().toPath()),
-                new BungeePlatformModule(this)
-        );
-
-        // Bungeecord doesn't have a build-in function to disable plugins,
-        // so there is no need to have a custom Platform class like Spigot
-        platform = injector.getInstance(FloodgatePlatform.class);
-
-        long endCtm = System.currentTimeMillis();
-        injector.getInstance(FloodgateLogger.class)
-                .translatedInfo("floodgate.core.finish", endCtm - ctm);
+        platform = new BungeePlatform(this);
+        platform.load();
     }
 
     @Override
     public void onEnable() {
-        platform.enable(
-                new CommandModule(),
-                new BungeeListenerModule(),
-                new BungeeAddonModule(),
-                new PluginMessageModule()
-        );
+        platform.enable();
     }
 
     @Override

@@ -16,7 +16,8 @@ val deployProjects = setOf(
     projects.core,
     projects.bungee,
     projects.spigot,
-    projects.velocity
+    projects.velocity,
+    projects.universal
 ).map { it.dependencyProject }
 
 //todo re-add checkstyle when we switch back to 2 space indention

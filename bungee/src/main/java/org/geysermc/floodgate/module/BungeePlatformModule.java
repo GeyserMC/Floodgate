@@ -38,7 +38,6 @@ import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
-import org.geysermc.floodgate.BungeePlugin;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
@@ -63,7 +62,7 @@ import org.geysermc.floodgate.util.LanguageManager;
 
 @RequiredArgsConstructor
 public final class BungeePlatformModule extends AbstractModule {
-    private final BungeePlugin plugin;
+    private final Plugin plugin;
 
     @Override
     protected void configure() {

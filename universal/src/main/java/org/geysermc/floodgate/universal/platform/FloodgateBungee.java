@@ -23,24 +23,36 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-object Versions {
-    const val geyserVersion = "2.0.4-SNAPSHOT"
-    const val cumulusVersion = "1.1"
-    const val eventsVersion = "1.0-SNAPSHOT"
-    const val configUtilsVersion = "1.0-SNAPSHOT"
-    const val fastutilVersion = "8.5.3"
-    const val guiceVersion = "5.1.0"
-    const val nettyVersion = "4.1.49.Final"
-    const val snakeyamlVersion = "1.28"
-    const val cloudVersion = "1.5.0"
-    const val bstatsVersion = "3.0.0"
+package org.geysermc.floodgate.universal.platform;
 
-    const val javaWebsocketVersion = "1.5.2"
+import net.md_5.bungee.api.plugin.Plugin;
+import org.geysermc.floodgate.universal.UniversalLoader;
+import org.geysermc.floodgate.universal.holder.FloodgateHolder;
+import org.geysermc.floodgate.universal.logger.JavaUtilLogger;
+import org.geysermc.floodgate.universal.util.UniversalLogger;
 
-    const val checkerQual = "3.19.0"
+public class FloodgateBungee extends Plugin {
+  private FloodgateHolder holder;
 
-    // Platform versions
-    const val velocityVersion = "3.1.1"
-    const val bungeeCommit = "ff5727c"
-    const val spigotVersion = "1.13-R0.1-SNAPSHOT"
+  @Override
+  public void onLoad() {
+    UniversalLogger logger = new JavaUtilLogger(getLogger());
+    try {
+      holder = new UniversalLoader("bungee", getDataFolder().toPath(), logger).start();
+      holder.init(new Class[]{Plugin.class}, this);
+      holder.load();
+    } catch (Exception exception) {
+      throw new RuntimeException("Failed to load Floodgate", exception);
+    }
+  }
+
+  @Override
+  public void onEnable() {
+    holder.enable();
+  }
+
+  @Override
+  public void onDisable() {
+    holder.disable();
+  }
 }

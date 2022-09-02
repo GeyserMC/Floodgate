@@ -25,39 +25,62 @@
 
 package org.geysermc.floodgate;
 
+import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.InstanceHolder;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.link.PlayerLink;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.event.EventBus;
 import org.geysermc.floodgate.event.PostEnableEvent;
 import org.geysermc.floodgate.event.ShutdownEvent;
-import org.geysermc.floodgate.module.PostInitializeModule;
+import org.geysermc.floodgate.module.PostEnableModules;
 
-public class FloodgatePlatform {
+@Getter(AccessLevel.PROTECTED)
+public abstract class FloodgatePlatform {
     private static final UUID KEY = UUID.randomUUID();
-    @Inject private PlatformInjector injector;
+    private PlatformInjector injector;
 
-    @Inject private FloodgateConfig config;
+    private FloodgateConfig config;
     @Inject private Injector guice;
 
-    @Inject
-    public void init(
-            FloodgateApi api,
-            PlayerLink link,
-            PacketHandlers packetHandlers,
-            HandshakeHandlers handshakeHandlers) {
-        InstanceHolder.set(api, link, this.injector, packetHandlers, handshakeHandlers, KEY);
+
+    public void load() {
+        long startTime = System.currentTimeMillis();
+
+        guice = guice != null ?
+                guice.createChildInjector(loadStageModules()) :
+                Guice.createInjector(loadStageModules());
+
+        config = guice.getInstance(FloodgateConfig.class);
+        injector = guice.getInstance(PlatformInjector.class);
+
+        InstanceHolder.set(
+                guice.getInstance(FloodgateApi.class),
+                guice.getInstance(PlayerLink.class),
+                injector,
+                guice.getInstance(PacketHandlers.class),
+                guice.getInstance(HandshakeHandlers.class),
+                KEY
+        );
+
+        long endTime = System.currentTimeMillis();
+        guice.getInstance(FloodgateLogger.class)
+                .translatedInfo("floodgate.core.finish", endTime - startTime);
     }
 
-    public void enable(Module... postInitializeModules) throws RuntimeException {
+    protected abstract Module[] loadStageModules();
+
+    public void enable() throws RuntimeException {
         if (injector == null) {
             throw new RuntimeException("Failed to find the platform injector!");
         }
@@ -68,10 +91,12 @@ public class FloodgatePlatform {
             throw new RuntimeException("Failed to inject the packet listener!", exception);
         }
 
-        this.guice = guice.createChildInjector(new PostInitializeModule(postInitializeModules));
+        this.guice = guice.createChildInjector(new PostEnableModules(postEnableStageModules()));
 
         guice.getInstance(EventBus.class).fire(new PostEnableEvent());
     }
+
+    protected abstract Module[] postEnableStageModules();
 
     public void disable() {
         guice.getInstance(EventBus.class).fire(new ShutdownEvent());

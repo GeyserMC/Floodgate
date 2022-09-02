@@ -29,12 +29,12 @@ import com.google.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Listener;
-import org.geysermc.floodgate.BungeePlugin;
+import net.md_5.bungee.api.plugin.Plugin;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 
 @RequiredArgsConstructor(onConstructor = @__(@Inject))
 public final class BungeeListenerRegistration implements ListenerRegistration<Listener> {
-    private final BungeePlugin plugin;
+    private final Plugin plugin;
 
     @Override
     public void register(Listener listener) {

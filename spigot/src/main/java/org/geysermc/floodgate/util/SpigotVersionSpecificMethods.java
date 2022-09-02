@@ -27,7 +27,7 @@ package org.geysermc.floodgate.util;
 
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.geysermc.floodgate.SpigotPlugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public final class SpigotVersionSpecificMethods {
     private static final boolean NEW_GET_LOCALE;
@@ -41,9 +41,9 @@ public final class SpigotVersionSpecificMethods {
         );
     }
 
-    private final SpigotPlugin plugin;
+    private final JavaPlugin plugin;
 
-    public SpigotVersionSpecificMethods(SpigotPlugin plugin) {
+    public SpigotVersionSpecificMethods(JavaPlugin plugin) {
         this.plugin = plugin;
     }
 

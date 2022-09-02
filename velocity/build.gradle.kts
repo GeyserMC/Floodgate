@@ -1,4 +1,3 @@
-var velocityVersion = "3.1.1"
 var log4jVersion = "2.11.2"
 var gsonVersion = "2.8.8"
 var guavaVersion = "25.1-jre"
@@ -18,5 +17,5 @@ provided("com.google.code.gson", "gson", gsonVersion)
 provided("com.google.guava", "guava", guavaVersion)
 provided("com.google.inject", "guice", Versions.guiceVersion)
 provided("org.yaml", "snakeyaml", Versions.snakeyamlVersion) // included in Configurate
-provided("com.velocitypowered", "velocity-api", velocityVersion)
+provided("com.velocitypowered", "velocity-api", Versions.velocityVersion)
 provided("org.apache.logging.log4j", "log4j-core", log4jVersion)

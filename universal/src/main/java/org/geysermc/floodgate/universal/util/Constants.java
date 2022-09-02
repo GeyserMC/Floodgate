@@ -23,24 +23,32 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-object Versions {
-    const val geyserVersion = "2.0.4-SNAPSHOT"
-    const val cumulusVersion = "1.1"
-    const val eventsVersion = "1.0-SNAPSHOT"
-    const val configUtilsVersion = "1.0-SNAPSHOT"
-    const val fastutilVersion = "8.5.3"
-    const val guiceVersion = "5.1.0"
-    const val nettyVersion = "4.1.49.Final"
-    const val snakeyamlVersion = "1.28"
-    const val cloudVersion = "1.5.0"
-    const val bstatsVersion = "3.0.0"
+package org.geysermc.floodgate.universal.util;
 
-    const val javaWebsocketVersion = "1.5.2"
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-    const val checkerQual = "3.19.0"
+public final class Constants {
+  public static final String GIT_BRANCH = "${branch}";
 
-    // Platform versions
-    const val velocityVersion = "3.1.1"
-    const val bungeeCommit = "ff5727c"
-    const val spigotVersion = "1.13-R0.1-SNAPSHOT"
+  public static final Path CACHE_PATH = Paths.get("cache");
+  public static final String PLUGIN_VERSION_FILE_NAME = "plugin_version.json";
+  public static final String PLUGIN_NAME_FORMAT = "floodgate-%s.jar";
+
+  public static Path cachedPluginPath(Path dataDirectory, String platformName) {
+    return dataDirectory
+        .resolve(CACHE_PATH)
+        .resolve(String.format(PLUGIN_NAME_FORMAT, platformName));
+  }
+
+  public static Path cachedPluginVersionPath(Path dataDirectory) {
+    return dataDirectory
+        .resolve(CACHE_PATH)
+        .resolve(PLUGIN_VERSION_FILE_NAME);
+  }
+
+  public static boolean shouldCheck(Path dataDirectory) {
+    return Files.notExists(dataDirectory.resolve(".no_version_check"));
+  }
 }

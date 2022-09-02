@@ -31,7 +31,7 @@ import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.geysermc.floodgate.SpigotPlugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinData;
@@ -41,11 +41,11 @@ import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
 
 public final class SpigotSkinApplier implements SkinApplier {
     private final SpigotVersionSpecificMethods versionSpecificMethods;
-    private final SpigotPlugin plugin;
+    private final JavaPlugin plugin;
 
     public SpigotSkinApplier(
             SpigotVersionSpecificMethods versionSpecificMethods,
-            SpigotPlugin plugin) {
+            JavaPlugin plugin) {
         this.versionSpecificMethods = versionSpecificMethods;
         this.plugin = plugin;
     }

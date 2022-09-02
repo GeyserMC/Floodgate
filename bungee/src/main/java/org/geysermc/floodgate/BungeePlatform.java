@@ -25,30 +25,39 @@
 
 package org.geysermc.floodgate;
 
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.java.JavaPlugin;
+import com.google.inject.Module;
+import net.md_5.bungee.api.plugin.Plugin;
+import org.geysermc.floodgate.module.BungeeAddonModule;
+import org.geysermc.floodgate.module.BungeeListenerModule;
+import org.geysermc.floodgate.module.BungeePlatformModule;
+import org.geysermc.floodgate.module.CommandModule;
+import org.geysermc.floodgate.module.PluginMessageModule;
+import org.geysermc.floodgate.module.ProxyCommonModule;
+import org.geysermc.floodgate.util.ReflectionUtils;
 
-public final class SpigotPlugin extends JavaPlugin {
-    private FloodgatePlatform platform;
+public class BungeePlatform extends FloodgatePlatform {
+    private final Plugin plugin;
 
-    @Override
-    public void onLoad() {
-        platform = new SpigotPlatform(this);
-        platform.load();
+    public BungeePlatform(Plugin floodgatePlugin) {
+        this.plugin = floodgatePlugin;
+        ReflectionUtils.setPrefix("net.md_5.bungee");
     }
 
     @Override
-    public void onEnable() {
-        try {
-            platform.enable();
-        } catch (Exception exception) {
-            Bukkit.getPluginManager().disablePlugin(this);
-            throw exception;
-        }
+    protected Module[] loadStageModules() {
+        return new Module[]{
+                new ProxyCommonModule(plugin.getDataFolder().toPath()),
+                new BungeePlatformModule(plugin)
+        };
     }
 
     @Override
-    public void onDisable() {
-        platform.disable();
+    protected Module[] postEnableStageModules() {
+        return new Module[]{
+                new CommandModule(),
+                new BungeeListenerModule(),
+                new BungeeAddonModule(),
+                new PluginMessageModule()
+        };
     }
 }

@@ -36,7 +36,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
-import org.geysermc.floodgate.SpigotPlugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.command.util.Permission;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.player.FloodgateCommandPreprocessor;
@@ -44,7 +44,7 @@ import org.geysermc.floodgate.player.UserAudience;
 
 @RequiredArgsConstructor
 public final class SpigotCommandModule extends CommandModule {
-    private final SpigotPlugin plugin;
+    private final JavaPlugin plugin;
 
     @Override
     protected void configure() {

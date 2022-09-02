@@ -23,24 +23,24 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-object Versions {
-    const val geyserVersion = "2.0.4-SNAPSHOT"
-    const val cumulusVersion = "1.1"
-    const val eventsVersion = "1.0-SNAPSHOT"
-    const val configUtilsVersion = "1.0-SNAPSHOT"
-    const val fastutilVersion = "8.5.3"
-    const val guiceVersion = "5.1.0"
-    const val nettyVersion = "4.1.49.Final"
-    const val snakeyamlVersion = "1.28"
-    const val cloudVersion = "1.5.0"
-    const val bstatsVersion = "3.0.0"
+package org.geysermc.floodgate.universal.util;
 
-    const val javaWebsocketVersion = "1.5.2"
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-    const val checkerQual = "3.19.0"
+public class FileUtils {
+  public static void writeToPath(Path path, byte[] data) {
+    try {
+      Files.createDirectories(path.getParent());
+    } catch (IOException exception) {
+      throw new IllegalStateException("Failed to create directories for " + path, exception);
+    }
 
-    // Platform versions
-    const val velocityVersion = "3.1.1"
-    const val bungeeCommit = "ff5727c"
-    const val spigotVersion = "1.13-R0.1-SNAPSHOT"
+    try {
+      Files.write(path, data);
+    } catch (IOException exception) {
+      throw new IllegalStateException("Failed to write to path", exception);
+    }
+  }
 }

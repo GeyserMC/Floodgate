@@ -1,4 +1,3 @@
-var bungeeCommit = "ff5727c"
 var gsonVersion = "2.8.0"
 var guavaVersion = "21.0"
 
@@ -14,7 +13,7 @@ relocate("cloud.commandframework")
 relocate("io.leangen.geantyref")
 
 // these dependencies are already present on the platform
-provided("com.github.SpigotMC.BungeeCord", "bungeecord-proxy", bungeeCommit)
+provided("com.github.SpigotMC.BungeeCord", "bungeecord-proxy", Versions.bungeeCommit)
 provided("com.google.code.gson", "gson", gsonVersion)
 provided("com.google.guava", "guava", guavaVersion)
 provided("org.yaml", "snakeyaml", Versions.snakeyamlVersion)

@@ -23,24 +23,37 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-object Versions {
-    const val geyserVersion = "2.0.4-SNAPSHOT"
-    const val cumulusVersion = "1.1"
-    const val eventsVersion = "1.0-SNAPSHOT"
-    const val configUtilsVersion = "1.0-SNAPSHOT"
-    const val fastutilVersion = "8.5.3"
-    const val guiceVersion = "5.1.0"
-    const val nettyVersion = "4.1.49.Final"
-    const val snakeyamlVersion = "1.28"
-    const val cloudVersion = "1.5.0"
-    const val bstatsVersion = "3.0.0"
+package org.geysermc.floodgate.universal.downloader;
 
-    const val javaWebsocketVersion = "1.5.2"
+import java.io.IOException;
+import java.nio.file.Path;
+import org.geysermc.floodgate.universal.util.Constants;
+import org.geysermc.floodgate.universal.util.FileUtils;
+import org.geysermc.floodgate.universal.util.HttpClient;
+import org.geysermc.floodgate.universal.util.HttpClient.HttpResponse;
 
-    const val checkerQual = "3.19.0"
+public class FloodgateDownloader {
+  public static void download(Path dataDirectory, String platformName, String downloadUrl) {
+    try {
+      HttpResponse<byte[]> response = HttpClient.getInstance().getRawData(downloadUrl);
 
-    // Platform versions
-    const val velocityVersion = "3.1.1"
-    const val bungeeCommit = "ff5727c"
-    const val spigotVersion = "1.13-R0.1-SNAPSHOT"
+      if (!response.isCodeOk()) {
+        throw new RuntimeException(String.format(
+            "Got an invalid response code (%s) while downloading Floodgate for %s",
+            response.getHttpCode(), platformName
+        ));
+      }
+
+      FileUtils.writeToPath(
+          Constants.cachedPluginPath(dataDirectory, platformName),
+          response.getResponse()
+      );
+
+    } catch (IOException exception) {
+      throw new RuntimeException(
+          "Something went wrong while downloading Floodgate for " + platformName,
+          exception
+      );
+    }
+  }
 }
