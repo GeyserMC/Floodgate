@@ -2,7 +2,6 @@ plugins {
     `java-library`
     id("floodgate.build-logic")
     id("io.freefair.lombok") version "6.3.0" apply false
-    id("org.quiltmc.loom") version "0.12.+" apply false
 }
 
 allprojects {

@@ -2,8 +2,6 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
     repositories {
-        //jcenter()
-        maven("https://maven.quiltmc.org/repository/release") { name = "Quilt" }
         maven("https://maven.fabricmc.net") { name = "Fabric" }
         gradlePluginPortal()
     }

@@ -11,7 +11,7 @@ dependencies {
 
 tasks {
     processResources {
-        filesMatching(listOf("plugin.yml", "bungee.yml", "velocity-plugin.json")) {
+        filesMatching(listOf("plugin.yml", "bungee.yml", "velocity-plugin.json", "fabric.mod.json")) {
             expand(
                 "id" to "floodgate",
                 "name" to "floodgate",
