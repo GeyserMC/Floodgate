@@ -4,7 +4,7 @@ val loaderVersion = "0.17.5-beta.1"
 val quiltedFabricVersion = "4.0.0-beta.11+0.60.0"
 
 plugins {
-    id("org.quiltmc.loom") version "0.12.+"
+    id("org.quiltmc.loom")
     id("java")
     id("maven-publish")
 }
@@ -22,6 +22,14 @@ tasks.withType<JavaCompile> {
 
 loom {
     accessWidenerPath.set(file("src/main/resources/floodgate.accesswidener"))
+}
+
+repositories {
+    // specifically for adventure-platform-fabric:5.4.0-SNAPSHOT
+    maven("https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+        name = "sonatype-oss-snapshots1"
+        mavenContent { snapshotsOnly() }
+    }
 }
 
 dependencies {

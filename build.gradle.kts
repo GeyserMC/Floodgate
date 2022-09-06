@@ -2,12 +2,50 @@ plugins {
     `java-library`
     id("floodgate.build-logic")
     id("io.freefair.lombok") version "6.3.0" apply false
+    id("org.quiltmc.loom") version "0.12.+" apply false
 }
 
 allprojects {
     group = "org.geysermc.floodgate"
     version = "2.2.0-SNAPSHOT"
     description = "Allows Bedrock players to join Java edition servers while keeping the server in online mode"
+
+    repositories {
+//        mavenLocal()
+
+        // Geyser, Cumulus etc.
+        maven("https://repo.opencollab.dev/maven-releases") {
+            mavenContent { releasesOnly() }
+        }
+        maven("https://repo.opencollab.dev/maven-snapshots") {
+            mavenContent { snapshotsOnly() }
+        }
+
+        // Spigot, BungeeCord
+        maven("https://oss.sonatype.org/content/repositories/snapshots") {
+            mavenContent { snapshotsOnly() }
+        }
+
+        // Paper, Velocity
+        maven("https://repo.papermc.io/repository/maven-public") {
+            content {
+                includeGroupByRegex(
+                    "(io\\.papermc\\..*|com\\.destroystokyo\\..*|com\\.velocitypowered)"
+                )
+            }
+        }
+
+        maven("https://libraries.minecraft.net") {
+            name = "minecraft"
+            mavenContent { releasesOnly() }
+        }
+
+        mavenCentral()
+
+        maven("https://jitpack.io") {
+            content { includeGroupByRegex("com\\.github\\..*") }
+        }
+    }
 }
 
 val deployProjects = setOf(
