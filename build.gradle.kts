@@ -15,6 +15,7 @@ val deployProjects = setOf(
     // for future Floodgate integration + Fabric
     projects.core,
     projects.bungee,
+    projects.fabric,
     projects.spigot,
     projects.velocity
 ).map { it.dependencyProject }

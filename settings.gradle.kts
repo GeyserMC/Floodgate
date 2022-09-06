@@ -1,7 +1,7 @@
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    //repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS) todo: this breaks fabric
     repositories {
 //        mavenLocal()
 
@@ -32,8 +32,14 @@ dependencyResolutionManagement {
             mavenContent { snapshotsOnly() }
         }
 
-        // BungeeCord
+        // BungeeCord and Fabric
         maven("https://oss.sonatype.org/content/repositories/snapshots") {
+            mavenContent { snapshotsOnly() }
+        }
+
+        // specifically for adventure-platform-fabric:5.4.0-SNAPSHOT
+        maven("https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+            name = "sonatype-oss-snapshots1"
             mavenContent { snapshotsOnly() }
         }
 
@@ -52,6 +58,8 @@ dependencyResolutionManagement {
 
 pluginManagement {
     repositories {
+        //jcenter()
+        maven("https://maven.fabricmc.net") { name = "Fabric" }
         gradlePluginPortal()
     }
     plugins {
@@ -66,6 +74,7 @@ include(":api")
 include(":ap")
 include(":core")
 include(":bungee")
+include(":fabric")
 include(":spigot")
 include(":velocity")
 include(":sqlite")

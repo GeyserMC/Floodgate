@@ -1,0 +1,6 @@
+accessWidener v1 named
+
+# To change login state
+accessible class net/minecraft/server/network/ServerLoginPacketListenerImpl$State
+# For player skin refreshing
+accessible class net/minecraft/server/level/ChunkMap$TrackedEntity
