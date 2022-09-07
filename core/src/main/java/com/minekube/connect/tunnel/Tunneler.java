@@ -75,6 +75,8 @@ public class Tunneler implements Closeable {
             }
         };
 
+        AtomicBoolean opened = new AtomicBoolean();
+
         WebSocket ws = httpClient.newWebSocket(request, new WebSocketListener() {
             @Override
             public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
@@ -100,6 +102,7 @@ public class Tunneler implements Closeable {
 
             @Override
             public void onOpen(@NotNull WebSocket webSocket, @NotNull Response response) {
+                opened.set(true);
                 // TODO log connected(?)
             }
         });
@@ -118,6 +121,11 @@ public class Tunneler implements Closeable {
                     ws.close(1002, t.getLocalizedMessage());
                 }
                 handlerOnClose.run();
+            }
+
+            @Override
+            public boolean opened() {
+                return opened.get();
             }
         };
     }

@@ -25,6 +25,8 @@
 
 package com.minekube.connect.network.netty;
 
+import com.google.rpc.Code;
+import com.google.rpc.Status;
 import com.minekube.connect.api.SimpleConnectApi;
 import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.api.player.ConnectPlayer;
@@ -52,7 +54,7 @@ public class LocalChannelInboundHandler extends SimpleChannelInboundHandler<Byte
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         // Reject session proposal in case we are still able to and connection was stopped very early.
-        sessionProposal.reject(StatusProto.fromThrowable(cause));
+        rejectProposal(StatusProto.fromThrowable(cause));
         ctx.close();
         super.exceptionCaught(ctx, cause);
     }
@@ -80,8 +82,22 @@ public class LocalChannelInboundHandler extends SimpleChannelInboundHandler<Byte
     public void channelInactive(@NotNull ChannelHandlerContext ctx) throws Exception {
         api.setPendingRemove(player);
         tunnelConn.close();
-        // Reject session proposal in case we are still able to and connection was stopped very early.
-        sessionProposal.reject(null);
+
+        rejectProposal(Status.newBuilder()
+                .setCode(Code.UNKNOWN_VALUE)
+                .setMessage("local connection closed")
+                .build());
+
         super.channelInactive(ctx);
+    }
+
+    private void rejectProposal(Status reason) {
+        // Reject session proposal if the tunnel was never opened.
+        // Helps to prevent confusion by the watch & tunnel services
+        // since a session proposal is automatically accepted a when
+        // we opened the tunnel, so we should not send a reject after it.
+        if (!tunnelConn.opened()) {
+            sessionProposal.reject(reason);
+        }
     }
 }

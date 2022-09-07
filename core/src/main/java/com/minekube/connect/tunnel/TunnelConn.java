@@ -43,4 +43,14 @@ public abstract class TunnelConn {
     public void close() {
         close(null);
     }
+
+    /**
+     * Indicated whether this tunnel was ever opened at some point.
+     * Does not indicate the current active state.
+     *
+     * @return whether the tunnel was successfully opened at some point in time
+     */
+    public boolean opened() {
+        return false;
+    }
 }
