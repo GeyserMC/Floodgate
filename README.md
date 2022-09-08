@@ -21,10 +21,10 @@ isolated from the upstream.
 
 ## Working setups
 
-The Connect plugin supports the following platform settings.
+When installing the Connect plugin the following platform settings are supported.
 
 - PaperMC/Spigot
-    - ! Must always set `enforce-secure-profile: false` in [server.properties](https://minecraft.fandom.com/wiki/Server.properties)
+    - If running in Online mode you must set to `enforce-secure-profile: false` in [server.properties](https://minecraft.fandom.com/wiki/Server.properties)
     - ✔️️ No forwarding + Online mode
     - ✔️ No forwarding + Offline mode
     - ✔️ Velocity forwarding + Online/Offline mode
@@ -35,10 +35,11 @@ The Connect plugin supports the following platform settings.
         - ❌ Can't connect to Velocity enabled PaperMC server through Velocity proxy
     - ✔️ Bungee forwarding (aka legacy) + Offline/Offline mode
     - ✔️ None forwarding + Online/Offline mode
-    - ✔️ `force-key-authentication: true`
+    - ✔️ `force-key-authentication: true` in [velocity.toml](https://github.com/PaperMC/Velocity/blob/dev/3.0.0/proxy/src/main/resources/default-velocity.toml#L19)
 - Bungee
     - ✔️ Bungee forwarding + Offline mode
     - ✔️ Bungee forwarding + Online mode
+    - ✔️ `enforce_secure_profile: true` in [config.yml](https://www.spigotmc.org/wiki/bungeecord-configuration-guide/)
 
 You can install the Connect plugin on any of the above platforms. The plugin will automatically
 detect the platform and will configure itself accordingly.
