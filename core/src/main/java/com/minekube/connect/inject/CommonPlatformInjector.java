@@ -106,7 +106,7 @@ public abstract class CommonPlatformInjector implements PlatformInjector {
     }
 
     /**
-     * Method to loop throguh all the addons and call {@link InjectorAddon#onChannelClosed(Channel)}
+     * Method to loop through all the addons and call {@link InjectorAddon#onChannelClosed(Channel)}
      * if {@link InjectorAddon#shouldInject()}
      *
      * @param channel the channel that was injected

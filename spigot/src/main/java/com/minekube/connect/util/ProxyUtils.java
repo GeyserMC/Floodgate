@@ -25,53 +25,21 @@
 
 package com.minekube.connect.util;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.minekube.connect.util.ReflectionUtils.getField;
-
-import java.lang.reflect.Field;
-
-@SuppressWarnings("ConstantConditions")
 public final class ProxyUtils {
-    private static final Field IS_BUNGEE_DATA;
-    private static final Field IS_MODERN_FORWARDING;
-    private static final Field VELOCITY_SECRET_KEY;
-
-    static {
-        Class<?> spigotConfig = ReflectionUtils.getClass("org.spigotmc.SpigotConfig");
-        IS_BUNGEE_DATA = getField(spigotConfig, "bungee");
-        checkNotNull(IS_BUNGEE_DATA, "bungee field cannot be null. Are you using CraftBukkit?");
-
-        Field velocitySupport;
-        Field velocitySecretKey;
-        try {
-            Class<?> paperConfig = Class.forName("com.destroystokyo.paper.PaperConfig");
-            velocitySupport = getField(paperConfig, "velocitySupport");
-            velocitySecretKey = getField(paperConfig, "velocitySecretKey");
-        } catch (ClassNotFoundException e) {
-            // We're not on a platform that has modern forwarding
-            velocitySupport = null; // NOPMD - there's really not a better way around this unless you want to use an optional
-            velocitySecretKey = null; // NOPMD
-        }
-        IS_MODERN_FORWARDING = velocitySupport;
-        VELOCITY_SECRET_KEY = velocitySecretKey;
-    }
 
     public static boolean isProxyData() {
         return isBungeeData() || isVelocitySupport();
     }
 
     public static boolean isBungeeData() {
-        return ReflectionUtils.getCastedValue(null, IS_BUNGEE_DATA);
+        return ReflectionUtils.castedStaticBooleanValue(ClassNames.BUNGEE);
     }
 
     public static boolean isVelocitySupport() {
-        if (IS_MODERN_FORWARDING == null) {
+        if (ClassNames.PAPER_VELOCITY_SUPPORT == null) {
             return false;
         }
-        return ReflectionUtils.getCastedValue(null, IS_MODERN_FORWARDING);
-    }
 
-    public static byte[] velocitySecretKey() {
-        return ReflectionUtils.getCastedValue(null, VELOCITY_SECRET_KEY);
+        return ClassNames.PAPER_VELOCITY_SUPPORT.getAsBoolean();
     }
 }

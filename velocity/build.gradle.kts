@@ -5,7 +5,7 @@ var guavaVersion = "25.1-jre"
 
 dependencies {
     api(projects.core)
-    api("cloud.commandframework", "cloud-velocity", Versions.cloudVersion)
+    implementation("cloud.commandframework", "cloud-velocity", Versions.cloudVersion)
 }
 
 relocate("cloud.commandframework")

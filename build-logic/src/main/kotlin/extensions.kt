@@ -45,29 +45,30 @@ fun Project.lastCommitHash(): String? =
 // retrieved from https://wiki.jenkins-ci.org/display/JENKINS/Building+a+software+project
 // some properties might be specific to Jenkins
 fun Project.branchName(): String =
-    System.getProperty("GIT_BRANCH", "local/dev")
-
+    System.getenv("GIT_BRANCH") ?: "local/dev"
 fun Project.buildNumber(): Int =
-    Integer.parseInt(System.getProperty("BUILD_NUMBER", "-1"))
+    Integer.parseInt(System.getenv("BUILD_NUMBER") ?: "-1")
 
 fun Project.buildNumberAsString(): String =
     buildNumber().takeIf { it != -1 }?.toString() ?: "??"
 
-val providedDependencies = mutableMapOf<String, MutableSet<String>>()
+val providedDependencies = mutableMapOf<String, MutableSet<Pair<String, Any>>>()
 val relocatedPackages = mutableMapOf<String, MutableSet<String>>()
 
 fun Project.provided(pattern: String, name: String, version: String, excludedOn: Int = 0b110) {
-    providedDependencies.getOrPut(project.name) { mutableSetOf() }
-        .add(
-            "${calcExclusion(pattern, 0b100, excludedOn)}:" +
-                    "${calcExclusion(name, 0b10, excludedOn)}:" +
-                    calcExclusion(version, 0b1, excludedOn)
-        )
+    val format = "${calcExclusion(pattern, 0b100, excludedOn)}:" +
+            "${calcExclusion(name, 0b10, excludedOn)}:" +
+            calcExclusion(version, 0b1, excludedOn)
+
+    providedDependencies.getOrPut(project.name) { mutableSetOf() }.add(Pair(format, format))
     dependencies.add("compileOnlyApi", "$pattern:$name:$version")
 }
 
-fun Project.provided(dependency: ProjectDependency) =
-    provided(dependency.group!!, dependency.name, dependency.version!!)
+fun Project.provided(dependency: ProjectDependency) {
+    providedDependencies.getOrPut(project.name) { mutableSetOf() }
+        .add(Pair(dependency.group + ":" + dependency.name, dependency))
+    dependencies.add("compileOnlyApi", dependency)
+}
 
 
 fun Project.relocate(pattern: String) =

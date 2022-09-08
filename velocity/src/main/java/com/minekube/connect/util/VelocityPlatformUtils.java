@@ -18,4 +18,9 @@ public final class VelocityPlatformUtils extends PlatformUtils {
     public String minecraftVersion() {
         return ProtocolVersion.MAXIMUM_VERSION.getMostRecentSupportedVersion();
     }
+
+    @Override
+    public String serverImplementationName() {
+        return server.getVersion().getName();
+    }
 }

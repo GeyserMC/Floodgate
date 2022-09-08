@@ -25,9 +25,14 @@
 
 package com.minekube.connect.util;
 
+import static com.minekube.connect.util.ReflectionUtils.castedStaticBooleanValue;
+import static com.minekube.connect.util.ReflectionUtils.getBooleanValue;
+import static com.minekube.connect.util.ReflectionUtils.getClassSilently;
 import static com.minekube.connect.util.ReflectionUtils.getField;
 import static com.minekube.connect.util.ReflectionUtils.getFieldOfType;
 import static com.minekube.connect.util.ReflectionUtils.getMethod;
+import static com.minekube.connect.util.ReflectionUtils.getValue;
+import static com.minekube.connect.util.ReflectionUtils.invoke;
 
 import com.google.common.base.Preconditions;
 import com.mojang.authlib.GameProfile;
@@ -36,6 +41,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.SocketAddress;
+import java.util.function.BooleanSupplier;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
@@ -59,11 +67,16 @@ public class ClassNames {
     public static final Field LOGIN_PROFILE;
     public static final Field PACKET_LISTENER;
 
+    @Nullable public static final Field PAPER_DISABLE_USERNAME_VALIDATION;
+    @Nullable public static final BooleanSupplier PAPER_VELOCITY_SUPPORT;
+
     public static final Method GET_PROFILE_METHOD;
     public static final Method LOGIN_DISCONNECT;
     public static final Method NETWORK_EXCEPTION_CAUGHT;
     public static final Method INIT_UUID;
     public static final Method FIRE_LOGIN_EVENTS;
+
+    public static final Field BUNGEE;
 
     static {
         String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
@@ -72,18 +85,18 @@ public class ClassNames {
         // SpigotSkinApplier
         Class<?> craftPlayerClass = ReflectionUtils.getClass(
                 "org.bukkit.craftbukkit." + version + ".entity.CraftPlayer");
-        GET_PROFILE_METHOD = ReflectionUtils.getMethod(craftPlayerClass, "getProfile");
+        GET_PROFILE_METHOD = getMethod(craftPlayerClass, "getProfile");
         checkNotNull(GET_PROFILE_METHOD, "Get profile method");
 
         String nmsPackage = SPIGOT_MAPPING_PREFIX + '.';
 
         // SpigotInjector
-        MINECRAFT_SERVER = getClassOrFallBack(
+        MINECRAFT_SERVER = getClassOrFallback(
                 "net.minecraft.server.MinecraftServer",
                 nmsPackage + "MinecraftServer"
         );
 
-        SERVER_CONNECTION = getClassOrFallBack(
+        SERVER_CONNECTION = getClassOrFallback(
                 "net.minecraft.server.network.ServerConnection",
                 nmsPackage + "ServerConnection"
         );
@@ -98,14 +111,14 @@ public class ClassNames {
                 craftOfflinePlayerClass, true, craftServerClass, GameProfile.class);
 
         // SpigotDataHandler
-        Class<?> networkManager = getClassOrFallBack(
+        Class<?> networkManager = getClassOrFallback(
                 "net.minecraft.network.NetworkManager",
                 nmsPackage + "NetworkManager"
         );
 
         SOCKET_ADDRESS = getFieldOfType(networkManager, SocketAddress.class, false);
 
-        HANDSHAKE_PACKET = getClassOrFallBack(
+        HANDSHAKE_PACKET = getClassOrFallback(
                 "net.minecraft.network.protocol.handshake.PacketHandshakingInSetProtocol",
                 nmsPackage + "PacketHandshakingInSetProtocol"
         );
@@ -113,12 +126,12 @@ public class ClassNames {
         HANDSHAKE_HOST = getFieldOfType(HANDSHAKE_PACKET, String.class);
         checkNotNull(HANDSHAKE_HOST, "Handshake host");
 
-        LOGIN_START_PACKET = getClassOrFallBack(
+        LOGIN_START_PACKET = getClassOrFallback(
                 "net.minecraft.network.protocol.login.PacketLoginInStart",
                 nmsPackage + "PacketLoginInStart"
         );
 
-        LOGIN_LISTENER = getClassOrFallBack(
+        LOGIN_LISTENER = getClassOrFallback(
                 "net.minecraft.server.network.LoginListener",
                 nmsPackage + "LoginListener"
         );
@@ -141,14 +154,14 @@ public class ClassNames {
         INIT_UUID = getMethod(LOGIN_LISTENER, "initUUID");
         checkNotNull(INIT_UUID, "initUUID from LoginListener");
 
-        Class<?> packetListenerClass = getClassOrFallBack(
+        Class<?> packetListenerClass = getClassOrFallback(
                 "net.minecraft.network.PacketListener",
                 nmsPackage + "PacketListener"
         );
         PACKET_LISTENER = getFieldOfType(networkManager, packetListenerClass);
         checkNotNull(PACKET_LISTENER, "Packet listener");
 
-        LOGIN_HANDLER = getClassOrFallBack(
+        LOGIN_HANDLER = getClassOrFallback(
                 "net.minecraft.server.network.LoginListener$LoginHandler",
                 nmsPackage + "LoginListener$LoginHandler"
         );
@@ -159,10 +172,60 @@ public class ClassNames {
 
         FIRE_LOGIN_EVENTS = getMethod(LOGIN_HANDLER, "fireEvents");
         checkNotNull(FIRE_LOGIN_EVENTS, "fireEvents from LoginHandler");
+
+        PAPER_DISABLE_USERNAME_VALIDATION = getField(LOGIN_LISTENER,
+                "iKnowThisMayNotBeTheBestIdeaButPleaseDisableUsernameValidation");
+
+        if (Constants.DEBUG_MODE) {
+            System.out.println("Paper disable username validation field exists? " +
+                    (PAPER_DISABLE_USERNAME_VALIDATION != null));
+        }
+
+        // ProxyUtils
+        Class<?> spigotConfig = ReflectionUtils.getClass("org.spigotmc.SpigotConfig");
+        checkNotNull(spigotConfig, "Spigot config");
+
+        BUNGEE = getField(spigotConfig, "bungee");
+        checkNotNull(BUNGEE, "Bungee field");
+
+        Class<?> paperConfigNew = getClassSilently(
+                "io.papermc.paper.configuration.GlobalConfiguration");
+        if (paperConfigNew != null) {
+            // 1.19 and later
+            Method paperConfigGet = checkNotNull(getMethod(paperConfigNew, "get"),
+                    "GlobalConfiguration get");
+            Field paperConfigProxies = checkNotNull(getField(paperConfigNew, "proxies"),
+                    "Proxies field");
+            Field paperConfigVelocity = checkNotNull(
+                    getField(paperConfigProxies.getType(), "velocity"),
+                    "velocity field");
+            Field paperVelocityEnabled = checkNotNull(
+                    getField(paperConfigVelocity.getType(), "enabled"),
+                    "Velocity enabled field");
+            PAPER_VELOCITY_SUPPORT = () -> {
+                Object paperConfigInstance = invoke(null, paperConfigGet);
+                Object proxiesInstance = getValue(paperConfigInstance, paperConfigProxies);
+                Object velocityInstance = getValue(proxiesInstance, paperConfigVelocity);
+                return getBooleanValue(velocityInstance, paperVelocityEnabled);
+            };
+        } else {
+            // Pre-1.19
+            Class<?> paperConfig = getClassSilently(
+                    "com.destroystokyo.paper.PaperConfig");
+
+            if (paperConfig != null) {
+                Field velocitySupport = getField(paperConfig, "velocitySupport");
+                // velocitySupport field is null pre-1.13
+                PAPER_VELOCITY_SUPPORT = velocitySupport != null ?
+                        () -> castedStaticBooleanValue(velocitySupport) : null;
+            } else {
+                PAPER_VELOCITY_SUPPORT = null;
+            }
+        }
     }
 
-    private static Class<?> getClassOrFallBack(String className, String fallbackName) {
-        Class<?> clazz = ReflectionUtils.getClassSilently(className);
+    private static Class<?> getClassOrFallback(String className, String fallbackName) {
+        Class<?> clazz = getClassSilently(className);
 
         if (clazz != null) {
             if (Constants.DEBUG_MODE) {
@@ -180,7 +243,7 @@ public class ClassNames {
         return clazz;
     }
 
-    private static void checkNotNull(Object toCheck, String objectName) {
-        Preconditions.checkNotNull(toCheck, objectName + " cannot be null");
+    private static <T> T checkNotNull(@CheckForNull T toCheck, @CheckForNull String objectName) {
+        return Preconditions.checkNotNull(toCheck, objectName + " cannot be null");
     }
 }

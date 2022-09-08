@@ -27,7 +27,7 @@ public final class Metrics {
     Metrics(ConnectConfig config,
             PlatformUtils platformUtils,
             ConnectApi api,
-            @Named("platformName") String platformName,
+            @Named("platformName") String implementationName,
             ConnectLogger logger) {
 
         MetricsConfig metricsConfig = config.getMetrics();
@@ -61,7 +61,7 @@ public final class Metrics {
 
                     return Collections.singletonMap(
                             categoryName,
-                            Collections.singletonMap(platformName, 1)
+                            Collections.singletonMap(implementationName, 1)
                     );
                 })
         );
@@ -72,10 +72,12 @@ public final class Metrics {
         );
 
         metricsBase.addCustomChart(
-                new SimplePie("connect_version", () -> Constants.VERSION)
-        );
+                new DrilldownPie("platform", () -> Collections.singletonMap(
+                        implementationName,
+                        Collections.singletonMap(platformUtils.serverImplementationName(), 1)
+                )));
 
-        metricsBase.addCustomChart(new SimplePie("platform", () -> platformName));
+        metricsBase.addCustomChart(new SimplePie("platform", () -> implementationName));
 
         metricsBase.addCustomChart(new AdvancedPie("passthrough_auth_player_count", () -> {
             Map<String, Integer> valueMap = new HashMap<>();
@@ -91,7 +93,7 @@ public final class Metrics {
                     // e.g.: 1.16.5 => (Spigot, 1)
                     return Collections.singletonMap(
                             platformUtils.minecraftVersion(),
-                            Collections.singletonMap(platformName, 1)
+                            Collections.singletonMap(implementationName, 1)
                     );
                 })
         );

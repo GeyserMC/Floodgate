@@ -16,4 +16,9 @@ public class SpigotPlatformUtils extends PlatformUtils {
     public String minecraftVersion() {
         return Bukkit.getServer().getVersion().split("\\(MC: ")[1].split("\\)")[0];
     }
+
+    @Override
+    public String serverImplementationName() {
+        return Bukkit.getServer().getName();
+    }
 }

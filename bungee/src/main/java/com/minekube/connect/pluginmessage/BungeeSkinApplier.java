@@ -25,27 +25,56 @@
 
 package com.minekube.connect.pluginmessage;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.minekube.connect.util.ReflectionUtils.getConstructor;
 import static com.minekube.connect.util.ReflectionUtils.getFieldOfType;
-import static com.minekube.connect.util.ReflectionUtils.setValue;
+import static com.minekube.connect.util.ReflectionUtils.getMethodByName;
 
 import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.api.player.ConnectPlayer;
 import com.minekube.connect.skin.SkinApplier;
 import com.minekube.connect.skin.SkinData;
+import com.minekube.connect.util.ReflectionUtils;
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.connection.LoginResult;
-import net.md_5.bungee.connection.LoginResult.Property;
 
 @RequiredArgsConstructor
 public final class BungeeSkinApplier implements SkinApplier {
-    private static final Field LOGIN_RESULT;
+    private static final Constructor<?> LOGIN_RESULT_CONSTRUCTOR;
+    private static final Field LOGIN_RESULT_FIELD;
+    private static final Method SET_PROPERTIES_METHOD;
+
+    private static final Class<?> PROPERTY_CLASS;
+    private static final Constructor<?> PROPERTY_CONSTRUCTOR;
+
 
     static {
-        LOGIN_RESULT = getFieldOfType(InitialHandler.class, LoginResult.class);
+        PROPERTY_CLASS = ReflectionUtils.getClassOrFallbackPrefixed(
+                "protocol.Property", "connection.LoginResult$Property"
+        );
+
+        LOGIN_RESULT_CONSTRUCTOR = getConstructor(
+                LoginResult.class, true,
+                String.class, String.class, Array.newInstance(PROPERTY_CLASS, 0).getClass()
+        );
+
+        LOGIN_RESULT_FIELD = getFieldOfType(InitialHandler.class, LoginResult.class);
+        checkNotNull(LOGIN_RESULT_FIELD, "LoginResult field cannot be null");
+
+        SET_PROPERTIES_METHOD = getMethodByName(LoginResult.class, "setProperties", true);
+
+        PROPERTY_CONSTRUCTOR = ReflectionUtils.getConstructor(
+                PROPERTY_CLASS, true,
+                String.class, String.class, String.class
+        );
+        checkNotNull(PROPERTY_CONSTRUCTOR, "Property constructor cannot be null");
     }
 
     private final ConnectLogger logger;
@@ -61,7 +90,7 @@ public final class BungeeSkinApplier implements SkinApplier {
         try {
             handler = (InitialHandler) player.getPendingConnection();
         } catch (Exception exception) {
-            logger.error("Incompatible BungeeCord fork detected", exception);
+            logger.error("Incompatible Bungeecord fork detected", exception);
             return;
         }
 
@@ -70,12 +99,20 @@ public final class BungeeSkinApplier implements SkinApplier {
         // which Connect players don't have
         if (loginResult == null) {
             // id and name are unused and properties will be overridden
-            loginResult = new LoginResult(null, null, null);
-            setValue(handler, LOGIN_RESULT, loginResult);
+            loginResult = (LoginResult) ReflectionUtils.newInstance(
+                    LOGIN_RESULT_CONSTRUCTOR, null, null, null
+            );
+            ReflectionUtils.setValue(handler, LOGIN_RESULT_FIELD, loginResult);
         }
 
-        Property property = new Property("textures", skinData.getValue(), skinData.getSignature());
+        Object property = ReflectionUtils.newInstance(
+                PROPERTY_CONSTRUCTOR,
+                "textures", skinData.getValue(), skinData.getSignature()
+        );
 
-        loginResult.setProperties(new Property[]{property});
+        Object propertyArray = Array.newInstance(PROPERTY_CLASS, 1);
+        Array.set(propertyArray, 0, property);
+
+        ReflectionUtils.invoke(loginResult, SET_PROPERTIES_METHOD, propertyArray);
     }
 }
