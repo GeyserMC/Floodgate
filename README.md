@@ -24,7 +24,7 @@ isolated from the upstream.
 The Connect plugin supports the following platform settings.
 
 - PaperMC/Spigot
-    - Must always set `enforce-secure-profile: false` in [server.properties](https://minecraft.fandom.com/wiki/Server.properties)
+    - ! Must always set `enforce-secure-profile: false` in [server.properties](https://minecraft.fandom.com/wiki/Server.properties)
     - ✔️️ No forwarding + Online mode
     - ✔️ No forwarding + Offline mode
     - ✔️ Velocity forwarding + Online/Offline mode
