@@ -48,8 +48,8 @@ services. This ultimately allows you to add your Minecraft networks to the globa
 You can also install the Connect plugin on your Spigot/PaperMc servers and still join them from your
 own proxies as well as through the Connect network.
 
-You don't need to use own proxies since the Connect network already works like global shared proxy
+You don't need to use own proxies since the Connect network already works like a global shared proxy
 where every Minecraft server/proxy can connect to.
 
 There will be public APIs available for you to manage your connected endpoints and players like
-sending a players a message, moving them between your servers and so on.
+sending players a message, moving them between your servers and so on.
