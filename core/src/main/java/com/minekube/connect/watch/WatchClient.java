@@ -44,7 +44,9 @@ import org.jetbrains.annotations.Nullable;
 public class WatchClient {
     private static final String ENDPOINT_HEADER = "Connect-Endpoint";
     private static final String WATCH_URL = System.getenv().getOrDefault(
-            "CONNECT_WATCH_URL", "wss://connect-watch.minekube.net");
+            // TODO switch to production endpoint when launched
+            // Use the demo endpoint for now
+            "CONNECT_WATCH_URL", "wss://demo.minekube.net/watch");
 
     private final OkHttpClient httpClient;
     private final ConnectConfig config;

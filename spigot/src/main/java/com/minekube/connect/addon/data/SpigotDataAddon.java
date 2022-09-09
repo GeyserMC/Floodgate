@@ -59,10 +59,7 @@ public final class SpigotDataAddon implements InjectorAddon {
 
     @Override
     public void onChannelClosed(Channel channel) {
-        System.out.println("server side player channel closed");
         LocalSession.context(channel, ctx -> {
-            // TODO test if we get this message
-            System.out.println("and got local session context! NICE!!!");
             if (api.setPendingRemove(ctx.getPlayer())) {
                 logger.translatedInfo("connect.ingame.disconnect_name",
                         ctx.getPlayer().getUsername());
