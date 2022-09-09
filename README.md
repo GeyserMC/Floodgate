@@ -9,8 +9,7 @@ Minekube Connect allows you to connect any Minecraft server, whether online mode
 your protected home network or anywhere else in the world, with our highly available, performant and
 low latency edge proxies network nearest to you.
 
-Please refer to https://github.com/minekube/connect for more documentation. A documentation website
-is following.
+Please refer to https://developers.minekube.com/connect for more documentation.
 
 **Special thanks goes to the [GeyserMC](https://github.com/GeyserMC) developers for their Floodgate
 and GeyserMC open source projects.** This repository forks Floodgate and only reuses its phenomenal
