@@ -11,13 +11,6 @@ low latency edge proxies network nearest to you.
 
 Please refer to https://developers.minekube.com/connect for more documentation.
 
-**Special thanks goes to the [GeyserMC](https://github.com/GeyserMC) developers for their Floodgate
-and GeyserMC open source projects.** This repository forks Floodgate and only reuses its phenomenal
-project layout for our plugin as well as the very similar internal player connection injection
-methods applied. Note that our plugin is completely different from Floodgate and Geyser plugins as
-it differs in functionality and should work alongside those as we have refactored our plugin to work
-isolated from the upstream.
-
 ## Working setups
 
 When installing the Connect plugin the following platform settings are supported.
@@ -55,3 +48,12 @@ where every Minecraft server/proxy can connect to.
 
 There will be public APIs available for you to manage your connected endpoints and players like
 sending players a message, moving them between your servers and so on.
+
+## Special thanks
+
+**Special thanks goes to the [GeyserMC](https://github.com/GeyserMC) developers for their Floodgate
+and GeyserMC open source projects.** This repository forks Floodgate and only reuses its phenomenal
+project layout for our plugin as well as the very similar internal player connection injection
+methods applied. Note that our plugin is completely different from Floodgate and Geyser plugins as
+it differs in functionality and should work alongside those as we have refactored our plugin to work
+isolated from the upstream.
