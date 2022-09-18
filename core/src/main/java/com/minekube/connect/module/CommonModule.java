@@ -40,6 +40,7 @@ import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.api.packet.PacketHandlers;
 import com.minekube.connect.config.ConfigHolder;
 import com.minekube.connect.config.ConfigLoader;
+import com.minekube.connect.config.ConfigLoader.EndpointNameGenerator;
 import com.minekube.connect.config.ConnectConfig;
 import com.minekube.connect.inject.CommonPlatformInjector;
 import com.minekube.connect.packet.PacketHandlersImpl;
@@ -88,8 +89,10 @@ public class CommonModule extends AbstractModule {
     @Singleton
     public ConfigLoader configLoader(
             @Named("configClass") Class<? extends ConnectConfig> configClass,
-            ConnectLogger logger) {
-        return new ConfigLoader(dataDirectory, configClass, logger);
+            ConnectLogger logger,
+            EndpointNameGenerator endpointNameGenerator
+    ) {
+        return new ConfigLoader(dataDirectory, configClass, endpointNameGenerator, logger);
     }
 
     @Provides
@@ -123,7 +126,8 @@ public class CommonModule extends AbstractModule {
                         // Add authorization token to every request
                         .addHeader("Authorization", "Bearer " + apiToken)
                         // Add Connect Metadata to every request
-                        .addHeader("Connect-TotalPlayers", String.valueOf(platformUtils.getPlayerCount()))
+                        .addHeader("Connect-TotalPlayers",
+                                String.valueOf(platformUtils.getPlayerCount()))
                         .addHeader("Connect-Players", String.valueOf(api.getPlayerCount()))
                         .addHeader("Connect-AuthType", platformUtils.authType().name())
                         .addHeader("Connect-Platform", implementationName)

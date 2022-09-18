@@ -48,6 +48,8 @@ import java.nio.file.Path;
 import java.util.UUID;
 
 public class ConnectPlatform {
+    private static final String DOMAIN_SUFFIX = ".demo.minekube.net";
+
     private static final UUID KEY = UUID.randomUUID();
     private final ConnectApi api;
     private final PlatformInjector injector;
@@ -116,6 +118,8 @@ public class ConnectPlatform {
         this.guice = guice.createChildInjector(new PostInitializeModule(postInitializeModules));
 
         guice.getInstance(Metrics.class);
+
+        logger.info("Your public domain: "+config.getEndpoint()+DOMAIN_SUFFIX);
 
         return true;
     }
