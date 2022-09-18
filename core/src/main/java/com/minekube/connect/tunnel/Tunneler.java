@@ -64,7 +64,7 @@ public class Tunneler implements Closeable {
         checkArgument(!sessionId.isEmpty(), "sessionId must not be empty");
 
         Request request = new Request.Builder()
-                .url(tunnelServiceAddr) // TODO default env var
+                .url(tunnelServiceAddr)
                 .addHeader(SESSION_HEADER, sessionId)
                 .build();
 

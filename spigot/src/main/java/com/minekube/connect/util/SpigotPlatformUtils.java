@@ -21,4 +21,9 @@ public class SpigotPlatformUtils extends PlatformUtils {
     public String serverImplementationName() {
         return Bukkit.getServer().getName();
     }
+
+    @Override
+    public int getPlayerCount() {
+        return Bukkit.getServer().getOnlinePlayers().size();
+    }
 }

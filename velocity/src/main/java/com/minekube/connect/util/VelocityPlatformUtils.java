@@ -23,4 +23,9 @@ public final class VelocityPlatformUtils extends PlatformUtils {
     public String serverImplementationName() {
         return server.getVersion().getName();
     }
+
+    @Override
+    public int getPlayerCount() {
+        return server.getPlayerCount();
+    }
 }

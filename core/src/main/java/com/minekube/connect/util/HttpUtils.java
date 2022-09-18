@@ -28,6 +28,7 @@ package com.minekube.connect.util;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.minekube.connect.api.ConnectApi;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -183,15 +184,10 @@ public class HttpUtils {
     }
 
 
-    public static OkHttpClient defaultOkHttpClient() {
+    public static OkHttpClient defaultOkHttpClient(ConnectApi api) {
         return new OkHttpClient.Builder()
                 .protocols(ImmutableList.of(Protocol.HTTP_1_1, Protocol.HTTP_2))
                 .connectionPool(new ConnectionPool(100, 5, TimeUnit.MINUTES))
-                .addInterceptor(chain -> chain.proceed(chain.request()
-//                        .newBuilder()
-//                        .addHeader() // TODO add common client metadata to every request
-//                        .build()
-                ))
                 .build();
     }
 }

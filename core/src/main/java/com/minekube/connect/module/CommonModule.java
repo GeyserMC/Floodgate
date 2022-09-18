@@ -43,8 +43,10 @@ import com.minekube.connect.config.ConfigLoader;
 import com.minekube.connect.config.ConnectConfig;
 import com.minekube.connect.inject.CommonPlatformInjector;
 import com.minekube.connect.packet.PacketHandlersImpl;
+import com.minekube.connect.platform.util.PlatformUtils;
 import com.minekube.connect.util.HttpUtils;
 import com.minekube.connect.util.LanguageManager;
+import com.minekube.connect.util.Metrics;
 import com.minekube.connect.util.Utils;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -100,7 +102,11 @@ public class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public OkHttpClient okHttpClient() throws IOException {
+    public OkHttpClient okHttpClient(
+            ConnectApi api,
+            PlatformUtils platformUtils,
+            @Named("platformName") String implementationName
+    ) throws IOException {
         Path tokenFile = dataDirectory.resolve("token.json");
 
         Optional<String> token = Token.load(tokenFile);
@@ -112,10 +118,22 @@ public class CommonModule extends AbstractModule {
         }
         final String apiToken = token.get();
 
-        return HttpUtils.defaultOkHttpClient().newBuilder()
+        return HttpUtils.defaultOkHttpClient(api).newBuilder()
                 .addInterceptor(chain -> chain.proceed(chain.request().newBuilder()
                         // Add authorization token to every request
                         .addHeader("Authorization", "Bearer " + apiToken)
+                        // Add Connect Metadata to every request
+                        .addHeader("Connect-TotalPlayers", String.valueOf(platformUtils.getPlayerCount()))
+                        .addHeader("Connect-Players", String.valueOf(api.getPlayerCount()))
+                        .addHeader("Connect-AuthType", platformUtils.authType().name())
+                        .addHeader("Connect-Platform", implementationName)
+                        .addHeader("Connect-Platform", platformUtils.serverImplementationName())
+                        .addHeader("Connect-MCVersion", platformUtils.minecraftVersion())
+                        .addHeader("Connect-JavaVersion", Metrics.JAVA_VERSION)
+                        .addHeader("Connect-osName", Metrics.OS_NAME)
+                        .addHeader("Connect-osArch", Metrics.OS_ARCH)
+                        .addHeader("Connect-osVersion", Metrics.OS_VERSION)
+                        .addHeader("Connect-coreCount", String.valueOf(Metrics.CORE_COUNT))
                         .build()))
                 .build();
     }

@@ -27,6 +27,14 @@ public abstract class PlatformUtils {
      */
     public abstract String serverImplementationName();
 
+    /**
+     * Returns the amount of players currently online,
+     * including Connect players.
+     *
+     * @return the amount of players online
+     */
+    public abstract int getPlayerCount();
+
     public enum AuthType {
         ONLINE,
         PROXIED,

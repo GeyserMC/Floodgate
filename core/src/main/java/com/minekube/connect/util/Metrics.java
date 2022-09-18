@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Named;
@@ -101,7 +102,7 @@ public final class Metrics {
         // Source: Geyser
         metricsBase.addCustomChart(new DrilldownPie("java_version", () -> {
             Map<String, Map<String, Integer>> map = new HashMap<>();
-            String javaVersion = System.getProperty("java.version");
+            String javaVersion = JAVA_VERSION;
             Map<String, Integer> entry = new HashMap<>();
             entry.put(javaVersion, 1);
 
@@ -125,9 +126,15 @@ public final class Metrics {
     }
 
     private void appendPlatformData(JsonObjectBuilder builder) {
-        builder.appendField("osName", System.getProperty("os.name"));
-        builder.appendField("osArch", System.getProperty("os.arch"));
-        builder.appendField("osVersion", System.getProperty("os.version"));
-        builder.appendField("coreCount", Runtime.getRuntime().availableProcessors());
+        builder.appendField("osName", OS_NAME);
+        builder.appendField("osArch",OS_ARCH);
+        builder.appendField("osVersion", OS_VERSION);
+        builder.appendField("coreCount", CORE_COUNT);
     }
+
+    public static final String JAVA_VERSION = System.getProperty("java.version");
+    public static final String OS_NAME = System.getProperty("os.name");
+    public static final String OS_ARCH = System.getProperty("os.arch");
+    public static final String OS_VERSION = System.getProperty("os.version");
+    public static final int CORE_COUNT = Runtime.getRuntime().availableProcessors();
 }
