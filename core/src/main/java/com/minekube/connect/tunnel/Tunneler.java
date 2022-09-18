@@ -28,10 +28,17 @@ package com.minekube.connect.tunnel;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.minekube.connect.tunnel.TunnelConn.Handler;
+import com.minekube.connect.util.ReflectionUtils;
 import java.io.Closeable;
+import java.io.EOFException;
+import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import okhttp3.Call;
@@ -54,6 +61,8 @@ public class Tunneler implements Closeable {
     }
 
     private static final String SESSION_HEADER = "Connect-Session";
+
+    private static final Field DATA = ReflectionUtils.getField(ByteString.class, "data");
 
     public TunnelConn tunnel(final String tunnelServiceAddr, String sessionId, Handler handler) {
         checkNotNull(tunnelServiceAddr, "tunnelServiceAddr must not be null");
@@ -91,13 +100,19 @@ public class Tunneler implements Closeable {
             @Override
             public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable t,
                                   @Nullable Response response) {
-                handler.onError(t);
+                if (!(t instanceof EOFException)) {
+                    handler.onError(t);
+                }
                 handlerOnClose.run();
             }
 
+
             @Override
             public void onMessage(@NotNull WebSocket webSocket, @NotNull ByteString bytes) {
-                handler.onReceive(bytes.toByteArray());
+                // handler.onReceive(bytes.toByteArray()); // would copy
+
+                // zero-copy get byte array
+                handler.onReceive(ReflectionUtils.getCastedValue(bytes, DATA));
             }
 
             @Override
@@ -118,7 +133,7 @@ public class Tunneler implements Closeable {
                 if (t == null) {
                     ws.close(1000, "tunnel closed clientside");
                 } else {
-                    ws.close(1002, t.getLocalizedMessage());
+                    ws.close(1002, t.toString());
                 }
                 handlerOnClose.run();
             }
@@ -134,7 +149,10 @@ public class Tunneler implements Closeable {
     public void close() { // todo call on plugin shutdown
         // closes all requests to tunnel services,
         // disconnects tunneled players instantaneously
-        Stream.of(httpClient.dispatcher().runningCalls(), httpClient.dispatcher().queuedCalls())
+        Stream.of(
+                        httpClient.dispatcher().runningCalls(),
+                        httpClient.dispatcher().queuedCalls()
+                )
                 .flatMap(Collection::stream)
                 .filter(call -> call.request().header(SESSION_HEADER) != null)
                 .forEach(Call::cancel);

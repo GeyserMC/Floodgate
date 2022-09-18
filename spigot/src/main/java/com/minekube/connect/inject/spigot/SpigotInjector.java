@@ -50,6 +50,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.NoSuchElementException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -126,6 +127,11 @@ public final class SpigotInjector extends CommonPlatformInjector {
     }
 
     public void injectClient(ChannelFuture future) {
+        try { // fix for reloads
+            future.channel().pipeline().remove("connect-init");
+        } catch (NoSuchElementException ignored) {
+        }
+
         future.channel().pipeline().addFirst("connect-init", new ChannelInboundHandlerAdapter() {
             @Override
             public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {

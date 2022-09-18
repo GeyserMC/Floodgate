@@ -177,9 +177,9 @@ public class WatcherRegister {
         @Override
         public void onError(Throwable t) {
             logger.error("Connection error with WatchService: " +
-                            t.getLocalizedMessage() + (
+                            t + (
                             t.getCause() == null ? ""
-                                    : " (cause: " + t.getCause().getLocalizedMessage() + ")"
+                                    : " (cause: " + t.getCause().toString() + ")"
                     )
             );
             retry();

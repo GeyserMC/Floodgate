@@ -81,7 +81,9 @@ public class LocalChannelInboundHandler extends SimpleChannelInboundHandler<Byte
     @Override
     public void channelInactive(@NotNull ChannelHandlerContext ctx) throws Exception {
         api.setPendingRemove(player);
-        tunnelConn.close();
+        if (tunnelConn != null) {
+            tunnelConn.close();
+        }
 
         rejectProposal(Status.newBuilder()
                 .setCode(Code.UNKNOWN_VALUE)

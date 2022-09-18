@@ -54,9 +54,9 @@ class TunnelHandler implements Handler {
             return;
         }
         logger.error("Connection error with TunnelService: " +
-                        t.getLocalizedMessage() + (
+                        t + (
                         t.getCause() == null ? ""
-                                : " (cause: " + t.getCause().getLocalizedMessage() + ")"
+                                : " (cause: " + t.getCause().toString() + ")"
                 )
         );
     }

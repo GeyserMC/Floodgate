@@ -87,7 +87,7 @@ public class WatchClient {
                     res = WatchResponse.parseFrom(bytes.asByteBuffer());
                 } catch (InvalidProtocolBufferException e) {
                     e.printStackTrace();
-                    webSocket.close(1002, e.getLocalizedMessage());
+                    webSocket.close(1002, e.toString());
                     return;
                 }
 
