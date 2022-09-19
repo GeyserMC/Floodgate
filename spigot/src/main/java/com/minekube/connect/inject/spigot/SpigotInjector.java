@@ -206,7 +206,7 @@ public final class SpigotInjector extends CommonPlatformInjector {
                 })
                 // Set to MAX_PRIORITY as MultithreadEventLoopGroup#newDefaultThreadFactory which DefaultEventLoopGroup implements does by default
                 .group(new DefaultEventLoopGroup(0,
-                        new DefaultThreadFactory("Geyser Spigot connection thread",
+                        new DefaultThreadFactory("Connect Spigot connection thread",
                                 Thread.MAX_PRIORITY)))
                 .localAddress(LocalAddress.ANY))
                 .bind()

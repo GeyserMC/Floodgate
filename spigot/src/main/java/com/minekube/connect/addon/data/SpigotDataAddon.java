@@ -31,6 +31,7 @@ import com.minekube.connect.api.SimpleConnectApi;
 import com.minekube.connect.api.inject.InjectorAddon;
 import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.config.ConnectConfig;
+import com.minekube.connect.network.netty.LocalChannelInboundHandler;
 import com.minekube.connect.network.netty.LocalSession;
 import io.netty.channel.Channel;
 
@@ -59,12 +60,7 @@ public final class SpigotDataAddon implements InjectorAddon {
 
     @Override
     public void onChannelClosed(Channel channel) {
-        LocalSession.context(channel, ctx -> {
-            if (api.setPendingRemove(ctx.getPlayer())) {
-                logger.translatedInfo("connect.ingame.disconnect_name",
-                        ctx.getPlayer().getUsername());
-            }
-        });
+        LocalSession.context(channel, ctx -> LocalChannelInboundHandler.onChannelClosed(ctx, api, logger));
     }
 
     @Override

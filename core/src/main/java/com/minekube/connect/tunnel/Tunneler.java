@@ -146,13 +146,9 @@ public class Tunneler implements Closeable {
     }
 
     @Override
-    public void close() { // todo call on plugin shutdown
-        // closes all requests to tunnel services,
-        // disconnects tunneled players instantaneously
-        Stream.of(
-                        httpClient.dispatcher().runningCalls(),
-                        httpClient.dispatcher().queuedCalls()
-                )
+    public void close() {
+        // cancel queued connections
+        Stream.of( httpClient.dispatcher().queuedCalls())
                 .flatMap(Collection::stream)
                 .filter(call -> call.request().header(SESSION_HEADER) != null)
                 .forEach(Call::cancel);
