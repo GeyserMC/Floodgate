@@ -33,5 +33,8 @@ public interface Watcher {
 
     default void onCompleted() {
     }
+
+    default void onOpen() {
+    }
 }
 

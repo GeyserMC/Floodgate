@@ -73,6 +73,10 @@ public class WatcherRegister {
         }
     }
 
+    public void resetBackOff() {
+        backOffPolicy.reset();
+    }
+
     public void stop() {
         if (ws != null) {
             if (started.compareAndSet(true, false)) {
@@ -114,7 +118,7 @@ public class WatcherRegister {
                 return;
             }
             retryTask = new TimerTask();
-            logger.info("Reconnecting in {}...",
+            logger.info("Trying to reconnect in {}...",
                     Utils.humanReadableFormat(Duration.ofMillis(millis)));
             timer.schedule(retryTask, millis);
         }
@@ -138,6 +142,14 @@ public class WatcherRegister {
     }
 
     private class WatcherImpl implements Watcher {
+
+        @Override
+        public void onOpen() {
+            // Reset the retry backoff after a successful connection
+            resetBackOff();
+            logger.translatedInfo("connect.watch.started");
+        }
+
         @Override
         public void onProposal(SessionProposal proposal) {
             if (proposal.getSession().getTunnelServiceAddr().isEmpty()) {
