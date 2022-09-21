@@ -6,7 +6,7 @@ val loaderVersion = "0.14.6"
 val fabricVersion = "0.55.3+1.19"
 
 plugins {
-    id("fabric-loom") version "0.12-SNAPSHOT"
+    id("fabric-loom") version "1.0-SNAPSHOT"
     id("java")
     id("maven-publish")
 }
