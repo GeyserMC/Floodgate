@@ -43,8 +43,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Base64.Encoder;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
@@ -232,22 +230,23 @@ public class Utils {
     }
 
 
-    private static final String AZ_LOWER = "abcdefghijklmnopqrstuvwxyz";
     private static final SecureRandom rnd = new SecureRandom();
 
-    public static String randomString(int len) {
-        StringBuilder sb = new StringBuilder(len);
-        for (int i = 0; i < len; i++) {
-            sb.append(AZ_LOWER.charAt(rnd.nextInt(AZ_LOWER.length())));
-        }
-        return sb.toString();
+    public static String randomString(int length) {
+        return randomSecureString(length);
     }
 
     public static String randomSecureString(int length) {
-        byte[] bytes = new byte[length];
-        rnd.nextBytes(bytes);
-        Encoder encoder = Base64.getUrlEncoder().withoutPadding();
-        return encoder.encodeToString(bytes);
+        // source: https://www.baeldung.com/java-random-string#plainjava-bounded
+        final int leftLimit = 97; // letter 'a'
+        final int rightLimit = 122; // letter 'z'
+        final StringBuilder buffer = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            int randomLimitedInt = leftLimit + (int)
+                    (rnd.nextFloat() * (rightLimit - leftLimit + 1));
+            buffer.append((char) randomLimitedInt);
+        }
+        return buffer.toString();
     }
 
     public static String humanReadableFormat(Duration duration) {

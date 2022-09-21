@@ -27,7 +27,9 @@ package com.minekube.connect.watch;
 
 import com.google.inject.Inject;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.config.ConnectConfig;
+import com.minekube.connect.register.WatcherRegister;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.SessionRejection;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.SessionRejection.Builder;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.WatchRequest;
@@ -87,7 +89,7 @@ public class WatchClient {
                     res = WatchResponse.parseFrom(bytes.asByteBuffer());
                 } catch (InvalidProtocolBufferException e) {
                     e.printStackTrace();
-                    webSocket.close(1002, e.getLocalizedMessage());
+                    webSocket.close(1002, e.toString());
                     return;
                 }
 
@@ -111,7 +113,7 @@ public class WatchClient {
 
             @Override
             public void onOpen(@NotNull WebSocket webSocket, @NotNull Response response) {
-                // TODO log connected(?)
+                watcher.onOpen();
             }
         });
 

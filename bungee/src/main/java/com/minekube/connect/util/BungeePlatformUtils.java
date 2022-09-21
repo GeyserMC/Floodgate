@@ -48,4 +48,9 @@ public final class BungeePlatformUtils extends PlatformUtils {
     public String serverImplementationName() {
         return proxyServer.getName();
     }
+
+    @Override
+    public int getPlayerCount() {
+        return proxyServer.getOnlineCount();
+    }
 }

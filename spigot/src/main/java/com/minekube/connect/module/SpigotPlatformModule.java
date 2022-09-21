@@ -84,7 +84,11 @@ public final class SpigotPlatformModule extends AbstractModule {
             SpigotVersionSpecificMethods versionSpecificMethods,
             LanguageManager languageManager) {
         return new SpigotCommandUtil(
-                languageManager, plugin.getServer(), api, versionSpecificMethods, plugin);
+                languageManager,
+                plugin.getServer(),
+                api,
+                versionSpecificMethods,
+                plugin);
     }
 
     @Provides

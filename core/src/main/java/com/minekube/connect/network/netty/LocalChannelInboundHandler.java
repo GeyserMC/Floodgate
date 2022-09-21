@@ -29,10 +29,9 @@ import com.google.rpc.Code;
 import com.google.rpc.Status;
 import com.minekube.connect.api.SimpleConnectApi;
 import com.minekube.connect.api.logger.ConnectLogger;
-import com.minekube.connect.api.player.ConnectPlayer;
+import com.minekube.connect.network.netty.LocalSession.Context;
 import com.minekube.connect.tunnel.TunnelConn;
 import com.minekube.connect.tunnel.Tunneler;
-import com.minekube.connect.watch.SessionProposal;
 import io.grpc.protobuf.StatusProto;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -43,18 +42,17 @@ import org.jetbrains.annotations.NotNull;
 
 @RequiredArgsConstructor
 public class LocalChannelInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
+    private final Context context;
     private final ConnectLogger logger;
-    private final SimpleConnectApi api;
     private final Tunneler tunneler;
-    private final ConnectPlayer player;
-    private final SessionProposal sessionProposal;
+    private final SimpleConnectApi api;
 
     private TunnelConn tunnelConn;
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         // Reject session proposal in case we are still able to and connection was stopped very early.
-        rejectProposal(StatusProto.fromThrowable(cause));
+        rejectProposal(context, StatusProto.fromThrowable(cause));
         ctx.close();
         super.exceptionCaught(ctx, cause);
     }
@@ -63,10 +61,11 @@ public class LocalChannelInboundHandler extends SimpleChannelInboundHandler<Byte
     public void channelActive(@NotNull ChannelHandlerContext ctx) throws Exception {
         // Start tunnel from downstream server -> upstream TunnelService
         tunnelConn = tunneler.tunnel(
-                sessionProposal.getSession().getTunnelServiceAddr(),
-                sessionProposal.getSession().getId(),
+                context.getSessionProposal().getSession().getTunnelServiceAddr(),
+                context.getSessionProposal().getSession().getId(),
                 new TunnelHandler(logger, ctx.channel())
         );
+        context.tunnelConn.set(tunnelConn);
         super.channelActive(ctx);
     }
 
@@ -80,24 +79,45 @@ public class LocalChannelInboundHandler extends SimpleChannelInboundHandler<Byte
 
     @Override
     public void channelInactive(@NotNull ChannelHandlerContext ctx) throws Exception {
-        api.setPendingRemove(player);
-        tunnelConn.close();
-
-        rejectProposal(Status.newBuilder()
-                .setCode(Code.UNKNOWN_VALUE)
-                .setMessage("local connection closed")
-                .build());
-
+        onChannelClosed(context, api, logger);
         super.channelInactive(ctx);
     }
 
-    private void rejectProposal(Status reason) {
+    public static void onChannelClosed(Context context,
+                                       SimpleConnectApi api,
+                                       ConnectLogger logger
+    ) {
+        // Surround with try-catch to prevent exceptions when server shutdown and classes are unloaded before
+        // we could use them.
+        try {
+            TunnelConn tunnelConn = context.getTunnelConn().getAndSet(null);
+            if (tunnelConn != null) {
+                tunnelConn.close();
+            }
+
+            if (api.setPendingRemove(context.getPlayer())) {
+                logger.translatedInfo("connect.ingame.disconnect_name",
+                        context.getPlayer().getUsername());
+            }
+
+            Status reason = Status.newBuilder()
+                    .setCode(Code.UNKNOWN_VALUE)
+                    .setMessage("local connection closed")
+                    .build();
+
+            rejectProposal(context, reason);
+        } catch (Throwable ignored) {
+        }
+    }
+
+    static void rejectProposal(Context context, Status reason) {
         // Reject session proposal if the tunnel was never opened.
         // Helps to prevent confusion by the watch & tunnel services
         // since a session proposal is automatically accepted a when
         // we opened the tunnel, so we should not send a reject after it.
-        if (!tunnelConn.opened()) {
-            sessionProposal.reject(reason);
+        TunnelConn tunnelConn = context.getTunnelConn().get();
+        if (tunnelConn == null || !tunnelConn.opened()) {
+            context.getSessionProposal().reject(reason);
         }
     }
 }

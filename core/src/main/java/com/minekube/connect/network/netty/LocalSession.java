@@ -33,6 +33,7 @@ import com.minekube.connect.api.player.ConnectPlayer;
 import com.minekube.connect.api.player.GameProfile;
 import com.minekube.connect.api.player.GameProfile.Property;
 import com.minekube.connect.player.ConnectPlayerImpl;
+import com.minekube.connect.tunnel.TunnelConn;
 import com.minekube.connect.tunnel.Tunneler;
 import com.minekube.connect.watch.SessionProposal;
 import com.minekube.connect.watch.SessionProposal.State;
@@ -52,6 +53,7 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
@@ -133,7 +135,8 @@ public final class LocalSession {
 
         final Context context = new Context(
                 fromProto(sessionProposal.getSession()),
-                createAddress(sessionProposal.getSession().getPlayer().getAddr())
+                createAddress(sessionProposal.getSession().getPlayer().getAddr()),
+                sessionProposal
         );
 
         if (DEFAULT_EVENT_LOOP_GROUP == null) {
@@ -155,7 +158,8 @@ public final class LocalSession {
                         channel.setContext(context);
                         ChannelPipeline pipeline = channel.pipeline();
                         pipeline.addLast("connect-tunnel", new LocalChannelInboundHandler(
-                                logger, api, tunneler, context.player, sessionProposal));
+                                context, logger, tunneler, api
+                        ));
                     }
                 })
                 .group(DEFAULT_EVENT_LOOP_GROUP)
@@ -205,6 +209,9 @@ public final class LocalSession {
     public static class Context {
         final @NotNull ConnectPlayer player;
         final @NotNull InetSocketAddress spoofedAddress; // real client address
+        final @NotNull SessionProposal sessionProposal;
+
+        AtomicReference<TunnelConn> tunnelConn = new AtomicReference<>(null);
     }
 
     private static InetSocketAddress createAddress(String addr) {

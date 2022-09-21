@@ -25,16 +25,24 @@
 
 package com.minekube.connect.config;
 
+import com.google.inject.Inject;
 import com.minekube.connect.api.logger.ConnectLogger;
+import com.minekube.connect.util.Utils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Request.Builder;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.geysermc.configutils.ConfigUtilities;
 import org.geysermc.configutils.file.codec.PathFileCodec;
 import org.geysermc.configutils.file.template.ResourceTemplateReader;
@@ -45,6 +53,7 @@ import org.geysermc.configutils.updater.change.Changes;
 public final class ConfigLoader {
     private final Path dataFolder;
     private final Class<? extends ConnectConfig> configClass;
+    private final EndpointNameGenerator endpointNameGenerator;
 
     private final ConnectLogger logger;
 
@@ -71,6 +80,7 @@ public final class ConfigLoader {
                                 .version(1, Changes.versionBuilder())
                                 .build())
                         .definePlaceholder("metrics.uuid", UUID::randomUUID)
+                        .definePlaceholder("endpoint", endpointNameGenerator::get)
                         .postInitializeCallbackArgument(this)
                         .saveConfigAutomatically(true)
                         .build();
@@ -100,5 +110,55 @@ public final class ConfigLoader {
         String content = new String(Files.readAllBytes(path), charset)
                 .replace("${metrics.uuid}", UUID.randomUUID().toString());
         Files.write(path, content.getBytes(charset));
+    }
+
+    public static class EndpointNameGenerator {
+        private static final String URL = "https://randomname.minekube.net";
+
+        final private OkHttpClient client;
+
+        @Inject
+        public EndpointNameGenerator(OkHttpClient client) {
+            this.client = client.newBuilder()
+                    .callTimeout(Duration.ofSeconds(5))
+                    .build();
+        }
+
+        String get() {
+            Request req = new Builder()
+                    .url(URL)
+                    .build();
+
+            Response res;
+            try {
+                res = client.newCall(req).execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return fallback();
+            }
+
+            if (res.code() != 200) {
+                return fallback();
+            }
+
+            String name;
+            try (ResponseBody body = res.body()){
+                assert body != null;
+                name = body.string();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return fallback();
+            }
+
+            if (name.isEmpty()) {
+                return fallback();
+            }
+
+            return name;
+        }
+
+        String fallback() {
+            return Utils.randomString(5);
+        }
     }
 }

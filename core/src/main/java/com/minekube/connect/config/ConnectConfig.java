@@ -45,7 +45,7 @@ public class ConnectConfig {
      * The endpoint name of this instance that is registered when calling the watch service for
      * listening for sessions for this endpoint.
      */
-    private final String endpoint = Utils.randomString(6); // default to random name
+    private final String endpoint = Utils.randomString(5); // default to random name
 
     public boolean isProxy() {
         return this instanceof ProxyConnectConfig;

@@ -41,6 +41,7 @@ import com.minekube.connect.inject.CommonPlatformInjector;
 import com.minekube.connect.module.ConfigLoadedModule;
 import com.minekube.connect.module.PostInitializeModule;
 import com.minekube.connect.register.WatcherRegister;
+import com.minekube.connect.tunnel.Tunneler;
 import com.minekube.connect.util.Metrics;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -48,6 +49,8 @@ import java.nio.file.Path;
 import java.util.UUID;
 
 public class ConnectPlatform {
+    private static final String DOMAIN_SUFFIX = ".demo.minekube.net";
+
     private static final UUID KEY = UUID.randomUUID();
     private final ConnectApi api;
     private final PlatformInjector injector;
@@ -117,12 +120,16 @@ public class ConnectPlatform {
 
         guice.getInstance(Metrics.class);
 
+        logger.info("Endpoint name: " + config.getEndpoint());
+        logger.info("Your public address: " + config.getEndpoint() + DOMAIN_SUFFIX);
+
         return true;
     }
 
     public boolean disable() {
-        guice.getInstance(CommonPlatformInjector.class).shutdown();
         guice.getInstance(WatcherRegister.class).stop();
+        guice.getInstance(Tunneler.class).close();
+        guice.getInstance(CommonPlatformInjector.class).shutdown();
         return true;
     }
 
