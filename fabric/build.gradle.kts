@@ -41,12 +41,11 @@ java {
     withSourcesJar()
 }
 
-// fixme: this should exist apparently
-//val shadowJar by tasks.getting(ShadowJar::class) {
-    //configurations = listOf(
-        //project.configurations.shadow.fileCollection()
-    //)
-//}
+tasks {
+    shadowJar {
+        configurations = listOf(project.configurations.shadow.get())
+    }
+}
 
 val remappedShadowJar = tasks.create<RemapJarTask>("remappedShadowJar") {
     dependsOn(tasks.shadowJar)
