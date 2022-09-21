@@ -13,6 +13,8 @@ dependencies {
     implementation("org.jfrog.buildinfo", "build-info-extractor-gradle", "4.26.1")
     implementation("gradle.plugin.com.github.johnrengelman", "shadow", "7.1.2")
 
+    // Within the gradle plugin classpath, there is a version conflict between loom and some other
+    // plugin for databind. This fixes it: minimum 1.13.2 is required by loom.
     implementation("com.fasterxml.jackson.core:jackson-databind:2.13.3")
 }
 
