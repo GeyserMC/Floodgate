@@ -10,14 +10,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up JDK 1.8
+      - name: Set up JDK 17
         uses: actions/setup-java@v2
         with:
           distribution: 'temurin'
-          java-version: '8'
+          java-version: '17'
           cache: 'gradle'
 
-      - name: Build with Maven
+      - name: Build with Gradle
         run: ./gradlew build
 
       - name: Archive artifacts (Floodgate Bungee)
@@ -26,6 +26,13 @@ jobs:
         with:
           name: Floodgate Bungee
           path: bungee/build/libs/floodgate-bungee.jar
+
+      - name: Archive artifacts (Floodgate Fabric)
+        uses: actions/upload-artifact@v2
+        if: success()
+        with:
+          name: Floodgate Fabric
+          path: fabric/build/libs/floodgate-fabric.jar
 
       - name: Archive artifacts (Floodgate Spigot)
         uses: actions/upload-artifact@v2
