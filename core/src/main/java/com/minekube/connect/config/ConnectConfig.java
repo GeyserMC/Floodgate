@@ -47,6 +47,15 @@ public class ConnectConfig {
      */
     private final String endpoint = Utils.randomString(5); // default to random name
 
+    private static final String ENDPOINT_ENV = System.getenv("CONNECT_ENDPOINT");
+
+    public String getEndpoint() {
+        if (!ENDPOINT_ENV.isEmpty()) {
+            return ENDPOINT_ENV;
+        }
+        return endpoint;
+    }
+
     public boolean isProxy() {
         return this instanceof ProxyConnectConfig;
     }
