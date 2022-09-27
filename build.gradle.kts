@@ -6,7 +6,7 @@ plugins {
 
 allprojects {
     group = "com.minekube.connect"
-    version = "0.2.1"
+    version = "0.2.7"
     description =
         "Connects the server/proxy to the global Connect network to reach more players while also supporting online mode server, bungee or velocity mode. Visit https://minekube.com/connect"
 }
