@@ -26,6 +26,7 @@
 package com.minekube.connect.config;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.util.Utils;
 import java.io.File;
@@ -56,6 +57,13 @@ public final class ConfigLoader {
     private final EndpointNameGenerator endpointNameGenerator;
 
     private final ConnectLogger logger;
+
+    private static void fixPlaceholderIssue(Path path) throws IOException {
+        Charset charset = StandardCharsets.UTF_8;
+        String content = new String(Files.readAllBytes(path), charset)
+                .replace("${metrics.uuid}", UUID.randomUUID().toString());
+        Files.write(path, content.getBytes(charset));
+    }
 
     @SuppressWarnings("unchecked")
     public <T extends ConnectConfig> T load() {
@@ -105,20 +113,13 @@ public final class ConfigLoader {
         }
     }
 
-    private static void fixPlaceholderIssue(Path path) throws IOException {
-        Charset charset = StandardCharsets.UTF_8;
-        String content = new String(Files.readAllBytes(path), charset)
-                .replace("${metrics.uuid}", UUID.randomUUID().toString());
-        Files.write(path, content.getBytes(charset));
-    }
-
     public static class EndpointNameGenerator {
         private static final String URL = "https://randomname.minekube.net";
 
         final private OkHttpClient client;
 
         @Inject
-        public EndpointNameGenerator(OkHttpClient client) {
+        public EndpointNameGenerator(@Named("defaultHttpClient") OkHttpClient client) {
             this.client = client.newBuilder()
                     .callTimeout(Duration.ofSeconds(5))
                     .build();
@@ -142,7 +143,7 @@ public final class ConfigLoader {
             }
 
             String name;
-            try (ResponseBody body = res.body()){
+            try (ResponseBody body = res.body()) {
                 assert body != null;
                 name = body.string();
             } catch (IOException e) {

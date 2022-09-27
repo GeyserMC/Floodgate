@@ -28,7 +28,6 @@ package com.minekube.connect.util;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.minekube.connect.api.ConnectApi;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -166,6 +165,13 @@ public class HttpUtils {
         return null;
     }
 
+    public static OkHttpClient defaultOkHttpClient() {
+        return new OkHttpClient.Builder()
+                .protocols(ImmutableList.of(Protocol.HTTP_1_1, Protocol.HTTP_2))
+                .connectionPool(new ConnectionPool(100, 5, TimeUnit.MINUTES))
+                .build();
+    }
+
     @Getter
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class HttpResponse<T> {
@@ -181,13 +187,5 @@ public class HttpUtils {
         DefaultHttpResponse(int httpCode, JsonObject response) {
             super(httpCode, response);
         }
-    }
-
-
-    public static OkHttpClient defaultOkHttpClient(ConnectApi api) {
-        return new OkHttpClient.Builder()
-                .protocols(ImmutableList.of(Protocol.HTTP_1_1, Protocol.HTTP_2))
-                .connectionPool(new ConnectionPool(100, 5, TimeUnit.MINUTES))
-                .build();
     }
 }

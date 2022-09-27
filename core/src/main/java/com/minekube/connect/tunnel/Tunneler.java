@@ -28,17 +28,14 @@ package com.minekube.connect.tunnel;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.minekube.connect.tunnel.TunnelConn.Handler;
 import com.minekube.connect.util.ReflectionUtils;
 import java.io.Closeable;
 import java.io.EOFException;
 import java.lang.reflect.Field;
 import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import okhttp3.Call;
@@ -53,16 +50,14 @@ import org.jetbrains.annotations.Nullable;
 
 public class Tunneler implements Closeable {
 
+    private static final String SESSION_HEADER = "Connect-Session";
+    private static final Field DATA = ReflectionUtils.getField(ByteString.class, "data");
     private final OkHttpClient httpClient;
 
     @Inject
-    public Tunneler(OkHttpClient httpClient) {
+    public Tunneler(@Named("connectHttpClient") OkHttpClient httpClient) {
         this.httpClient = httpClient;
     }
-
-    private static final String SESSION_HEADER = "Connect-Session";
-
-    private static final Field DATA = ReflectionUtils.getField(ByteString.class, "data");
 
     public TunnelConn tunnel(final String tunnelServiceAddr, String sessionId, Handler handler) {
         checkNotNull(tunnelServiceAddr, "tunnelServiceAddr must not be null");
@@ -148,7 +143,7 @@ public class Tunneler implements Closeable {
     @Override
     public void close() {
         // cancel queued connections
-        Stream.of( httpClient.dispatcher().queuedCalls())
+        Stream.of(httpClient.dispatcher().queuedCalls())
                 .flatMap(Collection::stream)
                 .filter(call -> call.request().header(SESSION_HEADER) != null)
                 .forEach(Call::cancel);

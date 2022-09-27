@@ -26,10 +26,9 @@
 package com.minekube.connect.watch;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.config.ConnectConfig;
-import com.minekube.connect.register.WatcherRegister;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.SessionRejection;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.SessionRejection.Builder;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.WatchRequest;
@@ -54,7 +53,7 @@ public class WatchClient {
     private final ConnectConfig config;
 
     @Inject
-    public WatchClient(OkHttpClient httpClient, ConnectConfig config) {
+    public WatchClient(@Named("connectHttpClient") OkHttpClient httpClient, ConnectConfig config) {
         this.httpClient = httpClient;
         this.config = config;
     }

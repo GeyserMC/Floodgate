@@ -103,12 +103,22 @@ public class CommonModule extends AbstractModule {
         return new LanguageManager(configHolder, logger);
     }
 
+
     @Provides
     @Singleton
-    public OkHttpClient okHttpClient(
-            ConnectApi api,
+    @Named("defaultHttpClient")
+    public OkHttpClient defaultOkHttpClient() {
+        return HttpUtils.defaultOkHttpClient();
+    }
+
+    @Provides
+    @Singleton
+    @Named("connectHttpClient")
+    public OkHttpClient connectOkHttpClient(
+            @Named("defaultHttpClient") OkHttpClient defaultOkHttpClient,
             PlatformUtils platformUtils,
-            @Named("platformName") String implementationName
+            @Named("platformName") String implementationName,
+            ConnectApi api
     ) throws IOException {
         Path tokenFile = dataDirectory.resolve("token.json");
 
@@ -121,7 +131,7 @@ public class CommonModule extends AbstractModule {
         }
         final String apiToken = token.get();
 
-        return HttpUtils.defaultOkHttpClient(api).newBuilder()
+        return defaultOkHttpClient.newBuilder()
                 .addInterceptor(chain -> chain.proceed(chain.request().newBuilder()
                         // Add authorization token to every request
                         .addHeader("Authorization", "Bearer " + apiToken)
@@ -160,6 +170,7 @@ public class CommonModule extends AbstractModule {
         static void save(Path tokenFile, String token) throws IOException {
             checkNotNull(tokenFile);
             checkNotNull(token);
+            tokenFile.toFile().getParentFile().mkdirs(); // In case our data directory doesn't exist yet
             try (Writer writer = new FileWriter(tokenFile.toFile())) {
                 new Gson().toJson(new Token(token), writer);
             }
