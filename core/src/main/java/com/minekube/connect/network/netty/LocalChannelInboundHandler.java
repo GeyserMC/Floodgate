@@ -49,6 +49,46 @@ public class LocalChannelInboundHandler extends SimpleChannelInboundHandler<Byte
 
     private TunnelConn tunnelConn;
 
+    public static void onChannelClosed(Context context,
+                                       SimpleConnectApi api,
+                                       ConnectLogger logger
+    ) {
+        // Surround with try-catch to prevent exceptions when server shutdown and classes are unloaded before
+        // we could use them.
+        try {
+            TunnelConn tunnelConn = context.getTunnelConn().getAndSet(null);
+            if (tunnelConn != null) {
+                tunnelConn.close();
+            }
+
+            if (api.setPendingRemove(context.getPlayer())) {
+                if (!context.getPlayer().getUsername().isEmpty()) { // might be just a ping request
+                    logger.translatedInfo("connect.ingame.disconnect_name",
+                            context.getPlayer().getUsername());
+                }
+            }
+
+            Status reason = Status.newBuilder()
+                    .setCode(Code.UNKNOWN_VALUE)
+                    .setMessage("local connection closed")
+                    .build();
+
+            rejectProposal(context, reason);
+        } catch (Throwable ignored) {
+        }
+    }
+
+    static void rejectProposal(Context context, Status reason) {
+        // Reject session proposal if the tunnel was never opened.
+        // Helps to prevent confusion by the watch & tunnel services
+        // since a session proposal is automatically accepted a when
+        // we opened the tunnel, so we should not send a reject after it.
+        TunnelConn tunnelConn = context.getTunnelConn().get();
+        if (tunnelConn == null || !tunnelConn.opened()) {
+            context.getSessionProposal().reject(reason);
+        }
+    }
+
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         // Reject session proposal in case we are still able to and connection was stopped very early.
@@ -81,43 +121,5 @@ public class LocalChannelInboundHandler extends SimpleChannelInboundHandler<Byte
     public void channelInactive(@NotNull ChannelHandlerContext ctx) throws Exception {
         onChannelClosed(context, api, logger);
         super.channelInactive(ctx);
-    }
-
-    public static void onChannelClosed(Context context,
-                                       SimpleConnectApi api,
-                                       ConnectLogger logger
-    ) {
-        // Surround with try-catch to prevent exceptions when server shutdown and classes are unloaded before
-        // we could use them.
-        try {
-            TunnelConn tunnelConn = context.getTunnelConn().getAndSet(null);
-            if (tunnelConn != null) {
-                tunnelConn.close();
-            }
-
-            if (api.setPendingRemove(context.getPlayer())) {
-                logger.translatedInfo("connect.ingame.disconnect_name",
-                        context.getPlayer().getUsername());
-            }
-
-            Status reason = Status.newBuilder()
-                    .setCode(Code.UNKNOWN_VALUE)
-                    .setMessage("local connection closed")
-                    .build();
-
-            rejectProposal(context, reason);
-        } catch (Throwable ignored) {
-        }
-    }
-
-    static void rejectProposal(Context context, Status reason) {
-        // Reject session proposal if the tunnel was never opened.
-        // Helps to prevent confusion by the watch & tunnel services
-        // since a session proposal is automatically accepted a when
-        // we opened the tunnel, so we should not send a reject after it.
-        TunnelConn tunnelConn = context.getTunnelConn().get();
-        if (tunnelConn == null || !tunnelConn.opened()) {
-            context.getSessionProposal().reject(reason);
-        }
     }
 }

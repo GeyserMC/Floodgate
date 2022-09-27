@@ -136,7 +136,8 @@ public final class ReflectionUtils {
     }
 
     @Nullable
-    public static <T> Constructor<T> getConstructor(Class<T> clazz, boolean declared, Class<?>... parameters) {
+    public static <T> Constructor<T> getConstructor(Class<T> clazz, boolean declared,
+                                                    Class<?>... parameters) {
         try {
             Constructor<T> constructor;
             if (declared) {
@@ -246,6 +247,9 @@ public final class ReflectionUtils {
      */
     @Nullable
     public static Object getValue(Object instance, Field field) {
+        if (field == null) {
+            return null;
+        }
         makeAccessible(field);
         try {
             return field.get(instance);
@@ -432,7 +436,8 @@ public final class ReflectionUtils {
 
         Method[] methods = declared ? clazz.getDeclaredMethods() : clazz.getMethods();
 
-        outer : for (Method method : methods) {
+        outer:
+        for (Method method : methods) {
             if (parameterTypes.length != method.getParameterCount() ||
                     !method.getReturnType().equals(returnType)) {
                 continue;

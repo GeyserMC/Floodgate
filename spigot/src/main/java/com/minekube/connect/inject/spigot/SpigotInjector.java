@@ -72,12 +72,30 @@ public final class SpigotInjector extends CommonPlatformInjector {
 
     @Getter private boolean injected;
 
+    // We need to disable the enforceSecureProfile in server.properties.
+    // This has no effect if the server is already in offline mode.
+//    private static void disableEnforceSecureProfile() {
+//        Server server = Bukkit.getServer();
+//        Method getProperties = ReflectionUtils.getMethod(server, "getProperties");
+//        if (getProperties == null) {
+//            return;
+//        }
+//        Object serverProperties = ReflectionUtils.invoke(server, getProperties);
+//        if (serverProperties == null) {
+//            return;
+//        }
+//        // enforceSecureProfile field is obfuscated, need to find another way to get this field
+//        ReflectionUtils.setValue(serverProperties, "enforceSecureProfile", false);
+//    }
+
     @Override
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     public boolean inject() throws Exception {
         if (isInjected()) {
             return true;
         }
+
+//        disableEnforceSecureProfile();
 
         if (getServerConnection() != null) {
             for (Field field : serverConnection.getClass().getDeclaredFields()) {
