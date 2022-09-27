@@ -50,7 +50,7 @@ public class ConnectConfig {
     private static final String ENDPOINT_ENV = System.getenv("CONNECT_ENDPOINT");
 
     public String getEndpoint() {
-        if (!ENDPOINT_ENV.isEmpty()) {
+        if (ENDPOINT_ENV != null && !ENDPOINT_ENV.isEmpty()) {
             return ENDPOINT_ENV;
         }
         return endpoint;
