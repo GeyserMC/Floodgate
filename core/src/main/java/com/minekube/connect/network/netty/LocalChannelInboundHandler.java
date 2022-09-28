@@ -42,11 +42,13 @@ import org.jetbrains.annotations.NotNull;
 
 @RequiredArgsConstructor
 public class LocalChannelInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
+    private static final String FORCE_TUNNEL_SERVICE_ADDR = System.getenv(
+            "CONNECT_FORCE_TUNNEL_SERVICE_ADDR");
+
     private final Context context;
     private final ConnectLogger logger;
     private final Tunneler tunneler;
     private final SimpleConnectApi api;
-
     private TunnelConn tunnelConn;
 
     public static void onChannelClosed(Context context,
@@ -97,11 +99,18 @@ public class LocalChannelInboundHandler extends SimpleChannelInboundHandler<Byte
         super.exceptionCaught(ctx, cause);
     }
 
+    private String tunnelSvcAddr() {
+        if (FORCE_TUNNEL_SERVICE_ADDR != null && !FORCE_TUNNEL_SERVICE_ADDR.isEmpty()) {
+            return FORCE_TUNNEL_SERVICE_ADDR;
+        }
+        return context.getSessionProposal().getSession().getTunnelServiceAddr();
+    }
+
     @Override
     public void channelActive(@NotNull ChannelHandlerContext ctx) throws Exception {
         // Start tunnel from downstream server -> upstream TunnelService
         tunnelConn = tunneler.tunnel(
-                context.getSessionProposal().getSession().getTunnelServiceAddr(),
+                tunnelSvcAddr(),
                 context.getSessionProposal().getSession().getId(),
                 new TunnelHandler(logger, ctx.channel())
         );
