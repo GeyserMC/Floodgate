@@ -49,7 +49,7 @@ import java.nio.file.Path;
 import java.util.UUID;
 
 public class ConnectPlatform {
-    private static final String DOMAIN_SUFFIX = ".demo.minekube.net";
+    private static final String DOMAIN_SUFFIX = ".play.minekube.net";
 
     private static final UUID KEY = UUID.randomUUID();
     private final ConnectApi api;
