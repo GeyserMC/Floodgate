@@ -25,7 +25,7 @@ When installing the Connect plugin the following platform settings are supported
 - Velocity
     - ✔️ Velocity forwarding (aka modern) + Online/Offline mode
         - ❌ Can't connect to Velocity enabled PaperMC server through Velocity proxy
-    - ✔️ Bungee forwarding (aka legacy) + Offline/Offline mode
+    - ✔️ Bungee forwarding (aka legacy) + Online/Offline mode
     - ✔️ None forwarding + Online/Offline mode
     - ✔️ `force-key-authentication: true` in [velocity.toml](https://github.com/PaperMC/Velocity/blob/dev/3.0.0/proxy/src/main/resources/default-velocity.toml#L19)
 - Bungee
