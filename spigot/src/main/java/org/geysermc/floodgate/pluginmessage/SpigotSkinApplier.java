@@ -25,7 +25,6 @@
 
 package org.geysermc.floodgate.pluginmessage;
 
-import com.destroystokyo.paper.profile.ProfileProperty;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
@@ -63,11 +62,16 @@ public final class SpigotSkinApplier implements SkinApplier {
             return false;
         }
 
-        for (ProfileProperty property : player.getPlayerProfile().getProperties()) {
-            if (property.getName().equals("textures")) {
-                if (!property.getValue().isEmpty()) {
-                    return true;
-                }
+        GameProfile profile = ReflectionUtils.castedInvoke(player, ClassNames.GET_PROFILE_METHOD);
+        if (profile == null) {
+            throw new IllegalStateException("The GameProfile cannot be null! " + player.getName());
+        }
+
+        // Need to be careful here - getProperties() returns an authlib PropertyMap, which extends
+        // MultiMap from Guava. Floodgate relocates Guava.
+        for (Property textures : profile.getProperties().get("textures")) {
+            if (!textures.getValue().isEmpty()) {
+                return true;
             }
         }
         return false;
