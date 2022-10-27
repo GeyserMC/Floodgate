@@ -170,7 +170,9 @@ public class CommonModule extends AbstractModule {
             FloodgateApi api,
             SkinApplier skinApplier,
             FloodgateLogger logger) {
-        return new SkinUploadManager(api, skinApplier, logger);
+        SkinUploadManager manager = new SkinUploadManager(api, skinApplier, logger);
+        eventBus.register(manager);
+        return manager;
     }
 
     @Provides

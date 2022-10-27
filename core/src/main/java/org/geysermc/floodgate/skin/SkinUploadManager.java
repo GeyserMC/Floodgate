@@ -29,9 +29,13 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.AllArgsConstructor;
+import org.geysermc.event.Listener;
+import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.event.ShutdownEvent;
 
+@Listener
 @AllArgsConstructor
 public final class SkinUploadManager {
     private final Int2ObjectMap<SkinUploadSocket> connections =
@@ -52,5 +56,17 @@ public final class SkinUploadManager {
 
     public void removeConnection(int id, SkinUploadSocket socket) {
         connections.remove(id, socket);
+    }
+
+    public void closeAllSockets() {
+        for (SkinUploadSocket socket : connections.values()) {
+            socket.close();
+        }
+        connections.clear();
+    }
+
+    @Subscribe
+    public void onShutdown(ShutdownEvent ignored) {
+        closeAllSockets();
     }
 }
