@@ -85,7 +85,7 @@ public final class SpigotSkinApplier implements SkinApplier {
             if (firstTry) {
                 Bukkit.getScheduler().runTaskLater(plugin,
                         () -> {
-                            if (hasSkin(floodgatePlayer)) {
+                            if (!hasSkin(floodgatePlayer)) {
                                 applySkin0(floodgatePlayer, skinData, false);
                             }
                         },
