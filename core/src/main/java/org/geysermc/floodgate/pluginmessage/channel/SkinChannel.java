@@ -29,9 +29,8 @@ import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
-import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.api.player.PropertyKey;
+import org.geysermc.api.GeyserApiBase;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
@@ -39,7 +38,7 @@ import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinData;
 
 public class SkinChannel implements PluginMessageChannel {
-    @Inject private FloodgateApi api;
+    @Inject private GeyserApiBase api;
     @Inject private FloodgateConfig config;
     @Inject private SkinApplier skinApplier;
 
@@ -76,8 +75,8 @@ public class SkinChannel implements PluginMessageChannel {
 
     @Override
     public Result handleServerCall(byte[] data, UUID playerUuid, String playerUsername) {
-        FloodgatePlayer floodgatePlayer = api.getPlayer(playerUuid);
-        if (floodgatePlayer == null) {
+        Connection connection = api.connectionByUuid(playerUuid);
+        if (connection == null) {
             return Result.kick("Player sent skins data for a non-Floodgate player");
         }
 
@@ -89,7 +88,7 @@ public class SkinChannel implements PluginMessageChannel {
             return Result.kick("Got invalid skin data");
         }
 
-        if (floodgatePlayer.isLinked() || skinApplier.hasSkin(floodgatePlayer)) {
+        if (connection.isLinked() || skinApplier.hasSkin(connection)) {
             return Result.handled();
         }
 
@@ -102,8 +101,7 @@ public class SkinChannel implements PluginMessageChannel {
 
         SkinData skinData = new SkinData(value, signature);
 
-        floodgatePlayer.addProperty(PropertyKey.SKIN_UPLOADED, skinData);
-        skinApplier.applySkin(floodgatePlayer, skinData);
+        skinApplier.applySkin(connection, skinData);
 
         return Result.handled();
     }

@@ -38,6 +38,7 @@ import org.bstats.charts.DrilldownPie;
 import org.bstats.charts.SimplePie;
 import org.bstats.charts.SingleLineChart;
 import org.bstats.json.JsonObjectBuilder;
+import org.geysermc.api.GeyserApiBase;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
@@ -49,7 +50,7 @@ public final class Metrics {
     private final MetricsBase metricsBase;
 
     @Inject
-    Metrics(FloodgateConfig config, PlatformUtils platformUtils, FloodgateApi api,
+    Metrics(FloodgateConfig config, PlatformUtils platformUtils, GeyserApiBase api,
             @Named("implementationName") String implementationName, FloodgateLogger logger) {
 
         MetricsConfig metricsConfig = config.getMetrics();
@@ -71,12 +72,12 @@ public final class Metrics {
         );
 
         metricsBase.addCustomChart(
-                new SingleLineChart("players", api::getPlayerCount)
+                new SingleLineChart("players", api::onlineConnectionsCount)
         );
 
         metricsBase.addCustomChart(
                 new DrilldownPie("player_count", () -> {
-                    int playerCount = api.getPlayerCount();
+                    int playerCount = api.onlineConnectionsCount();
                     // 0 = 0 - 4, 9 = 5 - 9, etc.
                     int category = playerCount / 5 * 5;
                     String categoryName = category + " - " + (category + 4);

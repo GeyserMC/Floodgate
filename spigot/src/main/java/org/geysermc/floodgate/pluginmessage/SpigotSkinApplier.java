@@ -32,6 +32,7 @@ import com.mojang.authlib.properties.PropertyMap;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinData;
@@ -51,13 +52,13 @@ public final class SpigotSkinApplier implements SkinApplier {
     }
 
     @Override
-    public void applySkin(FloodgatePlayer floodgatePlayer, SkinData skinData) {
-        applySkin0(floodgatePlayer, skinData, true);
+    public void applySkin(Connection connection, SkinData skinData) {
+        applySkin0(connection, skinData, true);
     }
 
     @Override
-    public boolean hasSkin(FloodgatePlayer floodgatePlayer) {
-        Player player = Bukkit.getPlayer(floodgatePlayer.getCorrectUniqueId());
+    public boolean hasSkin(Connection connection) {
+        Player player = Bukkit.getPlayer(connection.javaUuid());
 
         if (player == null) {
             return false;
@@ -73,8 +74,8 @@ public final class SpigotSkinApplier implements SkinApplier {
         return false;
     }
 
-    private void applySkin0(FloodgatePlayer floodgatePlayer, SkinData skinData, boolean firstTry) {
-        Player player = Bukkit.getPlayer(floodgatePlayer.getCorrectUniqueId());
+    private void applySkin0(Connection floodgatePlayer, SkinData skinData, boolean firstTry) {
+        Player player = Bukkit.getPlayer(floodgatePlayer.javaUuid());
 
         // player is probably not logged in yet
         if (player == null) {

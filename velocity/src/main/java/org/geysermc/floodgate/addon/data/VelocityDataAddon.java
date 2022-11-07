@@ -35,6 +35,7 @@ import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
+import org.geysermc.floodgate.player.Connection;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 
 public final class VelocityDataAddon implements InjectorAddon {
@@ -62,7 +63,7 @@ public final class VelocityDataAddon implements InjectorAddon {
 
     @Inject
     @Named("playerAttribute")
-    private AttributeKey<FloodgatePlayer> playerAttribute;
+    private AttributeKey<Connection> playerAttribute;
 
     @Override
     public void onInject(Channel channel, boolean toServer) {
@@ -88,9 +89,9 @@ public final class VelocityDataAddon implements InjectorAddon {
 
     @Override
     public void onChannelClosed(Channel channel) {
-        FloodgatePlayer player = channel.attr(playerAttribute).get();
+        Connection player = channel.attr(playerAttribute).get();
         if (player != null && api.setPendingRemove(player)) {
-            logger.translatedInfo("floodgate.ingame.disconnect_name", player.getUsername());
+            logger.translatedInfo("floodgate.ingame.disconnect_name", player.javaUsername());
         }
     }
 

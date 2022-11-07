@@ -39,8 +39,8 @@ import net.md_5.bungee.netty.ChannelWrapper;
 import net.md_5.bungee.netty.HandlerBoss;
 import net.md_5.bungee.netty.PacketHandler;
 import net.md_5.bungee.protocol.packet.Handshake;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.player.FloodgatePlayerImpl;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.ReflectionUtils;
@@ -65,7 +65,7 @@ public class BungeeServerDataHandler extends ChannelOutboundHandlerAdapter {
     }
 
     private final ProxyFloodgateApi api;
-    private final AttributeKey<FloodgatePlayer> playerAttribute;
+    private final AttributeKey<Connection> playerAttribute;
 
     @Override
     public void write(ChannelHandlerContext ctx, Object packet, ChannelPromise promise) {
@@ -83,10 +83,10 @@ public class BungeeServerDataHandler extends ChannelOutboundHandlerAdapter {
             UserConnection connection = ReflectionUtils.getCastedValue(handler, USER_CONNECTION);
             ChannelWrapper wrapper = ReflectionUtils.getCastedValue(connection, CHANNEL_WRAPPER);
 
-            FloodgatePlayer player = wrapper.getHandle().attr(playerAttribute).get();
+            Connection player = wrapper.getHandle().attr(playerAttribute).get();
 
             if (player != null) {
-                BedrockData data = player.as(FloodgatePlayerImpl.class).toBedrockData();
+                BedrockData data = ((FloodgatePlayerImpl) player).toBedrockData();
                 String encryptedData = api.createEncryptedDataString(data);
 
                 Handshake handshake = (Handshake) packet;
@@ -105,7 +105,7 @@ public class BungeeServerDataHandler extends ChannelOutboundHandlerAdapter {
                 }
 
                 handshake.setHost(originalAddress + '\0' + encryptedData + remaining);
-                // Bungeecord will add his data after our data
+                // Bungeecord will add its data after our data
             }
 
             ctx.pipeline().remove(this);

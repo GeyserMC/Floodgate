@@ -35,6 +35,7 @@ import java.util.UUID;
 import org.geysermc.floodgate.api.packet.PacketHandler;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.player.Connection;
 
 public class SpigotProtocolSupportHandler implements PacketHandler {
     private static final Method getFromChannel;
@@ -81,7 +82,7 @@ public class SpigotProtocolSupportHandler implements PacketHandler {
 
     @Inject
     @Named("playerAttribute")
-    private AttributeKey<FloodgatePlayer> playerAttribute;
+    private AttributeKey<Connection> playerAttribute;
 
     @Inject
     public void register(PacketHandlers packetHandlers) {
@@ -90,7 +91,7 @@ public class SpigotProtocolSupportHandler implements PacketHandler {
 
     @Override
     public Object handle(ChannelHandlerContext ctx, Object packet, boolean serverbound) {
-        FloodgatePlayer player = ctx.channel().attr(playerAttribute).get();
+        Connection player = ctx.channel().attr(playerAttribute).get();
         if (player == null) {
             return packet;
         }
@@ -99,14 +100,14 @@ public class SpigotProtocolSupportHandler implements PacketHandler {
         Object profile = ReflectionUtils.invoke(connection, getLoginProfile);
 
         // set correct uuid and name on ProtocolSupport's end, since we skip the LoginStart
-        ReflectionUtils.invoke(profile, setName, player.getCorrectUsername());
-        ReflectionUtils.invoke(profile, setOriginalName, player.getCorrectUsername());
-        ReflectionUtils.invoke(profile, setUuid, player.getCorrectUniqueId());
-        ReflectionUtils.invoke(profile, setOriginalUuid, player.getCorrectUniqueId());
+        ReflectionUtils.invoke(profile, setName, player.javaUsername());
+        ReflectionUtils.invoke(profile, setOriginalName, player.javaUsername());
+        ReflectionUtils.invoke(profile, setUuid, player.javaUuid());
+        ReflectionUtils.invoke(profile, setOriginalUuid, player.javaUuid());
 
         Object temp = ReflectionUtils.invoke(connection, getNetworkManagerWrapper);
         temp = ReflectionUtils.invoke(temp, getPacketListener);
-        ReflectionUtils.invoke(temp, handleLoginStart, player.getCorrectUsername());
+        ReflectionUtils.invoke(temp, handleLoginStart, player.javaUsername());
         return packet;
     }
 }

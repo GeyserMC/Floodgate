@@ -39,16 +39,16 @@ import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
+import org.geysermc.api.GeyserApiBase;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.event.PostOrder;
 import org.geysermc.floodgate.addon.data.HandshakeHandlersImpl;
-import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ConfigLoader;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.crypto.AesCipher;
@@ -91,7 +91,7 @@ public class CommonModule extends AbstractModule {
 
         bind(HttpClient.class).in(Singleton.class);
 
-        bind(FloodgateApi.class).to(SimpleFloodgateApi.class);
+        bind(GeyserApiBase.class).to(SimpleFloodgateApi.class);
         bind(PlatformInjector.class).to(CommonPlatformInjector.class);
 
         bind(HandshakeHandlers.class).to(HandshakeHandlersImpl.class);
@@ -151,7 +151,7 @@ public class CommonModule extends AbstractModule {
             FloodgateCipher cipher,
             FloodgateConfig config,
             SkinUploadManager skinUploadManager,
-            @Named("playerAttribute") AttributeKey<FloodgatePlayer> playerAttribute,
+            @Named("playerAttribute") AttributeKey<Connection> playerAttribute,
             FloodgateLogger logger) {
 
         return new FloodgateHandshakeHandler(handshakeHandlers, api, cipher, config,
@@ -167,7 +167,7 @@ public class CommonModule extends AbstractModule {
     @Provides
     @Singleton
     public SkinUploadManager skinUploadManager(
-            FloodgateApi api,
+            GeyserApiBase api,
             SkinApplier skinApplier,
             FloodgateLogger logger) {
         return new SkinUploadManager(api, skinApplier, logger);
@@ -197,7 +197,7 @@ public class CommonModule extends AbstractModule {
     @Provides
     @Singleton
     @Named("playerAttribute")
-    public AttributeKey<FloodgatePlayer> playerAttribute() {
+    public AttributeKey<Connection> playerAttribute() {
         return AttributeKey.valueOf("floodgate-player");
     }
 }

@@ -36,6 +36,7 @@ import com.google.inject.Inject;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.link.LinkRequestResult;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -52,7 +53,7 @@ import org.geysermc.floodgate.util.Constants;
 
 @NoArgsConstructor
 public final class LinkAccountCommand implements FloodgateCommand {
-    @Inject private FloodgateApi api;
+    @Inject private SimpleFloodgateApi api;
     @Inject private FloodgateLogger logger;
 
     @Override
@@ -95,7 +96,7 @@ public final class LinkAccountCommand implements FloodgateCommand {
         String targetName = targetUser.username();
 
         // when the player is a Bedrock player
-        if (api.isFloodgatePlayer(sender.uuid())) {
+        if (api.isBedrockPlayer(sender.uuid())) {
             if (!context.contains("code")) {
                 sender.sendMessage(Message.BEDROCK_USAGE);
                 return;

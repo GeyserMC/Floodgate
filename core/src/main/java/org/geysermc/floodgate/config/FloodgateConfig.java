@@ -64,9 +64,12 @@ public class FloodgateConfig implements GenericPostInitializeCallback<ConfigLoad
     public CallbackResult postInitialize(ConfigLoader loader) {
         Path keyPath = loader.getDataDirectory().resolve(getKeyFileName());
 
-        // don't assume that the key always exists with the existence of a config
         if (!Files.exists(keyPath)) {
-            loader.generateKey(keyPath);
+            // TODO improve message and also link to article about corrupted keys/WinSCP/FTP
+            // Like, where is key.pem?
+            // TODO don't be so noisy with error. It makes it hard to understand what the error is.
+            return CallbackResult.failed("Floodgate requires a key file! " +
+                    "Copy your key file from Geyser (key.pem) and paste it into " + keyPath);
         }
 
         try {

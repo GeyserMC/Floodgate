@@ -41,8 +41,8 @@ import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.player.FloodgatePlayerImpl;
 import org.geysermc.floodgate.util.BedrockData;
 
@@ -101,7 +101,7 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
             Player velocityPlayer = castedInvoke(association, GET_PLAYER);
 
             //noinspection ConstantConditions
-            FloodgatePlayer player = api.getPlayer(velocityPlayer.getUniqueId());
+            Connection player = api.connectionByUuid(velocityPlayer.getUniqueId());
 
             //todo use something similar to what's written below for a more direct approach
 
@@ -112,7 +112,7 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
             //FloodgatePlayer player = playerChannel.attr(playerAttribute).get();
             if (player != null) {
                 // Player is a Floodgate player
-                BedrockData data = player.as(FloodgatePlayerImpl.class).toBedrockData();
+                BedrockData data = ((FloodgatePlayerImpl) player).toBedrockData();
                 String encryptedData = api.createEncryptedDataString(data);
 
                 // use the same system that we use on bungee, our data goes before all the other data

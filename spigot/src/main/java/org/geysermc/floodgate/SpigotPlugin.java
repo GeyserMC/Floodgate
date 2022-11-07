@@ -39,6 +39,7 @@ public final class SpigotPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        // TODO don't enable if onLoad failed
         try {
             platform.enable();
         } catch (Exception exception) {

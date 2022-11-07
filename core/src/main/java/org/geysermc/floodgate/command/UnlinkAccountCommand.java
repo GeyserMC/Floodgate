@@ -35,6 +35,7 @@ import com.google.inject.Inject;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.link.GlobalPlayerLinking;
@@ -47,7 +48,7 @@ import org.geysermc.floodgate.command.util.Permission;
 
 @NoArgsConstructor
 public final class UnlinkAccountCommand implements FloodgateCommand {
-    @Inject private FloodgateApi api;
+    @Inject private SimpleFloodgateApi api;
 
     @Override
     public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {

@@ -40,8 +40,8 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.connection.LoginResult;
 import net.md_5.bungee.protocol.Property;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinData;
 import org.geysermc.floodgate.util.ReflectionUtils;
@@ -80,8 +80,8 @@ public final class BungeeSkinApplier implements SkinApplier {
     private final FloodgateLogger logger;
 
     @Override
-    public void applySkin(FloodgatePlayer uuid, SkinData skinData) {
-        ProxiedPlayer player = ProxyServer.getInstance().getPlayer(uuid.getCorrectUniqueId());
+    public void applySkin(Connection uuid, SkinData skinData) {
+        ProxiedPlayer player = ProxyServer.getInstance().getPlayer(uuid.javaUuid());
         if (player == null) {
             return;
         }
@@ -114,8 +114,8 @@ public final class BungeeSkinApplier implements SkinApplier {
     }
 
     @Override
-    public boolean hasSkin(FloodgatePlayer fPlayer) {
-        ProxiedPlayer player = ProxyServer.getInstance().getPlayer(fPlayer.getCorrectUniqueId());
+    public boolean hasSkin(Connection fPlayer) {
+        ProxiedPlayer player = ProxyServer.getInstance().getPlayer(fPlayer.javaUuid());
         if (player == null) {
             return false;
         }

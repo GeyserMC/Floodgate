@@ -32,9 +32,12 @@ import com.google.inject.Module;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.geysermc.api.Geyser;
+import org.geysermc.api.GeyserApiBase;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.InstanceHolder;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
+import org.geysermc.floodgate.api.impl.FloodgateApiWrapper;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -64,14 +67,15 @@ public abstract class FloodgatePlatform {
         config = guice.getInstance(FloodgateConfig.class);
         injector = guice.getInstance(PlatformInjector.class);
 
+        GeyserApiBase api = guice.getInstance(GeyserApiBase.class);
         InstanceHolder.set(
-                guice.getInstance(FloodgateApi.class),
+                new FloodgateApiWrapper(api),
                 guice.getInstance(PlayerLink.class),
                 injector,
                 guice.getInstance(PacketHandlers.class),
-                guice.getInstance(HandshakeHandlers.class),
                 KEY
         );
+        Geyser.set(api);
 
         long endTime = System.currentTimeMillis();
         guice.getInstance(FloodgateLogger.class)

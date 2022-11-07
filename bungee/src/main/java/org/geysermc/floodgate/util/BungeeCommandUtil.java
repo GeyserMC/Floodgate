@@ -31,6 +31,7 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.api.GeyserApiBase;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.player.UserAudience;
@@ -41,7 +42,7 @@ public final class BungeeCommandUtil extends CommandUtil {
     private final ProxyServer server;
     private UserAudience console;
 
-    public BungeeCommandUtil(LanguageManager manager, ProxyServer server, FloodgateApi api) {
+    public BungeeCommandUtil(LanguageManager manager, ProxyServer server, GeyserApiBase api) {
         super(manager, api);
         this.server = server;
     }

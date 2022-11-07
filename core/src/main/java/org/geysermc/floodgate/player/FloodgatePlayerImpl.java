@@ -25,78 +25,108 @@
 
 package org.geysermc.floodgate.player;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.net.InetSocketAddress;
 import java.util.UUID;
 import lombok.AccessLevel;
-import lombok.Getter;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.api.InstanceHolder;
-import org.geysermc.floodgate.api.ProxyFloodgateApi;
-import org.geysermc.floodgate.api.handshake.HandshakeData;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.api.player.PropertyKey;
-import org.geysermc.floodgate.api.player.PropertyKey.Result;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.common.value.qual.IntRange;
+import org.geysermc.api.Geyser;
+import org.geysermc.api.connection.Connection;
+import org.geysermc.api.util.BedrockPlatform;
+import org.geysermc.api.util.InputMode;
+import org.geysermc.api.util.UiProfile;
+import org.geysermc.cumulus.form.Form;
+import org.geysermc.cumulus.form.util.FormBuilder;
+import org.geysermc.floodgate.addon.data.HandshakeDataImpl;
 import org.geysermc.floodgate.util.BedrockData;
-import org.geysermc.floodgate.util.DeviceOs;
-import org.geysermc.floodgate.util.InputMode;
 import org.geysermc.floodgate.util.LinkedPlayer;
-import org.geysermc.floodgate.util.UiProfile;
 import org.geysermc.floodgate.util.Utils;
 
-@Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-@SuppressWarnings("unchecked")
-public final class FloodgatePlayerImpl implements FloodgatePlayer {
+@Builder
+public final class FloodgatePlayerImpl implements Connection {
     private final String version;
     private final String username;
     private final String javaUsername;
     private final UUID javaUniqueId;
     private final String xuid;
-    private final DeviceOs deviceOs;
+    private final BedrockPlatform deviceOs;
     private final String languageCode;
     private final UiProfile uiProfile;
     private final InputMode inputMode;
     private final String ip;
-    private final boolean fromProxy;
     private final boolean proxy; // if current platform is a proxy
     private final LinkedPlayer linkedPlayer;
 
     private final int subscribeId;
     private final String verifyCode;
 
-    @Getter(AccessLevel.PRIVATE)
-    private Map<PropertyKey, Object> propertyKeyToValue;
-    @Getter(AccessLevel.PRIVATE)
-    private Map<String, PropertyKey> stringToPropertyKey;
+    private final InetSocketAddress socketAddress;
 
-    static FloodgatePlayerImpl from(BedrockData data, HandshakeData handshakeData) {
-        FloodgateApi api = InstanceHolder.getApi();
-
+    static FloodgatePlayerImpl from(BedrockData data, HandshakeDataImpl handshakeData, int port) {
         UUID javaUniqueId = Utils.getJavaUuid(data.getXuid());
 
-        DeviceOs deviceOs = DeviceOs.fromId(data.getDeviceOs());
+        BedrockPlatform deviceOs = BedrockPlatform.fromId(data.getDeviceOs());
         UiProfile uiProfile = UiProfile.fromId(data.getUiProfile());
         InputMode inputMode = InputMode.fromId(data.getInputMode());
 
         LinkedPlayer linkedPlayer = handshakeData.getLinkedPlayer();
 
+        InetSocketAddress socketAddress = new InetSocketAddress(data.getIp(), port);
+
         return new FloodgatePlayerImpl(
                 data.getVersion(), data.getUsername(), handshakeData.getJavaUsername(),
                 javaUniqueId, data.getXuid(), deviceOs, data.getLanguageCode(), uiProfile,
-                inputMode, data.getIp(), data.isFromProxy(), api instanceof ProxyFloodgateApi,
-                linkedPlayer, data.getSubscribeId(), data.getVerifyCode());
+                inputMode, data.getIp(), data.isFromProxy(),
+                linkedPlayer, data.getSubscribeId(), data.getVerifyCode(), socketAddress);
     }
 
     @Override
-    public UUID getCorrectUniqueId() {
+    public @NonNull String bedrockUsername() {
+        return username;
+    }
+
+    @Override
+    public @MonotonicNonNull String javaUsername() {
+        return linkedPlayer != null ? linkedPlayer.getJavaUsername() : javaUsername;
+    }
+
+    @Override
+    public @MonotonicNonNull UUID javaUuid() {
         return linkedPlayer != null ? linkedPlayer.getJavaUniqueId() : javaUniqueId;
     }
 
     @Override
-    public String getCorrectUsername() {
-        return linkedPlayer != null ? linkedPlayer.getJavaUsername() : javaUsername;
+    public @NonNull String xuid() {
+        return xuid;
+    }
+
+    @Override
+    public @NonNull String version() {
+        return version;
+    }
+
+    @Override
+    public @NonNull BedrockPlatform platform() {
+        return deviceOs;
+    }
+
+    @Override
+    public @NonNull String languageCode() {
+        return languageCode;
+    }
+
+    @Override
+    public @NonNull UiProfile uiProfile() {
+        return uiProfile;
+    }
+
+    @Override
+    public @NonNull InputMode inputMode() {
+        return inputMode;
     }
 
     @Override
@@ -104,124 +134,29 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
         return linkedPlayer != null;
     }
 
+    @Override
+    public boolean sendForm(@NonNull Form form) {
+        return Geyser.api().sendForm(javaUuid(), form);
+    }
+
+    @Override
+    public boolean sendForm(@NonNull FormBuilder<?, ?, ?> formBuilder) {
+        return Geyser.api().sendForm(javaUuid(), formBuilder);
+    }
+
+    @Override
+    public boolean transfer(@NonNull String address, @IntRange(from = 0L, to = 65535L) int port) {
+        return Geyser.api().transfer(javaUuid(), address, port);
+    }
+
+    @Override
+    public InetSocketAddress socketAddress() {
+        return socketAddress;
+    }
+
     public BedrockData toBedrockData() {
         return BedrockData.of(version, username, xuid, deviceOs.ordinal(), languageCode,
                 uiProfile.ordinal(), inputMode.ordinal(), ip, linkedPlayer, proxy, subscribeId,
                 verifyCode);
-    }
-
-    @Override
-    public boolean hasProperty(PropertyKey key) {
-        if (propertyKeyToValue == null) {
-            return false;
-        }
-        return propertyKeyToValue.get(key) != null;
-    }
-
-    @Override
-    public boolean hasProperty(String key) {
-        if (stringToPropertyKey == null) {
-            return false;
-        }
-        return hasProperty(stringToPropertyKey.get(key));
-    }
-
-    @Override
-    public <T> T getProperty(PropertyKey key) {
-        if (propertyKeyToValue == null) {
-            return null;
-        }
-        return (T) propertyKeyToValue.get(key);
-    }
-
-    @Override
-    public <T> T getProperty(String key) {
-        if (stringToPropertyKey == null) {
-            return null;
-        }
-        return getProperty(stringToPropertyKey.get(key));
-    }
-
-    @Override
-    public <T> T removeProperty(String key) {
-        if (stringToPropertyKey == null) {
-            return null;
-        }
-
-        PropertyKey propertyKey = stringToPropertyKey.get(key);
-
-        if (propertyKey == null || !propertyKey.isRemovable()) {
-            return null;
-        }
-
-        return (T) propertyKeyToValue.remove(propertyKey);
-    }
-
-    @Override
-    public <T> T removeProperty(PropertyKey key) {
-        if (stringToPropertyKey == null) {
-            return null;
-        }
-
-        PropertyKey propertyKey = stringToPropertyKey.get(key.getKey());
-
-        if (propertyKey == null || !propertyKey.equals(key) || !propertyKey.isRemovable()) {
-            return null;
-        }
-
-        stringToPropertyKey.remove(key.getKey());
-
-        return (T) propertyKeyToValue.remove(key);
-    }
-
-    @Override
-    public <T> T addProperty(PropertyKey key, Object value) {
-        if (stringToPropertyKey == null) {
-            stringToPropertyKey = new HashMap<>();
-            propertyKeyToValue = new HashMap<>();
-
-            stringToPropertyKey.put(key.getKey(), key);
-            propertyKeyToValue.put(key, value);
-            return null;
-        }
-
-        PropertyKey propertyKey = stringToPropertyKey.get(key.getKey());
-
-        if (propertyKey != null && propertyKey.isAddAllowed(key) == Result.ALLOWED) {
-            stringToPropertyKey.put(key.getKey(), key);
-            return (T) propertyKeyToValue.put(key, value);
-        }
-
-        return (T) stringToPropertyKey.computeIfAbsent(key.getKey(), (keyString) -> {
-            propertyKeyToValue.put(key, value);
-            return key;
-        });
-    }
-
-    @Override
-    public <T> T addProperty(String key, Object value) {
-        PropertyKey propertyKey = new PropertyKey(key, true, true);
-
-        if (stringToPropertyKey == null) {
-            stringToPropertyKey = new HashMap<>();
-            propertyKeyToValue = new HashMap<>();
-
-            stringToPropertyKey.put(key, propertyKey);
-            propertyKeyToValue.put(propertyKey, value);
-            return null;
-        }
-
-        PropertyKey currentPropertyKey = stringToPropertyKey.get(key);
-
-        // key is always changeable if it passes this if statement
-        if (currentPropertyKey != null && currentPropertyKey.isAddAllowed(key) == Result.ALLOWED) {
-            stringToPropertyKey.put(key, propertyKey);
-            return (T) propertyKeyToValue.put(propertyKey, value);
-        }
-
-        return (T) stringToPropertyKey.computeIfAbsent(key, (keyString) -> {
-            propertyKeyToValue.put(propertyKey, value);
-            return propertyKey;
-        });
     }
 }

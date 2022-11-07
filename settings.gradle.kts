@@ -3,7 +3,7 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-//        mavenLocal()
+        mavenLocal()
 
         // Geyser, Cumulus etc.
         maven("https://repo.opencollab.dev/maven-releases") {
@@ -62,7 +62,7 @@ pluginManagement {
 
 rootProject.name = "floodgate-parent"
 
-include(":api")
+include(":legacy-api")
 include(":ap")
 include(":core")
 include(":bungee")

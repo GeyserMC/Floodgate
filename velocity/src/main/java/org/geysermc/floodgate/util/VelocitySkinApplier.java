@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinData;
 
@@ -41,8 +41,8 @@ public class VelocitySkinApplier implements SkinApplier {
     private final ProxyServer server;
 
     @Override
-    public void applySkin(FloodgatePlayer floodgatePlayer, SkinData skinData) {
-        server.getPlayer(floodgatePlayer.getCorrectUniqueId()).ifPresent(player -> {
+    public void applySkin(Connection connection, SkinData skinData) {
+        server.getPlayer(connection.javaUuid()).ifPresent(player -> {
             List<Property> properties = new ArrayList<>(player.getGameProfileProperties());
             properties.add(new Property("textures", skinData.getValue(), skinData.getSignature()));
             player.setGameProfileProperties(properties);
@@ -50,8 +50,8 @@ public class VelocitySkinApplier implements SkinApplier {
     }
 
     @Override
-    public boolean hasSkin(FloodgatePlayer floodgatePlayer) {
-        Optional<Player> player = server.getPlayer(floodgatePlayer.getCorrectUniqueId());
+    public boolean hasSkin(Connection connection) {
+        Optional<Player> player = server.getPlayer(connection.javaUuid());
 
         if (player.isPresent()) {
             for (Property property : player.get().getGameProfileProperties()) {

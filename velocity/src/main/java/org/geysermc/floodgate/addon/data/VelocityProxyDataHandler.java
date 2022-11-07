@@ -41,6 +41,7 @@ import java.net.InetSocketAddress;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.player.Connection;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler.ResultType;
@@ -113,9 +114,9 @@ public final class VelocityProxyDataHandler extends CommonDataHandler {
     @Override
     protected boolean shouldRemoveHandler(HandshakeResult result) {
         if (result.getResultType() == ResultType.SUCCESS) {
-            FloodgatePlayer player = result.getFloodgatePlayer();
+            Connection player = result.getFloodgatePlayer();
             logger.info("Floodgate player who is logged in as {} {} joined",
-                    player.getCorrectUsername(), player.getCorrectUniqueId());
+                    player.javaUsername(), player.javaUuid());
 
             // the way Velocity stores whether to force key authentication
             boolean forceKeyAuthentication = Boolean.getBoolean("auth.forceSecureProfiles");

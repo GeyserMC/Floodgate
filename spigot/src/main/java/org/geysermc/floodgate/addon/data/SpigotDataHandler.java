@@ -34,6 +34,7 @@ import io.netty.util.AttributeKey;
 import java.net.InetSocketAddress;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.player.Connection;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.util.ClassNames;
@@ -41,7 +42,7 @@ import org.geysermc.floodgate.util.ProxyUtils;
 
 public final class SpigotDataHandler extends CommonDataHandler {
     private Object networkManager;
-    private FloodgatePlayer player;
+    private Connection player;
     private boolean proxyData;
 
     public SpigotDataHandler(
@@ -80,7 +81,7 @@ public final class SpigotDataHandler extends CommonDataHandler {
 
         if (!proxyData) {
             // Use a spoofedUUID for initUUID (just like Bungeecord)
-            setValue(networkManager, "spoofedUUID", player.getCorrectUniqueId());
+            setValue(networkManager, "spoofedUUID", player.javaUuid());
         }
 
         // we can only remove the handler if the data is proxy data and username validation doesn't
@@ -150,7 +151,7 @@ public final class SpigotDataHandler extends CommonDataHandler {
 
             // set the player his GameProfile, we can't change the username without this
             GameProfile gameProfile = new GameProfile(
-                    player.getCorrectUniqueId(), player.getCorrectUsername()
+                    player.javaUuid(), player.javaUsername()
             );
             setValue(packetListener, ClassNames.LOGIN_PROFILE, gameProfile);
 

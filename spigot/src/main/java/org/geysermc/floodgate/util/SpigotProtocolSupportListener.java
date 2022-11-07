@@ -34,6 +34,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
+import org.geysermc.api.Geyser;
 import org.geysermc.floodgate.api.FloodgateApi;
 
 @SuppressWarnings("unchecked")
@@ -69,7 +70,7 @@ public final class SpigotProtocolSupportListener {
                         return;
                     }
 
-                    if (FloodgateApi.getInstance().isFloodgatePlayer(uuid)) {
+                    if (Geyser.api().isBedrockPlayer(uuid)) {
                         // otherwise ProtocolSupport attempts to connect with online mode
                         ReflectionUtils.invoke(event, setOnlineMode, false);
                     }

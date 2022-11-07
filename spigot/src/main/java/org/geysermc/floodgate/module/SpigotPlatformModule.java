@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.geysermc.api.GeyserApiBase;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
@@ -78,7 +79,7 @@ public final class SpigotPlatformModule extends AbstractModule {
     @Provides
     @Singleton
     public CommandUtil commandUtil(
-            FloodgateApi api,
+            GeyserApiBase api,
             SpigotVersionSpecificMethods versionSpecificMethods,
             LanguageManager languageManager) {
         return new SpigotCommandUtil(

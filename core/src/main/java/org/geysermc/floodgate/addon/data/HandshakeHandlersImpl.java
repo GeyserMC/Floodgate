@@ -32,7 +32,7 @@ import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.api.handshake.HandshakeHandler;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 
-public class HandshakeHandlersImpl implements HandshakeHandlers {
+public class HandshakeHandlersImpl {
     private final Random random = new Random();
     private final Int2ObjectMap<HandshakeHandler> handshakeHandlers = new Int2ObjectOpenHashMap<>();
 

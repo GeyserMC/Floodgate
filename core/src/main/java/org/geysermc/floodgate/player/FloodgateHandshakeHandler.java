@@ -41,13 +41,12 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.addon.data.HandshakeDataImpl;
 import org.geysermc.floodgate.addon.data.HandshakeHandlersImpl;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.skin.SkinUploadManager;
@@ -62,7 +61,7 @@ public final class FloodgateHandshakeHandler {
     private final FloodgateCipher cipher;
     private final FloodgateConfig config;
     private final SkinUploadManager skinUploadManager;
-    private final AttributeKey<FloodgatePlayer> playerAttribute;
+    private final AttributeKey<Connection> playerAttribute;
     private final FloodgateLogger logger;
 
     public FloodgateHandshakeHandler(
@@ -71,7 +70,7 @@ public final class FloodgateHandshakeHandler {
             FloodgateCipher cipher,
             FloodgateConfig config,
             SkinUploadManager skinUploadManager,
-            AttributeKey<FloodgatePlayer> playerAttribute,
+            AttributeKey<Connection> playerAttribute,
             FloodgateLogger logger) {
 
         this.handshakeHandlers = handshakeHandlers;
@@ -206,7 +205,7 @@ public final class FloodgateHandshakeHandler {
             LinkedPlayer linkedPlayer) {
 
         try {
-            HandshakeData handshakeData = new HandshakeDataImpl(
+            HandshakeDataImpl handshakeData = new HandshakeDataImpl(
                     channel, true, bedrockData.clone(), config,
                     linkedPlayer != null ? linkedPlayer.clone() : null, hostname);
 
@@ -221,15 +220,13 @@ public final class FloodgateHandshakeHandler {
                         bedrockData.getVerifyCode());
             }
 
-            FloodgatePlayer player = FloodgatePlayerImpl.from(bedrockData, handshakeData);
+            int port = ((InetSocketAddress) channel.remoteAddress()).getPort();
+
+            Connection player = FloodgatePlayerImpl.from(bedrockData, handshakeData, port);
 
             api.addPlayer(player);
 
             channel.attr(playerAttribute).set(player);
-
-            int port = ((InetSocketAddress) channel.remoteAddress()).getPort();
-            InetSocketAddress socketAddress = new InetSocketAddress(handshakeData.getIp(), port);
-            player.addProperty(PropertyKey.SOCKET_ADDRESS, socketAddress);
 
             return new HandshakeResult(ResultType.SUCCESS, handshakeData, bedrockData, player);
         } catch (Exception exception) {
@@ -244,7 +241,7 @@ public final class FloodgateHandshakeHandler {
             BedrockData bedrockData,
             String hostname) {
 
-        HandshakeData handshakeData = new HandshakeDataImpl(channel, bedrockData != null,
+        HandshakeInjectedData handshakeData = new HandshakeDataImpl(channel, bedrockData != null,
                 bedrockData, config, null, hostname);
         handshakeHandlers.callHandshakeHandlers(handshakeData);
 
@@ -279,13 +276,13 @@ public final class FloodgateHandshakeHandler {
     @Getter
     public static class HandshakeResult extends IllegalStateException {
         private final ResultType resultType;
-        private final HandshakeData handshakeData;
+        private final HandshakeInjectedData handshakeData;
         private final BedrockData bedrockData;
-        private final FloodgatePlayer floodgatePlayer;
+        private final Connection floodgatePlayer;
 
         public InetSocketAddress getNewIp(Channel channel) {
             if (floodgatePlayer != null) {
-                return floodgatePlayer.getProperty(PropertyKey.SOCKET_ADDRESS);
+                return floodgatePlayer.socketAddress();
             }
             if (handshakeData.getIp() != null) {
                 int port = ((InetSocketAddress) channel.remoteAddress()).getPort();
