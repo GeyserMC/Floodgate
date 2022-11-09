@@ -62,7 +62,7 @@ pluginManagement {
 
 rootProject.name = "floodgate-parent"
 
-include(":legacy-api")
+include(":api")
 include(":ap")
 include(":core")
 include(":bungee")

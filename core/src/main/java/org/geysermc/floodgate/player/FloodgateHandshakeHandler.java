@@ -241,7 +241,7 @@ public final class FloodgateHandshakeHandler {
             BedrockData bedrockData,
             String hostname) {
 
-        HandshakeInjectedData handshakeData = new HandshakeDataImpl(channel, bedrockData != null,
+        HandshakeData handshakeData = new HandshakeDataImpl(channel, bedrockData != null,
                 bedrockData, config, null, hostname);
         handshakeHandlers.callHandshakeHandlers(handshakeData);
 
@@ -276,13 +276,13 @@ public final class FloodgateHandshakeHandler {
     @Getter
     public static class HandshakeResult extends IllegalStateException {
         private final ResultType resultType;
-        private final HandshakeInjectedData handshakeData;
+        private final HandshakeData handshakeData;
         private final BedrockData bedrockData;
         private final Connection floodgatePlayer;
 
         public InetSocketAddress getNewIp(Channel channel) {
             if (floodgatePlayer != null) {
-                return floodgatePlayer.socketAddress();
+                return (InetSocketAddress) floodgatePlayer.socketAddress();
             }
             if (handshakeData.getIp() != null) {
                 int port = ((InetSocketAddress) channel.remoteAddress()).getPort();

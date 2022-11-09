@@ -36,7 +36,7 @@ import org.geysermc.floodgate.util.LinkedPlayer;
 import org.geysermc.floodgate.util.Utils;
 
 @Getter
-public class HandshakeDataImpl {
+public class HandshakeDataImpl implements HandshakeData {
     private final Channel channel;
     private final boolean floodgatePlayer;
     private final BedrockData bedrockData;
