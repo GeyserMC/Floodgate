@@ -44,7 +44,6 @@ public final class ProxyCommonModule extends CommonModule {
         super.configure();
 
         bind(SimpleFloodgateApi.class).to(ProxyFloodgateApi.class);
-        bind(ProxyFloodgateApi.class).in(Singleton.class);
     }
 
     @Provides

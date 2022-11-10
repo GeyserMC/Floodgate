@@ -24,10 +24,10 @@
  */
 
 object Versions {
-    const val geyserVersion = "2.0.4-SNAPSHOT"
     const val cumulusVersion = "1.1"
     const val eventsVersion = "1.0-SNAPSHOT"
     const val configUtilsVersion = "1.0-SNAPSHOT"
+    const val gsonVersion = "2.3.1"
     const val fastutilVersion = "8.5.3"
     const val guiceVersion = "5.1.0"
     const val nettyVersion = "4.1.49.Final"

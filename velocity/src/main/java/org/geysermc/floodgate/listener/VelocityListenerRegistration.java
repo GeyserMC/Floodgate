@@ -27,13 +27,12 @@ package org.geysermc.floodgate.listener;
 
 import com.velocitypowered.api.event.EventManager;
 import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.VelocityPlugin;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 
 @RequiredArgsConstructor
 public final class VelocityListenerRegistration implements ListenerRegistration<Object> {
     private final EventManager eventManager;
-    private final VelocityPlugin plugin;
+    private final Object plugin;
 
     @Override
     public void register(Object listener) {

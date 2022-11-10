@@ -35,6 +35,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
@@ -160,6 +162,7 @@ public class Utils {
      * @param input the fully qualified name of the annotation
      * @return a set of all the classes annotated by the given annotation
      */
+    @SuppressWarnings("ConstantConditions")
     public static Set<Class<?>> getGeneratedClassesForAnnotation(String input) {
         try (InputStream annotatedClass = Utils.class.getClassLoader().getResourceAsStream(input);
              BufferedReader reader = new BufferedReader(new InputStreamReader(annotatedClass))) {
@@ -173,5 +176,14 @@ public class Utils {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @SuppressWarnings({"ManualArrayToCollectionCopy", "UseBulkOperation"})
+    public static <T> List<T> asList(T... data) {
+        List<T> list = new ArrayList<>(data.length);
+        for (T entry : data) {
+            list.add(entry);
+        }
+        return list;
     }
 }

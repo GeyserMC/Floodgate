@@ -37,9 +37,9 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.event.EventManager;
+import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.proxy.ProxyServer;
 import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.VelocityPlugin;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.inject.velocity.VelocityInjector;
@@ -96,7 +96,11 @@ public final class VelocityPlatformModule extends AbstractModule {
     @Singleton
     public ListenerRegistration<Object> listenerRegistration(
             EventManager eventManager,
-            VelocityPlugin plugin) {
+            PluginContainer container
+    ) {
+        //noinspection OptionalGetWithoutIsPresent
+        Object plugin = container.getInstance().get();
+
         return new VelocityListenerRegistration(eventManager, plugin);
     }
 

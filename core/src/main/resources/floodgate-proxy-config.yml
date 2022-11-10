@@ -1,4 +1,4 @@
->> config.yml
+>> floodgate-config.yml
 >>| 16
 # Should the proxy send the bedrock player data to the servers it is connecting to?
 # This requires Floodgate to be installed on the servers.

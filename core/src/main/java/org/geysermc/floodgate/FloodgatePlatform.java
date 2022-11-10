@@ -29,13 +29,15 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import java.util.List;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.geysermc.api.Geyser;
 import org.geysermc.api.GeyserApiBase;
+import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.InstanceHolder;
-import org.geysermc.floodgate.api.impl.FloodgateApiWrapper;
+import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -67,10 +69,11 @@ public abstract class FloodgatePlatform {
 
         GeyserApiBase api = guice.getInstance(GeyserApiBase.class);
         InstanceHolder.set(
-                new FloodgateApiWrapper(api),
+                guice.getInstance(FloodgateApi.class),
                 guice.getInstance(PlayerLink.class),
                 injector,
                 guice.getInstance(PacketHandlers.class),
+                guice.getInstance(HandshakeHandlers.class),
                 KEY
         );
         Geyser.set(api);
@@ -80,7 +83,7 @@ public abstract class FloodgatePlatform {
                 .translatedInfo("floodgate.core.finish", endTime - startTime);
     }
 
-    protected abstract Module[] loadStageModules();
+    protected abstract List<Module> loadStageModules();
 
     public void enable() throws RuntimeException {
         if (injector == null) {
@@ -98,7 +101,7 @@ public abstract class FloodgatePlatform {
         guice.getInstance(EventBus.class).fire(new PostEnableEvent());
     }
 
-    protected abstract Module[] postEnableStageModules();
+    protected abstract List<Module> postEnableStageModules();
 
     public void disable() {
         guice.getInstance(EventBus.class).fire(new ShutdownEvent());
@@ -114,5 +117,9 @@ public abstract class FloodgatePlatform {
 
     public boolean isProxy() {
         return config.isProxy();
+    }
+
+    public <T> T getInstance(Class<T> clazz) {
+        return guice.getInstance(clazz);
     }
 }

@@ -43,9 +43,11 @@ import org.geysermc.api.GeyserApiBase;
 import org.geysermc.api.connection.Connection;
 import org.geysermc.event.PostOrder;
 import org.geysermc.floodgate.addon.data.HandshakeHandlersImpl;
+import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
+import org.geysermc.floodgate.api.legacy.LegacyApiWrapper;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
@@ -67,7 +69,7 @@ import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinUploadManager;
 import org.geysermc.floodgate.util.Constants;
-import org.geysermc.floodgate.util.HttpClient;
+import org.geysermc.floodgate.util.WebEndpoints;
 
 @RequiredArgsConstructor
 public class CommonModule extends AbstractModule {
@@ -89,18 +91,21 @@ public class CommonModule extends AbstractModule {
         eventBus.subscribe(ShutdownEvent.class, ignored -> commonPool.shutdown(), PostOrder.LAST);
         bind(ExecutorService.class).annotatedWith(Names.named("commonPool")).toInstance(commonPool);
 
-        bind(HttpClient.class).in(Singleton.class);
-
         bind(GeyserApiBase.class).to(SimpleFloodgateApi.class);
         bind(PlatformInjector.class).to(CommonPlatformInjector.class);
 
         bind(HandshakeHandlers.class).to(HandshakeHandlersImpl.class);
-        bind(HandshakeHandlersImpl.class).in(Singleton.class);
 
         bind(PacketHandlers.class).to(PacketHandlersImpl.class);
         bind(PacketHandlersImpl.class).asEagerSingleton();
 
         install(new AutoBindModule());
+    }
+
+    @Provides
+    @Singleton
+    public FloodgateApi floodgateApi(GeyserApiBase api, WebEndpoints webEndpoints) {
+        return new LegacyApiWrapper(api, webEndpoints);
     }
 
     @Provides
@@ -132,15 +137,6 @@ public class CommonModule extends AbstractModule {
     @Named("dataDirectory")
     public Path dataDirectory() {
         return dataDirectory;
-    }
-
-    @Provides
-    @Singleton
-    public ConfigLoader configLoader(
-            @Named("configClass") Class<? extends FloodgateConfig> configClass,
-            KeyProducer producer,
-            FloodgateCipher cipher) {
-        return new ConfigLoader(dataDirectory, configClass, producer, cipher);
     }
 
     @Provides

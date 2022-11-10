@@ -28,6 +28,7 @@ package org.geysermc.floodgate.api;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,7 @@ import org.geysermc.floodgate.pluginmessage.channel.FormChannel;
 import org.geysermc.floodgate.pluginmessage.channel.TransferChannel;
 import org.geysermc.floodgate.util.HttpClient;
 
+@Singleton
 public class SimpleFloodgateApi implements GeyserApiBase {
     private final Map<UUID, Connection> players = new HashMap<>();
     private final Cache<UUID, Connection> pendingRemove =

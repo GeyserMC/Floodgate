@@ -26,6 +26,7 @@
 package org.geysermc.floodgate;
 
 import com.google.inject.Module;
+import java.util.List;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.module.PaperListenerModule;
@@ -39,6 +40,7 @@ import org.geysermc.floodgate.util.ReflectionUtils;
 import org.geysermc.floodgate.util.SpigotHandshakeHandler;
 import org.geysermc.floodgate.util.SpigotProtocolSupportHandler;
 import org.geysermc.floodgate.util.SpigotProtocolSupportListener;
+import org.geysermc.floodgate.util.Utils;
 
 public class SpigotPlatform extends FloodgatePlatform {
     private final JavaPlugin plugin;
@@ -48,24 +50,24 @@ public class SpigotPlatform extends FloodgatePlatform {
     }
 
     @Override
-    protected Module[] loadStageModules() {
-        return new Module[]{
+    protected List<Module> loadStageModules() {
+        return Utils.asList(
                 new ServerCommonModule(plugin.getDataFolder().toPath()),
                 new SpigotPlatformModule(plugin)
-        };
+        );
     }
 
     @Override
-    protected Module[] postEnableStageModules() {
+    protected List<Module> postEnableStageModules() {
         boolean usePaperListener = ReflectionUtils.getClassSilently(
                 "com.destroystokyo.paper.event.profile.PreFillProfileEvent") != null;
 
-        return new Module[]{
+        return Utils.asList(
                 new SpigotCommandModule(plugin),
                 new SpigotAddonModule(),
                 new PluginMessageModule(),
                 (usePaperListener ? new PaperListenerModule() : new SpigotListenerModule())
-        };
+        );
     }
 
     @Override

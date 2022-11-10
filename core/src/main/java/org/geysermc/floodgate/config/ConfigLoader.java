@@ -25,12 +25,14 @@
 
 package org.geysermc.floodgate.config;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.Key;
 import java.util.UUID;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.geysermc.configutils.ConfigUtilities;
 import org.geysermc.configutils.file.codec.PathFileCodec;
 import org.geysermc.configutils.file.template.ResourceTemplateReader;
@@ -39,13 +41,26 @@ import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.crypto.KeyProducer;
 
 @Getter
-@RequiredArgsConstructor
+@Singleton
 public final class ConfigLoader {
-    private final Path dataDirectory;
-    private final Class<? extends FloodgateConfig> configClass;
+    @Inject
+    @Named("dataDirectory")
+    private Path dataDirectory;
 
-    private final KeyProducer keyProducer;
-    private final FloodgateCipher cipher;
+    @Inject
+    @Named("configClass")
+    private Class<? extends FloodgateConfig> configClass;
+
+    @Inject
+
+    private KeyProducer keyProducer;
+
+    @Inject
+    private FloodgateCipher cipher;
+
+    @Inject(optional = true)
+    @Named("configFile")
+    private String configFile = "config.yml";
 
     @SuppressWarnings("unchecked")
     public <T extends FloodgateConfig> T load() {
@@ -53,6 +68,7 @@ public final class ConfigLoader {
         if (ProxyFloodgateConfig.class.isAssignableFrom(configClass)) {
             templateFile = "proxy-" + templateFile;
         }
+        templateFile = "floodgate-" + templateFile;
 
         //todo old Floodgate logged a message when version = 0 and it generated a new key.
         // Might be nice to allow you to run a function for a specific version.
@@ -63,7 +79,7 @@ public final class ConfigLoader {
         ConfigUtilities utilities =
                 ConfigUtilities.builder()
                         .fileCodec(PathFileCodec.of(dataDirectory))
-                        .configFile("config.yml")
+                        .configFile(configFile)
                         .templateReader(ResourceTemplateReader.of(getClass()))
                         .template(templateFile)
                         .changes(Changes.builder()

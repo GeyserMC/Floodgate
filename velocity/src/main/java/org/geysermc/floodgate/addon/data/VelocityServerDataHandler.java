@@ -35,7 +35,6 @@ import static org.geysermc.floodgate.util.ReflectionUtils.invoke;
 import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
 
 import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.ProxyServer;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
@@ -43,7 +42,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
-import org.geysermc.floodgate.player.FloodgatePlayerImpl;
+import org.geysermc.floodgate.player.FloodgateConnection;
 import org.geysermc.floodgate.util.BedrockData;
 
 @SuppressWarnings("ConstantConditions")
@@ -51,7 +50,6 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
     private static final Class<?> HANDSHAKE_PACKET;
     private static final Field HANDSHAKE_ADDRESS;
     private static final Method GET_ASSOCIATION;
-    private static final Method GET_FORWARDING_MODE;
     private static final Method GET_PLAYER;
 
     static {
@@ -66,11 +64,6 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
         GET_ASSOCIATION = getMethod(minecraftConnection, "getAssociation");
         checkNotNull(GET_ASSOCIATION, "getAssociation in MinecraftConnection cannot be null");
 
-        Class<?> configClass = getPrefixedClass("config.VelocityConfiguration");
-
-        GET_FORWARDING_MODE = getMethod(configClass, "getPlayerInfoForwardingMode");
-        checkNotNull(GET_FORWARDING_MODE, "getPlayerInfoForwardingMode in VelocityConfiguration cannot be null");
-
         Class<?> serverConnection = getPrefixedClass("connection.backend.VelocityServerConnection");
 
         GET_PLAYER = getMethod(serverConnection, "getPlayer");
@@ -78,15 +71,10 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
     }
 
     private final ProxyFloodgateApi api;
-    private final boolean isModernForwarding;
     //private final AttributeKey<FloodgatePlayer> playerAttribute;
 
-    public VelocityServerDataHandler(ProxyFloodgateApi api,
-                                     ProxyServer proxy) {
+    public VelocityServerDataHandler(ProxyFloodgateApi api) {
         this.api = api;
-
-        Enum<?> forwardingMode = castedInvoke(proxy.getConfiguration(), GET_FORWARDING_MODE);
-        this.isModernForwarding = "MODERN".equals(forwardingMode.name());
     }
 
     @Override
@@ -112,15 +100,16 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
             //FloodgatePlayer player = playerChannel.attr(playerAttribute).get();
             if (player != null) {
                 // Player is a Floodgate player
-                BedrockData data = ((FloodgatePlayerImpl) player).toBedrockData();
+                BedrockData data = ((FloodgateConnection) player).toBedrockData();
                 String encryptedData = api.createEncryptedDataString(data);
 
                 // use the same system that we use on bungee, our data goes before all the other data
                 int addressFinished = address.indexOf('\0');
                 String originalAddress;
                 String remaining;
-                if (isModernForwarding && addressFinished == -1) {
-                    // There is no additional data to hook onto
+                if (addressFinished == -1) {
+                    // There is no additional data to hook onto.
+                    // this is the case for 'no forwarding' and 'modern forwarding'
                     originalAddress = address;
                     remaining = "";
                 } else {

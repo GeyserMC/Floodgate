@@ -26,10 +26,12 @@
 package org.geysermc.floodgate.api;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.nio.charset.StandardCharsets;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.util.BedrockData;
 
+@Singleton
 public final class ProxyFloodgateApi extends SimpleFloodgateApi {
     @Inject
     private FloodgateCipher cipher;

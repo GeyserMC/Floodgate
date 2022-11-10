@@ -27,11 +27,12 @@ package org.geysermc.floodgate.module;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public final class PostEnableModules extends AbstractModule {
-    private final Module[] postInitializeModules;
+    private final List<Module> postInitializeModules;
 
     @Override
     protected void configure() {

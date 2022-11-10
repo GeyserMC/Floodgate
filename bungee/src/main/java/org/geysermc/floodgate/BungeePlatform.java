@@ -26,6 +26,7 @@
 package org.geysermc.floodgate;
 
 import com.google.inject.Module;
+import java.util.List;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.geysermc.floodgate.module.BungeeAddonModule;
 import org.geysermc.floodgate.module.BungeeListenerModule;
@@ -34,6 +35,7 @@ import org.geysermc.floodgate.module.CommandModule;
 import org.geysermc.floodgate.module.PluginMessageModule;
 import org.geysermc.floodgate.module.ProxyCommonModule;
 import org.geysermc.floodgate.util.ReflectionUtils;
+import org.geysermc.floodgate.util.Utils;
 
 public class BungeePlatform extends FloodgatePlatform {
     private final Plugin plugin;
@@ -44,20 +46,20 @@ public class BungeePlatform extends FloodgatePlatform {
     }
 
     @Override
-    protected Module[] loadStageModules() {
-        return new Module[]{
+    protected List<Module> loadStageModules() {
+        return Utils.asList(
                 new ProxyCommonModule(plugin.getDataFolder().toPath()),
                 new BungeePlatformModule(plugin)
-        };
+        );
     }
 
     @Override
-    protected Module[] postEnableStageModules() {
-        return new Module[]{
+    protected List<Module> postEnableStageModules() {
+        return Utils.asList(
                 new CommandModule(),
                 new BungeeListenerModule(),
                 new BungeeAddonModule(),
                 new PluginMessageModule()
-        };
+        );
     }
 }

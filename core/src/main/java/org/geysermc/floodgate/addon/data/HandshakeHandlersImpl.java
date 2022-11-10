@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.addon.data;
 
+import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Random;
@@ -32,7 +33,8 @@ import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.api.handshake.HandshakeHandler;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 
-public class HandshakeHandlersImpl {
+@Singleton
+public class HandshakeHandlersImpl implements HandshakeHandlers {
     private final Random random = new Random();
     private final Int2ObjectMap<HandshakeHandler> handshakeHandlers = new Int2ObjectOpenHashMap<>();
 

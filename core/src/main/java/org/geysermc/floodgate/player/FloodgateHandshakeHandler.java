@@ -205,7 +205,7 @@ public final class FloodgateHandshakeHandler {
             LinkedPlayer linkedPlayer) {
 
         try {
-            HandshakeDataImpl handshakeData = new HandshakeDataImpl(
+            HandshakeData handshakeData = new HandshakeDataImpl(
                     channel, true, bedrockData.clone(), config,
                     linkedPlayer != null ? linkedPlayer.clone() : null, hostname);
 
@@ -222,7 +222,7 @@ public final class FloodgateHandshakeHandler {
 
             int port = ((InetSocketAddress) channel.remoteAddress()).getPort();
 
-            Connection player = FloodgatePlayerImpl.from(bedrockData, handshakeData, port);
+            Connection player = FloodgateConnection.from(bedrockData, handshakeData, port);
 
             api.addPlayer(player);
 

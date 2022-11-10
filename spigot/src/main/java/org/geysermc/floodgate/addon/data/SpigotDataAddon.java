@@ -34,7 +34,6 @@ import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.player.Connection;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 
 public final class SpigotDataAddon implements InjectorAddon {

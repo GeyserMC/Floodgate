@@ -32,10 +32,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.Method;
 import java.util.UUID;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.packet.PacketHandler;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.player.Connection;
 
 public class SpigotProtocolSupportHandler implements PacketHandler {
     private static final Method getFromChannel;

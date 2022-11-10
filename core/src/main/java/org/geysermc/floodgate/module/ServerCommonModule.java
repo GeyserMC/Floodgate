@@ -29,18 +29,11 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import java.nio.file.Path;
-import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.config.FloodgateConfig;
 
 public final class ServerCommonModule extends CommonModule {
     public ServerCommonModule(Path dataDirectory) {
         super(dataDirectory);
-    }
-
-    @Override
-    protected void configure() {
-        super.configure();
-        bind(SimpleFloodgateApi.class).in(Singleton.class);
     }
 
     @Provides

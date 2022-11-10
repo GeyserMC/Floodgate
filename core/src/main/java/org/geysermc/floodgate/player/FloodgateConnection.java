@@ -28,7 +28,6 @@ package org.geysermc.floodgate.player;
 import java.net.InetSocketAddress;
 import java.util.UUID;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -40,14 +39,14 @@ import org.geysermc.api.util.InputMode;
 import org.geysermc.api.util.UiProfile;
 import org.geysermc.cumulus.form.Form;
 import org.geysermc.cumulus.form.util.FormBuilder;
-import org.geysermc.floodgate.addon.data.HandshakeDataImpl;
+import org.geysermc.floodgate.api.handshake.HandshakeData;
+import org.geysermc.floodgate.api.legacy.PropertyGlue;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.LinkedPlayer;
 import org.geysermc.floodgate.util.Utils;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-@Builder
-public final class FloodgatePlayerImpl implements Connection {
+public final class FloodgateConnection implements Connection {
     private final String version;
     private final String username;
     private final String javaUsername;
@@ -66,7 +65,9 @@ public final class FloodgatePlayerImpl implements Connection {
 
     private final InetSocketAddress socketAddress;
 
-    static FloodgatePlayerImpl from(BedrockData data, HandshakeDataImpl handshakeData, int port) {
+    private final PropertyGlue propertyGlue = new PropertyGlue();
+
+    static FloodgateConnection from(BedrockData data, HandshakeData handshakeData, int port) {
         UUID javaUniqueId = Utils.getJavaUuid(data.getXuid());
 
         BedrockPlatform deviceOs = BedrockPlatform.fromId(data.getDeviceOs());
@@ -77,7 +78,7 @@ public final class FloodgatePlayerImpl implements Connection {
 
         InetSocketAddress socketAddress = new InetSocketAddress(data.getIp(), port);
 
-        return new FloodgatePlayerImpl(
+        return new FloodgateConnection(
                 data.getVersion(), data.getUsername(), handshakeData.getJavaUsername(),
                 javaUniqueId, data.getXuid(), deviceOs, data.getLanguageCode(), uiProfile,
                 inputMode, data.getIp(), data.isFromProxy(),
@@ -150,7 +151,7 @@ public final class FloodgatePlayerImpl implements Connection {
     }
 
     @Override
-    public InetSocketAddress socketAddress() {
+    public @NonNull InetSocketAddress socketAddress() {
         return socketAddress;
     }
 
@@ -158,5 +159,9 @@ public final class FloodgatePlayerImpl implements Connection {
         return BedrockData.of(version, username, xuid, deviceOs.ordinal(), languageCode,
                 uiProfile.ordinal(), inputMode.ordinal(), ip, linkedPlayer, proxy, subscribeId,
                 verifyCode);
+    }
+
+    public PropertyGlue propertyGlue() {
+        return propertyGlue;
     }
 }

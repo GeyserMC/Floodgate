@@ -5,8 +5,8 @@ plugins {
 }
 
 dependencies {
-    api("org.geysermc", "api", "3.0.0-SNAPSHOT")
     api(projects.api)
+    api("org.geysermc", "api", "3.0.0-SNAPSHOT")
 //    api("org.geysermc", "floodgate-legacy-api", "3.0.0-SNAPSHOT")
     api("org.geysermc.configutils", "configutils", Versions.configUtilsVersion)
 
