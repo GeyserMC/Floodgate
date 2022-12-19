@@ -33,11 +33,19 @@ dependencies {
     // Base Floodgate
     implementation("org.geysermc.floodgate:core:${project.mod_version}")
     shadow("org.geysermc.floodgate:core:${project.mod_version}") {
+        exclude group: "cloud.commandframework", module: "*" // Cloud is included jar-in-jar
+        exclude group: "org.geysermc.floodgate", module: "api"
         exclude group: 'com.google.guava', module: "guava"
         exclude group: 'com.google.code.gson', module: "gson"
         exclude group: 'org.slf4j', module: "slf4j-api"
         exclude group: 'net.kyori', module: '*' // Let Adventure-Platform provide its desired Adventure version
         exclude group: 'it.unimi.dsi.fastutil', module: "*"
+    }
+
+    shadow(implementation("org.geysermc.floodgate:api:${project.mod_version}")) {
+        exclude group: 'com.google.guava', module: "guava"
+        exclude group: 'com.google.code.gson', module: "gson"
+        exclude group: "org.ow2.asm", module: "*" // From Events lib
     }
 
     include(modImplementation('cloud.commandframework:cloud-fabric:1.8.0-SNAPSHOT') {
