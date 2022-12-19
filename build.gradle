@@ -1,7 +1,5 @@
 import net.fabricmc.loom.task.RemapJarTask
 
-import java.nio.file.FileSystems
-
 plugins {
     id 'com.github.johnrengelman.shadow' version '7.0.0'
     id 'fabric-loom' version '1.0-SNAPSHOT'
