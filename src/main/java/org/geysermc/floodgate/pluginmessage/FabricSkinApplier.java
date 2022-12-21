@@ -44,7 +44,7 @@ public final class FabricSkinApplier implements SkinApplier {
                 }
 
                 otherPlayer.connection.send(new ClientboundPlayerInfoRemovePacket(Collections.singletonList(bedrockPlayer.getUUID())));
-                otherPlayer.connection.send(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, bedrockPlayer));
+                otherPlayer.connection.send(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(Collections.singletonList(bedrockPlayer)));
                 if (samePlayer) {
                     continue;
                 }
