@@ -126,30 +126,60 @@ public final class SpigotInjector extends CommonPlatformInjector {
             return;
         }
 
-        // remove injection from clients
-        for (Channel channel : getInjectedClients()) {
-            removeAddonsCall(channel);
-        }
-        getInjectedClients().clear();
-
-        // and change the list back to the original
+        // let's change the list back to the original first
+        // so that new connections are not handled through our custom list
         Object serverConnection = getServerConnection();
         if (serverConnection != null) {
             Field field = ReflectionUtils.getField(serverConnection.getClass(), injectedFieldName);
-            List<?> list = (List<?>) ReflectionUtils.getValue(serverConnection, field);
 
-            if (list instanceof CustomList) {
-                CustomList customList = (CustomList) list;
-                ReflectionUtils.setValue(serverConnection, field, customList.getOriginalList());
-                customList.clear();
-                customList.addAll(list);
+            if (!findAndReplaceCustomList(serverConnection, field)) {
+                throw new IllegalStateException(
+                        "Unable to remove all references of Floodgate! " +
+                        "Reloading will very likely break Floodgate."
+                );
             }
         }
+
+        // remove injection from clients
+        for (Channel channel : injectedClients()) {
+            removeAddonsCall(channel);
+        }
+
+        //todo make sure that all references are removed from the channels,
+        // except from one AttributeKey with Floodgate player data which could be used
+        // after reloading
 
         injected = false;
     }
 
-    public Object getServerConnection() {
+    /**
+     * Replaces all references of CustomList with the original list.
+     * It's entirely possible that e.g. the most recent channel map override isn't Floodgate's
+     */
+    private boolean findAndReplaceCustomList(Object object, Field possibleListField) {
+        Object value = ReflectionUtils.getValue(object, possibleListField);
+
+        if (value == null || value.getClass() == Object.class) {
+            return false;
+        }
+
+        if (value instanceof CustomList) {
+            // all we have to do is replace the list with the original list.
+            // the original list is up-to-date, so we don't have to clear/add/whatever anything
+            CustomList customList = (CustomList) value;
+            ReflectionUtils.setValue(object, possibleListField, customList.getOriginalList());
+        }
+
+        boolean found = false;
+        for (Field field : value.getClass().getDeclaredFields()) {
+            // normally list types don't have a lot of fields, so let's just try all of them
+            found |= findAndReplaceCustomList(value, field);
+        }
+
+        return found;
+    }
+
+    private Object getServerConnection() {
         if (serverConnection != null) {
             return serverConnection;
         }
