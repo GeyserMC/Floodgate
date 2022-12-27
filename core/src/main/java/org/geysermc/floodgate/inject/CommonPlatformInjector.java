@@ -35,21 +35,21 @@ import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 
 public abstract class CommonPlatformInjector implements PlatformInjector {
-    private final Map<Channel, ?> injectedClients =
-            Collections.synchronizedMap(new WeakHashMap<>());
+    private final Set<Channel> injectedClients =
+            Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
 
     private final Map<Class<?>, InjectorAddon> addons = new HashMap<>();
 
     protected boolean addInjectedClient(Channel channel) {
-        return injectedClients.put(channel, null) != null;
+        return injectedClients.add(channel);
     }
 
     public boolean removeInjectedClient(Channel channel) {
-        return injectedClients.remove(channel) != null;
+        return injectedClients.remove(channel);
     }
 
     public Set<Channel> injectedClients() {
-        return injectedClients.keySet();
+        return injectedClients;
     }
 
     @Override
