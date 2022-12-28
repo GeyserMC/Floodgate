@@ -31,14 +31,15 @@ import com.google.inject.Module;
 import java.util.UUID;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.InstanceHolder;
+import org.geysermc.floodgate.api.event.FloodgateEventBus;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.event.EventBus;
-import org.geysermc.floodgate.event.PostEnableEvent;
-import org.geysermc.floodgate.event.ShutdownEvent;
+import org.geysermc.floodgate.event.lifecycle.PostEnableEvent;
+import org.geysermc.floodgate.event.lifecycle.ShutdownEvent;
 import org.geysermc.floodgate.module.PostInitializeModule;
 
 public class FloodgatePlatform {
@@ -52,9 +53,13 @@ public class FloodgatePlatform {
     public void init(
             FloodgateApi api,
             PlayerLink link,
+            FloodgateEventBus eventBus,
             PacketHandlers packetHandlers,
-            HandshakeHandlers handshakeHandlers) {
-        InstanceHolder.set(api, link, this.injector, packetHandlers, handshakeHandlers, KEY);
+            HandshakeHandlers handshakeHandlers
+    ) {
+        InstanceHolder.set(
+                api, link, eventBus, this.injector, packetHandlers, handshakeHandlers, KEY
+        );
     }
 
     public void enable(Module... postInitializeModules) throws RuntimeException {

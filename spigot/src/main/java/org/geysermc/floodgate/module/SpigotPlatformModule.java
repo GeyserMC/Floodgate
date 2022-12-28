@@ -61,9 +61,11 @@ public final class SpigotPlatformModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        bind(SpigotPlugin.class).toInstance(plugin);
         bind(PlatformUtils.class).to(SpigotPlatformUtils.class);
         bind(Logger.class).annotatedWith(Names.named("logger")).toInstance(plugin.getLogger());
         bind(FloodgateLogger.class).to(JavaUtilFloodgateLogger.class);
+        bind(SkinApplier.class).to(SpigotSkinApplier.class);
     }
 
     @Provides
@@ -140,12 +142,6 @@ public final class SpigotPlatformModule extends AbstractModule {
     @Singleton
     public PluginMessageRegistration pluginMessageRegister() {
         return new SpigotPluginMessageRegistration(plugin);
-    }
-
-    @Provides
-    @Singleton
-    public SkinApplier skinApplier(SpigotVersionSpecificMethods versionSpecificMethods) {
-        return new SpigotSkinApplier(versionSpecificMethods, plugin);
     }
 
     @Provides

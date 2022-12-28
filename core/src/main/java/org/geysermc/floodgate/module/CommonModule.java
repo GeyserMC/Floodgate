@@ -43,6 +43,7 @@ import org.geysermc.event.PostOrder;
 import org.geysermc.floodgate.addon.data.HandshakeHandlersImpl;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
+import org.geysermc.floodgate.api.event.FloodgateEventBus;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.link.PlayerLink;
@@ -57,14 +58,13 @@ import org.geysermc.floodgate.crypto.Base64Topping;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.crypto.KeyProducer;
 import org.geysermc.floodgate.event.EventBus;
-import org.geysermc.floodgate.event.ShutdownEvent;
+import org.geysermc.floodgate.event.lifecycle.ShutdownEvent;
 import org.geysermc.floodgate.event.util.ListenerAnnotationMatcher;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.link.PlayerLinkHolder;
 import org.geysermc.floodgate.packet.PacketHandlersImpl;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
-import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinUploadManager;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.HttpClient;
@@ -77,6 +77,7 @@ public class CommonModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(EventBus.class).toInstance(eventBus);
+        bind(FloodgateEventBus.class).to(EventBus.class);
         // register every class that has the Listener annotation
         bindListener(new ListenerAnnotationMatcher(), new TypeListener() {
             @Override
@@ -162,17 +163,6 @@ public class CommonModule extends AbstractModule {
     @Singleton
     public PluginMessageManager pluginMessageManager() {
         return new PluginMessageManager();
-    }
-
-    @Provides
-    @Singleton
-    public SkinUploadManager skinUploadManager(
-            FloodgateApi api,
-            SkinApplier skinApplier,
-            FloodgateLogger logger) {
-        SkinUploadManager manager = new SkinUploadManager(api, skinApplier, logger);
-        eventBus.register(manager);
-        return manager;
     }
 
     @Provides

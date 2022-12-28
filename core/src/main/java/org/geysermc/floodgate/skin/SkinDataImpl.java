@@ -23,41 +23,36 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.event;
+package org.geysermc.floodgate.skin;
 
-import com.google.inject.Singleton;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import com.google.gson.JsonObject;
+import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.geysermc.event.PostOrder;
-import org.geysermc.event.bus.impl.EventBusImpl;
-import org.geysermc.event.subscribe.Subscribe;
-import org.geysermc.event.subscribe.Subscriber;
-import org.geysermc.floodgate.api.event.FloodgateEventBus;
-import org.geysermc.floodgate.api.event.FloodgateSubscriber;
+import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 
-@Singleton
-@SuppressWarnings("unchecked")
-public final class EventBus extends EventBusImpl<Object, FloodgateSubscriber<?>>
-        implements FloodgateEventBus {
-    @Override
-    protected <H, T, B extends Subscriber<T>> B makeSubscription(
-            @NonNull Class<T> eventClass,
-            @NonNull Subscribe subscribe,
-            @NonNull H listener,
-            @NonNull BiConsumer<H, T> handler
-    ) {
-        return (B) new EventSubscriber<>(
-                eventClass, subscribe.postOrder(), subscribe.ignoreCancelled(), listener, handler
+public class SkinDataImpl implements SkinData {
+    private final String value;
+    private final String signature;
+
+    public SkinDataImpl(@NonNull String value, @NonNull String signature) {
+        this.value = Objects.requireNonNull(value);
+        this.signature = Objects.requireNonNull(signature);
+    }
+
+    public static SkinData from(JsonObject data) {
+        return new SkinDataImpl(
+                data.get("value").getAsString(),
+                data.get("signature").getAsString()
         );
     }
 
     @Override
-    protected <T, B extends Subscriber<T>> B makeSubscription(
-            @NonNull Class<T> eventClass,
-            @NonNull Consumer<T> handler,
-            @NonNull PostOrder postOrder
-    ) {
-        return (B) new EventSubscriber<>(eventClass, handler, postOrder);
+    public @NonNull String value() {
+        return value;
+    }
+
+    @Override
+    public @NonNull String signature() {
+        return signature;
     }
 }

@@ -48,7 +48,7 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.skin.SkinData;
+import org.geysermc.floodgate.skin.SkinDataImpl;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
@@ -130,8 +130,8 @@ public final class BungeeListener implements Listener {
         // To fix the February 2 2022 Mojang authentication changes
         if (!config.isSendFloodgateData()) {
             FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
-            if (player != null && !player.isLinked() && !skinApplier.hasSkin(player)) {
-                skinApplier.applySkin(player, new SkinData("", ""));
+            if (player != null && !player.isLinked()) {
+                skinApplier.applySkin(player, new SkinDataImpl("", ""));
             }
         }
     }

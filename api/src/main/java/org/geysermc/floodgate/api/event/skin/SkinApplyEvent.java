@@ -23,18 +23,52 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.skin;
+package org.geysermc.floodgate.api.event.skin;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.common.returnsreceiver.qual.This;
+import org.geysermc.event.Cancellable;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
-public interface SkinApplier {
+/**
+ * An event that's fired when Floodgate receives a player skin. The event will be cancelled by
+ * default when hasSkin is true, as Floodgate by default only applies skins when the player has no
+ * skin applied yet.
+ */
+public interface SkinApplyEvent extends Cancellable {
     /**
-     * Apply a skin to a {@link FloodgatePlayer player}
-     *
-     * @param floodgatePlayer player to apply skin to
-     * @param skinData data for skin to apply to player
+     * Returns the player that will receive the skin.
      */
-    void applySkin(@NonNull FloodgatePlayer floodgatePlayer, @NonNull SkinData skinData);
+    @NonNull FloodgatePlayer player();
+
+    /**
+     * Returns the skin texture currently applied to the player.
+     */
+    @Nullable SkinData currentSkin();
+
+    /**
+     * Returns the skin texture to be applied to the player.
+     */
+    @NonNull SkinData newSkin();
+
+    /**
+     * Sets the skin texture to be applied to the player
+     *
+     * @param skinData the skin to apply
+     * @return this
+     */
+    @This SkinApplyEvent newSkin(@NonNull SkinData skinData);
+
+    interface SkinData {
+        /**
+         * Returns the value of the skin texture.
+         */
+        @NonNull String value();
+
+        /**
+         * Returns the signature of the skin texture.
+         */
+        @NonNull String signature();
+    }
 }

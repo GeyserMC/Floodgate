@@ -69,6 +69,7 @@ public final class VelocityPlatformModule extends AbstractModule {
         bind(CommandUtil.class).to(VelocityCommandUtil.class);
         bind(PlatformUtils.class).to(VelocityPlatformUtils.class);
         bind(FloodgateLogger.class).to(Slf4jFloodgateLogger.class);
+        bind(SkinApplier.class).to(VelocitySkinApplier.class);
     }
 
     @Provides
@@ -110,12 +111,6 @@ public final class VelocityPlatformModule extends AbstractModule {
     @Singleton
     public PluginMessageRegistration pluginMessageRegistration(ProxyServer proxy) {
         return new VelocityPluginMessageRegistration(proxy);
-    }
-
-    @Provides
-    @Singleton
-    public SkinApplier skinApplier(ProxyServer server) {
-        return new VelocitySkinApplier(server);
     }
 
     /*

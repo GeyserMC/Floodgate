@@ -23,7 +23,9 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.event;
+package org.geysermc.floodgate.api.event;
 
-public class PostEnableEvent {
+import org.geysermc.event.subscribe.Subscriber;
+
+public interface FloodgateSubscriber<T> extends Subscriber<T> {
 }

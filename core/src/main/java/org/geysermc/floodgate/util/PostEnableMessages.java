@@ -32,7 +32,7 @@ import org.geysermc.event.Listener;
 import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.event.PostEnableEvent;
+import org.geysermc.floodgate.event.lifecycle.PostEnableEvent;
 
 @AutoBind
 @Listener

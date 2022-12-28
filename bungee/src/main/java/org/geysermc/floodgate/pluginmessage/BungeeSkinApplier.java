@@ -26,68 +26,55 @@
 package org.geysermc.floodgate.pluginmessage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.geysermc.floodgate.util.ReflectionUtils.getConstructor;
 import static org.geysermc.floodgate.util.ReflectionUtils.getFieldOfType;
-import static org.geysermc.floodgate.util.ReflectionUtils.getMethodByName;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import lombok.RequiredArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.connection.LoginResult;
 import net.md_5.bungee.protocol.Property;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.floodgate.api.event.skin.SkinApplyEvent;
+import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.event.EventBus;
+import org.geysermc.floodgate.event.skin.SkinApplyEventImpl;
 import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.skin.SkinData;
+import org.geysermc.floodgate.skin.SkinDataImpl;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
-@RequiredArgsConstructor
+@Singleton
 public final class BungeeSkinApplier implements SkinApplier {
-    private static final Constructor<?> LOGIN_RESULT_CONSTRUCTOR;
     private static final Field LOGIN_RESULT_FIELD;
-    private static final Method SET_PROPERTIES_METHOD;
-
-    private static final Class<?> PROPERTY_CLASS;
-    private static final Constructor<?> PROPERTY_CONSTRUCTOR;
 
     static {
-        PROPERTY_CLASS = ReflectionUtils.getClassOrFallbackPrefixed(
-                "protocol.Property", "connection.LoginResult$Property"
-        );
-
-        LOGIN_RESULT_CONSTRUCTOR = getConstructor(
-                LoginResult.class, true,
-                String.class, String.class, Array.newInstance(PROPERTY_CLASS, 0).getClass()
-        );
-
         LOGIN_RESULT_FIELD = getFieldOfType(InitialHandler.class, LoginResult.class);
         checkNotNull(LOGIN_RESULT_FIELD, "LoginResult field cannot be null");
-
-        SET_PROPERTIES_METHOD = getMethodByName(LoginResult.class, "setProperties", true);
-
-        PROPERTY_CONSTRUCTOR = ReflectionUtils.getConstructor(
-                PROPERTY_CLASS, true,
-                String.class, String.class, String.class
-        );
-        checkNotNull(PROPERTY_CONSTRUCTOR, "Property constructor cannot be null");
     }
 
-    private final FloodgateLogger logger;
+    private final ProxyServer server = ProxyServer.getInstance();
+
+    @Inject private EventBus eventBus;
+    @Inject private FloodgateLogger logger;
 
     @Override
-    public void applySkin(FloodgatePlayer uuid, SkinData skinData) {
-        ProxiedPlayer player = ProxyServer.getInstance().getPlayer(uuid.getCorrectUniqueId());
+    public void applySkin(@NonNull FloodgatePlayer floodgatePlayer, @NonNull SkinData skinData) {
+        ProxiedPlayer player = server.getPlayer(floodgatePlayer.getCorrectUniqueId());
         if (player == null) {
             return;
         }
 
-        InitialHandler handler = getHandler(player);
-        if (handler == null) {
+        InitialHandler handler;
+        try {
+            handler = (InitialHandler) player.getPendingConnection();
+        } catch (Exception exception) {
+            logger.error("Incompatible Bungeecord fork detected", exception);
             return;
         }
 
@@ -95,57 +82,46 @@ public final class BungeeSkinApplier implements SkinApplier {
         // expected to be null since LoginResult is the data from hasJoined,
         // which Floodgate players don't have
         if (loginResult == null) {
-            // id and name are unused and properties will be overridden
-            loginResult = (LoginResult) ReflectionUtils.newInstance(
-                    LOGIN_RESULT_CONSTRUCTOR, null, null, null
-            );
+            // id and name are unused
+            loginResult = new LoginResult(null, null, new Property[0]);
             ReflectionUtils.setValue(handler, LOGIN_RESULT_FIELD, loginResult);
         }
 
-        Object property = ReflectionUtils.newInstance(
-                PROPERTY_CONSTRUCTOR,
-                "textures", skinData.getValue(), skinData.getSignature()
-        );
+        Property[] properties = loginResult.getProperties();
 
-        Object propertyArray = Array.newInstance(PROPERTY_CLASS, 1);
-        Array.set(propertyArray, 0, property);
+        SkinData currentSkin = currentSkin(properties);
 
-        ReflectionUtils.invoke(loginResult, SET_PROPERTIES_METHOD, propertyArray);
+        SkinApplyEvent event = new SkinApplyEventImpl(floodgatePlayer, currentSkin, skinData);
+        event.setCancelled(floodgatePlayer.isLinked());
+
+        eventBus.fire(event);
+
+        if (event.isCancelled()) {
+            return;
+        }
+
+        loginResult.setProperties(replaceSkin(properties, event.newSkin()));
     }
 
-    @Override
-    public boolean hasSkin(FloodgatePlayer fPlayer) {
-        ProxiedPlayer player = ProxyServer.getInstance().getPlayer(fPlayer.getCorrectUniqueId());
-        if (player == null) {
-            return false;
-        }
-
-        InitialHandler handler = getHandler(player);
-        if (handler == null) {
-            return false;
-        }
-
-        LoginResult loginResult = handler.getLoginProfile();
-        if (loginResult == null) {
-            return false;
-        }
-
-        for (Property property : loginResult.getProperties()) {
+    private SkinData currentSkin(Property[] properties) {
+        for (Property property : properties) {
             if (property.getName().equals("textures")) {
                 if (!property.getValue().isEmpty()) {
-                    return true;
+                    return new SkinDataImpl(property.getValue(), property.getSignature());
                 }
             }
         }
-        return false;
+        return null;
     }
 
-    private InitialHandler getHandler(ProxiedPlayer player) {
-        try {
-            return (InitialHandler) player.getPendingConnection();
-        } catch (Exception exception) {
-            logger.error("Incompatible Bungeecord fork detected", exception);
-            return null;
+    private Property[] replaceSkin(Property[] properties, SkinData skinData) {
+        List<Property> list = new ArrayList<>();
+        for (Property property : properties) {
+            if (!property.getName().equals("textures")) {
+                list.add(property);
+            }
         }
+        list.add(new Property("textures", skinData.value(), skinData.signature()));
+        return list.toArray(new Property[0]);
     }
 }
