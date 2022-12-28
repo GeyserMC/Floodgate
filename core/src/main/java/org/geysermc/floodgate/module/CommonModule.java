@@ -38,6 +38,7 @@ import io.netty.util.AttributeKey;
 import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.event.PostOrder;
 import org.geysermc.floodgate.addon.data.HandshakeHandlersImpl;
@@ -87,8 +88,19 @@ public class CommonModule extends AbstractModule {
         });
 
         ExecutorService commonPool = Executors.newCachedThreadPool();
-        eventBus.subscribe(ShutdownEvent.class, ignored -> commonPool.shutdown(), PostOrder.LAST);
-        bind(ExecutorService.class).annotatedWith(Names.named("commonPool")).toInstance(commonPool);
+        ScheduledExecutorService commonScheduledPool = Executors.newSingleThreadScheduledExecutor();
+
+        eventBus.subscribe(ShutdownEvent.class, ignored -> {
+            commonPool.shutdown();
+            commonScheduledPool.shutdown();
+        }, PostOrder.LAST);
+
+        bind(ExecutorService.class)
+                .annotatedWith(Names.named("commonPool"))
+                .toInstance(commonPool);
+        bind(ScheduledExecutorService.class)
+                .annotatedWith(Names.named("commonScheduledPool"))
+                .toInstance(commonScheduledPool);
 
         bind(HttpClient.class).in(Singleton.class);
 

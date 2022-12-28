@@ -26,8 +26,11 @@
 package org.geysermc.floodgate.util;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import org.geysermc.event.Listener;
 import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -41,6 +44,9 @@ public final class PostEnableMessages {
 
     @Inject private FloodgateConfig config;
     @Inject private FloodgateLogger logger;
+    @Inject
+    @Named("commonScheduledPool")
+    private ScheduledExecutorService executorService;
 
     public void add(String[] message, Object... args) {
         StringBuilder builder = new StringBuilder();
@@ -93,14 +99,11 @@ public final class PostEnableMessages {
 
     @Subscribe
     public void onPostEnable(PostEnableEvent ignored) {
-        new Thread(() -> {
-            // normally proxies don't have a lot of plugins, so proxies don't need to sleep as long
-            try {
-                Thread.sleep(config.isProxy() ? 2000 : 5000);
-            } catch (InterruptedException ignored1) {
-            }
-
-            messages.forEach(logger::warn);
-        }).start();
+        // normally proxies don't have a lot of plugins, so proxies don't need to sleep as long
+        executorService.schedule(
+                () -> messages.forEach(logger::warn),
+                config.isProxy() ? 2 : 5,
+                TimeUnit.SECONDS
+        );
     }
 }
