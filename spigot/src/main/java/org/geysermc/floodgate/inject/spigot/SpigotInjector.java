@@ -25,6 +25,8 @@
 
 package org.geysermc.floodgate.inject.spigot;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -36,13 +38,15 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.util.ClassNames;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
-@RequiredArgsConstructor
+@Singleton
 public final class SpigotInjector extends CommonPlatformInjector {
+    @Inject private FloodgateLogger logger;
+
     private Object serverConnection;
     private String injectedFieldName;
 
@@ -131,13 +135,23 @@ public final class SpigotInjector extends CommonPlatformInjector {
         Object serverConnection = getServerConnection();
         if (serverConnection != null) {
             Field field = ReflectionUtils.getField(serverConnection.getClass(), injectedFieldName);
+            Object value = ReflectionUtils.getValue(serverConnection, field);
 
-            if (!findAndReplaceCustomList(serverConnection, field)) {
-                throw new IllegalStateException(
-                        "Unable to remove all references of Floodgate! " +
-                        "Reloading will very likely break Floodgate."
-                );
+            if (value instanceof CustomList) {
+                // all we have to do is replace the list with the original list.
+                // the original list is up-to-date, so we don't have to clear/add/whatever anything
+                CustomList customList = (CustomList) value;
+                ReflectionUtils.setValue(serverConnection, field, customList.getOriginalList());
+                return;
             }
+
+            // we could replace all references of CustomList that are directly in 'value', but that
+            // only brings you so far. ProtocolLib for example stores the original value
+            // (which would be our CustomList e.g.) in a separate object
+            logger.debug(
+                    "Unable to remove all references of Floodgate due to {}! ",
+                    value.getClass().getName()
+            );
         }
 
         // remove injection from clients
@@ -150,33 +164,6 @@ public final class SpigotInjector extends CommonPlatformInjector {
         // after reloading
 
         injected = false;
-    }
-
-    /**
-     * Replaces all references of CustomList with the original list.
-     * It's entirely possible that e.g. the most recent channel map override isn't Floodgate's
-     */
-    private boolean findAndReplaceCustomList(Object object, Field possibleListField) {
-        Object value = ReflectionUtils.getValue(object, possibleListField);
-
-        if (value == null || value.getClass() == Object.class) {
-            return false;
-        }
-
-        if (value instanceof CustomList) {
-            // all we have to do is replace the list with the original list.
-            // the original list is up-to-date, so we don't have to clear/add/whatever anything
-            CustomList customList = (CustomList) value;
-            ReflectionUtils.setValue(object, possibleListField, customList.getOriginalList());
-        }
-
-        boolean found = false;
-        for (Field field : value.getClass().getDeclaredFields()) {
-            // normally list types don't have a lot of fields, so let's just try all of them
-            found |= findAndReplaceCustomList(value, field);
-        }
-
-        return found;
     }
 
     private Object getServerConnection() {

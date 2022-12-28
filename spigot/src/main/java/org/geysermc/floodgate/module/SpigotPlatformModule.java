@@ -62,6 +62,7 @@ public final class SpigotPlatformModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(PlatformUtils.class).to(SpigotPlatformUtils.class);
+        bind(CommonPlatformInjector.class).to(SpigotInjector.class);
         bind(Logger.class).annotatedWith(Names.named("logger")).toInstance(plugin.getLogger());
         bind(FloodgateLogger.class).to(JavaUtilFloodgateLogger.class);
     }
@@ -95,12 +96,6 @@ public final class SpigotPlatformModule extends AbstractModule {
     /*
     DebugAddon / PlatformInjector
      */
-
-    @Provides
-    @Singleton
-    public CommonPlatformInjector platformInjector() {
-        return new SpigotInjector();
-    }
 
     @Provides
     @Named("packetEncoder")
