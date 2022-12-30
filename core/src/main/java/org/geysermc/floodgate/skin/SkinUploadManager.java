@@ -42,7 +42,7 @@ public final class SkinUploadManager {
     private final Int2ObjectMap<SkinUploadSocket> connections =
             Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>());
 
-    @Inject private GeyserBaseApi api;
+    @Inject private GeyserApiBase api;
     @Inject private SkinApplier applier;
     @Inject private FloodgateLogger logger;
 

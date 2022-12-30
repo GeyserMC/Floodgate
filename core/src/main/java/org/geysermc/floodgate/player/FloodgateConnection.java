@@ -40,6 +40,7 @@ import org.geysermc.api.util.UiProfile;
 import org.geysermc.cumulus.form.Form;
 import org.geysermc.cumulus.form.util.FormBuilder;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
+import org.geysermc.floodgate.api.legacy.LegacyPlayerWrapper;
 import org.geysermc.floodgate.api.legacy.PropertyGlue;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.LinkedPlayer;
@@ -66,6 +67,7 @@ public final class FloodgateConnection implements Connection {
     private final InetSocketAddress socketAddress;
 
     private final PropertyGlue propertyGlue = new PropertyGlue();
+    private LegacyPlayerWrapper legacyPlayer;
 
     static FloodgateConnection from(BedrockData data, HandshakeData handshakeData, int port) {
         UUID javaUniqueId = Utils.getJavaUuid(data.getXuid());
@@ -159,6 +161,13 @@ public final class FloodgateConnection implements Connection {
         return BedrockData.of(version, username, xuid, deviceOs.ordinal(), languageCode,
                 uiProfile.ordinal(), inputMode.ordinal(), ip, linkedPlayer, proxy, subscribeId,
                 verifyCode);
+    }
+
+    public LegacyPlayerWrapper legacySelf() {
+        if (legacyPlayer == null) {
+            legacyPlayer = new LegacyPlayerWrapper(this);
+        }
+        return legacyPlayer;
     }
 
     public PropertyGlue propertyGlue() {

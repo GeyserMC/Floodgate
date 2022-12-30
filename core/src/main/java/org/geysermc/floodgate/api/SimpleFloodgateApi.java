@@ -27,12 +27,14 @@ package org.geysermc.floodgate.api;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.api.GeyserApiBase;
@@ -67,7 +69,7 @@ public class SimpleFloodgateApi implements GeyserApiBase {
 
     @Override
     public @NonNull List<? extends Connection> onlineConnections() {
-        return players.values().stream().collect(Collectors.toList()); // TODO guarantee immutable
+        return ImmutableList.copyOf(players.values());
     }
 
     @Override

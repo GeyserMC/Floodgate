@@ -64,8 +64,8 @@ public final class BungeeSkinApplier implements SkinApplier {
     @Inject private FloodgateLogger logger;
 
     @Override
-    public void applySkin(@NonNull Connection floodgatePlayer, @NonNull SkinData skinData) {
-        ProxiedPlayer player = server.getPlayer(floodgatePlayer.javaUuid());
+    public void applySkin(@NonNull Connection connection, @NonNull SkinData skinData) {
+        ProxiedPlayer player = server.getPlayer(connection.javaUuid());
         if (player == null) {
             return;
         }
@@ -91,8 +91,8 @@ public final class BungeeSkinApplier implements SkinApplier {
 
         SkinData currentSkin = currentSkin(properties);
 
-        SkinApplyEvent event = new SkinApplyEventImpl(floodgatePlayer, currentSkin, skinData);
-        event.setCancelled(floodgatePlayer.isLinked());
+        SkinApplyEvent event = new SkinApplyEventImpl(connection, currentSkin, skinData);
+        event.setCancelled(connection.isLinked());
 
         eventBus.fire(event);
 

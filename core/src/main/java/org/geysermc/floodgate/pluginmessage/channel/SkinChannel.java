@@ -30,11 +30,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import org.geysermc.api.GeyserApiBase;
 import org.geysermc.api.connection.Connection;
+import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
 import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.skin.SkinData;
 import org.geysermc.floodgate.skin.SkinDataImpl;
 
 public class SkinChannel implements PluginMessageChannel {

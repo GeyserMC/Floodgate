@@ -35,7 +35,6 @@ import lombok.RequiredArgsConstructor;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.api.GeyserApiBase;
-import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.inject.spigot.SpigotInjector;
@@ -61,18 +60,12 @@ public final class SpigotPlatformModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(SpigotPlugin.class).toInstance(plugin);
+        bind(JavaPlugin.class).toInstance(plugin);
         bind(PlatformUtils.class).to(SpigotPlatformUtils.class);
         bind(CommonPlatformInjector.class).to(SpigotInjector.class);
         bind(Logger.class).annotatedWith(Names.named("logger")).toInstance(plugin.getLogger());
         bind(FloodgateLogger.class).to(JavaUtilFloodgateLogger.class);
         bind(SkinApplier.class).to(SpigotSkinApplier.class);
-    }
-
-    @Provides
-    @Singleton
-    public JavaPlugin javaPlugin() {
-        return plugin;
     }
 
     /*

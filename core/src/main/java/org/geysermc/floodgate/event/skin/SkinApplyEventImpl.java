@@ -28,9 +28,11 @@ package org.geysermc.floodgate.event.skin;
 import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.event.util.AbstractCancellable;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.player.FloodgateConnection;
 
 public class SkinApplyEventImpl extends AbstractCancellable implements SkinApplyEvent {
     private final FloodgatePlayer player;
@@ -38,11 +40,12 @@ public class SkinApplyEventImpl extends AbstractCancellable implements SkinApply
     private SkinData newSkin;
 
     public SkinApplyEventImpl(
-            @NonNull FloodgatePlayer player,
+            @NonNull Connection connection,
             @Nullable SkinData currentSkin,
             @NonNull SkinData newSkin
     ) {
-        this.player = Objects.requireNonNull(player);
+        Objects.requireNonNull(connection);
+        this.player = ((FloodgateConnection) connection).legacySelf();
         this.currentSkin = currentSkin;
         this.newSkin = Objects.requireNonNull(newSkin);
     }

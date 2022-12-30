@@ -35,7 +35,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
 public final class PaperProfileListener implements Listener {
     @Inject private SimpleFloodgateApi api;

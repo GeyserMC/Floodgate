@@ -56,7 +56,7 @@ public final class LegacyApiWrapper implements FloodgateApi {
     public Collection<FloodgatePlayer> getPlayers() {
         return apiBase.onlineConnections()
                 .stream()
-                .map(connection -> new LegacyPlayerWrapper((FloodgateConnection) connection))
+                .map(connection -> ((FloodgateConnection) connection).legacySelf())
                 .collect(Collectors.toList());
     }
 
@@ -73,10 +73,10 @@ public final class LegacyApiWrapper implements FloodgateApi {
     @Override
     public FloodgatePlayer getPlayer(UUID uuid) {
         FloodgateConnection connection = (FloodgateConnection) apiBase.connectionByUuid(uuid);
-        if (connection != null) {
-            return new LegacyPlayerWrapper(connection);
+        if (connection == null) {
+            return null;
         }
-        return null;
+        return connection.legacySelf();
     }
 
     @Override
