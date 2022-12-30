@@ -26,12 +26,12 @@
 package org.geysermc.floodgate.util;
 
 public final class Constants {
-    public static final String VERSION = "${floodgateVersion}";
-    public static final int BUILD_NUMBER = Integer.parseInt("${buildNumber}");
-    public static final String GIT_BRANCH = "${branch}";
+    public static final String VERSION = "@floodgateVersion@";
+    public static final int BUILD_NUMBER = Integer.parseInt("@buildNumber@");
+    public static final String GIT_BRANCH = "@branch@";
     public static final int METRICS_ID = 14649;
 
-    public static final char COLOR_CHAR = '§';
+    public static final char COLOR_CHAR = '\u00A7';
 
     public static final boolean DEBUG_MODE = false;
     public static final boolean PRINT_ALL_PACKETS = false;
@@ -55,7 +55,7 @@ public final class Constants {
 
     public static final String NTP_SERVER = "time.cloudflare.com";
     public static final String INTERNAL_ERROR_MESSAGE =
-            "An internal error happened while handling Floodgate data." + 
+            "An internal error happened while handling Floodgate data." +
             " Try logging in again or contact a server administrator if the issue persists.";
     public static final String UNSUPPORTED_DATA_VERSION =
             "Received an unsupported Floodgate data version." +

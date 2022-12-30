@@ -34,14 +34,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.geysermc.event.Listener;
-import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.command.util.Permission;
-import org.geysermc.floodgate.event.ShutdownEvent;
 import org.geysermc.floodgate.news.data.AnnouncementData;
 import org.geysermc.floodgate.news.data.BuildSpecificData;
 import org.geysermc.floodgate.news.data.CheckAfterData;
@@ -52,10 +48,11 @@ import org.geysermc.floodgate.util.HttpClient;
 import org.geysermc.floodgate.util.HttpClient.HttpResponse;
 
 @AutoBind
-@Listener
 public class NewsChecker {
-    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     private final Map<Integer, NewsItem> activeNewsItems = new HashMap<>();
+    @Inject
+    @Named("commonScheduledPool")
+    private ScheduledExecutorService executorService;
 
     @Inject
     private CommandUtil commandUtil;
@@ -197,15 +194,6 @@ public class NewsChecker {
         }
         activeNewsItems.put(item.getId(), item);
         activateNews(item);
-    }
-
-    public void shutdown() {
-        executorService.shutdown();
-    }
-
-    @Subscribe
-    public void onShutdown(ShutdownEvent ignored) {
-        shutdown();
     }
 
     private void activateNews(NewsItem item) {

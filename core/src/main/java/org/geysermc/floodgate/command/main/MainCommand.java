@@ -42,6 +42,7 @@ import org.geysermc.floodgate.player.UserAudience;
 public final class MainCommand extends SubCommands implements FloodgateCommand {
     public MainCommand() {
         defineSubCommand(FirewallCheckSubcommand.class);
+        defineSubCommand(VersionSubcommand.class);
     }
 
     @Override

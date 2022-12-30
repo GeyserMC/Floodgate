@@ -38,6 +38,7 @@ import io.netty.util.AttributeKey;
 import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.api.GeyserApiBase;
 import org.geysermc.api.connection.Connection;
@@ -45,6 +46,7 @@ import org.geysermc.event.PostOrder;
 import org.geysermc.floodgate.addon.data.HandshakeHandlersImpl;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
+import org.geysermc.floodgate.api.event.FloodgateEventBus;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.legacy.LegacyApiWrapper;
@@ -59,14 +61,13 @@ import org.geysermc.floodgate.crypto.Base64Topping;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.crypto.KeyProducer;
 import org.geysermc.floodgate.event.EventBus;
-import org.geysermc.floodgate.event.ShutdownEvent;
+import org.geysermc.floodgate.event.lifecycle.ShutdownEvent;
 import org.geysermc.floodgate.event.util.ListenerAnnotationMatcher;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.link.PlayerLinkHolder;
 import org.geysermc.floodgate.packet.PacketHandlersImpl;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
-import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinUploadManager;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.WebEndpoints;
@@ -79,6 +80,7 @@ public class CommonModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(EventBus.class).toInstance(eventBus);
+        bind(FloodgateEventBus.class).to(EventBus.class);
         // register every class that has the Listener annotation
         bindListener(new ListenerAnnotationMatcher(), new TypeListener() {
             @Override
@@ -88,8 +90,19 @@ public class CommonModule extends AbstractModule {
         });
 
         ExecutorService commonPool = Executors.newCachedThreadPool();
-        eventBus.subscribe(ShutdownEvent.class, ignored -> commonPool.shutdown(), PostOrder.LAST);
-        bind(ExecutorService.class).annotatedWith(Names.named("commonPool")).toInstance(commonPool);
+        ScheduledExecutorService commonScheduledPool = Executors.newSingleThreadScheduledExecutor();
+
+        eventBus.subscribe(ShutdownEvent.class, ignored -> {
+            commonPool.shutdown();
+            commonScheduledPool.shutdown();
+        }, PostOrder.LAST);
+
+        bind(ExecutorService.class)
+                .annotatedWith(Names.named("commonPool"))
+                .toInstance(commonPool);
+        bind(ScheduledExecutorService.class)
+                .annotatedWith(Names.named("commonScheduledPool"))
+                .toInstance(commonScheduledPool);
 
         bind(GeyserApiBase.class).to(SimpleFloodgateApi.class);
         bind(PlatformInjector.class).to(CommonPlatformInjector.class);
@@ -158,15 +171,6 @@ public class CommonModule extends AbstractModule {
     @Singleton
     public PluginMessageManager pluginMessageManager() {
         return new PluginMessageManager();
-    }
-
-    @Provides
-    @Singleton
-    public SkinUploadManager skinUploadManager(
-            GeyserApiBase api,
-            SkinApplier skinApplier,
-            FloodgateLogger logger) {
-        return new SkinUploadManager(api, skinApplier, logger);
     }
 
     @Provides

@@ -43,7 +43,7 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.database.config.DatabaseConfig;
 import org.geysermc.floodgate.database.config.DatabaseConfigLoader;
-import org.geysermc.floodgate.event.ShutdownEvent;
+import org.geysermc.floodgate.event.lifecycle.ShutdownEvent;
 import org.geysermc.floodgate.util.InjectorHolder;
 
 @Listener

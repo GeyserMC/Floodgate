@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.event;
+package org.geysermc.floodgate.event.lifecycle;
 
 public class ShutdownEvent {
 }

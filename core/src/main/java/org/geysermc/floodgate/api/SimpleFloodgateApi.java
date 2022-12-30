@@ -29,10 +29,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -51,7 +49,7 @@ import org.geysermc.floodgate.util.HttpClient;
 
 @Singleton
 public class SimpleFloodgateApi implements GeyserApiBase {
-    private final Map<UUID, Connection> players = new HashMap<>();
+    private final Map<UUID, Connection> players = new ConcurrentHashMap<>();
     private final Cache<UUID, Connection> pendingRemove =
             CacheBuilder.newBuilder()
                     .expireAfterWrite(20, TimeUnit.SECONDS)

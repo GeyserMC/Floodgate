@@ -37,6 +37,7 @@ import org.geysermc.api.Geyser;
 import org.geysermc.api.GeyserApiBase;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.InstanceHolder;
+import org.geysermc.floodgate.api.event.FloodgateEventBus;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.link.PlayerLink;
@@ -44,8 +45,8 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.event.EventBus;
-import org.geysermc.floodgate.event.PostEnableEvent;
-import org.geysermc.floodgate.event.ShutdownEvent;
+import org.geysermc.floodgate.event.lifecycle.PostEnableEvent;
+import org.geysermc.floodgate.event.lifecycle.ShutdownEvent;
 import org.geysermc.floodgate.module.PostEnableModules;
 
 @Getter(AccessLevel.PROTECTED)
@@ -71,6 +72,7 @@ public abstract class FloodgatePlatform {
         InstanceHolder.set(
                 guice.getInstance(FloodgateApi.class),
                 guice.getInstance(PlayerLink.class),
+                guice.getInstance(FloodgateEventBus.class),
                 injector,
                 guice.getInstance(PacketHandlers.class),
                 guice.getInstance(HandshakeHandlers.class),

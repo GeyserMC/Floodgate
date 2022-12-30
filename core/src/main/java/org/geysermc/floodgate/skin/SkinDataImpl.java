@@ -23,24 +23,36 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-object Versions {
-    const val cumulusVersion = "1.1.1"
-    const val eventsVersion = "1.0-SNAPSHOT"
-    const val configUtilsVersion = "1.0-SNAPSHOT"
-    const val gsonVersion = "2.3.1"
-    const val fastutilVersion = "8.5.3"
-    const val guiceVersion = "5.1.0"
-    const val nettyVersion = "4.1.49.Final"
-    const val snakeyamlVersion = "1.28"
-    const val cloudVersion = "1.5.0"
-    const val bstatsVersion = "3.0.0"
+package org.geysermc.floodgate.skin;
 
-    const val javaWebsocketVersion = "1.5.2"
+import com.google.gson.JsonObject;
+import java.util.Objects;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 
-    const val checkerQual = "3.19.0"
+public class SkinDataImpl implements SkinData {
+    private final String value;
+    private final String signature;
 
-    // Platform versions
-    const val velocityVersion = "3.1.1"
-    const val bungeeCommit = "ff5727c"
-    const val spigotVersion = "1.13-R0.1-SNAPSHOT"
+    public SkinDataImpl(@NonNull String value, @NonNull String signature) {
+        this.value = Objects.requireNonNull(value);
+        this.signature = Objects.requireNonNull(signature);
+    }
+
+    public static SkinData from(JsonObject data) {
+        return new SkinDataImpl(
+                data.get("value").getAsString(),
+                data.get("signature").getAsString()
+        );
+    }
+
+    @Override
+    public @NonNull String value() {
+        return value;
+    }
+
+    @Override
+    public @NonNull String signature() {
+        return signature;
+    }
 }

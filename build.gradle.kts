@@ -6,7 +6,7 @@ plugins {
 
 allprojects {
     group = "org.geysermc.floodgate"
-    version = "2.2.0-SNAPSHOT"
+    version = "2.2.1-SNAPSHOT"
     description = "Allows Bedrock players to join Java edition servers while keeping the server in online mode"
 }
 

@@ -25,43 +25,60 @@
 
 package org.geysermc.floodgate.util;
 
-import com.velocitypowered.api.proxy.Player;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.util.GameProfile.Property;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.api.connection.Connection;
+import org.geysermc.floodgate.api.event.skin.SkinApplyEvent;
+import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
+import org.geysermc.floodgate.event.EventBus;
+import org.geysermc.floodgate.event.skin.SkinApplyEventImpl;
 import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.skin.SkinData;
+import org.geysermc.floodgate.skin.SkinDataImpl;
 
-@RequiredArgsConstructor
+@Singleton
 public class VelocitySkinApplier implements SkinApplier {
-    private final ProxyServer server;
+    @Inject private ProxyServer server;
+    @Inject private EventBus eventBus;
 
     @Override
     public void applySkin(Connection connection, SkinData skinData) {
         server.getPlayer(connection.javaUuid()).ifPresent(player -> {
             List<Property> properties = new ArrayList<>(player.getGameProfileProperties());
-            properties.add(new Property("textures", skinData.getValue(), skinData.getSignature()));
+
+            SkinData currentSkin = currentSkin(properties);
+
+            SkinApplyEvent event = new SkinApplyEventImpl(connection, currentSkin, skinData);
+            event.setCancelled(connection.isLinked());
+
+            eventBus.fire(event);
+
+            if (event.isCancelled()) {
+                return;
+            }
+
+            replaceSkin(properties, event.newSkin());
             player.setGameProfileProperties(properties);
         });
     }
 
-    @Override
-    public boolean hasSkin(Connection connection) {
-        Optional<Player> player = server.getPlayer(connection.javaUuid());
-
-        if (player.isPresent()) {
-            for (Property property : player.get().getGameProfileProperties()) {
-                if (property.getName().equals("textures")) {
-                    if (!property.getValue().isEmpty()) {
-                        return true;
-                    }
+    private SkinData currentSkin(List<Property> properties) {
+        for (Property property : properties) {
+            if (property.getName().equals("textures")) {
+                if (!property.getValue().isEmpty()) {
+                    return new SkinDataImpl(property.getValue(), property.getSignature());
                 }
             }
         }
-        return false;
+        return null;
+    }
+
+    private void replaceSkin(List<Property> properties, SkinData skinData) {
+        properties.removeIf(property -> property.getName().equals("textures"));
+        properties.add(new Property("textures", skinData.value(), skinData.signature()));
     }
 }

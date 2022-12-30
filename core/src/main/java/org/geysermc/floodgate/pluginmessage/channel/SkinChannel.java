@@ -25,7 +25,6 @@
 
 package org.geysermc.floodgate.pluginmessage.channel;
 
-import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
@@ -36,6 +35,7 @@ import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinData;
+import org.geysermc.floodgate.skin.SkinDataImpl;
 
 public class SkinChannel implements PluginMessageChannel {
     @Inject private GeyserApiBase api;
@@ -88,18 +88,10 @@ public class SkinChannel implements PluginMessageChannel {
             return Result.kick("Got invalid skin data");
         }
 
-        if (connection.isLinked() || skinApplier.hasSkin(connection)) {
-            return Result.handled();
-        }
-
         String value = split[0];
         String signature = split[1];
 
-        JsonObject result = new JsonObject();
-        result.addProperty("value", value);
-        result.addProperty("signature", signature);
-
-        SkinData skinData = new SkinData(value, signature);
+        SkinData skinData = new SkinDataImpl(value, signature);
 
         skinApplier.applySkin(connection, skinData);
 

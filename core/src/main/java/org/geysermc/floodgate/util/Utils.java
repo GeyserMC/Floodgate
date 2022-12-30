@@ -35,6 +35,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.annotation.Annotation;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -77,7 +78,7 @@ public class Utils {
             if (is == null) {
                 return null;
             }
-            properties.load(is);
+            properties.load(new InputStreamReader(is, StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new AssertionError("Failed to read properties file", e);
         }

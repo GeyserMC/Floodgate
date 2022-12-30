@@ -25,22 +25,26 @@
 
 package org.geysermc.floodgate.skin;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import lombok.AllArgsConstructor;
 import org.geysermc.api.GeyserApiBase;
-import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.event.Listener;
+import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.event.lifecycle.ShutdownEvent;
 
-@AllArgsConstructor
+@Listener
+@Singleton
 public final class SkinUploadManager {
     private final Int2ObjectMap<SkinUploadSocket> connections =
             Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>());
 
-    private final GeyserApiBase api;
-    private final SkinApplier applier;
-    private final FloodgateLogger logger;
+    @Inject private GeyserBaseApi api;
+    @Inject private SkinApplier applier;
+    @Inject private FloodgateLogger logger;
 
     public void addConnectionIfNeeded(int id, String verifyCode) {
         connections.computeIfAbsent(id, (ignored) -> {
@@ -53,5 +57,17 @@ public final class SkinUploadManager {
 
     public void removeConnection(int id, SkinUploadSocket socket) {
         connections.remove(id, socket);
+    }
+
+    public void closeAllSockets() {
+        for (SkinUploadSocket socket : connections.values()) {
+            socket.close();
+        }
+        connections.clear();
+    }
+
+    @Subscribe
+    public void onShutdown(ShutdownEvent ignored) {
+        closeAllSockets();
     }
 }

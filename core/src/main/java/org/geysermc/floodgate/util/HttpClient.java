@@ -57,6 +57,10 @@ public class HttpClient {
         return CompletableFuture.supplyAsync(() -> get(urlString), executorService);
     }
 
+    public <T> CompletableFuture<HttpResponse<T>> asyncGet(String urlString, Class<T> response) {
+        return CompletableFuture.supplyAsync(() -> get(urlString, response), executorService);
+    }
+
     public DefaultHttpResponse get(String urlString) {
         return readDefaultResponse(request(urlString));
     }
@@ -99,12 +103,14 @@ public class HttpClient {
             return new HttpResponse<>(-1, null);
         }
 
+        int responseCode = -1;
         try {
-            int responseCode = connection.getResponseCode();
+            responseCode = connection.getResponseCode();
             T response = gson.fromJson(streamReader, clazz);
             return new HttpResponse<>(responseCode, response);
         } catch (Exception ignored) {
-            return new HttpResponse<>(-1, null);
+            // e.g. when the response isn't JSON
+            return new HttpResponse<>(responseCode, null);
         } finally {
             try {
                 streamReader.close();
@@ -149,11 +155,7 @@ public class HttpClient {
         try {
             stream = connection.getInputStream();
         } catch (Exception exception) {
-            try {
-                stream = connection.getErrorStream();
-            } catch (Exception exception1) {
-                throw new RuntimeException("Both the input and the error stream failed?!");
-            }
+            stream = connection.getErrorStream();
         }
 
         // it's null for example when it couldn't connect to the server

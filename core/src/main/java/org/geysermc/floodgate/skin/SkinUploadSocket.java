@@ -36,6 +36,7 @@ import javax.net.ssl.SSLException;
 import lombok.Getter;
 import org.geysermc.api.GeyserApiBase;
 import org.geysermc.api.connection.Connection;
+import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.util.Utils;
 import org.geysermc.floodgate.util.WebsocketEventType;
@@ -60,8 +61,8 @@ final class SkinUploadSocket extends WebSocketClient {
             SkinUploadManager uploadManager,
             GeyserApiBase api,
             SkinApplier applier,
-            FloodgateLogger logger) {
-
+            FloodgateLogger logger
+    ) {
         super(getWebsocketUri(id, verifyCode));
         this.id = id;
         this.verifyCode = verifyCode;
@@ -82,7 +83,7 @@ final class SkinUploadSocket extends WebSocketClient {
     }
 
     @Override
-    public void onOpen(ServerHandshake handshakedata) {
+    public void onOpen(ServerHandshake ignored) {
         setConnectionLostTimeout(11);
     }
 
@@ -113,10 +114,9 @@ final class SkinUploadSocket extends WebSocketClient {
                                 player.javaUsername());
                         return;
                     }
-                    if (!player.isLinked() && !applier.hasSkin(player)) {
-                        SkinData skinData = SkinData.from(message.getAsJsonObject("data"));
-                        applier.applySkin(player, skinData);
-                    }
+
+                    SkinData skinData = SkinDataImpl.from(message.getAsJsonObject("data"));
+                    applier.applySkin(player, skinData);
                 }
                 break;
             case LOG_MESSAGE:

@@ -23,18 +23,45 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.skin;
+package org.geysermc.floodgate.event.skin;
 
+import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.geysermc.api.connection.Connection;
-import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.geysermc.event.util.AbstractCancellable;
+import org.geysermc.floodgate.api.event.skin.SkinApplyEvent;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
-public interface SkinApplier {
-    /**
-     * Apply a skin to a {@link Connection player}
-     *
-     * @param connection player to apply skin to
-     * @param skinData data for skin to apply to player
-     */
-    void applySkin(@NonNull Connection connection, @NonNull SkinData skinData);
+public class SkinApplyEventImpl extends AbstractCancellable implements SkinApplyEvent {
+    private final FloodgatePlayer player;
+    private final SkinData currentSkin;
+    private SkinData newSkin;
+
+    public SkinApplyEventImpl(
+            @NonNull FloodgatePlayer player,
+            @Nullable SkinData currentSkin,
+            @NonNull SkinData newSkin
+    ) {
+        this.player = Objects.requireNonNull(player);
+        this.currentSkin = currentSkin;
+        this.newSkin = Objects.requireNonNull(newSkin);
+    }
+
+    @Override
+    public @NonNull FloodgatePlayer player() {
+        return player;
+    }
+
+    public @Nullable SkinData currentSkin() {
+        return currentSkin;
+    }
+
+    public @NonNull SkinData newSkin() {
+        return newSkin;
+    }
+
+    public SkinApplyEventImpl newSkin(@NonNull SkinData skinData) {
+        this.newSkin = Objects.requireNonNull(skinData);
+        return this;
+    }
 }
