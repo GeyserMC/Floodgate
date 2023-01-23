@@ -1,3 +1,5 @@
+[![Logo](https://github.com/minekube/connect/blob/b599dfc8e37741922f4cbfb8f6c1c6ec36ee742d/.web/docs/public/og-image.png?raw=true)](https://connect.minekube.com)
+
 # Minekube Connect - Plugin
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
