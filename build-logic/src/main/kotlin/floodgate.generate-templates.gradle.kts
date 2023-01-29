@@ -62,8 +62,6 @@ fun Project.configureIdeSync(vararg generateAllTasks: TaskProvider<Task>) {
             }
         }
     }
-
-    //todo wasn't able to find something for VS(Code)
 }
 
 inline fun <reified T : Any> ExtensionContainer.findByType(noinline action: T.() -> Unit) {
