@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.pluginmessage.channel;
+package org.geysermc.floodgate.pluginmessage.channel.music;
 
 import com.google.inject.Inject;
 import java.nio.charset.StandardCharsets;
@@ -31,12 +31,12 @@ import java.util.UUID;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
 
-public class MusicChannel implements PluginMessageChannel {
+public class QueueMusicChannel implements PluginMessageChannel {
     @Inject private PluginMessageUtils pluginMessageUtils;
 
     @Override
     public String getIdentifier() {
-        return "floodgate:music";
+        return "floodgate:music_queue";
     }
 
     @Override
@@ -60,14 +60,14 @@ public class MusicChannel implements PluginMessageChannel {
 
     @Override
     public Result handleServerCall(byte[] data, UUID targetUuid, String targetUsername) {
-        return Result.kick("I'm sorry, I'm unable to play music on the server :(");
+        return Result.kick("I'm sorry, I'm unable to queue music on the server :(");
     }
 
     public boolean sendQueueMusic(UUID player, float fadeSeconds, boolean repeatMode, String trackName, float volume) {
         int fadeSecondsBits = Float.floatToIntBits(fadeSeconds);
         int volumeBits = Float.floatToIntBits(volume);
         byte[] trackNameBytes = trackName.getBytes(StandardCharsets.UTF_8);
-        byte[] data = new byte[trackNameBytes.length + 8];
+        byte[] data = new byte[trackNameBytes.length + 9];
 
         data[0] = (byte) (fadeSecondsBits >> 24);
         data[1] = (byte) (fadeSecondsBits >> 16);
@@ -78,52 +78,9 @@ public class MusicChannel implements PluginMessageChannel {
         data[6] = (byte) (volumeBits >> 16);
         data[7] = (byte) (volumeBits >> 8);
         data[8] = (byte) (volumeBits);
-        System.arraycopy(trackNameBytes, 0, data, 8, trackNameBytes.length);
+        System.arraycopy(trackNameBytes, 0, data, 9, trackNameBytes.length);
 
-        return pluginMessageUtils.sendMessage(player, getIdentifier() + ":queue", data);
-    }
-
-    public boolean sendPlayMusic(UUID player, float fadeSeconds, boolean repeatMode, String trackName, float volume) {
-        int fadeSecondsBits = Float.floatToIntBits(fadeSeconds);
-        int volumeBits = Float.floatToIntBits(volume);
-        byte[] trackNameBytes = trackName.getBytes(StandardCharsets.UTF_8);
-        byte[] data = new byte[trackNameBytes.length + 8];
-
-        data[0] = (byte) (fadeSecondsBits >> 24);
-        data[1] = (byte) (fadeSecondsBits >> 16);
-        data[2] = (byte) (fadeSecondsBits >> 8);
-        data[3] = (byte) (fadeSecondsBits);
-        data[4] = (byte) (repeatMode ? 1 : 0);
-        data[5] = (byte) (volumeBits >> 24);
-        data[6] = (byte) (volumeBits >> 16);
-        data[7] = (byte) (volumeBits >> 8);
-        data[8] = (byte) (volumeBits);
-        System.arraycopy(trackNameBytes, 0, data, 8, trackNameBytes.length);
-
-        return pluginMessageUtils.sendMessage(player, getIdentifier() + ":play", data);
-    }
-
-    public boolean sendStopMusic(UUID player, float fadeSeconds) {
-        int fadeSecondsBits = Float.floatToIntBits(fadeSeconds);
-        byte[] data = new byte[4];
-
-        data[0] = (byte) (fadeSecondsBits >> 24);
-        data[1] = (byte) (fadeSecondsBits >> 16);
-        data[2] = (byte) (fadeSecondsBits >> 8);
-        data[3] = (byte) (fadeSecondsBits);
-
-        return pluginMessageUtils.sendMessage(player, getIdentifier() + ":stop", data);
-    }
-
-    public boolean sendSetMusicVolume(UUID player, float volume) {
-        int volumeBits = Float.floatToIntBits(volume);
-        byte[] data = new byte[4];
-
-        data[0] = (byte) (volumeBits >> 24);
-        data[1] = (byte) (volumeBits >> 16);
-        data[2] = (byte) (volumeBits >> 8);
-        data[3] = (byte) (volumeBits);
-
-        return pluginMessageUtils.sendMessage(player, getIdentifier() + ":volume", data);
+        return pluginMessageUtils.sendMessage(player, getIdentifier(), data);
     }
 }
+ 
