@@ -45,6 +45,7 @@ import org.geysermc.floodgate.api.unsafe.Unsafe;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.pluginmessage.channel.FormChannel;
+import org.geysermc.floodgate.pluginmessage.channel.MusicChannel;
 import org.geysermc.floodgate.pluginmessage.channel.TransferChannel;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.HttpClient;
@@ -140,6 +141,34 @@ public class SimpleFloodgateApi implements FloodgateApi {
         return pluginMessageManager
                 .getChannel(TransferChannel.class)
                 .sendTransfer(uuid, address, port);
+    }
+
+    @Override
+    public boolean queueMusic(UUID uuid, float fadeSeconds, boolean repeatMode, String trackName, float volume) {
+        return pluginMessageManager
+                .getChannel(MusicChannel.class)
+                .sendQueueMusic(uuid, fadeSeconds, repeatMode, trackName, volume);
+    }
+
+    @Override
+    public boolean playMusic(UUID uuid, float fadeSeconds, boolean repeatMode, String trackName, float volume) {
+        return pluginMessageManager
+                .getChannel(MusicChannel.class)
+                .sendPlayMusic(uuid, fadeSeconds, repeatMode, trackName, volume);
+    }
+
+    @Override
+    public boolean stopMusic(UUID uuid, float fadeSeconds) {
+        return pluginMessageManager
+                .getChannel(MusicChannel.class)
+                .sendStopMusic(uuid, fadeSeconds);
+    }
+
+    @Override
+    public boolean setMusicVolume(UUID uuid, float volume) {
+        return pluginMessageManager
+                .getChannel(MusicChannel.class)
+                .sendSetMusicVolume(uuid, volume);
     }
 
     @Override

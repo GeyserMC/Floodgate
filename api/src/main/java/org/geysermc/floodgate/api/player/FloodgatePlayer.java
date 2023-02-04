@@ -143,6 +143,48 @@ public interface FloodgatePlayer {
         return FloodgateApi.getInstance().transferPlayer(getCorrectUniqueId(), address, port);
     }
 
+    /**
+     * Queue a music track to be played for the player later.
+     * @param fadeSeconds The amount of time in seconds to fade the music in and out from 0 to 10 seconds
+     * @param repeatMode Whether the music should repeat
+     * @param trackName The name of the music track to queue
+     * @param volume The volume of the music track from 0 to 1
+     * @return true if the music was successfully queued
+     */
+    default boolean queueMusic(float fadeSeconds, boolean repeatMode, String trackName, float volume) {
+        return FloodgateApi.getInstance().queueMusic(getCorrectUniqueId(), fadeSeconds, repeatMode, trackName, volume);
+    }
+
+    /**
+     * Play a music track for the player.
+     * @param fadeSeconds The amount of time in seconds to fade the music in and out from 0 to 10 seconds
+     * @param repeatMode Whether the music should repeat
+     * @param trackName The name of the music track to play
+     * @param volume The volume of the music track from 0 to 1
+     * @return true if the music was successfully played
+     */
+    default boolean playMusic(float fadeSeconds, boolean repeatMode, String trackName, float volume) {
+        return FloodgateApi.getInstance().playMusic(getCorrectUniqueId(), fadeSeconds, repeatMode, trackName, volume);
+    }
+
+    /**
+     * Stop the current music track for the player.
+     * @param fadeSeconds The amount of time in seconds to fade the music in and out from 0 to 10 seconds
+     * @return true if the music was successfully stopped
+     */
+    default boolean stopMusic(float fadeSeconds) {
+        return FloodgateApi.getInstance().stopMusic(getCorrectUniqueId(), fadeSeconds);
+    }
+
+    /**
+     * Set the volume of the current music track for the player.
+     * @param volume The volume of the music track from 0 to 1
+     * @return true if the music volume was successfully set
+     */
+    default boolean setMusicVolume(float volume) {
+        return FloodgateApi.getInstance().setMusicVolume(getCorrectUniqueId(), volume);
+    }
+
     @Deprecated
     boolean hasProperty(PropertyKey key);
 

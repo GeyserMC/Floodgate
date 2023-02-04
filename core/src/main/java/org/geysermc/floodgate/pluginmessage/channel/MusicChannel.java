@@ -63,7 +63,7 @@ public class MusicChannel implements PluginMessageChannel {
         return Result.kick("I'm sorry, I'm unable to play music on the server :(");
     }
 
-    public boolean queueMusic(UUID player, float fadeSeconds, boolean repeatMode, String trackName, float volume) {
+    public boolean sendQueueMusic(UUID player, float fadeSeconds, boolean repeatMode, String trackName, float volume) {
         int fadeSecondsBits = Float.floatToIntBits(fadeSeconds);
         int volumeBits = Float.floatToIntBits(volume);
         byte[] trackNameBytes = trackName.getBytes(StandardCharsets.UTF_8);
@@ -83,7 +83,7 @@ public class MusicChannel implements PluginMessageChannel {
         return pluginMessageUtils.sendMessage(player, getIdentifier() + ":queue", data);
     }
 
-    public boolean playMusic(UUID player, float fadeSeconds, boolean repeatMode, String trackName, float volume) {
+    public boolean sendPlayMusic(UUID player, float fadeSeconds, boolean repeatMode, String trackName, float volume) {
         int fadeSecondsBits = Float.floatToIntBits(fadeSeconds);
         int volumeBits = Float.floatToIntBits(volume);
         byte[] trackNameBytes = trackName.getBytes(StandardCharsets.UTF_8);
@@ -103,7 +103,7 @@ public class MusicChannel implements PluginMessageChannel {
         return pluginMessageUtils.sendMessage(player, getIdentifier() + ":play", data);
     }
 
-    public boolean stopMusic(UUID player, float fadeSeconds) {
+    public boolean sendStopMusic(UUID player, float fadeSeconds) {
         int fadeSecondsBits = Float.floatToIntBits(fadeSeconds);
         byte[] data = new byte[4];
 
@@ -115,7 +115,7 @@ public class MusicChannel implements PluginMessageChannel {
         return pluginMessageUtils.sendMessage(player, getIdentifier() + ":stop", data);
     }
 
-    public boolean setMusicVolume(UUID player, float volume) {
+    public boolean sendSetMusicVolume(UUID player, float volume) {
         int volumeBits = Float.floatToIntBits(volume);
         byte[] data = new byte[4];
 
