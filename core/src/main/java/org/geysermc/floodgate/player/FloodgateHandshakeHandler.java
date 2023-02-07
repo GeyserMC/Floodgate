@@ -53,6 +53,7 @@ import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.skin.SkinUploadManager;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.InvalidFormatException;
+import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.LinkedPlayer;
 import org.geysermc.floodgate.util.Utils;
 
@@ -64,6 +65,7 @@ public final class FloodgateHandshakeHandler {
     private final SkinUploadManager skinUploadManager;
     private final AttributeKey<FloodgatePlayer> playerAttribute;
     private final FloodgateLogger logger;
+    private final LanguageManager languageManager;
 
     public FloodgateHandshakeHandler(
             HandshakeHandlersImpl handshakeHandlers,
@@ -72,7 +74,8 @@ public final class FloodgateHandshakeHandler {
             FloodgateConfig config,
             SkinUploadManager skinUploadManager,
             AttributeKey<FloodgatePlayer> playerAttribute,
-            FloodgateLogger logger) {
+            FloodgateLogger logger,
+            LanguageManager languageManager) {
 
         this.handshakeHandlers = handshakeHandlers;
         this.api = api;
@@ -81,6 +84,7 @@ public final class FloodgateHandshakeHandler {
         this.skinUploadManager = skinUploadManager;
         this.playerAttribute = playerAttribute;
         this.logger = logger;
+        this.languageManager = languageManager;
     }
 
     /**
@@ -211,7 +215,9 @@ public final class FloodgateHandshakeHandler {
                     linkedPlayer != null ? linkedPlayer.clone() : null, hostname);
 
             if (config.getPlayerLink().isRequireLink() && linkedPlayer == null) {
-                handshakeData.setDisconnectReason("floodgate.core.not_linked");
+                String reason = languageManager.getString("floodgate.core.not_linked",
+                        bedrockData.getLanguageCode());
+                handshakeData.setDisconnectReason(reason);
             }
 
             handshakeHandlers.callHandshakeHandlers(handshakeData);
