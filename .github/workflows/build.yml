@@ -21,10 +21,29 @@ jobs:
         with:
           arguments: build
 
-      - name: Publish
+      - name: Publish to Maven Repository
         uses: gradle/gradle-build-action@v2
         env:
           ORG_GRADLE_PROJECT_geysermcUsername: "${{ secrets.DEPLOY_USER }}"
           ORG_GRADLE_PROJECT_geysermcPassword: "${{ secrets.DEPLOY_PASS }}"
         with:
           arguments: publish
+
+      - name: Publish to Downloads API
+        shell: bash
+        run: |
+          # Save the private key to a file
+          echo "$DOWNLOADS_PRIVATE_KEY" > id_ecdsa
+          chmod 600 id_ecdsa
+
+          # Get the version from gradle.properties
+          version=$(cat gradle.properties | grep -o "version=[0-9\\.]*" | cut -d"=" -f2)
+
+          # Copy over artifacts
+          scp -B -o StrictHostKeyChecking=no -i id_ecdsa **/build/libs/floodgate-*.jar $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP:~/files/
+
+          # Remove un-needed artifacts
+          ssh -o StrictHostKeyChecking=no -i id_ecdsa $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP rm ~/files/floodgate-parent-*.jar ~/files/floodgate-api.jar ~/files/floodgate-core.jar
+
+          # Run the build script
+          ssh -o StrictHostKeyChecking=no -i id_ecdsa $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP ./handleBuild.sh floodgate $version $GITHUB_RUN_ID $GITHUB_SHA
