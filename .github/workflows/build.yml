@@ -1,0 +1,30 @@
+name: Build
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-java@v3
+        with:
+          java-version: 8
+          distribution: temurin
+
+      - name: Build
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build
+
+      - name: Publish
+        uses: gradle/gradle-build-action@v2
+        env:
+          ORG_GRADLE_PROJECT_geysermcUsername: "${{ secrets.DEPLOY_USER }}"
+          ORG_GRADLE_PROJECT_geysermcPassword: "${{ secrets.DEPLOY_PASS }}"
+        with:
+          arguments: publish

@@ -1,3 +1,4 @@
+@file:Suppress("UnstableApiUsage")
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 dependencyResolutionManagement {
@@ -53,6 +54,10 @@ dependencyResolutionManagement {
 pluginManagement {
     repositories {
         gradlePluginPortal()
+    }
+    plugins {
+        id("net.kyori.indra")
+        id("net.kyori.indra.git")
     }
     includeBuild("build-logic")
 }
