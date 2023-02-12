@@ -61,6 +61,32 @@ pipeline {
                 )
             }
         }
+        
+        stage ('Publish') {
+            when {
+                anyOf {
+                    branch "master"
+                }
+            }
+
+            steps {
+                withCredentials([sshUserPrivateKey(credentialsId: 'DOWNLOADS_PRIVATE_KEY', keyFileVariable: 'id_ecdsa', usernameVariable: 'username'), string(credentialsId: 'DOWNLOADS_SERVER_IP', variable: 'server_ip')]) {
+                    sh '''
+                    # Get the version from gradle.properties
+                    version=$(cat gradle.properties | grep -o "version=[0-9\\.]*" | cut -d"=" -f2)
+
+                    # Copy over artifacts
+                    scp -B -o StrictHostKeyChecking=no -i ${id_ecdsa} **/build/libs/floodgate-*.jar ${username}@${server_ip}:~/files/
+                    
+                    # Remove un-needed artifacts
+                    ssh -o StrictHostKeyChecking=no -i ${id_ecdsa} ${username}@${server_ip} rm ~/files/floodgate-parent-*.jar ~/files/floodgate-api.jar ~/files/floodgate-core.jar
+
+                    # Run the build script
+                    ssh -o StrictHostKeyChecking=no -i ${id_ecdsa} ${username}@${server_ip} ./handleBuild.sh floodgate $version $BUILD_NUMBER $GIT_COMMIT
+                    '''
+                }
+            }
+        }
     }
 
     post {
