@@ -12,7 +12,7 @@ import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.geysermc.floodgate.MinecraftServerHolder;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.mixin.ConnectionMixin;
-import org.geysermc.floodgate.mixin.ClientIntentionPacketMixin;
+import org.geysermc.floodgate.mixin.ClientIntentionPacketMixinInterface;
 import org.geysermc.floodgate.mixin_interface.ServerLoginPacketListenerSetter;
 import com.mojang.authlib.GameProfile;
 import io.netty.channel.ChannelHandlerContext;
@@ -48,7 +48,7 @@ public final class FabricDataHandler extends CommonDataHandler {
     protected Object setHostname(Object handshakePacket, String hostname) {
         // While it would be ideal to simply create a new handshake packet, the packet constructor
         // does not allow us to set the protocol version
-        ((ClientIntentionPacketMixin) handshakePacket).setAddress(hostname);
+        ((ClientIntentionPacketMixinInterface) handshakePacket).setAddress(hostname);
         return handshakePacket;
     }
 
