@@ -69,6 +69,7 @@ import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.skin.SkinUploadManager;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.HttpClient;
+import org.geysermc.floodgate.util.LanguageManager;
 
 @RequiredArgsConstructor
 public class CommonModule extends AbstractModule {
@@ -165,10 +166,11 @@ public class CommonModule extends AbstractModule {
             FloodgateConfig config,
             SkinUploadManager skinUploadManager,
             @Named("playerAttribute") AttributeKey<FloodgatePlayer> playerAttribute,
-            FloodgateLogger logger) {
+            FloodgateLogger logger,
+            LanguageManager languageManager) {
 
         return new FloodgateHandshakeHandler(handshakeHandlers, api, cipher, config,
-                skinUploadManager, playerAttribute, logger);
+                skinUploadManager, playerAttribute, logger, languageManager);
     }
 
     @Provides
