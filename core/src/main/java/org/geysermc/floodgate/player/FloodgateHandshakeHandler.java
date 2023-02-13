@@ -52,6 +52,7 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.skin.SkinUploadManager;
 import org.geysermc.floodgate.util.BedrockData;
+import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.InvalidFormatException;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.LinkedPlayer;
@@ -215,8 +216,11 @@ public final class FloodgateHandshakeHandler {
                     linkedPlayer != null ? linkedPlayer.clone() : null, hostname);
 
             if (config.getPlayerLink().isRequireLink() && linkedPlayer == null) {
-                String reason = languageManager.getString("floodgate.core.not_linked",
-                        bedrockData.getLanguageCode());
+                String reason = languageManager.getString(
+                        "floodgate.core.not_linked",
+                        bedrockData.getLanguageCode(),
+                        Constants.LINK_INFO_URL
+                );
                 handshakeData.setDisconnectReason(reason);
             }
 
