@@ -30,6 +30,7 @@ jobs:
           arguments: publish
 
       - name: Publish to Downloads API
+        if: ${{ github.ref_name == "master" && job.status == "success" }}
         shell: bash
         run: |
           # Save the private key to a file
