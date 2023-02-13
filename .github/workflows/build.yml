@@ -23,6 +23,7 @@ jobs:
           arguments: build
 
       - name: Publish to Maven Repository
+        if: ${{ job.status == 'success' }}
         uses: gradle/gradle-build-action@v2
         env:
           ORG_GRADLE_PROJECT_geysermcUsername: ${{ vars.DEPLOY_USER }}
@@ -31,7 +32,7 @@ jobs:
           arguments: publish
 
       - name: Publish to Downloads API
-        if: ${{ github.ref_name == "master" && job.status == "success" }}
+        if: ${{ github.ref_name == 'master' && job.status == 'success' }}
         shell: bash
         run: |
           # Save the private key to a file
@@ -49,3 +50,9 @@ jobs:
 
           # Run the build script
           ssh -o StrictHostKeyChecking=no -i id_ecdsa $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP ./handleBuild.sh floodgate $version $GITHUB_RUN_ID $GITHUB_SHA
+
+      - name: Notify Discord
+        uses: Tim203/actions-git-discord-webhook@main
+        with:
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
+          status: ${{ job.status }}
