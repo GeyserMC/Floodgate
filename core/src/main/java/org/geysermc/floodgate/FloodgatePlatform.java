@@ -41,6 +41,7 @@ import org.geysermc.floodgate.event.EventBus;
 import org.geysermc.floodgate.event.lifecycle.PostEnableEvent;
 import org.geysermc.floodgate.event.lifecycle.ShutdownEvent;
 import org.geysermc.floodgate.module.PostInitializeModule;
+import org.geysermc.floodgate.util.Metrics;
 
 public class FloodgatePlatform {
     private static final UUID KEY = UUID.randomUUID();
@@ -80,6 +81,7 @@ public class FloodgatePlatform {
 
     public void disable() {
         guice.getInstance(EventBus.class).fire(new ShutdownEvent());
+        guice.getInstance(Metrics.class).shutdown();
 
         if (injector != null && injector.canRemoveInjection()) {
             try {

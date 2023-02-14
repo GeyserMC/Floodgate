@@ -145,4 +145,8 @@ public final class Metrics {
         builder.appendField("osVersion", System.getProperty("os.version"));
         builder.appendField("coreCount", Runtime.getRuntime().availableProcessors());
     }
+
+    public void shutdown() {
+        metricsBase.shutdown();
+    }
 }
