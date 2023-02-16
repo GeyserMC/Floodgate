@@ -32,7 +32,8 @@ public class FabricMod implements ModInitializer {
 
             platform.enable(
                             new FabricAddonModule(),
-                            new FabricListenerModule()
+                            new FabricListenerModule(),
+                            new PluginMessageModule()
                     );
 
             long endCtm = System.currentTimeMillis();

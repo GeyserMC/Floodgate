@@ -5,8 +5,10 @@ import org.geysermc.floodgate.listener.FabricEventListener;
 import org.geysermc.floodgate.listener.FabricEventRegistration;
 import org.geysermc.floodgate.logger.Log4jFloodgateLogger;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
+import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.platform.util.PlatformUtils;
 import org.geysermc.floodgate.pluginmessage.FabricPluginMessageRegistration;
+import org.geysermc.floodgate.pluginmessage.FabricPluginMessageUtils;
 import org.geysermc.floodgate.pluginmessage.FabricSkinApplier;
 import org.geysermc.floodgate.pluginmessage.PluginMessageRegistration;
 import org.geysermc.floodgate.util.FabricCommandUtil;
@@ -79,6 +81,12 @@ public final class FabricPlatformModule extends AbstractModule {
     @Named("packetHandler")
     public String packetHandler() {
         return "packet_handler";
+    }
+
+    @Provides
+    @Singleton
+    public PluginMessageUtils pluginMessageUtils() {
+        return new FabricPluginMessageUtils();
     }
 
     @Provides
