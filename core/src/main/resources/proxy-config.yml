@@ -1,6 +1,10 @@
 # The endpoint name of this server/proxy instance registered on startup with the Connect network.
-# Default is a random string. Uncomment to specify your own endpoint name.
+# Default is a random string. You can change it to a custom endpoint name.
 endpoint: ${endpoint}
+
+# This setting is only relevant if you want to allow cracked players to join.
+# If left blank, the correct mode will be securely detected automatically.
+allow-offline-mode-players: false
 
 # The default locale for Connect. By default, Connect uses the system locale
 #default-locale: en_US

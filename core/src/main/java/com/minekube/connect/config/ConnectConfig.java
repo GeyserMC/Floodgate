@@ -47,6 +47,12 @@ public class ConnectConfig {
      */
     private final String endpoint = Utils.randomString(5); // default to random name
 
+    /**
+     * Whether cracked players should be allowed to join.
+     * If not set, Connect will automatically detect if the server is in offline mode.
+     */
+    private Boolean allowOfflineModePlayers;
+
     private static final String ENDPOINT_ENV = System.getenv("CONNECT_ENDPOINT");
 
     public String getEndpoint() {

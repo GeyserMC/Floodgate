@@ -44,6 +44,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class WatchClient {
     private static final String ENDPOINT_HEADER = "Connect-Endpoint";
+    private static final String ENDPOINT_OFFLINE_MODE_HEADER = ENDPOINT_HEADER + "-Offline-Mode";
     private static final String WATCH_URL = System.getenv().getOrDefault(
             "CONNECT_WATCH_URL", "wss://watch-connect.minekube.net");
 
@@ -57,12 +58,17 @@ public class WatchClient {
     }
 
     public WebSocket watch(Watcher watcher) {
-        Request request = new Request.Builder()
+        Request.Builder request = new Request.Builder()
                 .url(WATCH_URL)
-                .addHeader(ENDPOINT_HEADER, config.getEndpoint())
-                .build();
+                .header(ENDPOINT_HEADER, config.getEndpoint());
 
-        return httpClient.newWebSocket(request, new WebSocketListener() {
+        if (config.getAllowOfflineModePlayers() != null) {
+            request = request.header(ENDPOINT_OFFLINE_MODE_HEADER,
+                    config.getAllowOfflineModePlayers().toString());
+        }
+
+        Request req = request.build();
+        return httpClient.newWebSocket(req, new WebSocketListener() {
             @Override
             public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
                 watcher.onCompleted();

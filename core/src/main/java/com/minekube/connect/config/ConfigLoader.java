@@ -130,22 +130,21 @@ public final class ConfigLoader {
                     .url(URL)
                     .build();
 
-            Response res;
-            try {
-                res = client.newCall(req).execute();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return fallback();
-            }
-
-            if (res.code() != 200) {
-                return fallback();
-            }
-
             String name;
-            try (ResponseBody body = res.body()) {
-                assert body != null;
-                name = body.string();
+
+            try (Response res = client.newCall(req).execute()) {
+                if (res.code() != 200) {
+                    return fallback();
+                }
+
+                try (ResponseBody body = res.body()) {
+                    assert body != null;
+                    name = body.string();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return fallback();
+                }
+
             } catch (IOException e) {
                 e.printStackTrace();
                 return fallback();
