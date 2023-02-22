@@ -9,9 +9,10 @@ repositories {
 }
 
 dependencies {
-    implementation("net.kyori", "indra-common", "2.0.6")
-    implementation("org.jfrog.buildinfo", "build-info-extractor-gradle", "4.26.1")
+    implementation("net.kyori", "indra-common", "3.0.1")
+    implementation("net.kyori", "indra-git", "3.0.1")
     implementation("gradle.plugin.com.github.johnrengelman", "shadow", "7.1.1")
+    implementation("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext", "gradle-idea-ext", "1.1.7")
 }
 
 tasks.withType<KotlinCompile> {

@@ -26,18 +26,17 @@
 package org.geysermc.floodgate.inject;
 
 import io.netty.channel.Channel;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import lombok.AccessLevel;
-import lombok.Getter;
+import java.util.WeakHashMap;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 
 public abstract class CommonPlatformInjector implements PlatformInjector {
-    @Getter(AccessLevel.PROTECTED)
-    private final Set<Channel> injectedClients = new HashSet<>();
+    private final Set<Channel> injectedClients =
+            Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
 
     private final Map<Class<?>, InjectorAddon> addons = new HashMap<>();
 
@@ -47,6 +46,10 @@ public abstract class CommonPlatformInjector implements PlatformInjector {
 
     public boolean removeInjectedClient(Channel channel) {
         return injectedClients.remove(channel);
+    }
+
+    public Set<Channel> injectedClients() {
+        return injectedClients;
     }
 
     @Override

@@ -25,6 +25,8 @@
 
 package org.geysermc.floodgate.inject.spigot;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -36,13 +38,15 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.util.ClassNames;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
-@RequiredArgsConstructor
+@Singleton
 public final class SpigotInjector extends CommonPlatformInjector {
+    @Inject private FloodgateLogger logger;
+
     private Object serverConnection;
     private String injectedFieldName;
 
@@ -126,30 +130,43 @@ public final class SpigotInjector extends CommonPlatformInjector {
             return;
         }
 
-        // remove injection from clients
-        for (Channel channel : getInjectedClients()) {
-            removeAddonsCall(channel);
-        }
-        getInjectedClients().clear();
-
-        // and change the list back to the original
+        // let's change the list back to the original first
+        // so that new connections are not handled through our custom list
         Object serverConnection = getServerConnection();
         if (serverConnection != null) {
             Field field = ReflectionUtils.getField(serverConnection.getClass(), injectedFieldName);
-            List<?> list = (List<?>) ReflectionUtils.getValue(serverConnection, field);
+            Object value = ReflectionUtils.getValue(serverConnection, field);
 
-            if (list instanceof CustomList) {
-                CustomList customList = (CustomList) list;
+            if (value instanceof CustomList) {
+                // all we have to do is replace the list with the original list.
+                // the original list is up-to-date, so we don't have to clear/add/whatever anything
+                CustomList customList = (CustomList) value;
                 ReflectionUtils.setValue(serverConnection, field, customList.getOriginalList());
-                customList.clear();
-                customList.addAll(list);
+                return;
             }
+
+            // we could replace all references of CustomList that are directly in 'value', but that
+            // only brings you so far. ProtocolLib for example stores the original value
+            // (which would be our CustomList e.g.) in a separate object
+            logger.debug(
+                    "Unable to remove all references of Floodgate due to {}! ",
+                    value.getClass().getName()
+            );
         }
+
+        // remove injection from clients
+        for (Channel channel : injectedClients()) {
+            removeAddonsCall(channel);
+        }
+
+        //todo make sure that all references are removed from the channels,
+        // except from one AttributeKey with Floodgate player data which could be used
+        // after reloading
 
         injected = false;
     }
 
-    public Object getServerConnection() {
+    private Object getServerConnection() {
         if (serverConnection != null) {
             return serverConnection;
         }

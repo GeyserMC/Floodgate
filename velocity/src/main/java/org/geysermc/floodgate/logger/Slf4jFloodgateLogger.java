@@ -39,10 +39,11 @@ import org.slf4j.Logger;
 @Singleton
 public final class Slf4jFloodgateLogger implements FloodgateLogger {
     @Inject private Logger logger;
-    @Inject private LanguageManager languageManager;
+    private LanguageManager languageManager;
 
     @Inject
-    private void init(FloodgateConfig config) {
+    private void init(LanguageManager languageManager, FloodgateConfig config) {
+        this.languageManager = languageManager;
         if (config.isDebug() && !logger.isDebugEnabled()) {
             Configurator.setLevel(logger.getName(), Level.DEBUG);
         }

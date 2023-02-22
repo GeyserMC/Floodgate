@@ -23,38 +23,36 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.command.util;
+package org.geysermc.floodgate.skin;
 
-import static org.geysermc.floodgate.command.util.PermissionDefault.OP;
-import static org.geysermc.floodgate.command.util.PermissionDefault.TRUE;
+import com.google.gson.JsonObject;
+import java.util.Objects;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 
-public enum Permission {
-    COMMAND_MAIN("floodgate.command.floodgate", TRUE),
-    COMMAND_MAIN_FIREWALL(COMMAND_MAIN, "firewall", OP),
-    COMMAND_MAIN_VERSION(COMMAND_MAIN, "version", OP),
-    COMMAND_LINK("floodgate.command.linkaccount", TRUE),
-    COMMAND_UNLINK("floodgate.command.unlinkaccount", TRUE),
-    COMMAND_WHITELIST("floodgate.command.fwhitelist", OP),
+public class SkinDataImpl implements SkinData {
+    private final String value;
+    private final String signature;
 
-    NEWS_RECEIVE("floodgate.news.receive", OP);
-
-    private final String permission;
-    private final PermissionDefault defaultValue;
-
-    Permission(String permission, PermissionDefault defaultValue) {
-        this.permission = permission;
-        this.defaultValue = defaultValue;
+    public SkinDataImpl(@NonNull String value, @NonNull String signature) {
+        this.value = Objects.requireNonNull(value);
+        this.signature = Objects.requireNonNull(signature);
     }
 
-    Permission(Permission parent, String child, PermissionDefault defaultValue) {
-        this(parent.get() + "." + child, defaultValue);
+    public static SkinData from(JsonObject data) {
+        return new SkinDataImpl(
+                data.get("value").getAsString(),
+                data.get("signature").getAsString()
+        );
     }
 
-    public String get() {
-        return permission;
+    @Override
+    public @NonNull String value() {
+        return value;
     }
 
-    public PermissionDefault defaultValue() {
-        return defaultValue;
+    @Override
+    public @NonNull String signature() {
+        return signature;
     }
 }

@@ -23,41 +23,45 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.event;
+package org.geysermc.floodgate.event.skin;
 
-import com.google.inject.Singleton;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.geysermc.event.PostOrder;
-import org.geysermc.event.bus.impl.EventBusImpl;
-import org.geysermc.event.subscribe.Subscribe;
-import org.geysermc.event.subscribe.Subscriber;
-import org.geysermc.floodgate.api.event.FloodgateEventBus;
-import org.geysermc.floodgate.api.event.FloodgateSubscriber;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.geysermc.event.util.AbstractCancellable;
+import org.geysermc.floodgate.api.event.skin.SkinApplyEvent;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
-@Singleton
-@SuppressWarnings("unchecked")
-public final class EventBus extends EventBusImpl<Object, FloodgateSubscriber<?>>
-        implements FloodgateEventBus {
-    @Override
-    protected <H, T, B extends Subscriber<T>> B makeSubscription(
-            @NonNull Class<T> eventClass,
-            @NonNull Subscribe subscribe,
-            @NonNull H listener,
-            @NonNull BiConsumer<H, T> handler
+public class SkinApplyEventImpl extends AbstractCancellable implements SkinApplyEvent {
+    private final FloodgatePlayer player;
+    private final SkinData currentSkin;
+    private SkinData newSkin;
+
+    public SkinApplyEventImpl(
+            @NonNull FloodgatePlayer player,
+            @Nullable SkinData currentSkin,
+            @NonNull SkinData newSkin
     ) {
-        return (B) new EventSubscriber<>(
-                eventClass, subscribe.postOrder(), subscribe.ignoreCancelled(), listener, handler
-        );
+        this.player = Objects.requireNonNull(player);
+        this.currentSkin = currentSkin;
+        this.newSkin = Objects.requireNonNull(newSkin);
     }
 
     @Override
-    protected <T, B extends Subscriber<T>> B makeSubscription(
-            @NonNull Class<T> eventClass,
-            @NonNull Consumer<T> handler,
-            @NonNull PostOrder postOrder
-    ) {
-        return (B) new EventSubscriber<>(eventClass, handler, postOrder);
+    public @NonNull FloodgatePlayer player() {
+        return player;
+    }
+
+    public @Nullable SkinData currentSkin() {
+        return currentSkin;
+    }
+
+    public @NonNull SkinData newSkin() {
+        return newSkin;
+    }
+
+    public SkinApplyEventImpl newSkin(@NonNull SkinData skinData) {
+        this.newSkin = Objects.requireNonNull(skinData);
+        return this;
     }
 }

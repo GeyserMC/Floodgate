@@ -32,10 +32,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.geysermc.cumulus.form.Form;
 import org.geysermc.cumulus.form.util.FormBuilder;
@@ -51,7 +51,7 @@ import org.geysermc.floodgate.util.HttpClient;
 import org.geysermc.floodgate.util.Utils;
 
 public class SimpleFloodgateApi implements FloodgateApi {
-    private final Map<UUID, FloodgatePlayer> players = new HashMap<>();
+    private final Map<UUID, FloodgatePlayer> players = new ConcurrentHashMap<>();
     private final Cache<UUID, FloodgatePlayer> pendingRemove =
             CacheBuilder.newBuilder()
                     .expireAfterWrite(20, TimeUnit.SECONDS)

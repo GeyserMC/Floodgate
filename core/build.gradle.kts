@@ -1,7 +1,5 @@
-import net.kyori.blossom.BlossomExtension
-
 plugins {
-    id("net.kyori.blossom")
+    id("floodgate.generate-templates")
 }
 
 dependencies {
@@ -26,9 +24,10 @@ provided("io.netty", "netty-codec", Versions.nettyVersion)
 
 relocate("org.bstats")
 
-configure<BlossomExtension> {
-    val constantsFile = "src/main/java/org/geysermc/floodgate/util/Constants.java"
-    replaceToken("\${floodgateVersion}", fullVersion(), constantsFile)
-    replaceToken("\${branch}", branchName(), constantsFile)
-    replaceToken("\${buildNumber}", buildNumber(), constantsFile)
+tasks {
+    templateSources {
+        replaceToken("floodgateVersion", fullVersion())
+        replaceToken("branch", branchName())
+        replaceToken("buildNumber", buildNumber())
+    }
 }

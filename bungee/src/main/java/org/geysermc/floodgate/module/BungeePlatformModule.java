@@ -69,6 +69,7 @@ public final class BungeePlatformModule extends AbstractModule {
         bind(PlatformUtils.class).to(BungeePlatformUtils.class);
         bind(Logger.class).annotatedWith(Names.named("logger")).toInstance(plugin.getLogger());
         bind(FloodgateLogger.class).to(JavaUtilFloodgateLogger.class);
+        bind(SkinApplier.class).to(BungeeSkinApplier.class);
     }
 
     @Provides
@@ -118,12 +119,6 @@ public final class BungeePlatformModule extends AbstractModule {
     @Singleton
     public PluginMessageRegistration pluginMessageRegistration() {
         return new BungeePluginMessageRegistration();
-    }
-
-    @Provides
-    @Singleton
-    public SkinApplier skinApplier(FloodgateLogger logger) {
-        return new BungeeSkinApplier(logger);
     }
 
     /*

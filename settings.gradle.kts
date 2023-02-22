@@ -1,3 +1,4 @@
+@file:Suppress("UnstableApiUsage")
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 dependencyResolutionManagement {
@@ -55,7 +56,8 @@ pluginManagement {
         gradlePluginPortal()
     }
     plugins {
-        id("net.kyori.blossom") version "1.2.0"
+        id("net.kyori.indra")
+        id("net.kyori.indra.git")
     }
     includeBuild("build-logic")
 }
