@@ -33,12 +33,14 @@ import static org.geysermc.floodgate.util.ReflectionUtils.invoke;
 import com.velocitypowered.api.proxy.ProxyServer;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
+import jakarta.inject.Singleton;
 import java.lang.reflect.Method;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 
 @RequiredArgsConstructor
+@Singleton
 public final class VelocityInjector extends CommonPlatformInjector {
     private final ProxyServer server;
 

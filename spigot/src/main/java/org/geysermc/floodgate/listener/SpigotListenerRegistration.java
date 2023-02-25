@@ -25,7 +25,7 @@
 
 package org.geysermc.floodgate.listener;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;

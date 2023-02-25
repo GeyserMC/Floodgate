@@ -25,22 +25,31 @@
 
 package org.geysermc.floodgate.register;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import java.util.Set;
-import lombok.RequiredArgsConstructor;
+import jakarta.inject.Inject;
+import jakarta.inject.Qualifier;
+import jakarta.inject.Singleton;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
-public final class ListenerRegister<T> {
-    private final ListenerRegistration<T> registration;
-    private final Injector guice;
-
+@Singleton
+@SuppressWarnings({"rawtypes", "unchecked"})
+public final class ListenerRegister {
     @Inject
-    public void registerListeners(Set<T> foundListeners) {
-        for (T listener : foundListeners) {
-            guice.injectMembers(listener);
-            registration.register(listener);
-        }
+    ListenerRegistration registration;
+
+//    @Inject
+//    public void registerListeners(Set<@Listener Object> foundListeners) {
+//        for (Object listener : foundListeners) {
+//            registration.register(listener);
+//        }
+//    }
+
+    @Qualifier
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE_USE)
+    public @interface Listener {
     }
 }

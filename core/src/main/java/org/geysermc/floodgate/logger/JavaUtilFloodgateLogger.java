@@ -27,24 +27,26 @@ package org.geysermc.floodgate.logger;
 
 import static org.geysermc.floodgate.util.MessageFormatter.format;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
+import io.avaje.inject.Secondary;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.util.LanguageManager;
 
+@Secondary
 @Singleton
 public final class JavaUtilFloodgateLogger implements FloodgateLogger {
     @Inject
     @Named("logger")
-    private Logger logger;
+    Logger logger;
     private LanguageManager languageManager;
 
     @Inject
-    private void init(LanguageManager languageManager, FloodgateConfig config) {
+    public void init(LanguageManager languageManager, FloodgateConfig config) {
         this.languageManager = languageManager;
         if (config.isDebug()) {
             logger.setLevel(Level.ALL);

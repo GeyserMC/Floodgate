@@ -25,7 +25,7 @@
 
 package org.geysermc.floodgate.pluginmessage;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +33,8 @@ import java.util.Set;
 public class PluginMessageManager {
     private final Map<Class<? extends PluginMessageChannel>, PluginMessageChannel> classInstanceMap = new HashMap<>();
     private final Map<String, PluginMessageChannel> identifierInstanceMap = new HashMap<>();
+
+    @Inject PluginMessageRegistration registration;
 
     @Inject
     public void addChannels(Set<PluginMessageChannel> channels) {
@@ -43,6 +45,7 @@ public class PluginMessageManager {
         for (PluginMessageChannel channel : channels) {
             classInstanceMap.put(channel.getClass(), channel);
             identifierInstanceMap.put(channel.getIdentifier(), channel);
+            registration.register(channel);
         }
     }
 

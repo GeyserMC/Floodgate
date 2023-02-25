@@ -25,11 +25,12 @@
 
 package org.geysermc.floodgate.addon.data;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.velocitypowered.api.proxy.ProxyServer;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -37,32 +38,33 @@ import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 
+@Singleton
 public final class VelocityDataAddon implements InjectorAddon {
-    @Inject private FloodgateHandshakeHandler handshakeHandler;
-    @Inject private ProxyFloodgateConfig config;
-    @Inject private ProxyFloodgateApi api;
-    @Inject private ProxyServer proxy;
-    @Inject private FloodgateLogger logger;
+    @Inject FloodgateHandshakeHandler handshakeHandler;
+    @Inject ProxyFloodgateConfig config;
+    @Inject ProxyFloodgateApi api;
+    @Inject ProxyServer proxy;
+    @Inject FloodgateLogger logger;
 
     @Inject
     @Named("packetHandler")
-    private String packetHandler;
+    String packetHandler;
 
     @Inject
     @Named("packetDecoder")
-    private String packetDecoder;
+    String packetDecoder;
 
     @Inject
     @Named("packetEncoder")
-    private String packetEncoder;
+    String packetEncoder;
 
     @Inject
     @Named("kickMessageAttribute")
-    private AttributeKey<String> kickMessageAttribute;
+    AttributeKey<String> kickMessageAttribute;
 
     @Inject
     @Named("playerAttribute")
-    private AttributeKey<FloodgatePlayer> playerAttribute;
+    AttributeKey<FloodgatePlayer> playerAttribute;
 
     @Override
     public void onInject(Channel channel, boolean toServer) {

@@ -25,10 +25,11 @@
 
 package org.geysermc.floodgate.addon;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import org.geysermc.floodgate.addon.debug.ChannelInDebugHandler;
 import org.geysermc.floodgate.addon.debug.ChannelOutDebugHandler;
 import org.geysermc.floodgate.addon.debug.StateChangeDetector;
@@ -37,21 +38,22 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.util.Utils;
 
+@Singleton
 public final class DebugAddon implements InjectorAddon {
-    @Inject private FloodgateConfig config;
-    @Inject private FloodgateLogger logger;
+    @Inject FloodgateConfig config;
+    @Inject FloodgateLogger logger;
 
     @Inject
     @Named("implementationName")
-    private String implementationName;
+    String implementationName;
 
     @Inject
     @Named("packetEncoder")
-    private String packetEncoder;
+    String packetEncoder;
 
     @Inject
     @Named("packetDecoder")
-    private String packetDecoder;
+    String packetDecoder;
 
     @Override
     public void onInject(Channel channel, boolean toServer) {

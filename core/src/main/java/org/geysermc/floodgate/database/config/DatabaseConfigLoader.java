@@ -26,8 +26,8 @@
 package org.geysermc.floodgate.database.config;
 
 import com.google.gson.JsonObject;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,19 +42,19 @@ public class DatabaseConfigLoader {
 
     @Inject
     @Named("dataDirectory")
-    private Path dataDirectory;
+    Path dataDirectory;
 
     @Inject
     @Named("databaseName")
-    private String name;
+    String name;
 
     @Inject
     @Named("databaseClassLoader")
-    private ClassLoader classLoader;
+    ClassLoader classLoader;
 
     @Inject
     @Named("databaseInitData")
-    private JsonObject initData;
+    JsonObject initData;
 
     @Inject
     public void init() {

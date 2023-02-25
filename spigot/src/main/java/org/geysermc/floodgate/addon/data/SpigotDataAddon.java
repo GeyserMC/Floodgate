@@ -25,10 +25,11 @@
 
 package org.geysermc.floodgate.addon.data;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -36,23 +37,24 @@ import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 
+@Singleton
 public final class SpigotDataAddon implements InjectorAddon {
-    @Inject private FloodgateHandshakeHandler handshakeHandler;
-    @Inject private FloodgateConfig config;
-    @Inject private SimpleFloodgateApi api;
-    @Inject private FloodgateLogger logger;
+    @Inject FloodgateHandshakeHandler handshakeHandler;
+    @Inject FloodgateConfig config;
+    @Inject SimpleFloodgateApi api;
+    @Inject FloodgateLogger logger;
 
     @Inject
     @Named("packetHandler")
-    private String packetHandlerName;
+    String packetHandlerName;
 
     @Inject
     @Named("kickMessageAttribute")
-    private AttributeKey<String> kickMessageAttribute;
+    AttributeKey<String> kickMessageAttribute;
 
     @Inject
     @Named("playerAttribute")
-    private AttributeKey<FloodgatePlayer> playerAttribute;
+    AttributeKey<FloodgatePlayer> playerAttribute;
 
     @Override
     public void onInject(Channel channel, boolean toServer) {

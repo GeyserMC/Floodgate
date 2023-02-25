@@ -25,15 +25,14 @@
 
 package org.geysermc.floodgate;
 
-import com.google.inject.Guice;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Module;
+import io.avaje.inject.BeanScope;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.InstanceHolder;
+import org.geysermc.floodgate.api.ProxyModule;
+import org.geysermc.floodgate.api.ServerModule;
 import org.geysermc.floodgate.api.event.FloodgateEventBus;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
@@ -44,43 +43,41 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.event.EventBus;
 import org.geysermc.floodgate.event.lifecycle.PostEnableEvent;
 import org.geysermc.floodgate.event.lifecycle.ShutdownEvent;
-import org.geysermc.floodgate.module.PostEnableModules;
 
 @Getter(AccessLevel.PROTECTED)
 public abstract class FloodgatePlatform {
     private static final UUID KEY = UUID.randomUUID();
-    private PlatformInjector injector;
-
+    
+    private BeanScope scope;
     private FloodgateConfig config;
-    @Inject private Injector guice;
-
-
+    private PlatformInjector injector;
+    
     public void load() {
         long startTime = System.currentTimeMillis();
 
-        guice = guice != null ?
-                guice.createChildInjector(loadStageModules()) :
-                Guice.createInjector(loadStageModules());
+       scope = BeanScope.builder()
+               .bean("isProxy", boolean.class, isProxy())
+               .modules(new FloodgateModule())
+               .modules(isProxy() ? new ProxyModule() : new ServerModule())
+               .build();
 
-        config = guice.getInstance(FloodgateConfig.class);
-        injector = guice.getInstance(PlatformInjector.class);
+        config = scope.get(FloodgateConfig.class);
+        injector = scope.get(PlatformInjector.class);
 
         InstanceHolder.set(
-                guice.getInstance(FloodgateApi.class),
-                guice.getInstance(PlayerLink.class),
-                guice.getInstance(FloodgateEventBus.class),
+                scope.get(FloodgateApi.class),
+                scope.get(PlayerLink.class),
+                scope.get(FloodgateEventBus.class),
                 injector,
-                guice.getInstance(PacketHandlers.class),
-                guice.getInstance(HandshakeHandlers.class),
+                scope.get(PacketHandlers.class),
+                scope.get(HandshakeHandlers.class),
                 KEY
         );
 
         long endTime = System.currentTimeMillis();
-        guice.getInstance(FloodgateLogger.class)
+        scope.get(FloodgateLogger.class)
                 .translatedInfo("floodgate.core.finish", endTime - startTime);
     }
-
-    protected abstract Module[] loadStageModules();
 
     public void enable() throws RuntimeException {
         if (injector == null) {
@@ -93,15 +90,13 @@ public abstract class FloodgatePlatform {
             throw new RuntimeException("Failed to inject the packet listener!", exception);
         }
 
-        this.guice = guice.createChildInjector(new PostEnableModules(postEnableStageModules()));
+//        this.guice = guice.createChildInjector(new PostEnableModules(postEnableStageModules()));
 
-        guice.getInstance(EventBus.class).fire(new PostEnableEvent());
+        scope.get(EventBus.class).fire(new PostEnableEvent());
     }
 
-    protected abstract Module[] postEnableStageModules();
-
     public void disable() {
-        guice.getInstance(EventBus.class).fire(new ShutdownEvent());
+        scope.get(EventBus.class).fire(new ShutdownEvent());
 
         if (injector != null && injector.canRemoveInjection()) {
             try {
@@ -110,9 +105,9 @@ public abstract class FloodgatePlatform {
                 throw new RuntimeException("Failed to remove the injection!", exception);
             }
         }
+
+        scope.close();
     }
 
-    public boolean isProxy() {
-        return config.isProxy();
-    }
+    abstract boolean isProxy();
 }

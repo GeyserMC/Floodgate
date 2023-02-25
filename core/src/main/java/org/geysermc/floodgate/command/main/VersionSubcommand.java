@@ -29,7 +29,7 @@ import static org.geysermc.floodgate.util.Constants.COLOR_CHAR;
 
 import cloud.commandframework.context.CommandContext;
 import com.google.gson.JsonElement;
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.command.WhitelistCommand.Message;
 import org.geysermc.floodgate.command.util.Permission;
@@ -39,11 +39,13 @@ import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.HttpClient;
 
 public class VersionSubcommand extends FloodgateSubCommand {
-    @Inject
-    private HttpClient httpClient;
+    @Inject HttpClient httpClient;
+    @Inject FloodgateLogger logger;
 
-    @Inject
-    private FloodgateLogger logger;
+    @Override
+    public Class<?> parent() {
+        return MainCommand.class;
+    }
 
     @Override
     public String name() {

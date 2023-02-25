@@ -26,6 +26,7 @@
 package org.geysermc.floodgate.packet;
 
 import io.netty.channel.ChannelHandlerContext;
+import jakarta.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,6 +41,7 @@ import org.geysermc.floodgate.api.packet.PacketHandler;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
 import org.geysermc.floodgate.api.util.TriFunction;
 
+@Singleton
 public final class PacketHandlersImpl implements PacketHandlers {
     private final Map<PacketHandler, List<HandlerEntry>> handlers = new HashMap<>();
     private final Set<TriFunction<ChannelHandlerContext, Object, Boolean, Object>> globalPacketHandlers = new HashSet<>();

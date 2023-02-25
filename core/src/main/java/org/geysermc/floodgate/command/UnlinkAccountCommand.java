@@ -31,11 +31,12 @@ import cloud.commandframework.ArgumentDescription;
 import cloud.commandframework.Command;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.context.CommandContext;
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.link.PlayerLink;
+import org.geysermc.floodgate.command.util.Permission;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.link.GlobalPlayerLinking;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
@@ -43,11 +44,10 @@ import org.geysermc.floodgate.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.player.UserAudience.PlayerAudience;
 import org.geysermc.floodgate.util.Constants;
-import org.geysermc.floodgate.command.util.Permission;
 
-@NoArgsConstructor
+@Singleton
 public final class UnlinkAccountCommand implements FloodgateCommand {
-    @Inject private FloodgateApi api;
+    @Inject FloodgateApi api;
 
     @Override
     public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {

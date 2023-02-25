@@ -28,9 +28,9 @@ package org.geysermc.floodgate.module;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.bukkit.BukkitCommandManager;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import lombok.RequiredArgsConstructor;
+import io.avaje.inject.Bean;
+import io.avaje.inject.Factory;
+import jakarta.inject.Inject;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -42,18 +42,11 @@ import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.player.FloodgateCommandPreprocessor;
 import org.geysermc.floodgate.player.UserAudience;
 
-@RequiredArgsConstructor
-public final class SpigotCommandModule extends CommandModule {
-    private final JavaPlugin plugin;
+@Factory
+public final class SpigotCommandModule {
+    @Inject JavaPlugin plugin;
 
-    @Override
-    protected void configure() {
-        super.configure();
-        registerPermissions();
-    }
-
-    @Provides
-    @Singleton
+    @Bean
     @SneakyThrows
     public CommandManager<UserAudience> commandManager(CommandUtil commandUtil) {
         CommandManager<UserAudience> commandManager = new BukkitCommandManager<>(
@@ -66,7 +59,8 @@ public final class SpigotCommandModule extends CommandModule {
         return commandManager;
     }
 
-    private void registerPermissions() {
+    @Inject
+    void registerPermissions() {
         PluginManager manager = Bukkit.getPluginManager();
         for (Permission permission : Permission.values()) {
             if (manager.getPermission(permission.get()) != null) {

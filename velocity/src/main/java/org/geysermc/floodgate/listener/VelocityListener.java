@@ -34,8 +34,6 @@ import static org.geysermc.floodgate.util.ReflectionUtils.getValue;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
@@ -47,6 +45,9 @@ import com.velocitypowered.api.util.GameProfile;
 import com.velocitypowered.api.util.GameProfile.Property;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Objects;
@@ -56,8 +57,11 @@ import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
+import org.geysermc.floodgate.register.ListenerRegister;
 import org.geysermc.floodgate.util.LanguageManager;
 
+@ListenerRegister.Listener
+@Singleton
 public final class VelocityListener {
     private static final Field INITIAL_MINECRAFT_CONNECTION;
     private static final Field INITIAL_CONNECTION_DELEGATE;
@@ -90,18 +94,18 @@ public final class VelocityListener {
                     .expireAfterAccess(20, TimeUnit.SECONDS)
                     .build();
 
-    @Inject private ProxyFloodgateConfig config;
-    @Inject private ProxyFloodgateApi api;
-    @Inject private LanguageManager languageManager;
-    @Inject private FloodgateLogger logger;
+    @Inject ProxyFloodgateConfig config;
+    @Inject ProxyFloodgateApi api;
+    @Inject LanguageManager languageManager;
+    @Inject FloodgateLogger logger;
 
     @Inject
     @Named("playerAttribute")
-    private AttributeKey<FloodgatePlayer> playerAttribute;
+    AttributeKey<FloodgatePlayer> playerAttribute;
 
     @Inject
     @Named("kickMessageAttribute")
-    private AttributeKey<String> kickMessageAttribute;
+    AttributeKey<String> kickMessageAttribute;
 
     @Subscribe(order = PostOrder.EARLY)
     public void onPreLogin(PreLoginEvent event) {

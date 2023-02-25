@@ -26,9 +26,9 @@
 package org.geysermc.floodgate.pluginmessage.channel;
 
 import com.google.common.base.Charsets;
-import com.google.inject.Inject;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
+import jakarta.inject.Inject;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.geysermc.cumulus.form.Form;
@@ -44,9 +44,9 @@ public class FormChannel implements PluginMessageChannel {
     private final Short2ObjectMap<Form> storedForms = new Short2ObjectOpenHashMap<>();
     private final AtomicInteger nextFormId = new AtomicInteger(0);
 
-    @Inject private PluginMessageUtils pluginMessageUtils;
-    @Inject private FloodgateConfig config;
-    @Inject private FloodgateLogger logger;
+    @Inject PluginMessageUtils pluginMessageUtils;
+    @Inject FloodgateConfig config;
+    @Inject FloodgateLogger logger;
 
     @Override
     public String getIdentifier() {

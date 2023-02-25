@@ -26,6 +26,7 @@
 package org.geysermc.floodgate.inject;
 
 import io.netty.channel.Channel;
+import jakarta.inject.Inject;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +40,11 @@ public abstract class CommonPlatformInjector implements PlatformInjector {
             Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
 
     private final Map<Class<?>, InjectorAddon> addons = new HashMap<>();
+
+    @Inject
+    void registerAddons(Set<InjectorAddon> addons) {
+        addons.forEach(this::addAddon);
+    }
 
     protected boolean addInjectedClient(Channel channel) {
         return injectedClients.add(channel);

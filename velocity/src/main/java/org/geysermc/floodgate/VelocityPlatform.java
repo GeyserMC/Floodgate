@@ -26,15 +26,8 @@
 package org.geysermc.floodgate;
 
 import com.google.inject.Inject;
-import com.google.inject.Module;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import java.nio.file.Path;
-import org.geysermc.floodgate.module.CommandModule;
-import org.geysermc.floodgate.module.PluginMessageModule;
-import org.geysermc.floodgate.module.ProxyCommonModule;
-import org.geysermc.floodgate.module.VelocityAddonModule;
-import org.geysermc.floodgate.module.VelocityListenerModule;
-import org.geysermc.floodgate.module.VelocityPlatformModule;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
 public class VelocityPlatform extends FloodgatePlatform {
@@ -46,20 +39,7 @@ public class VelocityPlatform extends FloodgatePlatform {
     }
 
     @Override
-    protected Module[] loadStageModules() {
-        return new Module[]{
-                new ProxyCommonModule(dataDirectory),
-                new VelocityPlatformModule(getGuice())
-        };
-    }
-
-    @Override
-    protected Module[] postEnableStageModules() {
-        return new Module[]{
-                new CommandModule(),
-                new VelocityListenerModule(),
-                new VelocityAddonModule(),
-                new PluginMessageModule()
-        };
+    boolean isProxy() {
+        return true;
     }
 }

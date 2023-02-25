@@ -28,8 +28,8 @@ package org.geysermc.floodgate.pluginmessage;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.geysermc.floodgate.util.ReflectionUtils.getFieldOfType;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,8 +60,8 @@ public final class BungeeSkinApplier implements SkinApplier {
 
     private final ProxyServer server = ProxyServer.getInstance();
 
-    @Inject private EventBus eventBus;
-    @Inject private FloodgateLogger logger;
+    @Inject EventBus eventBus;
+    @Inject FloodgateLogger logger;
 
     @Override
     public void applySkin(@NonNull FloodgatePlayer floodgatePlayer, @NonNull SkinData skinData) {

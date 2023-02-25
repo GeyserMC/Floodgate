@@ -25,26 +25,28 @@
 
 package org.geysermc.floodgate.addon;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import org.geysermc.floodgate.addon.packethandler.ChannelInPacketHandler;
 import org.geysermc.floodgate.addon.packethandler.ChannelOutPacketHandler;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.packet.PacketHandlersImpl;
 import org.geysermc.floodgate.util.Utils;
 
+@Singleton
 public class PacketHandlerAddon implements InjectorAddon {
-    @Inject private PacketHandlersImpl packetHandlers;
+    @Inject PacketHandlersImpl packetHandlers;
 
     @Inject
     @Named("packetEncoder")
-    private String packetEncoder;
+    String packetEncoder;
 
     @Inject
     @Named("packetDecoder")
-    private String packetDecoder;
+    String packetDecoder;
 
     @Override
     public void onInject(Channel channel, boolean toServer) {

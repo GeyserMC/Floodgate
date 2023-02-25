@@ -26,8 +26,8 @@
 package org.geysermc.floodgate.util;
 
 import com.google.common.base.Joiner;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -45,13 +45,13 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 public final class LanguageManager {
     private final Map<String, Properties> localeMappings = new HashMap<>();
 
-    @Inject private FloodgateConfig config;
-    @Inject private FloodgateLogger logger;
+    @Inject FloodgateConfig config;
+    @Inject FloodgateLogger logger;
 
     /**
      * The locale used in console and as a fallback
      */
-    @Getter private String defaultLocale;
+    @Getter String defaultLocale;
 
     /**
      * Cleans up and formats a locale string

@@ -32,9 +32,10 @@ import cloud.commandframework.Command;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.context.CommandContext;
-import com.google.inject.Inject;
+import io.avaje.inject.Secondary;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.link.LinkRequestResult;
 import org.geysermc.floodgate.api.link.PlayerLink;
@@ -50,10 +51,11 @@ import org.geysermc.floodgate.player.audience.ProfileAudience;
 import org.geysermc.floodgate.player.audience.ProfileAudienceArgument;
 import org.geysermc.floodgate.util.Constants;
 
-@NoArgsConstructor
+@Singleton
+@Secondary
 public final class LinkAccountCommand implements FloodgateCommand {
-    @Inject private FloodgateApi api;
-    @Inject private FloodgateLogger logger;
+    @Inject FloodgateApi api;
+    @Inject FloodgateLogger logger;
 
     @Override
     public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {

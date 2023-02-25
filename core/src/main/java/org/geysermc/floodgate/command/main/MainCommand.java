@@ -32,6 +32,7 @@ import cloud.commandframework.Command;
 import cloud.commandframework.Command.Builder;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.context.CommandContext;
+import jakarta.inject.Singleton;
 import java.util.Locale;
 import org.geysermc.floodgate.command.util.Permission;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
@@ -39,12 +40,8 @@ import org.geysermc.floodgate.platform.command.FloodgateSubCommand;
 import org.geysermc.floodgate.platform.command.SubCommands;
 import org.geysermc.floodgate.player.UserAudience;
 
+@Singleton
 public final class MainCommand extends SubCommands implements FloodgateCommand {
-    public MainCommand() {
-        defineSubCommand(FirewallCheckSubcommand.class);
-        defineSubCommand(VersionSubcommand.class);
-    }
-
     @Override
     public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
         Builder<UserAudience> builder = commandManager.commandBuilder(

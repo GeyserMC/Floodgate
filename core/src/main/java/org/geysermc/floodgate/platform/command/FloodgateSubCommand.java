@@ -30,6 +30,8 @@ import org.geysermc.floodgate.command.util.Permission;
 import org.geysermc.floodgate.player.UserAudience;
 
 public abstract class FloodgateSubCommand {
+    public abstract Class<?> parent();
+
     public abstract String name();
 
     public abstract String description();

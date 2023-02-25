@@ -30,6 +30,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
+import jakarta.inject.Singleton;
 import java.lang.reflect.Field;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,7 @@ import org.geysermc.floodgate.util.BungeeReflectionUtils;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
 @RequiredArgsConstructor
+@Singleton
 public final class BungeeInjector extends CommonPlatformInjector {
     private static final String BUNGEE_INIT = "floodgate-bungee-init";
 

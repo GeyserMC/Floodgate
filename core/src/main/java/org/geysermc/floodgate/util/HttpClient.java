@@ -27,9 +27,9 @@ package org.geysermc.floodgate.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -51,7 +51,7 @@ public class HttpClient {
     private final Gson gson = new Gson();
     @Inject
     @Named("commonPool")
-    private ExecutorService executorService;
+    ExecutorService executorService;
 
     public CompletableFuture<DefaultHttpResponse> asyncGet(String urlString) {
         return CompletableFuture.supplyAsync(() -> get(urlString), executorService);

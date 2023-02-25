@@ -25,10 +25,11 @@
 
 package org.geysermc.floodgate.util;
 
-import com.google.inject.Inject;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,11 +40,14 @@ import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.player.UserAudience.ConsoleAudience;
 import org.geysermc.floodgate.player.UserAudience.PlayerAudience;
+import org.geysermc.floodgate.register.ListenerRegister;
 
+@ListenerRegister.Listener
+@Singleton
 public final class VelocityCommandUtil extends CommandUtil {
     private static UserAudience console;
 
-    @Inject private ProxyServer server;
+    @Inject ProxyServer server;
 
     @Inject
     public VelocityCommandUtil(LanguageManager manager, FloodgateApi api) {

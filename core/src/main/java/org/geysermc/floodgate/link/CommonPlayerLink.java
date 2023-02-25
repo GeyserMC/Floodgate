@@ -25,9 +25,8 @@
 
 package org.geysermc.floodgate.link;
 
-import com.google.inject.Inject;
-import com.google.inject.Key;
-import com.google.inject.name.Names;
+import io.avaje.inject.BeanScope;
+import jakarta.inject.Inject;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -44,7 +43,6 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.database.config.DatabaseConfig;
 import org.geysermc.floodgate.database.config.DatabaseConfigLoader;
 import org.geysermc.floodgate.event.lifecycle.ShutdownEvent;
-import org.geysermc.floodgate.util.InjectorHolder;
 
 @Listener
 public abstract class CommonPlayerLink implements PlayerLink {
@@ -57,17 +55,17 @@ public abstract class CommonPlayerLink implements PlayerLink {
 
     @Inject
     @Getter(AccessLevel.PROTECTED)
-    private FloodgateLogger logger;
+    FloodgateLogger logger;
 
     @Inject
     @Getter(AccessLevel.PROTECTED)
-    private FloodgateApi api;
+    FloodgateApi api;
 
     @Inject
-    private InjectorHolder injectorHolder;
+    BeanScope scope;
 
     @Inject
-    private void init(FloodgateConfig config) {
+    void init(FloodgateConfig config) {
         FloodgateConfig.PlayerLinkConfig linkConfig = config.getPlayerLink();
         enabled = linkConfig.isEnabled();
         allowLinking = linkConfig.isAllowed();
@@ -94,12 +92,12 @@ public abstract class CommonPlayerLink implements PlayerLink {
     public <T extends DatabaseConfig> T getConfig(Class<T> configClass) {
         // this method is not intended to be used more than once. It'll make a new instance of
         // DatabaseConfigLoader and DatabaseConfig every time you run this method.
-        return injectorHolder.get().getInstance(DatabaseConfigLoader.class).loadAs(configClass);
+        return scope.get(DatabaseConfigLoader.class).loadAs(configClass);
     }
 
     @Override
     public String getName() {
-        return injectorHolder.get().getInstance(Key.get(String.class, Names.named("databaseName")));
+        return scope.get(String.class, "databaseName");
     }
 
     @Override

@@ -30,7 +30,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.module.PaperListenerModule;
 import org.geysermc.floodgate.module.PluginMessageModule;
-import org.geysermc.floodgate.module.ServerCommonModule;
 import org.geysermc.floodgate.module.SpigotAddonModule;
 import org.geysermc.floodgate.module.SpigotCommandModule;
 import org.geysermc.floodgate.module.SpigotListenerModule;

@@ -25,14 +25,14 @@
 
 package org.geysermc.floodgate.pluginmessage.channel;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.UUID;
 import org.geysermc.floodgate.api.UnsafeFloodgateApi;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
 
 public final class PacketChannel implements PluginMessageChannel {
-    @Inject private PluginMessageUtils pluginMessageUtils;
+    @Inject PluginMessageUtils pluginMessageUtils;
 
     @Override
     public String getIdentifier() {

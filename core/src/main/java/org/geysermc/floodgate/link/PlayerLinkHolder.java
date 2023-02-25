@@ -29,11 +29,10 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import com.google.inject.name.Names;
+import io.avaje.inject.BeanScope;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -53,22 +52,22 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.FloodgateConfig.PlayerLinkConfig;
 import org.geysermc.floodgate.event.lifecycle.ShutdownEvent;
 import org.geysermc.floodgate.util.Constants;
-import org.geysermc.floodgate.util.InjectorHolder;
 import org.geysermc.floodgate.util.Utils;
 
 @Listener
 @Singleton
 @SuppressWarnings("unchecked")
 public final class PlayerLinkHolder {
-    @Inject private Injector injector;
-    @Inject private FloodgateConfig config;
-    @Inject private FloodgateLogger logger;
+    @Inject BeanScope currentScope;
+    @Inject FloodgateConfig config;
+    @Inject FloodgateLogger logger;
 
     @Inject
     @Named("dataDirectory")
-    private Path dataDirectory;
+    Path dataDirectory;
 
     private URLClassLoader classLoader;
+    private BeanScope childScope;
     private PlayerLink instance;
 
     @NonNull
@@ -100,7 +99,7 @@ public final class PlayerLinkHolder {
         // been found, or when global linking is enabled and own player linking is disabled.
         if (linkConfig.isEnableGlobalLinking() &&
                 (files.isEmpty() || !linkConfig.isEnableOwnLinking())) {
-            return injector.getInstance(GlobalPlayerLinking.class);
+            return currentScope.get(GlobalPlayerLinking.class);
         }
 
         if (files.isEmpty()) {
@@ -174,26 +173,18 @@ public final class PlayerLinkHolder {
 
             init = false;
 
-            InjectorHolder injectorHolder = new InjectorHolder();
-            Injector linkInjector = injector.createChildInjector(binder -> {
-                binder.bind(String.class)
-                        .annotatedWith(Names.named("databaseName"))
-                        .toInstance(databaseName);
-                binder.bind(ClassLoader.class).annotatedWith(
-                        Names.named("databaseClassLoader")).toInstance(classLoader);
-                binder.bind(JsonObject.class)
-                        .annotatedWith(Names.named("databaseInitData"))
-                        .toInstance(dbInitConfig);
-                binder.bind(InjectorHolder.class)
-                        .toInstance(injectorHolder);
-            });
-            injectorHolder.set(linkInjector);
+            childScope = BeanScope.builder()
+                    .parent(currentScope)
+                    .bean("databaseName", String.class, databaseName)
+                    .bean("databaseClassLoader", ClassLoader.class, classLoader)
+                    .bean("databaseInitData", JsonObject.class, dbInitConfig)
+                    .build();
 
-            instance = linkInjector.getInstance(mainClass);
+            instance = childScope.get(mainClass);
 
             // we use our own internal PlayerLinking when global linking is enabled
             if (linkConfig.isEnableGlobalLinking()) {
-                GlobalPlayerLinking linking = linkInjector.getInstance(GlobalPlayerLinking.class);
+                GlobalPlayerLinking linking = childScope.get(GlobalPlayerLinking.class);
                 linking.setDatabaseImpl(instance);
                 linking.load();
                 return linking;
@@ -220,6 +211,7 @@ public final class PlayerLinkHolder {
     @Subscribe
     public void onShutdown(ShutdownEvent ignored) throws Exception {
         instance.stop();
+        childScope.close();
         classLoader.close();
     }
 }

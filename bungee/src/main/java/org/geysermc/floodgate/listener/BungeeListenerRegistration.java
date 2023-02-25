@@ -25,7 +25,7 @@
 
 package org.geysermc.floodgate.listener;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Listener;

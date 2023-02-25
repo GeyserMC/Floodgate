@@ -25,14 +25,13 @@
 
 package org.geysermc.floodgate.util;
 
-import com.google.inject.Inject;
 import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.api.proxy.ProxyServer;
+import jakarta.inject.Inject;
 import org.geysermc.floodgate.platform.util.PlatformUtils;
 
 public final class VelocityPlatformUtils extends PlatformUtils {
-    @Inject
-    private ProxyServer server;
+    @Inject ProxyServer server;
 
     @Override
     public AuthType authType() {

@@ -33,7 +33,8 @@ import cloud.commandframework.CommandManager;
 import cloud.commandframework.context.CommandContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.UUID;
 import lombok.Getter;
 import org.geysermc.floodgate.api.FloodgateApi;
@@ -51,15 +52,16 @@ import org.geysermc.floodgate.player.audience.ProfileAudienceArgument;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.HttpClient;
 
+@Singleton
 public class WhitelistCommand implements FloodgateCommand {
-    @Inject private FloodgateConfig config;
-    @Inject private HttpClient httpClient;
-    @Inject private FloodgateLogger logger;
+    @Inject FloodgateConfig config;
+    @Inject HttpClient httpClient;
+    @Inject FloodgateLogger logger;
 
     @Override
     public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
         Command.Builder<UserAudience> builder = commandManager.commandBuilder("fwhitelist",
-                ArgumentDescription.of("Easy way to whitelist Bedrock players"))
+                        ArgumentDescription.of("Easy way to whitelist Bedrock players"))
                 .permission(Permission.COMMAND_WHITELIST.get());
 
         commandManager.command(builder

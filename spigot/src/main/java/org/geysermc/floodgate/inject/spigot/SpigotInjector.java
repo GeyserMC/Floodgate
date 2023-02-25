@@ -25,13 +25,13 @@
 
 package org.geysermc.floodgate.inject.spigot;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -45,7 +45,7 @@ import org.geysermc.floodgate.util.ReflectionUtils;
 
 @Singleton
 public final class SpigotInjector extends CommonPlatformInjector {
-    @Inject private FloodgateLogger logger;
+    @Inject FloodgateLogger logger;
 
     private Object serverConnection;
     private String injectedFieldName;

@@ -27,8 +27,8 @@ package org.geysermc.floodgate.logger;
 
 import static org.geysermc.floodgate.util.MessageFormatter.format;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -38,11 +38,11 @@ import org.slf4j.Logger;
 
 @Singleton
 public final class Slf4jFloodgateLogger implements FloodgateLogger {
-    @Inject private Logger logger;
+    @Inject Logger logger;
     private LanguageManager languageManager;
 
     @Inject
-    private void init(LanguageManager languageManager, FloodgateConfig config) {
+    void init(LanguageManager languageManager, FloodgateConfig config) {
         this.languageManager = languageManager;
         if (config.isDebug() && !logger.isDebugEnabled()) {
             Configurator.setLevel(logger.getName(), Level.DEBUG);

@@ -26,9 +26,8 @@
 package org.geysermc.floodgate.register;
 
 import cloud.commandframework.CommandManager;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Key;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.Set;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
@@ -39,22 +38,14 @@ import org.geysermc.floodgate.player.UserAudience;
  * is currently in use. So that the commands only have to be written once (in the common module) and
  * can be used across all platforms without the need of adding platform specific commands.
  */
+@Singleton
 public final class CommandRegister {
-    private final CommandManager<UserAudience> commandManager;
-    private final FloodgateConfig config;
-    private final Injector guice;
-
-    @Inject
-    public CommandRegister(Injector guice) {
-        this.commandManager = guice.getInstance(new Key<CommandManager<UserAudience>>() {});
-        this.config = guice.getInstance(FloodgateConfig.class);
-        this.guice = guice;
-    }
+    @Inject CommandManager<UserAudience> commandManager;
+    @Inject FloodgateConfig config;
 
     @Inject
     public void registerCommands(Set<FloodgateCommand> foundCommands) {
         for (FloodgateCommand command : foundCommands) {
-            guice.injectMembers(command);
             if (command.shouldRegister(config)) {
                 commandManager.command(command.buildCommand(commandManager));
             }

@@ -27,64 +27,41 @@ package org.geysermc.floodgate.module;
 
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
-import cloud.commandframework.velocity.CloudInjectionModule;
 import cloud.commandframework.velocity.VelocityCommandManager;
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
-import com.google.inject.Key;
 import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.event.EventManager;
 import com.velocitypowered.api.proxy.ProxyServer;
-import lombok.RequiredArgsConstructor;
+import io.avaje.inject.Bean;
+import io.avaje.inject.Factory;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import org.geysermc.floodgate.VelocityPlugin;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.inject.velocity.VelocityInjector;
 import org.geysermc.floodgate.listener.VelocityListenerRegistration;
-import org.geysermc.floodgate.logger.Slf4jFloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
-import org.geysermc.floodgate.platform.util.PlatformUtils;
 import org.geysermc.floodgate.player.FloodgateCommandPreprocessor;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.pluginmessage.PluginMessageRegistration;
 import org.geysermc.floodgate.pluginmessage.VelocityPluginMessageRegistration;
 import org.geysermc.floodgate.pluginmessage.VelocityPluginMessageUtils;
-import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.util.VelocityCommandUtil;
-import org.geysermc.floodgate.util.VelocityPlatformUtils;
-import org.geysermc.floodgate.util.VelocitySkinApplier;
 
-@RequiredArgsConstructor
-public final class VelocityPlatformModule extends AbstractModule {
-    private final Injector guice;
-
-    @Override
-    protected void configure() {
-        bind(CommandUtil.class).to(VelocityCommandUtil.class);
-        bind(PlatformUtils.class).to(VelocityPlatformUtils.class);
-        bind(FloodgateLogger.class).to(Slf4jFloodgateLogger.class);
-        bind(SkinApplier.class).to(VelocitySkinApplier.class);
-    }
-
-    @Provides
+@Factory
+public final class VelocityPlatformModule {
+    @Bean
     @Singleton
-    public CommandManager<UserAudience> commandManager(CommandUtil commandUtil) {
-        Injector child = guice.createChildInjector(new CloudInjectionModule<>(
-                UserAudience.class,
+    public CommandManager<UserAudience> commandManager(CommandUtil commandUtil, ProxyServer proxy) {
+        CommandManager<UserAudience> commandManager = new VelocityCommandManager<>(
+                null,
+                proxy,
                 CommandExecutionCoordinator.simpleCoordinator(),
                 commandUtil::getUserAudience,
                 audience -> (CommandSource) audience.source()
-        ));
-
-        CommandManager<UserAudience> commandManager =
-                child.getInstance(new Key<VelocityCommandManager<UserAudience>>() {});
-
+        );
         commandManager.registerCommandPreProcessor(new FloodgateCommandPreprocessor<>(commandUtil));
         return commandManager;
     }

@@ -27,7 +27,8 @@ package org.geysermc.floodgate.listener;
 
 import com.destroystokyo.paper.event.profile.PreFillProfileEvent;
 import com.destroystokyo.paper.profile.ProfileProperty;
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -36,8 +37,9 @@ import org.bukkit.event.Listener;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
+@Singleton
 public final class PaperProfileListener implements Listener {
-    @Inject private SimpleFloodgateApi api;
+    @Inject SimpleFloodgateApi api;
 
     @EventHandler
     public void onFill(PreFillProfileEvent event) {

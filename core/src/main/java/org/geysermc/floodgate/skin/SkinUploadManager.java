@@ -25,11 +25,11 @@
 
 package org.geysermc.floodgate.skin;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.geysermc.event.Listener;
 import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.floodgate.api.FloodgateApi;
@@ -42,9 +42,9 @@ public final class SkinUploadManager {
     private final Int2ObjectMap<SkinUploadSocket> connections =
             Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>());
 
-    @Inject private FloodgateApi api;
-    @Inject private SkinApplier applier;
-    @Inject private FloodgateLogger logger;
+    @Inject FloodgateApi api;
+    @Inject SkinApplier applier;
+    @Inject FloodgateLogger logger;
 
     public void addConnectionIfNeeded(int id, String verifyCode) {
         connections.computeIfAbsent(id, (ignored) -> {

@@ -25,11 +25,11 @@
 
 package org.geysermc.floodgate.util;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.AttributeKey;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.lang.reflect.Method;
 import java.util.UUID;
 import org.geysermc.floodgate.api.packet.PacketHandler;
@@ -81,7 +81,7 @@ public class SpigotProtocolSupportHandler implements PacketHandler {
 
     @Inject
     @Named("playerAttribute")
-    private AttributeKey<FloodgatePlayer> playerAttribute;
+    AttributeKey<FloodgatePlayer> playerAttribute;
 
     @Inject
     public void register(PacketHandlers packetHandlers) {

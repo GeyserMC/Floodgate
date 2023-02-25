@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2023 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,28 +23,13 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.register;
+package org.geysermc.floodgate.scope;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import java.util.Set;
-import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
-import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
-import org.geysermc.floodgate.pluginmessage.PluginMessageRegistration;
+import jakarta.inject.Scope;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-public class PluginMessageRegister {
-    @Inject private Injector guice;
-    @Inject private PluginMessageManager manager;
-    @Inject private PluginMessageRegistration registration;
-
-    @Inject
-    public void registerChannels(Set<PluginMessageChannel> channels) {
-        // we can safely add the channels this way
-        guice.injectMembers(manager);
-
-        for (PluginMessageChannel channel : channels) {
-            guice.injectMembers(channel);
-            registration.register(channel);
-        }
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Scope
+public @interface ServerScope {
 }

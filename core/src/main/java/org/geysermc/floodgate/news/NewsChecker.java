@@ -27,8 +27,10 @@ package org.geysermc.floodgate.news;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import io.avaje.inject.PostConstruct;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -42,35 +44,32 @@ import org.geysermc.floodgate.news.data.AnnouncementData;
 import org.geysermc.floodgate.news.data.BuildSpecificData;
 import org.geysermc.floodgate.news.data.CheckAfterData;
 import org.geysermc.floodgate.platform.command.CommandUtil;
-import org.geysermc.floodgate.util.AutoBind;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.HttpClient;
 import org.geysermc.floodgate.util.HttpClient.HttpResponse;
 
-@AutoBind
+@Singleton
 public class NewsChecker {
     private final Map<Integer, NewsItem> activeNewsItems = new HashMap<>();
-    @Inject
-    @Named("commonScheduledPool")
-    private ScheduledExecutorService executorService;
 
     @Inject
-    private CommandUtil commandUtil;
-    @Inject
-    private HttpClient httpClient;
-    @Inject
-    private FloodgateLogger logger;
+    @Named("commonScheduledPool")
+    ScheduledExecutorService executorService;
+
+    @Inject CommandUtil commandUtil;
+    @Inject HttpClient httpClient;
+    @Inject FloodgateLogger logger;
 
     @Inject
     @Named("gitBranch")
-    private String branch;
+    String branch;
     @Inject
     @Named("buildNumber")
-    private int build;
+    int build;
 
     private boolean firstCheck;
 
-    @Inject
+    @PostConstruct
     public void start() {
         executorService.scheduleWithFixedDelay(this::checkNews, 0, 30, TimeUnit.MINUTES);
     }

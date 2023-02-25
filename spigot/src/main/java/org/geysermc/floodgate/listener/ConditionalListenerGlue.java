@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2023 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,23 +23,30 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.register;
+package org.geysermc.floodgate.listener;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import java.util.Set;
-import org.geysermc.floodgate.api.inject.InjectorAddon;
-import org.geysermc.floodgate.api.inject.PlatformInjector;
+import io.avaje.inject.BeanScope;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import org.bukkit.event.Listener;
+import org.geysermc.floodgate.platform.listener.ListenerRegistration;
+import org.geysermc.floodgate.util.ReflectionUtils;
 
-public final class AddonRegister {
-    @Inject private Injector guice;
-    @Inject private PlatformInjector injector;
+@Singleton
+@SuppressWarnings({"rawtypes", "unchecked"})
+public class ConditionalListenerGlue {
+    @Inject ListenerRegistration registration;
 
     @Inject
-    public void registerAddons(Set<InjectorAddon> addons) {
-        for (InjectorAddon addon : addons) {
-            guice.injectMembers(addon);
-            injector.addAddon(addon);
-        }
+    void registerListener(BeanScope scope) {
+        boolean usePaperListener = ReflectionUtils.getClassSilently(
+                "com.destroystokyo.paper.event.profile.PreFillProfileEvent") != null;
+
+        Listener listener =
+                usePaperListener ?
+                        scope.get(PaperProfileListener.class) :
+                        scope.get(SpigotListener.class);
+
+        registration.register(listener);
     }
 }

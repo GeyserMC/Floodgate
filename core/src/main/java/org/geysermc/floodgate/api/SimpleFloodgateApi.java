@@ -30,7 +30,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
@@ -46,10 +46,12 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.pluginmessage.channel.FormChannel;
 import org.geysermc.floodgate.pluginmessage.channel.TransferChannel;
+import org.geysermc.floodgate.scope.ServerScope;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.HttpClient;
 import org.geysermc.floodgate.util.Utils;
 
+@ServerScope
 public class SimpleFloodgateApi implements FloodgateApi {
     private final Map<UUID, FloodgatePlayer> players = new ConcurrentHashMap<>();
     private final Cache<UUID, FloodgatePlayer> pendingRemove =
@@ -57,10 +59,10 @@ public class SimpleFloodgateApi implements FloodgateApi {
                     .expireAfterWrite(20, TimeUnit.SECONDS)
                     .build();
 
-    @Inject private PluginMessageManager pluginMessageManager;
-    @Inject private FloodgateConfig config;
-    @Inject private HttpClient httpClient;
-    @Inject private FloodgateLogger logger;
+    @Inject PluginMessageManager pluginMessageManager;
+    @Inject FloodgateConfig config;
+    @Inject HttpClient httpClient;
+    @Inject FloodgateLogger logger;
 
     @Override
     public String getPlayerPrefix() {

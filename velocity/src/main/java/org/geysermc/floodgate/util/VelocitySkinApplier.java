@@ -25,10 +25,10 @@
 
 package org.geysermc.floodgate.util;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.util.GameProfile.Property;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -42,8 +42,8 @@ import org.geysermc.floodgate.skin.SkinDataImpl;
 
 @Singleton
 public class VelocitySkinApplier implements SkinApplier {
-    @Inject private ProxyServer server;
-    @Inject private EventBus eventBus;
+    @Inject ProxyServer server;
+    @Inject EventBus eventBus;
 
     @Override
     public void applySkin(@NonNull FloodgatePlayer floodgatePlayer, @NonNull SkinData skinData) {

@@ -25,8 +25,9 @@
 
 package org.geysermc.floodgate.util;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
@@ -44,14 +45,18 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.FloodgateConfig.MetricsConfig;
 import org.geysermc.floodgate.platform.util.PlatformUtils;
 
-@AutoBind
+@Singleton
 public final class Metrics {
     private final MetricsBase metricsBase;
 
     @Inject
-    Metrics(FloodgateConfig config, PlatformUtils platformUtils, FloodgateApi api,
-            @Named("implementationName") String implementationName, FloodgateLogger logger) {
-
+    Metrics(
+            FloodgateConfig config,
+            PlatformUtils platformUtils,
+            FloodgateApi api,
+            @Named("implementationName") String implementationName,
+            FloodgateLogger logger
+    ) {
         MetricsConfig metricsConfig = config.getMetrics();
 
         metricsBase = new MetricsBase(

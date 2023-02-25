@@ -25,15 +25,14 @@
 
 package org.geysermc.floodgate.util;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.UUID;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.api.handshake.HandshakeHandler;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 
 public class SpigotHandshakeHandler implements HandshakeHandler {
-    @Inject
-    private FloodgateLogger logger;
+    @Inject FloodgateLogger logger;
 
     @Override
     public void handle(HandshakeData data) {

@@ -25,27 +25,15 @@
 
 package org.geysermc.floodgate.platform.command;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import java.util.Collections;
-import java.util.HashSet;
+import jakarta.inject.Inject;
 import java.util.Set;
 
 public abstract class SubCommands {
-    private final Set<Class<? extends FloodgateSubCommand>> toRegister = new HashSet<>();
-    private Set<FloodgateSubCommand> subCommands;
-
-    public void defineSubCommand(Class<? extends FloodgateSubCommand> subCommandClass) {
-        toRegister.add(subCommandClass);
-    }
+    Set<FloodgateSubCommand> subCommands;
 
     @Inject
-    public void registerSubCommands(Injector injector) {
-        Set<FloodgateSubCommand> subCommandSet = new HashSet<>();
-        for (Class<? extends FloodgateSubCommand> subCommand : toRegister) {
-            subCommandSet.add(injector.getInstance(subCommand));
-        }
-        subCommands = Collections.unmodifiableSet(subCommandSet);
+    public void setup(Set<FloodgateSubCommand> subCommands) {
+        subCommands.removeIf(subCommand -> !subCommand.parent().isAssignableFrom(this.getClass()));
     }
 
     protected Set<FloodgateSubCommand> subCommands() {

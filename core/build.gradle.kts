@@ -16,6 +16,14 @@ dependencies {
     api("cloud.commandframework", "cloud-core", Versions.cloudVersion)
     api("org.yaml", "snakeyaml", Versions.snakeyamlVersion)
     api("org.bstats", "bstats-base", Versions.bstatsVersion)
+
+    api("com.google.guava:guava:31.1-jre")
+
+    api("io.avaje:avaje-inject:8.13-RC2")
+    annotationProcessor("io.avaje:avaje-inject-generator:8.13-RC2")
+
+    testImplementation("io.avaje:avaje-inject-test:8.13-RC2")
+    testAnnotationProcessor("io.avaje:avaje-inject-generator:8.13-RC2")
 }
 
 // present on all platforms

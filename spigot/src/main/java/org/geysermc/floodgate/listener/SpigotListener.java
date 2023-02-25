@@ -25,7 +25,8 @@
 
 package org.geysermc.floodgate.listener;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.UUID;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -37,10 +38,11 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.util.LanguageManager;
 
+@Singleton
 public final class SpigotListener implements Listener {
-    @Inject private SimpleFloodgateApi api;
-    @Inject private LanguageManager languageManager;
-    @Inject private FloodgateLogger logger;
+    @Inject SimpleFloodgateApi api;
+    @Inject LanguageManager languageManager;
+    @Inject FloodgateLogger logger;
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerLogin(PlayerLoginEvent event) {

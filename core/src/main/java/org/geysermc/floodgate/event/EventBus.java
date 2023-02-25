@@ -25,7 +25,7 @@
 
 package org.geysermc.floodgate.event;
 
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.checkerframework.checker.nullness.qual.NonNull;

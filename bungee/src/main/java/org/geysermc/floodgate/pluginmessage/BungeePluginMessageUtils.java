@@ -25,8 +25,9 @@
 
 package org.geysermc.floodgate.pluginmessage;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.ServerConnection;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -40,11 +41,13 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel.Identity;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel.Result;
+import org.geysermc.floodgate.register.ListenerRegister;
 
-@RequiredArgsConstructor
+@ListenerRegister.Listener
+@Singleton
 public final class BungeePluginMessageUtils extends PluginMessageUtils implements Listener {
-    private final PluginMessageManager pluginMessageManager;
-    private final FloodgateLogger logger;
+    @Inject PluginMessageManager pluginMessageManager;
+    @Inject FloodgateLogger logger;
 
     @EventHandler(priority = EventPriority.LOW)
     public void onPluginMessage(PluginMessageEvent event) {

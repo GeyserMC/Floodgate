@@ -25,11 +25,11 @@
 
 package org.geysermc.floodgate.pluginmessage;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -47,9 +47,9 @@ import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
 
 @Singleton
 public final class SpigotSkinApplier implements SkinApplier {
-    @Inject private SpigotVersionSpecificMethods versionSpecificMethods;
-    @Inject private JavaPlugin plugin;
-    @Inject private EventBus eventBus;
+    @Inject SpigotVersionSpecificMethods versionSpecificMethods;
+    @Inject JavaPlugin plugin;
+    @Inject EventBus eventBus;
 
     @Override
     public void applySkin(@NonNull FloodgatePlayer floodgatePlayer, @NonNull SkinData skinData) {

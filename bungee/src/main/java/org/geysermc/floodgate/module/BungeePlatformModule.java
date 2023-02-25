@@ -30,9 +30,9 @@ import cloud.commandframework.bungee.BungeeCommandManager;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.CommandSender;
@@ -46,14 +46,11 @@ import org.geysermc.floodgate.listener.BungeeListenerRegistration;
 import org.geysermc.floodgate.logger.JavaUtilFloodgateLogger;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
-import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.platform.util.PlatformUtils;
 import org.geysermc.floodgate.player.FloodgateCommandPreprocessor;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.pluginmessage.BungeePluginMessageRegistration;
-import org.geysermc.floodgate.pluginmessage.BungeePluginMessageUtils;
 import org.geysermc.floodgate.pluginmessage.BungeeSkinApplier;
-import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.pluginmessage.PluginMessageRegistration;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.util.BungeeCommandUtil;
@@ -105,14 +102,6 @@ public final class BungeePlatformModule extends AbstractModule {
     @Singleton
     public ListenerRegistration<Listener> listenerRegistration() {
         return new BungeeListenerRegistration(plugin);
-    }
-
-    @Provides
-    @Singleton
-    public PluginMessageUtils pluginMessageUtils(
-            PluginMessageManager manager,
-            FloodgateLogger logger) {
-        return new BungeePluginMessageUtils(manager, logger);
     }
 
     @Provides

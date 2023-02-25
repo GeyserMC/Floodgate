@@ -25,7 +25,7 @@
 
 package org.geysermc.floodgate.pluginmessage.channel;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import org.geysermc.floodgate.api.FloodgateApi;
@@ -38,9 +38,9 @@ import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinDataImpl;
 
 public class SkinChannel implements PluginMessageChannel {
-    @Inject private FloodgateApi api;
-    @Inject private FloodgateConfig config;
-    @Inject private SkinApplier skinApplier;
+    @Inject FloodgateApi api;
+    @Inject FloodgateConfig config;
+    @Inject SkinApplier skinApplier;
 
     @Override
     public String getIdentifier() {

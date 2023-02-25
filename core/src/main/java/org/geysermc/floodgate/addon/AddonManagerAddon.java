@@ -25,13 +25,15 @@
 
 package org.geysermc.floodgate.addon;
 
-import com.google.inject.Inject;
 import io.netty.channel.Channel;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 
+@Singleton
 public final class AddonManagerAddon implements InjectorAddon {
-    @Inject private CommonPlatformInjector injector;
+    @Inject CommonPlatformInjector injector;
 
     @Override
     public void onInject(Channel channel, boolean toServer) {

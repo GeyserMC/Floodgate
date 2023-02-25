@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.config;
 
+import jakarta.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,6 +39,7 @@ import org.geysermc.configutils.loader.callback.GenericPostInitializeCallback;
  * addition to the global configuration like {@link ProxyFloodgateConfig} for the proxies.
  */
 @Getter
+@Singleton
 public class FloodgateConfig implements GenericPostInitializeCallback<ConfigLoader> {
     private String keyFileName;
     private String usernamePrefix = "";

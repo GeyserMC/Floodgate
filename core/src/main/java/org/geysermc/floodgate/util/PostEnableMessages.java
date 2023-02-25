@@ -25,8 +25,9 @@
 
 package org.geysermc.floodgate.util;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import io.avaje.inject.PostConstruct;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -42,11 +43,11 @@ import org.geysermc.floodgate.event.lifecycle.PostEnableEvent;
 public final class PostEnableMessages {
     private final List<String> messages = new ArrayList<>();
 
-    @Inject private FloodgateConfig config;
-    @Inject private FloodgateLogger logger;
+    @Inject FloodgateConfig config;
+    @Inject FloodgateLogger logger;
     @Inject
     @Named("commonScheduledPool")
-    private ScheduledExecutorService executorService;
+    ScheduledExecutorService executorService;
 
     public void add(String[] message, Object... args) {
         StringBuilder builder = new StringBuilder();
@@ -60,12 +61,8 @@ public final class PostEnableMessages {
         messages.add(MessageFormatter.format(builder.toString(), args));
     }
 
-    @Inject
-    private void init() {
-        registerPrefixMessages();
-    }
-
-    private void registerPrefixMessages() {
+    @PostConstruct
+    void registerPrefixMessages() {
         String prefix = config.getRawUsernamePrefix();
 
         if (prefix.isEmpty()) {

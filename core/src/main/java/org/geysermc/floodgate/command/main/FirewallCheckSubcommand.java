@@ -29,8 +29,8 @@ import static org.geysermc.floodgate.util.Constants.COLOR_CHAR;
 
 import cloud.commandframework.context.CommandContext;
 import com.google.gson.JsonElement;
-import com.google.inject.Inject;
 import it.unimi.dsi.fastutil.Pair;
+import jakarta.inject.Inject;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
@@ -45,6 +45,11 @@ import org.geysermc.floodgate.util.Utils;
 final class FirewallCheckSubcommand extends FloodgateSubCommand {
     @Inject
     private HttpClient httpClient;
+
+    @Override
+    public Class<?> parent() {
+        return FirewallCheckSubcommand.class;
+    }
 
     @Override
     public String name() {
