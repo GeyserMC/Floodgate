@@ -34,7 +34,7 @@ object Versions {
     const val nettyVersion = "4.1.49.Final"
     const val snakeyamlVersion = "1.28"
     const val cloudVersion = "1.5.0"
-    const val bstatsVersion = "3.0.1"
+    const val bstatsVersion = "d2fbbd6823"
 
     const val javaWebsocketVersion = "1.5.2"
 
