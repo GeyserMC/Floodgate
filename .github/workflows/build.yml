@@ -15,25 +15,30 @@ jobs:
         with:
           java-version: 8
           distribution: temurin
-          cache: gradle
 
       - name: Build
         uses: gradle/gradle-build-action@v2
         with:
           arguments: build
+          cache-read-only: ${{ github.ref_name != 'master' && github.ref_name != 'development' }}
 
       - name: Publish to Maven Repository
-        if: ${{ job.status == 'success' && github.repository == 'GeyserMC/Floodgate' }}
+        if: ${{ github.repository == 'GeyserMC/Floodgate' }}
         uses: gradle/gradle-build-action@v2
         env:
           ORG_GRADLE_PROJECT_geysermcUsername: ${{ vars.DEPLOY_USER }}
           ORG_GRADLE_PROJECT_geysermcPassword: ${{ secrets.DEPLOY_PASS }}
         with:
           arguments: publish
+          cache-read-only: ${{ github.ref_name != 'master' && github.ref_name != 'development' }}
 
       - name: Publish to Downloads API
-        if: ${{ github.ref_name == 'master' && job.status == 'success' && github.repository == 'GeyserMC/Floodgate' }}
+        if: ${{ github.ref_name == 'master' && github.repository == 'GeyserMC/Floodgate' }}
         shell: bash
+        env:
+          DOWNLOADS_USERNAME: ${{ vars.DOWNLOADS_USERNAME }}
+          DOWNLOADS_PRIVATE_KEY: ${{ secrets.DOWNLOADS_PRIVATE_KEY }}
+          DOWNLOADS_SERVER_IP: ${{ secrets.DOWNLOADS_SERVER_IP }}
         run: |
           # Save the private key to a file
           echo "$DOWNLOADS_PRIVATE_KEY" > id_ecdsa
@@ -49,11 +54,10 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i id_ecdsa $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP rm ~/files/floodgate-parent-*.jar ~/files/floodgate-api.jar ~/files/floodgate-core.jar
 
           # Run the build script
-          ssh -o StrictHostKeyChecking=no -i id_ecdsa $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP ./handleBuild.sh floodgate $version $GITHUB_RUN_ID $GITHUB_SHA
+          ssh -o StrictHostKeyChecking=no -i id_ecdsa $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP ./handleBuild.sh floodgate $version $GITHUB_RUN_NUMBER $GITHUB_SHA
 
       - name: Notify Discord
-        if: ${{ github.repository == 'GeyserMC/Floodgate' }}
+        if: ${{ (success() || failure()) && github.repository == 'GeyserMC/Floodgate' }}
         uses: Tim203/actions-git-discord-webhook@main
         with:
           webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
-          status: ${{ job.status }}
