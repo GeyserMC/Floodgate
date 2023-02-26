@@ -71,6 +71,10 @@ public class WatchClient {
         return httpClient.newWebSocket(req, new WebSocketListener() {
             @Override
             public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
+                if (code != 1000) {
+                    watcher.onError(new RuntimeException("Watch closed with code " + code + ": " + reason));
+                    return;
+                }
                 watcher.onCompleted();
             }
 

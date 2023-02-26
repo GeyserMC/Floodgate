@@ -145,9 +145,10 @@ public class WatcherRegister {
 
         @Override
         public void onOpen() {
-            // Reset the retry backoff after a successful connection
-            resetBackOff();
             logger.translatedInfo("connect.watch.started");
+
+            // Reset the retry backoff after the connection is healthy for some seconds
+            startResetBackOffTimer();
         }
 
         @Override
@@ -194,7 +195,39 @@ public class WatcherRegister {
                                     : " (cause: " + t.getCause().toString() + ")"
                     )
             );
+            cancelResetBackOffTimer();
             retry();
         }
+
+        @Override
+        public void onCompleted() {
+            cancelResetBackOffTimer();
+            retry();
+        }
+
+        private Timer resetBackOffTimer;
+
+        void startResetBackOffTimer() {
+            if (resetBackOffTimer != null) {
+                resetBackOffTimer.cancel();
+            }
+            resetBackOffTimer = new Timer();
+            resetBackOffTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    if (started.get()) {
+                        resetBackOff();
+                    }
+                }
+            }, Duration.ofSeconds(10).toMillis());
+        }
+
+        void cancelResetBackOffTimer() {
+            if (resetBackOffTimer != null) {
+                resetBackOffTimer.cancel();
+                resetBackOffTimer = null;
+            }
+        }
+
     }
 }
