@@ -15,7 +15,9 @@ dependencies {
     api("org.java-websocket", "Java-WebSocket", Versions.javaWebsocketVersion)
     api("cloud.commandframework", "cloud-core", Versions.cloudVersion)
     api("org.yaml", "snakeyaml", Versions.snakeyamlVersion)
-    api("org.bstats", "bstats-base", Versions.bstatsVersion)
+
+    //todo use official dependency once https://github.com/Bastian/bstats-metrics/pull/118 is merged
+    api("com.github.Konicai.bstats-metrics", "bstats-base", Versions.bstatsVersion)
 }
 
 // present on all platforms
