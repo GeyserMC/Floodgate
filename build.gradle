@@ -112,6 +112,7 @@ shadowJar {
     configurations = [project.configurations.shadow]
     // TODO this is temporary until Floodgate's dev branch is merged
     relocate("com.google.inject", "org.geysermc.floodgate.shadow.guice")
+    relocate("org.yaml.snakeyaml", "org.geysermc.floodgate.shadow.snakeyaml") //relocate snakeyaml to avoid conflicts with other mods
     exclude([
             'cloud/**',
             'com/google/common/**', 'com/google/errorprone/**', 'com/google/gson/**', 'com/google/j2objc/**', 'com/google/thirdparty/**',
