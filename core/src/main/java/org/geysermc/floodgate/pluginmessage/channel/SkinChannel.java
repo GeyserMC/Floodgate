@@ -25,7 +25,6 @@
 
 package org.geysermc.floodgate.pluginmessage.channel;
 
-import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
@@ -36,7 +35,7 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
 import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.skin.SkinData;
+import org.geysermc.floodgate.skin.SkinDataImpl;
 
 public class SkinChannel implements PluginMessageChannel {
     @Inject private FloodgateApi api;
@@ -51,16 +50,13 @@ public class SkinChannel implements PluginMessageChannel {
     @Override
     public Result handleProxyCall(
             byte[] data,
-            UUID targetUuid,
-            String targetUsername,
-            Identity targetIdentity,
             UUID sourceUuid,
             String sourceUsername,
-            Identity sourceIdentity) {
-
+            Identity sourceIdentity
+    ) {
         // we can only get skins from Geyser (client)
         if (sourceIdentity == Identity.PLAYER) {
-            Result result = handleServerCall(data, targetUuid, targetUsername);
+            Result result = handleServerCall(data, sourceUuid, sourceUsername);
             // aka translate 'handled' into 'forward' when send-floodgate-data is enabled
             if (!result.isAllowed() && result.getReason() == null) {
                 if (config.isProxy() && ((ProxyFloodgateConfig) config).isSendFloodgateData()) {
@@ -78,8 +74,8 @@ public class SkinChannel implements PluginMessageChannel {
     }
 
     @Override
-    public Result handleServerCall(byte[] data, UUID targetUuid, String targetUsername) {
-        FloodgatePlayer floodgatePlayer = api.getPlayer(targetUuid);
+    public Result handleServerCall(byte[] data, UUID playerUuid, String playerUsername) {
+        FloodgatePlayer floodgatePlayer = api.getPlayer(playerUuid);
         if (floodgatePlayer == null) {
             return Result.kick("Player sent skins data for a non-Floodgate player");
         }
@@ -92,18 +88,10 @@ public class SkinChannel implements PluginMessageChannel {
             return Result.kick("Got invalid skin data");
         }
 
-        if (floodgatePlayer.isLinked()) {
-            return Result.handled();
-        }
-
         String value = split[0];
         String signature = split[1];
 
-        JsonObject result = new JsonObject();
-        result.addProperty("value", value);
-        result.addProperty("signature", signature);
-
-        SkinData skinData = new SkinData(value, signature);
+        SkinDataImpl skinData = new SkinDataImpl(value, signature);
 
         floodgatePlayer.addProperty(PropertyKey.SKIN_UPLOADED, skinData);
         skinApplier.applySkin(floodgatePlayer, skinData);

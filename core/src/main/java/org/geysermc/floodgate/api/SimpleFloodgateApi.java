@@ -30,41 +30,41 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.inject.Inject;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import lombok.RequiredArgsConstructor;
 import org.geysermc.cumulus.form.Form;
 import org.geysermc.cumulus.form.util.FormBuilder;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.unsafe.Unsafe;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
+import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.pluginmessage.channel.FormChannel;
 import org.geysermc.floodgate.pluginmessage.channel.TransferChannel;
 import org.geysermc.floodgate.util.Constants;
-import org.geysermc.floodgate.util.HttpUtils;
+import org.geysermc.floodgate.util.HttpClient;
 import org.geysermc.floodgate.util.Utils;
 
-@RequiredArgsConstructor
 public class SimpleFloodgateApi implements FloodgateApi {
-    private final Map<UUID, FloodgatePlayer> players = new HashMap<>();
+    private final Map<UUID, FloodgatePlayer> players = new ConcurrentHashMap<>();
     private final Cache<UUID, FloodgatePlayer> pendingRemove =
             CacheBuilder.newBuilder()
                     .expireAfterWrite(20, TimeUnit.SECONDS)
                     .build();
 
-    private final PluginMessageManager pluginMessageManager;
-    private final FloodgateConfigHolder configHolder;
-    private final FloodgateLogger logger;
+    @Inject private PluginMessageManager pluginMessageManager;
+    @Inject private FloodgateConfig config;
+    @Inject private HttpClient httpClient;
+    @Inject private FloodgateLogger logger;
 
     @Override
     public String getPlayerPrefix() {
-        return configHolder.get().getUsernamePrefix();
+        return config.getUsernamePrefix();
     }
 
     @Override
@@ -148,7 +148,7 @@ public class SimpleFloodgateApi implements FloodgateApi {
             return Utils.failedFuture(new IllegalStateException("Received an invalid gamertag"));
         }
 
-        return HttpUtils.asyncGet(Constants.GET_XUID_URL + gamertag)
+        return httpClient.asyncGet(Constants.GET_XUID_URL + gamertag)
                 .thenApply(result -> {
                     JsonObject response = result.getResponse();
 
@@ -163,7 +163,7 @@ public class SimpleFloodgateApi implements FloodgateApi {
 
     @Override
     public CompletableFuture<String> getGamertagFor(long xuid) {
-        return HttpUtils.asyncGet(Constants.GET_GAMERTAG_URL + xuid)
+        return httpClient.asyncGet(Constants.GET_GAMERTAG_URL + xuid)
                 .thenApply(result -> {
                     JsonObject response = result.getResponse();
 

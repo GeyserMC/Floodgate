@@ -287,7 +287,7 @@ public final class ReflectionUtils {
     }
 
     /**
-     * Get the value of a field and cast it to <T>.
+     * Get the value of a field and cast it to T.
      *
      * @param instance the instance to get the value from
      * @param field    the field to get the value from
@@ -301,7 +301,7 @@ public final class ReflectionUtils {
     }
 
     /**
-     * Get the value of a field and cast it to <T>.
+     * Get the value of a field and cast it to T.
      *
      * @param instance  the instance to get the value from
      * @param fieldName the field to get the value from
@@ -424,7 +424,7 @@ public final class ReflectionUtils {
     }
 
     @Nullable
-    public static Method getMethod(
+    public static Method getMethodThatReturns(
             Class<?> clazz,
             Class<?> returnType,
             boolean declared,

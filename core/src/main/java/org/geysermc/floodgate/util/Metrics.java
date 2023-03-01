@@ -26,24 +26,29 @@
 package org.geysermc.floodgate.util;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.inject.Named;
 import org.bstats.MetricsBase;
 import org.bstats.charts.DrilldownPie;
 import org.bstats.charts.SimplePie;
 import org.bstats.charts.SingleLineChart;
 import org.bstats.json.JsonObjectBuilder;
+import org.geysermc.event.Listener;
+import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.FloodgateConfig.MetricsConfig;
+import org.geysermc.floodgate.event.lifecycle.ShutdownEvent;
 import org.geysermc.floodgate.platform.util.PlatformUtils;
 
+@Listener
+@AutoBind
 public final class Metrics {
     private final MetricsBase metricsBase;
 
@@ -143,5 +148,10 @@ public final class Metrics {
         builder.appendField("osArch", System.getProperty("os.arch"));
         builder.appendField("osVersion", System.getProperty("os.version"));
         builder.appendField("coreCount", Runtime.getRuntime().availableProcessors());
+    }
+
+    @Subscribe
+    public void onShutdown(ShutdownEvent ignored) {
+        metricsBase.shutdown();
     }
 }

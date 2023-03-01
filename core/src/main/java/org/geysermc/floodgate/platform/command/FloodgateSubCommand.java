@@ -23,33 +23,18 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate;
+package org.geysermc.floodgate.platform.command;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.api.inject.PlatformInjector;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import cloud.commandframework.context.CommandContext;
+import org.geysermc.floodgate.command.util.Permission;
+import org.geysermc.floodgate.player.UserAudience;
 
-public final class SpigotPlatform extends FloodgatePlatform {
-    @Inject private JavaPlugin plugin;
+public abstract class FloodgateSubCommand {
+    public abstract String name();
 
-    @Inject
-    public SpigotPlatform(FloodgateApi api, PlatformInjector platformInjector,
-                          FloodgateLogger logger, Injector injector) {
-        super(api, platformInjector, logger, injector);
-    }
+    public abstract String description();
 
-    @Override
-    public boolean enable(Module... postInitializeModules) {
-        boolean success = super.enable(postInitializeModules);
-        if (!success) {
-            Bukkit.getPluginManager().disablePlugin(plugin);
-            return false;
-        }
-        return true;
-    }
+    public abstract Permission permission();
+
+    public abstract void execute(CommandContext<UserAudience> context);
 }

@@ -30,6 +30,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import org.geysermc.cumulus.form.Form;
 import org.geysermc.cumulus.form.util.FormBuilder;
+import org.geysermc.floodgate.api.event.FloodgateEventBus;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.unsafe.Unsafe;
@@ -147,6 +148,10 @@ public interface FloodgateApi {
      * the given xuid
      */
     CompletableFuture<String> getGamertagFor(long xuid);
+
+    default FloodgateEventBus getEventBus() {
+        return InstanceHolder.getEventBus();
+    }
 
     /**
      * Returns the instance that manages all the linking.

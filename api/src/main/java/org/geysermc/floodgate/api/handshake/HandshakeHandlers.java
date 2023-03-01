@@ -25,6 +25,13 @@
 
 package org.geysermc.floodgate.api.handshake;
 
+/**
+ * @deprecated This system has been deprecated and will not be available in the new API that will be
+ * introduced when Geyser will include Floodgate (and thus will have some common base API).
+ * <br>
+ * It might be replaced with an event (probably internal), but that isn't certain yet.
+ */
+@Deprecated
 public interface HandshakeHandlers {
     /**
      * Register a custom handshake handler. This can be used to check and edit the player during the

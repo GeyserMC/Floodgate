@@ -27,42 +27,50 @@ package org.geysermc.floodgate.news;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.command.util.Permission;
 import org.geysermc.floodgate.news.data.AnnouncementData;
 import org.geysermc.floodgate.news.data.BuildSpecificData;
 import org.geysermc.floodgate.news.data.CheckAfterData;
 import org.geysermc.floodgate.platform.command.CommandUtil;
+import org.geysermc.floodgate.util.AutoBind;
 import org.geysermc.floodgate.util.Constants;
-import org.geysermc.floodgate.util.HttpUtils;
-import org.geysermc.floodgate.util.HttpUtils.HttpResponse;
-import org.geysermc.floodgate.command.util.Permission;
+import org.geysermc.floodgate.util.HttpClient;
+import org.geysermc.floodgate.util.HttpClient.HttpResponse;
 
+@AutoBind
 public class NewsChecker {
-    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
-    private final CommandUtil commandUtil;
-    private final FloodgateLogger logger;
-
     private final Map<Integer, NewsItem> activeNewsItems = new HashMap<>();
-    private final String branch;
-    private final int build;
+    @Inject
+    @Named("commonScheduledPool")
+    private ScheduledExecutorService executorService;
+
+    @Inject
+    private CommandUtil commandUtil;
+    @Inject
+    private HttpClient httpClient;
+    @Inject
+    private FloodgateLogger logger;
+
+    @Inject
+    @Named("gitBranch")
+    private String branch;
+    @Inject
+    @Named("buildNumber")
+    private int build;
 
     private boolean firstCheck;
 
-    public NewsChecker(CommandUtil commandUtil, FloodgateLogger logger, String branch, int build) {
-        this.commandUtil = commandUtil;
-        this.logger = logger;
-        this.branch = branch;
-        this.build = build;
-    }
-
+    @Inject
     public void start() {
         executorService.scheduleWithFixedDelay(this::checkNews, 0, 30, TimeUnit.MINUTES);
     }
@@ -72,10 +80,10 @@ public class NewsChecker {
     }
 
     private void checkNews() {
-        HttpResponse<JsonArray> response =
-                HttpUtils.getSilent(
-                        Constants.NEWS_OVERVIEW_URL + Constants.NEWS_PROJECT_NAME,
-                        JsonArray.class);
+        HttpResponse<JsonArray> response = httpClient.getSilent(
+                Constants.NEWS_OVERVIEW_URL + Constants.NEWS_PROJECT_NAME,
+                JsonArray.class
+        );
 
         JsonArray array = response.getResponse();
 
@@ -192,9 +200,5 @@ public class NewsChecker {
         for (NewsItemAction action : item.getActions()) {
             handleNewsItem(null, item, action);
         }
-    }
-
-    public void shutdown() {
-        executorService.shutdown();
     }
 }

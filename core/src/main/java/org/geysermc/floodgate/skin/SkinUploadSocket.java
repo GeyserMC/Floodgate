@@ -35,6 +35,7 @@ import java.net.URI;
 import javax.net.ssl.SSLException;
 import lombok.Getter;
 import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.player.PropertyKey;
@@ -61,8 +62,8 @@ final class SkinUploadSocket extends WebSocketClient {
             SkinUploadManager uploadManager,
             FloodgateApi api,
             SkinApplier applier,
-            FloodgateLogger logger) {
-
+            FloodgateLogger logger
+    ) {
         super(getWebsocketUri(id, verifyCode));
         this.id = id;
         this.verifyCode = verifyCode;
@@ -83,7 +84,7 @@ final class SkinUploadSocket extends WebSocketClient {
     }
 
     @Override
-    public void onOpen(ServerHandshake handshakedata) {
+    public void onOpen(ServerHandshake ignored) {
         setConnectionLostTimeout(11);
     }
 
@@ -114,10 +115,14 @@ final class SkinUploadSocket extends WebSocketClient {
                                 player.getCorrectUsername());
                         return;
                     }
+
+                    SkinData skinData = SkinDataImpl.from(message.getAsJsonObject("data"));
+                    applier.applySkin(player, skinData);
+
+                    // legacy stuff,
+                    // will be removed shortly after or during the Floodgate-Geyser integration
                     if (!player.isLinked()) {
-                        SkinData skinData = SkinData.from(message.getAsJsonObject("data"));
                         player.addProperty(PropertyKey.SKIN_UPLOADED, skinData);
-                        applier.applySkin(player, skinData);
                     }
                 }
                 break;

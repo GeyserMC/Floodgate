@@ -27,6 +27,7 @@ package org.geysermc.floodgate;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -43,7 +44,7 @@ import org.geysermc.floodgate.util.SpigotProtocolSupportHandler;
 import org.geysermc.floodgate.util.SpigotProtocolSupportListener;
 
 public final class SpigotPlugin extends JavaPlugin {
-    private SpigotPlatform platform;
+    private FloodgatePlatform platform;
     private Injector injector;
 
     @Override
@@ -54,7 +55,7 @@ public final class SpigotPlugin extends JavaPlugin {
                 new SpigotPlatformModule(this)
         );
 
-        platform = injector.getInstance(SpigotPlatform.class);
+        platform = injector.getInstance(FloodgatePlatform.class);
 
         long endCtm = System.currentTimeMillis();
         injector.getInstance(FloodgateLogger.class)
@@ -66,14 +67,18 @@ public final class SpigotPlugin extends JavaPlugin {
         boolean usePaperListener = ReflectionUtils.getClassSilently(
                 "com.destroystokyo.paper.event.profile.PreFillProfileEvent") != null;
 
-        platform.enable(
-                new SpigotCommandModule(this),
-                new SpigotAddonModule(),
-                new PluginMessageModule(),
-                (usePaperListener ? new PaperListenerModule() : new SpigotListenerModule())
-        );
+        try {
+            platform.enable(
+                    new SpigotCommandModule(this),
+                    new SpigotAddonModule(),
+                    new PluginMessageModule(),
+                    (usePaperListener ? new PaperListenerModule() : new SpigotListenerModule())
+            );
+        } catch (Exception exception) {
+            Bukkit.getPluginManager().disablePlugin(this);
+            throw exception;
+        }
 
-        //todo add proper support for disabling things on shutdown and enabling this on enable
         injector.getInstance(HandshakeHandlers.class)
                 .addHandshakeHandler(injector.getInstance(SpigotHandshakeHandler.class));
 

@@ -34,6 +34,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.geysermc.event.Listener;
+import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.link.LinkRequest;
 import org.geysermc.floodgate.api.link.PlayerLink;
@@ -41,11 +43,13 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.database.config.DatabaseConfig;
 import org.geysermc.floodgate.database.config.DatabaseConfigLoader;
+import org.geysermc.floodgate.event.lifecycle.ShutdownEvent;
 import org.geysermc.floodgate.util.InjectorHolder;
 
+@Listener
 public abstract class CommonPlayerLink implements PlayerLink {
     @Getter(AccessLevel.PROTECTED)
-    private final ExecutorService executorService = Executors.newFixedThreadPool(11);
+    private final ExecutorService executorService = Executors.newCachedThreadPool();
 
     @Getter private boolean enabled;
     @Getter private boolean allowLinking;
@@ -101,5 +105,10 @@ public abstract class CommonPlayerLink implements PlayerLink {
     @Override
     public void stop() {
         executorService.shutdown();
+    }
+
+    @Subscribe
+    public void onShutdown(ShutdownEvent ignored) {
+        stop();
     }
 }

@@ -1,34 +1,15 @@
 plugins {
     id("floodgate.shadow-conventions")
-    id("com.jfrog.artifactory")
-    id("maven-publish")
+    id("net.kyori.indra.publishing")
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            groupId = project.group as String
-            artifactId = project.name
-            version = project.version as String
-
-            artifact(tasks["shadowJar"])
-            artifact(tasks["sourcesJar"])
+indra {
+    configurePublications {
+        if (shouldAddBranchName()) {
+            version = versionWithBranchName()
         }
     }
-}
 
-artifactory {
-    setContextUrl("https://repo.opencollab.dev/artifactory")
-    publish {
-        repository {
-            setRepoKey(if (isSnapshot()) "maven-snapshots" else "maven-releases")
-            setMavenCompatible(true)
-        }
-        defaults {
-            publications("mavenJava")
-            setPublishArtifacts(true)
-            setPublishPom(true)
-            setPublishIvy(false)
-        }
-    }
+    publishSnapshotsTo("geysermc", "https://repo.opencollab.dev/maven-snapshots")
+    publishReleasesTo("geysermc", "https://repo.opencollab.dev/maven-releases")
 }
