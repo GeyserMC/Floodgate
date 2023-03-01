@@ -51,7 +51,7 @@ jobs:
           scp -B -o StrictHostKeyChecking=no -i id_ecdsa **/build/libs/floodgate-*.jar $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP:~/files/
 
           # Remove un-needed artifacts
-          ssh -o StrictHostKeyChecking=no -i id_ecdsa $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP rm ./files/floodgate-parent-*.jar ./files/floodgate-api.jar ./files/floodgate-core.jar
+          ssh -o StrictHostKeyChecking=no -i id_ecdsa $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP rm ./files/floodgate-api.jar ./files/floodgate-core.jar
 
           # Run the build script
           ssh -o StrictHostKeyChecking=no -i id_ecdsa $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP ./handleBuild.sh floodgate $version $GITHUB_RUN_NUMBER $GITHUB_SHA
