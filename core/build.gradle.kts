@@ -19,11 +19,11 @@ dependencies {
 
     api("com.google.guava:guava:31.1-jre")
 
-    api("io.avaje:avaje-inject:8.13-RC2")
-    annotationProcessor("io.avaje:avaje-inject-generator:8.13-RC2")
+    api("io.avaje:avaje-inject:8.13")
+    annotationProcessor("io.avaje:avaje-inject-generator:8.13")
 
-    testImplementation("io.avaje:avaje-inject-test:8.13-RC2")
-    testAnnotationProcessor("io.avaje:avaje-inject-generator:8.13-RC2")
+    testImplementation("io.avaje:avaje-inject-test:8.13")
+    testAnnotationProcessor("io.avaje:avaje-inject-generator:8.13")
 }
 
 // present on all platforms

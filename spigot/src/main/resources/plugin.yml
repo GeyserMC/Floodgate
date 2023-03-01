@@ -3,5 +3,5 @@ description: ${description}
 version: ${version}
 author: ${author}
 website: ${url}
-main: org.geysermc.floodgate.SpigotPlugin
+main: org.geysermc.floodgate.spigot.SpigotPlugin
 api-version: 1.13

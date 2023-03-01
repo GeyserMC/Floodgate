@@ -26,6 +26,7 @@
 package org.geysermc.floodgate.database.config;
 
 import lombok.Getter;
+import org.geysermc.floodgate.core.database.config.DatabaseConfig;
 
 @Getter
 public class MongoConfig implements DatabaseConfig {
