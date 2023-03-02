@@ -20,6 +20,7 @@ indra {
     javaVersions {
         // without toolchain & strictVersion sun.misc.Unsafe won't be found
         minimumToolchain(8)
+        target(11)
         strictVersions(true)
     }
 }
