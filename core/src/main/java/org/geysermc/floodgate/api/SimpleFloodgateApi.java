@@ -46,6 +46,10 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.pluginmessage.channel.FormChannel;
 import org.geysermc.floodgate.pluginmessage.channel.TransferChannel;
+import org.geysermc.floodgate.pluginmessage.channel.music.PlayMusicChannel;
+import org.geysermc.floodgate.pluginmessage.channel.music.QueueMusicChannel;
+import org.geysermc.floodgate.pluginmessage.channel.music.SetMusicVolumeChannel;
+import org.geysermc.floodgate.pluginmessage.channel.music.StopMusicChannel;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.HttpClient;
 import org.geysermc.floodgate.util.Utils;
@@ -140,6 +144,34 @@ public class SimpleFloodgateApi implements FloodgateApi {
         return pluginMessageManager
                 .getChannel(TransferChannel.class)
                 .sendTransfer(uuid, address, port);
+    }
+
+    @Override
+    public boolean queueMusic(UUID uuid, float fadeSeconds, boolean repeatMode, String trackName, float volume) {
+        return pluginMessageManager
+                .getChannel(QueueMusicChannel.class)
+                .sendQueueMusic(uuid, fadeSeconds, repeatMode, trackName, volume);
+    }
+
+    @Override
+    public boolean playMusic(UUID uuid, float fadeSeconds, boolean repeatMode, String trackName, float volume) {
+        return pluginMessageManager
+                .getChannel(PlayMusicChannel.class)
+                .sendPlayMusic(uuid, fadeSeconds, repeatMode, trackName, volume);
+    }
+
+    @Override
+    public boolean stopMusic(UUID uuid, float fadeSeconds) {
+        return pluginMessageManager
+                .getChannel(StopMusicChannel.class)
+                .sendStopMusic(uuid, fadeSeconds);
+    }
+
+    @Override
+    public boolean setMusicVolume(UUID uuid, float volume) {
+        return pluginMessageManager
+                .getChannel(SetMusicVolumeChannel.class)
+                .sendSetMusicVolume(uuid, volume);
     }
 
     @Override

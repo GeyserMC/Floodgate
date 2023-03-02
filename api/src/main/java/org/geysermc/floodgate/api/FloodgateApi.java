@@ -114,6 +114,44 @@ public interface FloodgateApi {
     boolean transferPlayer(UUID uuid, String address, int port);
 
     /**
+     * Queue a music track to be played for the player by uuid later.
+     * @param uuid The UUID of the player to queue the music for
+     * @param fadeSeconds The amount of time in seconds to fade the music in and out from 0 to 10 seconds
+     * @param repeatMode Whether the music should repeat
+     * @param trackName The name of the music track to queue
+     * @param volume The volume of the music track from 0 to 1
+     * @return true if the music was successfully queued
+     */
+    boolean queueMusic(UUID uuid, float fadeSeconds, boolean repeatMode, String trackName, float volume);
+
+    /**
+     * Play a music track for the player by uuid.
+     * @param uuid The UUID of the player to play the music for
+     * @param fadeSeconds The amount of time in seconds to fade the music in and out from 0 to 10 seconds
+     * @param repeatMode Whether the music should repeat
+     * @param trackName The name of the music track to play
+     * @param volume The volume of the music track from 0 to 1
+     * @return true if the music was successfully played
+     */
+    boolean playMusic(UUID uuid, float fadeSeconds, boolean repeatMode, String trackName, float volume);
+
+    /**
+     * Stop the current music track for the player by uuid.
+     * @param uuid The UUID of the player to stop the music for
+     * @param fadeSeconds The amount of time in seconds to fade the music in and out from 0 to 10 seconds
+     * @return true if the music was successfully stopped
+     */
+    boolean stopMusic(UUID uuid, float fadeSeconds);
+
+    /**
+     * Set the volume of the current music track for the player by uuid.
+     * @param uuid The UUID of the player to set the music volume for
+     * @param volume The volume of the music track from 0 to 1
+     * @return true if the music volume was successfully set
+     */
+    boolean setMusicVolume(UUID uuid, float volume);
+
+    /**
      * Get the xuid of the user that has the given gamertag.
      *
      * @param gamertag the gamertag of the player
