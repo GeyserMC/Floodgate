@@ -34,6 +34,7 @@ import java.net.InetSocketAddress;
 import java.util.Queue;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
@@ -47,6 +48,7 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
     protected final FloodgateConfig config;
     protected final AttributeKey<String> kickMessageAttribute;
     protected final PacketBlocker blocker;
+    protected final FloodgateLogger logger;
 
     protected final Queue<Object> packetQueue = Queues.newConcurrentLinkedQueue();
     protected Object handshakePacket;
@@ -70,6 +72,7 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
         this.handshakePacket = handshakePacket;
         HostnameSeparationResult separation = handshakeHandler.separateHostname(hostname);
 
+        logger.info("Is Floodgate player? {} ({})", separation.floodgateData() != null, ctx.channel().id());
         if (separation.floodgateData() == null) {
             // not a Floodgate player, make sure to resend the cancelled handshake packet
             disablePacketQueue(true);
@@ -93,6 +96,10 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
                 .handle(channel, separation.floodgateData(), separation.hostnameRemainder())
                 .thenApply(result -> {
                     HandshakeData handshakeData = result.getHandshakeData();
+                    logger.info(
+                            "passed the first half {} {} ({})",
+                            handshakeData.shouldDisconnect(), result.getResultType(), ctx.channel().id()
+                    );
 
                     // we'll change the IP address to the real IP of the client very early on
                     // so that almost every plugin will use the real IP of the client

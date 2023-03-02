@@ -32,6 +32,7 @@ import com.mojang.authlib.GameProfile;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.net.InetSocketAddress;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
@@ -47,8 +48,10 @@ public final class SpigotDataHandler extends CommonDataHandler {
     public SpigotDataHandler(
             FloodgateHandshakeHandler handshakeHandler,
             FloodgateConfig config,
-            AttributeKey<String> kickMessageAttribute) {
-        super(handshakeHandler, config, kickMessageAttribute, new PacketBlocker());
+            AttributeKey<String> kickMessageAttribute,
+            FloodgateLogger logger
+    ) {
+        super(handshakeHandler, config, kickMessageAttribute, new PacketBlocker(), logger);
     }
 
     @Override
@@ -104,6 +107,7 @@ public final class SpigotDataHandler extends CommonDataHandler {
 
     @Override
     public boolean channelRead(Object packet) throws Exception {
+        logger.info("received packet {} ({})", packet.getClass().getName(), ctx.channel().id());
         if (ClassNames.HANDSHAKE_PACKET.isInstance(packet)) {
             // ProtocolSupport would break if we added this during the creation of this handler
             ctx.pipeline().addAfter("splitter", "floodgate_packet_blocker", blocker);
@@ -119,17 +123,27 @@ public final class SpigotDataHandler extends CommonDataHandler {
     }
 
     private boolean checkAndHandleLogin(Object packet) throws Exception {
+        logger.info("check packet {} ({})", packet.getClass().getName(), ctx.channel().id());
         if (ClassNames.LOGIN_START_PACKET.isInstance(packet)) {
             Object packetListener = ClassNames.PACKET_LISTENER.get(networkManager);
 
             String kickMessage = getKickMessage();
+            boolean loginListener = !ClassNames.LOGIN_LISTENER.isInstance(packetListener);
+            boolean usernameValidation = ClassNames.PAPER_DISABLE_USERNAME_VALIDATION != null;
+            logger.info(
+                    "{} {} {} {} ({})",
+                    kickMessage, loginListener, usernameValidation, proxyData, ctx.channel().id()
+            );
+
+
+
             if (kickMessage != null) {
                 disconnect(packetListener, kickMessage);
                 return true;
             }
 
             // check if the server is actually in the Login state
-            if (!ClassNames.LOGIN_LISTENER.isInstance(packetListener)) {
+            if (loginListener) {
                 // player is not in the login state, abort
 
                 // I would've liked to close the channel for security reasons, but our big friend
@@ -138,7 +152,7 @@ public final class SpigotDataHandler extends CommonDataHandler {
                 return true;
             }
 
-            if (ClassNames.PAPER_DISABLE_USERNAME_VALIDATION != null) {
+            if (usernameValidation) {
                 // ensure that Paper will not be checking
                 setValue(packetListener, ClassNames.PAPER_DISABLE_USERNAME_VALIDATION, true);
                 if (proxyData) {
@@ -167,6 +181,8 @@ public final class SpigotDataHandler extends CommonDataHandler {
             Object loginHandler =
                     ClassNames.LOGIN_HANDLER_CONSTRUCTOR.newInstance(packetListener);
             ClassNames.FIRE_LOGIN_EVENTS.invoke(loginHandler);
+
+            logger.info("removing self ({})", ctx.channel().id());
 
             ctx.pipeline().remove(this);
             return true;

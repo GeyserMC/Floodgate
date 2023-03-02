@@ -58,9 +58,10 @@ public final class ChannelOutDebugHandler extends MessageToByteEncoder<ByteBuf> 
 
             if (changeDetector.shouldPrintPacket(msg, toServer)) {
                 logger.info(
-                        "{} {}:\n{}",
+                        "{} {} ({}):\n{}",
                         direction,
                         changeDetector.getCurrentState(),
+                        ctx.channel().id(),
                         ByteBufUtil.prettyHexDump(msg)
                 );
 

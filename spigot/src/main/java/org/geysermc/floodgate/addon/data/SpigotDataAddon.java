@@ -59,7 +59,7 @@ public final class SpigotDataAddon implements InjectorAddon {
         // we have to add the packet blocker in the data handler, otherwise ProtocolSupport breaks
         channel.pipeline().addBefore(
                 packetHandlerName, "floodgate_data_handler",
-                new SpigotDataHandler(handshakeHandler, config, kickMessageAttribute)
+                new SpigotDataHandler(handshakeHandler, config, kickMessageAttribute, logger)
         );
     }
 

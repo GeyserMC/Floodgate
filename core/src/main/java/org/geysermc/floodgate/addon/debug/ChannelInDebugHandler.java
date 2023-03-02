@@ -57,9 +57,10 @@ public final class ChannelInDebugHandler extends SimpleChannelInboundHandler<Byt
             int index = msg.readerIndex();
 
             if (changeDetector.shouldPrintPacket(msg, !toServer)) {
-                logger.info("{} {}:\n{}",
+                logger.info("{} {} ({}):\n{}",
                         direction,
                         changeDetector.getCurrentState(),
+                        ctx.channel().id(),
                         ByteBufUtil.prettyHexDump(msg)
                 );
 
