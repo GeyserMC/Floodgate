@@ -31,6 +31,7 @@ import static org.geysermc.floodgate.util.BedrockData.EXPECTED_LENGTH;
 
 import com.google.common.base.Charsets;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelId;
 import io.netty.util.AttributeKey;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
@@ -125,19 +126,23 @@ public final class FloodgateHandshakeHandler {
 
         byte[] floodgateData = floodgateDataString.getBytes(Charsets.UTF_8);
 
+        logger.info("before supply ({})", channel.id());
         return CompletableFuture.supplyAsync(() -> {
+            logger.info("in supply ({})", channel.id());
 
             String decrypted;
             try {
                 // the actual decryption of the data
                 decrypted = cipher.decryptToString(floodgateData);
             } catch (InvalidFormatException e) {
+                logger.info("not floodgate data ({})", channel.id());
                 // when the Floodgate format couldn't be found
                 throw callHandlerAndReturnResult(
                         NOT_FLOODGATE_DATA,
                         channel, null, hostname
                 );
             } catch (Exception e) {
+                logger.error("decrypt error ({})", e, channel.id());
                 // all the other exceptions are caused by invalid/tempered Floodgate data
                 if (config.isDebug()) {
                     e.printStackTrace();
@@ -152,6 +157,10 @@ public final class FloodgateHandshakeHandler {
             try {
                 BedrockData bedrockData = BedrockData.fromString(decrypted);
 
+                logger.info(
+                        "bedrock data: length {}, has link: {} ({})",
+                        bedrockData.getDataLength(), bedrockData.hasPlayerLink(), channel.id()
+                );
                 if (bedrockData.getDataLength() != EXPECTED_LENGTH) {
                     throw callHandlerAndReturnResult(
                             INVALID_DATA_LENGTH,
@@ -170,8 +179,12 @@ public final class FloodgateHandshakeHandler {
 
             } catch (Exception exception) {
                 if (exception instanceof HandshakeResult) {
+                    if (((HandshakeResult) exception).getResultType() != NOT_FLOODGATE_DATA) {
+                        logger.error("some error ({})", exception, channel.id());
+                    }
                     throw (HandshakeResult) exception;
                 }
+                logger.error("some error1 ({})", exception, channel.id());
                 exception.printStackTrace();
 
                 throw callHandlerAndReturnResult(
@@ -179,7 +192,7 @@ public final class FloodgateHandshakeHandler {
                         channel, null, hostname
                 );
             }
-        }).thenCompose(this::fetchLinkedPlayer).handle((result, error) -> {
+        }).thenCompose(bedrockData -> fetchLinkedPlayer(bedrockData, channel.id())).handle((result, error) -> {
             if (error == null) {
                 return handlePart2(channel, hostname, result.left(), result.right());
             }
@@ -195,6 +208,7 @@ public final class FloodgateHandshakeHandler {
                 return (HandshakeResult) error;
             }
 
+            logger.error("not HandshakeResult error ({})", error, channel.id());
             error.printStackTrace();
 
             return callHandlerAndReturnResult(
@@ -211,6 +225,7 @@ public final class FloodgateHandshakeHandler {
             LinkedPlayer linkedPlayer) {
 
         try {
+            logger.info("part 2 {} ({})", linkedPlayer, channel.id());
             HandshakeData handshakeData = new HandshakeDataImpl(
                     channel, true, bedrockData.clone(), config,
                     linkedPlayer != null ? linkedPlayer.clone() : null, hostname);
@@ -224,6 +239,7 @@ public final class FloodgateHandshakeHandler {
                 handshakeData.setDisconnectReason(reason);
             }
 
+            logger.info("calling handshake handlers ({})", channel.id());
             handshakeHandlers.callHandshakeHandlers(handshakeData);
 
             if (!handshakeData.shouldDisconnect()) {
@@ -231,6 +247,7 @@ public final class FloodgateHandshakeHandler {
                         bedrockData.getVerifyCode());
             }
 
+            logger.info("adding player ({})", channel.id());
             FloodgatePlayer player = FloodgatePlayerImpl.from(bedrockData, handshakeData);
 
             api.addPlayer(player);
@@ -243,6 +260,7 @@ public final class FloodgateHandshakeHandler {
 
             return new HandshakeResult(ResultType.SUCCESS, handshakeData, bedrockData, player);
         } catch (Exception exception) {
+            logger.error("an exception happened ({})", exception, channel.id());
             exception.printStackTrace();
             return callHandlerAndReturnResult(ResultType.EXCEPTION, channel, null, hostname);
         }
@@ -261,7 +279,8 @@ public final class FloodgateHandshakeHandler {
         return new HandshakeResult(resultType, handshakeData, bedrockData, null);
     }
 
-    private CompletableFuture<Pair<BedrockData, LinkedPlayer>> fetchLinkedPlayer(BedrockData data) {
+    private CompletableFuture<Pair<BedrockData, LinkedPlayer>> fetchLinkedPlayer(BedrockData data, ChannelId id) {
+        logger.info("maybe fetch player link {} ({})", api.getPlayerLink().isEnabled(), id);
         if (!api.getPlayerLink().isEnabled()) {
             return CompletableFuture.completedFuture(new ObjectObjectImmutablePair<>(data, null));
         }

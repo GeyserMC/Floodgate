@@ -72,7 +72,10 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
         this.handshakePacket = handshakePacket;
         HostnameSeparationResult separation = handshakeHandler.separateHostname(hostname);
 
-        logger.info("Is Floodgate player? {} ({})", separation.floodgateData() != null, ctx.channel().id());
+        logger.info(
+                "Is Floodgate player? {} {} ({})",
+                separation.floodgateData() != null, separation.headerVersion(), ctx.channel().id()
+        );
         if (separation.floodgateData() == null) {
             // not a Floodgate player, make sure to resend the cancelled handshake packet
             disablePacketQueue(true);
