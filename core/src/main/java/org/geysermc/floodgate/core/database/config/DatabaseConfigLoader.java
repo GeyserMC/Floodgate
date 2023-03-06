@@ -26,6 +26,7 @@
 package org.geysermc.floodgate.core.database.config;
 
 import com.google.gson.JsonObject;
+import io.micronaut.context.annotation.Requires;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.io.BufferedReader;
@@ -37,6 +38,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
 import org.yaml.snakeyaml.introspector.BeanAccess;
 
+@Requires(env = "no")
 public class DatabaseConfigLoader {
     private Yaml yaml;
 
@@ -45,15 +47,15 @@ public class DatabaseConfigLoader {
     Path dataDirectory;
 
     @Inject
-    @Named("databaseName")
+    @Named("database.name")
     String name;
 
     @Inject
-    @Named("databaseClassLoader")
+    @Named("database.classloader")
     ClassLoader classLoader;
 
     @Inject
-    @Named("databaseInitData")
+    @Named("database.init.data")
     JsonObject initData;
 
     @Inject

@@ -25,7 +25,9 @@
 
 package org.geysermc.floodgate.core.link;
 
-import io.avaje.inject.BeanScope;
+import io.micronaut.context.ApplicationContext;
+import io.micronaut.context.annotation.Requires;
+import jakarta.annotation.PreDestroy;
 import jakarta.inject.Inject;
 import java.util.Random;
 import java.util.UUID;
@@ -33,8 +35,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.geysermc.event.Listener;
-import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.link.LinkRequest;
 import org.geysermc.floodgate.api.link.PlayerLink;
@@ -42,9 +42,9 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.database.config.DatabaseConfig;
 import org.geysermc.floodgate.core.database.config.DatabaseConfigLoader;
-import org.geysermc.floodgate.core.event.lifecycle.ShutdownEvent;
 
-@Listener
+//@Listener
+@Requires(env = "no")
 public abstract class CommonPlayerLink implements PlayerLink {
     @Getter(AccessLevel.PROTECTED)
     private final ExecutorService executorService = Executors.newCachedThreadPool();
@@ -62,7 +62,7 @@ public abstract class CommonPlayerLink implements PlayerLink {
     FloodgateApi api;
 
     @Inject
-    BeanScope scope;
+    ApplicationContext context;
 
     @Inject
     void init(FloodgateConfig config) {
@@ -92,21 +92,17 @@ public abstract class CommonPlayerLink implements PlayerLink {
     public <T extends DatabaseConfig> T getConfig(Class<T> configClass) {
         // this method is not intended to be used more than once. It'll make a new instance of
         // DatabaseConfigLoader and DatabaseConfig every time you run this method.
-        return scope.get(DatabaseConfigLoader.class).loadAs(configClass);
+        return context.getBean(DatabaseConfigLoader.class).loadAs(configClass);
     }
 
     @Override
     public String getName() {
-        return scope.get(String.class, "databaseName");
+        return context.get("database.name", String.class).get();
     }
 
     @Override
+    @PreDestroy
     public void stop() {
         executorService.shutdown();
-    }
-
-    @Subscribe
-    public void onShutdown(ShutdownEvent ignored) {
-        stop();
     }
 }

@@ -1,13 +1,11 @@
 plugins {
     id("floodgate.generate-templates")
+    id("io.micronaut.library") version "3.7.4"
 }
 
 dependencies {
     api(projects.api)
     api("org.geysermc.configutils", "configutils", Versions.configUtilsVersion)
-
-    compileOnly(projects.ap)
-    annotationProcessor(projects.ap)
 
     api("com.google.inject", "guice", Versions.guiceVersion)
     api("com.nukkitx.fastutil", "fastutil-short-object-maps", Versions.fastutilVersion)
@@ -19,11 +17,9 @@ dependencies {
 
     api("com.google.guava:guava:31.1-jre")
 
-    api("io.avaje:avaje-inject:8.13")
-    annotationProcessor("io.avaje:avaje-inject-generator:8.13")
-
-    testImplementation("io.avaje:avaje-inject-test:8.13")
-    testAnnotationProcessor("io.avaje:avaje-inject-generator:8.13")
+    annotationProcessor("io.micronaut:micronaut-inject-java")
+    api("io.micronaut", "micronaut-inject-java")
+    api("io.micronaut", "micronaut-context")
 }
 
 // present on all platforms

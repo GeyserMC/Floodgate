@@ -40,11 +40,9 @@ import org.geysermc.floodgate.core.platform.command.CommandUtil;
 import org.geysermc.floodgate.core.player.UserAudience;
 import org.geysermc.floodgate.core.player.UserAudience.ConsoleAudience;
 import org.geysermc.floodgate.core.player.UserAudience.PlayerAudience;
-import org.geysermc.floodgate.core.register.ListenerRegister;
 import org.geysermc.floodgate.core.util.LanguageManager;
 import org.geysermc.floodgate.core.util.Utils;
 
-@ListenerRegister.Listener
 @Singleton
 public final class VelocityCommandUtil extends CommandUtil {
     private static UserAudience console;

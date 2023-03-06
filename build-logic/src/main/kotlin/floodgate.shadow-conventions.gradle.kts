@@ -18,6 +18,8 @@ tasks {
         val sJar: ShadowJar = this
 
         doFirst {
+//            mergeServiceFiles()
+
             providedDependencies[project.name]?.forEach { (name, notation) ->
                 sJar.dependencies {
                     println("Excluding $name from ${project.name}")

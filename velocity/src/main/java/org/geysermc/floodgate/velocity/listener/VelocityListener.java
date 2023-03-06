@@ -57,10 +57,10 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.core.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
-import org.geysermc.floodgate.core.register.ListenerRegister;
+import org.geysermc.floodgate.core.listener.McListener;
 import org.geysermc.floodgate.core.util.LanguageManager;
 
-@ListenerRegister.Listener
+@McListener
 @Singleton
 public final class VelocityListener {
     private static final Field INITIAL_MINECRAFT_CONNECTION;

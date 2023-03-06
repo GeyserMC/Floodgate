@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2023 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,16 +23,28 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.ap;
+package org.geysermc.floodgate.core.listener;
 
-import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
-import javax.lang.model.SourceVersion;
+import io.micronaut.context.ApplicationContext;
+import io.micronaut.core.annotation.AnnotationMetadata;
+import io.micronaut.inject.qualifiers.Qualifiers;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.core.platform.listener.ListenerRegistration;
+import org.geysermc.floodgate.core.util.EagerSingleton;
 
-@SupportedAnnotationTypes("*")
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
-public class AutoBindProcessor extends ClassProcessor {
-    public AutoBindProcessor() {
-        super("org.geysermc.floodgate.util.AutoBind");
+@EagerSingleton
+@SuppressWarnings({"rawtypes", "unchecked"})
+public final class McListenerRegister {
+    @Inject ListenerRegistration registration;
+    @Inject FloodgateLogger logger;
+
+    @PostConstruct
+    public void registerListeners(ApplicationContext context) {
+        context.getBeansOfType(
+                Object.class,
+                Qualifiers.byAnnotation(AnnotationMetadata.EMPTY_METADATA, McListener.class)
+        ).forEach(registration::register);
     }
 }

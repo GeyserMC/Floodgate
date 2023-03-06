@@ -57,7 +57,7 @@ public final class DebugAddon implements InjectorAddon {
 
     @Override
     public void onInject(Channel channel, boolean toServer) {
-        logger.info("Successfully called onInject. To server? " + toServer);
+        logger.info("Successfully called onInject. To server? {} ({})", toServer, channel.id());
 
         StateChangeDetector changeDetector = new StateChangeDetector(
                 channel, packetEncoder, packetDecoder, logger
@@ -74,6 +74,7 @@ public final class DebugAddon implements InjectorAddon {
 
     @Override
     public void onRemoveInject(Channel channel) {
+        logger.info("Removing injection ({})", channel.id());
         ChannelPipeline pipeline = channel.pipeline();
 
         Utils.removeHandler(pipeline, "floodgate_debug_out");

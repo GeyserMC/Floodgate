@@ -23,17 +23,16 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-@InjectModule(
-        requiresPackages = {FloodgatePlatform.class, FloodgateApi.class, ProxyModule.class},
-        requires = {ProxyServer.class, LanguageManager.class},
-        provides = Path.class
-)
-package org.geysermc.floodgate.velocity;
+package org.geysermc.floodgate.core.scope;
 
-import com.velocitypowered.api.proxy.ProxyServer;
-import io.avaje.inject.InjectModule;
-import java.nio.file.Path;
-import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.core.FloodgatePlatform;
-import org.geysermc.floodgate.core.api.ProxyModule;
-import org.geysermc.floodgate.core.util.LanguageManager;
+import io.micronaut.context.annotation.Requires;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE_USE})
+@Requires(property = "platform.proxy", value = "false")
+public @interface ServerOnly {
+}

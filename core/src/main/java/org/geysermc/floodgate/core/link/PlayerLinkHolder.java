@@ -29,9 +29,10 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import io.avaje.inject.Bean;
-import io.avaje.inject.BeanScope;
-import io.avaje.inject.Factory;
+import io.micronaut.context.ApplicationContext;
+import io.micronaut.context.annotation.Bean;
+import io.micronaut.context.annotation.Factory;
+import jakarta.annotation.PreDestroy;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
@@ -46,12 +47,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.geysermc.event.Listener;
-import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.config.FloodgateConfig.PlayerLinkConfig;
-import org.geysermc.floodgate.core.event.lifecycle.ShutdownEvent;
 import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.Utils;
 
@@ -59,15 +58,15 @@ import org.geysermc.floodgate.core.util.Utils;
 @Factory
 @SuppressWarnings("unchecked")
 public final class PlayerLinkHolder {
-    private final BeanScope currentScope;
+    private final ApplicationContext currentContext;
 
     private URLClassLoader classLoader;
-    private BeanScope childScope;
+    private ApplicationContext childContext;
     private PlayerLink instance;
 
     @Inject
-    PlayerLinkHolder(BeanScope scope) {
-        this.currentScope = scope;
+    PlayerLinkHolder(ApplicationContext context) {
+        this.currentContext = context;
     }
 
     @Bean
@@ -104,7 +103,7 @@ public final class PlayerLinkHolder {
         // been found, or when global linking is enabled and own player linking is disabled.
         if (linkConfig.isEnableGlobalLinking() &&
                 (files.isEmpty() || !linkConfig.isEnableOwnLinking())) {
-            return currentScope.get(GlobalPlayerLinking.class);
+            return currentContext.getBean(GlobalPlayerLinking.class);
         }
 
         if (files.isEmpty()) {
@@ -178,18 +177,26 @@ public final class PlayerLinkHolder {
 
             init = false;
 
-            childScope = BeanScope.builder()
-                    .parent(currentScope)
-                    .bean("databaseName", String.class, databaseName)
-                    .bean("databaseClassLoader", ClassLoader.class, classLoader)
-                    .bean("databaseInitData", JsonObject.class, dbInitConfig)
-                    .build();
+//            childContext = ApplicationContext.builder()
+//                    .singletons()
+//                    .classLoader(classLoader)
+//                    .packages()
+//                    .properties(Map.of(
+//                            "database.name", databaseName,
+//                            "database.classloader", classLoader,
+//                            "database.init.data", dbInitConfig
+//                    ))
+//                    .build();
+//
+//            childContext.registerBeanDefinition(RuntimeBeanDefinition.builder(null).)
+//
+//            childContext.environment(helo -> helo.);
 
-            instance = childScope.get(mainClass);
+            instance = childContext.getBean(mainClass);
 
             // we use our own internal PlayerLinking when global linking is enabled
             if (linkConfig.isEnableGlobalLinking()) {
-                GlobalPlayerLinking linking = childScope.get(GlobalPlayerLinking.class);
+                GlobalPlayerLinking linking = childContext.getBean(GlobalPlayerLinking.class);
                 linking.setDatabaseImpl(instance);
                 linking.load();
                 return linking;
@@ -213,10 +220,10 @@ public final class PlayerLinkHolder {
         }
     }
 
-    @Subscribe
-    public void onShutdown(ShutdownEvent ignored) throws Exception {
+    @PreDestroy
+    void close() throws Exception {
         instance.stop();
-        childScope.close();
+        childContext.close();
         classLoader.close();
     }
 }

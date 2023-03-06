@@ -27,6 +27,7 @@ package org.geysermc.floodgate.velocity.logger;
 
 import static org.geysermc.floodgate.core.util.MessageFormatter.format;
 
+import io.micronaut.context.BeanProvider;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.apache.logging.log4j.Level;
@@ -38,12 +39,11 @@ import org.slf4j.Logger;
 
 @Singleton
 public final class Slf4jFloodgateLogger implements FloodgateLogger {
-    private LanguageManager languageManager;
+    @Inject BeanProvider<LanguageManager> languageManager;
     @Inject Logger logger;
 
     @Inject
-    void init(LanguageManager languageManager, FloodgateConfig config) {
-        this.languageManager = languageManager;
+    void init(FloodgateConfig config) {
         if (config.isDebug() && !logger.isDebugEnabled()) {
             Configurator.setLevel(logger.getName(), Level.DEBUG);
         }
@@ -71,7 +71,7 @@ public final class Slf4jFloodgateLogger implements FloodgateLogger {
 
     @Override
     public void translatedInfo(String message, Object... args) {
-        logger.info(languageManager.getLogString(message, args));
+        logger.info(languageManager.get().getLogString(message, args));
     }
 
     @Override

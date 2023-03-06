@@ -26,18 +26,18 @@
 package org.geysermc.floodgate.velocity.listener;
 
 import com.velocitypowered.api.event.EventManager;
+import com.velocitypowered.api.plugin.PluginContainer;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.geysermc.floodgate.core.platform.listener.ListenerRegistration;
-import org.geysermc.floodgate.velocity.VelocityPlugin;
 
 @Singleton
 public final class VelocityListenerRegistration implements ListenerRegistration<Object> {
     @Inject EventManager eventManager;
-    @Inject VelocityPlugin plugin;
+    @Inject PluginContainer pluginContainer;
 
     @Override
     public void register(Object listener) {
-        eventManager.register(plugin, listener);
+        eventManager.register(pluginContainer, listener);
     }
 }

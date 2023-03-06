@@ -34,29 +34,30 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.ChannelMessageSource;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
+import io.micronaut.context.BeanProvider;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.core.listener.McListener;
 import org.geysermc.floodgate.core.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel.Identity;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel.Result;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageManager;
-import org.geysermc.floodgate.core.register.ListenerRegister;
 
-@ListenerRegister.Listener
+@McListener
 @Singleton
 public class VelocityPluginMessageUtils extends PluginMessageUtils {
-    @Inject PluginMessageManager pluginMessageManager;
+    @Inject BeanProvider<PluginMessageManager> pluginMessageManager;
     @Inject ProxyServer proxy;
     @Inject FloodgateLogger logger;
 
     @Subscribe
     public void onPluginMessage(PluginMessageEvent event) {
         String channelId = event.getIdentifier().getId();
-        PluginMessageChannel channel = pluginMessageManager.getChannel(channelId);
+        PluginMessageChannel channel = pluginMessageManager.get().getChannel(channelId);
         if (channel == null) {
             return;
         }

@@ -25,21 +25,19 @@
 
 package org.geysermc.floodgate.core.module;
 
-import io.avaje.inject.Bean;
-import io.avaje.inject.Factory;
+import io.micronaut.context.annotation.Bean;
+import io.micronaut.context.annotation.Factory;
 import io.netty.util.AttributeKey;
-import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.geysermc.event.Listener;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.core.event.EventBus;
-import org.geysermc.floodgate.core.event.lifecycle.ShutdownEvent;
 import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.crypto.AesCipher;
 import org.geysermc.floodgate.crypto.AesKeyProducer;
@@ -50,23 +48,18 @@ import org.geysermc.floodgate.crypto.KeyProducer;
 @Factory
 @Listener
 public class CommonModule {
-    @Bean
+    @Bean(preDestroy = "shutdown")
     @Singleton
     @Named("commonPool")
     public ExecutorService commonPool() {
         return new ThreadPoolExecutor(0, 20, 60L, TimeUnit.SECONDS, new SynchronousQueue<>());
     }
 
-    @Inject
-    public void registerShutdown(
-            EventBus eventBus,
-            @Named("commonPool") ExecutorService commonPool,
-            @Named("commonScheduledPool") ScheduledExecutorService commonScheduledPool
-    ) {
-        eventBus.subscribe(ShutdownEvent.class, ignored -> {
-            commonPool.shutdown();
-            commonScheduledPool.shutdown();
-        });
+    @Bean(preDestroy = "shutdown")
+    @Singleton
+    @Named("commonScheduledPool")
+    public ScheduledExecutorService commonScheduledPool() {
+        return Executors.newSingleThreadScheduledExecutor();
     }
 
     @Bean
@@ -91,7 +84,7 @@ public class CommonModule {
     @Bean
     @Singleton
     @Named("buildNumber")
-    public Integer buildNumber() {
+    public int buildNumber() {
         return Constants.BUILD_NUMBER;
     }
 

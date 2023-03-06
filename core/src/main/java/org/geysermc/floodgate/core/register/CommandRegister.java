@@ -27,18 +27,18 @@ package org.geysermc.floodgate.core.register;
 
 import cloud.commandframework.CommandManager;
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import java.util.Set;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.core.player.UserAudience;
+import org.geysermc.floodgate.core.util.EagerSingleton;
 
 /**
  * This class is responsible for registering commands to the command register of the platform that
  * is currently in use. So that the commands only have to be written once (in the common module) and
  * can be used across all platforms without the need of adding platform specific commands.
  */
-@Singleton
+@EagerSingleton
 public final class CommandRegister {
     @Inject CommandManager<UserAudience> commandManager;
     @Inject FloodgateConfig config;

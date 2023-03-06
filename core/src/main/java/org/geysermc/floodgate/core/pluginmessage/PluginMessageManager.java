@@ -39,7 +39,8 @@ public class PluginMessageManager {
     @Inject PluginMessageRegistration registration;
 
     @Inject
-    public void addChannels(Set<PluginMessageChannel> channels) {
+    public void registerChannels(Set<PluginMessageChannel> channels) {
+        channels.forEach(channel -> System.out.println(channel.getClass().getName()));
         if (!classInstanceMap.isEmpty()) {
             return;
         }

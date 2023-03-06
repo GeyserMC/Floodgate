@@ -25,10 +25,10 @@
 
 package org.geysermc.floodgate.core.config;
 
-import io.avaje.inject.Bean;
+import io.micronaut.context.annotation.Bean;
+import io.micronaut.context.annotation.Factory;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import jakarta.inject.Singleton;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.Key;
@@ -38,12 +38,12 @@ import org.geysermc.configutils.ConfigUtilities;
 import org.geysermc.configutils.file.codec.PathFileCodec;
 import org.geysermc.configutils.file.template.ResourceTemplateReader;
 import org.geysermc.configutils.updater.change.Changes;
-import org.geysermc.floodgate.core.scope.ProxyScope;
-import org.geysermc.floodgate.core.scope.ServerScope;
+import org.geysermc.floodgate.core.scope.ProxyOnly;
+import org.geysermc.floodgate.core.scope.ServerOnly;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.crypto.KeyProducer;
 
-@Singleton
+@Factory
 @Getter
 public final class ConfigLoader {
     private final Path dataDirectory;
@@ -62,13 +62,13 @@ public final class ConfigLoader {
     }
 
     @Bean
-    @ServerScope
+    @ServerOnly
     FloodgateConfig config() {
         return load(FloodgateConfig.class);
     }
 
     @Bean
-    @ProxyScope
+    @ProxyOnly
     ProxyFloodgateConfig proxyConfig() {
         return load(ProxyFloodgateConfig.class);
     }

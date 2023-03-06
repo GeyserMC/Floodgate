@@ -23,33 +23,17 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.register;
+package org.geysermc.floodgate.core.listener;
 
-import jakarta.inject.Inject;
+
 import jakarta.inject.Qualifier;
-import jakarta.inject.Singleton;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.geysermc.floodgate.core.platform.listener.ListenerRegistration;
 
-@Singleton
-@SuppressWarnings({"rawtypes", "unchecked"})
-public final class ListenerRegister {
-    @Inject
-    ListenerRegistration registration;
-
-//    @Inject
-//    public void registerListeners(Set<@Listener Object> foundListeners) {
-//        for (Object listener : foundListeners) {
-//            registration.register(listener);
-//        }
-//    }
-
-    @Qualifier
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE_USE)
-    public @interface Listener {
-    }
+@Qualifier
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE_USE)
+public @interface McListener {
 }

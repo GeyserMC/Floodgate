@@ -43,9 +43,8 @@ import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel.Identity;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel.Result;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageManager;
-import org.geysermc.floodgate.core.register.ListenerRegister;
 
-@ListenerRegister.Listener
+@McListener
 @Singleton
 public final class BungeePluginMessageUtils extends PluginMessageUtils implements Listener {
     @Inject PluginMessageManager pluginMessageManager;

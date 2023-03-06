@@ -30,6 +30,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import io.micronaut.context.BeanProvider;
 import jakarta.inject.Inject;
 import java.util.Collection;
 import java.util.Map;
@@ -47,12 +48,12 @@ import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.core.pluginmessage.channel.FormChannel;
 import org.geysermc.floodgate.core.pluginmessage.channel.TransferChannel;
-import org.geysermc.floodgate.core.scope.ServerScope;
+import org.geysermc.floodgate.core.scope.ServerOnly;
 import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.HttpClient;
 import org.geysermc.floodgate.core.util.Utils;
 
-@ServerScope
+@ServerOnly
 public class SimpleFloodgateApi implements FloodgateApi {
     private final Map<UUID, FloodgatePlayer> players = new ConcurrentHashMap<>();
     private final Cache<UUID, FloodgatePlayer> pendingRemove =
@@ -60,7 +61,7 @@ public class SimpleFloodgateApi implements FloodgateApi {
                     .expireAfterWrite(20, TimeUnit.SECONDS)
                     .build();
 
-    @Inject PluginMessageManager pluginMessageManager;
+    @Inject BeanProvider<PluginMessageManager> pluginMessageManager;
     @Inject FloodgateConfig config;
     @Inject HttpClient httpClient;
     @Inject FloodgateLogger logger;
@@ -120,7 +121,7 @@ public class SimpleFloodgateApi implements FloodgateApi {
 
     @Override
     public boolean sendForm(UUID uuid, Form form) {
-        return pluginMessageManager.getChannel(FormChannel.class).sendForm(uuid, form);
+        return pluginMessageManager.get().getChannel(FormChannel.class).sendForm(uuid, form);
     }
 
     @Override
@@ -140,7 +141,7 @@ public class SimpleFloodgateApi implements FloodgateApi {
 
     @Override
     public boolean transferPlayer(UUID uuid, String address, int port) {
-        return pluginMessageManager
+        return pluginMessageManager.get()
                 .getChannel(TransferChannel.class)
                 .sendTransfer(uuid, address, port);
     }
@@ -185,7 +186,7 @@ public class SimpleFloodgateApi implements FloodgateApi {
         logger.warn("A plugin is trying to access an unsafe part of the Floodgate api!" +
                 " The use of this api can result in client crashes if used incorrectly." +
                 " Caller: " + callerClass);
-        return new UnsafeFloodgateApi(pluginMessageManager);
+        return new UnsafeFloodgateApi(pluginMessageManager.get());
     }
 
     public FloodgatePlayer addPlayer(FloodgatePlayer player) {

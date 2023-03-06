@@ -25,7 +25,7 @@
 
 package org.geysermc.floodgate.core.util;
 
-import io.avaje.inject.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;

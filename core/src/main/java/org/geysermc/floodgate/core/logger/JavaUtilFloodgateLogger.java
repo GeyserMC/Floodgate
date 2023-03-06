@@ -27,10 +27,10 @@ package org.geysermc.floodgate.core.logger;
 
 import static org.geysermc.floodgate.core.util.MessageFormatter.format;
 
-import io.avaje.inject.Secondary;
+import io.micronaut.context.annotation.Requires;
+import io.micronaut.context.annotation.Secondary;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import jakarta.inject.Singleton;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -38,7 +38,7 @@ import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.util.LanguageManager;
 
 @Secondary
-@Singleton
+@Requires(property = "platform.logger", value = "java.util")
 public final class JavaUtilFloodgateLogger implements FloodgateLogger {
     @Inject
     @Named("logger")

@@ -25,9 +25,10 @@
 
 package org.geysermc.floodgate.core.event;
 
-import io.avaje.inject.BeanScope;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import io.micronaut.context.ApplicationContext;
+import io.micronaut.core.annotation.AnnotationMetadata;
+import io.micronaut.inject.qualifiers.Qualifiers;
+import jakarta.annotation.PostConstruct;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -38,19 +39,24 @@ import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.event.subscribe.Subscriber;
 import org.geysermc.floodgate.api.event.FloodgateEventBus;
 import org.geysermc.floodgate.api.event.FloodgateSubscriber;
+import org.geysermc.floodgate.core.util.EagerSingleton;
 
-@Singleton
+@EagerSingleton
 @SuppressWarnings("unchecked")
 public final class EventBus extends EventBusImpl<Object, FloodgateSubscriber<?>>
         implements FloodgateEventBus {
-    @Inject
-    public void registerListeners(BeanScope scope) {
-        // https://github.com/avaje/avaje-inject/issues/289
-        for (Object listener : scope.listByAnnotation(Listener.class)) {
-            register(listener);
-        }
-    }
 
+//    @Inject
+//    Set<@Listener Object> detectedListeners;
+
+    @PostConstruct
+    void registerListeners(ApplicationContext context) {
+        // https://github.com/micronaut-projects/micronaut-core/issues/8881
+        context.getBeansOfType(
+                Object.class,
+                Qualifiers.byAnnotation(AnnotationMetadata.EMPTY_METADATA, Listener.class)
+        ).forEach(this::register);
+    }
 
     @Override
     protected <H, T, B extends Subscriber<T>> B makeSubscription(

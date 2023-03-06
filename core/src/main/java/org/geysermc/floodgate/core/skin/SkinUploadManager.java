@@ -28,13 +28,12 @@ package org.geysermc.floodgate.core.skin;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import jakarta.annotation.PreDestroy;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.geysermc.event.Listener;
-import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.core.event.lifecycle.ShutdownEvent;
 
 @Listener
 @Singleton
@@ -59,15 +58,11 @@ public final class SkinUploadManager {
         connections.remove(id, socket);
     }
 
-    public void closeAllSockets() {
+    @PreDestroy
+    void closeAllSockets() {
         for (SkinUploadSocket socket : connections.values()) {
             socket.close();
         }
         connections.clear();
-    }
-
-    @Subscribe
-    public void onShutdown(ShutdownEvent ignored) {
-        closeAllSockets();
     }
 }

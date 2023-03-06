@@ -29,9 +29,10 @@ import cloud.commandframework.CommandManager;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.velocity.VelocityCommandManager;
 import com.velocitypowered.api.command.CommandSource;
+import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.proxy.ProxyServer;
-import io.avaje.inject.Bean;
-import io.avaje.inject.Factory;
+import io.micronaut.context.annotation.Bean;
+import io.micronaut.context.annotation.Factory;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
@@ -42,9 +43,13 @@ import org.geysermc.floodgate.core.player.UserAudience;
 public final class VelocityPlatformModule {
     @Bean
     @Singleton
-    public CommandManager<UserAudience> commandManager(CommandUtil commandUtil, ProxyServer proxy) {
+    public CommandManager<UserAudience> commandManager(
+            CommandUtil commandUtil,
+            ProxyServer proxy,
+            PluginContainer container
+    ) {
         CommandManager<UserAudience> commandManager = new VelocityCommandManager<>(
-                null,
+                container,
                 proxy,
                 CommandExecutionCoordinator.simpleCoordinator(),
                 commandUtil::getUserAudience,

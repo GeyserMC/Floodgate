@@ -23,32 +23,16 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.addon;
+package org.geysermc.floodgate.core.scope;
 
-import io.netty.channel.Channel;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import org.geysermc.floodgate.api.inject.InjectorAddon;
-import org.geysermc.floodgate.core.inject.CommonPlatformInjector;
+import io.micronaut.context.annotation.Requires;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Singleton
-public final class AddonManagerAddon implements InjectorAddon {
-    @Inject CommonPlatformInjector injector;
-
-    @Override
-    public void onInject(Channel channel, boolean toServer) {
-        channel.closeFuture().addListener(listener -> {
-            injector.channelClosedCall(channel);
-            injector.removeInjectedClient(channel);
-        });
-    }
-
-    @Override
-    public void onRemoveInject(Channel channel) {
-    }
-
-    @Override
-    public boolean shouldInject() {
-        return true;
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE_USE})
+@Requires(property = "platform.proxy", value = "true")
+public @interface ProxyOnly {
 }

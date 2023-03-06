@@ -26,6 +26,8 @@
 package org.geysermc.floodgate.core.util;
 
 import com.google.common.base.Joiner;
+import io.micronaut.context.BeanProvider;
+import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.net.URL;
@@ -45,8 +47,8 @@ import org.geysermc.floodgate.core.config.FloodgateConfig;
 public final class LanguageManager {
     private final Map<String, Properties> localeMappings = new HashMap<>();
 
-    @Inject FloodgateConfig config;
-    @Inject FloodgateLogger logger;
+    @Inject BeanProvider<FloodgateConfig> config;
+    @Inject BeanProvider<FloodgateLogger> logger;
 
     /**
      * The locale used in console and as a fallback
@@ -71,13 +73,15 @@ public final class LanguageManager {
     /**
      * Tries to load the log's locale file once a string has been requested
      */
-    @Inject
+    @PostConstruct
     public void init() {
+        FloodgateLogger logger = this.logger.get();
+
         if (!loadLocale("en_US")) {// Fallback
             logger.error("Failed to load the fallback language. This will likely cause errors!");
         }
 
-        defaultLocale = formatLocale(config.getDefaultLocale());
+        defaultLocale = formatLocale(config.get().getDefaultLocale());
 
         if (isValidLanguage(defaultLocale)) {
             if (loadLocale(defaultLocale)) {
@@ -121,7 +125,7 @@ public final class LanguageManager {
             return true;
         }
 
-        logger.warn("Missing locale file: " + formatLocale);
+        logger.get().warn("Missing locale file: " + formatLocale);
         return false;
     }
 
@@ -182,7 +186,7 @@ public final class LanguageManager {
                 .getResource("/languages/texts/" + locale + ".properties");
 
         if (languageFile == null) {
-            logger.warn(locale + " is not a supported Floodgate language.");
+            logger.get().warn(locale + " is not a supported Floodgate language.");
             return false;
         }
         return true;

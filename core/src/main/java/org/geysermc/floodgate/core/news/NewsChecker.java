@@ -27,7 +27,7 @@ package org.geysermc.floodgate.core.news;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import io.avaje.inject.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;

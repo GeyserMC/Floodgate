@@ -25,14 +25,15 @@
 
 package org.geysermc.floodgate.core.platform.command;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import java.util.Set;
 
 public abstract class SubCommands {
-    Set<FloodgateSubCommand> subCommands;
+    @Inject Set<FloodgateSubCommand> subCommands;
 
-    @Inject
-    public void setup(Set<FloodgateSubCommand> subCommands) {
+    @PostConstruct
+    public void setup() {
         subCommands.removeIf(subCommand -> !subCommand.parent().isAssignableFrom(this.getClass()));
     }
 

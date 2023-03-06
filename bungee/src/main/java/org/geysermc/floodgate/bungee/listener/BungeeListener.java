@@ -48,13 +48,12 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.core.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
-import org.geysermc.floodgate.core.register.ListenerRegister;
 import org.geysermc.floodgate.core.skin.SkinApplier;
 import org.geysermc.floodgate.core.skin.SkinDataImpl;
 import org.geysermc.floodgate.core.util.LanguageManager;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
 
-@ListenerRegister.Listener
+@McListener
 @Singleton
 @SuppressWarnings("ConstantConditions")
 public final class BungeeListener implements Listener {

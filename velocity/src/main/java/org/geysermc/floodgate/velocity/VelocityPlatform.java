@@ -26,9 +26,12 @@
 package org.geysermc.floodgate.velocity;
 
 import com.google.inject.Inject;
+import com.velocitypowered.api.event.EventManager;
+import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
-import io.avaje.inject.BeanScopeBuilder;
+import io.micronaut.context.ApplicationContext;
+import io.micronaut.inject.qualifiers.Qualifiers;
 import java.nio.file.Path;
 import org.geysermc.floodgate.core.FloodgatePlatform;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
@@ -36,22 +39,24 @@ import org.slf4j.Logger;
 
 public class VelocityPlatform extends FloodgatePlatform {
     @Inject
-    private @DataDirectory Path dataDirectory;
-    @Inject
-    private ProxyServer proxyServer;
-    @Inject
-    private Logger logger;
+    @DataDirectory
+    Path dataDirectory;
+    @Inject ProxyServer proxyServer;
+    @Inject EventManager eventManager;
+    @Inject PluginContainer container;
+    @Inject Logger logger;
 
     public VelocityPlatform() {
         ReflectionUtils.setPrefix("com.velocitypowered.proxy");
     }
 
     @Override
-    protected void onBuildBeanScope(BeanScopeBuilder builder) {
-        builder.bean(ProxyServer.class, proxyServer)
-                .bean("dataDirectory", Path.class, dataDirectory)
-                .bean(Logger.class, logger)
-                .modules(new VelocityModule());
+    protected void onContextCreated(ApplicationContext context) {
+        context.registerSingleton(proxyServer)
+                .registerSingleton(container)
+                .registerSingleton(eventManager)
+                .registerSingleton(Path.class, dataDirectory, Qualifiers.byName("dataDirectory"))
+                .registerSingleton(logger);
     }
 
     @Override

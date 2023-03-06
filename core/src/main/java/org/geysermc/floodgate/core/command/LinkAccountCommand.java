@@ -30,7 +30,7 @@ import cloud.commandframework.Command;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.context.CommandContext;
-import io.avaje.inject.Secondary;
+import io.micronaut.context.annotation.Secondary;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.Getter;

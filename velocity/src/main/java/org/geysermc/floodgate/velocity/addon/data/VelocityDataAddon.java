@@ -85,7 +85,9 @@ public final class VelocityDataAddon implements InjectorAddon {
         // The handler is already added so we should add our handler before it
         channel.pipeline().addBefore(
                 packetHandler, "floodgate_data_handler",
-                new VelocityProxyDataHandler(config, handshakeHandler, blocker, kickMessageAttribute, logger)
+                new VelocityProxyDataHandler(
+                        config, handshakeHandler, blocker, kickMessageAttribute, logger
+                )
         );
     }
 

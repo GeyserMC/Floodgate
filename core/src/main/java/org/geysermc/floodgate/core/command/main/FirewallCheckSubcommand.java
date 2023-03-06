@@ -43,8 +43,7 @@ import org.geysermc.floodgate.core.util.HttpClient.HttpResponse;
 import org.geysermc.floodgate.core.util.Utils;
 
 final class FirewallCheckSubcommand extends FloodgateSubCommand {
-    @Inject
-    private HttpClient httpClient;
+    @Inject HttpClient httpProvider;
 
     @Override
     public Class<?> parent() {
@@ -84,7 +83,7 @@ final class FirewallCheckSubcommand extends FloodgateSubCommand {
                 sender, "global api",
                 () -> {
                     HttpResponse<JsonElement> response =
-                            httpClient.get(Constants.HEALTH_URL, JsonElement.class);
+                            httpProvider.get(Constants.HEALTH_URL, JsonElement.class);
 
                     if (!response.isCodeOk()) {
                         throw new IllegalStateException(String.format(

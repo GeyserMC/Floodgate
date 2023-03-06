@@ -26,6 +26,7 @@
 package org.geysermc.floodgate.core.inject;
 
 import io.netty.channel.Channel;
+import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,9 +42,11 @@ public abstract class CommonPlatformInjector implements PlatformInjector {
 
     private final Map<Class<?>, InjectorAddon> addons = new HashMap<>();
 
-    @Inject
-    public void registerAddons(Set<InjectorAddon> addons) {
-        addons.forEach(this::addAddon);
+    @Inject Set<InjectorAddon> detectedAddons;
+
+    @PostConstruct
+    public void registerAddons() {
+        detectedAddons.forEach(this::addAddon);
     }
 
     protected boolean addInjectedClient(Channel channel) {
@@ -78,6 +81,12 @@ public abstract class CommonPlatformInjector implements PlatformInjector {
      *                      connecting to the proxy or false when the platform isn't a proxy
      */
     public void injectAddonsCall(Channel channel, boolean proxyToServer) {
+        // don't forget to remove the addons when the channel closes
+        channel.closeFuture().addListener(listener -> {
+            channelClosedCall(channel);
+            removeInjectedClient(channel);
+        });
+
         for (InjectorAddon addon : addons.values()) {
             if (addon.shouldInject()) {
                 addon.onInject(channel, proxyToServer);

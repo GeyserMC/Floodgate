@@ -25,7 +25,6 @@
 
 package org.geysermc.floodgate.core.util;
 
-import io.avaje.inject.spi.Module;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
@@ -174,14 +173,6 @@ public class Utils {
             }).collect(Collectors.toSet());
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    public static Module makeModule(String moduleClassName) {
-        try {
-            return (Module) Class.forName(moduleClassName).getDeclaredConstructor().newInstance();
-        } catch (Throwable throwable) {
-            throw new RuntimeException(throwable);
         }
     }
 }

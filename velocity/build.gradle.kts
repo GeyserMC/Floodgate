@@ -4,12 +4,9 @@ var guavaVersion = "25.1-jre"
 
 dependencies {
     api(projects.core)
+    annotationProcessor(projects.core)
+
     implementation("cloud.commandframework", "cloud-velocity", Versions.cloudVersion)
-
-    annotationProcessor("io.avaje:avaje-inject-generator:8.13")
-
-    testImplementation("io.avaje:avaje-inject-test:8.13")
-    testAnnotationProcessor("io.avaje:avaje-inject-generator:8.13")
 }
 
 relocate("cloud.commandframework")

@@ -23,13 +23,16 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.scope;
+package org.geysermc.floodgate.core.util;
 
-import jakarta.inject.Scope;
+import jakarta.inject.Singleton;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+/**
+ * Instead of a normal Singleton this is an
+ */
 @Retention(RetentionPolicy.RUNTIME)
-@Scope
-public @interface ProxyScope {
+@Singleton
+public @interface EagerSingleton {
 }
