@@ -33,11 +33,15 @@ import com.google.common.base.Charsets;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelId;
 import io.netty.util.AttributeKey;
+import io.netty.util.concurrent.DefaultThreadFactory;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -68,6 +72,13 @@ public final class FloodgateHandshakeHandler {
     private final AttributeKey<FloodgatePlayer> playerAttribute;
     private final FloodgateLogger logger;
     private final LanguageManager languageManager;
+    private final ThreadPoolExecutor executorService =
+            new ThreadPoolExecutor(
+                    0, Runtime.getRuntime().availableProcessors(),
+                    60L, TimeUnit.SECONDS,
+                    new SynchronousQueue<>(),
+                    new DefaultThreadFactory("floodgate_login")
+            );
 
     public FloodgateHandshakeHandler(
             HandshakeHandlersImpl handshakeHandlers,
@@ -126,7 +137,13 @@ public final class FloodgateHandshakeHandler {
 
         byte[] floodgateData = floodgateDataString.getBytes(Charsets.UTF_8);
 
-        logger.info("before supply ({})", channel.id());
+        logger.info(
+                "before supply {} {}/{} ({})",
+                executorService.getActiveCount(),
+                executorService.getPoolSize(),
+                executorService.getMaximumPoolSize(),
+                channel.id()
+        );
         return CompletableFuture.supplyAsync(() -> {
             logger.info("in supply ({})", channel.id());
 
@@ -192,7 +209,7 @@ public final class FloodgateHandshakeHandler {
                         channel, null, hostname
                 );
             }
-        }).thenCompose(bedrockData -> fetchLinkedPlayer(bedrockData, channel.id())).handle((result, error) -> {
+        }, executorService).thenCompose(bedrockData -> fetchLinkedPlayer(bedrockData, channel.id())).handle((result, error) -> {
             if (error == null) {
                 return handlePart2(channel, hostname, result.left(), result.right());
             }
