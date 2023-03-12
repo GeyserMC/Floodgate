@@ -23,40 +23,22 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.pluginmessage;
+package org.geysermc.floodgate.core.config;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import io.micronaut.context.env.PropertySource;
 
-@Singleton
-public class PluginMessageManager {
-    private final Map<Class<? extends PluginMessageChannel>, PluginMessageChannel> classInstanceMap = new HashMap<>();
-    private final Map<String, PluginMessageChannel> identifierInstanceMap = new HashMap<>();
-
-    @Inject PluginMessageRegistration registration;
-
-    @Inject
-    public void registerChannels(Set<PluginMessageChannel> channels) {
-        if (!classInstanceMap.isEmpty()) {
-            return;
-        }
-
-        for (PluginMessageChannel channel : channels) {
-            classInstanceMap.put(channel.getClass(), channel);
-            identifierInstanceMap.put(channel.getIdentifier(), channel);
-            registration.register(channel);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T extends PluginMessageChannel> T getChannel(Class<T> channelType) {
-        return (T) classInstanceMap.get(channelType);
-    }
-
-    public PluginMessageChannel getChannel(String identifier) {
-        return identifierInstanceMap.get(identifier);
+public interface Properties {
+    public static PropertySource defaults() {
+        return PropertySource.of(
+                "floodgate-properties",
+                "micronaut.data.mongodb.create-collections", true,
+                "mongodb.uri", "mongodb://root:root@localhost:27017/test?authSource=admin",
+                "mongodb.uuid-representation", "standard",
+                "datasources.default.url", "jdbc:h2:./test",
+                "datasources.default.username", "sa",
+                "datasources.default.password", "",
+                "datasources.default.schema-generate", "create",
+                "datasources.default.dialect", "H2"
+        );
     }
 }

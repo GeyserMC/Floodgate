@@ -18,10 +18,7 @@ indra {
     mitLicense()
 
     javaVersions {
-        target(11)
-        // without toolchain & strictVersion sun.misc.Unsafe won't be found
-//        minimumToolchain(8)
-//        strictVersions(true)
+        target(17)
     }
 }
 

@@ -20,6 +20,15 @@ dependencies {
     annotationProcessor("io.micronaut:micronaut-inject-java")
     api("io.micronaut", "micronaut-inject-java")
     api("io.micronaut", "micronaut-context")
+
+    annotationProcessor("io.micronaut.data:micronaut-data-processor")
+    implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
+    implementation("io.micronaut.sql:micronaut-jdbc-hikari")
+    runtimeOnly("com.h2database:h2")
+
+//    annotationProcessor("io.micronaut.data:micronaut-data-document-processor")
+//    compileOnly("io.micronaut.data:micronaut-data-mongodb")
+//    runtimeOnly("org.mongodb:mongodb-driver-sync")
 }
 
 // present on all platforms

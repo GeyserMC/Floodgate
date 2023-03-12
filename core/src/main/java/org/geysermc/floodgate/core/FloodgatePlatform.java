@@ -36,6 +36,9 @@ import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
+import org.geysermc.floodgate.core.config.Properties;
+import org.geysermc.floodgate.core.database.PlayerLinkRepository;
+import org.geysermc.floodgate.core.database.entity.LinkedPlayer;
 import org.geysermc.floodgate.core.event.EventBus;
 import org.geysermc.floodgate.core.event.lifecycle.PostEnableEvent;
 import org.geysermc.floodgate.core.event.lifecycle.ShutdownEvent;
@@ -47,7 +50,8 @@ public abstract class FloodgatePlatform {
     private ApplicationContext context;
     private PlatformInjector injector;
 
-    protected void onContextCreated(ApplicationContext context) {}
+    protected void onContextCreated(ApplicationContext context) {
+    }
 
     public void load() {
         long startTime = System.currentTimeMillis();
@@ -57,10 +61,28 @@ public abstract class FloodgatePlatform {
                 .properties(Map.of(
                         "platform.proxy", isProxy()
                 ))
+                .propertySources(Properties.defaults())
+                .environmentPropertySource(false)
                 .eagerInitAnnotated(EagerSingleton.class)
+                .eagerInitSingletons(true)
                 .build();
         onContextCreated(context);
         context.start();
+
+        LinkedPlayer link = new LinkedPlayer()
+                .bedrockId(UUID.fromString("00000000-0000-0000-0009-01f64f65c7c3"))
+                .javaUniqueId(UUID.fromString("d34eb447-6e90-4c78-9281-600df88aef1d"))
+                .javaUsername("Tim203");
+        System.out.println(context.getBean(PlayerLinkRepository.class).save(link));
+
+        System.out.println(context.getBean(PlayerLinkRepository.class)
+                .findByBedrockId(UUID.fromString("00000000-0000-0000-0009-01f64f65c7c3")));
+        System.out.println(context.getBean(PlayerLinkRepository.class)
+                .findByJavaUniqueId(UUID.fromString("d34eb447-6e90-4c78-9281-600df88aef1d")));
+        System.out.println(context.getBean(PlayerLinkRepository.class)
+                .existsByBedrockId(UUID.fromString("00000000-0000-0000-0009-01f64f65c7c3")));
+        System.out.println(context.getBean(PlayerLinkRepository.class)
+                .existsByJavaUniqueId(UUID.fromString("d34eb447-6e90-4c78-9281-600df88aef1d")));
 
 //        var scopeBuilder = BeanScope.builder()
 //                .bean("isProxy", boolean.class, isProxy())
