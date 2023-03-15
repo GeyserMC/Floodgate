@@ -51,7 +51,7 @@ dependencies {
         because "Commands library implementation for Fabric"
     })
 
-    include(modImplementation('net.kyori:adventure-platform-fabric:5.6.0-SNAPSHOT') {
+    include(modImplementation('net.kyori:adventure-platform-fabric:5.8.0-SNAPSHOT') {
         because "Chat library implementation for Fabric that includes methods for communicating with the server"
         // Thanks to zml for this fix
         // The package modifies Brigadier which causes a LinkageError at runtime if included
