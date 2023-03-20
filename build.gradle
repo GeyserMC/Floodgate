@@ -5,6 +5,7 @@ plugins {
     id 'fabric-loom' version '1.0-SNAPSHOT'
     id 'java'
     id 'maven-publish'
+    id "com.modrinth.minotaur" version "2.+"
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -146,5 +147,23 @@ publishing {
     // select the repositories you want to publish to
     repositories {
         mavenLocal()
+    }
+}
+
+modrinth {
+    projectId = "wKkoqHrH"
+    versionNumber = project.version as String + "-" + System.getenv("GITHUB_RUN_NUMBER")
+    versionType = "beta"
+    changelog = "A changelog can be found at https://github.com/GeyserMC/Floodgate-Fabric/commits"
+
+    syncBodyFrom = rootProject.file("README.md").text
+
+    uploadFile = tasks.getByPath("remappedShadowJar")
+    gameVersions = ["1.19.4"]
+
+    loaders = ["fabric"]
+
+    dependencies {
+        required.project "fabric-api"
     }
 }
