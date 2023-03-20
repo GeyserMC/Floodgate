@@ -151,7 +151,7 @@ publishing {
 }
 
 modrinth {
-    projectId = "wKkoqHrH"
+    projectId = "bWrNNfkb"
     versionNumber = project.version as String + "-" + System.getenv("GITHUB_RUN_NUMBER")
     versionType = "beta"
     changelog = "A changelog can be found at https://github.com/GeyserMC/Floodgate-Fabric/commits"
