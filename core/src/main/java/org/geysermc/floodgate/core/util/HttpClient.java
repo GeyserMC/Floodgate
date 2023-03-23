@@ -30,9 +30,12 @@ import com.google.gson.JsonObject;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -46,8 +49,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @SuppressWarnings({"PMD.CloseResource", "PMD.PreserveStackTrace"})
 @Singleton
 public class HttpClient {
-    private static final String USER_AGENT = "GeyserMC/Floodgate";
-
     private final Gson gson = new Gson();
     @Inject
     @Named("commonPool")
@@ -86,7 +87,7 @@ public class HttpClient {
         try {
             connection.setRequestMethod("GET");
             connection.setUseCaches(false);
-            connection.setRequestProperty("User-Agent", USER_AGENT);
+            connection.setRequestProperty("User-Agent", Constants.USER_AGENT);
             connection.setConnectTimeout(3000);
             connection.setReadTimeout(5000);
         } catch (Exception exception) {
@@ -94,6 +95,26 @@ public class HttpClient {
         }
 
         return connection;
+    }
+
+    @NonNull
+    public HttpResponse<byte[]> getRawData(String urlString) throws IOException {
+        HttpURLConnection connection = request(urlString);
+
+        try (InputStream inputStream = connection.getInputStream()) {
+            int responseCode = connection.getResponseCode();
+
+            byte[] buffer = new byte[8196];
+            int len;
+            try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+                while ((len = inputStream.read(buffer, 0, buffer.length)) != -1) {
+                    outputStream.write(buffer, 0, len);
+                }
+                return new HttpResponse<>(responseCode, outputStream.toByteArray());
+            }
+        } catch (SocketTimeoutException | NullPointerException exception) {
+            return new HttpResponse<>(-1, null);
+        }
     }
 
     @NonNull

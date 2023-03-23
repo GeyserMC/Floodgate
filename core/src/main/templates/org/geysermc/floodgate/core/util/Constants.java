@@ -39,6 +39,7 @@ public final class Constants {
     public static final String DATABASE_NAME_FORMAT = "^floodgate-[a-zA-Z0-9_]{0,16}-database.jar$";
 
 
+    public static final String USER_AGENT = "GeyserMC/Floodgate";
     private static final String API_BASE_URL = "s://api.geysermc.org";
     public static final String HEALTH_URL = "http" + API_BASE_URL + "/health";
 

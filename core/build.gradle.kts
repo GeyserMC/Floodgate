@@ -1,5 +1,6 @@
 plugins {
     id("floodgate.generate-templates")
+    id("floodgate.dependency-hash")
     id("io.micronaut.library") version "3.7.4"
 }
 

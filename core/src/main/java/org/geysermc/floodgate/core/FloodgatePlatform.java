@@ -26,6 +26,7 @@
 package org.geysermc.floodgate.core;
 
 import io.micronaut.context.ApplicationContext;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.UUID;
 import org.geysermc.floodgate.api.FloodgateApi;
@@ -42,6 +43,10 @@ import org.geysermc.floodgate.core.database.entity.LinkedPlayer;
 import org.geysermc.floodgate.core.event.EventBus;
 import org.geysermc.floodgate.core.event.lifecycle.PostEnableEvent;
 import org.geysermc.floodgate.core.event.lifecycle.ShutdownEvent;
+import org.geysermc.floodgate.core.library.Library;
+import org.geysermc.floodgate.core.library.LibraryManager;
+import org.geysermc.floodgate.core.library.Repository;
+import org.geysermc.floodgate.core.library.info.DependencyInfoLoader;
 import org.geysermc.floodgate.core.util.EagerSingleton;
 
 public abstract class FloodgatePlatform {
@@ -55,6 +60,21 @@ public abstract class FloodgatePlatform {
 
     public void load() {
         long startTime = System.currentTimeMillis();
+
+        var infoLoader = DependencyInfoLoader.load(
+                getClass().getClassLoader().getResource("dependencyInfo.txt")
+        );
+
+        new LibraryManager(ClassLoader.getSystemClassLoader().getParent(), Paths.get("./libs"))
+                .addLibrary(
+                        Library.builder(infoLoader)
+                                .id("guava")
+                                .repository(Repository.MAVEN_CENTRAL)
+                                .groupId("com.google.guava")
+                                .artifactId("guava")
+                                .build()
+                )
+                .apply();
 
         //noinspection unchecked
         context = ApplicationContext.builder()
