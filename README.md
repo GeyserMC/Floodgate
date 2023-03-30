@@ -6,7 +6,7 @@
 [Download](https://ci.kejona.dev/job/Floodgate/job/master/)
 
 
-#### This is a fork of [Floodgate](https://github.com/GeyserMC/Floodgate) with components that are also included in Geyser, stripped out. This prevents [errors](https://github.com/GeyserMC/Floodgate/issues/178) that are caused by usage of the Floodgate API when both Geyser and Floodgate are installed on BungeeCord or Velocity. This only needs to be installed when a plugin is using the Floodgate API.
+#### This is a fork of [Floodgate](https://github.com/GeyserMC/Floodgate) with components that are already included in Geyser, stripped out. This prevents [errors](https://github.com/GeyserMC/Floodgate/issues/178) that are caused by usage of the Floodgate API when both Geyser and Floodgate are installed on BungeeCord or Velocity. This only needs to be installed when a plugin is using the Floodgate API.
 
 Hybrid mode plugin to allow for connections from [Geyser](https://github.com/GeyserMC/Geyser) to join online mode servers.
 
