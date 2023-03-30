@@ -47,8 +47,8 @@ public final class VelocityPlugin {
 
     @Inject
     public VelocityPlugin(@DataDirectory Path dataDirectory, Injector guice) {
-        // PROJECTG
-        guice.getInstance(Logger.class).warn("This is a fork of Floodgate by ProjectG that allows using the Floodgate API on BungeeCord and Velocity when Geyser is also installed. Geyser is required for this to work.");
+        // kejonaMC
+        guice.getInstance(Logger.class).warn("This is a fork of Floodgate by kejonaMC that allows using the Floodgate API on BungeeCord and Velocity when Geyser is also installed. Geyser is required for this to work.");
 
         ReflectionUtils.setPrefix("com.velocitypowered.proxy");
 

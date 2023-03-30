@@ -49,8 +49,8 @@ public final class SpigotPlugin extends JavaPlugin {
 
     @Override
     public void onLoad() {
-        // PROJECTG
-        getLogger().warning("This is a fork of Floodgate by ProjectG that allows using the Floodgate API on BungeeCord and Velocity when Geyser is also installed. Geyser is required for this to work.");
+        // kejonaMC
+        getLogger().warning("This is a fork of Floodgate by kejonaMC that allows using the Floodgate API on BungeeCord and Velocity when Geyser is also installed. Geyser is required for this to work.");
 
         long ctm = System.currentTimeMillis();
         injector = Guice.createInjector(

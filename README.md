@@ -1,7 +1,7 @@
 # Floodgate For Proxies With Geyser
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Build Status](https://ci.projectg.dev/job/Floodgate/job/master/badge/icon)](https://ci.kejona.dev/job/Floodgate/job/master/)
+[![Build Status](https://ci.kejona.dev/job/Floodgate/job/master/badge/icon)](https://ci.kejona.dev/job/Floodgate/job/master/)
 [![Discord](https://img.shields.io/discord/853331530004299807?color=7289da&label=discord&logo=discord&logoColor=white)](https://discord.gg/M2SvqCu4e9)  
 [Download](https://ci.kejona.dev/job/Floodgate/job/master/)
 
