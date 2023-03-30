@@ -37,10 +37,9 @@ public interface PlatformInjector {
      * Injects the server connection. This will allow various addons (like getting the Floodgate
      * data and debug mode) to work.
      *
-     * @return true if the connection has successfully been injected
-     * @throws Exception if something went wrong while injecting the server connection
+     * @throws Exception if the platform couldn't be injected
      */
-    boolean inject() throws Exception;
+    void inject() throws Exception;
 
     /**
      * Some platforms may not be able to remove their injection process. If so, this method will
@@ -56,10 +55,9 @@ public interface PlatformInjector {
      * Removes the injection from the server. Please note that this function should only be used
      * internally (on plugin shutdown). This method will also remove every added addon.
      *
-     * @return true if the injection has successfully been removed
-     * @throws Exception if something went wrong while removing the injection
+     * @throws Exception if the platform injection could not be removed
      */
-    boolean removeInjection() throws Exception;
+    void removeInjection() throws Exception;
 
     /**
      * If the server connection is currently injected.

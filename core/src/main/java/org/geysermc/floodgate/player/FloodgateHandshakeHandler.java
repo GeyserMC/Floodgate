@@ -48,11 +48,13 @@ import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.player.PropertyKey;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
+import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.skin.SkinUploadManager;
 import org.geysermc.floodgate.util.BedrockData;
+import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.InvalidFormatException;
+import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.LinkedPlayer;
 import org.geysermc.floodgate.util.Utils;
 
@@ -60,27 +62,30 @@ public final class FloodgateHandshakeHandler {
     private final HandshakeHandlersImpl handshakeHandlers;
     private final SimpleFloodgateApi api;
     private final FloodgateCipher cipher;
-    private final FloodgateConfigHolder configHolder;
+    private final FloodgateConfig config;
     private final SkinUploadManager skinUploadManager;
     private final AttributeKey<FloodgatePlayer> playerAttribute;
     private final FloodgateLogger logger;
+    private final LanguageManager languageManager;
 
     public FloodgateHandshakeHandler(
             HandshakeHandlersImpl handshakeHandlers,
             SimpleFloodgateApi api,
             FloodgateCipher cipher,
-            FloodgateConfigHolder configHolder,
+            FloodgateConfig config,
             SkinUploadManager skinUploadManager,
             AttributeKey<FloodgatePlayer> playerAttribute,
-            FloodgateLogger logger) {
+            FloodgateLogger logger,
+            LanguageManager languageManager) {
 
         this.handshakeHandlers = handshakeHandlers;
         this.api = api;
         this.cipher = cipher;
-        this.configHolder = configHolder;
+        this.config = config;
         this.skinUploadManager = skinUploadManager;
         this.playerAttribute = playerAttribute;
         this.logger = logger;
+        this.languageManager = languageManager;
     }
 
     /**
@@ -134,7 +139,7 @@ public final class FloodgateHandshakeHandler {
                 );
             } catch (Exception e) {
                 // all the other exceptions are caused by invalid/tempered Floodgate data
-                if (configHolder.get().isDebug()) {
+                if (config.isDebug()) {
                     e.printStackTrace();
                 }
 
@@ -207,11 +212,16 @@ public final class FloodgateHandshakeHandler {
 
         try {
             HandshakeData handshakeData = new HandshakeDataImpl(
-                    channel, true, bedrockData.clone(), configHolder.get(),
+                    channel, true, bedrockData.clone(), config,
                     linkedPlayer != null ? linkedPlayer.clone() : null, hostname);
 
-            if (configHolder.get().getPlayerLink().isRequireLink() && linkedPlayer == null) {
-                handshakeData.setDisconnectReason("floodgate.core.not_linked");
+            if (config.getPlayerLink().isRequireLink() && linkedPlayer == null) {
+                String reason = languageManager.getString(
+                        "floodgate.core.not_linked",
+                        bedrockData.getLanguageCode(),
+                        Constants.LINK_INFO_URL
+                );
+                handshakeData.setDisconnectReason(reason);
             }
 
             handshakeHandlers.callHandshakeHandlers(handshakeData);
@@ -245,7 +255,7 @@ public final class FloodgateHandshakeHandler {
             String hostname) {
 
         HandshakeData handshakeData = new HandshakeDataImpl(channel, bedrockData != null,
-                bedrockData, configHolder.get(), null, hostname);
+                bedrockData, config, null, hostname);
         handshakeHandlers.callHandshakeHandlers(handshakeData);
 
         return new HandshakeResult(resultType, handshakeData, bedrockData, null);

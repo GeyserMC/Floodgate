@@ -29,8 +29,8 @@ import lombok.Getter;
 
 @Getter
 public class MysqlConfig implements DatabaseConfig {
-        private String hostname = "localhost";
-        private String database = "floodgate";
-        private String username = "floodgate";
-        private String password;
+  private String hostname = "localhost";
+  private String database = "floodgate";
+  private String username = "floodgate";
+  private String password;
 }

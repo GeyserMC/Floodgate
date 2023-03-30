@@ -80,18 +80,7 @@ public interface FloodgateLogger {
     void trace(String message, Object... args);
 
     /**
-     * Enables debug mode for the Floodgate logger.
-     */
-    void enableDebug();
-
-    /**
-     * Disables debug mode for the Floodgate logger. Debug messages can still be sent after running
-     * this method, but they will be hidden from the console.
-     */
-    void disableDebug();
-
-    /**
-     * Returns if debugging is enabled
+     * Returns true if debugging is enabled
      */
     boolean isDebug();
 }

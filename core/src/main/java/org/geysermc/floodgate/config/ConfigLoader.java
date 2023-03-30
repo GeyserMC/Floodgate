@@ -35,20 +35,17 @@ import org.geysermc.configutils.ConfigUtilities;
 import org.geysermc.configutils.file.codec.PathFileCodec;
 import org.geysermc.configutils.file.template.ResourceTemplateReader;
 import org.geysermc.configutils.updater.change.Changes;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.crypto.KeyProducer;
 
 @Getter
 @RequiredArgsConstructor
 public final class ConfigLoader {
-    private final Path dataFolder;
+    private final Path dataDirectory;
     private final Class<? extends FloodgateConfig> configClass;
 
     private final KeyProducer keyProducer;
     private final FloodgateCipher cipher;
-
-    private final FloodgateLogger logger;
 
     @SuppressWarnings("unchecked")
     public <T extends FloodgateConfig> T load() {
@@ -65,7 +62,7 @@ public final class ConfigLoader {
 
         ConfigUtilities utilities =
                 ConfigUtilities.builder()
-                        .fileCodec(PathFileCodec.of(dataFolder))
+                        .fileCodec(PathFileCodec.of(dataDirectory))
                         .configFile("config.yml")
                         .templateReader(ResourceTemplateReader.of(getClass()))
                         .template(templateFile)
@@ -100,21 +97,16 @@ public final class ConfigLoader {
             String decrypted = cipher.decryptToString(encrypted);
 
             if (!test.equals(decrypted)) {
-                logger.error("Whoops, we tested the generated Floodgate keys but " +
-                        "the decrypted test message doesn't match the original.\n" +
+                throw new RuntimeException("Failed to decrypt test message.\n" +
                         "Original message: " + test + "." +
                         "Decrypted message: " + decrypted + ".\n" +
                         "The encrypted message itself: " + new String(encrypted)
-                );
-                throw new RuntimeException(
-                        "Tested the generated public and private key but, " +
-                                "the decrypted message doesn't match the original!"
                 );
             }
 
             Files.write(keyPath, key.getEncoded());
         } catch (Exception exception) {
-            logger.error("Error while creating key", exception);
+            throw new RuntimeException("Error while creating key", exception);
         }
     }
 }

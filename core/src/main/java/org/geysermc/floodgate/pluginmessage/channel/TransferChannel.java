@@ -42,27 +42,24 @@ public class TransferChannel implements PluginMessageChannel {
     @Override
     public Result handleProxyCall(
             byte[] data,
-            UUID targetUuid,
-            String targetUsername,
-            Identity targetIdentity,
             UUID sourceUuid,
             String sourceUsername,
-            Identity sourceIdentity) {
-
+            Identity sourceIdentity
+    ) {
         if (sourceIdentity == Identity.SERVER) {
             // send it to the client
             return Result.forward();
         }
 
         if (sourceIdentity == Identity.PLAYER) {
-            handleServerCall(data, targetUuid, targetUsername);
+            handleServerCall(data, sourceUuid, sourceUsername);
         }
 
         return Result.handled();
     }
 
     @Override
-    public Result handleServerCall(byte[] data, UUID targetUuid, String targetUsername) {
+    public Result handleServerCall(byte[] data, UUID playerUuid, String playerUsername) {
         return Result.kick("I'm sorry, I'm unable to transfer a server :(");
     }
 

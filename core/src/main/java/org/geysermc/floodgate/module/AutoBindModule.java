@@ -23,37 +23,17 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.config;
+package org.geysermc.floodgate.module;
 
-import org.geysermc.floodgate.util.FloodgateInfoHolder;
+import com.google.inject.AbstractModule;
+import org.geysermc.floodgate.util.AutoBind;
+import org.geysermc.floodgate.util.Utils;
 
-public class FloodgateConfigHolder {
-    private FloodgateConfig config;
-
-    public boolean has() {
-        return config != null;
-    }
-
-    public boolean isProxy() {
-        return config instanceof ProxyFloodgateConfig;
-    }
-
-    public FloodgateConfig get() {
-        return config;
-    }
-
-    public ProxyFloodgateConfig getAsProxy() {
-        return getAs();
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T extends FloodgateConfig> T getAs() {
-        return (T) config;
-    }
-
-    public void set(FloodgateConfig config) {
-        this.config = config;
-        // for Geyser dump
-        FloodgateInfoHolder.setConfig(config);
+public class AutoBindModule extends AbstractModule {
+    @Override
+    protected void configure() {
+        for (Class<?> clazz : Utils.getGeneratedClassesForAnnotation(AutoBind.class)) {
+            bind(clazz).asEagerSingleton();
+        }
     }
 }

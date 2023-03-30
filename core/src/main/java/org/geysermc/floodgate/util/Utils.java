@@ -33,21 +33,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.Reader;
 import java.io.StringWriter;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
+import java.lang.annotation.Annotation;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Utils {
-    private static final Pattern NON_UNIQUE_PREFIX = Pattern.compile("^[a-zA-Z0-9_]{0,16}$");
+    private static final Pattern NON_UNIQUE_PREFIX = Pattern.compile("^\\w{0,16}$");
     private static final Pattern DATABASE_NAME = Pattern.compile(Constants.DATABASE_NAME_FORMAT);
 
     /**
@@ -66,33 +64,21 @@ public class Utils {
         }
     }
 
-    public static List<String> readAllLines(String resourcePath) throws IOException {
-        InputStream stream = Utils.class.getClassLoader().getResourceAsStream(resourcePath);
-        try (BufferedReader reader = newBufferedReader(stream, StandardCharsets.UTF_8)) {
-            List<String> result = new ArrayList<>();
-            for (; ; ) {
-                String line = reader.readLine();
-                if (line == null) {
-                    break;
-                }
-                result.add(line);
-            }
-            return result;
-        }
-    }
-
-    public static BufferedReader newBufferedReader(InputStream inputStream, Charset charset) {
-        CharsetDecoder decoder = charset.newDecoder();
-        Reader reader = new InputStreamReader(inputStream, decoder);
-        return new BufferedReader(reader);
-    }
-
+    /**
+     * Reads a properties resource file
+     * @param resourceFile the resource file to read
+     * @return the properties file if the resource exists, otherwise null
+     * @throws AssertionError if something went wrong while readin the resource file
+     */
     public static Properties readProperties(String resourceFile) {
         Properties properties = new Properties();
         try (InputStream is = Utils.class.getClassLoader().getResourceAsStream(resourceFile)) {
-            properties.load(is);
+            if (is == null) {
+                return null;
+            }
+            properties.load(new InputStreamReader(is, StandardCharsets.UTF_8));
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new AssertionError("Failed to read properties file", e);
         }
         return properties;
     }
@@ -150,5 +136,43 @@ public class Utils {
         CompletableFuture<U> future = new CompletableFuture<>();
         future.completeExceptionally(ex);
         return future;
+    }
+
+    /**
+     * Returns a set of all the classes that are annotated by a given annotation.
+     * Keep in mind that these are from a set of generated annotations generated
+     * at compile time by the annotation processor, meaning that arbitrary annotations
+     * cannot be passed into this method and expected to get a set of classes back.
+     *
+     * @param annotationClass the annotation class
+     * @return a set of all the classes annotated by the given annotation
+     */
+    public static Set<Class<?>> getGeneratedClassesForAnnotation(Class<? extends Annotation> annotationClass) {
+        return getGeneratedClassesForAnnotation(annotationClass.getName());
+    }
+
+    /**
+     * Returns a set of all the classes that are annotated by a given annotation.
+     * Keep in mind that these are from a set of generated annotations generated
+     * at compile time by the annotation processor, meaning that arbitrary annotations
+     * cannot be passed into this method and expected to have a set of classes
+     * returned back.
+     *
+     * @param input the fully qualified name of the annotation
+     * @return a set of all the classes annotated by the given annotation
+     */
+    public static Set<Class<?>> getGeneratedClassesForAnnotation(String input) {
+        try (InputStream annotatedClass = Utils.class.getClassLoader().getResourceAsStream(input);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(annotatedClass))) {
+            return reader.lines().map(className -> {
+                try {
+                    return Class.forName(className);
+                } catch (ClassNotFoundException ex) {
+                    throw new RuntimeException("Failed to find class for annotation " + input, ex);
+                }
+            }).collect(Collectors.toSet());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

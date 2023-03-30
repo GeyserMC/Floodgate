@@ -26,30 +26,27 @@
 package org.geysermc.floodgate.util;
 
 import com.google.common.base.Joiner;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
 
 /**
  * Manages translations for strings in Floodgate
  */
-@RequiredArgsConstructor
+@Singleton
 public final class LanguageManager {
     private final Map<String, Properties> localeMappings = new HashMap<>();
-    private final FloodgateConfigHolder configHolder;
-    private final FloodgateLogger logger;
+
+    @Inject private FloodgateConfig config;
+    @Inject private FloodgateLogger logger;
 
     /**
      * The locale used in console and as a fallback
@@ -71,22 +68,13 @@ public final class LanguageManager {
         }
     }
 
-    public boolean isLoaded() {
-        return logger != null && defaultLocale != null;
-    }
-
     /**
      * Tries to load the log's locale file once a string has been requested
      */
+    @Inject
     private void init() {
         if (!loadLocale("en_US")) {// Fallback
             logger.error("Failed to load the fallback language. This will likely cause errors!");
-        }
-
-        FloodgateConfig config = configHolder.get();
-        if (config == null) {
-            // :thonk:
-            return;
         }
 
         defaultLocale = formatLocale(config.getDefaultLocale());
@@ -125,21 +113,11 @@ public final class LanguageManager {
             return true;
         }
 
-        InputStream localeStream = LanguageManager.class.getClassLoader().getResourceAsStream(
-                "languages/texts/" + formatLocale + ".properties");
+        Properties properties =
+                Utils.readProperties("languages/texts/" + formatLocale + ".properties");
 
-        // load the locale
-        if (localeStream != null) {
-            Properties localeProp = new Properties();
-
-            try (Reader reader = new InputStreamReader(localeStream, StandardCharsets.UTF_8)) {
-                localeProp.load(reader);
-            } catch (Exception e) {
-                throw new AssertionError("Failed to load Floodgate locale", e);
-            }
-
-            // insert the locale into the mappings
-            localeMappings.put(formatLocale, localeProp);
+        if (properties != null) {
+            localeMappings.put(formatLocale, properties);
             return true;
         }
 
@@ -167,14 +145,6 @@ public final class LanguageManager {
      * @return translated string or "key arg1, arg2 (etc.)" if it was not found in the given locale
      */
     public String getString(String key, String locale, Object... values) {
-        if (!isLoaded()) {
-            init();
-            // we can skip everything if the LanguageManager can't be loaded yet
-            if (!isLoaded()) {
-                return formatNotFound(key, values);
-            }
-        }
-
         Properties properties = localeMappings.get(locale);
         String formatString = null;
 

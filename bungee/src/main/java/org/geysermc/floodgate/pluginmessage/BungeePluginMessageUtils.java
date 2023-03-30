@@ -53,21 +53,6 @@ public final class BungeePluginMessageUtils extends PluginMessageUtils implement
             return;
         }
 
-        UUID targetUuid = null;
-        String targetUsername = null;
-        Identity targetIdentity = Identity.UNKNOWN;
-
-        Connection target = event.getReceiver();
-        if (target instanceof ProxiedPlayer) {
-            ProxiedPlayer player = (ProxiedPlayer) target;
-            targetUuid = player.getUniqueId();
-            targetUsername = player.getName();
-            targetIdentity = Identity.PLAYER;
-
-        } else if (target instanceof ServerConnection) {
-            targetIdentity = Identity.SERVER;
-        }
-
         UUID sourceUuid = null;
         String sourceUsername = null;
         Identity sourceIdentity = Identity.UNKNOWN;
@@ -83,8 +68,9 @@ public final class BungeePluginMessageUtils extends PluginMessageUtils implement
             sourceIdentity = Identity.SERVER;
         }
 
-        Result result = channel.handleProxyCall(event.getData(), targetUuid, targetUsername,
-                targetIdentity, sourceUuid, sourceUsername, sourceIdentity);
+        Result result = channel.handleProxyCall(
+                event.getData(), sourceUuid, sourceUsername, sourceIdentity
+        );
 
         event.setCancelled(!result.isAllowed());
 

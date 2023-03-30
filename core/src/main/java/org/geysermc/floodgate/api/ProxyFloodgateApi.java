@@ -25,24 +25,14 @@
 
 package org.geysermc.floodgate.api;
 
+import com.google.inject.Inject;
 import java.nio.charset.StandardCharsets;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
-import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.util.BedrockData;
 
 public final class ProxyFloodgateApi extends SimpleFloodgateApi {
-    private final FloodgateCipher cipher;
-
-    public ProxyFloodgateApi(
-            PluginMessageManager pluginMessageManager,
-            FloodgateConfigHolder configHolder,
-            FloodgateLogger logger,
-            FloodgateCipher cipher) {
-        super(pluginMessageManager, configHolder, logger);
-        this.cipher = cipher;
-    }
+    @Inject
+    private FloodgateCipher cipher;
 
     public byte[] createEncryptedData(BedrockData bedrockData) {
         try {

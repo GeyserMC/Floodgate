@@ -1,4 +1,4 @@
-var velocityVersion = "3.0.1"
+var velocityVersion = "3.1.1"
 var log4jVersion = "2.11.2"
 var gsonVersion = "2.8.8"
 var guavaVersion = "25.1-jre"

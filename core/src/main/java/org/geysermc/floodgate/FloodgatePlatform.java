@@ -28,121 +28,66 @@ package org.geysermc.floodgate;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import com.google.inject.name.Named;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.UUID;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.InstanceHolder;
+import org.geysermc.floodgate.api.event.FloodgateEventBus;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.link.PlayerLink;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
-import org.geysermc.floodgate.config.ConfigLoader;
 import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.config.FloodgateConfigHolder;
-import org.geysermc.floodgate.link.PlayerLinkLoader;
-import org.geysermc.floodgate.module.ConfigLoadedModule;
+import org.geysermc.floodgate.event.EventBus;
+import org.geysermc.floodgate.event.lifecycle.PostEnableEvent;
+import org.geysermc.floodgate.event.lifecycle.ShutdownEvent;
 import org.geysermc.floodgate.module.PostInitializeModule;
-import org.geysermc.floodgate.news.NewsChecker;
-import org.geysermc.floodgate.util.Metrics;
-import org.geysermc.floodgate.util.PrefixCheckTask;
 
 public class FloodgatePlatform {
     private static final UUID KEY = UUID.randomUUID();
-    private final FloodgateApi api;
-    private final PlatformInjector injector;
+    @Inject private PlatformInjector injector;
 
-    private final FloodgateLogger logger;
-
-    private FloodgateConfig config;
-    private Injector guice;
-
-    @Inject
-    public FloodgatePlatform(
-            FloodgateApi api,
-            PlatformInjector platformInjector,
-            FloodgateLogger logger,
-            Injector guice) {
-
-        this.api = api;
-        this.injector = platformInjector;
-        this.logger = logger;
-        this.guice = guice;
-    }
+    @Inject private FloodgateConfig config;
+    @Inject private Injector guice;
 
     @Inject
     public void init(
-            @Named("dataDirectory") Path dataDirectory,
-            ConfigLoader configLoader,
-            FloodgateConfigHolder configHolder,
+            FloodgateApi api,
+            PlayerLink link,
+            FloodgateEventBus eventBus,
             PacketHandlers packetHandlers,
-            HandshakeHandlers handshakeHandlers) {
-
-        if (!Files.isDirectory(dataDirectory)) {
-            try {
-                Files.createDirectory(dataDirectory);
-            } catch (IOException exception) {
-                logger.error("Failed to create the data folder", exception);
-                throw new RuntimeException("Failed to create the data folder", exception);
-            }
-        }
-
-        config = configLoader.load();
-        if (config.isDebug()) {
-            logger.enableDebug();
-        }
-
-        configHolder.set(config);
-        guice = guice.createChildInjector(new ConfigLoadedModule(config));
-        PlayerLink link = guice.getInstance(PlayerLinkLoader.class).load();
-
-        InstanceHolder.set(api, link, this.injector, packetHandlers, handshakeHandlers, KEY);
-
-        guice.getInstance(NewsChecker.class).start();
+            HandshakeHandlers handshakeHandlers
+    ) {
+        InstanceHolder.set(
+                api, link, eventBus, this.injector, packetHandlers, handshakeHandlers, KEY
+        );
     }
 
-    public boolean enable(Module... postInitializeModules) {
+    public void enable(Module... postInitializeModules) throws RuntimeException {
         if (injector == null) {
-            logger.error("Failed to find the platform injector!");
-            return false;
+            throw new RuntimeException("Failed to find the platform injector!");
         }
 
         try {
-            if (!injector.inject()) {
-                logger.error("Failed to inject the packet listener!");
-                return false;
-            }
+            injector.inject();
         } catch (Exception exception) {
-            logger.error("Failed to inject the packet listener!", exception);
-            return false;
+            throw new RuntimeException("Failed to inject the packet listener!", exception);
         }
 
         this.guice = guice.createChildInjector(new PostInitializeModule(postInitializeModules));
 
-        PrefixCheckTask.checkAndExecuteDelayed(config, logger);
-
-        guice.getInstance(Metrics.class);
-
-        return true;
+        guice.getInstance(EventBus.class).fire(new PostEnableEvent());
     }
 
-    public boolean disable() {
+    public void disable() {
+        guice.getInstance(EventBus.class).fire(new ShutdownEvent());
+
         if (injector != null && injector.canRemoveInjection()) {
             try {
-                if (!injector.removeInjection()) {
-                    logger.error("Failed to remove the injection!");
-                }
+                injector.removeInjection();
             } catch (Exception exception) {
-                logger.error("Failed to remove the injection!", exception);
+                throw new RuntimeException("Failed to remove the injection!", exception);
             }
         }
-
-        guice.getInstance(NewsChecker.class).shutdown();
-        api.getPlayerLink().stop();
-        return true;
     }
 
     public boolean isProxy() {

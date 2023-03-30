@@ -56,11 +56,9 @@ import org.geysermc.floodgate.pluginmessage.PluginMessageRegistration;
 import org.geysermc.floodgate.pluginmessage.VelocityPluginMessageRegistration;
 import org.geysermc.floodgate.pluginmessage.VelocityPluginMessageUtils;
 import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.VelocityCommandUtil;
 import org.geysermc.floodgate.util.VelocityPlatformUtils;
 import org.geysermc.floodgate.util.VelocitySkinApplier;
-import org.slf4j.Logger;
 
 @RequiredArgsConstructor
 public final class VelocityPlatformModule extends AbstractModule {
@@ -70,6 +68,8 @@ public final class VelocityPlatformModule extends AbstractModule {
     protected void configure() {
         bind(CommandUtil.class).to(VelocityCommandUtil.class);
         bind(PlatformUtils.class).to(VelocityPlatformUtils.class);
+        bind(FloodgateLogger.class).to(Slf4jFloodgateLogger.class);
+        bind(SkinApplier.class).to(VelocitySkinApplier.class);
     }
 
     @Provides
@@ -87,12 +87,6 @@ public final class VelocityPlatformModule extends AbstractModule {
 
         commandManager.registerCommandPreProcessor(new FloodgateCommandPreprocessor<>(commandUtil));
         return commandManager;
-    }
-
-    @Provides
-    @Singleton
-    public FloodgateLogger floodgateLogger(Logger logger, LanguageManager languageManager) {
-        return new Slf4jFloodgateLogger(logger, languageManager);
     }
 
     /*
@@ -119,20 +113,14 @@ public final class VelocityPlatformModule extends AbstractModule {
         return new VelocityPluginMessageRegistration(proxy);
     }
 
-    @Provides
-    @Singleton
-    public SkinApplier skinApplier(ProxyServer server) {
-        return new VelocitySkinApplier(server);
-    }
-
     /*
     DebugAddon / PlatformInjector
      */
 
     @Provides
     @Singleton
-    public CommonPlatformInjector platformInjector(ProxyServer server, FloodgateLogger logger) {
-        return new VelocityInjector(server, logger);
+    public CommonPlatformInjector platformInjector(ProxyServer server) {
+        return new VelocityInjector(server);
     }
 
     @Provides

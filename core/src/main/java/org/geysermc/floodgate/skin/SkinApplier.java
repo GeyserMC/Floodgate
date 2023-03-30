@@ -25,8 +25,16 @@
 
 package org.geysermc.floodgate.skin;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
 public interface SkinApplier {
-    void applySkin(FloodgatePlayer floodgatePlayer, SkinData skinData);
+    /**
+     * Apply a skin to a {@link FloodgatePlayer player}
+     *
+     * @param floodgatePlayer player to apply skin to
+     * @param skinData data for skin to apply to player
+     */
+    void applySkin(@NonNull FloodgatePlayer floodgatePlayer, @NonNull SkinData skinData);
 }

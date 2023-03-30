@@ -1,12 +1,27 @@
 plugins {
     `java-library`
-    `maven-publish`
 //    id("net.ltgt.errorprone")
+    id("net.kyori.indra")
     id("net.kyori.indra.git")
 }
 
 dependencies {
     compileOnly("org.checkerframework", "checker-qual", Versions.checkerQual)
+}
+
+indra {
+    github("GeyserMC", "Floodgate") {
+        ci(true)
+        issues(true)
+        scm(true)
+    }
+    mitLicense()
+
+    javaVersions {
+        // without toolchain & strictVersion sun.misc.Unsafe won't be found
+        minimumToolchain(8)
+        strictVersions(true)
+    }
 }
 
 tasks {
@@ -22,14 +37,4 @@ tasks {
             )
         }
     }
-    compileJava {
-        options.encoding = Charsets.UTF_8.name()
-    }
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-
-    withSourcesJar()
 }

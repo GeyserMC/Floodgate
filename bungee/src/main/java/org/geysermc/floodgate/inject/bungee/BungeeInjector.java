@@ -35,6 +35,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.netty.PipelineUtils;
 import net.md_5.bungee.protocol.MinecraftEncoder;
+import net.md_5.bungee.protocol.Varint21LengthFieldExtraBufPrepender;
 import net.md_5.bungee.protocol.Varint21LengthFieldPrepender;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
@@ -49,27 +50,31 @@ public final class BungeeInjector extends CommonPlatformInjector {
     @Getter private boolean injected;
 
     @Override
-    public boolean inject() {
-        try {
-            // Can everyone just switch to Velocity please :)
+    public void inject() {
+        // Can everyone just switch to Velocity please :)
 
-            Field framePrepender = ReflectionUtils.getField(PipelineUtils.class, "framePrepender");
-
-            // Required in order to inject into both Geyser <-> proxy AND proxy <-> server
-            // (Instead of just replacing the ChannelInitializer which is only called for
-            // player <-> proxy)
-            BungeeCustomPrepender customPrepender = new BungeeCustomPrepender(
-                    this, ReflectionUtils.castedStaticValue(framePrepender)
+        // Newer Bungee versions have a separate prepender for backend and client connections
+        Field serverFramePrepender =
+                ReflectionUtils.getField(PipelineUtils.class, "serverFramePrepender");
+        if (serverFramePrepender != null) {
+            BungeeCustomServerPrepender customServerPrepender = new BungeeCustomServerPrepender(
+                    this, ReflectionUtils.castedStaticValue(serverFramePrepender)
             );
-
-            BungeeReflectionUtils.setFieldValue(null, framePrepender, customPrepender);
-
-            injected = true;
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+            BungeeReflectionUtils.setFieldValue(null, serverFramePrepender, customServerPrepender);
         }
+
+        Field framePrepender = ReflectionUtils.getField(PipelineUtils.class, "framePrepender");
+
+        // Required in order to inject into both Geyser <-> proxy AND proxy <-> server
+        // (Instead of just replacing the ChannelInitializer which is only called for
+        // player <-> proxy)
+        BungeeCustomPrepender customPrepender = new BungeeCustomPrepender(
+                this, ReflectionUtils.castedStaticValue(framePrepender)
+        );
+
+        BungeeReflectionUtils.setFieldValue(null, framePrepender, customPrepender);
+
+        injected = true;
     }
 
     @Override
@@ -78,9 +83,9 @@ public final class BungeeInjector extends CommonPlatformInjector {
     }
 
     @Override
-    public boolean removeInjection() {
-        logger.error("Floodgate cannot remove itself from Bungee without a reboot");
-        return false;
+    public void removeInjection() {
+        throw new IllegalStateException(
+                "Floodgate cannot remove itself from Bungee without a reboot");
     }
 
     void injectClient(Channel channel, boolean clientToProxy) {
@@ -122,6 +127,22 @@ public final class BungeeInjector extends CommonPlatformInjector {
                         BUNGEE_INIT, new BungeeProxyToServerInjectInitializer(injector)
                 );
             }
+        }
+    }
+
+    @RequiredArgsConstructor
+    private static final class BungeeCustomServerPrepender
+            extends Varint21LengthFieldExtraBufPrepender {
+        private final BungeeInjector injector;
+        private final Varint21LengthFieldExtraBufPrepender original;
+
+        @Override
+        public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+            original.handlerAdded(ctx);
+            // The Minecraft encoder being in the pipeline isn't present until later
+
+            // Proxy <-> Server
+            ctx.pipeline().addLast(BUNGEE_INIT, new BungeeProxyToServerInjectInitializer(injector));
         }
     }
 

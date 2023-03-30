@@ -35,10 +35,6 @@ public enum LinkRequestResult {
      */
     UNKNOWN_ERROR,
     /**
-     * @deprecated this result isn't used. Instead the link code is returned
-     */
-    REQUEST_CREATED,
-    /**
      * The specified bedrock username is already linked to a Java account.
      */
     ALREADY_LINKED,
