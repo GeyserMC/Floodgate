@@ -21,7 +21,7 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (mixinClassName.equals("org/geysermc/floodgate/mixin/ClientIntentionPacketMixin")) {
+        if (mixinClassName.equals("org.geysermc.floodgate.mixin.ClientIntentionPacketMixin")) {
             //returns true if fabricproxy-lite is present, therefore loading the mixin. If not present, the mixin will not be loaded.
             return FabricLoader.getInstance().isModLoaded("fabricproxy-lite");
         }
