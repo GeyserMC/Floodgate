@@ -121,9 +121,11 @@ public interface FloodgateConfig extends GenericPostInitializeCallback<ConfigLoa
 
     @ConfigSection
     interface DisconnectMessages {
+        @Comment
         @DefaultString("Please connect through the official Geyser")
         String invalidKey();
 
+        @Comment
         @DefaultString("Expected {} arguments, got {}. Is Geyser up-to-date?")
         String invalidArgumentsLength();
     }
@@ -151,7 +153,7 @@ public interface FloodgateConfig extends GenericPostInitializeCallback<ConfigLoa
         long linkCodeTimeout();
 
         @Comment
-        @DefaultString("mysql")
+        @DefaultString("sqlite")
         String type();
 
         @Comment

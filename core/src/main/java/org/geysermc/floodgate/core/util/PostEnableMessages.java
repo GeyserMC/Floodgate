@@ -29,6 +29,7 @@ import io.micronaut.runtime.event.annotation.EventListener;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -39,7 +40,7 @@ import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.event.lifecycle.PostEnableEvent;
 
 @Listener
-@EagerSingleton
+@Singleton
 public final class PostEnableMessages {
     private final List<String> messages = new ArrayList<>();
 

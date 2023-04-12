@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.core.config;
 
+import org.geysermc.configutils.node.meta.Comment;
 import org.geysermc.configutils.node.meta.ConfigVersion;
 import org.geysermc.configutils.node.meta.Defaults.DefaultBoolean;
 import org.geysermc.configutils.node.meta.Inherit;
@@ -34,6 +35,7 @@ import org.geysermc.configutils.node.meta.Inherit;
  */
 @Inherit(ConfigVersion.class)
 public interface ProxyFloodgateConfig extends FloodgateConfig {
+    @Comment
     @DefaultBoolean
     boolean sendFloodgateData();
 }
