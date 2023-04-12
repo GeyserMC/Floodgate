@@ -66,10 +66,10 @@ public abstract class CommonPlayerLink implements PlayerLink {
 
     @Inject
     void init(FloodgateConfig config) {
-        FloodgateConfig.PlayerLinkConfig linkConfig = config.getPlayerLink();
-        enabled = linkConfig.isEnabled();
-        allowLinking = linkConfig.isAllowed();
-        verifyLinkTimeout = linkConfig.getLinkCodeTimeout();
+        FloodgateConfig.PlayerLinkConfig linkConfig = config.playerLink();
+        enabled = linkConfig.enabled();
+        allowLinking = linkConfig.allowed();
+        verifyLinkTimeout = linkConfig.linkCodeTimeout();
     }
 
     public String createCode() {

@@ -154,7 +154,7 @@ public final class VelocityListener {
                     Collections.emptyList()
             );
             // The texture properties addition is to fix the February 2 2022 Mojang authentication changes
-            if (!config.isSendFloodgateData() && !player.isLinked()) {
+            if (!config.sendFloodgateData() && !player.isLinked()) {
                 profile = profile.addProperty(new Property("textures", "", ""));
             }
             event.setGameProfile(profile);

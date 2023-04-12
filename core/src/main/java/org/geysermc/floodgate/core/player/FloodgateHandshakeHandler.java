@@ -123,7 +123,7 @@ public final class FloodgateHandshakeHandler {
                 );
             } catch (Exception e) {
                 // all the other exceptions are caused by invalid/tempered Floodgate data
-                if (config.isDebug()) {
+                if (config.debug()) {
                     e.printStackTrace();
                 }
 
@@ -199,7 +199,7 @@ public final class FloodgateHandshakeHandler {
                     channel, true, bedrockData.clone(), config,
                     linkedPlayer != null ? linkedPlayer.clone() : null, hostname);
 
-            if (config.getPlayerLink().isRequireLink() && linkedPlayer == null) {
+            if (config.playerLink().requireLink() && linkedPlayer == null) {
                 String reason = languageManager.getString(
                         "floodgate.core.not_linked",
                         bedrockData.getLanguageCode(),

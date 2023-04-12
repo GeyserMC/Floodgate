@@ -131,7 +131,7 @@ public final class BungeeListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPostLogin(PostLoginEvent event) {
         // To fix the February 2 2022 Mojang authentication changes
-        if (!config.isSendFloodgateData()) {
+        if (!config.sendFloodgateData()) {
             FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
             if (player != null && !player.isLinked()) {
                 skinApplier.applySkin(player, new SkinDataImpl("", ""));

@@ -159,9 +159,9 @@ public final class LinkAccountCommand implements FloodgateCommand {
 
     @Override
     public boolean shouldRegister(FloodgateConfig config) {
-        FloodgateConfig.PlayerLinkConfig linkConfig = config.getPlayerLink();
-        return linkConfig.isEnabled() &&
-                (linkConfig.isEnableOwnLinking() || linkConfig.isEnableGlobalLinking());
+        FloodgateConfig.PlayerLinkConfig linkConfig = config.playerLink();
+        return linkConfig.enabled() &&
+                (linkConfig.enableOwnLinking() || linkConfig.enableGlobalLinking());
     }
 
     @Getter

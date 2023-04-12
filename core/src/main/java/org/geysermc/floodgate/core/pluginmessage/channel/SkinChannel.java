@@ -59,7 +59,7 @@ public class SkinChannel implements PluginMessageChannel {
             Result result = handleServerCall(data, sourceUuid, sourceUsername);
             // aka translate 'handled' into 'forward' when send-floodgate-data is enabled
             if (!result.isAllowed() && result.getReason() == null) {
-                if (config.isProxy() && ((ProxyFloodgateConfig) config).isSendFloodgateData()) {
+                if (config.proxy() && ((ProxyFloodgateConfig) config).sendFloodgateData()) {
                     return Result.forward();
                 }
             }

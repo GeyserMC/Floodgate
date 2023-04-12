@@ -25,10 +25,12 @@
 
 package org.geysermc.floodgate.core.config;
 
+import io.micronaut.context.ApplicationContext;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.Key;
@@ -36,10 +38,11 @@ import java.util.UUID;
 import lombok.Getter;
 import org.geysermc.configutils.ConfigUtilities;
 import org.geysermc.configutils.file.codec.PathFileCodec;
-import org.geysermc.configutils.file.template.ResourceTemplateReader;
 import org.geysermc.configutils.updater.change.Changes;
+import org.geysermc.floodgate.core.event.lifecycle.ConfigLoadedEvent;
 import org.geysermc.floodgate.core.scope.ProxyOnly;
 import org.geysermc.floodgate.core.scope.ServerOnly;
+import org.geysermc.floodgate.core.util.LanguageManager;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.crypto.KeyProducer;
 
@@ -49,40 +52,40 @@ public final class ConfigLoader {
     private final Path dataDirectory;
     private final KeyProducer keyProducer;
     private final FloodgateCipher cipher;
+    private final LanguageManager languageManager;
+    private final ApplicationContext context;
 
     @Inject
     ConfigLoader(
             @Named("dataDirectory") Path dataDirectory,
             KeyProducer keyProducer,
-            FloodgateCipher cipher
+            FloodgateCipher cipher,
+            LanguageManager languageManager,
+            ApplicationContext context
     ) {
         this.dataDirectory = dataDirectory;
         this.keyProducer = keyProducer;
         this.cipher = cipher;
+        this.languageManager = languageManager;
+        this.context = context;
     }
 
     @Bean
     @ServerOnly
+    @Singleton
     FloodgateConfig config() {
         return load(FloodgateConfig.class);
     }
 
     @Bean
     @ProxyOnly
+    @Singleton
     ProxyFloodgateConfig proxyConfig() {
         return load(ProxyFloodgateConfig.class);
     }
 
     @SuppressWarnings("unchecked")
     private <T extends FloodgateConfig> T load(Class<? extends FloodgateConfig> configClass) {
-        String templateFile = "config.yml";
-        if (ProxyFloodgateConfig.class.isAssignableFrom(configClass)) {
-            templateFile = "proxy-" + templateFile;
-        }
-
-        //todo old Floodgate logged a message when version = 0 and it generated a new key.
-        // Might be nice to allow you to run a function for a specific version.
-
         // it would also be nice to have sections in versionBuilder so that you don't have to
         // provide the path all the time
 
@@ -90,27 +93,31 @@ public final class ConfigLoader {
                 ConfigUtilities.builder()
                         .fileCodec(PathFileCodec.of(dataDirectory))
                         .configFile("config.yml")
-                        .templateReader(ResourceTemplateReader.of(getClass()))
-                        .template(templateFile)
                         .changes(Changes.builder()
                                 .version(1, Changes.versionBuilder()
-                                        .keyRenamed("player-link.enable", "player-link.enabled")
-                                        .keyRenamed("player-link.allow-linking", "player-link.allowed"))
+                                        .keyRenamed("playerLink.enable", "playerLink.enabled")
+                                        .keyRenamed("playerLink.allowLinking", "playerLink.allowed"))
                                 .version(2, Changes.versionBuilder()
-                                        .keyRenamed("player-link.use-global-linking", "player-link.enable-global-linking"))
+                                        .keyRenamed("playerLink.useGlobalLinking", "playerLink.enableGlobalLinking"))
                                 .build())
                         .definePlaceholder("metrics.uuid", UUID::randomUUID)
                         .postInitializeCallbackArgument(this)
+                        .commentTranslator((key) -> languageManager.getLogString("floodgate.config." + key))
                         .build();
 
+        T config;
         try {
-            return (T) utilities.executeOn(configClass);
+            config = (T) utilities.executeOn(configClass);
         } catch (Throwable throwable) {
             throw new RuntimeException(
                     "Failed to load the config! Try to delete the config file if this error persists",
                     throwable
             );
         }
+
+        context.getEventPublisher(ConfigLoadedEvent.class)
+                .publishEvent(new ConfigLoadedEvent(config));
+        return config;
     }
 
     public void generateKey(Path keyPath) {

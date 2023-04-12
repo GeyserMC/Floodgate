@@ -48,7 +48,7 @@ public final class JavaUtilFloodgateLogger implements FloodgateLogger {
     @Inject
     public void init(LanguageManager languageManager, FloodgateConfig config) {
         this.languageManager = languageManager;
-        if (config.isDebug()) {
+        if (config.debug()) {
             logger.setLevel(Level.ALL);
         }
     }

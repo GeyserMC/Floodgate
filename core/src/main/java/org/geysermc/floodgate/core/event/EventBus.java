@@ -29,6 +29,7 @@ import io.micronaut.context.ApplicationContext;
 import io.micronaut.core.annotation.AnnotationMetadata;
 import io.micronaut.inject.qualifiers.Qualifiers;
 import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -45,13 +46,21 @@ import org.geysermc.floodgate.core.util.EagerSingleton;
 @SuppressWarnings("unchecked")
 public final class EventBus extends EventBusImpl<Object, FloodgateSubscriber<?>>
         implements FloodgateEventBus {
+    @Inject ApplicationContext context;
 
-//    @Inject
-//    Set<@Listener Object> detectedListeners;
+
+    @Override
+    @SuppressWarnings("rawtypes")
+    public boolean fire(@NonNull Object event) {
+        context.getEventPublisher((Class) event.getClass()).publishEvent(event);
+        // todo differentiate internal events from public events
+        return super.fire(event);
+    }
 
     @PostConstruct
     void registerListeners(ApplicationContext context) {
         // https://github.com/micronaut-projects/micronaut-core/issues/8881
+        // todo this doesn't really seem to work?
         context.getBeansOfType(
                 Object.class,
                 Qualifiers.byAnnotation(AnnotationMetadata.EMPTY_METADATA, Listener.class)

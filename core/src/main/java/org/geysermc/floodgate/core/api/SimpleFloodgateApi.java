@@ -68,7 +68,7 @@ public class SimpleFloodgateApi implements FloodgateApi {
 
     @Override
     public String getPlayerPrefix() {
-        return config.getUsernamePrefix();
+        return config.usernamePrefix();
     }
 
     @Override

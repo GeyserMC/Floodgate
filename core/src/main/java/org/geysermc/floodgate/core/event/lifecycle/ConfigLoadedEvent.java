@@ -23,17 +23,9 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.config;
+package org.geysermc.floodgate.core.event.lifecycle;
 
-import org.geysermc.configutils.node.meta.ConfigVersion;
-import org.geysermc.configutils.node.meta.Defaults.DefaultBoolean;
-import org.geysermc.configutils.node.meta.Inherit;
+import org.geysermc.floodgate.core.config.FloodgateConfig;
 
-/**
- * The Floodgate configuration used by proxy platforms, currently Velocity and Bungeecord.
- */
-@Inherit(ConfigVersion.class)
-public interface ProxyFloodgateConfig extends FloodgateConfig {
-    @DefaultBoolean
-    boolean sendFloodgateData();
+public record ConfigLoadedEvent(FloodgateConfig config) {
 }

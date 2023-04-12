@@ -28,12 +28,13 @@ package org.geysermc.floodgate.velocity.logger;
 import static org.geysermc.floodgate.core.util.MessageFormatter.format;
 
 import io.micronaut.context.BeanProvider;
+import io.micronaut.runtime.event.annotation.EventListener;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.core.config.FloodgateConfig;
+import org.geysermc.floodgate.core.event.lifecycle.ConfigLoadedEvent;
 import org.geysermc.floodgate.core.util.LanguageManager;
 import org.slf4j.Logger;
 
@@ -42,9 +43,9 @@ public final class Slf4jFloodgateLogger implements FloodgateLogger {
     @Inject BeanProvider<LanguageManager> languageManager;
     @Inject Logger logger;
 
-    @Inject
-    void init(FloodgateConfig config) {
-        if (config.isDebug() && !logger.isDebugEnabled()) {
+    @EventListener
+    void onConfigLoaded(ConfigLoadedEvent event) {
+        if (event.config().debug() && !logger.isDebugEnabled()) {
             Configurator.setLevel(logger.getName(), Level.DEBUG);
         }
     }

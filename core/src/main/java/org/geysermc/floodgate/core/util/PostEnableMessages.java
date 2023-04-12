@@ -25,22 +25,21 @@
 
 package org.geysermc.floodgate.core.util;
 
+import io.micronaut.runtime.event.annotation.EventListener;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import jakarta.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.geysermc.event.Listener;
-import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.event.lifecycle.PostEnableEvent;
 
 @Listener
-@Singleton
+@EagerSingleton
 public final class PostEnableMessages {
     private final List<String> messages = new ArrayList<>();
 
@@ -64,7 +63,7 @@ public final class PostEnableMessages {
 
     @PostConstruct
     void registerPrefixMessages() {
-        String prefix = config.getRawUsernamePrefix();
+        String prefix = config.rawUsernamePrefix();
 
         if (prefix.isEmpty()) {
             add(new String[]{
@@ -95,12 +94,12 @@ public final class PostEnableMessages {
         }
     }
 
-    @Subscribe
+    @EventListener
     public void onPostEnable(PostEnableEvent ignored) {
         // normally proxies don't have a lot of plugins, so proxies don't need to sleep as long
         executorService.schedule(
                 () -> messages.forEach(logger::warn),
-                config.isProxy() ? 2 : 5,
+                config.proxy() ? 2 : 5,
                 TimeUnit.SECONDS
         );
     }

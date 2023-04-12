@@ -57,13 +57,13 @@ public final class Metrics {
             @Named("implementationName") String implementationName,
             FloodgateLogger logger
     ) {
-        MetricsConfig metricsConfig = config.getMetrics();
+        MetricsConfig metricsConfig = config.metrics();
 
         metricsBase = new MetricsBase(
                 "server-implementation",
-                metricsConfig.getUuid(),
+                metricsConfig.uuid(),
                 Constants.METRICS_ID,
-                metricsConfig.isEnabled(),
+                metricsConfig.enabled(),
                 this::appendPlatformData,
                 jsonObjectBuilder -> { /* NOP */ },
                 null,

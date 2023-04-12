@@ -113,10 +113,10 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
                             setKickMessage(Constants.INTERNAL_ERROR_MESSAGE);
                             break;
                         case DECRYPT_ERROR:
-                            setKickMessage(config.getDisconnect().getInvalidKey());
+                            setKickMessage(config.disconnect().invalidKey());
                             break;
                         case INVALID_DATA_LENGTH:
-                            setKickMessage(config.getDisconnect().getInvalidArgumentsLength());
+                            setKickMessage(config.disconnect().invalidArgumentsLength());
                             break;
                         default:
                             break;
@@ -187,7 +187,7 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         super.exceptionCaught(ctx, cause);
-        if (config.isDebug()) {
+        if (config.debug()) {
             cause.printStackTrace();
         }
     }

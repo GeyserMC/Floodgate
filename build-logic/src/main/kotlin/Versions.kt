@@ -27,11 +27,11 @@ object Versions {
     const val geyserVersion = "2.0.7-SNAPSHOT"
     const val cumulusVersion = "1.1.1"
     const val eventsVersion = "1.0-SNAPSHOT"
-    const val configUtilsVersion = "1.0-SNAPSHOT"
+    const val configUtilsVersion = "2.0-SNAPSHOT"
     const val fastutilVersion = "8.5.3"
     const val guiceVersion = "5.1.0"
     const val nettyVersion = "4.1.49.Final"
-    const val snakeyamlVersion = "1.28"
+    const val snakeyamlVersion = "2.0"
     const val cloudVersion = "1.5.0"
     const val bstatsVersion = "3.0.1"
 

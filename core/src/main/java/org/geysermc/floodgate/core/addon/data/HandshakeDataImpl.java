@@ -66,10 +66,10 @@ public class HandshakeDataImpl implements HandshakeData {
         UUID javaUniqueId = null;
 
         if (bedrockData != null) {
-            String prefix = config.getUsernamePrefix();
+            String prefix = config.usernamePrefix();
             int usernameLength = Math.min(bedrockData.getUsername().length(), 16 - prefix.length());
             javaUsername = prefix + bedrockData.getUsername().substring(0, usernameLength);
-            if (config.isReplaceSpaces()) {
+            if (config.replaceSpaces()) {
                 javaUsername = javaUsername.replace(" ", "_");
             }
 

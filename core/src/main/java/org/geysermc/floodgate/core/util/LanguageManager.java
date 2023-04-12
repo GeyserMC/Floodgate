@@ -47,7 +47,6 @@ import org.geysermc.floodgate.core.config.FloodgateConfig;
 public final class LanguageManager {
     private final Map<String, Properties> localeMappings = new HashMap<>();
 
-    @Inject BeanProvider<FloodgateConfig> config;
     @Inject BeanProvider<FloodgateLogger> logger;
 
     /**
@@ -75,15 +74,17 @@ public final class LanguageManager {
      */
     @PostConstruct
     public void init() {
-        FloodgateLogger logger = this.logger.get();
-
-        if (!loadLocale("en_US")) {// Fallback
-            logger.error("Failed to load the fallback language. This will likely cause errors!");
+        if (!loadLocale("en_US")) {
+            logger.get().error("Failed to load the fallback language. This will likely cause errors!");
         }
+        defaultLocale = "en_US";
+    }
 
-        defaultLocale = formatLocale(config.get().getDefaultLocale());
+    public void loadConfiguredDefaultLocale(FloodgateConfig config) {
+        FloodgateLogger logger = this.logger.get();
+        defaultLocale = formatLocale(config.defaultLocale());
 
-        if (isValidLanguage(defaultLocale)) {
+        if (!"system".equals(defaultLocale) && isValidLanguage(defaultLocale)) {
             if (loadLocale(defaultLocale)) {
                 return;
             }

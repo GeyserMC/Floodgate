@@ -84,8 +84,8 @@ public final class PlayerLinkHolder {
             throw new IllegalStateException("Config cannot be null!");
         }
 
-        PlayerLinkConfig linkConfig = config.getPlayerLink();
-        if (!linkConfig.isEnabled()) {
+        PlayerLinkConfig linkConfig = config.playerLink();
+        if (!linkConfig.enabled()) {
             return new DisabledPlayerLink();
         }
 
@@ -101,8 +101,8 @@ public final class PlayerLinkHolder {
 
         // we can skip the rest if global linking is enabled and no database implementations has
         // been found, or when global linking is enabled and own player linking is disabled.
-        if (linkConfig.isEnableGlobalLinking() &&
-                (files.isEmpty() || !linkConfig.isEnableOwnLinking())) {
+        if (linkConfig.enableGlobalLinking() &&
+                (files.isEmpty() || !linkConfig.enableOwnLinking())) {
             return currentContext.getBean(GlobalPlayerLinking.class);
         }
 
@@ -117,7 +117,7 @@ public final class PlayerLinkHolder {
         // We only want to load one database implementation
         if (files.size() > 1) {
             boolean found = false;
-            databaseName = linkConfig.getType();
+            databaseName = linkConfig.type();
 
             String expectedName = "floodgate-" + databaseName + "-database.jar";
             for (Path path : files) {
@@ -129,7 +129,7 @@ public final class PlayerLinkHolder {
 
             if (!found) {
                 logger.error(
-                        "Failed to find an implementation for type: {}", linkConfig.getType()
+                        "Failed to find an implementation for type: {}", linkConfig.type()
                 );
                 return new DisabledPlayerLink();
             }
@@ -195,7 +195,7 @@ public final class PlayerLinkHolder {
             instance = childContext.getBean(mainClass);
 
             // we use our own internal PlayerLinking when global linking is enabled
-            if (linkConfig.isEnableGlobalLinking()) {
+            if (linkConfig.enableGlobalLinking()) {
                 GlobalPlayerLinking linking = childContext.getBean(GlobalPlayerLinking.class);
                 linking.setDatabaseImpl(instance);
                 linking.load();

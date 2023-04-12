@@ -83,6 +83,6 @@ public final class DebugAddon implements InjectorAddon {
 
     @Override
     public boolean shouldInject() {
-        return config.isDebug();
+        return config.debug();
     }
 }
