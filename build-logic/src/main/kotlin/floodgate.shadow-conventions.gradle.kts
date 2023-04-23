@@ -7,14 +7,14 @@ plugins {
 
 tasks {
     named<Jar>("jar") {
-        archiveClassifier.set("unshaded")
+        archiveClassifier = "unshaded"
         from(project.rootProject.file("LICENSE"))
     }
 
     val shadowJar = named<ShadowJar>("shadowJar") {
-        archiveBaseName.set("floodgate-${project.name}")
-        archiveVersion.set("")
-        archiveClassifier.set("")
+        archiveBaseName = "floodgate-${project.name}"
+        archiveVersion = ""
+        archiveClassifier = ""
 
         val sJar: ShadowJar = this
 
@@ -37,7 +37,7 @@ tasks {
 
         val destinationDir = System.getenv("DESTINATION_DIRECTORY");
         if (destinationDir != null) {
-            destinationDirectory.set(file(destinationDir))
+            destinationDirectory = file(destinationDir)
         }
     }
 

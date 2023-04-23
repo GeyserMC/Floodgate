@@ -1,13 +1,10 @@
-var log4jVersion = "2.11.2"
-var gsonVersion = "2.8.8"
-var guavaVersion = "25.1-jre"
-
 plugins {
     java
 }
 
 dependencies {
     api(projects.isolation)
+    compileOnlyApi("com.velocitypowered", "velocity-api", Versions.velocityVersion)
 }
 
 tasks {
@@ -17,9 +14,9 @@ tasks {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         from (configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
 
-        archiveBaseName.set("floodgate-${project.name}")
-        archiveVersion.set("")
-        archiveClassifier.set("")
+        archiveBaseName = "floodgate-${project.name}"
+        archiveVersion = ""
+        archiveClassifier = ""
 
         val velocityBaseJar = project.projects
             .velocityBase.dependencyProject
