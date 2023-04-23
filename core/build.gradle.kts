@@ -1,11 +1,12 @@
 plugins {
     id("floodgate.generate-templates")
     id("floodgate.dependency-hash")
-    id("io.micronaut.library") version "3.7.4"
+    id("io.micronaut.library")
 }
 
 dependencies {
     api(projects.api)
+    compileOnlyApi(projects.isolation)
     api("org.geysermc.configutils", "configutils", Versions.configUtilsVersion)
 
     api("com.google.inject", "guice", Versions.guiceVersion)
@@ -23,9 +24,17 @@ dependencies {
     api("io.micronaut", "micronaut-context")
 
     annotationProcessor("io.micronaut.data:micronaut-data-processor")
-    implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
-    implementation("io.micronaut.sql:micronaut-jdbc-hikari")
-    runtimeOnly("com.h2database:h2")
+    implementation("io.micronaut.data:micronaut-data-model")
+    implementation("jakarta.persistence:jakarta.persistence-api:2.2.3")
+
+//    compileOnlyApi("io.micronaut.data:micronaut-data-hibernate-jpa")
+    //todo add these as libs
+    //compileOnly("io.micronaut.data:micronaut-data-hibernate-jpa")
+    //compileOnly("io.micronaut.sql:micronaut-jdbc-hikari")
+    //compileOnly("com.h2database:h2")
+    //implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
+    //implementation("io.micronaut.sql:micronaut-jdbc-hikari")
+    //runtimeOnly("com.h2database:h2")
 
 //    annotationProcessor("io.micronaut.data:micronaut-data-document-processor")
 //    compileOnly("io.micronaut.data:micronaut-data-mongodb")

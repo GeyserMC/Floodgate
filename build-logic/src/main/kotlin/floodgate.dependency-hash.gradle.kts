@@ -17,10 +17,9 @@ tasks.register("listDependencyInfo") {
 
 tasks.register("writeDependencyInfo") {
     doLast {
-        Files.writeString(
-            dependenciesInfoFile(),
-            dependenciesToString(listDependencies())
-        )
+        val path = dependenciesInfoFile()
+        Files.createDirectories(path.parent)
+        Files.writeString(path, dependenciesToString(listDependencies()))
     }
 }
 
@@ -34,9 +33,9 @@ tasks.register("checkDependencyInfoFile") {
     }
 }
 
-tasks.named("build") {
-    dependsOn("checkDependencyHashesFile")
-}
+//tasks.named("build") {
+//    dependsOn("checkDependencyInfoFile")
+//}
 
 fun dependenciesToString(dependencies: Collection<Dependency>): String {
     val builder = StringBuilder()

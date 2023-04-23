@@ -26,7 +26,6 @@
 package org.geysermc.floodgate.core;
 
 import io.micronaut.context.ApplicationContext;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.UUID;
 import org.geysermc.floodgate.api.FloodgateApi;
@@ -43,17 +42,22 @@ import org.geysermc.floodgate.core.database.entity.LinkedPlayer;
 import org.geysermc.floodgate.core.event.EventBus;
 import org.geysermc.floodgate.core.event.lifecycle.PostEnableEvent;
 import org.geysermc.floodgate.core.event.lifecycle.ShutdownEvent;
-import org.geysermc.floodgate.core.library.Library;
-import org.geysermc.floodgate.core.library.LibraryManager;
-import org.geysermc.floodgate.core.library.Repository;
-import org.geysermc.floodgate.core.library.info.DependencyInfoLoader;
 import org.geysermc.floodgate.core.util.EagerSingleton;
+import org.geysermc.floodgate.isolation.library.Library;
+import org.geysermc.floodgate.isolation.library.LibraryManager;
+import org.geysermc.floodgate.isolation.library.Repository;
+import org.geysermc.floodgate.isolation.library.info.DependencyInfoLoader;
 
 public abstract class FloodgatePlatform {
     private static final UUID KEY = UUID.randomUUID();
 
+    private final LibraryManager manager;
     private ApplicationContext context;
     private PlatformInjector injector;
+
+    protected FloodgatePlatform(LibraryManager manager) {
+        this.manager = manager;
+    }
 
     protected void onContextCreated(ApplicationContext context) {
     }
@@ -65,19 +69,28 @@ public abstract class FloodgatePlatform {
                 getClass().getClassLoader().getResource("dependencyInfo.txt")
         );
 
-        new LibraryManager(ClassLoader.getSystemClassLoader().getParent(), Paths.get("./libs"))
+        manager
+//                .addLibrary(
+//                        Library.builder(infoLoader)
+//                                .id("guava")
+//                                .repository(Repository.MAVEN_CENTRAL)
+//                                .groupId("com.google.guava")
+//                                .artifactId("guava")
+//                                .build()
+//                )
                 .addLibrary(
-                        Library.builder(infoLoader)
-                                .id("guava")
-                                .repository(Repository.MAVEN_CENTRAL)
-                                .groupId("com.google.guava")
-                                .artifactId("guava")
+                        Library.builder()
+                                .id("local-linking")
+                                .repository(Repository.OPEN_COLLAB)
+                                .groupId("org.geysermc.floodgate")
+                                .artifactId("database")
+                                .version("a-version")
                                 .build()
                 )
                 .apply();
 
         //noinspection unchecked
-        context = ApplicationContext.builder()
+        context = ApplicationContext.builder(manager.classLoader())
                 .properties(Map.of(
                         "platform.proxy", isProxy()
                 ))
@@ -139,8 +152,6 @@ public abstract class FloodgatePlatform {
         } catch (Exception exception) {
             throw new RuntimeException("Failed to inject the packet listener!", exception);
         }
-
-//        this.guice = guice.createChildInjector(new PostEnableModules(postEnableStageModules()));
 
         context.getBean(EventBus.class).fire(new PostEnableEvent());
     }

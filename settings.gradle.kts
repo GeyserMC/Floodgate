@@ -68,11 +68,16 @@ include(":api")
 include(":core")
 include(":bungee")
 include(":spigot")
-include(":velocity")
 include(":universal")
 include(":sqlite")
 include(":mysql")
 include(":mongo")
-project(":sqlite").projectDir = file("database/sqlite")
-project(":mysql").projectDir = file("database/mysql")
-project(":mongo").projectDir = file("database/mongo")
+include(":database")
+include(":isolation")
+
+arrayOf("velocity").forEach { platform ->
+    arrayOf("base", "isolated").forEach {
+        include(":$platform-$it")
+        project(":$platform-$it").projectDir = file("$platform/$it")
+    }
+}

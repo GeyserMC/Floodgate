@@ -10,6 +10,7 @@ tasks {
         archiveClassifier.set("unshaded")
         from(project.rootProject.file("LICENSE"))
     }
+
     val shadowJar = named<ShadowJar>("shadowJar") {
         archiveBaseName.set("floodgate-${project.name}")
         archiveVersion.set("")
@@ -39,6 +40,7 @@ tasks {
             destinationDirectory.set(file(destinationDir))
         }
     }
+
     named("build") {
         dependsOn(shadowJar)
     }

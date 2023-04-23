@@ -34,7 +34,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.UUID;
@@ -133,9 +132,5 @@ public class Utils {
         CompletableFuture<U> future = new CompletableFuture<>();
         future.completeExceptionally(ex);
         return future;
-    }
-
-    public static String base64Encode(byte[] data) {
-        return Base64.getEncoder().encodeToString(data);
     }
 }

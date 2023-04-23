@@ -1,7 +1,8 @@
 plugins {
     `java-library`
     id("floodgate.build-logic")
-    id("io.freefair.lombok") version "6.3.0" apply false
+    id("io.freefair.lombok") version "8.0.1" apply false
+    id("io.micronaut.library") version "3.7.8" apply false
 }
 
 allprojects {
@@ -16,7 +17,7 @@ val deployProjects = setOf(
     projects.core,
     projects.bungee,
     projects.spigot,
-    projects.velocity,
+    projects.velocityIsolated,
     projects.universal
 ).map { it.dependencyProject }
 
@@ -28,13 +29,6 @@ subprojects {
         plugin("java-library")
         plugin("io.freefair.lombok")
         plugin("floodgate.build-logic")
-    }
-
-    val relativePath = projectDir.relativeTo(rootProject.projectDir).path
-
-    if (relativePath.startsWith("database" + File.separator)) {
-        group = rootProject.group as String + ".database"
-        plugins.apply("floodgate.database-conventions")
     }
 
     when (this) {
