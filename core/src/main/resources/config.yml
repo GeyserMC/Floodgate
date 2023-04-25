@@ -7,6 +7,14 @@ endpoint: ${endpoint}
 # If left blank, the correct mode will be securely detected automatically.
 allow-offline-mode-players: false
 
+# Super endpoints are authorized to control this endpoint via Connect API.
+# e.g. disconnect players from this endpoint, send messages to players, etc.
+#
+# You can add as many super endpoint names as you want.
+#super-endpoints:
+#  - pvp-endpoint
+#  - someones-hub
+
 # The default locale for Connect. By default, Connect uses the system locale
 #default-locale: en_US
 

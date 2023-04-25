@@ -121,6 +121,9 @@ public class ConnectPlatform {
         guice.getInstance(Metrics.class);
 
         logger.info("Endpoint name: " + config.getEndpoint());
+        if (config.getSuperEndpoints() != null && !config.getSuperEndpoints().isEmpty()) {
+            logger.info("Super endpoints: " + String.join(", ", config.getSuperEndpoints()));
+        }
         logger.info("Your public address: " + config.getEndpoint() + DOMAIN_SUFFIX);
 
         return true;

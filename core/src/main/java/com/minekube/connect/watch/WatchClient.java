@@ -29,6 +29,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.minekube.connect.config.ConnectConfig;
+import java.io.IOException;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.SessionRejection;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.SessionRejection.Builder;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.WatchRequest;
@@ -45,6 +46,7 @@ import org.jetbrains.annotations.Nullable;
 public class WatchClient {
     private static final String ENDPOINT_HEADER = "Connect-Endpoint";
     private static final String ENDPOINT_OFFLINE_MODE_HEADER = ENDPOINT_HEADER + "-Offline-Mode";
+    private static final String ENDPOINT_PARENTS_HEADER = ENDPOINT_HEADER + "-Parents";
     private static final String WATCH_URL = System.getenv().getOrDefault(
             "CONNECT_WATCH_URL", "wss://watch-connect.minekube.net");
 
@@ -66,13 +68,19 @@ public class WatchClient {
             request = request.header(ENDPOINT_OFFLINE_MODE_HEADER,
                     config.getAllowOfflineModePlayers().toString());
         }
+        if (config.getSuperEndpoints() != null) {
+            for (String superEndpoint : config.getSuperEndpoints()) {
+                request = request.addHeader(ENDPOINT_PARENTS_HEADER, superEndpoint);
+            }
+        }
 
         Request req = request.build();
         return httpClient.newWebSocket(req, new WebSocketListener() {
             @Override
             public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
                 if (code != 1000) {
-                    watcher.onError(new RuntimeException("Watch closed with code " + code + ": " + reason));
+                    watcher.onError(
+                            new RuntimeException("Watch closed with code " + code + ": " + reason));
                     return;
                 }
                 watcher.onCompleted();
@@ -86,7 +94,21 @@ public class WatchClient {
             @Override
             public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable t,
                                   @Nullable Response response) {
-                watcher.onError(t);
+
+                // Try to get a more detailed error message from the server
+                String message = null;
+                if (response != null && response.body() != null) {
+                    try {
+                        message = response.body().string();
+                    } catch (IOException ignored) {
+                    }
+                }
+
+                if (message == null || message.isEmpty()) {
+                    watcher.onError(t);
+                } else {
+                    watcher.onError(new RuntimeException(message, t));
+                }
             }
 
             @Override

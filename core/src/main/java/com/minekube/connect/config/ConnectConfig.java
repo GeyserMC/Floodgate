@@ -26,6 +26,7 @@
 package com.minekube.connect.config;
 
 import com.minekube.connect.util.Utils;
+import java.util.List;
 import lombok.Getter;
 
 /**
@@ -49,9 +50,15 @@ public class ConnectConfig {
 
     /**
      * Whether cracked players should be allowed to join.
-     * If not set, Connect will automatically detect if the server is in offline mode.
+     * If not set, Connect will automatically detect if the server allows cracked players.
      */
     private Boolean allowOfflineModePlayers;
+
+    /**
+     * Super endpoints are authorized to control this endpoint via Connect API.
+     * e.g. disconnect players from this endpoint, send messages to players, etc.
+     */
+    private List<String> superEndpoints;
 
     private static final String ENDPOINT_ENV = System.getenv("CONNECT_ENDPOINT");
 
