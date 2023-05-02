@@ -26,7 +26,8 @@
 package org.geysermc.floodgate.core.util;
 
 public final class Constants {
-    public static final String VERSION = "@floodgateVersion@";
+    public static final String FULL_VERSION = "@fullVersion@";
+    public static final String VERSION = "@version@";
     public static final int BUILD_NUMBER = Integer.parseInt("@buildNumber@");
     public static final String GIT_BRANCH = "@branch@";
     public static final int METRICS_ID = 14649;

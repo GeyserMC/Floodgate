@@ -33,20 +33,15 @@ import org.geysermc.floodgate.api.InstanceHolder;
 import org.geysermc.floodgate.api.event.FloodgateEventBus;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
-import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
 import org.geysermc.floodgate.core.config.Properties;
-import org.geysermc.floodgate.core.database.PlayerLinkRepository;
-import org.geysermc.floodgate.core.database.entity.LinkedPlayer;
 import org.geysermc.floodgate.core.event.EventBus;
 import org.geysermc.floodgate.core.event.lifecycle.PostEnableEvent;
 import org.geysermc.floodgate.core.event.lifecycle.ShutdownEvent;
 import org.geysermc.floodgate.core.util.EagerSingleton;
-import org.geysermc.floodgate.isolation.library.Library;
+import org.geysermc.floodgate.core.util.GlobalBeanCache;
 import org.geysermc.floodgate.isolation.library.LibraryManager;
-import org.geysermc.floodgate.isolation.library.Repository;
-import org.geysermc.floodgate.isolation.library.info.DependencyInfoLoader;
 
 public abstract class FloodgatePlatform {
     private static final UUID KEY = UUID.randomUUID();
@@ -65,32 +60,11 @@ public abstract class FloodgatePlatform {
     public void load() {
         long startTime = System.currentTimeMillis();
 
-        var infoLoader = DependencyInfoLoader.load(
-                getClass().getClassLoader().getResource("dependencyInfo.txt")
-        );
-
-        manager
-//                .addLibrary(
-//                        Library.builder(infoLoader)
-//                                .id("guava")
-//                                .repository(Repository.MAVEN_CENTRAL)
-//                                .groupId("com.google.guava")
-//                                .artifactId("guava")
-//                                .build()
-//                )
-                .addLibrary(
-                        Library.builder()
-                                .id("local-linking")
-                                .repository(Repository.OPEN_COLLAB)
-                                .groupId("org.geysermc.floodgate")
-                                .artifactId("database")
-                                .version("a-version")
-                                .build()
-                )
-                .apply();
+        GlobalBeanCache.cacheIfAbsent("libraryManager", () -> manager);
 
         //noinspection unchecked
         context = ApplicationContext.builder(manager.classLoader())
+                .singletons(manager)
                 .properties(Map.of(
                         "platform.proxy", isProxy()
                 ))
@@ -102,34 +76,11 @@ public abstract class FloodgatePlatform {
         onContextCreated(context);
         context.start();
 
-        LinkedPlayer link = new LinkedPlayer()
-                .bedrockId(UUID.fromString("00000000-0000-0000-0009-01f64f65c7c3"))
-                .javaUniqueId(UUID.fromString("d34eb447-6e90-4c78-9281-600df88aef1d"))
-                .javaUsername("Tim203");
-        System.out.println(context.getBean(PlayerLinkRepository.class).save(link));
-
-        System.out.println(context.getBean(PlayerLinkRepository.class)
-                .findByBedrockId(UUID.fromString("00000000-0000-0000-0009-01f64f65c7c3")));
-        System.out.println(context.getBean(PlayerLinkRepository.class)
-                .findByJavaUniqueId(UUID.fromString("d34eb447-6e90-4c78-9281-600df88aef1d")));
-        System.out.println(context.getBean(PlayerLinkRepository.class)
-                .existsByBedrockId(UUID.fromString("00000000-0000-0000-0009-01f64f65c7c3")));
-        System.out.println(context.getBean(PlayerLinkRepository.class)
-                .existsByJavaUniqueId(UUID.fromString("d34eb447-6e90-4c78-9281-600df88aef1d")));
-
-//        var scopeBuilder = BeanScope.builder()
-//                .bean("isProxy", boolean.class, isProxy())
-//                .modules(new CoreModule())
-//                // temporary fix for https://github.com/avaje/avaje-inject/issues/295
-//                .modules(makeModule(isProxy() ? PROXY_MODULE : SERVER_MODULE));
-//        onBuildBeanScope(scopeBuilder);
-//        scope = scopeBuilder.build();
-
         injector = context.getBean(PlatformInjector.class);
 
         InstanceHolder.set(
                 context.getBean(FloodgateApi.class),
-                context.getBean(PlayerLink.class),
+                null, // todo context.getBean(PlayerLink.class),
                 context.getBean(FloodgateEventBus.class),
                 injector,
                 context.getBean(PacketHandlers.class),

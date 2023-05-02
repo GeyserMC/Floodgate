@@ -23,20 +23,17 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.config;
+package org.geysermc.floodgate.core.database;
 
-import io.micronaut.context.env.PropertySource;
+import io.micronaut.context.annotation.Requires;
+import io.micronaut.data.annotation.Repository;
+import io.micronaut.data.repository.async.AsyncCrudRepository;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import org.geysermc.floodgate.core.database.entity.LinkRequest;
 
-public interface Properties {
-    public static PropertySource defaults() {
-        return PropertySource.of(
-                "floodgate-properties",
-                "datasources.default.url", "jdbc:h2:./test",
-                "datasources.default.username", "sa",
-                "datasources.default.password", "",
-                "datasources.default.driverClassName", "org.h2.Driver",
-                "jpa.default.properties.hibernate.hbm2ddl.auto", "update",
-                "jpa.default.properties.hibernate.show_sql", "true"
-        );
-    }
+@Repository
+@Requires(property = "config.database.enabled", value = "true")
+public interface PendingLinkRepository extends AsyncCrudRepository<LinkRequest, UUID> {
+    CompletableFuture<LinkRequest> findByJavaUsername(String javaUsername);
 }

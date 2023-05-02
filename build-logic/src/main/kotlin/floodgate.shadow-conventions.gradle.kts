@@ -19,7 +19,7 @@ tasks {
         val sJar: ShadowJar = this
 
         doFirst {
-//            mergeServiceFiles()
+            mergeServiceFiles()
 
             providedDependencies[project.name]?.forEach { (name, notation) ->
                 sJar.dependencies {

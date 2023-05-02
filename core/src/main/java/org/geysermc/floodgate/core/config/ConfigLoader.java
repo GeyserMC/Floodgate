@@ -25,8 +25,8 @@
 
 package org.geysermc.floodgate.core.config;
 
-import io.micronaut.context.ApplicationContext;
 import io.micronaut.context.annotation.Bean;
+import io.micronaut.context.annotation.BootstrapContextCompatible;
 import io.micronaut.context.annotation.Factory;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -39,49 +39,43 @@ import lombok.Getter;
 import org.geysermc.configutils.ConfigUtilities;
 import org.geysermc.configutils.file.codec.PathFileCodec;
 import org.geysermc.configutils.updater.change.Changes;
-import org.geysermc.floodgate.core.event.lifecycle.ConfigLoadedEvent;
 import org.geysermc.floodgate.core.scope.ProxyOnly;
 import org.geysermc.floodgate.core.scope.ServerOnly;
-import org.geysermc.floodgate.core.util.LanguageManager;
+import org.geysermc.floodgate.core.util.GlobalBeanCache;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.crypto.KeyProducer;
 
 @Factory
 @Getter
+@BootstrapContextCompatible
 public final class ConfigLoader {
     private final Path dataDirectory;
     private final KeyProducer keyProducer;
     private final FloodgateCipher cipher;
-    private final LanguageManager languageManager;
-    private final ApplicationContext context;
 
     @Inject
     ConfigLoader(
             @Named("dataDirectory") Path dataDirectory,
             KeyProducer keyProducer,
-            FloodgateCipher cipher,
-            LanguageManager languageManager,
-            ApplicationContext context
+            FloodgateCipher cipher
     ) {
         this.dataDirectory = dataDirectory;
         this.keyProducer = keyProducer;
         this.cipher = cipher;
-        this.languageManager = languageManager;
-        this.context = context;
     }
 
     @Bean
     @ServerOnly
     @Singleton
     FloodgateConfig config() {
-        return load(FloodgateConfig.class);
+        return GlobalBeanCache.cacheIfAbsent("config", () -> load(FloodgateConfig.class));
     }
 
     @Bean
     @ProxyOnly
     @Singleton
     ProxyFloodgateConfig proxyConfig() {
-        return load(ProxyFloodgateConfig.class);
+        return GlobalBeanCache.cacheIfAbsent("config", () -> load(ProxyFloodgateConfig.class));
     }
 
     @SuppressWarnings("unchecked")
@@ -99,25 +93,20 @@ public final class ConfigLoader {
                                         .keyRenamed("playerLink.allowLinking", "playerLink.allowed"))
                                 .version(2, Changes.versionBuilder()
                                         .keyRenamed("playerLink.useGlobalLinking", "playerLink.enableGlobalLinking"))
+                                .version(3, Changes.versionBuilder()
+                                        .keyRenamed("playerLink.type", "database.type"))
                                 .build())
                         .definePlaceholder("metrics.uuid", UUID::randomUUID)
                         .postInitializeCallbackArgument(this)
-                        .commentTranslator((key) -> languageManager.getLogString("floodgate.config." + key))
                         .build();
-
-        T config;
         try {
-            config = (T) utilities.executeOn(configClass);
+            return (T) utilities.executeOn(configClass);
         } catch (Throwable throwable) {
             throw new RuntimeException(
                     "Failed to load the config! Try to delete the config file if this error persists",
                     throwable
             );
         }
-
-        context.getEventPublisher(ConfigLoadedEvent.class)
-                .publishEvent(new ConfigLoadedEvent(config));
-        return config;
     }
 
     public void generateKey(Path keyPath) {

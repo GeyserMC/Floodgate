@@ -29,8 +29,7 @@ import cloud.commandframework.ArgumentDescription;
 import cloud.commandframework.Command;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.context.CommandContext;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.UUID;
@@ -40,6 +39,8 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.command.util.Permission;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
+import org.geysermc.floodgate.core.http.UnsuccessfulResponse;
+import org.geysermc.floodgate.core.http.xbox.XboxClient;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
 import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
@@ -47,13 +48,12 @@ import org.geysermc.floodgate.core.platform.util.PlayerType;
 import org.geysermc.floodgate.core.player.UserAudience;
 import org.geysermc.floodgate.core.player.audience.ProfileAudience;
 import org.geysermc.floodgate.core.player.audience.ProfileAudienceArgument;
-import org.geysermc.floodgate.core.util.Constants;
-import org.geysermc.floodgate.core.util.HttpClient;
 
 @Singleton
 public class WhitelistCommand implements FloodgateCommand {
+    @Inject FloodgateApi api;
     @Inject FloodgateConfig config;
-    @Inject HttpClient httpClient;
+    @Inject XboxClient xboxClient;
     @Inject FloodgateLogger logger;
 
     @Override
@@ -86,7 +86,7 @@ public class WhitelistCommand implements FloodgateCommand {
         }
 
         if (uuid != null) {
-            if (!FloodgateApi.getInstance().isFloodgateId(uuid)) {
+            if (!api.isFloodgateId(uuid)) {
                 sender.sendMessage(Message.INVALID_USERNAME);
                 return;
             }
@@ -129,32 +129,34 @@ public class WhitelistCommand implements FloodgateCommand {
         final String strippedName = name;
 
         // We need to get the UUID of the player if it's not manually specified
-        httpClient.asyncGet(Constants.GET_XUID_URL + name)
+        xboxClient.xuidByGamertag(name)
                 .whenComplete((result, error) -> {
                     if (error != null) {
-                        sender.sendMessage(Message.API_UNAVAILABLE);
-                        error.printStackTrace();
+                        if (!(error instanceof HttpClientResponseException exception)) {
+                            sender.sendMessage(Message.API_UNAVAILABLE);
+                            error.printStackTrace();
+                            return;
+                        }
+                        sender.sendMessage(Message.UNEXPECTED_ERROR);
+
+                        var response = exception.getResponse().getBody(UnsuccessfulResponse.class);
+                        var message =
+                                response.isPresent() ?
+                                        response.get().message() :
+                                        exception.getMessage();
+                        logger.error(
+                                "Got an error from requesting the xuid of a Bedrock player: {}",
+                                message
+                        );
                         return;
                     }
 
-                    JsonObject response = result.getResponse();
-
-                    if (!result.isCodeOk()) {
-                        sender.sendMessage(Message.UNEXPECTED_ERROR);
-                        logger.error(
-                                "Got an error from requesting the xuid of a Bedrock player: {}",
-                                response.get("message").getAsString()
-                        );
-                    }
-
-                    JsonElement xuidElement = response.get("xuid");
-
-                    if (xuidElement == null) {
+                    Long xuid = result.xuid();
+                    if (xuid == null) {
                         sender.sendMessage(Message.USER_NOT_FOUND);
                         return;
                     }
 
-                    String xuid = xuidElement.getAsString();
                     CommandUtil commandUtil = context.get("CommandUtil");
 
                     try {

@@ -23,20 +23,35 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.config;
+package org.geysermc.floodgate.core.http.link;
 
-import io.micronaut.context.env.PropertySource;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.UUID;
+import org.geysermc.floodgate.core.util.Utils;
 
-public interface Properties {
-    public static PropertySource defaults() {
-        return PropertySource.of(
-                "floodgate-properties",
-                "datasources.default.url", "jdbc:h2:./test",
-                "datasources.default.username", "sa",
-                "datasources.default.password", "",
-                "datasources.default.driverClassName", "org.h2.Driver",
-                "jpa.default.properties.hibernate.hbm2ddl.auto", "update",
-                "jpa.default.properties.hibernate.show_sql", "true"
-        );
+public record LinkedPlayer(
+        @JsonProperty("bedrock_id")
+        long xuid,
+        String gamertag,
+        @JsonProperty("java_id")
+        UUID uuid,
+        @JsonProperty("java_name")
+        String username
+) {
+    public boolean isLinked() {
+        // everything will be null when the player is not linked, since we return an empty object.
+        // but it's sufficient to check if one of them is null
+        return uuid != null;
+    }
+
+    public org.geysermc.floodgate.core.database.entity.LinkedPlayer toDatabase() {
+        if (!isLinked()) {
+            return null;
+        }
+
+        return new org.geysermc.floodgate.core.database.entity.LinkedPlayer()
+                .bedrockId(Utils.getJavaUuid(xuid))
+                .javaUniqueId(uuid)
+                .javaUsername(username);
     }
 }

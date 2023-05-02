@@ -32,10 +32,9 @@ import cloud.commandframework.context.CommandContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.Getter;
-import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.core.command.util.Permission;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
+import org.geysermc.floodgate.core.link.CommonPlayerLink;
 import org.geysermc.floodgate.core.link.GlobalPlayerLinking;
 import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
@@ -45,7 +44,7 @@ import org.geysermc.floodgate.core.util.Constants;
 
 @Singleton
 public final class UnlinkAccountCommand implements FloodgateCommand {
-    @Inject FloodgateApi api;
+    @Inject CommonPlayerLink link;
 
     @Override
     public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
@@ -61,11 +60,9 @@ public final class UnlinkAccountCommand implements FloodgateCommand {
     public void execute(CommandContext<UserAudience> context) {
         UserAudience sender = context.getSender();
 
-        PlayerLink link = api.getPlayerLink();
-
         //todo make this less hacky
         if (link instanceof GlobalPlayerLinking) {
-            if (((GlobalPlayerLinking) link).getDatabaseImpl() != null) {
+            if (((GlobalPlayerLinking) link).getDatabase() != null) {
                 sender.sendMessage(CommonCommandMessage.LOCAL_LINKING_NOTICE,
                         Constants.LINK_INFO_URL);
             } else {
@@ -75,12 +72,12 @@ public final class UnlinkAccountCommand implements FloodgateCommand {
             }
         }
 
-        if (!link.isEnabledAndAllowed()) {
+        if (!link.isActive()) {
             sender.sendMessage(CommonCommandMessage.LINKING_DISABLED);
             return;
         }
 
-        link.isLinkedPlayer(sender.uuid())
+        link.isLinked(sender.uuid())
                 .whenComplete((linked, error) -> {
                     if (error != null) {
                         sender.sendMessage(CommonCommandMessage.IS_LINKED_ERROR);
@@ -92,7 +89,7 @@ public final class UnlinkAccountCommand implements FloodgateCommand {
                         return;
                     }
 
-                    link.unlinkPlayer(sender.uuid())
+                    link.unlink(sender.uuid())
                             .whenComplete((unused, error1) -> {
                                 if (error1 != null) {
                                     sender.sendMessage(Message.UNLINK_ERROR);

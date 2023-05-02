@@ -69,7 +69,7 @@ public class VersionSubcommand extends FloodgateSubCommand {
                 COLOR_CHAR + "7You're currently on " + COLOR_CHAR + "b%s" +
                 COLOR_CHAR + "7 (branch: " + COLOR_CHAR + "b%s" + COLOR_CHAR + "7)\n" +
                 COLOR_CHAR + "eFetching latest build info...",
-                Constants.VERSION, Constants.GIT_BRANCH
+                Constants.FULL_VERSION, Constants.GIT_BRANCH
         ));
 
         String baseUrl = String.format(

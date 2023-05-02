@@ -33,14 +33,15 @@ import cloud.commandframework.context.CommandContext;
 import io.micronaut.context.annotation.Secondary;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import java.util.concurrent.CompletableFuture;
 import lombok.Getter;
 import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.api.link.LinkRequestResult;
-import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.command.util.Permission;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
+import org.geysermc.floodgate.core.link.CommonPlayerLink;
 import org.geysermc.floodgate.core.link.GlobalPlayerLinking;
+import org.geysermc.floodgate.core.link.LinkVerificationException;
 import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.core.player.UserAudience;
@@ -48,11 +49,13 @@ import org.geysermc.floodgate.core.player.UserAudience.PlayerAudience;
 import org.geysermc.floodgate.core.player.audience.ProfileAudience;
 import org.geysermc.floodgate.core.player.audience.ProfileAudienceArgument;
 import org.geysermc.floodgate.core.util.Constants;
+import org.geysermc.floodgate.core.util.Utils;
 
 @Singleton
 @Secondary
 public final class LinkAccountCommand implements FloodgateCommand {
     @Inject FloodgateApi api;
+    @Inject CommonPlayerLink link;
     @Inject FloodgateLogger logger;
 
     @Override
@@ -71,11 +74,9 @@ public final class LinkAccountCommand implements FloodgateCommand {
     public void execute(CommandContext<UserAudience> context) {
         UserAudience sender = context.getSender();
 
-        PlayerLink link = api.getPlayerLink();
-
         //todo make this less hacky
         if (link instanceof GlobalPlayerLinking) {
-            if (((GlobalPlayerLinking) link).getDatabaseImpl() != null) {
+            if (((GlobalPlayerLinking) link).getDatabase() != null) {
                 sender.sendMessage(CommonCommandMessage.LOCAL_LINKING_NOTICE,
                         Constants.LINK_INFO_URL);
             } else {
@@ -85,7 +86,7 @@ public final class LinkAccountCommand implements FloodgateCommand {
             }
         }
 
-        if (!link.isEnabledAndAllowed()) {
+        if (!link.isActive()) {
             sender.sendMessage(CommonCommandMessage.LINKING_DISABLED);
             return;
         }
@@ -103,33 +104,40 @@ public final class LinkAccountCommand implements FloodgateCommand {
 
             String code = context.get("code");
 
-            link.verifyLinkRequest(sender.uuid(), targetName, sender.username(), code)
-                    .whenComplete((result, throwable) -> {
-                        if (throwable != null || result == LinkRequestResult.UNKNOWN_ERROR) {
+            link.linkRequest(targetName)
+                    .thenApply(request -> {
+                        if (request == null || link.isRequestedPlayer(request, sender.uuid())) {
+                            throw LinkVerificationException.NO_LINK_REQUESTED;
+                        }
+
+                        if (!request.linkCode().equals(code)) {
+                            throw LinkVerificationException.INVALID_CODE;
+                        }
+
+                        if (request.isExpired(link.getVerifyLinkTimeout())) {
+                            throw LinkVerificationException.LINK_REQUEST_EXPIRED;
+                        }
+
+                        return request;
+                    })
+                    .thenCompose(request ->
+                            CompletableFuture.allOf(
+                                    link.invalidateLinkRequest(request),
+                                    link.addLink(
+                                            request.javaUniqueId(), request.javaUsername(), sender.uuid()
+                                    )
+                            )
+                    )
+                    .whenComplete(($, throwable) -> {
+                        if (throwable instanceof LinkVerificationException exception) {
+                            sender.sendMessage(exception.message());
+                            return;
+                        }
+                        if (throwable != null) {
                             sender.sendMessage(Message.LINK_REQUEST_ERROR);
                             return;
                         }
-
-                        switch (result) {
-                            case ALREADY_LINKED:
-                                sender.sendMessage(Message.ALREADY_LINKED);
-                                break;
-                            case NO_LINK_REQUESTED:
-                                sender.sendMessage(Message.NO_LINK_REQUESTED);
-                                break;
-                            case INVALID_CODE:
-                                sender.sendMessage(Message.INVALID_CODE);
-                                break;
-                            case REQUEST_EXPIRED:
-                                sender.sendMessage(Message.LINK_REQUEST_EXPIRED);
-                                break;
-                            case LINK_COMPLETED:
-                                sender.disconnect(Message.LINK_REQUEST_COMPLETED, targetName);
-                                break;
-                            default:
-                                sender.disconnect("Invalid account linking result");
-                                break;
-                        }
+                        sender.disconnect(Message.LINK_REQUEST_COMPLETED, targetName);
                     });
             return;
         }
@@ -139,21 +147,16 @@ public final class LinkAccountCommand implements FloodgateCommand {
             return;
         }
 
-        link.createLinkRequest(sender.uuid(), sender.username(), targetName)
-                .whenComplete((result, throwable) -> {
-                    if (throwable != null || result == LinkRequestResult.UNKNOWN_ERROR) {
+        String username = sender.username();
+        String code = Utils.generateCode(6);
+
+        link.createLinkRequest(sender.uuid(), username, targetName, code)
+                .whenComplete(($, throwable) -> {
+                    if (throwable != null) {
                         sender.sendMessage(Message.LINK_REQUEST_ERROR);
                         return;
                     }
-
-                    if (!(result instanceof String)) {
-                        logger.error("Expected string code, got {}", result);
-                        sender.sendMessage(Message.LINK_REQUEST_ERROR);
-                        return;
-                    }
-
-                    sender.sendMessage(Message.LINK_REQUEST_CREATED,
-                            targetName, sender.username(), result);
+                    sender.sendMessage(Message.LINK_REQUEST_CREATED, targetName, username, code);
                 });
     }
 

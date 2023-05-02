@@ -25,32 +25,26 @@
 
 package org.geysermc.floodgate.core.link;
 
+import io.micronaut.context.annotation.Replaces;
+import io.micronaut.context.annotation.Requires;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.floodgate.core.database.PendingLinkRepository;
+import org.geysermc.floodgate.core.database.PlayerLinkRepository;
 import org.geysermc.floodgate.core.database.entity.LinkRequest;
 import org.geysermc.floodgate.core.database.entity.LinkedPlayer;
 
-/**
- * Simple class used when PlayerLinking is disabled
- */
+@Requires(property = "config.playerLink.enableOwnLinking", value = "true")
+@Replaces(DisabledPlayerLink.class)
+@Named("localLinking")
 @Singleton
-final class DisabledPlayerLink extends CommonPlayerLink {
-    @Override
-    public boolean isEnabled() {
-        return false;
-    }
-
-    @Override
-    public long getVerifyLinkTimeout() {
-        return -1;
-    }
-
-    @Override
-    public boolean isAllowLinking() {
-        return false;
-    }
+public class PlayerLinkHibernate extends CommonPlayerLink {
+    @Inject PlayerLinkRepository linkRepository;
+    @Inject PendingLinkRepository pendingLinkRepository;
 
     @Override
     public CompletableFuture<LinkedPlayer> addLink(
@@ -58,22 +52,34 @@ final class DisabledPlayerLink extends CommonPlayerLink {
             @NonNull String javaUsername,
             @NonNull UUID bedrockId
     ) {
-        return failedFuture();
+        return linkRepository.save(
+                new LinkedPlayer()
+                        .javaUniqueId(javaUniqueId)
+                        .javaUsername(javaUsername)
+                        .bedrockId(bedrockId)
+        );
     }
 
     @Override
     public CompletableFuture<LinkedPlayer> fetchLink(@NonNull UUID uuid) {
-        return failedFuture();
+        return CompletableFuture.supplyAsync(() ->
+                linkRepository.findByBedrockIdOrJavaUniqueId(uuid, uuid).orElse(null)
+        );
     }
 
     @Override
     public CompletableFuture<Boolean> isLinked(@NonNull UUID uuid) {
-        return failedFuture();
+        return CompletableFuture.supplyAsync(() ->
+                linkRepository.existsByBedrockIdOrJavaUniqueId(uuid, uuid)
+        );
     }
 
     @Override
     public CompletableFuture<Void> unlink(@NonNull UUID uuid) {
-        return failedFuture();
+        return CompletableFuture.supplyAsync(() -> {
+            linkRepository.deleteByBedrockIdOrJavaUniqueId(uuid, uuid);
+            return null;
+        });
     }
 
     @Override
@@ -83,22 +89,22 @@ final class DisabledPlayerLink extends CommonPlayerLink {
             @NonNull String bedrockUsername,
             @NonNull String code
     ) {
-        return failedFuture();
+        return pendingLinkRepository.save(
+                new LinkRequest()
+                        .javaUniqueId(javaUniqueId)
+                        .javaUsername(javaUsername)
+                        .bedrockUsername(bedrockUsername)
+                        .linkCode(code)
+        );
     }
 
     @Override
     public CompletableFuture<LinkRequest> linkRequest(@NonNull String javaUsername) {
-        return failedFuture();
+        return pendingLinkRepository.findByJavaUsername(javaUsername);
     }
 
     @Override
     public CompletableFuture<Void> invalidateLinkRequest(@NonNull LinkRequest request) {
-        return failedFuture();
-    }
-
-    private <U> CompletableFuture<U> failedFuture() {
-        return CompletableFuture.failedFuture(new IllegalStateException(
-                "Cannot perform this action when PlayerLinking is disabled"
-        ));
+        return pendingLinkRepository.delete(request);
     }
 }

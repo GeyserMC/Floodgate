@@ -28,8 +28,6 @@ package org.geysermc.floodgate.core.api;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableSet;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import io.micronaut.context.BeanProvider;
 import jakarta.inject.Inject;
 import java.util.Collection;
@@ -45,12 +43,13 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.unsafe.Unsafe;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
+import org.geysermc.floodgate.core.http.xbox.GetGamertagResult;
+import org.geysermc.floodgate.core.http.xbox.GetXuidResult;
+import org.geysermc.floodgate.core.http.xbox.XboxClient;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.core.pluginmessage.channel.FormChannel;
 import org.geysermc.floodgate.core.pluginmessage.channel.TransferChannel;
 import org.geysermc.floodgate.core.scope.ServerOnly;
-import org.geysermc.floodgate.core.util.Constants;
-import org.geysermc.floodgate.core.util.HttpClient;
 import org.geysermc.floodgate.core.util.Utils;
 
 @ServerOnly
@@ -63,8 +62,8 @@ public class SimpleFloodgateApi implements FloodgateApi {
 
     @Inject BeanProvider<PluginMessageManager> pluginMessageManager;
     @Inject FloodgateConfig config;
-    @Inject HttpClient httpClient;
     @Inject FloodgateLogger logger;
+    @Inject XboxClient xboxClient;
 
     @Override
     public String getPlayerPrefix() {
@@ -148,36 +147,12 @@ public class SimpleFloodgateApi implements FloodgateApi {
 
     @Override
     public CompletableFuture<Long> getXuidFor(String gamertag) {
-        if (gamertag == null || gamertag.isEmpty() || gamertag.length() > 16) {
-            return Utils.failedFuture(new IllegalStateException("Received an invalid gamertag"));
-        }
-
-        return httpClient.asyncGet(Constants.GET_XUID_URL + gamertag)
-                .thenApply(result -> {
-                    JsonObject response = result.getResponse();
-
-                    if (!result.isCodeOk()) {
-                        throw new IllegalStateException(response.get("message").getAsString());
-                    }
-
-                    JsonElement xuid = response.get("xuid");
-                    return xuid != null ? xuid.getAsLong() : null;
-                });
+        return xboxClient.xuidByGamertag(gamertag).thenApply(GetXuidResult::xuid);
     }
 
     @Override
     public CompletableFuture<String> getGamertagFor(long xuid) {
-        return httpClient.asyncGet(Constants.GET_GAMERTAG_URL + xuid)
-                .thenApply(result -> {
-                    JsonObject response = result.getResponse();
-
-                    if (!result.isCodeOk()) {
-                        throw new IllegalStateException(response.get("message").getAsString());
-                    }
-
-                    JsonElement gamertag = response.get("gamertag");
-                    return gamertag != null ? gamertag.getAsString() : null;
-                });
+        return xboxClient.gamertagByXuid(xuid).thenApply(GetGamertagResult::gamertag);
     }
 
     @Override

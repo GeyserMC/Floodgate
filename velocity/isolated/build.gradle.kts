@@ -12,7 +12,7 @@ tasks {
         dependsOn(":velocity-base:build", configurations.runtimeClasspath)
 
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        from (configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+        from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
 
         archiveBaseName = "floodgate-${project.name}"
         archiveVersion = ""

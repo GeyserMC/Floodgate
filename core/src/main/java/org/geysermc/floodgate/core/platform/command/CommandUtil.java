@@ -192,7 +192,7 @@ public abstract class CommandUtil {
      * @return true if the player has been whitelisted, false if the player was already whitelisted.
      * Defaults to false when this platform doesn't support whitelisting.
      */
-    public boolean whitelistPlayer(String xuid, String username) {
+    public boolean whitelistPlayer(long xuid, String username) {
         UUID uuid = Utils.getJavaUuid(xuid);
         return whitelistPlayer(uuid, username);
     }
@@ -217,7 +217,7 @@ public abstract class CommandUtil {
      * @return true if the player has been removed from the whitelist, false if the player wasn't
      * whitelisted. Defaults to false when this platform doesn't support whitelisting.
      */
-    public boolean removePlayerFromWhitelist(String xuid, String username) {
+    public boolean removePlayerFromWhitelist(long xuid, String username) {
         UUID uuid = Utils.getJavaUuid(xuid);
         return removePlayerFromWhitelist(uuid, username);
     }

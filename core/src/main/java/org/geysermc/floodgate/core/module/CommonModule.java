@@ -26,10 +26,13 @@
 package org.geysermc.floodgate.core.module;
 
 import io.micronaut.context.annotation.Bean;
+import io.micronaut.context.annotation.BootstrapContextCompatible;
 import io.micronaut.context.annotation.Factory;
 import io.netty.util.AttributeKey;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -39,6 +42,7 @@ import java.util.concurrent.TimeUnit;
 import org.geysermc.event.Listener;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.core.util.Constants;
+import org.geysermc.floodgate.core.util.GlobalBeanCache;
 import org.geysermc.floodgate.crypto.AesCipher;
 import org.geysermc.floodgate.crypto.AesKeyProducer;
 import org.geysermc.floodgate.crypto.Base64Topping;
@@ -46,6 +50,7 @@ import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.crypto.KeyProducer;
 
 @Factory
+@BootstrapContextCompatible
 @Listener
 public class CommonModule {
     @Bean(preDestroy = "shutdown")
@@ -63,15 +68,26 @@ public class CommonModule {
     }
 
     @Bean
+    @BootstrapContextCompatible
     @Singleton
-    public KeyProducer keyProducer() {
-        return new AesKeyProducer();
+    @Named("dataDirectory")
+    public Path dataDirectory() {
+        // todo open discussion asking how you can register bootstrap context beans
+        return Paths.get("plugins", "floodgate");
     }
 
     @Bean
+    @BootstrapContextCompatible
+    @Singleton
+    public KeyProducer keyProducer() {
+        return GlobalBeanCache.cacheIfAbsent("keyProducer", AesKeyProducer::new);
+    }
+
+    @Bean
+    @BootstrapContextCompatible
     @Singleton
     public FloodgateCipher cipher() {
-        return new AesCipher(new Base64Topping());
+        return GlobalBeanCache.cacheIfAbsent("cipher", () -> new AesCipher(new Base64Topping()));
     }
 
     @Bean

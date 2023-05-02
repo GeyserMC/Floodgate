@@ -51,6 +51,7 @@ import org.geysermc.floodgate.core.addon.data.HandshakeDataImpl;
 import org.geysermc.floodgate.core.addon.data.HandshakeHandlersImpl;
 import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
+import org.geysermc.floodgate.core.link.CommonPlayerLink;
 import org.geysermc.floodgate.core.skin.SkinUploadManager;
 import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.LanguageManager;
@@ -63,6 +64,7 @@ import org.geysermc.floodgate.util.LinkedPlayer;
 public final class FloodgateHandshakeHandler {
     @Inject HandshakeHandlersImpl handshakeHandlers;
     @Inject SimpleFloodgateApi api;
+    @Inject CommonPlayerLink link;
     @Inject FloodgateCipher cipher;
     @Inject FloodgateConfig config;
     @Inject SkinUploadManager skinUploadManager;
@@ -246,10 +248,16 @@ public final class FloodgateHandshakeHandler {
     }
 
     private CompletableFuture<Pair<BedrockData, LinkedPlayer>> fetchLinkedPlayer(BedrockData data) {
-        if (!api.getPlayerLink().isEnabled()) {
+        if (!link.isEnabled()) {
             return CompletableFuture.completedFuture(new ObjectObjectImmutablePair<>(data, null));
         }
-        return api.getPlayerLink().getLinkedPlayer(Utils.getJavaUuid(data.getXuid()))
+        return link.fetchLink(Utils.getJavaUuid(data.getXuid()))
+                .thenApply(link -> {
+                    if (link == null) {
+                        return null;
+                    }
+                    return LinkedPlayer.of(link.javaUsername(), link.javaUniqueId(), link.bedrockId());
+                })
                 .thenApply(link -> new ObjectObjectImmutablePair<>(data, link))
                 .handle((result, error) -> {
                     if (error != null) {

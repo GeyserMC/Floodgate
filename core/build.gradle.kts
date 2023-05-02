@@ -22,23 +22,16 @@ dependencies {
     annotationProcessor("io.micronaut:micronaut-inject-java")
     api("io.micronaut", "micronaut-inject-java")
     api("io.micronaut", "micronaut-context")
+    api("io.micronaut", "micronaut-http-client")
+    api("io.micronaut", "micronaut-validation")
+
+    //todo add hibernate dependency back in core,
+    // it's not possible to make it optional as the service files would be messed up
+    api(projects.database)
 
     annotationProcessor("io.micronaut.data:micronaut-data-processor")
     implementation("io.micronaut.data:micronaut-data-model")
     implementation("jakarta.persistence:jakarta.persistence-api:2.2.3")
-
-//    compileOnlyApi("io.micronaut.data:micronaut-data-hibernate-jpa")
-    //todo add these as libs
-    //compileOnly("io.micronaut.data:micronaut-data-hibernate-jpa")
-    //compileOnly("io.micronaut.sql:micronaut-jdbc-hikari")
-    //compileOnly("com.h2database:h2")
-    //implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
-    //implementation("io.micronaut.sql:micronaut-jdbc-hikari")
-    //runtimeOnly("com.h2database:h2")
-
-//    annotationProcessor("io.micronaut.data:micronaut-data-document-processor")
-//    compileOnly("io.micronaut.data:micronaut-data-mongodb")
-//    runtimeOnly("org.mongodb:mongodb-driver-sync")
 }
 
 // present on all platforms
@@ -49,7 +42,8 @@ relocate("org.bstats")
 
 tasks {
     templateSources {
-        replaceToken("floodgateVersion", fullVersion())
+        replaceToken("fullVersion", fullVersion())
+        replaceToken("version", version)
         replaceToken("branch", branchName())
         replaceToken("buildNumber", buildNumber())
     }

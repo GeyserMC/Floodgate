@@ -23,10 +23,27 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.database.config;
+package org.geysermc.floodgate.core.http.xbox;
 
-/**
- * Base class for every database related configuration.
- */
-public interface DatabaseConfig {
+import static io.micronaut.http.HttpHeaders.ACCEPT;
+import static io.micronaut.http.HttpHeaders.USER_AGENT;
+
+import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.Header;
+import io.micronaut.http.client.annotation.Client;
+import java.util.concurrent.CompletableFuture;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+@Client("${http.baseUrl}/v2/xbox")
+@Header(name = USER_AGENT, value = "${http.userAgent}")
+@Header(name = ACCEPT, value = "application/json")
+public interface XboxClient {
+    @Get("/xuid/{gamertag}")
+    CompletableFuture<GetXuidResult> xuidByGamertag(
+            @NotNull @Size(min = 1, max = 16) String gamertag
+    );
+
+    @Get("/gamertag/{xuid}")
+    CompletableFuture<GetGamertagResult> gamertagByXuid(long xuid);
 }

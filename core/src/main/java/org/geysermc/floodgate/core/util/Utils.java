@@ -34,15 +34,17 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 public class Utils {
     private static final Pattern NON_UNIQUE_PREFIX = Pattern.compile("^\\w{0,16}$");
     private static final Pattern DATABASE_NAME = Pattern.compile(Constants.DATABASE_NAME_FORMAT);
+    private static final Random random = new SecureRandom();
 
     /**
      * This method is used in Addons.<br> Most addons can be removed once the player associated to
@@ -99,6 +101,22 @@ public class Utils {
         return DATABASE_NAME.matcher(databaseName).matches();
     }
 
+    public static String generateCode(int length) {
+        StringBuilder code = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            code.append(generateCodeChar());
+        }
+        return code.toString();
+    }
+
+    public static char generateCodeChar() {
+        var codeChar = random.nextInt() % (10 + 26);
+        if (codeChar < 10) {
+            return (char) ('0' + codeChar);
+        }
+        return (char) ('A' + codeChar);
+    }
+
     public static int readVarInt(ByteBuf buffer) {
         int out = 0;
         int count = 0;
@@ -118,19 +136,5 @@ public class Utils {
         StringWriter writer = new StringWriter();
         throwable.printStackTrace(new PrintWriter(writer));
         return writer.toString();
-    }
-
-    /**
-     * Returns a new CompletableFuture that is already completed exceptionally with the given
-     * exception.
-     *
-     * @param ex  the exception
-     * @param <U> the type of the value
-     * @return the exceptionally completed CompletableFuture
-     */
-    public static <U> CompletableFuture<U> failedFuture(Throwable ex) {
-        CompletableFuture<U> future = new CompletableFuture<>();
-        future.completeExceptionally(ex);
-        return future;
     }
 }

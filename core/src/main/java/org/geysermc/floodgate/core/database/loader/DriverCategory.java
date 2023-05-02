@@ -23,20 +23,8 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.config;
+package org.geysermc.floodgate.core.database.loader;
 
-import io.micronaut.context.env.PropertySource;
-
-public interface Properties {
-    public static PropertySource defaults() {
-        return PropertySource.of(
-                "floodgate-properties",
-                "datasources.default.url", "jdbc:h2:./test",
-                "datasources.default.username", "sa",
-                "datasources.default.password", "",
-                "datasources.default.driverClassName", "org.h2.Driver",
-                "jpa.default.properties.hibernate.hbm2ddl.auto", "update",
-                "jpa.default.properties.hibernate.show_sql", "true"
-        );
-    }
+public enum DriverCategory {
+    HIBERNATE
 }

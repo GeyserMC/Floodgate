@@ -75,10 +75,6 @@ public interface FloodgateConfig extends GenericPostInitializeCallback<ConfigLoa
             usernamePrefix(".");
         }
 
-        // this happens before the config is serialized,
-        // so the messages in the config will be translated
-        loader.getLanguageManager().loadConfiguredDefaultLocale(this);
-
         return CallbackResult.ok();
     }
 
@@ -101,6 +97,8 @@ public interface FloodgateConfig extends GenericPostInitializeCallback<ConfigLoa
     String defaultLocale();
 
     DisconnectMessages disconnect();
+
+    DatabaseConfig database();
 
     @Comment
     PlayerLinkConfig playerLink();
@@ -131,6 +129,17 @@ public interface FloodgateConfig extends GenericPostInitializeCallback<ConfigLoa
     }
 
     @ConfigSection
+    interface DatabaseConfig {
+        @Comment
+        @DefaultBoolean(true)
+        boolean enabled();
+
+        @Comment
+        @DefaultString("h2")
+        String type();
+    }
+
+    @ConfigSection
     interface PlayerLinkConfig {
         @Comment
         @DefaultBoolean(true)
@@ -151,10 +160,6 @@ public interface FloodgateConfig extends GenericPostInitializeCallback<ConfigLoa
         @Comment
         @DefaultNumeric(300)
         long linkCodeTimeout();
-
-        @Comment
-        @DefaultString("sqlite")
-        String type();
 
         @Comment
         @DefaultBoolean(true)

@@ -25,18 +25,31 @@
 
 package org.geysermc.floodgate.core.database;
 
+import io.micronaut.context.annotation.Requires;
 import io.micronaut.data.annotation.Repository;
-import io.micronaut.data.repository.CrudRepository;
+import io.micronaut.data.repository.async.AsyncCrudRepository;
 import java.util.Optional;
 import java.util.UUID;
 import javax.validation.constraints.NotNull;
 import org.geysermc.floodgate.core.database.entity.LinkedPlayer;
 
 @Repository
-public interface PlayerLinkRepository extends CrudRepository<LinkedPlayer, UUID> {
+@Requires(property = "config.database.enabled", value = "true")
+public interface PlayerLinkRepository extends AsyncCrudRepository<LinkedPlayer, UUID> {
     Optional<LinkedPlayer> findByBedrockId(@NotNull UUID bedrockId);
+
     Optional<LinkedPlayer> findByJavaUniqueId(@NotNull UUID javaUniqueId);
 
+    Optional<LinkedPlayer> findByBedrockIdOrJavaUniqueId(
+            UUID bedrockId,
+            UUID javaUniqueId
+    );
+
     Boolean existsByBedrockId(@NotNull UUID bedrockId);
+
     Boolean existsByJavaUniqueId(@NotNull UUID javaUniqueId);
+
+    Boolean existsByBedrockIdOrJavaUniqueId(UUID bedrockId, UUID javaUniqueId);
+
+    void deleteByBedrockIdOrJavaUniqueId(UUID bedrockId, UUID javaUniqueId);
 }

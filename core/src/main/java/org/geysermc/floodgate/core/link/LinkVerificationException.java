@@ -23,20 +23,26 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.config;
+package org.geysermc.floodgate.core.link;
 
-import io.micronaut.context.env.PropertySource;
+import org.geysermc.floodgate.core.command.LinkAccountCommand.Message;
 
-public interface Properties {
-    public static PropertySource defaults() {
-        return PropertySource.of(
-                "floodgate-properties",
-                "datasources.default.url", "jdbc:h2:./test",
-                "datasources.default.username", "sa",
-                "datasources.default.password", "",
-                "datasources.default.driverClassName", "org.h2.Driver",
-                "jpa.default.properties.hibernate.hbm2ddl.auto", "update",
-                "jpa.default.properties.hibernate.show_sql", "true"
-        );
+public class LinkVerificationException extends RuntimeException {
+    public static final LinkVerificationException NO_LINK_REQUESTED =
+            new LinkVerificationException(Message.NO_LINK_REQUESTED);
+    public static final LinkVerificationException INVALID_CODE =
+            new LinkVerificationException(Message.INVALID_CODE);
+    public static final LinkVerificationException LINK_REQUEST_EXPIRED =
+            new LinkVerificationException(Message.LINK_REQUEST_EXPIRED);
+
+    private final Message message;
+
+    private LinkVerificationException(Message message) {
+        super(null, null, true, false);
+        this.message = message;
+    }
+
+    public Message message() {
+        return message;
     }
 }

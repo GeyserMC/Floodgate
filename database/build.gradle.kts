@@ -16,5 +16,5 @@ configurations.runtimeClasspath.get()
 dependencies {
     implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
     implementation("io.micronaut.sql:micronaut-jdbc-hikari")
-    runtimeOnly("com.h2database:h2")
+    //runtimeOnly("com.h2database:h2")
 }
