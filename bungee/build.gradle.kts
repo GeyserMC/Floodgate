@@ -1,22 +1,18 @@
-var gsonVersion = "2.8.0"
-var guavaVersion = "21.0"
-
 dependencies {
     api(projects.core)
     annotationProcessor(projects.core)
     implementation(projects.isolation)
 
-    implementation("cloud.commandframework", "cloud-bungee", Versions.cloudVersion)
+    implementation(libs.cloud.bungee)
 }
 
-relocate("com.google.inject")
 relocate("net.kyori")
 relocate("cloud.commandframework")
 // used in cloud
 relocate("io.leangen.geantyref")
 
 // these dependencies are already present on the platform
-provided("com.github.SpigotMC.BungeeCord", "bungeecord-proxy", Versions.bungeeCommit)
-provided("com.google.code.gson", "gson", gsonVersion)
-provided("com.google.guava", "guava", guavaVersion)
-provided("org.yaml", "snakeyaml", Versions.snakeyamlVersion)
+provided(libs.bungee)
+provided(libs.gson)
+provided(libs.guava)
+provided(libs.snakeyaml)

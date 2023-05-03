@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-    compileOnly("org.checkerframework", "checker-qual", Versions.checkerQual)
+    compileOnly("org.checkerframework", "checker-qual", "3.19.0")
 }
 
 indra {

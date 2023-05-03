@@ -1,0 +1,96 @@
+[versions]
+# parent
+micronaut-gradle = "3.7.9"
+lombok = "8.0.1"
+
+# api
+geyser = "2.0.7-SNAPSHOT"
+cumulus = "1.1.1"
+events = "1.0-SNAPSHOT"
+netty = "4.1.49.Final"
+gson = "2.8.5"
+
+# core
+config-utils = "2.0-SNAPSHOT"
+fastutil = "8.5.3"
+java-websocket = "1.5.2"
+cloud = "1.5.0"
+snakeyaml = "2.0"
+bstats = "3.0.2"
+guava = "31.1-jre"
+
+# bungee
+bungee = "dfd847f"
+
+# spigot
+folia = "1.19.4-R0.1-SNAPSHOT"
+authlib = "1.5.21"
+
+# velocity
+velocity = "3.1.1"
+
+# buildSrc
+indra = "3.0.1"
+shadow = "7.1.1"
+gradle-idea-ext = "1.1.7"
+checkerframework = "3.19.0"
+
+[libraries]
+# api
+geyser-common = { module = "org.geysermc:common", version.ref = "geyser" }
+cumulus = { module = "org.geysermc.cumulus:cumulus", version.ref = "cumulus" }
+events = { module = "org.geysermc.event:events", version.ref = "events" }
+netty-transport = { module = "io.netty:netty-transport", version.ref = "netty" }
+# indirectly included
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+
+# core
+config-utils = { module = "org.geysermc.configutils:configutils", version.ref = "config-utils" }
+fastutil-short-object-maps = { module = "com.nukkitx.fastutil:fastutil-short-object-maps", version.ref = "fastutil" }
+fastutil-int-object-maps = { module = "com.nukkitx.fastutil:fastutil-int-object-maps", version.ref = "fastutil" }
+java-websocket = { module = "org.java-websocket:Java-WebSocket", version.ref = "java-websocket" }
+cloud-core = { module = "cloud.commandframework:cloud-core", version.ref = "cloud" }
+snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "snakeyaml" }
+bstats = { module = "org.bstats:bstats-base", version.ref = "bstats" }
+guava = { module = "com.google.guava:guava", version.ref = "guava" }
+
+micronaut-inject = { module = "io.micronaut:micronaut-inject-java" }
+micronaut-context = { module = "io.micronaut:micronaut-context" }
+micronaut-http-client = { module = "io.micronaut:micronaut-http-client" }
+micronaut-validation = { module = "io.micronaut:micronaut-validation" }
+micronaut-data-processor = { module = "io.micronaut.data:micronaut-data-processor" }
+micronaut-hibernate = { module = "io.micronaut.data:micronaut-data-hibernate-jpa" }
+micronaut-hikari = { module = "io.micronaut.sql:micronaut-jdbc-hikari" }
+
+netty-codec = { module = "io.netty:netty-codec", version.ref = "netty" }
+
+# database types
+h2 = { module = "com.h2database:h2" }
+
+# bungee
+bungee = { module = "com.github.SpigotMC.BungeeCord:bungeecord-proxy", version.ref = "bungee" }
+cloud-bungee = { module = "cloud.commandframework:cloud-bungee", version.ref = "cloud" }
+
+# spigot
+folia-api = { module = "dev.folia:folia-api", version.ref = "folia" }
+cloud-bukkit = { module = "cloud.commandframework:cloud-bukkit", version.ref = "cloud" }
+authlib = { module = "com.mojang:authlib", version.ref = "authlib" }
+
+# velocity
+cloud-velocity = { module = "cloud.commandframework:cloud-velocity", version.ref = "cloud" }
+velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "velocity" }
+
+# buildSrc
+checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "checkerframework" }
+# plugins
+indra-common = { module = "net.kyori:indra-common", version.ref = "indra" }
+indra-git = { module = "net.kyori:indra-git", version.ref = "indra" }
+shadow = { module = "gradle.plugin.com.github.johnrengelman:shadow", version.ref = "shadow" }
+gradle-idea-ext = { module = "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext", version.ref = "gradle-idea-ext" }
+
+[plugins]
+micronaut = { id = "io.micronaut.library", version.ref = "micronaut-gradle" }
+lombok = { id = "io.freefair.lombok", version.ref = "lombok" }
+
+[bundles]
+fastutil = ["fastutil-short-object-maps", "fastutil-int-object-maps"]

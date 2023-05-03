@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     api(projects.isolation)
-    compileOnlyApi("com.velocitypowered", "velocity-api", Versions.velocityVersion)
+    compileOnlyApi(libs.velocity.api)
 }
 
 tasks {

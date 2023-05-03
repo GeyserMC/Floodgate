@@ -1,8 +1,8 @@
 plugins {
     `java-library`
     id("floodgate.build-logic")
-    id("io.freefair.lombok") version "8.0.1" apply false
-    id("io.micronaut.library") version "3.7.8" apply false
+    alias(libs.plugins.micronaut) apply false
+    alias(libs.plugins.lombok) apply false
 }
 
 allprojects {

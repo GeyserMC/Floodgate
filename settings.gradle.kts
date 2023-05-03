@@ -53,7 +53,6 @@ pluginManagement {
         id("net.kyori.indra")
         id("net.kyori.indra.git")
     }
-    includeBuild("build-logic")
 }
 
 rootProject.name = "floodgate-parent"
@@ -63,9 +62,6 @@ include(":core")
 include(":bungee")
 include(":spigot")
 include(":universal")
-include(":sqlite")
-include(":mysql")
-include(":mongo")
 include(":database")
 include(":isolation")
 

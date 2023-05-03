@@ -25,7 +25,9 @@
 
 import net.kyori.indra.git.IndraGitExtension
 import org.gradle.api.Project
+import org.gradle.api.artifacts.MinimalExternalModuleDependency
 import org.gradle.api.artifacts.ProjectDependency
+import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.the
 
 fun Project.fullVersion(): String {
@@ -72,6 +74,11 @@ fun Project.provided(dependency: ProjectDependency) {
     dependencies.add("compileOnlyApi", dependency)
 }
 
+fun Project.provided(dependency: MinimalExternalModuleDependency) =
+    provided(dependency.module.group, dependency.module.name, dependency.versionConstraint.requiredVersion)
+
+fun Project.provided(provider: Provider<MinimalExternalModuleDependency>) =
+    provided(provider.get())
 
 fun Project.relocate(pattern: String) =
     relocatedPackages.getOrPut(project.name) { mutableSetOf() }

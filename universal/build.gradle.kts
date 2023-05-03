@@ -2,12 +2,12 @@ plugins {
   id("floodgate.generate-templates")
 }
 
-provided("com.github.SpigotMC.BungeeCord", "bungeecord-proxy", Versions.bungeeCommit)
-provided("com.destroystokyo.paper", "paper-api", Versions.spigotVersion)
-provided("com.velocitypowered", "velocity-api", Versions.velocityVersion)
+provided(libs.bungee)
+provided(libs.folia.api)
+provided(libs.velocity.api)
 
 // todo use an isolated class loader in the future
-provided("com.google.code.gson", "gson", "2.8.5")
+provided(libs.gson)
 
 tasks {
   templateSources {

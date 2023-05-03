@@ -14,7 +14,7 @@ configurations.runtimeClasspath.get()
     .exclude("io.micronaut", "micronaut-context")
 
 dependencies {
-    implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
-    implementation("io.micronaut.sql:micronaut-jdbc-hikari")
+    api(libs.micronaut.hibernate)
+    api(libs.micronaut.hikari)
     //runtimeOnly("com.h2database:h2")
 }

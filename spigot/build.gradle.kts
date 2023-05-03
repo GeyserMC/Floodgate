@@ -1,18 +1,14 @@
-var authlibVersion = "1.5.21"
-var guavaVersion = "21.0"
-var gsonVersion = "2.8.5"
-
 dependencies {
     api(projects.core)
     annotationProcessor(projects.core)
 
     implementation(projects.isolation)
 
-    implementation("cloud.commandframework", "cloud-bukkit", Versions.cloudVersion)
+    implementation(libs.cloud.bukkit)
     // hack to make pre 1.12 work
-    implementation("com.google.guava", "guava", guavaVersion)
+    implementation(libs.guava)
 
-    compileOnlyApi("dev.folia", "folia-api", Versions.spigotVersion)
+    compileOnlyApi(libs.folia.api)
 }
 
 relocate("com.google.inject")
@@ -26,8 +22,8 @@ relocate("com.google.guava")
 relocate("it.unimi")
 
 // these dependencies are already present on the platform
-provided("com.mojang", "authlib", authlibVersion)
-provided("io.netty", "netty-transport", Versions.nettyVersion)
-provided("io.netty", "netty-codec", Versions.nettyVersion)
-provided("com.google.code.gson", "gson", gsonVersion)
-provided("org.yaml", "snakeyaml", Versions.snakeyamlVersion)
+provided(libs.authlib)
+provided(libs.netty.transport)
+provided(libs.netty.codec)
+provided(libs.gson)
+provided(libs.snakeyaml)
