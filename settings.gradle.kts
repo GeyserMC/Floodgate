@@ -21,13 +21,7 @@ dependencyResolutionManagement {
 //        maven("https://repo.papermc.io/repository/maven-snapshots") {
 //            mavenContent { snapshotsOnly() }
 //        }
-        maven("https://repo.papermc.io/repository/maven-public") {
-            content {
-                includeGroupByRegex(
-                    "(io\\.papermc\\..*|com\\.destroystokyo\\..*|com\\.velocitypowered)"
-                )
-            }
-        }
+        maven("https://repo.papermc.io/repository/maven-public")
         // Spigot
         maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots") {
             mavenContent { snapshotsOnly() }

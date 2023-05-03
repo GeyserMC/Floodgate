@@ -33,7 +33,7 @@ object Versions {
     const val nettyVersion = "4.1.49.Final"
     const val snakeyamlVersion = "2.0"
     const val cloudVersion = "1.5.0"
-    const val bstatsVersion = "3.0.1"
+    const val bstatsVersion = "3.0.2"
 
     const val javaWebsocketVersion = "1.5.2"
 
@@ -41,6 +41,5 @@ object Versions {
 
     // Platform versions
     const val velocityVersion = "3.1.1"
-    const val bungeeCommit = "ff5727c"
-    const val spigotVersion = "1.13-R0.1-SNAPSHOT"
+    const val spigotVersion = "1.19.4-R0.1-SNAPSHOT"
 }

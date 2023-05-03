@@ -36,6 +36,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.netty.PipelineUtils;
 import net.md_5.bungee.protocol.MinecraftEncoder;
+import net.md_5.bungee.protocol.Varint21LengthFieldExtraBufPrepender;
 import net.md_5.bungee.protocol.Varint21LengthFieldPrepender;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.bungee.util.BungeeReflectionUtils;
@@ -53,6 +54,16 @@ public final class BungeeInjector extends CommonPlatformInjector {
     @Override
     public void inject() {
         // Can everyone just switch to Velocity please :)
+
+        // Newer Bungee versions have a separate prepender for backend and client connections
+        Field serverFramePrepender =
+                ReflectionUtils.getField(PipelineUtils.class, "serverFramePrepender");
+        if (serverFramePrepender != null) {
+            BungeeCustomServerPrepender customServerPrepender = new BungeeCustomServerPrepender(
+                    this, ReflectionUtils.castedStaticValue(serverFramePrepender)
+            );
+            BungeeReflectionUtils.setFieldValue(null, serverFramePrepender, customServerPrepender);
+        }
 
         Field framePrepender = ReflectionUtils.getField(PipelineUtils.class, "framePrepender");
 
@@ -118,6 +129,22 @@ public final class BungeeInjector extends CommonPlatformInjector {
                         BUNGEE_INIT, new BungeeProxyToServerInjectInitializer(injector)
                 );
             }
+        }
+    }
+
+    @RequiredArgsConstructor
+    private static final class BungeeCustomServerPrepender
+            extends Varint21LengthFieldExtraBufPrepender {
+        private final BungeeInjector injector;
+        private final Varint21LengthFieldExtraBufPrepender original;
+
+        @Override
+        public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+            original.handlerAdded(ctx);
+            // The Minecraft encoder being in the pipeline isn't present until later
+
+            // Proxy <-> Server
+            ctx.pipeline().addLast(BUNGEE_INIT, new BungeeProxyToServerInjectInitializer(injector));
         }
     }
 

@@ -79,6 +79,8 @@ public class ClassNames {
 
     public static final Field BUNGEE;
 
+    public static final boolean IS_FOLIA;
+
     static {
         String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
         SPIGOT_MAPPING_PREFIX = "net.minecraft.server." + version;
@@ -224,6 +226,10 @@ public class ClassNames {
                 PAPER_VELOCITY_SUPPORT = null;
             }
         }
+
+        IS_FOLIA = ReflectionUtils.getClassSilently(
+                "io.papermc.paper.threadedregions.scheduler.EntityScheduler"
+        ) != null;
     }
 
     private static <T> T checkNotNull(@CheckForNull T toCheck, @CheckForNull String objectName) {
