@@ -52,7 +52,7 @@ public abstract class CommonPlayerLink {
     FloodgateApi api;
 
     @Inject
-    void init(FloodgateConfig config) {
+    public void commonInit(FloodgateConfig config) {
         FloodgateConfig.PlayerLinkConfig linkConfig = config.playerLink();
         enabled = linkConfig.enabled();
         allowLinking = linkConfig.allowed();

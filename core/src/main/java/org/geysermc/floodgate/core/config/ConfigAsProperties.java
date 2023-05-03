@@ -52,10 +52,6 @@ public class ConfigAsProperties implements BootstrapPropertySourceLocator {
 
     @Inject FloodgateConfig config;
 
-    public ConfigAsProperties() {
-        System.out.println("test1");
-    }
-
     @Override
     public Iterable<PropertySource> findPropertySources(Environment environment)
             throws ConfigurationException {

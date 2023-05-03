@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.core.link;
 
+import io.micronaut.context.annotation.Secondary;
 import jakarta.inject.Singleton;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -36,6 +37,7 @@ import org.geysermc.floodgate.core.database.entity.LinkedPlayer;
  * Simple class used when PlayerLinking is disabled
  */
 @Singleton
+@Secondary
 final class DisabledPlayerLink extends CommonPlayerLink {
     @Override
     public boolean isEnabled() {

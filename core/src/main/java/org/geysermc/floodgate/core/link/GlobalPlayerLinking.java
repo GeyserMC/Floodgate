@@ -40,7 +40,7 @@ import org.geysermc.floodgate.core.database.entity.LinkRequest;
 import org.geysermc.floodgate.core.database.entity.LinkedPlayer;
 import org.geysermc.floodgate.core.http.link.GlobalLinkClient;
 
-@Requires(property = "config.link.enableGlobalLinking", value = "true")
+@Requires(property = "config.playerLink.enableGlobalLinking", value = "true")
 @Primary
 @Singleton
 @Getter
@@ -61,7 +61,7 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
             return getLinkedPlayer0(bedrockId);
         }
 
-        return database.fetchLink(bedrockId).thenComposeAsync(result -> {
+        return database.fetchLink(bedrockId).thenCompose(result -> {
             if (result != null) {
                 return CompletableFuture.completedFuture(result);
             }
@@ -82,7 +82,7 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
             return isLinkedPlayer0(bedrockId);
         }
 
-        return database.isLinked(bedrockId).thenComposeAsync(result -> {
+        return database.isLinked(bedrockId).thenCompose(result -> {
             if (result != null) {
                 return CompletableFuture.completedFuture(result);
             }

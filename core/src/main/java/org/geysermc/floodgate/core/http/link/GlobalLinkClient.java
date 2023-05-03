@@ -23,9 +23,22 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.event.lifecycle;
+package org.geysermc.floodgate.core.http.link;
 
-import org.geysermc.floodgate.core.config.FloodgateConfig;
+import static io.micronaut.http.HttpHeaders.ACCEPT;
+import static io.micronaut.http.HttpHeaders.USER_AGENT;
 
-public record ConfigLoadedEvent(FloodgateConfig config) {
+import io.micronaut.core.async.annotation.SingleResult;
+import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.Header;
+import io.micronaut.http.client.annotation.Client;
+import java.util.concurrent.CompletableFuture;
+
+@Client("${http.baseUrl}/v2/link")
+@Header(name = USER_AGENT, value = "${http.userAgent}")
+@Header(name = ACCEPT, value = "application/json")
+public interface GlobalLinkClient {
+    @Get("/bedrock/{xuid}")
+    @SingleResult
+    CompletableFuture<LinkedPlayer> bedrockLink(long xuid);
 }
