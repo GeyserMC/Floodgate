@@ -40,7 +40,7 @@ import org.geysermc.floodgate.core.player.FloodgateCommandPreprocessor;
 import org.geysermc.floodgate.core.player.UserAudience;
 
 @Factory
-public final class VelocityPlatformModule {
+public class VelocityPlatformModule {
     @Bean
     @Singleton
     public CommandManager<UserAudience> commandManager(
@@ -61,24 +61,28 @@ public final class VelocityPlatformModule {
 
     @Bean
     @Named("packetEncoder")
+    @Singleton
     public String packetEncoder() {
         return "minecraft-encoder";
     }
 
     @Bean
     @Named("packetDecoder")
+    @Singleton
     public String packetDecoder() {
         return "minecraft-decoder";
     }
 
     @Bean
     @Named("packetHandler")
+    @Singleton
     public String packetHandler() {
         return "handler";
     }
 
     @Bean
     @Named("implementationName")
+    @Singleton
     public String implementationName() {
         return "Velocity";
     }

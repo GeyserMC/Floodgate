@@ -26,15 +26,15 @@
 package org.geysermc.floodgate.bungee.listener;
 
 import jakarta.inject.Inject;
-import lombok.RequiredArgsConstructor;
+import jakarta.inject.Singleton;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.geysermc.floodgate.core.platform.listener.ListenerRegistration;
 
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
+@Singleton
 public final class BungeeListenerRegistration implements ListenerRegistration<Listener> {
-    private final Plugin plugin;
+    @Inject Plugin plugin;
 
     @Override
     public void register(Listener listener) {

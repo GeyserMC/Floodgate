@@ -25,60 +25,50 @@
 
 package org.geysermc.floodgate.spigot;
 
-import com.google.inject.Module;
+import io.micronaut.context.ApplicationContext;
+import io.micronaut.inject.qualifiers.Qualifiers;
+import java.nio.file.Path;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.core.FloodgatePlatform;
-import org.geysermc.floodgate.core.util.ReflectionUtils;
-import org.geysermc.floodgate.module.PaperListenerModule;
-import org.geysermc.floodgate.module.PluginMessageModule;
-import org.geysermc.floodgate.module.SpigotAddonModule;
-import org.geysermc.floodgate.module.SpigotListenerModule;
-import org.geysermc.floodgate.spigot.module.SpigotCommandModule;
-import org.geysermc.floodgate.spigot.module.SpigotPlatformModule;
-import org.geysermc.floodgate.spigot.util.SpigotHandshakeHandler;
+import org.geysermc.floodgate.isolation.library.LibraryManager;
 import org.geysermc.floodgate.spigot.util.SpigotProtocolSupportHandler;
 import org.geysermc.floodgate.spigot.util.SpigotProtocolSupportListener;
 
 public class SpigotPlatform extends FloodgatePlatform {
     private final JavaPlugin plugin;
+    private ApplicationContext context;
 
-    public SpigotPlatform(JavaPlugin floodgatePlugin) {
-        this.plugin = floodgatePlugin;
-    }
-
-    @Override
-    protected Module[] loadStageModules() {
-        return new Module[]{
-                new ServerCommonModule(plugin.getDataFolder().toPath()),
-                new SpigotPlatformModule(plugin)
-        };
-    }
-
-    @Override
-    protected Module[] postEnableStageModules() {
-        boolean usePaperListener = ReflectionUtils.getClassSilently(
-                "com.destroystokyo.paper.event.profile.PreFillProfileEvent") != null;
-
-        return new Module[]{
-                new SpigotCommandModule(plugin),
-                new SpigotAddonModule(),
-                new PluginMessageModule(),
-                (usePaperListener ? new PaperListenerModule() : new SpigotListenerModule())
-        };
+    public SpigotPlatform(JavaPlugin plugin, LibraryManager manager) {
+        super(manager);
+        this.plugin = plugin;
     }
 
     @Override
     public void enable() throws RuntimeException {
         super.enable();
 
-        getGuice().getInstance(HandshakeHandlers.class)
-                .addHandshakeHandler(getGuice().getInstance(SpigotHandshakeHandler.class));
-
         // add ProtocolSupport support (hack)
         if (plugin.getServer().getPluginManager().getPlugin("ProtocolSupport") != null) {
-            getGuice().getInstance(SpigotProtocolSupportHandler.class);
+            context.getBean(SpigotProtocolSupportHandler.class);
             SpigotProtocolSupportListener.registerHack(plugin);
         }
+    }
+
+    @Override
+    protected void onContextCreated(ApplicationContext context) {
+        context.registerSingleton(plugin)
+                .registerSingleton(plugin.getServer())
+                .registerSingleton(plugin.getSLF4JLogger())
+                .registerSingleton(
+                        Path.class,
+                        plugin.getDataFolder().toPath(),
+                        Qualifiers.byName("dataDirectory")
+                );
+        this.context = context;
+    }
+
+    @Override
+    protected boolean isProxy() {
+        return false;
     }
 }

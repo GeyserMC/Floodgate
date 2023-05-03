@@ -27,69 +27,63 @@ package org.geysermc.floodgate.core.logger;
 
 import static org.geysermc.floodgate.core.util.MessageFormatter.format;
 
-import io.micronaut.context.annotation.Requires;
-import io.micronaut.context.annotation.Secondary;
+import io.micronaut.context.BeanProvider;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import jakarta.inject.Singleton;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.util.LanguageManager;
+import org.slf4j.Logger;
 
-@Secondary
-@Requires(property = "platform.logger", value = "java.util")
-public final class JavaUtilFloodgateLogger implements FloodgateLogger {
-    @Inject
-    @Named("logger")
-    Logger logger;
-    private LanguageManager languageManager;
+@Singleton
+public final class Slf4jFloodgateLogger implements FloodgateLogger {
+    @Inject BeanProvider<LanguageManager> languageManager;
+    @Inject Logger logger;
 
     @Inject
-    public void init(LanguageManager languageManager, FloodgateConfig config) {
-        this.languageManager = languageManager;
-        if (config.debug()) {
-            logger.setLevel(Level.ALL);
-        }
+    void init(FloodgateConfig config) {
+//        if (config.debug() && !logger.isDebugEnabled()) {
+//            Configurator.setLevel(logger.getName(), Level.DEBUG);
+//        }
     }
 
     @Override
     public void error(String message, Object... args) {
-        logger.severe(format(message, args));
+        logger.error(message, args);
     }
 
     @Override
     public void error(String message, Throwable throwable, Object... args) {
-        logger.log(Level.SEVERE, format(message, args), throwable);
+        logger.error(format(message, args), throwable);
     }
 
     @Override
     public void warn(String message, Object... args) {
-        logger.warning(format(message, args));
+        logger.warn(message, args);
     }
 
     @Override
     public void info(String message, Object... args) {
-        logger.info(format(message, args));
+        logger.info(message, args);
     }
 
     @Override
     public void translatedInfo(String message, Object... args) {
-        logger.info(languageManager.getLogString(message, args));
+        logger.info(languageManager.get().getLogString(message, args));
     }
 
     @Override
     public void debug(String message, Object... args) {
-        logger.fine(format(message, args));
+        logger.debug(message, args);
     }
 
     @Override
     public void trace(String message, Object... args) {
-        logger.finer(format(message, args));
+        logger.trace(message, args);
     }
 
     @Override
     public boolean isDebug() {
-        return logger.getLevel() == Level.ALL;
+        return logger.isDebugEnabled();
     }
 }

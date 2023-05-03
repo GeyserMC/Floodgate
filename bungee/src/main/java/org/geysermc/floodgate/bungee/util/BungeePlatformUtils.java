@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.bungee.util;
 
+import jakarta.inject.Singleton;
 import java.lang.reflect.Field;
 import java.util.List;
 import net.md_5.bungee.api.ProxyServer;
@@ -32,6 +33,7 @@ import net.md_5.bungee.protocol.ProtocolConstants;
 import org.geysermc.floodgate.core.platform.util.PlatformUtils;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
 
+@Singleton
 @SuppressWarnings("ConstantConditions")
 public final class BungeePlatformUtils extends PlatformUtils {
     private static final String LATEST_SUPPORTED_VERSION;

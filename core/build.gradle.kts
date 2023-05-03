@@ -9,7 +9,6 @@ dependencies {
     compileOnlyApi(projects.isolation)
     api("org.geysermc.configutils", "configutils", Versions.configUtilsVersion)
 
-    api("com.google.inject", "guice", Versions.guiceVersion)
     api("com.nukkitx.fastutil", "fastutil-short-object-maps", Versions.fastutilVersion)
     api("com.nukkitx.fastutil", "fastutil-int-object-maps", Versions.fastutilVersion)
     api("org.java-websocket", "Java-WebSocket", Versions.javaWebsocketVersion)

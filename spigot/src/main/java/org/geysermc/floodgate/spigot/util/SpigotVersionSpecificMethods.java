@@ -25,6 +25,8 @@
 
 package org.geysermc.floodgate.spigot.util;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 import org.bukkit.entity.Player;
@@ -32,6 +34,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
 
+@Singleton
 public final class SpigotVersionSpecificMethods {
     private static final Method GET_SPIGOT;
     private static final Method OLD_GET_LOCALE;
@@ -47,11 +50,7 @@ public final class SpigotVersionSpecificMethods {
         );
     }
 
-    private final JavaPlugin plugin;
-
-    public SpigotVersionSpecificMethods(JavaPlugin plugin) {
-        this.plugin = plugin;
-    }
+    @Inject JavaPlugin plugin;
 
     public String getLocale(Player player) {
         if (OLD_GET_LOCALE == null) {

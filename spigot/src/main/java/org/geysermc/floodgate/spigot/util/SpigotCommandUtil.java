@@ -25,6 +25,8 @@
 
 package org.geysermc.floodgate.spigot.util;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.Collection;
 import java.util.UUID;
 import org.bukkit.Server;
@@ -38,11 +40,13 @@ import org.geysermc.floodgate.core.player.UserAudience.ConsoleAudience;
 import org.geysermc.floodgate.core.player.UserAudience.PlayerAudience;
 import org.geysermc.floodgate.core.util.LanguageManager;
 
+@Singleton
 public final class SpigotCommandUtil extends CommandUtil {
     private final Server server;
     private final SpigotVersionSpecificMethods versionSpecificMethods;
     private UserAudience console;
 
+    @Inject
     public SpigotCommandUtil(
             LanguageManager manager,
             Server server,

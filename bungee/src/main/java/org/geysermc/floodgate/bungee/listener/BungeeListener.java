@@ -48,15 +48,15 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.core.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
+import org.geysermc.floodgate.core.listener.McListener;
 import org.geysermc.floodgate.core.skin.SkinApplier;
 import org.geysermc.floodgate.core.skin.SkinDataImpl;
 import org.geysermc.floodgate.core.util.LanguageManager;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
 
-@McListener
 @Singleton
 @SuppressWarnings("ConstantConditions")
-public final class BungeeListener implements Listener {
+public final class BungeeListener implements Listener, McListener {
     private static final Field CHANNEL_WRAPPER;
     private static final Field PLAYER_NAME;
 

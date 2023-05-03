@@ -25,15 +25,16 @@
 
 package org.geysermc.floodgate.spigot.pluginmessage;
 
-import lombok.RequiredArgsConstructor;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.Messenger;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageRegistration;
 
-@RequiredArgsConstructor
+@Singleton
 public class SpigotPluginMessageRegistration implements PluginMessageRegistration {
-    private final JavaPlugin plugin;
+    @Inject JavaPlugin plugin;
 
     @Override
     public void register(PluginMessageChannel channel) {

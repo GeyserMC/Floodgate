@@ -26,14 +26,22 @@
 package org.geysermc.floodgate.spigot.util;
 
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.UUID;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.api.handshake.HandshakeHandler;
+import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.util.BedrockData;
 
+@Singleton
 public class SpigotHandshakeHandler implements HandshakeHandler {
     @Inject FloodgateLogger logger;
+
+    @Inject
+    void init(HandshakeHandlers handlers) {
+        handlers.addHandshakeHandler(this);
+    }
 
     @Override
     public void handle(HandshakeData data) {

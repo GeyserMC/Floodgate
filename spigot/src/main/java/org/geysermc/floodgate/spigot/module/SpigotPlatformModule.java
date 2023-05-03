@@ -25,122 +25,38 @@
 
 package org.geysermc.floodgate.spigot.module;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.name.Names;
+import io.micronaut.context.annotation.Bean;
+import io.micronaut.context.annotation.Factory;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
-import java.util.logging.Logger;
-import lombok.RequiredArgsConstructor;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.core.inject.CommonPlatformInjector;
-import org.geysermc.floodgate.core.logger.JavaUtilFloodgateLogger;
-import org.geysermc.floodgate.core.platform.command.CommandUtil;
-import org.geysermc.floodgate.core.platform.listener.ListenerRegistration;
-import org.geysermc.floodgate.core.platform.pluginmessage.PluginMessageUtils;
-import org.geysermc.floodgate.core.platform.util.PlatformUtils;
-import org.geysermc.floodgate.core.pluginmessage.PluginMessageRegistration;
-import org.geysermc.floodgate.core.skin.SkinApplier;
-import org.geysermc.floodgate.core.util.LanguageManager;
-import org.geysermc.floodgate.spigot.inject.SpigotInjector;
-import org.geysermc.floodgate.spigot.listener.SpigotListenerRegistration;
-import org.geysermc.floodgate.spigot.pluginmessage.SpigotPluginMessageRegistration;
-import org.geysermc.floodgate.spigot.pluginmessage.SpigotPluginMessageUtils;
-import org.geysermc.floodgate.spigot.pluginmessage.SpigotSkinApplier;
-import org.geysermc.floodgate.spigot.util.SpigotCommandUtil;
-import org.geysermc.floodgate.spigot.util.SpigotPlatformUtils;
-import org.geysermc.floodgate.spigot.util.SpigotVersionSpecificMethods;
 
-@RequiredArgsConstructor
-public final class SpigotPlatformModule extends AbstractModule {
-    private final JavaPlugin plugin;
-
-    @Override
-    protected void configure() {
-        bind(JavaPlugin.class).toInstance(plugin);
-        bind(PlatformUtils.class).to(SpigotPlatformUtils.class);
-        bind(CommonPlatformInjector.class).to(SpigotInjector.class);
-        bind(Logger.class).annotatedWith(Names.named("logger")).toInstance(plugin.getLogger());
-        bind(FloodgateLogger.class).to(JavaUtilFloodgateLogger.class);
-        bind(SkinApplier.class).to(SpigotSkinApplier.class);
-    }
-
-    @Provides
-    @Singleton
-    public JavaPlugin javaPlugin() {
-        return plugin;
-    }
-
-    /*
-    Commands / Listeners
-     */
-
-    @Provides
-    @Singleton
-    public CommandUtil commandUtil(
-            FloodgateApi api,
-            SpigotVersionSpecificMethods versionSpecificMethods,
-            LanguageManager languageManager) {
-        return new SpigotCommandUtil(
-                languageManager, plugin.getServer(), api, versionSpecificMethods);
-    }
-
-    @Provides
-    @Singleton
-    public ListenerRegistration<Listener> listenerRegistration() {
-        return new SpigotListenerRegistration(plugin);
-    }
-
-    /*
-    DebugAddon / PlatformInjector
-     */
-
-    @Provides
+@Factory
+public class SpigotPlatformModule {
+    @Bean
     @Named("packetEncoder")
+    @Singleton
     public String packetEncoder() {
         return "encoder";
     }
 
-    @Provides
+    @Bean
     @Named("packetDecoder")
+    @Singleton
     public String packetDecoder() {
         return "decoder";
     }
 
-    @Provides
+    @Bean
     @Named("packetHandler")
+    @Singleton
     public String packetHandler() {
         return "packet_handler";
     }
 
-    @Provides
+    @Bean
     @Named("implementationName")
+    @Singleton
     public String implementationName() {
         return "Spigot";
-    }
-
-    /*
-    Others
-     */
-
-    @Provides
-    @Singleton
-    public PluginMessageUtils pluginMessageUtils() {
-        return new SpigotPluginMessageUtils(plugin);
-    }
-
-    @Provides
-    @Singleton
-    public PluginMessageRegistration pluginMessageRegister() {
-        return new SpigotPluginMessageRegistration(plugin);
-    }
-
-    @Provides
-    @Singleton
-    public SpigotVersionSpecificMethods versionSpecificMethods() {
-        return new SpigotVersionSpecificMethods(plugin);
     }
 }

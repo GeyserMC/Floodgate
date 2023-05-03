@@ -3,6 +3,9 @@ var guavaVersion = "21.0"
 
 dependencies {
     api(projects.core)
+    annotationProcessor(projects.core)
+    implementation(projects.isolation)
+
     implementation("cloud.commandframework", "cloud-bungee", Versions.cloudVersion)
 }
 

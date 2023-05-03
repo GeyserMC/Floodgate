@@ -25,6 +25,8 @@
 
 package org.geysermc.floodgate.bungee.util;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.Collection;
 import java.util.UUID;
 import net.md_5.bungee.api.CommandSender;
@@ -39,13 +41,14 @@ import org.geysermc.floodgate.core.player.UserAudience.PlayerAudience;
 import org.geysermc.floodgate.core.util.LanguageManager;
 import org.geysermc.floodgate.core.util.Utils;
 
+@Singleton
 public final class BungeeCommandUtil extends CommandUtil {
-    private final ProxyServer server;
+    @Inject ProxyServer server;
     private UserAudience console;
 
-    public BungeeCommandUtil(LanguageManager manager, ProxyServer server, FloodgateApi api) {
+    @Inject
+    public BungeeCommandUtil(LanguageManager manager, FloodgateApi api) {
         super(manager, api);
-        this.server = server;
     }
 
     @Override

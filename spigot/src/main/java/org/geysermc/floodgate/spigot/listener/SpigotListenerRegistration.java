@@ -26,15 +26,15 @@
 package org.geysermc.floodgate.spigot.listener;
 
 import jakarta.inject.Inject;
-import lombok.RequiredArgsConstructor;
+import jakarta.inject.Singleton;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.core.platform.listener.ListenerRegistration;
 
-@RequiredArgsConstructor(onConstructor = @__(@Inject))
+@Singleton
 public final class SpigotListenerRegistration implements ListenerRegistration<Listener> {
-    private final JavaPlugin plugin;
+    @Inject JavaPlugin plugin;
 
     @Override
     public void register(Listener listener) {

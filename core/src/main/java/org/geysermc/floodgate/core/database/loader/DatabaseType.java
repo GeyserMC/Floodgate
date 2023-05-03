@@ -36,7 +36,7 @@ import org.geysermc.floodgate.isolation.library.Repository;
 public enum DatabaseType {
     H2(
             DriverCategory.HIBERNATE,
-            databaseModule(),
+//            databaseModule(),
             library("h2", Repository.MAVEN_CENTRAL, "com.h2database", "h2", "1.4.200")
     );
 

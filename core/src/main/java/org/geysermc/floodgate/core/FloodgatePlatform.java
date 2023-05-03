@@ -35,7 +35,6 @@ import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
-import org.geysermc.floodgate.core.config.Properties;
 import org.geysermc.floodgate.core.event.EventBus;
 import org.geysermc.floodgate.core.event.lifecycle.PostEnableEvent;
 import org.geysermc.floodgate.core.event.lifecycle.ShutdownEvent;
@@ -68,7 +67,7 @@ public abstract class FloodgatePlatform {
                 .properties(Map.of(
                         "platform.proxy", isProxy()
                 ))
-                .propertySources(Properties.defaults())
+//                .propertySources(Properties.defaults())
                 .environmentPropertySource(false)
                 .eagerInitAnnotated(EagerSingleton.class)
                 .eagerInitSingletons(true)

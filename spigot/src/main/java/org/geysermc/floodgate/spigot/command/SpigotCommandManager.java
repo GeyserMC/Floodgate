@@ -23,14 +23,15 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.spigot.module;
+package org.geysermc.floodgate.spigot.command;
 
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.bukkit.BukkitCommandManager;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
-import io.avaje.inject.Bean;
-import io.avaje.inject.Factory;
+import io.micronaut.context.annotation.Bean;
+import io.micronaut.context.annotation.Factory;
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -43,12 +44,11 @@ import org.geysermc.floodgate.core.player.FloodgateCommandPreprocessor;
 import org.geysermc.floodgate.core.player.UserAudience;
 
 @Factory
-public final class SpigotCommandModule {
-    @Inject JavaPlugin plugin;
-
+public class SpigotCommandManager {
     @Bean
     @SneakyThrows
-    public CommandManager<UserAudience> commandManager(CommandUtil commandUtil) {
+    @Singleton
+    public CommandManager<UserAudience> commandManager(CommandUtil commandUtil, JavaPlugin plugin) {
         CommandManager<UserAudience> commandManager = new BukkitCommandManager<>(
                 plugin,
                 CommandExecutionCoordinator.simpleCoordinator(),

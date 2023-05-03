@@ -25,15 +25,16 @@
 
 package org.geysermc.floodgate.spigot.pluginmessage;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.core.platform.pluginmessage.PluginMessageUtils;
 
-@RequiredArgsConstructor
+@Singleton
 public class SpigotPluginMessageUtils extends PluginMessageUtils {
-    private final JavaPlugin plugin;
+    @Inject JavaPlugin plugin;
 
     @Override
     public boolean sendMessage(UUID player, String channel, byte[] data) {

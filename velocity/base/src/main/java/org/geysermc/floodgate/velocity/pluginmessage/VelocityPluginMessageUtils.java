@@ -47,9 +47,8 @@ import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel.Identity;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel.Result;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageManager;
 
-@McListener
 @Singleton
-public class VelocityPluginMessageUtils extends PluginMessageUtils {
+public class VelocityPluginMessageUtils extends PluginMessageUtils implements McListener {
     @Inject BeanProvider<PluginMessageManager> pluginMessageManager;
     @Inject ProxyServer proxy;
     @Inject FloodgateLogger logger;

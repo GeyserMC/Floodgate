@@ -25,26 +25,23 @@
 
 package org.geysermc.floodgate.core.listener;
 
-import io.micronaut.context.ApplicationContext;
-import io.micronaut.core.annotation.AnnotationMetadata;
-import io.micronaut.inject.qualifiers.Qualifiers;
-import jakarta.annotation.PostConstruct;
+import io.micronaut.runtime.event.annotation.EventListener;
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import java.util.Set;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.core.event.lifecycle.PostEnableEvent;
 import org.geysermc.floodgate.core.platform.listener.ListenerRegistration;
-import org.geysermc.floodgate.core.util.EagerSingleton;
 
-@EagerSingleton
+@Singleton
 @SuppressWarnings({"rawtypes", "unchecked"})
 public final class McListenerRegister {
     @Inject ListenerRegistration registration;
     @Inject FloodgateLogger logger;
+    @Inject Set<McListener> listeners;
 
-    @PostConstruct
-    public void registerListeners(ApplicationContext context) {
-        context.getBeansOfType(
-                Object.class,
-                Qualifiers.byAnnotation(AnnotationMetadata.EMPTY_METADATA, McListener.class)
-        ).forEach(registration::register);
+    @EventListener
+    public void onPostEnable(PostEnableEvent ignored) {
+        listeners.forEach(registration::register);
     }
 }

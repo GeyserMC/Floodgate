@@ -2,26 +2,17 @@ var authlibVersion = "1.5.21"
 var guavaVersion = "21.0"
 var gsonVersion = "2.8.5"
 
-indra {
-    javaVersions {
-        // For Folia
-        target(8)
-        minimumToolchain(17)
-    }
-}
-
 dependencies {
     api(projects.core)
+    annotationProcessor(projects.core)
+
+    implementation(projects.isolation)
 
     implementation("cloud.commandframework", "cloud-bukkit", Versions.cloudVersion)
     // hack to make pre 1.12 work
     implementation("com.google.guava", "guava", guavaVersion)
 
-    compileOnlyApi("dev.folia", "folia-api", Versions.spigotVersion) {
-        attributes {
-            attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 17)
-        }
-    }
+    compileOnlyApi("dev.folia", "folia-api", Versions.spigotVersion)
 }
 
 relocate("com.google.inject")

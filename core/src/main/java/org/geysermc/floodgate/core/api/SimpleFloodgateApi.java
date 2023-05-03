@@ -30,6 +30,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableSet;
 import io.micronaut.context.BeanProvider;
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
@@ -53,6 +54,7 @@ import org.geysermc.floodgate.core.scope.ServerOnly;
 import org.geysermc.floodgate.core.util.Utils;
 
 @ServerOnly
+@Singleton
 public class SimpleFloodgateApi implements FloodgateApi {
     private final Map<UUID, FloodgatePlayer> players = new ConcurrentHashMap<>();
     private final Cache<UUID, FloodgatePlayer> pendingRemove =

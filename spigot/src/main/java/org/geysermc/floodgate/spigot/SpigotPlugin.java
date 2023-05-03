@@ -25,21 +25,23 @@
 
 package org.geysermc.floodgate.spigot;
 
+import java.nio.file.Paths;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.core.FloodgatePlatform;
+import org.geysermc.floodgate.isolation.library.LibraryManager;
 
 public final class SpigotPlugin extends JavaPlugin {
     private FloodgatePlatform platform;
 
     @Override
     public void onLoad() {
-        platform = new SpigotPlatform(this);
-        platform.load();
+        platform = new SpigotPlatform(this, new LibraryManager(getClassLoader(), Paths.get("./libs"), true));
     }
 
     @Override
     public void onEnable() {
+        platform.load();
         try {
             platform.enable();
         } catch (Exception exception) {

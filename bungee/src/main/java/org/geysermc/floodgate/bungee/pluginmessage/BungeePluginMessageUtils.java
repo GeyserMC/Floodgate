@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.bungee.pluginmessage;
 
+import io.micronaut.context.BeanProvider;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.UUID;
@@ -38,21 +39,24 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.core.listener.McListener;
 import org.geysermc.floodgate.core.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel.Identity;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel.Result;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageManager;
 
-@McListener
 @Singleton
-public final class BungeePluginMessageUtils extends PluginMessageUtils implements Listener {
-    @Inject PluginMessageManager pluginMessageManager;
+public final class BungeePluginMessageUtils
+        extends PluginMessageUtils
+        implements Listener, McListener
+{
+    @Inject BeanProvider<PluginMessageManager> pluginMessageManager;
     @Inject FloodgateLogger logger;
 
     @EventHandler(priority = EventPriority.LOW)
     public void onPluginMessage(PluginMessageEvent event) {
-        PluginMessageChannel channel = pluginMessageManager.getChannel(event.getTag());
+        PluginMessageChannel channel = pluginMessageManager.get().getChannel(event.getTag());
         if (channel == null) {
             return;
         }

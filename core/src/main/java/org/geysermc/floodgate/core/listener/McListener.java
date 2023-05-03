@@ -26,14 +26,8 @@
 package org.geysermc.floodgate.core.listener;
 
 
-import jakarta.inject.Qualifier;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import io.micronaut.core.annotation.Indexed;
 
-@Qualifier
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE_USE)
-public @interface McListener {
+@Indexed(McListener.class)
+public interface McListener {
 }

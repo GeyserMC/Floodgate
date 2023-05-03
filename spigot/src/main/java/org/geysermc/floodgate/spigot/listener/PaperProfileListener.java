@@ -27,6 +27,7 @@ package org.geysermc.floodgate.spigot.listener;
 
 import com.destroystokyo.paper.event.profile.PreFillProfileEvent;
 import com.destroystokyo.paper.profile.ProfileProperty;
+import io.micronaut.context.annotation.Requires;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.HashSet;
@@ -36,9 +37,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
+import org.geysermc.floodgate.core.listener.McListener;
 
+@Requires(classes = PreFillProfileEvent.class)
 @Singleton
-public final class PaperProfileListener implements Listener {
+public final class PaperProfileListener implements Listener, McListener {
     @Inject SimpleFloodgateApi api;
 
     @EventHandler

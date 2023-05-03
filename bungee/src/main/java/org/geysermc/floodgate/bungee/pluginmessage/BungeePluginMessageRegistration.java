@@ -25,10 +25,12 @@
 
 package org.geysermc.floodgate.bungee.pluginmessage;
 
+import jakarta.inject.Singleton;
 import net.md_5.bungee.api.ProxyServer;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageRegistration;
 
+@Singleton
 public class BungeePluginMessageRegistration implements PluginMessageRegistration {
     @Override
     public void register(PluginMessageChannel channel) {

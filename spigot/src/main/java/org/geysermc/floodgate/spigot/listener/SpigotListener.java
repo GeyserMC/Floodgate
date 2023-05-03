@@ -36,10 +36,11 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
+import org.geysermc.floodgate.core.listener.McListener;
 import org.geysermc.floodgate.core.util.LanguageManager;
 
 @Singleton
-public final class SpigotListener implements Listener {
+public final class SpigotListener implements Listener, McListener {
     @Inject SimpleFloodgateApi api;
     @Inject LanguageManager languageManager;
     @Inject FloodgateLogger logger;

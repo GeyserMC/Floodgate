@@ -25,14 +25,16 @@
 
 package org.geysermc.floodgate.bungee;
 
+import java.nio.file.Paths;
 import net.md_5.bungee.api.plugin.Plugin;
+import org.geysermc.floodgate.isolation.library.LibraryManager;
 
 public final class BungeePlugin extends Plugin {
     private BungeePlatform platform;
 
     @Override
     public void onLoad() {
-        platform = new BungeePlatform(this);
+        platform = new BungeePlatform(this, new LibraryManager(getClass().getClassLoader(), Paths.get("./libs"), true));
         platform.load();
     }
 
