@@ -39,7 +39,6 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.command.util.Permission;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
-import org.geysermc.floodgate.core.http.UnsuccessfulResponse;
 import org.geysermc.floodgate.core.http.xbox.XboxClient;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
 import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
@@ -139,15 +138,16 @@ public class WhitelistCommand implements FloodgateCommand {
                         }
                         sender.sendMessage(Message.UNEXPECTED_ERROR);
 
-                        var response = exception.getResponse().getBody(UnsuccessfulResponse.class);
-                        var message =
-                                response.isPresent() ?
-                                        response.get().message() :
-                                        exception.getMessage();
-                        logger.error(
-                                "Got an error from requesting the xuid of a Bedrock player: {}",
-                                message
-                        );
+                        //todo proper non-200 status handler
+//                        var response = exception.getResponse().getBody(UnsuccessfulResponse.class);
+//                        var message =
+//                                response.isPresent() ?
+//                                        response.get().message() :
+//                                        exception.getMessage();
+//                        logger.error(
+//                                "Got an error from requesting the xuid of a Bedrock player: {}",
+//                                message
+//                        );
                         return;
                     }
 

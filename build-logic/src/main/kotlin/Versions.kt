@@ -41,5 +41,6 @@ object Versions {
 
     // Platform versions
     const val velocityVersion = "3.1.1"
+    const val bungeeCommit = "dfd847f"
     const val spigotVersion = "1.19.4-R0.1-SNAPSHOT"
 }
