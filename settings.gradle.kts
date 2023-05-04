@@ -60,14 +60,17 @@ rootProject.name = "floodgate-parent"
 include(":api")
 include(":core")
 include(":bungee")
-include(":spigot")
 include(":universal")
 include(":database")
 include(":isolation")
 
-arrayOf("velocity").forEach { platform ->
+arrayOf("spigot", "velocity").forEach { platform ->
     arrayOf("base", "isolated").forEach {
-        include(":$platform-$it")
-        project(":$platform-$it").projectDir = file("$platform/$it")
+        var id = ":$platform-$it"
+        // isolated is the new default
+        if (id.endsWith("-isolated")) id = ":$platform"
+
+        include(id)
+        project(id).projectDir = file("$platform/$it")
     }
 }

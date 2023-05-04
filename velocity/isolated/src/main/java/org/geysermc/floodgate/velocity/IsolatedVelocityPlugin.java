@@ -31,7 +31,8 @@ import com.google.inject.Injector;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
-import java.nio.file.Paths;
+import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import java.nio.file.Path;
 import org.geysermc.floodgate.isolation.library.LibraryManager;
 import org.geysermc.floodgate.isolation.loader.PlatformHolder;
 import org.geysermc.floodgate.isolation.loader.PlatformLoader;
@@ -40,9 +41,11 @@ public final class IsolatedVelocityPlugin {
     private final PlatformHolder holder;
 
     @Inject
-    public IsolatedVelocityPlugin(Injector guice) {
+    public IsolatedVelocityPlugin(Injector guice, @DataDirectory Path dataDirectory) {
         try {
-            holder = PlatformLoader.loadDefault(getClass().getClassLoader(), Paths.get("./libs"));
+            var libsDirectory = dataDirectory.resolve("libs");
+
+            holder = PlatformLoader.loadDefault(getClass().getClassLoader(), libsDirectory);
             Injector child = guice.createChildInjector(new AbstractModule() {
                 @Override
                 protected void configure() {

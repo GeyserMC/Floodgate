@@ -7,7 +7,6 @@ plugins {
 
 allprojects {
     group = "org.geysermc.floodgate"
-    version = property("version")!!
     description = "Allows Bedrock players to join Java edition servers while keeping the server in online mode"
 }
 
@@ -17,7 +16,7 @@ val deployProjects = setOf(
     projects.core,
     projects.bungee,
     projects.spigot,
-    projects.velocityIsolated,
+    projects.velocity,
     projects.universal
 ).map { it.dependencyProject }
 
@@ -26,7 +25,7 @@ val shadowProjects = setOf(
     // for future Floodgate integration + Fabric
     projects.core,
     projects.bungee,
-    projects.spigot,
+    projects.spigotBase,
     projects.velocityBase,
     projects.universal
 ).map { it.dependencyProject }

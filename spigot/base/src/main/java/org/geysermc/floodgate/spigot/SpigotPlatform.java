@@ -38,7 +38,7 @@ public class SpigotPlatform extends FloodgatePlatform {
     private final JavaPlugin plugin;
     private ApplicationContext context;
 
-    public SpigotPlatform(JavaPlugin plugin, LibraryManager manager) {
+    public SpigotPlatform(LibraryManager manager, JavaPlugin plugin) {
         super(manager);
         this.plugin = plugin;
     }

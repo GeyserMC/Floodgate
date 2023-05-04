@@ -27,6 +27,8 @@ package org.geysermc.floodgate.isolation.loader;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 import org.geysermc.floodgate.isolation.library.LibraryManager;
 
 public class PlatformHolder {
@@ -40,11 +42,18 @@ public class PlatformHolder {
         this.manager = manager;
     }
 
-    public void init(Class<?>[] argumentTypes, Object... argumentValues)
+    public void init(List<Class<?>> argumentTypes, List<Object> argumentValues)
             throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        argumentTypes = new ArrayList<>(argumentTypes);
+        argumentValues = new ArrayList<>(argumentValues);
+
+        // LibraryManager is always the first argument
+        argumentTypes.add(0, LibraryManager.class);
+        argumentValues.add(0, manager);
+
         platformInstance = platformClass
-                .getConstructor(argumentTypes)
-                .newInstance(argumentValues);
+                .getConstructor(argumentTypes.toArray(Class[]::new))
+                .newInstance(argumentValues.toArray());
     }
 
     public void load() {

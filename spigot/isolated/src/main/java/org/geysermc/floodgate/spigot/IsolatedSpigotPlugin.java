@@ -25,25 +25,31 @@
 
 package org.geysermc.floodgate.spigot;
 
-import java.nio.file.Paths;
+import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.core.FloodgatePlatform;
-import org.geysermc.floodgate.isolation.library.LibraryManager;
+import org.geysermc.floodgate.isolation.loader.PlatformHolder;
+import org.geysermc.floodgate.isolation.loader.PlatformLoader;
 
-public final class SpigotPlugin extends JavaPlugin {
-    private FloodgatePlatform platform;
+public final class IsolatedSpigotPlugin extends JavaPlugin {
+    private PlatformHolder holder;
 
     @Override
     public void onLoad() {
-        platform = new SpigotPlatform(this, new LibraryManager(getClassLoader(), Paths.get("./libs"), true));
+        try {
+            var libsDirectory = getDataFolder().toPath().resolve("libs");
+            holder = PlatformLoader.loadDefault(getClass().getClassLoader(), libsDirectory);
+            holder.init(List.of(JavaPlugin.class), List.of(this));
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to load Floodgate", exception);
+        }
     }
 
     @Override
     public void onEnable() {
-        platform.load();
+        holder.load();
         try {
-            platform.enable();
+            holder.enable();
         } catch (Exception exception) {
             Bukkit.getPluginManager().disablePlugin(this);
             throw exception;
@@ -52,6 +58,6 @@ public final class SpigotPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        platform.disable();
+        holder.disable();
     }
 }
