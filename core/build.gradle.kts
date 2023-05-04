@@ -8,6 +8,7 @@ dependencies {
     api(projects.api)
     compileOnlyApi(projects.isolation)
     api(libs.config.utils)
+    annotationProcessor(libs.config.utils.ap)
 
     api(libs.bundles.fastutil)
     api(libs.java.websocket)
