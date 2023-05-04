@@ -1,7 +1,7 @@
 dependencies {
     api(projects.core)
     annotationProcessor(projects.core)
-    implementation(projects.isolation)
+    compileOnlyApi(projects.isolation)
 
     implementation(libs.cloud.bungee)
 }

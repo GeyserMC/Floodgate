@@ -24,7 +24,7 @@ val shadowProjects = setOf(
     projects.api,
     // for future Floodgate integration + Fabric
     projects.core,
-    projects.bungee,
+    projects.bungeeBase,
     projects.spigotBase,
     projects.velocityBase,
     projects.universal

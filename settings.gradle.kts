@@ -59,12 +59,11 @@ rootProject.name = "floodgate-parent"
 
 include(":api")
 include(":core")
-include(":bungee")
 include(":universal")
 include(":database")
 include(":isolation")
 
-arrayOf("spigot", "velocity").forEach { platform ->
+arrayOf("bungee", "spigot", "velocity").forEach { platform ->
     arrayOf("base", "isolated").forEach {
         var id = ":$platform-$it"
         // isolated is the new default

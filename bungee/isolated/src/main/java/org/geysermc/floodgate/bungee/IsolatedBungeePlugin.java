@@ -25,38 +25,33 @@
 
 package org.geysermc.floodgate.bungee;
 
-import io.micronaut.context.ApplicationContext;
-import io.micronaut.inject.qualifiers.Qualifiers;
-import java.nio.file.Path;
+import java.util.List;
 import net.md_5.bungee.api.plugin.Plugin;
-import org.geysermc.floodgate.core.FloodgatePlatform;
-import org.geysermc.floodgate.core.util.ReflectionUtils;
-import org.geysermc.floodgate.isolation.library.LibraryManager;
-import org.slf4j.LoggerFactory;
+import org.geysermc.floodgate.isolation.loader.PlatformHolder;
+import org.geysermc.floodgate.isolation.loader.PlatformLoader;
 
-public class BungeePlatform extends FloodgatePlatform {
-    private final Plugin plugin;
+public final class IsolatedBungeePlugin extends Plugin {
+    private PlatformHolder holder;
 
-    public BungeePlatform(Plugin plugin, LibraryManager manager) {
-        super(manager);
-        this.plugin = plugin;
-        ReflectionUtils.setPrefix("net.md_5.bungee");
+    @Override
+    public void onLoad() {
+        try {
+            var libsDirectory = getDataFolder().toPath().resolve("libs");
+            holder = PlatformLoader.loadDefault(getClass().getClassLoader(), libsDirectory);
+            holder.init(List.of(Plugin.class), List.of(this));
+            holder.load();
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to load Floodgate", exception);
+        }
     }
 
     @Override
-    protected void onContextCreated(ApplicationContext context) {
-        context.registerSingleton(plugin)
-                .registerSingleton(plugin.getProxy())
-                .registerSingleton(LoggerFactory.getLogger(BungeePlatform.class))
-                .registerSingleton(
-                        Path.class,
-                        plugin.getDataFolder().toPath(),
-                        Qualifiers.byName("dataDirectory")
-                );
+    public void onEnable() {
+        holder.enable();
     }
 
     @Override
-    protected boolean isProxy() {
-        return true;
+    public void onDisable() {
+        holder.disable();
     }
 }

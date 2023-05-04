@@ -25,26 +25,38 @@
 
 package org.geysermc.floodgate.bungee;
 
-import java.nio.file.Paths;
+import io.micronaut.context.ApplicationContext;
+import io.micronaut.inject.qualifiers.Qualifiers;
+import java.nio.file.Path;
 import net.md_5.bungee.api.plugin.Plugin;
+import org.geysermc.floodgate.core.FloodgatePlatform;
+import org.geysermc.floodgate.core.util.ReflectionUtils;
 import org.geysermc.floodgate.isolation.library.LibraryManager;
+import org.slf4j.LoggerFactory;
 
-public final class BungeePlugin extends Plugin {
-    private BungeePlatform platform;
+public class BungeePlatform extends FloodgatePlatform {
+    private final Plugin plugin;
 
-    @Override
-    public void onLoad() {
-        platform = new BungeePlatform(this, new LibraryManager(getClass().getClassLoader(), Paths.get("./libs"), true));
-        platform.load();
+    public BungeePlatform(LibraryManager manager, Plugin plugin) {
+        super(manager);
+        this.plugin = plugin;
+        ReflectionUtils.setPrefix("net.md_5.bungee");
     }
 
     @Override
-    public void onEnable() {
-        platform.enable();
+    protected void onContextCreated(ApplicationContext context) {
+        context.registerSingleton(plugin)
+                .registerSingleton(plugin.getProxy())
+                .registerSingleton(LoggerFactory.getLogger(BungeePlatform.class))
+                .registerSingleton(
+                        Path.class,
+                        plugin.getDataFolder().toPath(),
+                        Qualifiers.byName("dataDirectory")
+                );
     }
 
     @Override
-    public void onDisable() {
-        platform.disable();
+    protected boolean isProxy() {
+        return true;
     }
 }

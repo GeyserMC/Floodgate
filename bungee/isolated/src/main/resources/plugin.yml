@@ -2,4 +2,4 @@ name: ${name}
 description: ${description}
 version: ${version}
 author: ${author}
-main: org.geysermc.floodgate.bungee.BungeePlugin
+main: org.geysermc.floodgate.bungee.IsolatedBungeePlugin
