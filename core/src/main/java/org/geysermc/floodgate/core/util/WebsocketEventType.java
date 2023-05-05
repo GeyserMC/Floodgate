@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Geyser
  */
 
-package org.geysermc.floodgate.util;
+package org.geysermc.floodgate.core.util;
 
 public enum WebsocketEventType {
     /**

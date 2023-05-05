@@ -35,11 +35,11 @@ import java.util.Queue;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
+import org.geysermc.floodgate.core.crypto.FloodgateCipher;
 import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.core.player.HostnameSeparationResult;
 import org.geysermc.floodgate.core.util.Constants;
-import org.geysermc.floodgate.crypto.FloodgateCipher;
 
 @RequiredArgsConstructor
 public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {

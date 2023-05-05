@@ -39,7 +39,7 @@ import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.util.Utils;
-import org.geysermc.floodgate.util.WebsocketEventType;
+import org.geysermc.floodgate.core.util.WebsocketEventType;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 

@@ -4,13 +4,13 @@ micronaut-gradle = "3.7.9"
 lombok = "8.0.1"
 
 # api
-geyser = "2.0.7-SNAPSHOT"
 cumulus = "1.1.1"
 events = "1.0-SNAPSHOT"
 netty = "4.1.49.Final"
 gson = "2.8.5"
 
 # core
+base-api = "feature-floodgate-merge-1.0.0-SNAPSHOT"
 config-utils = "development-2.0-SNAPSHOT"
 fastutil = "8.5.3"
 java-websocket = "1.5.2"
@@ -41,12 +41,12 @@ gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 slf4j = { module = "org.slf4j:slf4j-api" }
 
 # api
-geyser-common = { module = "org.geysermc:common", version.ref = "geyser" }
 cumulus = { module = "org.geysermc.cumulus:cumulus", version.ref = "cumulus" }
 events = { module = "org.geysermc.event:events", version.ref = "events" }
 netty-transport = { module = "io.netty:netty-transport", version.ref = "netty" }
 
 # core
+base-api = { module = "org.geysermc.api:base-api", version.ref = "base-api" }
 config-utils = { module = "org.geysermc.configutils:core", version.ref = "config-utils" }
 config-utils-ap = { module = "org.geysermc.configutils:ap", version.ref = "config-utils" }
 fastutil-short-object-maps = { module = "com.nukkitx.fastutil:fastutil-short-object-maps", version.ref = "fastutil" }

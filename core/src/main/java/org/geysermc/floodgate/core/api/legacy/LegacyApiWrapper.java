@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2023 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,8 +23,10 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.api.legacy;
+package org.geysermc.floodgate.core.api.legacy;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -35,17 +37,15 @@ import org.geysermc.cumulus.form.util.FormBuilder;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.unsafe.Unsafe;
-import org.geysermc.floodgate.player.FloodgateConnection;
-import org.geysermc.floodgate.util.WebEndpoints;
+import org.geysermc.floodgate.core.http.xbox.GetGamertagResult;
+import org.geysermc.floodgate.core.http.xbox.GetXuidResult;
+import org.geysermc.floodgate.core.http.xbox.XboxClient;
+import org.geysermc.floodgate.core.player.FloodgateConnection;
 
+@Singleton
 public final class LegacyApiWrapper implements FloodgateApi {
-    private final GeyserApiBase apiBase;
-    private final WebEndpoints webEndpoints;
-
-    public LegacyApiWrapper(GeyserApiBase apiBase, WebEndpoints webEndpoints) {
-        this.apiBase = apiBase;
-        this.webEndpoints = webEndpoints;
-    }
+    @Inject GeyserApiBase apiBase;
+    @Inject XboxClient xboxClient;
 
     @Override
     public String getPlayerPrefix() {
@@ -116,12 +116,12 @@ public final class LegacyApiWrapper implements FloodgateApi {
 
     @Override
     public CompletableFuture<Long> getXuidFor(String gamertag) {
-        return webEndpoints.getXuidFor(gamertag);
+        return xboxClient.xuidByGamertag(gamertag).thenApply(GetXuidResult::xuid);
     }
 
     @Override
     public CompletableFuture<String> getGamertagFor(long xuid) {
-        return webEndpoints.getGamertagFor(xuid);
+        return xboxClient.gamertagByXuid(xuid).thenApply(GetGamertagResult::gamertag);
     }
 
     @Override

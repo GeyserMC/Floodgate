@@ -30,7 +30,6 @@ import cloud.commandframework.CommandManager;
 import cloud.commandframework.context.CommandContext;
 import jakarta.inject.Singleton;
 import org.geysermc.api.Geyser;
-import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.core.player.UserAudience;

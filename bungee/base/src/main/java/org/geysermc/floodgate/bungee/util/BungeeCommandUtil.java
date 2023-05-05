@@ -34,7 +34,6 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.api.GeyserApiBase;
-import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
 import org.geysermc.floodgate.core.player.UserAudience;
 import org.geysermc.floodgate.core.player.UserAudience.ConsoleAudience;

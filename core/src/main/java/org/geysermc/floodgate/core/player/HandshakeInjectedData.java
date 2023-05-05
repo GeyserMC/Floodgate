@@ -23,15 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.player;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import java.io.ByteArrayOutputStream;
-import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
-import java.util.UUID;
-import org.geysermc.api.connection.Connection;
+package org.geysermc.floodgate.core.player;
 
 public final class HandshakeInjectedData {
 // TIM I PROMISE THIS IS JUST AN IDEA

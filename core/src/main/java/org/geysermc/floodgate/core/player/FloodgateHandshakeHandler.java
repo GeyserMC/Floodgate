@@ -50,14 +50,14 @@ import org.geysermc.floodgate.core.addon.data.HandshakeDataImpl;
 import org.geysermc.floodgate.core.addon.data.HandshakeHandlersImpl;
 import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
+import org.geysermc.floodgate.core.crypto.FloodgateCipher;
 import org.geysermc.floodgate.core.link.CommonPlayerLink;
 import org.geysermc.floodgate.core.skin.SkinUploadManager;
 import org.geysermc.floodgate.core.util.Constants;
+import org.geysermc.floodgate.core.util.InvalidFormatException;
 import org.geysermc.floodgate.core.util.LanguageManager;
 import org.geysermc.floodgate.core.util.Utils;
-import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.util.BedrockData;
-import org.geysermc.floodgate.util.InvalidFormatException;
 import org.geysermc.floodgate.util.LinkedPlayer;
 
 public final class FloodgateHandshakeHandler {
@@ -284,7 +284,7 @@ public final class FloodgateHandshakeHandler {
 
         public InetSocketAddress getNewIp(Channel channel) {
             if (floodgatePlayer != null) {
-                return (InetSocketAddress) floodgatePlayer.socketAddress();
+                return floodgatePlayer.socketAddress();
             }
             if (handshakeData.getIp() != null) {
                 int port = ((InetSocketAddress) channel.remoteAddress()).getPort();

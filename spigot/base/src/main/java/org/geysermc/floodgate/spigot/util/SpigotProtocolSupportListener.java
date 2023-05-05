@@ -35,7 +35,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.geysermc.api.Geyser;
-import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
 
 @SuppressWarnings("unchecked")

@@ -36,7 +36,6 @@ import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.api.GeyserApiBase;
-import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
 import org.geysermc.floodgate.core.player.UserAudience;
 import org.geysermc.floodgate.core.player.UserAudience.ConsoleAudience;

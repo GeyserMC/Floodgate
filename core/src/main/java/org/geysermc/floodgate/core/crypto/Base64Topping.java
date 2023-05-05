@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2023 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,21 +20,21 @@
  * THE SOFTWARE.
  *
  * @author GeyserMC
- * @link https://github.com/GeyserMC/Geyser
+ * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.crypto;
+package org.geysermc.floodgate.core.crypto;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.security.Key;
+import java.util.Base64;
 
-public interface KeyProducer {
-    Key produce();
-    Key produceFrom(byte[] keyFileData);
+public final class Base64Topping implements Topping {
+    @Override
+    public byte[] encode(byte[] data) {
+        return Base64.getEncoder().encode(data);
+    }
 
-    default Key produceFrom(Path keyFileLocation) throws IOException {
-        return produceFrom(Files.readAllBytes(keyFileLocation));
+    @Override
+    public byte[] decode(byte[] data) {
+        return Base64.getDecoder().decode(data);
     }
 }

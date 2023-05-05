@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2023 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,12 +23,12 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.crypto;
+package org.geysermc.floodgate.core.crypto;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.security.Key;
-import org.geysermc.floodgate.util.InvalidFormatException;
+import org.geysermc.floodgate.core.util.InvalidFormatException;
 
 /**
  * Responsible for both encrypting and decrypting data

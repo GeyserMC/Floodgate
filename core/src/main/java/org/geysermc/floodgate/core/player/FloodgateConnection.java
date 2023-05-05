@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.player;
+package org.geysermc.floodgate.core.player;
 
 import java.net.InetSocketAddress;
 import java.util.UUID;
@@ -40,11 +40,11 @@ import org.geysermc.api.util.UiProfile;
 import org.geysermc.cumulus.form.Form;
 import org.geysermc.cumulus.form.util.FormBuilder;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
-import org.geysermc.floodgate.api.legacy.LegacyPlayerWrapper;
-import org.geysermc.floodgate.api.legacy.PropertyGlue;
+import org.geysermc.floodgate.core.api.legacy.LegacyPlayerWrapper;
+import org.geysermc.floodgate.core.api.legacy.PropertyGlue;
+import org.geysermc.floodgate.core.util.Utils;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.LinkedPlayer;
-import org.geysermc.floodgate.util.Utils;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class FloodgateConnection implements Connection {

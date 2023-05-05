@@ -28,8 +28,8 @@ package org.geysermc.floodgate.core.api;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.nio.charset.StandardCharsets;
+import org.geysermc.floodgate.core.crypto.FloodgateCipher;
 import org.geysermc.floodgate.core.scope.ProxyOnly;
-import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.util.BedrockData;
 
 @ProxyOnly

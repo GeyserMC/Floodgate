@@ -39,11 +39,11 @@ import lombok.Getter;
 import org.geysermc.configutils.ConfigUtilities;
 import org.geysermc.configutils.file.codec.PathFileCodec;
 import org.geysermc.configutils.updater.change.Changes;
+import org.geysermc.floodgate.core.crypto.FloodgateCipher;
+import org.geysermc.floodgate.core.crypto.KeyProducer;
 import org.geysermc.floodgate.core.scope.ProxyOnly;
 import org.geysermc.floodgate.core.scope.ServerOnly;
 import org.geysermc.floodgate.core.util.GlobalBeanCache;
-import org.geysermc.floodgate.crypto.FloodgateCipher;
-import org.geysermc.floodgate.crypto.KeyProducer;
 
 @Factory
 @Getter

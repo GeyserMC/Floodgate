@@ -39,15 +39,15 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.event.Listener;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.core.crypto.AesCipher;
+import org.geysermc.floodgate.core.crypto.AesKeyProducer;
+import org.geysermc.floodgate.core.crypto.Base64Topping;
+import org.geysermc.floodgate.core.crypto.FloodgateCipher;
+import org.geysermc.floodgate.core.crypto.KeyProducer;
 import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.GlobalBeanCache;
-import org.geysermc.floodgate.crypto.AesCipher;
-import org.geysermc.floodgate.crypto.AesKeyProducer;
-import org.geysermc.floodgate.crypto.Base64Topping;
-import org.geysermc.floodgate.crypto.FloodgateCipher;
-import org.geysermc.floodgate.crypto.KeyProducer;
 
 @Factory
 @BootstrapContextCompatible
@@ -114,7 +114,7 @@ public class CommonModule {
     @Bean
     @Singleton
     @Named("playerAttribute")
-    public AttributeKey<FloodgatePlayer> playerAttribute() {
+    public AttributeKey<Connection> playerAttribute() {
         return AttributeKey.valueOf("floodgate-player");
     }
 }

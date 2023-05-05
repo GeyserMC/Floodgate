@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.api.legacy;
+package org.geysermc.floodgate.core.api.legacy;
 
 import java.util.HashMap;
 import java.util.Map;

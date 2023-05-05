@@ -31,7 +31,6 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
