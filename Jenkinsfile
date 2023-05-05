@@ -15,7 +15,7 @@ pipeline {
                     usesPlugin: true,
                     tool: 'Gradle 7',
                     buildFile: 'build.gradle.kts',
-                    tasks: 'clean build',
+                    tasks: 'clean spigot:build',
                 )
             }
             post {
