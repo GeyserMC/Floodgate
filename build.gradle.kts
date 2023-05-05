@@ -1,6 +1,5 @@
 plugins {
     `java-library`
-    id("floodgate.build-logic")
     alias(libs.plugins.micronaut) apply false
     alias(libs.plugins.lombok) apply false
 }
@@ -8,12 +7,24 @@ plugins {
 allprojects {
     group = "org.geysermc.floodgate"
     description = "Allows Bedrock players to join Java edition servers while keeping the server in online mode"
+
+    apply {
+        plugin("floodgate.build-logic")
+        plugin("net.kyori.indra.git")
+    }
+
+    if (shouldAddBranchName()) {
+        version = versionWithBranchName()
+    }
 }
 
+//todo differentiate maven publishing from downloads publishing
 val deployProjects = setOf(
     projects.api,
     // for future Floodgate integration + Fabric
     projects.core,
+    projects.database,
+    projects.isolation,
     projects.bungee,
     projects.spigot,
     projects.velocity,
