@@ -37,6 +37,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.geysermc.api.GeyserApiBase;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.core.platform.util.PlayerType;
 import org.geysermc.floodgate.core.player.UserAudience;
@@ -51,7 +52,7 @@ import org.geysermc.floodgate.core.util.Utils;
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class CommandUtil {
     protected final LanguageManager manager;
-    protected final FloodgateApi api;
+    protected final GeyserApiBase api;
 
     public abstract @NonNull UserAudience getUserAudience(@NonNull Object source);
 
@@ -94,14 +95,14 @@ public abstract class CommandUtil {
                 break;
             case ONLY_JAVA:
                 for (Object player : players) {
-                    if (!api.isFloodgatePlayer(getUuidFromSource(player))) {
+                    if (!api.isBedrockPlayer(getUuidFromSource(player))) {
                         usernames.add(getUsernameFromSource(player));
                     }
                 }
                 break;
             case ONLY_BEDROCK:
                 for (Object player : players) {
-                    if (api.isFloodgatePlayer(getUuidFromSource(player))) {
+                    if (api.isBedrockPlayer(getUuidFromSource(player))) {
                         usernames.add(getUsernameFromSource(player));
                     }
                 }
@@ -133,7 +134,7 @@ public abstract class CommandUtil {
         if (filter == ALL_PLAYERS || player instanceof String || player instanceof UUID) {
             return player;
         }
-        return (filter == ONLY_BEDROCK) == api.isFloodgatePlayer(getUuidFromSource(player))
+        return (filter == ONLY_BEDROCK) == api.isBedrockPlayer(getUuidFromSource(player))
                 ? player
                 : fallback;
     }

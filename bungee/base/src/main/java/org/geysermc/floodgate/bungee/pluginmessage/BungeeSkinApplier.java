@@ -39,10 +39,10 @@ import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.connection.LoginResult;
 import net.md_5.bungee.protocol.Property;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.core.event.EventBus;
 import org.geysermc.floodgate.core.event.skin.SkinApplyEventImpl;
 import org.geysermc.floodgate.core.skin.SkinApplier;
@@ -64,8 +64,8 @@ public final class BungeeSkinApplier implements SkinApplier {
     @Inject FloodgateLogger logger;
 
     @Override
-    public void applySkin(@NonNull FloodgatePlayer floodgatePlayer, @NonNull SkinData skinData) {
-        ProxiedPlayer player = server.getPlayer(floodgatePlayer.getCorrectUniqueId());
+    public void applySkin(@NonNull Connection connection, @NonNull SkinData skinData) {
+        ProxiedPlayer player = server.getPlayer(connection.javaUuid());
         if (player == null) {
             return;
         }
@@ -91,8 +91,8 @@ public final class BungeeSkinApplier implements SkinApplier {
 
         SkinData currentSkin = currentSkin(properties);
 
-        SkinApplyEvent event = new SkinApplyEventImpl(floodgatePlayer, currentSkin, skinData);
-        event.setCancelled(floodgatePlayer.isLinked());
+        SkinApplyEvent event = new SkinApplyEventImpl(connection, currentSkin, skinData);
+        event.setCancelled(connection.isLinked());
 
         eventBus.fire(event);
 

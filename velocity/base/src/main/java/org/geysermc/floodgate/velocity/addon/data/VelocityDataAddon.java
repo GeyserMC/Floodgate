@@ -25,15 +25,14 @@
 
 package org.geysermc.floodgate.velocity.addon.data;
 
-import com.velocitypowered.api.proxy.ProxyServer;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.core.addon.data.PacketBlocker;
 import org.geysermc.floodgate.core.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
@@ -44,7 +43,6 @@ public final class VelocityDataAddon implements InjectorAddon {
     @Inject FloodgateHandshakeHandler handshakeHandler;
     @Inject ProxyFloodgateConfig config;
     @Inject ProxyFloodgateApi api;
-    @Inject ProxyServer proxy;
     @Inject FloodgateLogger logger;
 
     @Inject
@@ -65,7 +63,7 @@ public final class VelocityDataAddon implements InjectorAddon {
 
     @Inject
     @Named("playerAttribute")
-    AttributeKey<FloodgatePlayer> playerAttribute;
+    AttributeKey<Connection> playerAttribute;
 
     @Override
     public void onInject(Channel channel, boolean toServer) {
@@ -73,7 +71,7 @@ public final class VelocityDataAddon implements InjectorAddon {
             if (config.sendFloodgateData()) {
                 channel.pipeline().addAfter(
                         packetEncoder, "floodgate_data_handler",
-                        new VelocityServerDataHandler(api, proxy)
+                        new VelocityServerDataHandler(api)
                 );
             }
             return;
@@ -93,9 +91,9 @@ public final class VelocityDataAddon implements InjectorAddon {
 
     @Override
     public void onChannelClosed(Channel channel) {
-        FloodgatePlayer player = channel.attr(playerAttribute).get();
+        Connection player = channel.attr(playerAttribute).get();
         if (player != null && api.setPendingRemove(player)) {
-            logger.translatedInfo("floodgate.ingame.disconnect_name", player.getUsername());
+            logger.translatedInfo("floodgate.ingame.disconnect_name", player.javaUsername());
         }
     }
 

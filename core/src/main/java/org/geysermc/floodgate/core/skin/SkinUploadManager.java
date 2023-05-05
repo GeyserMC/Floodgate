@@ -31,8 +31,8 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import jakarta.annotation.PreDestroy;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import org.geysermc.api.GeyserApiBase;
 import org.geysermc.event.Listener;
-import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 
 @Listener
@@ -41,7 +41,7 @@ public final class SkinUploadManager {
     private final Int2ObjectMap<SkinUploadSocket> connections =
             Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>());
 
-    @Inject FloodgateApi api;
+    @Inject GeyserApiBase api;
     @Inject SkinApplier applier;
     @Inject FloodgateLogger logger;
 

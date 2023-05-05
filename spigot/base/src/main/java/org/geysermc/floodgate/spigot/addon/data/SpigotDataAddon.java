@@ -30,9 +30,9 @@ import io.netty.util.AttributeKey;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
@@ -54,7 +54,7 @@ public final class SpigotDataAddon implements InjectorAddon {
 
     @Inject
     @Named("playerAttribute")
-    AttributeKey<FloodgatePlayer> playerAttribute;
+    AttributeKey<Connection> playerAttribute;
 
     @Override
     public void onInject(Channel channel, boolean toServer) {
@@ -67,9 +67,9 @@ public final class SpigotDataAddon implements InjectorAddon {
 
     @Override
     public void onChannelClosed(Channel channel) {
-        FloodgatePlayer player = channel.attr(playerAttribute).get();
+        Connection player = channel.attr(playerAttribute).get();
         if (player != null && api.setPendingRemove(player)) {
-            logger.translatedInfo("floodgate.ingame.disconnect_name", player.getCorrectUsername());
+            logger.translatedInfo("floodgate.ingame.disconnect_name", player.javaUsername());
         }
     }
 

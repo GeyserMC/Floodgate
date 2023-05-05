@@ -29,6 +29,7 @@ import cloud.commandframework.Command;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.context.CommandContext;
 import jakarta.inject.Singleton;
+import org.geysermc.api.Geyser;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
@@ -47,7 +48,7 @@ public class TestCommand implements FloodgateCommand {
 
     @Override
     public void execute(CommandContext<UserAudience> context) {
-        int players = FloodgateApi.getInstance().getPlayers().size();
+        int players = Geyser.api().onlineConnectionsCount();
         context.getSender().sendMessage(String.valueOf(players));
     }
 

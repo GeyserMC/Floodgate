@@ -44,8 +44,8 @@ import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import net.md_5.bungee.netty.ChannelWrapper;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.core.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.core.listener.McListener;
@@ -77,7 +77,7 @@ public final class BungeeListener implements Listener, McListener {
 
     @Inject
     @Named("playerAttribute")
-    private AttributeKey<FloodgatePlayer> playerAttribute;
+    private AttributeKey<Connection> playerAttribute;
 
     @Inject
     @Named("kickMessageAttribute")
@@ -103,11 +103,11 @@ public final class BungeeListener implements Listener, McListener {
             return;
         }
 
-        FloodgatePlayer player = channel.attr(playerAttribute).get();
+        Connection player = channel.attr(playerAttribute).get();
         if (player != null) {
             connection.setOnlineMode(false);
-            connection.setUniqueId(player.getCorrectUniqueId());
-            ReflectionUtils.setValue(connection, PLAYER_NAME, player.getCorrectUsername());
+            connection.setUniqueId(player.javaUuid());
+            ReflectionUtils.setValue(connection, PLAYER_NAME, player.javaUsername());
         }
     }
 
@@ -116,15 +116,15 @@ public final class BungeeListener implements Listener, McListener {
         // if there was another player with the same uuid / name online,
         // he has been disconnected by now
         UUID uniqueId = event.getConnection().getUniqueId();
-        FloodgatePlayer player = api.getPlayer(uniqueId);
+        Connection player = api.connectionByUuid(uniqueId);
         if (player != null) {
             //todo we should probably move this log message earlier in the process, so that we know
             // that Floodgate has done its job
             logger.translatedInfo(
                     "floodgate.ingame.login_name",
-                    player.getCorrectUsername(), uniqueId
+                    player.javaUsername(), uniqueId
             );
-            languageManager.loadLocale(player.getLanguageCode());
+            languageManager.loadLocale(player.languageCode());
         }
     }
 
@@ -132,7 +132,7 @@ public final class BungeeListener implements Listener, McListener {
     public void onPostLogin(PostLoginEvent event) {
         // To fix the February 2 2022 Mojang authentication changes
         if (!config.sendFloodgateData()) {
-            FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
+            Connection player = api.connectionByUuid(event.getPlayer().getUniqueId());
             if (player != null && !player.isLinked()) {
                 skinApplier.applySkin(player, new SkinDataImpl("", ""));
             }

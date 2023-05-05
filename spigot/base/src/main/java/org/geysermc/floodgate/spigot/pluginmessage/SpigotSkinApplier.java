@@ -33,6 +33,7 @@ import jakarta.inject.Singleton;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
@@ -50,18 +51,18 @@ public final class SpigotSkinApplier implements SkinApplier {
     @Inject EventBus eventBus;
 
     @Override
-    public void applySkin(@NonNull FloodgatePlayer floodgatePlayer, @NonNull SkinData skinData) {
-        applySkin0(floodgatePlayer, skinData, true);
+    public void applySkin(@NonNull Connection connection, @NonNull SkinData skinData) {
+        applySkin0(connection, skinData, true);
     }
 
-    private void applySkin0(FloodgatePlayer floodgatePlayer, SkinData skinData, boolean firstTry) {
-        Player player = Bukkit.getPlayer(floodgatePlayer.getCorrectUniqueId());
+    private void applySkin0(Connection connection, SkinData skinData, boolean firstTry) {
+        Player player = Bukkit.getPlayer(connection.javaUuid());
 
         // player is probably not logged in yet
         if (player == null) {
             if (firstTry) {
                 versionSpecificMethods.schedule(
-                        () -> applySkin0(floodgatePlayer, skinData, false),
+                        () -> applySkin0(connection, skinData, false),
                         10 * 20
                 );
             }
@@ -80,8 +81,8 @@ public final class SpigotSkinApplier implements SkinApplier {
 
         SkinData currentSkin = currentSkin(properties);
 
-        SkinApplyEvent event = new SkinApplyEventImpl(floodgatePlayer, currentSkin, skinData);
-        event.setCancelled(floodgatePlayer.isLinked());
+        SkinApplyEvent event = new SkinApplyEventImpl(connection, currentSkin, skinData);
+        event.setCancelled(connection.isLinked());
 
         eventBus.fire(event);
 

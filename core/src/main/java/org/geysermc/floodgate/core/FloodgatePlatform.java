@@ -28,6 +28,8 @@ package org.geysermc.floodgate.core;
 import io.micronaut.context.ApplicationContext;
 import java.util.Map;
 import java.util.UUID;
+import org.geysermc.api.Geyser;
+import org.geysermc.api.GeyserApiBase;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.InstanceHolder;
 import org.geysermc.floodgate.api.event.FloodgateEventBus;
@@ -77,6 +79,7 @@ public abstract class FloodgatePlatform {
 
         injector = context.getBean(PlatformInjector.class);
 
+        GeyserApiBase api = guice.getInstance(GeyserApiBase.class);
         InstanceHolder.set(
                 context.getBean(FloodgateApi.class),
                 null, // todo context.getBean(PlayerLink.class),
@@ -86,6 +89,7 @@ public abstract class FloodgatePlatform {
                 context.getBean(HandshakeHandlers.class),
                 KEY
         );
+        Geyser.set(api);
 
         long endTime = System.currentTimeMillis();
         context.getBean(FloodgateLogger.class)
@@ -121,4 +125,8 @@ public abstract class FloodgatePlatform {
     }
 
     abstract protected boolean isProxy();
+
+    public <T> T getInstance(Class<T> clazz) {
+        return guice.getInstance(clazz);
+    }
 }

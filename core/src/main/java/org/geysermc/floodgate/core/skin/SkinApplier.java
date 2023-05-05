@@ -26,15 +26,15 @@
 package org.geysermc.floodgate.core.skin;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
 public interface SkinApplier {
     /**
-     * Apply a skin to a {@link FloodgatePlayer player}
+     * Apply a skin to a {@link Connection player}
      *
-     * @param floodgatePlayer player to apply skin to
+     * @param connection player to apply skin to
      * @param skinData data for skin to apply to player
      */
-    void applySkin(@NonNull FloodgatePlayer floodgatePlayer, @NonNull SkinData skinData);
+    void applySkin(@NonNull Connection connection, @NonNull SkinData skinData);
 }

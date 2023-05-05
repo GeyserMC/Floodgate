@@ -33,8 +33,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.core.listener.McListener;
 import org.geysermc.floodgate.core.util.LanguageManager;
@@ -54,15 +54,15 @@ public final class SpigotListener implements Listener, McListener {
 
         // if there was another player with the same uuid online,
         // he would've been disconnected by now
-        FloodgatePlayer player = api.getPlayer(uniqueId);
+        Connection player = api.connectionByUuid(uniqueId);
         if (player != null) {
             //todo we should probably move this log message earlier in the process, so that we know
             // that Floodgate has done its job
             logger.translatedInfo(
                     "floodgate.ingame.login_name",
-                    player.getCorrectUsername(), player.getCorrectUniqueId()
+                    player.javaUsername(), player.javaUuid()
             );
-            languageManager.loadLocale(player.getLanguageCode());
+            languageManager.loadLocale(player.languageCode());
         }
     }
 

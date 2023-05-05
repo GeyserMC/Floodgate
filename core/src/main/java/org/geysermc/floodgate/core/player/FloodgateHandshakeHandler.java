@@ -43,10 +43,9 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.core.addon.data.HandshakeDataImpl;
 import org.geysermc.floodgate.core.addon.data.HandshakeHandlersImpl;
 import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
@@ -70,7 +69,7 @@ public final class FloodgateHandshakeHandler {
     @Inject SkinUploadManager skinUploadManager;
     @Inject
     @Named("playerAttribute")
-    AttributeKey<FloodgatePlayer> playerAttribute;
+    AttributeKey<Connection> playerAttribute;
     @Inject FloodgateLogger logger;
     @Inject LanguageManager languageManager;
 
@@ -217,15 +216,13 @@ public final class FloodgateHandshakeHandler {
                         bedrockData.getVerifyCode());
             }
 
-            FloodgatePlayer player = FloodgatePlayerImpl.from(bedrockData, handshakeData);
+            int port = ((InetSocketAddress) channel.remoteAddress()).getPort();
+
+            Connection player = FloodgateConnection.from(bedrockData, handshakeData, port);
 
             api.addPlayer(player);
 
             channel.attr(playerAttribute).set(player);
-
-            int port = ((InetSocketAddress) channel.remoteAddress()).getPort();
-            InetSocketAddress socketAddress = new InetSocketAddress(handshakeData.getIp(), port);
-            player.addProperty(PropertyKey.SOCKET_ADDRESS, socketAddress);
 
             return new HandshakeResult(ResultType.SUCCESS, handshakeData, bedrockData, player);
         } catch (Exception exception) {
@@ -283,11 +280,11 @@ public final class FloodgateHandshakeHandler {
         private final ResultType resultType;
         private final HandshakeData handshakeData;
         private final BedrockData bedrockData;
-        private final FloodgatePlayer floodgatePlayer;
+        private final Connection floodgatePlayer;
 
         public InetSocketAddress getNewIp(Channel channel) {
             if (floodgatePlayer != null) {
-                return floodgatePlayer.getProperty(PropertyKey.SOCKET_ADDRESS);
+                return (InetSocketAddress) floodgatePlayer.socketAddress();
             }
             if (handshakeData.getIp() != null) {
                 int port = ((InetSocketAddress) channel.remoteAddress()).getPort();

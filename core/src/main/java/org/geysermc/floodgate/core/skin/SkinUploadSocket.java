@@ -34,11 +34,10 @@ import java.net.ConnectException;
 import java.net.URI;
 import javax.net.ssl.SSLException;
 import lombok.Getter;
-import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.api.GeyserApiBase;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.core.util.Utils;
 import org.geysermc.floodgate.util.WebsocketEventType;
 import org.java_websocket.client.WebSocketClient;
@@ -48,7 +47,7 @@ final class SkinUploadSocket extends WebSocketClient {
     private static final Gson gson = new Gson();
 
     private final SkinUploadManager uploadManager;
-    private final FloodgateApi api;
+    private final GeyserApiBase api;
     private final SkinApplier applier;
     private final FloodgateLogger logger;
 
@@ -60,7 +59,7 @@ final class SkinUploadSocket extends WebSocketClient {
             int id,
             String verifyCode,
             SkinUploadManager uploadManager,
-            FloodgateApi api,
+            GeyserApiBase api,
             SkinApplier applier,
             FloodgateLogger logger
     ) {
@@ -108,22 +107,16 @@ final class SkinUploadSocket extends WebSocketClient {
                 break;
             case SKIN_UPLOADED:
                 String xuid = message.get("xuid").getAsString();
-                FloodgatePlayer player = api.getPlayer(Utils.getJavaUuid(xuid));
+                Connection player = api.connectionByUuid(Utils.getJavaUuid(xuid));
                 if (player != null) {
                     if (!message.get("success").getAsBoolean()) {
                         logger.info("Failed to upload skin for {} ({})", xuid,
-                                player.getCorrectUsername());
+                                player.javaUsername());
                         return;
                     }
 
                     SkinData skinData = SkinDataImpl.from(message.getAsJsonObject("data"));
                     applier.applySkin(player, skinData);
-
-                    // legacy stuff,
-                    // will be removed shortly after or during the Floodgate-Geyser integration
-                    if (!player.isLinked()) {
-                        player.addProperty(PropertyKey.SKIN_UPLOADED, skinData);
-                    }
                 }
                 break;
             case LOG_MESSAGE:

@@ -33,6 +33,7 @@ import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.api.GeyserApiBase;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
 import org.geysermc.floodgate.core.player.UserAudience;
@@ -50,7 +51,7 @@ public final class SpigotCommandUtil extends CommandUtil {
     public SpigotCommandUtil(
             LanguageManager manager,
             Server server,
-            FloodgateApi api,
+            GeyserApiBase api,
             SpigotVersionSpecificMethods versionSpecificMethods
     ) {
         super(manager, api);

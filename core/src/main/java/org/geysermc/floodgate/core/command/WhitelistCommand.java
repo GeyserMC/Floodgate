@@ -85,7 +85,7 @@ public class WhitelistCommand implements FloodgateCommand {
         }
 
         if (uuid != null) {
-            if (!api.isFloodgateId(uuid)) {
+            if (uuid.getMostSignificantBits() != 0) { // TODO
                 sender.sendMessage(Message.INVALID_USERNAME);
                 return;
             }

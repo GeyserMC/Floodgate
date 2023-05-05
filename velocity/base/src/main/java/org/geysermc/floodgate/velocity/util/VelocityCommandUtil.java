@@ -35,6 +35,7 @@ import java.util.Optional;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.api.GeyserApiBase;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
 import org.geysermc.floodgate.core.player.UserAudience;
@@ -50,7 +51,7 @@ public final class VelocityCommandUtil extends CommandUtil {
     @Inject ProxyServer server;
 
     @Inject
-    public VelocityCommandUtil(LanguageManager manager, FloodgateApi api) {
+    public VelocityCommandUtil(LanguageManager manager, GeyserApiBase api) {
         super(manager, api);
     }
 

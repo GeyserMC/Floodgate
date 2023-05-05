@@ -28,9 +28,9 @@ package org.geysermc.floodgate.core.pluginmessage.channel;
 import jakarta.inject.Inject;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
-import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.api.player.PropertyKey;
+import org.geysermc.api.GeyserApiBase;
+import org.geysermc.api.connection.Connection;
+import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel;
@@ -38,7 +38,7 @@ import org.geysermc.floodgate.core.skin.SkinApplier;
 import org.geysermc.floodgate.core.skin.SkinDataImpl;
 
 public class SkinChannel implements PluginMessageChannel {
-    @Inject FloodgateApi api;
+    @Inject GeyserApiBase api;
     @Inject FloodgateConfig config;
     @Inject SkinApplier skinApplier;
 
@@ -75,8 +75,8 @@ public class SkinChannel implements PluginMessageChannel {
 
     @Override
     public Result handleServerCall(byte[] data, UUID playerUuid, String playerUsername) {
-        FloodgatePlayer floodgatePlayer = api.getPlayer(playerUuid);
-        if (floodgatePlayer == null) {
+        Connection connection = api.connectionByUuid(playerUuid);
+        if (connection == null) {
             return Result.kick("Player sent skins data for a non-Floodgate player");
         }
 
@@ -91,10 +91,9 @@ public class SkinChannel implements PluginMessageChannel {
         String value = split[0];
         String signature = split[1];
 
-        SkinDataImpl skinData = new SkinDataImpl(value, signature);
+        SkinData skinData = new SkinDataImpl(value, signature);
 
-        floodgatePlayer.addProperty(PropertyKey.SKIN_UPLOADED, skinData);
-        skinApplier.applySkin(floodgatePlayer, skinData);
+        skinApplier.applySkin(connection, skinData);
 
         return Result.handled();
     }

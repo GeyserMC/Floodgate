@@ -35,7 +35,7 @@ import java.util.Set;
 import java.util.UUID;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.core.listener.McListener;
 
@@ -51,7 +51,7 @@ public final class PaperProfileListener implements Listener, McListener {
             return;
         }
 
-        FloodgatePlayer player = api.getPlayer(id);
+        Connection player = api.connectionByUuid(id);
         if (player == null || player.isLinked()) {
             return;
         }

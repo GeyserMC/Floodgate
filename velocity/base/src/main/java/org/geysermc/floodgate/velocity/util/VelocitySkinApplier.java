@@ -32,9 +32,9 @@ import jakarta.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.core.event.EventBus;
 import org.geysermc.floodgate.core.event.skin.SkinApplyEventImpl;
 import org.geysermc.floodgate.core.skin.SkinApplier;
@@ -46,14 +46,14 @@ public class VelocitySkinApplier implements SkinApplier {
     @Inject EventBus eventBus;
 
     @Override
-    public void applySkin(@NonNull FloodgatePlayer floodgatePlayer, @NonNull SkinData skinData) {
-        server.getPlayer(floodgatePlayer.getCorrectUniqueId()).ifPresent(player -> {
+    public void applySkin(Connection connection, SkinData skinData) {
+        server.getPlayer(connection.javaUuid()).ifPresent(player -> {
             List<Property> properties = new ArrayList<>(player.getGameProfileProperties());
 
             SkinData currentSkin = currentSkin(properties);
 
-            SkinApplyEvent event = new SkinApplyEventImpl(floodgatePlayer, currentSkin, skinData);
-            event.setCancelled(floodgatePlayer.isLinked());
+            SkinApplyEvent event = new SkinApplyEventImpl(connection, currentSkin, skinData);
+            event.setCancelled(connection.isLinked());
 
             eventBus.fire(event);
 

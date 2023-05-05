@@ -6,6 +6,7 @@ plugins {
 
 dependencies {
     api(projects.api)
+    api("org.geysermc.api", "base-api", "feature-floodgate-merge-1.0.0-SNAPSHOT")
     compileOnlyApi(projects.isolation)
     api(libs.config.utils)
     annotationProcessor(libs.config.utils.ap)

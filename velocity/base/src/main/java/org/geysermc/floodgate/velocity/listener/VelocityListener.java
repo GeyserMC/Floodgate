@@ -53,8 +53,8 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import net.kyori.adventure.text.Component;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.core.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.core.listener.McListener;
@@ -87,7 +87,7 @@ public final class VelocityListener implements McListener {
         CHANNEL = getFieldOfType(minecraftConnection, Channel.class);
     }
 
-    private final Cache<InboundConnection, FloodgatePlayer> playerCache =
+    private final Cache<InboundConnection, Connection> playerCache =
             CacheBuilder.newBuilder()
                     .maximumSize(500)
                     .expireAfterAccess(20, TimeUnit.SECONDS)
@@ -100,7 +100,7 @@ public final class VelocityListener implements McListener {
 
     @Inject
     @Named("playerAttribute")
-    AttributeKey<FloodgatePlayer> playerAttribute;
+    AttributeKey<Connection> playerAttribute;
 
     @Inject
     @Named("kickMessageAttribute")
@@ -108,7 +108,7 @@ public final class VelocityListener implements McListener {
 
     @Subscribe(order = PostOrder.EARLY)
     public void onPreLogin(PreLoginEvent event) {
-        FloodgatePlayer player = null;
+        Connection player = null;
         String kickMessage;
         try {
             InboundConnection connection = event.getConnection();
@@ -143,13 +143,13 @@ public final class VelocityListener implements McListener {
 
     @Subscribe(order = PostOrder.EARLY)
     public void onGameProfileRequest(GameProfileRequestEvent event) {
-        FloodgatePlayer player = playerCache.getIfPresent(event.getConnection());
+        Connection player = playerCache.getIfPresent(event.getConnection());
         if (player != null) {
             playerCache.invalidate(event.getConnection());
 
             GameProfile profile = new GameProfile(
-                    player.getCorrectUniqueId(),
-                    player.getCorrectUsername(),
+                    player.javaUuid(),
+                    player.javaUsername(),
                     Collections.emptyList()
             );
             // The texture properties addition is to fix the February 2 2022 Mojang authentication changes
@@ -163,9 +163,9 @@ public final class VelocityListener implements McListener {
     @Subscribe(order = PostOrder.LAST)
     public void onLogin(LoginEvent event) {
         if (event.getResult().isAllowed()) {
-            FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
+            Connection player = api.connectionByUuid(event.getPlayer().getUniqueId());
             if (player != null) {
-                languageManager.loadLocale(player.getLanguageCode());
+                languageManager.loadLocale(player.languageCode());
             }
         }
     }

@@ -36,6 +36,7 @@ import jakarta.inject.Singleton;
 import java.util.concurrent.CompletableFuture;
 import lombok.Getter;
 import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.command.util.Permission;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
@@ -54,7 +55,7 @@ import org.geysermc.floodgate.core.util.Utils;
 @Singleton
 @Secondary
 public final class LinkAccountCommand implements FloodgateCommand {
-    @Inject FloodgateApi api;
+    @Inject SimpleFloodgateApi api;
     @Inject CommonPlayerLink link;
     @Inject FloodgateLogger logger;
 
@@ -96,7 +97,7 @@ public final class LinkAccountCommand implements FloodgateCommand {
         String targetName = targetUser.username();
 
         // when the player is a Bedrock player
-        if (api.isFloodgatePlayer(sender.uuid())) {
+        if (api.isBedrockPlayer(sender.uuid())) {
             if (!context.contains("code")) {
                 sender.sendMessage(Message.BEDROCK_USAGE);
                 return;

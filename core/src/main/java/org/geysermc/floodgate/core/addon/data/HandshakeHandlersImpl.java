@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.core.addon.data;
 
+import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import jakarta.inject.Singleton;
