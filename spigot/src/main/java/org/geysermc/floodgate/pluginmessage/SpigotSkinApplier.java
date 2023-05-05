@@ -33,7 +33,6 @@ import com.mojang.authlib.properties.PropertyMap;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.geysermc.floodgate.SpigotPlugin;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
@@ -48,7 +47,6 @@ import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
 @Singleton
 public final class SpigotSkinApplier implements SkinApplier {
     @Inject private SpigotVersionSpecificMethods versionSpecificMethods;
-    @Inject private SpigotPlugin plugin;
     @Inject private EventBus eventBus;
 
     @Override
@@ -62,8 +60,7 @@ public final class SpigotSkinApplier implements SkinApplier {
         // player is probably not logged in yet
         if (player == null) {
             if (firstTry) {
-                Bukkit.getScheduler().runTaskLater(
-                        plugin,
+                versionSpecificMethods.schedule(
                         () -> applySkin0(floodgatePlayer, skinData, false),
                         10 * 20
                 );
@@ -94,12 +91,10 @@ public final class SpigotSkinApplier implements SkinApplier {
 
         replaceSkin(properties, event.newSkin());
 
-        // By running as a task, we don't run into async issues
-        plugin.getServer().getScheduler().runTask(plugin, () -> {
+        versionSpecificMethods.maybeSchedule(() -> {
             for (Player p : Bukkit.getOnlinePlayers()) {
                 if (!p.equals(player) && p.canSee(player)) {
-                    versionSpecificMethods.hidePlayer(p, player);
-                    versionSpecificMethods.showPlayer(p, player);
+                    versionSpecificMethods.hideAndShowPlayer(p, player);
                 }
             }
         });

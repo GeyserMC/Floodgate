@@ -2,12 +2,26 @@ var authlibVersion = "1.5.21"
 var guavaVersion = "21.0"
 var gsonVersion = "2.8.5"
 
+indra {
+    javaVersions {
+        // For Folia
+        target(8)
+        minimumToolchain(17)
+    }
+}
+
 dependencies {
     api(projects.core)
 
     implementation("cloud.commandframework", "cloud-bukkit", Versions.cloudVersion)
     // hack to make pre 1.12 work
     implementation("com.google.guava", "guava", guavaVersion)
+
+    compileOnlyApi("dev.folia", "folia-api", Versions.spigotVersion) {
+        attributes {
+            attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 17)
+        }
+    }
 }
 
 relocate("com.google.inject")
@@ -21,7 +35,6 @@ relocate("com.google.guava")
 relocate("it.unimi")
 
 // these dependencies are already present on the platform
-provided("com.destroystokyo.paper", "paper-api", Versions.spigotVersion)
 provided("com.mojang", "authlib", authlibVersion)
 provided("io.netty", "netty-transport", Versions.nettyVersion)
 provided("io.netty", "netty-codec", Versions.nettyVersion)

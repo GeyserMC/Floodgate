@@ -4,7 +4,7 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-//        mavenLocal()
+        mavenLocal()
 
         // Geyser, Cumulus etc.
         maven("https://repo.opencollab.dev/maven-releases") {
@@ -21,13 +21,7 @@ dependencyResolutionManagement {
 //        maven("https://repo.papermc.io/repository/maven-snapshots") {
 //            mavenContent { snapshotsOnly() }
 //        }
-        maven("https://repo.papermc.io/repository/maven-public") {
-            content {
-                includeGroupByRegex(
-                    "(io\\.papermc\\..*|com\\.destroystokyo\\..*|com\\.velocitypowered)"
-                )
-            }
-        }
+        maven("https://repo.papermc.io/repository/maven-public")
         // Spigot
         maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots") {
             mavenContent { snapshotsOnly() }
