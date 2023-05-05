@@ -28,6 +28,9 @@ val deployProjects = setOf(
     projects.bungee,
     projects.spigot,
     projects.velocity,
+    projects.bungeeBase,
+    projects.spigotBase,
+    projects.velocityBase,
     projects.universal
 ).map { it.dependencyProject }
 
