@@ -28,6 +28,7 @@ package com.minekube.connect.api;
 import com.minekube.connect.api.player.ConnectPlayer;
 import java.util.Collection;
 import java.util.UUID;
+import minekube.connect.v1alpha1.ConnectServiceClientInterface;
 
 public interface ConnectApi {
     /**
@@ -62,4 +63,11 @@ public interface ConnectApi {
      * @return ConnectPlayer if the given uuid is a player tunneled by Connect
      */
     ConnectPlayer getPlayer(UUID uuid);
+
+    /**
+     * Get the client for the remote Connect API Service.
+     *
+     * @return the ConnectServiceClientInterface instance
+     */
+    ConnectServiceClientInterface getConnectServiceClient();
 }

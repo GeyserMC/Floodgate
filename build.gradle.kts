@@ -8,7 +8,7 @@ allprojects {
     group = "com.minekube.connect"
     version = "0.4.0"
     description =
-        "Connects the server/proxy to the global Connect network to reach more players while also supporting online mode server, bungee or velocity mode. Visit https://minekube.com/connect"
+        "Connects the server/proxy to the global Connect network to reach more players while also supporting online mode server, bungee or velocity mode. Visit https://connect.minekube.com"
 }
 
 val deployProjects = setOf(
