@@ -45,8 +45,6 @@ public class SimpleConnectApi implements ConnectApi {
                     .expireAfterWrite(20, TimeUnit.SECONDS)
                     .build();
 
-    private final ConnectLogger logger;
-
     @Override
     public Collection<ConnectPlayer> getPlayers() {
         return ImmutableSet.copyOf(players.values());

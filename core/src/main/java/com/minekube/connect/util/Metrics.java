@@ -1,6 +1,7 @@
 package com.minekube.connect.util;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.minekube.connect.api.ConnectApi;
 import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.config.ConnectConfig;
@@ -10,10 +11,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.inject.Named;
 import org.bstats.MetricsBase;
 import org.bstats.charts.AdvancedPie;
 import org.bstats.charts.DrilldownPie;
@@ -127,7 +126,7 @@ public final class Metrics {
 
     private void appendPlatformData(JsonObjectBuilder builder) {
         builder.appendField("osName", OS_NAME);
-        builder.appendField("osArch",OS_ARCH);
+        builder.appendField("osArch", OS_ARCH);
         builder.appendField("osVersion", OS_VERSION);
         builder.appendField("coreCount", CORE_COUNT);
     }

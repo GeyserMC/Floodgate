@@ -17,18 +17,21 @@ dependencies {
     api("org.bstats", "bstats-base", Versions.bstatsVersion)
 
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
-    runtimeOnly("io.grpc", "grpc-netty-shaded", Versions.gRPCVersion)
+    implementation("build.buf", "connect-kotlin-okhttp", Versions.connectKotlinVersion)
+    implementation("build.buf", "connect-kotlin-google-java-ext", Versions.connectKotlinVersion)
     implementation("io.grpc", "grpc-protobuf", Versions.gRPCVersion)
-    implementation("io.grpc", "grpc-stub", Versions.gRPCVersion)
+//    runtimeOnly("io.grpc", "grpc-netty-shaded", Versions.gRPCVersion) TODO REMOVE
+//    implementation("io.grpc", "grpc-stub", Versions.gRPCVersion)
     implementation("javax.annotation", "javax.annotation-api", "1.3.2")
 }
+
+relocate("org.bstats")
+relocate("build.buf")
 
 // present on all platforms
 provided("io.netty", "netty-transport", Versions.nettyVersion)
 provided("io.netty", "netty-codec", Versions.nettyVersion)
 provided("io.netty", "netty-transport-native-unix-common", Versions.nettyVersion)
-
-relocate("org.bstats")
 
 configure<BlossomExtension> {
     val constantsFile = "src/main/java/com/minekube/connect/util/Constants.java"
@@ -49,12 +52,17 @@ protobuf {
         id("grpc") {
             artifact = "io.grpc:protoc-gen-grpc-java:${Versions.gRPCVersion}"
         }
+        id("connectkt") {
+            // source https://github.com/bufbuild/connect-kotlin/releases/download/v0.1.4/protoc-gen-connect-kotlin.jar
+            path = file("protoc-gen-connect-kotlin.jar").path
+        }
     }
     generateProtoTasks {
         ofSourceSet("main").forEach {
             it.plugins {
                 // Apply the "grpc" plugin whose spec is defined above, without options.
-                id("grpc")
+//                id("grpc") // Use ConnectKt instead of standard gRPC
+                id("connectkt")
             }
         }
     }

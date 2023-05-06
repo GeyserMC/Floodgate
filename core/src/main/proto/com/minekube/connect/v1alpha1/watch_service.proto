@@ -11,11 +11,12 @@ service WatchService {
 
 message WatchRequest {
   // Sending this message rejects a session proposed by the WatchService. This message should be sent to inform
-  // the WatchService that the server will not try to make a take the proposed session. The only purpose of
-  // this message is to provide quicker feedback to the player that he will not be connected with an optional
-  // localized reason. See https://github.com/grpc/grpc/blob/master/src/proto/grpc/status/status.proto.
-  // If the session is not rejected the watcher should establish the connection for the proposed session.
-  // If neither of these actions happen the proposal times out out and the player receives a connection timeout
+  // the WatchService that the server declines the proposed session. The purpose of
+  // this message is to provide quicker feedback to the system and provide feedback to the player that the connection
+  // won't be created. The rejection status can optionally contain a localized reason that should
+  // be displayed to the player. See https://github.com/grpc/grpc/blob/master/src/proto/grpc/status/status.proto.
+  // If the session is not rejected the watcher/client should establish the connection for the proposed session.
+  // If neither of these actions happen the proposal times out and the player receives a connection timeout
   // error indicating that the endpoint is currently unavailable.
   SessionRejection session_rejection = 1;
 }

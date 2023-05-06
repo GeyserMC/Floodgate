@@ -1,0 +1,138 @@
+syntax = "proto3";
+
+package minekube.connect.v1alpha1;
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+// ConnectService is the service for integrating with Minekube Connect.
+//
+// The service is used internally and will become public in the future
+// when the API has stabilized and we are in the product phase where external
+// developers should be able to integrate with the Connect Platform.
+service ConnectService {
+  // ConnectEndpoint connects a player to an endpoint.
+  rpc ConnectEndpoint(ConnectEndpointRequest) returns (ConnectEndpointResponse);
+  // ListEndpoints lists active endpoints.
+  // That means it only returns endpoints with at least one endpoint session.
+  rpc ListEndpoints(ListEndpointsRequest) returns (ListEndpointsResponse);
+}
+
+message ListEndpointsRequest {
+  // The maximum number of entries to return.
+  // The service may return fewer than this value.
+  // If unspecified, at most 50 books will be returned.
+  // The maximum value is 1000; values above 1000 will be coerced to 1000.
+  int32 page_size = 1;
+
+  // A page token, received from a previous `ListEndpoints` call.
+  // Provide this to retrieve the subsequent page.
+  //
+  // When paginating, all other parameters provided to `ListEndpoints` must match
+  // the call that provided the page token.
+  string page_token = 2;
+}
+
+message ListEndpointsResponse {
+  // The endpoints that match the request.
+  repeated Endpoint endpoints = 1;
+
+  // A token, which can be sent as `page_token` to retrieve the next page.
+  // If this field is omitted, there are no subsequent pages.
+  string next_page_token = 2;
+}
+
+message ConnectEndpointRequest {
+  // The endpoint name to connect to.
+  // If the endpoint is not online, the request fails with NOT_FOUND.
+  string endpoint = 1;
+  // The player uuids to connect to the specified endpoint.
+  // Maximal 100 players can be connected at once.
+  //
+  // If a player is not online, the request will not fail.
+  //
+  // Format: only supports player UUIDs
+  repeated string players = 2;
+
+  // Note for future Public API: might support messages
+  // https://gitlab.com/backups-robin/minekube/apis/minekube/-/blob/master/minekube/net/cluster/v1beta2/cluster_api.proto#L169
+}
+
+message ConnectEndpointResponse {}
+
+// Endpoint is one or more server endpoints that can be connected to.
+message Endpoint {
+  // The global unique endpoint name that is human readable.
+  string name = 1;
+  // The active instances of this Endpoint watching for player sessions.
+  // If there are no sessions, the endpoint is not connected to the Connect Network
+  // and players cannot connect to it.
+  // Multiple sessions can be active at the same time to serve the same Endpoint.
+  // This is useful for load balancing players to the nearest Endpoint instance available.
+  repeated EndpointSession sessions = 2;
+}
+
+// EndpointSession is an active instance of an Endpoint
+// watching for incoming player sessions.
+message EndpointSession {
+  // The id of the session.
+  string id = 1;
+  // The time when the session was created.
+  // This can be used to determine the age of the endpoint session.
+  google.protobuf.Timestamp create_time = 2;
+  // Whether this endpoint session allows offline players to connect.
+  // If false, only online players can connect to this endpoint session.
+  // If true, offline and online players can connect to this endpoint session.
+  bool allows_offline_players = 3;
+}
+
+// A server status pong.
+message Status {
+  // A server list ping response (see https://wiki.vg/Server_List_Ping#Response)
+  message Ping {
+    // The server version information.
+    message Version {
+      // The version name.
+      // Examples: "PaperSpigot 1.8.8" or "Requires MC 1.8-1.15"
+      string name = 1;
+      // The version protocol id. (see https://wiki.vg/Protocol_version_numbers)
+      // Example: 47 (that is version 1.8.x)
+      int32 protocol = 2;
+    }
+    // The players information aka samples.
+    message Players {
+      // An online player.
+      message Player {
+        // The uuid of the player.
+        // Example: "f9954af4-bd9c-46f2-8b3c-7b593844866e"
+        string id = 1;
+        // The name of the player.
+        // Example: "RoboFlax"
+        string name = 2;
+      }
+      // Number of online players.
+      int32 count = 1;
+      // Limit of online players.
+      int32 max = 2;
+      // The players online, independent from count and max.
+      repeated Player players = 3;
+    }
+    // The server motd. Legacy or component text format.
+    // Example: "§aSurvival Server §c[1.8-1.15]\n§b§l😀 §c§lAre you bored? §7§l- §6§lCome and play with us! §b§l😀"
+    string description = 1;
+    // The server version.
+    Version version = 2;
+    // The players information.
+    Players players = 3;
+    // The server favicon data URL, if there is one.
+    // (see https://de.wikipedia.org/wiki/Data-URL)
+    string favicon = 4;
+    // The response latency for the ping request.
+    google.protobuf.Duration latency_duration = 5;
+    // The time when the ping request was sent.
+    google.protobuf.Timestamp request_time = 6;
+  }
+  // The server ping response, if any.
+  Ping ping = 1;
+}
+

@@ -34,6 +34,7 @@ object Versions {
     const val adventurePlatformVersion = "4.0.0"
     const val viaVersionVersion = "4.0.0"
     const val gRPCVersion = "1.44.0"
+    const val connectKotlinVersion = "0.1.4"
     const val protocVersion = "3.19.4"
     const val bstatsVersion = "3.0.0"
     const val gsonVersion = "2.8.6"

@@ -27,9 +27,18 @@ package com.minekube.connect.module;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import build.buf.connect.ProtocolClientConfig;
+import build.buf.connect.ProtocolClientInterface;
+import build.buf.connect.compression.GzipCompressionPool;
+import build.buf.connect.extensions.GoogleJavaProtobufStrategy;
+import build.buf.connect.impl.ProtocolClient;
+import build.buf.connect.okhttp.ConnectOkHttpClient;
+import build.buf.connect.protocols.NetworkProtocol;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.google.inject.AbstractModule;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -55,8 +64,12 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
+import minekube.connect.v1alpha1.ConnectServiceClient;
+import minekube.connect.v1alpha1.ConnectServiceClientInterface;
 import okhttp3.OkHttpClient;
 
 @RequiredArgsConstructor
@@ -70,6 +83,8 @@ public class CommonModule extends AbstractModule {
 
         bind(PacketHandlers.class).to(PacketHandlersImpl.class);
         bind(PacketHandlersImpl.class).asEagerSingleton();
+
+        bind(ConnectServiceClientInterface.class).to(ConnectServiceClient.class);
     }
 
     @Provides
@@ -113,15 +128,9 @@ public class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
-    @Named("connectHttpClient")
-    public OkHttpClient connectOkHttpClient(
-            @Named("defaultHttpClient") OkHttpClient defaultOkHttpClient,
-            PlatformUtils platformUtils,
-            @Named("platformName") String implementationName,
-            ConnectApi api
-    ) throws IOException {
+    @Named("connectToken")
+    public String connectToken() throws IOException {
         Path tokenFile = dataDirectory.resolve("token.json");
-
         Optional<String> token = Token.load(tokenFile);
         if (!token.isPresent()) {
             // Generate and save new token
@@ -129,12 +138,23 @@ public class CommonModule extends AbstractModule {
             Token.save(tokenFile, t);
             token = Optional.of(t);
         }
-        final String apiToken = token.get();
+        return token.get();
+    }
 
+    @Provides
+    @Singleton
+    @Named("connectHttpClient")
+    public OkHttpClient connectOkHttpClient(
+            @Named("defaultHttpClient") OkHttpClient defaultOkHttpClient,
+            PlatformUtils platformUtils,
+            @Named("platformName") String implementationName,
+            ConnectApi api,
+            @Named("connectToken") String connectToken
+    ) {
         return defaultOkHttpClient.newBuilder()
                 .addInterceptor(chain -> chain.proceed(chain.request().newBuilder()
                         // Add authorization token to every request
-                        .addHeader("Authorization", "Bearer " + apiToken)
+                        .addHeader("Authorization", "Bearer " + connectToken)
                         // Add Connect Metadata to every request
                         .addHeader("Connect-TotalPlayers",
                                 String.valueOf(platformUtils.getPlayerCount()))
@@ -150,6 +170,32 @@ public class CommonModule extends AbstractModule {
                         .addHeader("Connect-coreCount", String.valueOf(Metrics.CORE_COUNT))
                         .build()))
                 .build();
+    }
+
+    @Provides
+    @Singleton
+    public ProtocolClient protocolClient(
+            @Named("connectHttpClient") OkHttpClient connectOkHttpClient
+    ) {
+        final String connectServiceHost = System.getenv().getOrDefault(
+                "CONNECT_SERVICE_HOST", "https://connect-api.minekube.com");
+        return new ProtocolClient(
+                new ConnectOkHttpClient(connectOkHttpClient),
+                new ProtocolClientConfig(
+                        connectServiceHost,
+                        new GoogleJavaProtobufStrategy(),
+                        NetworkProtocol.CONNECT,
+                        null,
+                        Collections.emptyList(),
+                        Collections.singletonList(GzipCompressionPool.INSTANCE)
+                )
+        );
+    }
+
+    @Provides
+    @Singleton
+    public ConnectServiceClientInterface connectServiceClient(ProtocolClient protocolClient) {
+        return new ConnectServiceClient(protocolClient);
     }
 
     @RequiredArgsConstructor
