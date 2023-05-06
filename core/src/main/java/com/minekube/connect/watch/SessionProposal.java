@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import minekube.connect.v1alpha1.WatchServiceOuterClass.Session;
 
 @RequiredArgsConstructor

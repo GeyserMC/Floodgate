@@ -9,11 +9,15 @@ tasks {
     named<Jar>("jar") {
         archiveClassifier.set("unshaded")
         from(project.rootProject.file("LICENSE"))
+
+        addConnectKT(this@named)
     }
     val shadowJar = named<ShadowJar>("shadowJar") {
         archiveBaseName.set("connect-${project.name}")
         archiveVersion.set("")
         archiveClassifier.set("")
+
+        addConnectKT(this@named)
 
         val sJar: ShadowJar = this
 
@@ -34,6 +38,16 @@ tasks {
     }
     named("build") {
         dependsOn(shadowJar)
+    }
+}
+
+fun addConnectKT(jar: Jar) {
+    jar.exclude("**/*.proto")
+    jar.includeEmptyDirs = false
+
+    jar.from("build/generated/source/proto/main/connectkt") {
+        // Include all files under this directory
+        include("**/*")
     }
 }
 
