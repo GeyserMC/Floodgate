@@ -2,7 +2,7 @@ pipeline {
     agent any
     tools {
         gradle 'gradle'
-        jdk 'Jdk8'
+        jdk 'Jdk17'
     }
     options {
         buildDiscarder(logRotator(artifactNumToKeepStr: '5'))
