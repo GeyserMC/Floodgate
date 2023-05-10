@@ -1,4 +1,4 @@
-var bungeeCommit = "dfd847f"
+var bungeeCommit = "9e5ed82"
 var gsonVersion = "2.8.0"
 var guavaVersion = "21.0"
 
