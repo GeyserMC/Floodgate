@@ -107,6 +107,8 @@ public final class SpigotInjector extends CommonPlatformInjector {
     }
 
     public void injectClient(ChannelFuture future) {
+        if (future.channel().pipeline().get("floodgate-init")!=null)
+            return;
         future.channel().pipeline().addFirst("floodgate-init", new ChannelInboundHandlerAdapter() {
             @Override
             public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
