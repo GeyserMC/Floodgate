@@ -28,8 +28,9 @@ package org.geysermc.floodgate.command.main;
 import static org.geysermc.floodgate.util.Constants.COLOR_CHAR;
 
 import cloud.commandframework.context.CommandContext;
-import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.command.WhitelistCommand.Message;
 import org.geysermc.floodgate.command.util.Permission;
@@ -44,6 +45,10 @@ public class VersionSubcommand extends FloodgateSubCommand {
 
     @Inject
     private FloodgateLogger logger;
+
+    @Inject
+    @Named("implementationName")
+    private String implementationName;
 
     @Override
     public String name() {
@@ -70,14 +75,19 @@ public class VersionSubcommand extends FloodgateSubCommand {
                 Constants.VERSION, Constants.GIT_BRANCH
         ));
 
-        String baseUrl = String.format(
-                "https://ci.opencollab.dev/job/GeyserMC/job/Floodgate/job/%s/lastSuccessfulBuild/",
-                Constants.GIT_BRANCH
-        );
+        //noinspection ConstantValue
+        if (!Constants.GIT_MAIN_BRANCH.equals(Constants.GIT_BRANCH)) {
+            sender.sendMessage(String.format(
+                    COLOR_CHAR + "7Detected that you aren't on the %s branch, " +
+                    "so we can't fetch the latest version.",
+                    Constants.GIT_MAIN_BRANCH
+            ));
+            return;
+        }
 
         httpClient.asyncGet(
-                baseUrl + "buildNumber",
-                JsonElement.class
+                String.format(Constants.LATEST_VERSION_URL, Constants.PROJECT_NAME),
+                JsonObject.class
         ).whenComplete((result, error) -> {
             if (error != null) {
                 sender.sendMessage(COLOR_CHAR + "cCould not retrieve latest version info!");
@@ -85,10 +95,9 @@ public class VersionSubcommand extends FloodgateSubCommand {
                 return;
             }
 
-            JsonElement response = result.getResponse();
+            JsonObject response = result.getResponse();
 
-            logger.info(String.valueOf(response));
-            logger.info("{}", result.getHttpCode());
+            logger.debug("code: {}, response: ", result.getHttpCode(), String.valueOf(response));
 
             if (result.getHttpCode() == 404) {
                 sender.sendMessage(
@@ -102,20 +111,21 @@ public class VersionSubcommand extends FloodgateSubCommand {
                 //todo make it more generic instead of using a Whitelist command strings
                 logger.error(
                         "Got an error from requesting the latest Floodgate version: {}",
-                        response.toString()
+                        String.valueOf(response)
                 );
                 sender.sendMessage(Message.UNEXPECTED_ERROR);
                 return;
             }
 
-            int buildNumber = response.getAsInt();
+            int buildNumber = response.get("build").getAsInt();
 
             if (buildNumber > Constants.BUILD_NUMBER) {
                 sender.sendMessage(String.format(
                         COLOR_CHAR + "7There is a newer version of Floodgate available!\n" +
                         COLOR_CHAR + "7You are " + COLOR_CHAR + "e%s " + COLOR_CHAR + "7builds behind.\n" +
                         COLOR_CHAR + "7Download the latest Floodgate version here: " + COLOR_CHAR + "b%s",
-                        buildNumber - Constants.BUILD_NUMBER, baseUrl
+                        buildNumber - Constants.BUILD_NUMBER,
+                        String.format(Constants.LATEST_DOWNLOAD_URL, implementationName)
                 ));
                 return;
             }
