@@ -81,7 +81,7 @@ public class NewsChecker {
 
     private void checkNews() {
         HttpResponse<JsonArray> response = httpClient.getSilent(
-                Constants.NEWS_OVERVIEW_URL + Constants.NEWS_PROJECT_NAME,
+                Constants.NEWS_OVERVIEW_URL + Constants.PROJECT_NAME,
                 JsonArray.class
         );
 
@@ -173,7 +173,7 @@ public class NewsChecker {
 
         switch (item.getType()) {
             case ANNOUNCEMENT:
-                if (!item.getDataAs(AnnouncementData.class).isAffected(Constants.NEWS_PROJECT_NAME)) {
+                if (!item.getDataAs(AnnouncementData.class).isAffected(Constants.PROJECT_NAME)) {
                     return;
                 }
                 break;
