@@ -28,9 +28,9 @@ package org.geysermc.floodgate.core.database;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.data.annotation.Repository;
 import io.micronaut.data.repository.async.AsyncCrudRepository;
+import jakarta.validation.constraints.NotNull;
 import java.util.Optional;
 import java.util.UUID;
-import javax.validation.constraints.NotNull;
 import org.geysermc.floodgate.core.database.entity.LinkedPlayer;
 
 @Repository

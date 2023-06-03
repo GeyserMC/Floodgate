@@ -25,5 +25,7 @@
 
 package org.geysermc.floodgate.core.http.xbox;
 
-public record GetGamertagResult(String gamertag) {
+import jakarta.annotation.Nullable;
+
+public record GetGamertagResult(@Nullable String gamertag) {
 }

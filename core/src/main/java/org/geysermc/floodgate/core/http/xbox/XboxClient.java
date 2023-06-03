@@ -31,9 +31,9 @@ import static io.micronaut.http.HttpHeaders.USER_AGENT;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Header;
 import io.micronaut.http.client.annotation.Client;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.util.concurrent.CompletableFuture;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 @Client("${http.baseUrl}/v2/xbox")
 @Header(name = USER_AGENT, value = "${http.userAgent}")

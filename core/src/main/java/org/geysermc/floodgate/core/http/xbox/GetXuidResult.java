@@ -25,5 +25,7 @@
 
 package org.geysermc.floodgate.core.http.xbox;
 
-public record GetXuidResult(Long xuid) {
+import jakarta.annotation.Nullable;
+
+public record GetXuidResult(@Nullable Long xuid) {
 }

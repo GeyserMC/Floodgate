@@ -43,7 +43,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.SocketAddress;
 import java.util.function.BooleanSupplier;
-import javax.annotation.CheckForNull;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -233,7 +232,7 @@ public class ClassNames {
         ) != null;
     }
 
-    private static <T> T checkNotNull(@CheckForNull T toCheck, @CheckForNull String objectName) {
+    private static <T> T checkNotNull(T toCheck, String objectName) {
         return Preconditions.checkNotNull(toCheck, objectName + " cannot be null");
     }
 }

@@ -1,6 +1,6 @@
 [versions]
 # parent
-micronaut-gradle = "3.7.9"
+micronaut-gradle = "4.0.0-M2"
 lombok = "8.0.1"
 
 # api
@@ -59,11 +59,15 @@ guava = { module = "com.google.guava:guava", version.ref = "guava" }
 
 micronaut-inject = { module = "io.micronaut:micronaut-inject-java" }
 micronaut-context = { module = "io.micronaut:micronaut-context" }
-micronaut-http-client = { module = "io.micronaut:micronaut-http-client" }
-micronaut-validation = { module = "io.micronaut:micronaut-validation" }
+micronaut-http-client = { module = "io.micronaut:micronaut-http-client-jdk" }
+micronaut-validation = { module = "io.micronaut.validation:micronaut-validation" }
 micronaut-data-processor = { module = "io.micronaut.data:micronaut-data-processor" }
 micronaut-hibernate = { module = "io.micronaut.data:micronaut-data-hibernate-jpa" }
 micronaut-hikari = { module = "io.micronaut.sql:micronaut-jdbc-hikari" }
+
+micronaut-serde-jsonp = { module = "io.micronaut.serde:micronaut-serde-jsonp" }
+micronaut-serde-processor = { module = "io.micronaut.serde:micronaut-serde-processor" }
+jsonb-annotations = { module = "jakarta.json.bind:jakarta.json.bind-api" }
 
 netty-codec = { module = "io.netty:netty-codec", version.ref = "netty" }
 

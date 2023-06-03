@@ -25,17 +25,24 @@
 
 package org.geysermc.floodgate.core.http.link;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import io.micronaut.serde.annotation.Serdeable;
+import jakarta.annotation.Nullable;
+import jakarta.json.bind.annotation.JsonbProperty;
 import java.util.UUID;
 import org.geysermc.floodgate.core.util.Utils;
 
+@Serdeable
 public record LinkedPlayer(
-        @JsonProperty("bedrock_id")
-        long xuid,
+        @JsonbProperty("bedrock_id")
+        @Nullable
+        Long xuid,
+        @Nullable
         String gamertag,
-        @JsonProperty("java_id")
+        @JsonbProperty("java_id")
+        @Nullable
         UUID uuid,
-        @JsonProperty("java_name")
+        @JsonbProperty("java_name")
+        @Nullable
         String username
 ) {
     public boolean isLinked() {

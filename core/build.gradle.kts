@@ -25,6 +25,10 @@ dependencies {
     api(libs.micronaut.http.client)
     api(libs.micronaut.validation)
 
+    api(libs.micronaut.serde.jsonp)
+    compileOnlyApi(libs.jsonb.annotations)
+    annotationProcessor(libs.micronaut.serde.processor)
+
     //todo add hibernate dependency back in core,
     // it's not possible to make it optional as the service files would be messed up
     api(projects.database)

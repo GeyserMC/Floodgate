@@ -26,11 +26,11 @@
 package org.geysermc.floodgate.core.database.entity;
 
 import io.micronaut.core.annotation.AccessorsStyle;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
-import javax.persistence.Entity;
-import javax.persistence.Id;
 
 @Entity
 @AccessorsStyle(readPrefixes = "", writePrefixes = "")

@@ -6,7 +6,7 @@ plugins {
 
 configurations.runtimeClasspath.get()
     .exclude("org.slf4j", "slf4j-api")
-    .exclude("javax.validation", "validation-api")
+    .exclude("jakarta.validation", "validation-api")
     .exclude("io.micronaut", "micronaut-aop")
     .exclude("io.micronaut", "micronaut-core")
     .exclude("io.micronaut", "micronaut-runtime")
