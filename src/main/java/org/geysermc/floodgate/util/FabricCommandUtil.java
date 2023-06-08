@@ -3,10 +3,10 @@ package org.geysermc.floodgate.util;
 import com.mojang.authlib.GameProfile;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.UserWhiteListEntry;
-import net.minecraft.world.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.MinecraftServerHolder;
 import org.geysermc.floodgate.api.FloodgateApi;
@@ -70,8 +70,8 @@ public final class FabricCommandUtil extends CommandUtil {
     }
 
     @Override
-    public boolean hasPermission(Object player, String permission) {
-        return Permissions.check((Entity) player, permission);
+    public boolean hasPermission(Object source, String permission) {
+        return Permissions.check((SharedSuggestionProvider) source, permission);
     }
 
     @Override
