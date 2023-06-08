@@ -4,3 +4,5 @@ accessWidener v1 named
 accessible class net/minecraft/server/network/ServerLoginPacketListenerImpl$State
 # For player skin refreshing
 accessible class net/minecraft/server/level/ChunkMap$TrackedEntity
+# To access skins
+accessible field net/minecraft/world/entity/Entity level Lnet/minecraft/world/level/Level;

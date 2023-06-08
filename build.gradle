@@ -48,7 +48,7 @@ dependencies {
         exclude group: "org.ow2.asm", module: "*" // From Events lib
     }
 
-    include(modImplementation('cloud.commandframework:cloud-fabric:1.8.0-SNAPSHOT') {
+    include(modImplementation('cloud.commandframework:cloud-fabric:1.8.3') {
         because "Commands library implementation for Fabric"
     })
 
