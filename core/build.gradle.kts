@@ -14,7 +14,6 @@ dependencies {
     api("com.nukkitx.fastutil", "fastutil-int-object-maps", Versions.fastutilVersion)
     api("org.java-websocket", "Java-WebSocket", Versions.javaWebsocketVersion)
     api("cloud.commandframework", "cloud-core", Versions.cloudVersion)
-    api("org.yaml", "snakeyaml", Versions.snakeyamlVersion)
 
     //todo use official dependency once https://github.com/Bastian/bstats-metrics/pull/118 is merged
     api("com.github.Konicai.bstats-metrics", "bstats-base", Versions.bstatsVersion)
