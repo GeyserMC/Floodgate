@@ -159,7 +159,7 @@ modrinth {
     syncBodyFrom = rootProject.file("README.md").text
 
     uploadFile = tasks.getByPath("remappedShadowJar")
-    gameVersions = ["1.19.4, 1.20"]
+    gameVersions.addAll("1.19.4", "1.20")
 
     loaders = ["fabric"]
 
