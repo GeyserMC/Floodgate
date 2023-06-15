@@ -33,13 +33,14 @@ relocate("com.google.common")
 relocate("com.google.guava")
 // hack to make (old versions? of) Paper work
 relocate("it.unimi")
+// since 1.20
+relocate("org.yaml")
 
 // these dependencies are already present on the platform
 provided("com.mojang", "authlib", authlibVersion)
 provided("io.netty", "netty-transport", Versions.nettyVersion)
 provided("io.netty", "netty-codec", Versions.nettyVersion)
 provided("com.google.code.gson", "gson", gsonVersion)
-provided("org.yaml", "snakeyaml", Versions.snakeyamlVersion)
 
 // PROJECT-G: Override these dependencies present in Geyser
 provided("org.geysermc", "common", Versions.geyserVersion)

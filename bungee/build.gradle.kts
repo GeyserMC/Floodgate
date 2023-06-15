@@ -12,12 +12,13 @@ relocate("net.kyori")
 relocate("cloud.commandframework")
 // used in cloud
 relocate("io.leangen.geantyref")
+// since 1.20
+relocate("org.yaml")
 
 // these dependencies are already present on the platform
 provided("com.github.SpigotMC.BungeeCord", "bungeecord-proxy", bungeeCommit)
 provided("com.google.code.gson", "gson", gsonVersion)
 provided("com.google.guava", "guava", guavaVersion)
-provided("org.yaml", "snakeyaml", Versions.snakeyamlVersion)
 
 // PROJECT-G: Override these dependencies present in Geyser
 provided("org.geysermc", "common", Versions.geyserVersion)
