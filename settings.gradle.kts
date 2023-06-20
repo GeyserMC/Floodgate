@@ -2,7 +2,7 @@
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 dependencyResolutionManagement {
-    repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
+    // repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
     repositories {
         mavenLocal()
 
@@ -27,7 +27,7 @@ dependencyResolutionManagement {
             mavenContent { snapshotsOnly() }
         }
 
-        // BungeeCord
+        // Spigot, BungeeCord
         maven("https://oss.sonatype.org/content/repositories/snapshots") {
             mavenContent { snapshotsOnly() }
         }

@@ -2,8 +2,6 @@ plugins {
     `java-library`
     alias(libs.plugins.micronaut) apply false
     alias(libs.plugins.lombok) apply false
-
-    // TODO: plugin("fabric-loom") version "1.0-SNAPSHOT" apply false
 }
 
 allprojects {
@@ -31,6 +29,7 @@ val deployProjects = setOf(
     projects.fabric,
     projects.spigot,
     projects.velocity,
+    projects.fabricBase,
     projects.bungeeBase,
     projects.spigotBase,
     projects.velocityBase,
@@ -44,6 +43,7 @@ val shadowProjects = setOf(
     projects.bungeeBase,
     projects.spigotBase,
     projects.velocityBase,
+    projects.fabricBase,
     projects.universal
 ).map { it.dependencyProject }
 

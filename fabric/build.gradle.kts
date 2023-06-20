@@ -1,85 +1,20 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.fabricmc.loom.task.RemapJarTask
 
-val minecraftVersion = "1.19"
-val loaderVersion = "0.14.6"
-val fabricVersion = "0.55.3+1.19"
-
 plugins {
-    id("fabric-loom") //version "1.0-SNAPSHOT"
-    id("java")
-    id("maven-publish")
+    java
+    id("fabric-loom") version "1.0-SNAPSHOT" apply true
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-    }
-}
-
-tasks.withType<JavaCompile> {
-    options.encoding = "UTF-8"
-    sourceCompatibility = "17"
-    targetCompatibility = "17"
-    options.release.set(17)
-}
-
-loom {
-    accessWidenerPath.set(file("src/main/resources/floodgate.accesswidener"))
-}
-
-// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-// if it is present.
-// If you remove this task, sources will not be generated.
-//val sourcesJar = tasks.create<Jar>("sourcesJar") {
-    //archiveClassifier.set("sources")
-    //from(sourceSets["main"].allSource)
-//}
-
-// This is easier than what is immediately above?
-java {
-    withSourcesJar()
-}
-
-tasks {
-    shadowJar {
-        configurations = listOf(project.configurations.shadow.get())
-    }
-}
-
-val remappedShadowJar = tasks.create<RemapJarTask>("remappedShadowJar") {
-    dependsOn(tasks.shadowJar)
-    input.set(tasks.shadowJar.get().archiveFile) //fixme: deprecated
-    addNestedDependencies.set(true)
-    archiveFileName.set("floodgate-fabric.jar")
-}
-
-tasks.assemble {
-    dependsOn(remappedShadowJar)
-}
-
-artifacts {
-    archives(remappedShadowJar)
-    shadow(tasks.shadowJar)
-}
-
-repositories {
-    // specifically for adventure-platform-fabric:5.4.0-SNAPSHOT
-    maven("https://s01.oss.sonatype.org/content/repositories/snapshots/") {
-        name = "sonatype-oss-snapshots1"
-        mavenContent { snapshotsOnly() }
-    }
-}
-
-// todo: perform exclusions using floodgate build logic
 dependencies {
-    api(projects.core) {
+    api(projects.isolation) {
         exclude("com.google.guava", "guava")
         exclude("com.google.code.gson", "gson")
         exclude("org.slf4j", "slf4j-api")
         exclude("net.kyori", "*") // Let Adventure-Platform provide its desired Adventure version
         exclude("it.unimi.dsi.fastutil", "*")
     }
+    compileOnlyApi(libs.api)
 
     minecraft("com.mojang", "minecraft", minecraftVersion)
     mappings(loom.officialMojangMappings())
@@ -97,4 +32,41 @@ dependencies {
         // The package modifies Brigadier which causes a LinkageError at runtime if included
         exclude("ca.stellardrift", "colonel")
     })
+}
+
+loom {
+    accessWidenerPath.set(file("src/main/resources/floodgate.accesswidener"))
+}
+
+repositories {
+    // specifically for adventure-platform-fabric:5.4.0-SNAPSHOT
+    maven("https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+        name = "sonatype-oss-snapshots1"
+        mavenContent { snapshotsOnly() }
+    }
+}
+
+tasks {
+    jar {
+        dependsOn(":fabric-base:build", configurations.runtimeClasspath)
+
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+
+        archiveBaseName = "floodgate-${project.name}"
+        archiveVersion = ""
+        archiveClassifier = ""
+
+        val fabricBaseJar = project.projects
+            .spigotBase.dependencyProject
+            .buildDir
+            .resolve("libs")
+            .resolve("floodgate-fabric-base.jar")
+
+        from(fabricBaseJar.parentFile) {
+            include(fabricBaseJar.name)
+            rename("floodgate-fabric-base.jar", "platform-base.jar")
+            into("bundled/")
+        }
+    }
 }

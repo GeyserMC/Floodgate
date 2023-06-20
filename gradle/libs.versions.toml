@@ -20,7 +20,7 @@ bstats = "3.0.2"
 guava = "31.1-jre"
 
 # bungee
-bungee = "dfd847f"
+bungee = "c7adcf9"
 
 # spigot
 folia = "1.19.4-R0.1-SNAPSHOT"
@@ -28,6 +28,11 @@ authlib = "1.5.21"
 
 # velocity
 velocity = "3.1.1"
+
+# fabric
+fabric-minecraft = "1.19"
+fabric-loader = "0.14.6"
+fabric-api = "0.55.3+1.19"
 
 # buildSrc
 indra = "3.0.1"
@@ -86,6 +91,12 @@ authlib = { module = "com.mojang:authlib", version.ref = "authlib" }
 # velocity
 cloud-velocity = { module = "cloud.commandframework:cloud-velocity", version.ref = "cloud" }
 velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "velocity" }
+
+# fabric
+# check these on https://modmuss50.me/fabric.html
+fabric-minecraft = { group = "com.mojang", name = "minecraft", version.ref = "fabric-minecraft" }
+fabric-loader = { group = "net.fabricmc", name = "fabric-loader", version.ref = "fabric-loader" }
+fabric-api = { group = "net.fabricmc.fabric-api", name = "fabric-api", version.ref = "fabric-api" }
 
 # buildSrc
 checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "checkerframework" }
