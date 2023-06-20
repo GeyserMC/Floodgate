@@ -1,0 +1,70 @@
+name: Build
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Build
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build
+          cache-read-only: ${{ github.ref_name != 'master' && github.ref_name != 'development' }}
+
+      - name: Publish to Maven Repository
+        if: ${{ github.repository == 'GeyserMC/Floodgate' }}
+        uses: gradle/gradle-build-action@v2
+        env:
+          ORG_GRADLE_PROJECT_geysermcUsername: ${{ vars.DEPLOY_USER }}
+          ORG_GRADLE_PROJECT_geysermcPassword: ${{ secrets.DEPLOY_PASS }}
+        with:
+          arguments: publish
+          cache-read-only: ${{ github.ref_name != 'master' && github.ref_name != 'development' }}
+
+      - name: Publish to Downloads API
+        if: ${{ github.ref_name == 'master' && github.repository == 'GeyserMC/Floodgate' }}
+        shell: bash
+        env:
+          DOWNLOADS_USERNAME: ${{ vars.DOWNLOADS_USERNAME }}
+          DOWNLOADS_PRIVATE_KEY: ${{ secrets.DOWNLOADS_PRIVATE_KEY }}
+          DOWNLOADS_SERVER_IP: ${{ secrets.DOWNLOADS_SERVER_IP }}
+        run: |
+          # Save the private key to a file
+          echo "$DOWNLOADS_PRIVATE_KEY" > id_ecdsa
+          chmod 600 id_ecdsa
+          
+          # Set the project
+          project=floodgate
+
+          # Get the version from gradle.properties
+          version=$(cat gradle.properties | grep -o "version=[0-9\\.]*" | cut -d"=" -f2)
+          
+          # Create the build folder
+          ssh -o StrictHostKeyChecking=no -i id_ecdsa $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP mkdir -p "~/uploads/$project/$GITHUB_RUN_NUMBER/"
+
+          # Copy over artifacts
+          rsync -P -e "ssh -o StrictHostKeyChecking=no -i id_ecdsa" **/build/libs/floodgate-*.jar $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP:~/uploads/$project/$GITHUB_RUN_NUMBER/
+
+          # Remove un-needed artifacts
+          ssh -o StrictHostKeyChecking=no -i id_ecdsa $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP rm ./uploads/$project/$GITHUB_RUN_NUMBER/floodgate-api.jar ./uploads/$project/$GITHUB_RUN_NUMBER/floodgate-core.jar
+
+          # Push the metadata
+          echo "{\"project\": \"$project\", \"version\": \"$version\", \"id\": $GITHUB_RUN_NUMBER, \"commit\": \"$GITHUB_SHA\"}" > metadata.json
+          rsync -P -e "ssh -o StrictHostKeyChecking=no -i id_ecdsa" metadata.json $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP:~/uploads/$project/$GITHUB_RUN_NUMBER/
+
+      - name: Notify Discord
+        if: ${{ (success() || failure()) && github.repository == 'GeyserMC/Floodgate' }}
+        uses: Tim203/actions-git-discord-webhook@main
+        with:
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK }}

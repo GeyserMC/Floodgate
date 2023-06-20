@@ -27,6 +27,7 @@ package org.geysermc.floodgate.api;
 
 import java.util.UUID;
 import lombok.Getter;
+import org.geysermc.floodgate.api.event.FloodgateEventBus;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.link.PlayerLink;
@@ -35,6 +36,7 @@ import org.geysermc.floodgate.api.packet.PacketHandlers;
 public final class InstanceHolder {
     @Getter private static FloodgateApi api;
     @Getter private static PlayerLink playerLink;
+    @Getter private static FloodgateEventBus eventBus;
 
     @Getter private static PlatformInjector injector;
     @Getter private static PacketHandlers packetHandlers;
@@ -44,11 +46,12 @@ public final class InstanceHolder {
     public static boolean set(
             FloodgateApi floodgateApi,
             PlayerLink link,
+            FloodgateEventBus floodgateEventBus,
             PlatformInjector platformInjector,
             PacketHandlers packetHandlers,
             HandshakeHandlers handshakeHandlers,
-            UUID key) {
-
+            UUID key
+    ) {
         if (storedKey != null) {
             if (!storedKey.equals(key)) {
                 return false;
@@ -59,14 +62,10 @@ public final class InstanceHolder {
 
         api = floodgateApi;
         playerLink = link;
+        eventBus = floodgateEventBus;
         injector = platformInjector;
         InstanceHolder.packetHandlers = packetHandlers;
         InstanceHolder.handshakeHandlers = handshakeHandlers;
         return true;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T extends FloodgateApi> T castApi(Class<T> cast) {
-        return (T) api;
     }
 }

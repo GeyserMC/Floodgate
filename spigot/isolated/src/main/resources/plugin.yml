@@ -1,0 +1,8 @@
+name: ${name}
+description: ${description}
+version: ${version}
+author: ${author}
+website: ${url}
+main: org.geysermc.floodgate.spigot.IsolatedSpigotPlugin
+api-version: 1.13
+folia-supported: true

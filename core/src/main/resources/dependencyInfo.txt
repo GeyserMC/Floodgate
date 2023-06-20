@@ -1,0 +1,16 @@
+org.geysermc.configutils:configutils:2.0-SNAPSHOT:HiYf2qgXat5WOQOScSXPk8FBIKZDWYowCJPVJ+Uuv+0=
+com.google.inject:guice:5.1.0:QTDlC/rEgJnIYPDZA7kYYMgaJJyQ84JF+P7Vj8gXvCY=
+com.nukkitx.fastutil:fastutil-short-object-maps:8.5.3:nTF5o2PCLMeBm8gaPeU4Q41FG2CNpmC9PxeJVHZot+U=
+com.nukkitx.fastutil:fastutil-int-object-maps:8.5.3:Z0iKxf9OmoIcQtmqV9Lo9Z39XSpBXKjL8tavAdVCKBY=
+org.java-websocket:Java-WebSocket:1.5.2:/4adGYqNxdAJZzkuGHrtqTuDO3zdO8zvs9f7WDQJi4U=
+cloud.commandframework:cloud-core:1.5.0:+hDJlLwU84P6sf0gkDq+xStIqAHhMXUCI+Wb8VsD1Zk=
+io.micronaut.data:micronaut-data-model:3.9.6:Hdt2G2LRuAtIs1K2DayRz7OoiqZcbIfCUEstVIpQnUE=
+io.micronaut.sql:micronaut-jdbc-hikari:4.7.2:w2N1dH4vY/QjjQGsViMOwgVYxAnZNGgMm1doCa19wOA=
+io.micronaut.data:micronaut-data-hibernate-jpa:3.9.6:kFYugtQeXfLjqUCWrf3MFFDoUdYhXrPQmSh0pu2Zxzo=
+io.micronaut:micronaut-context:3.8.7:ir020Tq3UavnPZhXOUNHCl/XdGcVrOzhM1lU5NT6YEc=
+io.micronaut:micronaut-inject-java:3.8.7:V7Dxe3ctZ8+c7ZUDQ3Cwtsqc6S7l2SE8+qTVhvhTHQs=
+io.micronaut:micronaut-inject:3.8.7:6C+sHfQBffYWV/LnD+Vc5WhqRbkWZIgJXqxThca2tXE=
+org.yaml:snakeyaml:2.0:iAydiW5LdKBsVJwVyklkUBZdaQn6FdfmYr7o9qZtevo=
+org.bstats:bstats-base:3.0.1:vdyqrd84GBpK0MnfDnSXXMTauyzL9nkMSfAiMOrVU2Q=
+com.google.guava:guava:31.1-jre:pC7cnKt5Ljn+ObuU8/ymVe0Vf/h6iveOHWulsHxKAKs=
+com.h2database:h2:1.4.200:OtmsS2qunNnTrBxEdGXh7QYBm4UbiT3WqNdt222FvKY=
