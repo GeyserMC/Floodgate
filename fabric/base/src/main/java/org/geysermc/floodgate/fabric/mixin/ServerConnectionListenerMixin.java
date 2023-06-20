@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2023 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,40 +23,28 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.universal.platform;
+package org.geysermc.floodgate.fabric.mixin;
 
-import net.fabricmc.api.ModInitializer;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.universal.UniversalLoader;
-import org.geysermc.floodgate.universal.holder.FloodgateHolder;
-import org.geysermc.floodgate.universal.logger.JavaUtilLogger;
-import org.geysermc.floodgate.universal.logger.Slf4jLogger;
-import org.geysermc.floodgate.universal.util.UniversalLogger;
+import net.minecraft.server.network.ServerConnectionListener;
+import org.geysermc.floodgate.fabric.inject.fabric.FabricInjector;
+import io.netty.channel.ChannelFuture;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-public final class FloodgateFabric implements ModInitializer {
-  private FloodgateHolder holder;
+import java.net.InetAddress;
+import java.util.List;
 
+@Mixin(ServerConnectionListener.class)
+public abstract class ServerConnectionListenerMixin {
 
-  @Override
-  public void onInitialize() {
-    UniversalLogger logger = new JavaUtilLogger();
-    try {
-      holder = new UniversalLoader("spigot", getDataFolder().toPath(), logger).start();
-      holder.init(new Class[]{JavaPlugin.class}, this);
-      holder.load();
-    } catch (Exception exception) {
-      throw new RuntimeException("Failed to load Floodgate", exception);
+    @Shadow @Final private List<ChannelFuture> channels;
+
+    @Inject(method = "startTcpServerListener", at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
+    public void onChannelAdd(InetAddress address, int port, CallbackInfo ci) {
+        FabricInjector.getInstance().injectClient(this.channels.get(this.channels.size() - 1));
     }
-  }
-
-
-  public void onEnable() {
-    holder.enable();
-  }
-
-
-  public void onDisable() {
-    holder.disable();
-  }
-
 }

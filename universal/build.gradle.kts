@@ -5,6 +5,7 @@ plugins {
 provided(libs.bungee)
 provided(libs.folia.api)
 provided(libs.velocity.api)
+provided(libs.fabric.loader)
 
 // todo use an isolated class loader in the future
 provided(libs.gson)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2023 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,40 +23,24 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.universal.platform;
+package org.geysermc.floodgate.fabric.module;
 
-import net.fabricmc.api.ModInitializer;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.universal.UniversalLoader;
-import org.geysermc.floodgate.universal.holder.FloodgateHolder;
-import org.geysermc.floodgate.universal.logger.JavaUtilLogger;
-import org.geysermc.floodgate.universal.logger.Slf4jLogger;
-import org.geysermc.floodgate.universal.util.UniversalLogger;
+import com.google.inject.AbstractModule;
+import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.ProvidesIntoSet;
+import org.geysermc.floodgate.fabric.listener.FabricEventListener;
+import org.geysermc.floodgate.register.ListenerRegister;
 
-public final class FloodgateFabric implements ModInitializer {
-  private FloodgateHolder holder;
-
-
-  @Override
-  public void onInitialize() {
-    UniversalLogger logger = new JavaUtilLogger();
-    try {
-      holder = new UniversalLoader("spigot", getDataFolder().toPath(), logger).start();
-      holder.init(new Class[]{JavaPlugin.class}, this);
-      holder.load();
-    } catch (Exception exception) {
-      throw new RuntimeException("Failed to load Floodgate", exception);
+public final class FabricListenerModule extends AbstractModule {
+    @Override
+    protected void configure() {
+        bind(new TypeLiteral<ListenerRegister<FabricEventListener>>() {}).asEagerSingleton();
     }
-  }
 
-
-  public void onEnable() {
-    holder.enable();
-  }
-
-
-  public void onDisable() {
-    holder.disable();
-  }
-
+    @Singleton
+    @ProvidesIntoSet
+    public FabricEventListener fabricEventListener() {
+        return new FabricEventListener();
+    }
 }

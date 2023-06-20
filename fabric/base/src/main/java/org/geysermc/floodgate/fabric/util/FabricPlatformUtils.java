@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2023 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,40 +23,25 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.universal.platform;
+package org.geysermc.floodgate.fabric.util;
 
-import net.fabricmc.api.ModInitializer;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.universal.UniversalLoader;
-import org.geysermc.floodgate.universal.holder.FloodgateHolder;
-import org.geysermc.floodgate.universal.logger.JavaUtilLogger;
-import org.geysermc.floodgate.universal.logger.Slf4jLogger;
-import org.geysermc.floodgate.universal.util.UniversalLogger;
+import net.minecraft.SharedConstants;
+import org.geysermc.floodgate.fabric.MinecraftServerHolder;
+import org.geysermc.floodgate.platform.util.PlatformUtils;
 
-public final class FloodgateFabric implements ModInitializer {
-  private FloodgateHolder holder;
-
-
-  @Override
-  public void onInitialize() {
-    UniversalLogger logger = new JavaUtilLogger();
-    try {
-      holder = new UniversalLoader("spigot", getDataFolder().toPath(), logger).start();
-      holder.init(new Class[]{JavaPlugin.class}, this);
-      holder.load();
-    } catch (Exception exception) {
-      throw new RuntimeException("Failed to load Floodgate", exception);
+public class FabricPlatformUtils extends PlatformUtils {
+    @Override
+    public AuthType authType() {
+        return MinecraftServerHolder.get().usesAuthentication() ? AuthType.ONLINE : AuthType.OFFLINE;
     }
-  }
 
+    @Override
+    public String minecraftVersion() {
+        return SharedConstants.getCurrentVersion().getName();
+    }
 
-  public void onEnable() {
-    holder.enable();
-  }
-
-
-  public void onDisable() {
-    holder.disable();
-  }
-
+    @Override
+    public String serverImplementationName() {
+        return MinecraftServerHolder.get().getServerModName();
+    }
 }

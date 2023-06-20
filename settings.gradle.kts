@@ -37,6 +37,9 @@ dependencyResolutionManagement {
             mavenContent { releasesOnly() }
         }
 
+        // Fabric
+        maven("https://maven.fabricmc.net")
+
         mavenCentral()
 
         maven("https://jitpack.io") {
@@ -47,7 +50,6 @@ dependencyResolutionManagement {
 
 pluginManagement {
     repositories {
-        maven("https://maven.fabricmc.net") { name = "Fabric" }
         gradlePluginPortal()
     }
     plugins {

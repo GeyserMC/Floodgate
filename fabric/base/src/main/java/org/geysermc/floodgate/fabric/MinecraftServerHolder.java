@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2023 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,40 +23,23 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.universal.platform;
+package org.geysermc.floodgate.fabric;
 
-import net.fabricmc.api.ModInitializer;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.universal.UniversalLoader;
-import org.geysermc.floodgate.universal.holder.FloodgateHolder;
-import org.geysermc.floodgate.universal.logger.JavaUtilLogger;
-import org.geysermc.floodgate.universal.logger.Slf4jLogger;
-import org.geysermc.floodgate.universal.util.UniversalLogger;
+import net.minecraft.server.MinecraftServer;
 
-public final class FloodgateFabric implements ModInitializer {
-  private FloodgateHolder holder;
+public final class MinecraftServerHolder {
+    // Static because commands *need* to be initialized before the server is available
+    // Otherwise it would be a class variable
+    private static MinecraftServer INSTANCE;
 
-
-  @Override
-  public void onInitialize() {
-    UniversalLogger logger = new JavaUtilLogger();
-    try {
-      holder = new UniversalLoader("spigot", getDataFolder().toPath(), logger).start();
-      holder.init(new Class[]{JavaPlugin.class}, this);
-      holder.load();
-    } catch (Exception exception) {
-      throw new RuntimeException("Failed to load Floodgate", exception);
+    public static MinecraftServer get() {
+        return INSTANCE;
     }
-  }
 
+    static void set(MinecraftServer instance) {
+        INSTANCE = instance;
+    }
 
-  public void onEnable() {
-    holder.enable();
-  }
-
-
-  public void onDisable() {
-    holder.disable();
-  }
-
+    private MinecraftServerHolder() {
+    }
 }

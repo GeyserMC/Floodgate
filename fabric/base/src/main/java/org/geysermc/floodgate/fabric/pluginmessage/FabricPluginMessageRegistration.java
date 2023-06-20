@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2023 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,40 +23,19 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.universal.platform;
+package org.geysermc.floodgate.fabric.pluginmessage;
 
-import net.fabricmc.api.ModInitializer;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.universal.UniversalLoader;
-import org.geysermc.floodgate.universal.holder.FloodgateHolder;
-import org.geysermc.floodgate.universal.logger.JavaUtilLogger;
-import org.geysermc.floodgate.universal.logger.Slf4jLogger;
-import org.geysermc.floodgate.universal.util.UniversalLogger;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.resources.ResourceLocation;
 
-public final class FloodgateFabric implements ModInitializer {
-  private FloodgateHolder holder;
-
-
-  @Override
-  public void onInitialize() {
-    UniversalLogger logger = new JavaUtilLogger();
-    try {
-      holder = new UniversalLoader("spigot", getDataFolder().toPath(), logger).start();
-      holder.init(new Class[]{JavaPlugin.class}, this);
-      holder.load();
-    } catch (Exception exception) {
-      throw new RuntimeException("Failed to load Floodgate", exception);
+public class FabricPluginMessageRegistration implements PluginMessageRegistration {
+    @Override
+    public void register(PluginMessageChannel channel) {
+        ServerPlayNetworking.registerGlobalReceiver(new ResourceLocation(channel.getIdentifier()),
+                (server, player, handler, buf, responseSender) -> {
+            byte[] bytes = new byte[buf.readableBytes()];
+            buf.readBytes(bytes);
+            channel.handleServerCall(bytes, player.getUUID(), player.getGameProfile().getName());
+        });
     }
-  }
-
-
-  public void onEnable() {
-    holder.enable();
-  }
-
-
-  public void onDisable() {
-    holder.disable();
-  }
-
 }

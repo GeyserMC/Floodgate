@@ -2,6 +2,7 @@
 # parent
 micronaut-gradle = "4.0.0-M2"
 lombok = "8.0.1"
+loom = "1.2-SNAPSHOT"
 
 # api
 cumulus = "1.1.1"
@@ -97,6 +98,7 @@ velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "vel
 fabric-minecraft = { group = "com.mojang", name = "minecraft", version.ref = "fabric-minecraft" }
 fabric-loader = { group = "net.fabricmc", name = "fabric-loader", version.ref = "fabric-loader" }
 fabric-api = { group = "net.fabricmc.fabric-api", name = "fabric-api", version.ref = "fabric-api" }
+cloud-fabric = { module = "cloud.commandframework:cloud-fabric", version.ref = "cloud" }
 
 # buildSrc
 checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "checkerframework" }
@@ -109,6 +111,7 @@ gradle-idea-ext = { module = "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext
 [plugins]
 micronaut = { id = "io.micronaut.library", version.ref = "micronaut-gradle" }
 lombok = { id = "io.freefair.lombok", version.ref = "lombok" }
+loom = { id = "net.fabricmc.loom", version.ref = "loom" }
 
 [bundles]
 fastutil = ["fastutil-short-object-maps", "fastutil-int-object-maps"]
