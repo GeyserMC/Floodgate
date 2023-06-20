@@ -45,13 +45,18 @@ dependencyResolutionManagement {
         maven("https://jitpack.io") {
             content { includeGroupByRegex("com\\.github\\..*") }
         }
+
     }
 }
 
 pluginManagement {
     repositories {
         gradlePluginPortal()
+
+        // Fabric, loom specifically
+        maven("https://maven.fabricmc.net")
     }
+
     plugins {
         id("net.kyori.indra")
         id("net.kyori.indra.git")

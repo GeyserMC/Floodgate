@@ -15,7 +15,7 @@ base-api = "feature-floodgate-merge-1.0.0-SNAPSHOT"
 config-utils = "development-2.0-SNAPSHOT"
 fastutil = "8.5.3"
 java-websocket = "1.5.2"
-cloud = "1.5.0"
+cloud = "1.8.3"
 snakeyaml = "2.0"
 bstats = "3.0.2"
 guava = "31.1-jre"
@@ -31,9 +31,9 @@ authlib = "1.5.21"
 velocity = "3.1.1"
 
 # fabric
-fabric-minecraft = "1.19"
-fabric-loader = "0.14.6"
-fabric-api = "0.55.3+1.19"
+fabric_minecraft = "1.19"
+fabric_loader = "0.14.6"
+fabric_api = "0.55.3+1.19"
 
 # buildSrc
 indra = "3.0.1"
@@ -111,7 +111,7 @@ gradle-idea-ext = { module = "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext
 [plugins]
 micronaut = { id = "io.micronaut.library", version.ref = "micronaut-gradle" }
 lombok = { id = "io.freefair.lombok", version.ref = "lombok" }
-loom = { id = "net.fabricmc.loom", version.ref = "loom" }
+loom = { id = "fabric-loom", version.ref = "loom" }
 
 [bundles]
 fastutil = ["fastutil-short-object-maps", "fastutil-int-object-maps"]

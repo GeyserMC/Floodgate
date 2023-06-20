@@ -37,9 +37,6 @@ import org.slf4j.LoggerFactory;
 
 public final class FloodgateFabric implements ModInitializer {
   private FloodgateHolder holder;
-
-  public static final Logger LOGGER = LoggerFactory.getLogger("floodgate");
-
   @Override
   public void onInitialize() {
 
