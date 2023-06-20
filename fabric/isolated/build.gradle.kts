@@ -1,10 +1,12 @@
 plugins {
     java
-
+    libs.plugins.loom
 }
 
 dependencies {
     api(projects.isolation)
+    compileOnlyApi(libs.fabric.api)
+    compileOnlyApi(libs.fabric.loader)
 }
 
 tasks {

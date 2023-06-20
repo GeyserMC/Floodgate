@@ -1,7 +1,19 @@
+plugins {
+    java
+    libs.plugins.loom
+}
+
 dependencies {
     api(projects.core)
     annotationProcessor(projects.core)
     compileOnlyApi(projects.isolation)
+
+    compileOnlyApi(libs.fabric.api)
+    compileOnlyApi(libs.fabric.loader)
+
+
+
+
 
     //implementation(libs.cloud.fabric)
 

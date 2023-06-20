@@ -26,34 +26,46 @@
 package org.geysermc.floodgate.fabric;
 
 import java.util.List;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import org.geysermc.floodgate.isolation.loader.PlatformHolder;
+import org.geysermc.floodgate.isolation.loader.PlatformLoader;
 
 public final class IsolatedFabricMod implements ModInitializer {
     private PlatformHolder holder;
 
     @Override
-    public void onEnablel() {
+    public void onInitialize() {
+
+        // TODO: logger probably does not work, grrr
         try {
-            var libsDirectory = getDataFolder().toPath().resolve("libs");
+            var libsDirectory = FabricLoader.getInstance().getConfigDir().resolve("floodgate");
             holder = PlatformLoader.loadDefault(getClass().getClassLoader(), libsDirectory);
-            holder.init(List.of(JavaPlugin.class), List.of(this));
+            holder.init(List.of(ModInitializer.class), List.of(this));
         } catch (Exception exception) {
             throw new RuntimeException("Failed to load Floodgate", exception);
         }
+
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            onEnable();
+        });
+
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+            onDisable();
+        });
     }
 
-    @Override
     public void onEnable() {
         holder.load();
         try {
             holder.enable();
         } catch (Exception exception) {
-            Bukkit.getPluginManager().disablePlugin(this);
+            onDisable();
             throw exception;
         }
     }
 
-    @Override
     public void onDisable() {
         holder.disable();
     }

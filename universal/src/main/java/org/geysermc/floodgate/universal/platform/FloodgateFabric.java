@@ -26,37 +26,40 @@
 package org.geysermc.floodgate.universal.platform;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.universal.UniversalLoader;
 import org.geysermc.floodgate.universal.holder.FloodgateHolder;
-import org.geysermc.floodgate.universal.logger.JavaUtilLogger;
 import org.geysermc.floodgate.universal.logger.Slf4jLogger;
-import org.geysermc.floodgate.universal.util.UniversalLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class FloodgateFabric implements ModInitializer {
   private FloodgateHolder holder;
 
+  public static final Logger LOGGER = LoggerFactory.getLogger("floodgate");
 
   @Override
   public void onInitialize() {
-    UniversalLogger logger = new JavaUtilLogger();
+
+    // TODO: logger how works
+    new Slf4jLogger();
+
     try {
-      holder = new UniversalLoader("spigot", getDataFolder().toPath(), logger).start();
+      holder = new UniversalLoader("fabric", FabricLoader.getInstance().getConfigDir().resolve("floodgate"), new Slf4jLogger()).start();
       holder.init(new Class[]{JavaPlugin.class}, this);
       holder.load();
     } catch (Exception exception) {
       throw new RuntimeException("Failed to load Floodgate", exception);
     }
+
+    ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+      holder.enable();
+    });
+
+    ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+      holder.disable();
+    });
   }
-
-
-  public void onEnable() {
-    holder.enable();
-  }
-
-
-  public void onDisable() {
-    holder.disable();
-  }
-
 }
