@@ -1,6 +1,6 @@
 plugins {
     java
-    id("fabric-loom") version "1.2-SNAPSHOT" apply true
+    id("fabric-loom") version (libs.versions.loom) apply true
 }
 
 dependencies {

@@ -99,6 +99,7 @@ fabric-minecraft = { group = "com.mojang", name = "minecraft", version.ref = "fa
 fabric-loader = { group = "net.fabricmc", name = "fabric-loader", version.ref = "fabric-loader" }
 fabric-api = { group = "net.fabricmc.fabric-api", name = "fabric-api", version.ref = "fabric-api" }
 cloud-fabric = { module = "cloud.commandframework:cloud-fabric", version.ref = "cloud" }
+loom = { group = "net.fabricmc", name = "fabric-loom", version.ref = "loom" }
 
 # buildSrc
 checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "checkerframework" }
