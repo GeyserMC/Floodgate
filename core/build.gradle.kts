@@ -24,6 +24,7 @@ dependencies {
     api(libs.micronaut.context)
     api(libs.micronaut.http.client)
     api(libs.micronaut.validation)
+    annotationProcessor(libs.micronaut.validation.processor)
 
     api(libs.micronaut.serde.jsonp)
     compileOnlyApi(libs.jsonb.annotations)

@@ -69,7 +69,7 @@ public final class FloodgateConnection implements Connection {
     private final PropertyGlue propertyGlue = new PropertyGlue();
     private LegacyPlayerWrapper legacyPlayer;
 
-    static FloodgateConnection from(BedrockData data, HandshakeData handshakeData, int port) {
+    static FloodgateConnection from(BedrockData data, HandshakeData handshakeData) {
         UUID javaUniqueId = Utils.getJavaUuid(data.getXuid());
 
         BedrockPlatform deviceOs = BedrockPlatform.fromId(data.getDeviceOs());
@@ -78,7 +78,7 @@ public final class FloodgateConnection implements Connection {
 
         LinkedPlayer linkedPlayer = handshakeData.getLinkedPlayer();
 
-        InetSocketAddress socketAddress = new InetSocketAddress(data.getIp(), port);
+        InetSocketAddress socketAddress = new InetSocketAddress(data.getIp(), 0);
 
         return new FloodgateConnection(
                 data.getVersion(), data.getUsername(), handshakeData.getJavaUsername(),

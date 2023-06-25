@@ -23,45 +23,25 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.spigot.addon.data;
+package org.geysermc.floodgate.spigot.player;
 
-import io.netty.channel.Channel;
-import io.netty.util.AttributeKey;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
 import jakarta.inject.Singleton;
-import org.geysermc.floodgate.api.inject.InjectorAddon;
-import org.geysermc.floodgate.core.config.FloodgateConfig;
-import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
+import org.bukkit.entity.Player;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.geysermc.floodgate.core.player.ConnectionManager;
 
 @Singleton
-public final class SpigotDataAddon implements InjectorAddon {
-    @Inject FloodgateHandshakeHandler handshakeHandler;
-    @Inject FloodgateConfig config;
-
-    @Inject
-    @Named("packetHandler")
-    String packetHandlerName;
-
-    @Inject
-    @Named("kickMessageAttribute")
-    AttributeKey<String> kickMessageAttribute;
-
+public class SpigotConnectionManager extends ConnectionManager {
     @Override
-    public void onInject(Channel channel, boolean toServer) {
-        // we have to add the packet blocker in the data handler, otherwise ProtocolSupport breaks
-        channel.pipeline().addBefore(
-                packetHandlerName, "floodgate_data_handler",
-                new SpigotDataHandler(handshakeHandler, config, kickMessageAttribute)
-        );
-    }
-
-    @Override
-    public void onRemoveInject(Channel channel) {
-    }
-
-    @Override
-    public boolean shouldInject() {
-        return true;
+    protected @Nullable Object platformIdentifierOrConnectionFor(Object input) {
+        // in PlayerList#canPlayerLogin the old players with the same profile are disconnected (
+        // PlayerKickEvent, see ServerGamePacketListener#disconnect &
+        // PlayerQuitEvent, see PlayerList#remove
+        // ) before the first event runs with the Player instance (PlayerLoginEvent).
+        // This means that we can always use the Player's uuid
+        if (input instanceof Player player) {
+            return connectionByUuid(player.getUniqueId());
+        }
+        return null;
     }
 }

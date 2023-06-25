@@ -17,10 +17,11 @@ java-websocket = "1.5.2"
 cloud = "1.5.0"
 snakeyaml = "2.0"
 bstats = "3.0.2"
+# todo remove guava from events to be able to remove it here
 guava = "31.1-jre"
 
 # bungee
-bungee = "dfd847f"
+bungee = "master-SNAPSHOT"
 
 # spigot
 folia = "1.19.4-R0.1-SNAPSHOT"
@@ -61,6 +62,7 @@ micronaut-inject = { module = "io.micronaut:micronaut-inject-java" }
 micronaut-context = { module = "io.micronaut:micronaut-context" }
 micronaut-http-client = { module = "io.micronaut:micronaut-http-client-jdk" }
 micronaut-validation = { module = "io.micronaut.validation:micronaut-validation" }
+micronaut-validation-processor = { module = "io.micronaut.validation:micronaut-validation-processor" }
 micronaut-data-processor = { module = "io.micronaut.data:micronaut-data-processor" }
 micronaut-hibernate = { module = "io.micronaut.data:micronaut-data-hibernate-jpa" }
 micronaut-hikari = { module = "io.micronaut.sql:micronaut-jdbc-hikari" }

@@ -25,11 +25,11 @@
 
 package org.geysermc.floodgate.core.pluginmessage.channel;
 
-import com.google.common.base.Charsets;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMaps;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import jakarta.inject.Inject;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.geysermc.cumulus.form.Form;
@@ -110,7 +110,7 @@ public class FormChannel implements PluginMessageChannel {
         byte[] jsonData =
                 definition.codec()
                         .jsonData(form)
-                        .getBytes(Charsets.UTF_8);
+                        .getBytes(StandardCharsets.UTF_8);
 
         byte[] data = new byte[jsonData.length + 3];
         data[0] = (byte) definition.formType().ordinal();
@@ -123,7 +123,7 @@ public class FormChannel implements PluginMessageChannel {
     protected boolean callResponseConsumer(byte[] data) {
         Form storedForm = storedForms.remove(getFormId(data));
         if (storedForm != null) {
-            String responseData = new String(data, 2, data.length - 2, Charsets.UTF_8);
+            String responseData = new String(data, 2, data.length - 2, StandardCharsets.UTF_8);
             try {
                 formDefinitions.definitionFor(storedForm)
                         .handleFormResponse(storedForm, responseData);

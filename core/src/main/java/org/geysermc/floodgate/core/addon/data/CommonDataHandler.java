@@ -25,13 +25,13 @@
 
 package org.geysermc.floodgate.core.addon.data;
 
-import com.google.common.collect.Queues;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.AttributeKey;
 import java.net.InetSocketAddress;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
@@ -48,7 +48,7 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
     protected final AttributeKey<String> kickMessageAttribute;
     protected final PacketBlocker blocker;
 
-    protected final Queue<Object> packetQueue = Queues.newConcurrentLinkedQueue();
+    protected final Queue<Object> packetQueue = new ConcurrentLinkedQueue<>();
     protected Object handshakePacket;
     protected ChannelHandlerContext ctx;
 

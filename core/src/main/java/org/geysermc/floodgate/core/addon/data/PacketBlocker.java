@@ -25,10 +25,10 @@
 
 package org.geysermc.floodgate.core.addon.data;
 
-import com.google.common.collect.Queues;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * In Floodgate the PacketBlocker is used to temporarily prevent packets from being decoded. A
@@ -44,7 +44,7 @@ import java.util.Queue;
  * caused the server to switch to the login state.
  */
 public class PacketBlocker extends ChannelInboundHandlerAdapter {
-    private final Queue<Object> packetQueue = Queues.newConcurrentLinkedQueue();
+    private final Queue<Object> packetQueue = new ConcurrentLinkedQueue<>();
     private volatile boolean blockPackets;
 
     private ChannelHandlerContext ctx;

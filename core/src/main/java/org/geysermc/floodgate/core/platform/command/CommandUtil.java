@@ -82,10 +82,10 @@ public abstract class CommandUtil {
 
     protected abstract Collection<?> getOnlinePlayers();
 
-    public @NonNull Collection<String> getOnlineUsernames(@NonNull PlayerType limitTo) {
+    public @NonNull List<String> getOnlineUsernames(@NonNull PlayerType limitTo) {
         Collection<?> players = getOnlinePlayers();
 
-        Collection<String> usernames = new ArrayList<>();
+        List<String> usernames = new ArrayList<>();
         switch (limitTo) {
             case ALL_PLAYERS:
                 for (Object player : players) {

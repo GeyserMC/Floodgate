@@ -1,6 +1,5 @@
 var log4jVersion = "2.11.2"
 var gsonVersion = "2.8.8"
-var guavaVersion = "25.1-jre"
 
 dependencies {
     api(projects.core)

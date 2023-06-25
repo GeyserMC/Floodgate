@@ -30,6 +30,7 @@ import io.micronaut.core.annotation.AnnotationMetadata;
 import io.micronaut.inject.qualifiers.Qualifiers;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -40,14 +41,12 @@ import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.event.subscribe.Subscriber;
 import org.geysermc.floodgate.api.event.FloodgateEventBus;
 import org.geysermc.floodgate.api.event.FloodgateSubscriber;
-import org.geysermc.floodgate.core.util.EagerSingleton;
 
-@EagerSingleton
+@Singleton
 @SuppressWarnings("unchecked")
-public final class EventBus extends EventBusImpl<Object, FloodgateSubscriber<?>>
+public class EventBus extends EventBusImpl<Object, FloodgateSubscriber<?>>
         implements FloodgateEventBus {
     @Inject ApplicationContext context;
-
 
     @Override
     @SuppressWarnings("rawtypes")

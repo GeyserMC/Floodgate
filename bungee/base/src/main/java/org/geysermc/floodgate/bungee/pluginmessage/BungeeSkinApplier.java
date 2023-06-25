@@ -25,7 +25,7 @@
 
 package org.geysermc.floodgate.bungee.pluginmessage;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getFieldOfType;
 
 import jakarta.inject.Inject;
@@ -55,7 +55,7 @@ public final class BungeeSkinApplier implements SkinApplier {
 
     static {
         LOGIN_RESULT_FIELD = getFieldOfType(InitialHandler.class, LoginResult.class);
-        checkNotNull(LOGIN_RESULT_FIELD, "LoginResult field cannot be null");
+        requireNonNull(LOGIN_RESULT_FIELD, "LoginResult field cannot be null");
     }
 
     private final ProxyServer server = ProxyServer.getInstance();
