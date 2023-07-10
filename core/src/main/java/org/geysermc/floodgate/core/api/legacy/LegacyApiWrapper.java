@@ -100,16 +100,6 @@ public final class LegacyApiWrapper implements FloodgateApi {
     }
 
     @Override
-    public boolean sendForm(UUID uuid, org.geysermc.cumulus.Form<?> form) {
-        return sendForm(uuid, form.newForm());
-    }
-
-    @Override
-    public boolean sendForm(UUID uuid, org.geysermc.cumulus.util.FormBuilder<?, ?> formBuilder) {
-        return sendForm(uuid, formBuilder.build());
-    }
-
-    @Override
     public boolean transferPlayer(UUID uuid, String address, int port) {
         return apiBase.transfer(uuid, address, port);
     }

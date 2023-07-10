@@ -4,21 +4,19 @@ micronaut-gradle = "4.0.0-M2"
 lombok = "8.0.1"
 
 # api
-cumulus = "1.1.1"
-events = "1.0-SNAPSHOT"
+cumulus = "2.0.0-SNAPSHOT"
+events = "1.2-SNAPSHOT"
 netty = "4.1.49.Final"
 gson = "2.8.5"
 
 # core
-base-api = "feature-floodgate-merge-1.0.0-SNAPSHOT"
+base-api = "feature-floodgate-merge-1.1.0-SNAPSHOT"
 config-utils = "development-2.0-SNAPSHOT"
 fastutil = "8.5.3"
 java-websocket = "1.5.2"
 cloud = "1.5.0"
 snakeyaml = "2.0"
 bstats = "3.0.2"
-# todo remove guava from events to be able to remove it here
-guava = "31.1-jre"
 
 # bungee
 bungee = "master-SNAPSHOT"
@@ -56,7 +54,6 @@ java-websocket = { module = "org.java-websocket:Java-WebSocket", version.ref = "
 cloud-core = { module = "cloud.commandframework:cloud-core", version.ref = "cloud" }
 snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "snakeyaml" }
 bstats = { module = "org.bstats:bstats-base", version.ref = "bstats" }
-guava = { module = "com.google.guava:guava", version.ref = "guava" }
 
 micronaut-inject = { module = "io.micronaut:micronaut-inject-java" }
 micronaut-context = { module = "io.micronaut:micronaut-context" }

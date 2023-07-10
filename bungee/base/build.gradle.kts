@@ -14,5 +14,4 @@ relocate("io.leangen.geantyref")
 // these dependencies are already present on the platform
 provided(libs.bungee)
 provided(libs.gson)
-provided(libs.guava)
 provided(libs.snakeyaml)

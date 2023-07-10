@@ -17,8 +17,6 @@ dependencies {
     api(libs.snakeyaml)
     api(libs.bstats)
 
-    api(libs.guava)
-
     annotationProcessor(libs.micronaut.inject)
     api(libs.micronaut.inject)
     api(libs.micronaut.context)

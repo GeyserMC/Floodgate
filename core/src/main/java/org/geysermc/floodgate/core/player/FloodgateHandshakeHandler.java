@@ -281,9 +281,9 @@ public final class FloodgateHandshakeHandler {
         private final Connection floodgatePlayer;
 
         public InetSocketAddress getNewIp(Channel channel) {
-            if (floodgatePlayer != null) {
-                return floodgatePlayer.socketAddress();
-            }
+//            if (floodgatePlayer != null) {
+//                return floodgatePlayer.socketAddress();
+//            }
             if (handshakeData.getIp() != null) {
                 int port = ((InetSocketAddress) channel.remoteAddress()).getPort();
                 return new InetSocketAddress(handshakeData.getIp(), port);

@@ -40,7 +40,6 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.geysermc.api.connection.Connection;
-import org.geysermc.event.Listener;
 import org.geysermc.floodgate.core.crypto.AesCipher;
 import org.geysermc.floodgate.core.crypto.AesKeyProducer;
 import org.geysermc.floodgate.core.crypto.Base64Topping;
@@ -51,7 +50,6 @@ import org.geysermc.floodgate.core.util.GlobalBeanCache;
 
 @Factory
 @BootstrapContextCompatible
-@Listener
 public class CommonModule {
     @Bean(preDestroy = "shutdown")
     @Singleton

@@ -97,20 +97,6 @@ public interface FloodgateApi {
 
     boolean sendForm(UUID uuid, FormBuilder<?, ?, ?> formBuilder);
 
-    /**
-     * @deprecated since Cumulus 1.1 and will be removed when Cumulus 2.0 releases. Please use the
-     * new form classes instead.
-     */
-    @Deprecated
-    boolean sendForm(UUID uuid, org.geysermc.cumulus.Form<?> form);
-
-    /**
-     * @deprecated since Cumulus 1.1 and will be removed when Cumulus 2.0 releases. Please use the
-     * new form classes instead.
-     */
-    @Deprecated
-    boolean sendForm(UUID uuid, org.geysermc.cumulus.util.FormBuilder<?, ?> formBuilder);
-
     boolean transferPlayer(UUID uuid, String address, int port);
 
     /**

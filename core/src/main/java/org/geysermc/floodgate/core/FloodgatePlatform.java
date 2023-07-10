@@ -41,7 +41,6 @@ import org.geysermc.floodgate.api.packet.PacketHandlers;
 import org.geysermc.floodgate.core.event.EventBus;
 import org.geysermc.floodgate.core.event.lifecycle.PostEnableEvent;
 import org.geysermc.floodgate.core.event.lifecycle.ShutdownEvent;
-import org.geysermc.floodgate.core.util.EagerSingleton;
 import org.geysermc.floodgate.core.util.GlobalBeanCache;
 import org.geysermc.floodgate.isolation.library.LibraryManager;
 
@@ -72,7 +71,6 @@ public abstract class FloodgatePlatform {
                 ))
 //                .propertySources(Properties.defaults())
                 .environmentPropertySource(false)
-                .eagerInitAnnotated(EagerSingleton.class)
                 .eagerInitSingletons(true)
                 .build();
         onContextCreated(context);

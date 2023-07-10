@@ -34,6 +34,7 @@ import jakarta.inject.Singleton;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.event.FireResult;
 import org.geysermc.event.Listener;
 import org.geysermc.event.PostOrder;
 import org.geysermc.event.bus.impl.EventBusImpl;
@@ -50,7 +51,7 @@ public class EventBus extends EventBusImpl<Object, FloodgateSubscriber<?>>
 
     @Override
     @SuppressWarnings("rawtypes")
-    public boolean fire(@NonNull Object event) {
+    public FireResult fire(@NonNull Object event) {
         context.getEventPublisher((Class) event.getClass()).publishEvent(event);
         // todo differentiate internal events from public events
         return super.fire(event);

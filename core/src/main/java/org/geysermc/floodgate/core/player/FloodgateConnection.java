@@ -25,7 +25,6 @@
 
 package org.geysermc.floodgate.core.player;
 
-import java.net.InetSocketAddress;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -64,8 +63,6 @@ public final class FloodgateConnection implements Connection {
     private final int subscribeId;
     private final String verifyCode;
 
-    private final InetSocketAddress socketAddress;
-
     private final PropertyGlue propertyGlue = new PropertyGlue();
     private LegacyPlayerWrapper legacyPlayer;
 
@@ -78,13 +75,11 @@ public final class FloodgateConnection implements Connection {
 
         LinkedPlayer linkedPlayer = handshakeData.getLinkedPlayer();
 
-        InetSocketAddress socketAddress = new InetSocketAddress(data.getIp(), 0);
-
         return new FloodgateConnection(
                 data.getVersion(), data.getUsername(), handshakeData.getJavaUsername(),
                 javaUniqueId, data.getXuid(), deviceOs, data.getLanguageCode(), uiProfile,
                 inputMode, data.getIp(), data.isFromProxy(),
-                linkedPlayer, data.getSubscribeId(), data.getVerifyCode(), socketAddress);
+                linkedPlayer, data.getSubscribeId(), data.getVerifyCode());
     }
 
     @Override
@@ -150,11 +145,6 @@ public final class FloodgateConnection implements Connection {
     @Override
     public boolean transfer(@NonNull String address, @IntRange(from = 0L, to = 65535L) int port) {
         return Geyser.api().transfer(javaUuid(), address, port);
-    }
-
-    @Override
-    public @NonNull InetSocketAddress socketAddress() {
-        return socketAddress;
     }
 
     public BedrockData toBedrockData() {

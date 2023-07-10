@@ -34,12 +34,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.geysermc.event.Listener;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.event.lifecycle.PostEnableEvent;
 
-@Listener
 @Singleton
 public final class PostEnableMessages {
     private final List<String> messages = new ArrayList<>();
