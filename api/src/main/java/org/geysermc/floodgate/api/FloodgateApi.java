@@ -129,7 +129,7 @@ public interface FloodgateApi {
     /**
      * Get the gamertag of the user that has the given xuid.
      *
-     * @param xuid the gamertag of the player
+     * @param xuid the xuid of the player
      * @return the gamertag of the player with the given xuid, or null when there is not player with
      * the given xuid
      */
