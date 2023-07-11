@@ -4,6 +4,7 @@ var gsonVersion = "2.8.8"
 dependencies {
     api(projects.core)
     annotationProcessor(projects.core)
+    annotationProcessor(libs.micronaut.inject.java)
 
     implementation(libs.cloud.velocity)
 }

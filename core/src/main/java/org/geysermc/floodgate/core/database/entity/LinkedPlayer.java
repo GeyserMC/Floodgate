@@ -28,6 +28,7 @@ package org.geysermc.floodgate.core.database.entity;
 import io.micronaut.core.annotation.AccessorsStyle;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Transient;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -67,6 +68,7 @@ public class LinkedPlayer {
     }
 
     @Override
+    @Transient
     public boolean equals(Object obj) {
         if (obj == this) {
             return true;
@@ -80,11 +82,13 @@ public class LinkedPlayer {
     }
 
     @Override
+    @Transient
     public int hashCode() {
         return Objects.hash(bedrockId, javaUniqueId);
     }
 
     @Override
+    @Transient
     public String toString() {
         return "LinkedPlayer[" +
                 "bedrockId=" + bedrockId + ", " +
