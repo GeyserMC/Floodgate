@@ -28,7 +28,7 @@ package org.geysermc.floodgate.fabric.inject.fabric;
 import io.netty.channel.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.inject.CommonPlatformInjector;
+import org.geysermc.floodgate.core.inject.CommonPlatformInjector;
 
 @RequiredArgsConstructor
 public final class FabricInjector extends CommonPlatformInjector {
@@ -37,8 +37,8 @@ public final class FabricInjector extends CommonPlatformInjector {
     @Getter private final boolean injected = true;
 
     @Override
-    public boolean inject() throws Exception {
-        return true;
+    public void inject() throws Exception {
+        return;
     }
 
     public void injectClient(ChannelFuture future) {
@@ -64,8 +64,8 @@ public final class FabricInjector extends CommonPlatformInjector {
     }
 
     @Override
-    public boolean removeInjection() throws Exception {
-        return true;
+    public void removeInjection() throws Exception {
+        return;
     }
 
     public static FabricInjector getInstance() {

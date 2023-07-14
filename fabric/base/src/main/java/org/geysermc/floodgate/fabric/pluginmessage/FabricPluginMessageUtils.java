@@ -30,8 +30,8 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import org.geysermc.floodgate.core.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.fabric.MinecraftServerHolder;
-import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 
 import java.util.UUID;
 

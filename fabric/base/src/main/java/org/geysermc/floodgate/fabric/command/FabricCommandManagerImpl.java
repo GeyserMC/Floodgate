@@ -23,32 +23,40 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.fabric.module;
+package org.geysermc.floodgate.fabric.command;
 
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
-import cloud.commandframework.fabric.FabricCommandManager;
 import cloud.commandframework.fabric.FabricServerCommandManager;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
+import io.micronaut.context.annotation.Bean;
+import io.micronaut.context.annotation.Factory;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import lombok.SneakyThrows;
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.commands.CommandSourceStack;
-import org.geysermc.floodgate.platform.command.CommandUtil;
-import org.geysermc.floodgate.player.FloodgateCommandPreprocessor;
-import org.geysermc.floodgate.player.UserAudience;
+import org.geysermc.floodgate.core.platform.command.CommandUtil;
+import org.geysermc.floodgate.core.player.FloodgateCommandPreprocessor;
+import org.geysermc.floodgate.core.player.UserAudience;
 
-public final class FabricCommandModule extends CommandModule {
-    @Provides
-    @Singleton
+@Factory
+public final class FabricCommandManagerImpl {
+    @Bean
     @SneakyThrows
+    @Singleton
     public CommandManager<UserAudience> commandManager(CommandUtil commandUtil) {
-        FabricCommandManager<UserAudience, CommandSourceStack> commandManager = new FabricServerCommandManager<>(
+        CommandManager<UserAudience> commandManager = new FabricServerCommandManager<>(
                 CommandExecutionCoordinator.simpleCoordinator(),
                 commandUtil::getUserAudience,
                 audience -> (CommandSourceStack) audience.source()
         );
         commandManager.registerCommandPreProcessor(new FloodgateCommandPreprocessor<>(commandUtil));
         return commandManager;
+    }
+
+    @Inject
+    void registerPermissions() {
+        // TODO: permissions on fabric?
     }
 
 }

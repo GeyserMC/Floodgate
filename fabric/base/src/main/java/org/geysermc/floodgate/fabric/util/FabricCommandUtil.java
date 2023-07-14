@@ -33,11 +33,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.UserWhiteListEntry;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.api.GeyserApiBase;
+import org.geysermc.floodgate.core.platform.command.CommandUtil;
+import org.geysermc.floodgate.core.player.UserAudience;
+import org.geysermc.floodgate.core.util.LanguageManager;
 import org.geysermc.floodgate.fabric.MinecraftServerHolder;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.platform.command.CommandUtil;
-import org.geysermc.floodgate.player.UserAudience;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -45,13 +48,13 @@ public final class FabricCommandUtil extends CommandUtil {
     private final FloodgateLogger logger;
     private UserAudience console;
 
-    public FabricCommandUtil(LanguageManager manager, FloodgateApi api, FloodgateLogger logger) {
+    public FabricCommandUtil(LanguageManager manager, GeyserApiBase api, FloodgateLogger logger) {
         super(manager, api);
         this.logger = logger;
     }
 
     @Override
-    public UserAudience getUserAudience(final @NonNull Object sourceObj) {
+    public @NotNull UserAudience getUserAudience(final @NonNull Object sourceObj) {
         if (!(sourceObj instanceof CommandSourceStack stack)) {
             throw new IllegalArgumentException();
         }

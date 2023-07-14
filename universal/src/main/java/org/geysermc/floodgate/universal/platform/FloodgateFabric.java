@@ -31,6 +31,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import org.geysermc.floodgate.universal.UniversalLoader;
 import org.geysermc.floodgate.universal.holder.FloodgateHolder;
 import org.geysermc.floodgate.universal.logger.Slf4jLogger;
+
 public final class FloodgateFabric implements ModInitializer {
   private FloodgateHolder holder;
   @Override
@@ -45,11 +46,11 @@ public final class FloodgateFabric implements ModInitializer {
     }
 
     ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-      holder.enable();
+        holder.enable();
     });
 
     ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-      holder.disable();
+        holder.disable();
     });
   }
 }

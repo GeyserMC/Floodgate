@@ -25,19 +25,20 @@
 
 package org.geysermc.floodgate.fabric.listener;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.util.LanguageManager;
+import org.geysermc.floodgate.core.util.LanguageManager;
 
 public final class FabricEventListener {
     @Inject private FloodgateApi api;
     @Inject private FloodgateLogger logger;
-    @Inject private LanguageManager languageManager;
+    @Inject
+    private LanguageManager languageManager;
 
     public void onPlayerJoin(ServerGamePacketListenerImpl networkHandler, PacketSender packetSender, MinecraftServer server) {
         FloodgatePlayer player = api.getPlayer(networkHandler.player.getUUID());

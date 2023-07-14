@@ -27,6 +27,8 @@ package org.geysermc.floodgate.fabric.pluginmessage;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.resources.ResourceLocation;
+import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel;
+import org.geysermc.floodgate.core.pluginmessage.PluginMessageRegistration;
 
 public class FabricPluginMessageRegistration implements PluginMessageRegistration {
     @Override

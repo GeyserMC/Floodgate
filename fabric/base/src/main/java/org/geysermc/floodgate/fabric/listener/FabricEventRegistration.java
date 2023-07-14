@@ -25,10 +25,10 @@
 
 package org.geysermc.floodgate.fabric.listener;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import org.geysermc.floodgate.platform.listener.ListenerRegistration;
+import org.geysermc.floodgate.core.platform.listener.ListenerRegistration;
 
 @RequiredArgsConstructor(onConstructor = @__(@Inject))
 public final class FabricEventRegistration implements ListenerRegistration<FabricEventListener> {

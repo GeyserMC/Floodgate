@@ -29,7 +29,7 @@ import com.mojang.logging.LogUtils;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import net.minecraft.DefaultUncaughtExceptionHandler;
-import org.geysermc.api.connection.Connection;
+import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
@@ -50,8 +50,8 @@ import java.net.InetSocketAddress;
 
 public final class FabricDataHandler extends CommonDataHandler {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private Object networkManager;
-    private Connection player;
+    private Connection networkManager;
+    private org.geysermc.api.connection.Connection player;
 
     public FabricDataHandler(
             FloodgateHandshakeHandler handshakeHandler,
@@ -115,9 +115,9 @@ public final class FabricDataHandler extends CommonDataHandler {
                 return true;
             }
 
-            GameProfile gameProfile = new GameProfile(player(), player.getCorrectUsername());
+            GameProfile gameProfile = new GameProfile(player.javaUuid(), player.javaUsername());
 
-            if (player.isLinked() && player.getCorrectUniqueId().version() == 4) {
+            if (player.isLinked() && player.javaUuid().version() == 4) {
                 Thread texturesThread = new Thread("Bedrock Linked Player Texture Download") {
                     @Override
                     public void run() {
@@ -149,7 +149,7 @@ public final class FabricDataHandler extends CommonDataHandler {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         super.exceptionCaught(ctx, cause);
-        if (config.isDebug()) {
+        if (config.debug()) {
             cause.printStackTrace();
         }
     }

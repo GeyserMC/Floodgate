@@ -3,7 +3,6 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 dependencyResolutionManagement {
     repositories {
-        mavenCentral()
 
         // Geyser, Cumulus etc.
         maven("https://repo.opencollab.dev/main")
@@ -38,7 +37,7 @@ dependencyResolutionManagement {
         maven("https://jitpack.io") {
             content { includeGroupByRegex("com\\.github\\..*") }
         }
-
+        mavenCentral()
         mavenLocal()
     }
 }

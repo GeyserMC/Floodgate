@@ -18,6 +18,7 @@ java-websocket = "1.5.2"
 cloud = "1.8.3"
 snakeyaml = "2.0"
 bstats = "3.0.2"
+jakarta-persistence = "3.1.0"
 
 # bungee
 bungee = "master-SNAPSHOT"
@@ -72,7 +73,7 @@ micronaut-validation-processor = { module = "io.micronaut.validation:micronaut-v
 micronaut-data-processor = { module = "io.micronaut.data:micronaut-data-processor" }
 micronaut-data-jdbc = { module = "io.micronaut.data:micronaut-data-jdbc" }
 micronaut-hikari = { module = "io.micronaut.sql:micronaut-jdbc-hikari" }
-jakarta-persistence = { module = "jakarta.persistence:jakarta.persistence-api" }
+jakarta-persistence = { module = "jakarta.persistence:jakarta.persistence-api", version.ref = "jakarta-persistence" }
 
 micronaut-serde-jsonp = { module = "io.micronaut.serde:micronaut-serde-jsonp" }
 micronaut-serde-processor = { module = "io.micronaut.serde:micronaut-serde-processor" }

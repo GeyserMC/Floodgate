@@ -32,6 +32,9 @@ import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import org.geysermc.api.connection.Connection;
+import org.geysermc.floodgate.api.event.skin.SkinApplyEvent;
+import org.geysermc.floodgate.core.skin.SkinApplier;
 import org.geysermc.floodgate.fabric.MinecraftServerHolder;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.fabric.mixin.ChunkMapMixin;
@@ -43,10 +46,10 @@ import java.util.Collections;
 public final class FabricSkinApplier implements SkinApplier {
 
     @Override
-    public void applySkin(FloodgatePlayer floodgatePlayer, SkinData skinData) {
+    public void applySkin(Connection connection, SkinApplyEvent.SkinData skinData) {
         MinecraftServerHolder.get().execute(() -> {
             ServerPlayer bedrockPlayer = MinecraftServerHolder.get().getPlayerList()
-                    .getPlayer(floodgatePlayer.getCorrectUniqueId());
+                    .getPlayer(connection.javaUuid());
             if (bedrockPlayer == null) {
                 // Disconnected probably?
                 return;
@@ -56,7 +59,7 @@ public final class FabricSkinApplier implements SkinApplier {
             PropertyMap properties = bedrockPlayer.getGameProfile().getProperties();
 
             properties.removeAll("textures");
-            properties.put("textures", new Property("textures", skinData.getValue(), skinData.getSignature()));
+            properties.put("textures", new Property("textures", skinData.value(), skinData.signature()));
 
             ChunkMap tracker = ((ServerLevel) bedrockPlayer.level).getChunkSource().chunkMap;
             ChunkMap.TrackedEntity entry = ((ChunkMapMixin) tracker).getEntityMap().get(bedrockPlayer.getId());
@@ -68,7 +71,7 @@ public final class FabricSkinApplier implements SkinApplier {
                     entry.removePlayer(otherPlayer);
                 }
 
-                otherPlayer.connection.send(new ClientboundPlayerInfoRemovePacket(Collections.singletonList(bedrockPlayer.getUUID())));
+                otherPlayer.connection.send(new (Collections.singletonList(bedrockPlayer.getUUID())));
                 otherPlayer.connection.send(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(Collections.singletonList(bedrockPlayer)));
                 if (samePlayer) {
                     continue;

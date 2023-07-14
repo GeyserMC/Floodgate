@@ -1,7 +1,8 @@
 plugins {
     java
-    libs.plugins.loom
 }
+
+
 
 dependencies {
     api(projects.isolation)
