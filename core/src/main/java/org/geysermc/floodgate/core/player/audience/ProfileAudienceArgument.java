@@ -29,7 +29,8 @@ import cloud.commandframework.arguments.CommandArgument;
 import cloud.commandframework.arguments.parser.ArgumentParseResult;
 import cloud.commandframework.arguments.parser.ArgumentParser;
 import cloud.commandframework.context.CommandContext;
-import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
@@ -170,19 +171,19 @@ public class ProfileAudienceArgument extends CommandArgument<UserAudience, Profi
             String trimmedInput = input.trim();
 
             if (trimmedInput.isEmpty()) {
-                return ImmutableList.copyOf(commandUtil.getOnlineUsernames(limitTo));
+                return Collections.unmodifiableList(commandUtil.getOnlineUsernames(limitTo));
             }
 
             String lowercaseInput = input.toLowerCase(Locale.ROOT);
-            ImmutableList.Builder<String> builder = ImmutableList.builder();
+            List<String> profileSuggestions = new ArrayList<>();
 
             for (final String player : commandUtil.getOnlineUsernames(limitTo)) {
                 if (player.toLowerCase(Locale.ROOT).startsWith(lowercaseInput)) {
-                    builder.add(player);
+                    profileSuggestions.add(player);
                 }
             }
 
-            return builder.build();
+            return Collections.unmodifiableList(profileSuggestions);
         }
 
         @Override

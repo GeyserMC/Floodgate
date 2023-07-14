@@ -17,25 +17,23 @@ dependencies {
     api(libs.snakeyaml)
     api(libs.bstats)
 
-    api(libs.guava)
-
-    annotationProcessor(libs.micronaut.inject)
     api(libs.micronaut.inject)
+    annotationProcessor(libs.micronaut.inject.java)
     api(libs.micronaut.context)
     api(libs.micronaut.http.client)
     api(libs.micronaut.validation)
+    annotationProcessor(libs.micronaut.validation.processor)
 
     api(libs.micronaut.serde.jsonp)
-    compileOnlyApi(libs.jsonb.annotations)
+    compileOnlyApi(libs.jakarta.jsonb)
     annotationProcessor(libs.micronaut.serde.processor)
 
-    //todo add hibernate dependency back in core,
-    // it's not possible to make it optional as the service files would be messed up
-    api(projects.database)
-
+    api(libs.micronaut.data.jdbc)
+    runtimeOnly(libs.micronaut.hikari)
     annotationProcessor(libs.micronaut.data.processor)
-//    implementation("io.micronaut.data:micronaut-data-model")
-//    implementation("jakarta.persistence:jakarta.persistence-api:2.2.3")
+    compileOnlyApi(libs.jakarta.persistence)
+
+    runtimeOnly("com.h2database:h2")
 }
 
 // present on all platforms

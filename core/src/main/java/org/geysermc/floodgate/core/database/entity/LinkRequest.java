@@ -28,6 +28,7 @@ package org.geysermc.floodgate.core.database.entity;
 import io.micronaut.core.annotation.AccessorsStyle;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Transient;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
@@ -87,12 +88,14 @@ public class LinkRequest {
         return this;
     }
 
+    @Transient
     public boolean isExpired(long linkTimeout) {
         long timePassed = Instant.now().getEpochSecond() - requestTime;
         return timePassed > linkTimeout;
     }
 
     @Override
+    @Transient
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -105,11 +108,13 @@ public class LinkRequest {
     }
 
     @Override
+    @Transient
     public int hashCode() {
         return Objects.hash(javaUniqueId);
     }
 
     @Override
+    @Transient
     public String toString() {
         return "LinkRequest{" +
                 "javaUniqueId=" + javaUniqueId +

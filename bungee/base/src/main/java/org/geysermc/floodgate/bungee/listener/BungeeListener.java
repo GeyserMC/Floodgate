@@ -25,15 +25,13 @@
 
 package org.geysermc.floodgate.bungee.listener;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
-import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import java.lang.reflect.Field;
-import java.util.UUID;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
@@ -43,9 +41,9 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
-import net.md_5.bungee.netty.ChannelWrapper;
 import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.bungee.player.BungeeConnectionManager;
 import org.geysermc.floodgate.core.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.core.listener.McListener;
@@ -57,31 +55,23 @@ import org.geysermc.floodgate.core.util.ReflectionUtils;
 @Singleton
 @SuppressWarnings("ConstantConditions")
 public final class BungeeListener implements Listener, McListener {
-    private static final Field CHANNEL_WRAPPER;
     private static final Field PLAYER_NAME;
 
     static {
-        CHANNEL_WRAPPER =
-                ReflectionUtils.getFieldOfType(InitialHandler.class, ChannelWrapper.class);
-        checkNotNull(CHANNEL_WRAPPER, "ChannelWrapper field cannot be null");
-
         PLAYER_NAME = ReflectionUtils.getField(InitialHandler.class, "name");
-        checkNotNull(PLAYER_NAME, "Initial name field cannot be null");
+        requireNonNull(PLAYER_NAME, "Initial name field cannot be null");
     }
 
-    @Inject private ProxyFloodgateConfig config;
-    @Inject private ProxyFloodgateApi api;
-    @Inject private LanguageManager languageManager;
-    @Inject private FloodgateLogger logger;
-    @Inject private SkinApplier skinApplier;
-
-    @Inject
-    @Named("playerAttribute")
-    private AttributeKey<Connection> playerAttribute;
+    @Inject BungeeConnectionManager connectionManager;
+    @Inject ProxyFloodgateConfig config;
+    @Inject ProxyFloodgateApi api;
+    @Inject LanguageManager languageManager;
+    @Inject FloodgateLogger logger;
+    @Inject SkinApplier skinApplier;
 
     @Inject
     @Named("kickMessageAttribute")
-    private AttributeKey<String> kickMessageAttribute;
+    AttributeKey<String> kickMessageAttribute;
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPreLogin(PreLoginEvent event) {
@@ -90,10 +80,8 @@ public final class BungeeListener implements Listener, McListener {
             return;
         }
 
-        PendingConnection connection = event.getConnection();
-
-        ChannelWrapper wrapper = ReflectionUtils.getCastedValue(connection, CHANNEL_WRAPPER);
-        Channel channel = wrapper.getHandle();
+        PendingConnection pendingConnection = event.getConnection();
+        var channel = connectionManager.channelFor(pendingConnection);
 
         // check if the player has to be kicked
         String kickReason = channel.attr(kickMessageAttribute).get();
@@ -103,44 +91,41 @@ public final class BungeeListener implements Listener, McListener {
             return;
         }
 
-        Connection player = channel.attr(playerAttribute).get();
-        if (player != null) {
-            connection.setOnlineMode(false);
-            connection.setUniqueId(player.javaUuid());
-            ReflectionUtils.setValue(connection, PLAYER_NAME, player.javaUsername());
+        Connection connection = connectionManager.connectionByPlatformIdentifier(channel);
+        if (connection == null) {
+            return;
         }
+        pendingConnection.setOnlineMode(false);
+        pendingConnection.setUniqueId(connection.javaUuid());
+        ReflectionUtils.setValue(pendingConnection, PLAYER_NAME, connection.javaUsername());
     }
 
     @EventHandler
     public void onLogin(LoginEvent event) {
         // if there was another player with the same uuid / name online,
         // he has been disconnected by now
-        UUID uniqueId = event.getConnection().getUniqueId();
-        Connection player = api.connectionByUuid(uniqueId);
-        if (player != null) {
-            //todo we should probably move this log message earlier in the process, so that we know
-            // that Floodgate has done its job
-            logger.translatedInfo(
-                    "floodgate.ingame.login_name",
-                    player.javaUsername(), uniqueId
-            );
-            languageManager.loadLocale(player.languageCode());
+        Connection connection = api.connectionByPlatformIdentifier(event.getConnection());
+        if (connection == null) {
+            return;
         }
+
+        languageManager.loadLocale(connection.languageCode());
+        connectionManager.addAcceptedConnection(connection);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPostLogin(PostLoginEvent event) {
         // To fix the February 2 2022 Mojang authentication changes
         if (!config.sendFloodgateData()) {
-            Connection player = api.connectionByUuid(event.getPlayer().getUniqueId());
-            if (player != null && !player.isLinked()) {
-                skinApplier.applySkin(player, new SkinDataImpl("", ""));
+            Connection connection = api.connectionByPlatformIdentifier(event.getPlayer());
+            if (connection != null && !connection.isLinked()) {
+                skinApplier.applySkin(connection, new SkinDataImpl("", ""));
             }
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerDisconnect(PlayerDisconnectEvent event) {
-        api.playerRemoved(event.getPlayer().getUniqueId());
+        connectionManager.removeConnection(event.getPlayer());
     }
 }

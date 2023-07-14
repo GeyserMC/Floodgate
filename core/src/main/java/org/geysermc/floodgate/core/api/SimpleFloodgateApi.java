@@ -25,17 +25,12 @@
 
 package org.geysermc.floodgate.core.api;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.ImmutableList;
 import io.micronaut.context.BeanProvider;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.api.GeyserApiBase;
@@ -47,6 +42,7 @@ import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.http.xbox.XboxClient;
+import org.geysermc.floodgate.core.player.ConnectionManager;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.core.pluginmessage.channel.FormChannel;
 import org.geysermc.floodgate.core.pluginmessage.channel.TransferChannel;
@@ -55,12 +51,7 @@ import org.geysermc.floodgate.core.scope.ServerOnly;
 @ServerOnly
 @Singleton
 public class SimpleFloodgateApi implements GeyserApiBase {
-    private final Map<UUID, Connection> players = new ConcurrentHashMap<>();
-    private final Cache<UUID, Connection> pendingRemove =
-            CacheBuilder.newBuilder()
-                    .expireAfterWrite(20, TimeUnit.SECONDS)
-                    .build();
-
+    @Inject ConnectionManager connectionManager;
     @Inject BeanProvider<PluginMessageManager> pluginMessageManager;
     @Inject FloodgateConfig config;
     @Inject FloodgateLogger logger;
@@ -73,12 +64,12 @@ public class SimpleFloodgateApi implements GeyserApiBase {
 
     @Override
     public @NonNull List<? extends Connection> onlineConnections() {
-        return ImmutableList.copyOf(players.values());
+        return new ArrayList<>(connectionManager.acceptedConnections());
     }
 
     @Override
     public int onlineConnectionsCount() {
-        return players.size();
+        return connectionManager.acceptedConnectionsCount();
     }
 
     @Override
@@ -88,31 +79,16 @@ public class SimpleFloodgateApi implements GeyserApiBase {
 
     @Override
     public @Nullable Connection connectionByUuid(@NonNull UUID uuid) {
-        Connection selfPlayer = players.get(uuid);
-        if (selfPlayer != null) {
-            return selfPlayer;
-        }
+        return connectionManager.connectionByUuid(uuid);
+    }
 
-        // bedrock players are always stored by their xuid,
-        // so we return the instance if we know that the given uuid is a Floodgate uuid
-        if (isFloodgateId(uuid)) {
-            return pendingRemove.getIfPresent(uuid);
-        }
-
-        // make it possible to find player by Java id (linked players)
-        // TODO still needed?
-        for (Connection player : players.values()) {
-            if (player.javaUuid().equals(uuid)) {
-                return player;
-            }
-        }
-        // and don't forget the pending remove linked players
-        return getPendingRemovePlayer(uuid);
+    public @Nullable Connection connectionByPlatformIdentifier(@NonNull Object platformIdentifier) {
+        return connectionManager.connectionByPlatformIdentifier(platformIdentifier);
     }
 
     @Override
-    public @Nullable Connection connectionByXuid(@NonNull String s) {
-        return null;
+    public @Nullable Connection connectionByXuid(@NonNull String xuid) {
+        return connectionManager.connectionByXuid(xuid);
     }
 
     public boolean isFloodgateId(UUID uuid) {
@@ -156,43 +132,6 @@ public class SimpleFloodgateApi implements GeyserApiBase {
         return new UnsafeFloodgateApi(pluginMessageManager.get());
     }
     */
-
-    public Connection addPlayer(Connection player) {
-        // Bedrock players are always stored by their xuid
-        return players.put(player.javaUuid(), player);
-    }
-
-    /**
-     * This method is invoked when the player is no longer on the server, but the related platform-
-     * dependant event hasn't fired yet
-     * @param player
-     */
-    public boolean setPendingRemove(Connection player) {
-        pendingRemove.put(player.javaUuid(), player);
-        return players.remove(player.javaUuid(), player);
-    }
-
-    public void playerRemoved(UUID correctUuid) {
-        // we can remove the player directly if it is a Floodgate UUID.
-        // since it's stored by their Floodgate UUID
-        if (isFloodgateId(correctUuid)) {
-            pendingRemove.invalidate(correctUuid);
-            return;
-        }
-        Connection linkedPlayer = getPendingRemovePlayer(correctUuid);
-        if (linkedPlayer != null) {
-            pendingRemove.invalidate(linkedPlayer.javaUuid());
-        }
-    }
-
-    private Connection getPendingRemovePlayer(UUID correctUuid) {
-        for (Connection player : pendingRemove.asMap().values()) {
-            if (player.javaUuid().equals(correctUuid)) {
-                return player;
-            }
-        }
-        return null;
-    }
 
     public PlayerLink getPlayerLink() { // TODO
         return InstanceHolder.getPlayerLink();

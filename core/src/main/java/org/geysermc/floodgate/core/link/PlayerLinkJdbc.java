@@ -27,11 +27,14 @@ package org.geysermc.floodgate.core.link;
 
 import io.micronaut.context.annotation.Replaces;
 import io.micronaut.context.annotation.Requires;
+import io.micronaut.scheduling.TaskExecutors;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.function.Supplier;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.core.database.PendingLinkRepository;
 import org.geysermc.floodgate.core.database.PlayerLinkRepository;
@@ -42,44 +45,39 @@ import org.geysermc.floodgate.core.database.entity.LinkedPlayer;
 @Replaces(DisabledPlayerLink.class)
 @Named("localLinking")
 @Singleton
-public class PlayerLinkHibernate extends CommonPlayerLink {
+public class PlayerLinkJdbc extends CommonPlayerLink {
     @Inject PlayerLinkRepository linkRepository;
     @Inject PendingLinkRepository pendingLinkRepository;
+
+    @Inject
+    @Named(TaskExecutors.IO)
+    ExecutorService executor;
 
     @Override
     public CompletableFuture<LinkedPlayer> addLink(
             @NonNull UUID javaUniqueId,
             @NonNull String javaUsername,
-            @NonNull UUID bedrockId
-    ) {
-        return linkRepository.save(
+            @NonNull UUID bedrockId) {
+        return async(() -> linkRepository.save(
                 new LinkedPlayer()
                         .javaUniqueId(javaUniqueId)
                         .javaUsername(javaUsername)
-                        .bedrockId(bedrockId)
-        );
+                        .bedrockId(bedrockId)));
     }
 
     @Override
     public CompletableFuture<LinkedPlayer> fetchLink(@NonNull UUID uuid) {
-        return CompletableFuture.supplyAsync(() ->
-                linkRepository.findByBedrockIdOrJavaUniqueId(uuid, uuid).orElse(null)
-        );
+        return async(() -> linkRepository.findByBedrockIdOrJavaUniqueId(uuid, uuid).orElse(null));
     }
 
     @Override
     public CompletableFuture<Boolean> isLinked(@NonNull UUID uuid) {
-        return CompletableFuture.supplyAsync(() ->
-                linkRepository.existsByBedrockIdOrJavaUniqueId(uuid, uuid)
-        );
+        return async(() -> linkRepository.existsByBedrockIdOrJavaUniqueId(uuid, uuid));
     }
 
     @Override
     public CompletableFuture<Void> unlink(@NonNull UUID uuid) {
-        return CompletableFuture.supplyAsync(() -> {
-            linkRepository.deleteByBedrockIdOrJavaUniqueId(uuid, uuid);
-            return null;
-        });
+        return run(() -> linkRepository.deleteByBedrockIdOrJavaUniqueId(uuid, uuid));
     }
 
     @Override
@@ -87,24 +85,30 @@ public class PlayerLinkHibernate extends CommonPlayerLink {
             @NonNull UUID javaUniqueId,
             @NonNull String javaUsername,
             @NonNull String bedrockUsername,
-            @NonNull String code
-    ) {
-        return pendingLinkRepository.save(
+            @NonNull String code) {
+        return async(() -> pendingLinkRepository.save(
                 new LinkRequest()
                         .javaUniqueId(javaUniqueId)
                         .javaUsername(javaUsername)
                         .bedrockUsername(bedrockUsername)
-                        .linkCode(code)
-        );
+                        .linkCode(code)));
     }
 
     @Override
     public CompletableFuture<LinkRequest> linkRequest(@NonNull String javaUsername) {
-        return pendingLinkRepository.findByJavaUsername(javaUsername);
+        return async(() -> pendingLinkRepository.findByJavaUsername(javaUsername));
     }
 
     @Override
     public CompletableFuture<Void> invalidateLinkRequest(@NonNull LinkRequest request) {
-        return pendingLinkRepository.delete(request);
+        return run(() -> pendingLinkRepository.delete(request));
+    }
+
+    private <T> CompletableFuture<T> async(Supplier<T> toExecute) {
+        return CompletableFuture.supplyAsync(toExecute, executor);
+    }
+
+    private CompletableFuture<Void> run(Runnable toExecute) {
+        return CompletableFuture.runAsync(toExecute);
     }
 }

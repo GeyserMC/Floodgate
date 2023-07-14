@@ -30,10 +30,7 @@ import io.netty.util.AttributeKey;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
-import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
 
@@ -41,8 +38,6 @@ import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
 public final class SpigotDataAddon implements InjectorAddon {
     @Inject FloodgateHandshakeHandler handshakeHandler;
     @Inject FloodgateConfig config;
-    @Inject SimpleFloodgateApi api;
-    @Inject FloodgateLogger logger;
 
     @Inject
     @Named("packetHandler")
@@ -52,10 +47,6 @@ public final class SpigotDataAddon implements InjectorAddon {
     @Named("kickMessageAttribute")
     AttributeKey<String> kickMessageAttribute;
 
-    @Inject
-    @Named("playerAttribute")
-    AttributeKey<Connection> playerAttribute;
-
     @Override
     public void onInject(Channel channel, boolean toServer) {
         // we have to add the packet blocker in the data handler, otherwise ProtocolSupport breaks
@@ -63,14 +54,6 @@ public final class SpigotDataAddon implements InjectorAddon {
                 packetHandlerName, "floodgate_data_handler",
                 new SpigotDataHandler(handshakeHandler, config, kickMessageAttribute)
         );
-    }
-
-    @Override
-    public void onChannelClosed(Channel channel) {
-        Connection player = channel.attr(playerAttribute).get();
-        if (player != null && api.setPendingRemove(player)) {
-            logger.translatedInfo("floodgate.ingame.disconnect_name", player.javaUsername());
-        }
     }
 
     @Override

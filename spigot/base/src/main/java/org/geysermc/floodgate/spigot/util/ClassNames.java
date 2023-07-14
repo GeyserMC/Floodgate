@@ -35,13 +35,13 @@ import static org.geysermc.floodgate.core.util.ReflectionUtils.getMethod;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getValue;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.invoke;
 
-import com.google.common.base.Preconditions;
 import com.mojang.authlib.GameProfile;
 import io.netty.channel.ChannelHandlerContext;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.SocketAddress;
+import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -90,7 +90,7 @@ public class ClassNames {
         Class<?> craftPlayerClass = ReflectionUtils.getClass(
                 "org.bukkit.craftbukkit." + version + ".entity.CraftPlayer");
         GET_PROFILE_METHOD = getMethod(craftPlayerClass, "getProfile");
-        checkNotNull(GET_PROFILE_METHOD, "Get profile method");
+        requireNonNull(GET_PROFILE_METHOD, "Get profile method");
 
         String nmsPackage = SPIGOT_MAPPING_PREFIX + '.';
 
@@ -129,7 +129,7 @@ public class ClassNames {
         );
 
         HANDSHAKE_HOST = getFieldOfType(HANDSHAKE_PACKET, String.class);
-        checkNotNull(HANDSHAKE_HOST, "Handshake host");
+        requireNonNull(HANDSHAKE_HOST, "Handshake host");
 
         LOGIN_START_PACKET = getClassOrFallback(
                 "net.minecraft.network.protocol.login.PacketLoginInStart",
@@ -142,10 +142,10 @@ public class ClassNames {
         );
 
         LOGIN_PROFILE = getFieldOfType(LOGIN_LISTENER, GameProfile.class);
-        checkNotNull(LOGIN_PROFILE, "Profile from LoginListener");
+        requireNonNull(LOGIN_PROFILE, "Profile from LoginListener");
 
         LOGIN_DISCONNECT = getMethod(LOGIN_LISTENER, "disconnect", String.class);
-        checkNotNull(LOGIN_DISCONNECT, "LoginListener's disconnect method");
+        requireNonNull(LOGIN_DISCONNECT, "LoginListener's disconnect method");
 
         NETWORK_EXCEPTION_CAUGHT = getMethod(
                 networkManager,
@@ -155,14 +155,14 @@ public class ClassNames {
 
         // there are multiple no-arg void methods
         INIT_UUID = getMethod(LOGIN_LISTENER, "initUUID");
-        checkNotNull(INIT_UUID, "initUUID from LoginListener");
+        requireNonNull(INIT_UUID, "initUUID from LoginListener");
 
         Class<?> packetListenerClass = getClassOrFallback(
                 "net.minecraft.network.PacketListener",
                 nmsPackage + "PacketListener"
         );
         PACKET_LISTENER = getFieldOfType(networkManager, packetListenerClass);
-        checkNotNull(PACKET_LISTENER, "Packet listener");
+        requireNonNull(PACKET_LISTENER, "Packet listener");
 
         LOGIN_HANDLER = getClassOrFallback(
                 "net.minecraft.server.network.LoginListener$LoginHandler",
@@ -171,10 +171,10 @@ public class ClassNames {
 
         LOGIN_HANDLER_CONSTRUCTOR =
                 ReflectionUtils.getConstructor(LOGIN_HANDLER, true, LOGIN_LISTENER);
-        checkNotNull(LOGIN_HANDLER_CONSTRUCTOR, "LoginHandler constructor");
+        requireNonNull(LOGIN_HANDLER_CONSTRUCTOR, "LoginHandler constructor");
 
         FIRE_LOGIN_EVENTS = getMethod(LOGIN_HANDLER, "fireEvents");
-        checkNotNull(FIRE_LOGIN_EVENTS, "fireEvents from LoginHandler");
+        requireNonNull(FIRE_LOGIN_EVENTS, "fireEvents from LoginHandler");
 
 
         PAPER_DISABLE_USERNAME_VALIDATION = getField(LOGIN_LISTENER,
@@ -187,23 +187,23 @@ public class ClassNames {
 
         // ProxyUtils
         Class<?> spigotConfig = ReflectionUtils.getClass("org.spigotmc.SpigotConfig");
-        checkNotNull(spigotConfig, "Spigot config");
+        requireNonNull(spigotConfig, "Spigot config");
 
         BUNGEE = getField(spigotConfig, "bungee");
-        checkNotNull(BUNGEE, "Bungee field");
+        requireNonNull(BUNGEE, "Bungee field");
 
         Class<?> paperConfigNew = getClassSilently(
                 "io.papermc.paper.configuration.GlobalConfiguration");
         if (paperConfigNew != null) {
             // 1.19 and later
-            Method paperConfigGet = checkNotNull(getMethod(paperConfigNew, "get"),
+            Method paperConfigGet = requireNonNull(getMethod(paperConfigNew, "get"),
                     "GlobalConfiguration get");
-            Field paperConfigProxies = checkNotNull(getField(paperConfigNew, "proxies"),
+            Field paperConfigProxies = requireNonNull(getField(paperConfigNew, "proxies"),
                     "Proxies field");
-            Field paperConfigVelocity = checkNotNull(
+            Field paperConfigVelocity = requireNonNull(
                     getField(paperConfigProxies.getType(), "velocity"),
                     "velocity field");
-            Field paperVelocityEnabled = checkNotNull(
+            Field paperVelocityEnabled = requireNonNull(
                     getField(paperConfigVelocity.getType(), "enabled"),
                     "Velocity enabled field");
             PAPER_VELOCITY_SUPPORT = () -> {
@@ -232,7 +232,7 @@ public class ClassNames {
         ) != null;
     }
 
-    private static <T> T checkNotNull(T toCheck, String objectName) {
-        return Preconditions.checkNotNull(toCheck, objectName + " cannot be null");
+    private static <T> T requireNonNull(T toCheck, String objectName) {
+        return Objects.requireNonNull(toCheck, objectName + " cannot be null");
     }
 }

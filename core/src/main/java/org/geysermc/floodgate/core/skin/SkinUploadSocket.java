@@ -38,7 +38,6 @@ import org.geysermc.api.GeyserApiBase;
 import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.core.util.Utils;
 import org.geysermc.floodgate.core.util.WebsocketEventType;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -107,7 +106,7 @@ final class SkinUploadSocket extends WebSocketClient {
                 break;
             case SKIN_UPLOADED:
                 String xuid = message.get("xuid").getAsString();
-                Connection player = api.connectionByUuid(Utils.getJavaUuid(xuid));
+                Connection player = api.connectionByXuid(xuid);
                 if (player != null) {
                     if (!message.get("success").getAsBoolean()) {
                         logger.info("Failed to upload skin for {} ({})", xuid,

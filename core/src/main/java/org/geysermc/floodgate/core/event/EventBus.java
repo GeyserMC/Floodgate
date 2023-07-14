@@ -30,9 +30,11 @@ import io.micronaut.core.annotation.AnnotationMetadata;
 import io.micronaut.inject.qualifiers.Qualifiers;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.event.FireResult;
 import org.geysermc.event.Listener;
 import org.geysermc.event.PostOrder;
 import org.geysermc.event.bus.impl.EventBusImpl;
@@ -40,18 +42,16 @@ import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.event.subscribe.Subscriber;
 import org.geysermc.floodgate.api.event.FloodgateEventBus;
 import org.geysermc.floodgate.api.event.FloodgateSubscriber;
-import org.geysermc.floodgate.core.util.EagerSingleton;
 
-@EagerSingleton
+@Singleton
 @SuppressWarnings("unchecked")
-public final class EventBus extends EventBusImpl<Object, FloodgateSubscriber<?>>
+public class EventBus extends EventBusImpl<Object, FloodgateSubscriber<?>>
         implements FloodgateEventBus {
     @Inject ApplicationContext context;
 
-
     @Override
     @SuppressWarnings("rawtypes")
-    public boolean fire(@NonNull Object event) {
+    public FireResult fire(@NonNull Object event) {
         context.getEventPublisher((Class) event.getClass()).publishEvent(event);
         // todo differentiate internal events from public events
         return super.fire(event);

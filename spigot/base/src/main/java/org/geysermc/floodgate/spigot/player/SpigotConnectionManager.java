@@ -23,16 +23,25 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.util;
+package org.geysermc.floodgate.spigot.player;
 
 import jakarta.inject.Singleton;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import org.bukkit.entity.Player;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.geysermc.floodgate.core.player.ConnectionManager;
 
-/**
- * Instead of a normal Singleton this is an
- */
-@Retention(RetentionPolicy.RUNTIME)
 @Singleton
-public @interface EagerSingleton {
+public class SpigotConnectionManager extends ConnectionManager {
+    @Override
+    protected @Nullable Object platformIdentifierOrConnectionFor(Object input) {
+        // in PlayerList#canPlayerLogin the old players with the same profile are disconnected (
+        // PlayerKickEvent, see ServerGamePacketListener#disconnect &
+        // PlayerQuitEvent, see PlayerList#remove
+        // ) before the first event runs with the Player instance (PlayerLoginEvent).
+        // This means that we can always use the Player's uuid
+        if (input instanceof Player player) {
+            return connectionByUuid(player.getUniqueId());
+        }
+        return null;
+    }
 }

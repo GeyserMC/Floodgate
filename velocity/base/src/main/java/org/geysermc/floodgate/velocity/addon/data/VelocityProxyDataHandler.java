@@ -25,7 +25,7 @@
 
 package org.geysermc.floodgate.velocity.addon.data;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getCastedValue;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getField;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getMethodByName;
@@ -38,7 +38,6 @@ import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
-import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.addon.data.CommonDataHandler;
 import org.geysermc.floodgate.core.addon.data.PacketBlocker;
@@ -60,30 +59,30 @@ public final class VelocityProxyDataHandler extends CommonDataHandler {
 
     static {
         Class<?> iic = getPrefixedClass("connection.client.InitialInboundConnection");
-        checkNotNull(iic, "InitialInboundConnection class cannot be null");
+        requireNonNull(iic, "InitialInboundConnection class cannot be null");
 
         HANDSHAKE = getField(iic, "handshake");
-        checkNotNull(HANDSHAKE, "Handshake field cannot be null");
+        requireNonNull(HANDSHAKE, "Handshake field cannot be null");
 
         HANDSHAKE_PACKET = getPrefixedClass("protocol.packet.Handshake");
-        checkNotNull(HANDSHAKE_PACKET, "Handshake packet class cannot be null");
+        requireNonNull(HANDSHAKE_PACKET, "Handshake packet class cannot be null");
 
         HANDSHAKE_SERVER_ADDRESS = getField(HANDSHAKE_PACKET, "serverAddress");
-        checkNotNull(HANDSHAKE_SERVER_ADDRESS, "Address in the Handshake packet cannot be null");
+        requireNonNull(HANDSHAKE_SERVER_ADDRESS, "Address in the Handshake packet cannot be null");
 
         Class<?> minecraftConnection = getPrefixedClass("connection.MinecraftConnection");
         REMOTE_ADDRESS = getField(minecraftConnection, "remoteAddress");
-        checkNotNull(REMOTE_ADDRESS, "remoteAddress cannot be null");
+        requireNonNull(REMOTE_ADDRESS, "remoteAddress cannot be null");
 
         SERVER_LOGIN_PACKET = getPrefixedClass("protocol.packet.ServerLogin");
-        checkNotNull(SERVER_LOGIN_PACKET, "ServerLogin packet class cannot be null");
+        requireNonNull(SERVER_LOGIN_PACKET, "ServerLogin packet class cannot be null");
 
         GET_SESSION_HANDLER = getMethodByName(minecraftConnection, "getSessionHandler", true);
-        checkNotNull(GET_SESSION_HANDLER, "getSessionHandler method cannot be null");
+        requireNonNull(GET_SESSION_HANDLER, "getSessionHandler method cannot be null");
 
         INITIAL_LOGIN_SESSION_HANDLER =
                 getPrefixedClass("connection.client.InitialLoginSessionHandler");
-        checkNotNull(INITIAL_LOGIN_SESSION_HANDLER, "InitialLoginSessionHandler cannot be null");
+        requireNonNull(INITIAL_LOGIN_SESSION_HANDLER, "InitialLoginSessionHandler cannot be null");
 
         // allowed to be null if it's an old Velocity version
         FORCE_KEY_AUTHENTICATION = getField(INITIAL_LOGIN_SESSION_HANDLER, "forceKeyAuthentication");
@@ -115,14 +114,9 @@ public final class VelocityProxyDataHandler extends CommonDataHandler {
     @Override
     protected boolean shouldRemoveHandler(HandshakeResult result) {
         if (result.getResultType() == ResultType.SUCCESS) {
-            Connection player = result.getFloodgatePlayer();
-            logger.info("Floodgate player who is logged in as {} {} joined",
-                    player.javaUsername(), player.javaUuid());
-
             // the way Velocity stores whether to force key authentication
-            boolean forceKeyAuthentication = Boolean.getBoolean("auth.forceSecureProfiles");
             // we need the login packet to bypass the 'force key authentication'
-            return !forceKeyAuthentication;
+            return !Boolean.getBoolean("auth.forceSecureProfiles");
         }
         return super.shouldRemoveHandler(result);
     }

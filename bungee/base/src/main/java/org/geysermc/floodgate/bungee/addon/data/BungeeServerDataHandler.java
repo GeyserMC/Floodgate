@@ -25,7 +25,7 @@
 
 package org.geysermc.floodgate.bungee.addon.data;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
@@ -54,14 +54,14 @@ public class BungeeServerDataHandler extends ChannelOutboundHandlerAdapter {
 
     static {
         HANDLER = ReflectionUtils.getField(HandlerBoss.class, "handler");
-        checkNotNull(HANDLER, "handler field cannot be null");
+        requireNonNull(HANDLER, "handler field cannot be null");
 
         USER_CONNECTION = ReflectionUtils.getField(ServerConnector.class, "user");
-        checkNotNull(USER_CONNECTION, "user field cannot be null");
+        requireNonNull(USER_CONNECTION, "user field cannot be null");
 
         CHANNEL_WRAPPER =
                 ReflectionUtils.getFieldOfType(UserConnection.class, ChannelWrapper.class);
-        checkNotNull(CHANNEL_WRAPPER, "ChannelWrapper field cannot be null");
+        requireNonNull(CHANNEL_WRAPPER, "ChannelWrapper field cannot be null");
     }
 
     private final ProxyFloodgateApi api;

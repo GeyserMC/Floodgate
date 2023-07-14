@@ -97,20 +97,6 @@ public interface FloodgateApi {
 
     boolean sendForm(UUID uuid, FormBuilder<?, ?, ?> formBuilder);
 
-    /**
-     * @deprecated since Cumulus 1.1 and will be removed when Cumulus 2.0 releases. Please use the
-     * new form classes instead.
-     */
-    @Deprecated
-    boolean sendForm(UUID uuid, org.geysermc.cumulus.Form<?> form);
-
-    /**
-     * @deprecated since Cumulus 1.1 and will be removed when Cumulus 2.0 releases. Please use the
-     * new form classes instead.
-     */
-    @Deprecated
-    boolean sendForm(UUID uuid, org.geysermc.cumulus.util.FormBuilder<?, ?> formBuilder);
-
     boolean transferPlayer(UUID uuid, String address, int port);
 
     /**
@@ -143,7 +129,7 @@ public interface FloodgateApi {
     /**
      * Get the gamertag of the user that has the given xuid.
      *
-     * @param xuid the gamertag of the player
+     * @param xuid the xuid of the player
      * @return the gamertag of the player with the given xuid, or null when there is not player with
      * the given xuid
      */

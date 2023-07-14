@@ -90,14 +90,6 @@ public final class VelocityDataAddon implements InjectorAddon {
     }
 
     @Override
-    public void onChannelClosed(Channel channel) {
-        Connection player = channel.attr(playerAttribute).get();
-        if (player != null && api.setPendingRemove(player)) {
-            logger.translatedInfo("floodgate.ingame.disconnect_name", player.javaUsername());
-        }
-    }
-
-    @Override
     public void onRemoveInject(Channel channel) {
     }
 

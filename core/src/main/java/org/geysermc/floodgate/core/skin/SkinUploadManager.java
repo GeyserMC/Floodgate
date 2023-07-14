@@ -32,10 +32,8 @@ import jakarta.annotation.PreDestroy;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.geysermc.api.GeyserApiBase;
-import org.geysermc.event.Listener;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 
-@Listener
 @Singleton
 public final class SkinUploadManager {
     private final Int2ObjectMap<SkinUploadSocket> connections =

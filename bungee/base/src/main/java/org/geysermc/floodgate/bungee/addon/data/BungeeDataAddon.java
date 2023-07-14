@@ -32,7 +32,6 @@ import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.addon.data.PacketBlocker;
 import org.geysermc.floodgate.core.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
@@ -43,7 +42,6 @@ public class BungeeDataAddon implements InjectorAddon {
     @Inject private FloodgateHandshakeHandler handshakeHandler;
     @Inject private ProxyFloodgateConfig config;
     @Inject private ProxyFloodgateApi api;
-    @Inject private FloodgateLogger logger;
 
     @Inject
     @Named("packetHandler")
@@ -84,14 +82,6 @@ public class BungeeDataAddon implements InjectorAddon {
                 packetHandler, "floodgate_data_handler",
                 new BungeeProxyDataHandler(handshakeHandler, config, kickMessageAttribute, blocker)
         );
-    }
-
-    @Override
-    public void onChannelClosed(Channel channel) {
-        Connection player = channel.attr(playerAttribute).get();
-        if (player != null && api.setPendingRemove(player)) {
-            logger.translatedInfo("floodgate.ingame.disconnect_name", player.javaUsername());
-        }
     }
 
     @Override

@@ -36,7 +36,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.core.event.EventBus;
 import org.geysermc.floodgate.core.event.skin.SkinApplyEventImpl;
 import org.geysermc.floodgate.core.skin.SkinApplier;
@@ -75,8 +74,6 @@ public final class SpigotSkinApplier implements SkinApplier {
             throw new IllegalStateException("The GameProfile cannot be null! " + player.getName());
         }
 
-        // Need to be careful here - getProperties() returns an authlib PropertyMap, which extends
-        // MultiMap from Guava. Floodgate relocates Guava.
         PropertyMap properties = profile.getProperties();
 
         SkinData currentSkin = currentSkin(properties);

@@ -29,7 +29,6 @@ import static org.geysermc.floodgate.core.player.FloodgateHandshakeHandler.Resul
 import static org.geysermc.floodgate.core.player.FloodgateHandshakeHandler.ResultType.NOT_FLOODGATE_DATA;
 import static org.geysermc.floodgate.util.BedrockData.EXPECTED_LENGTH;
 
-import com.google.common.base.Charsets;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import it.unimi.dsi.fastutil.Pair;
@@ -37,6 +36,7 @@ import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import lombok.AccessLevel;
@@ -61,6 +61,7 @@ import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.LinkedPlayer;
 
 public final class FloodgateHandshakeHandler {
+    @Inject ConnectionManager connectionManager;
     @Inject HandshakeHandlersImpl handshakeHandlers;
     @Inject SimpleFloodgateApi api;
     @Inject CommonPlayerLink link;
@@ -106,9 +107,9 @@ public final class FloodgateHandshakeHandler {
     public CompletableFuture<HandshakeResult> handle(
             @NonNull Channel channel,
             @NonNull String floodgateDataString,
-            @NonNull String hostname) {
-
-        byte[] floodgateData = floodgateDataString.getBytes(Charsets.UTF_8);
+            @NonNull String hostname
+    ) {
+        byte[] floodgateData = floodgateDataString.getBytes(StandardCharsets.UTF_8);
 
         return CompletableFuture.supplyAsync(() -> {
 
@@ -193,8 +194,8 @@ public final class FloodgateHandshakeHandler {
             Channel channel,
             String hostname,
             BedrockData bedrockData,
-            LinkedPlayer linkedPlayer) {
-
+            LinkedPlayer linkedPlayer
+    ) {
         try {
             HandshakeData handshakeData = new HandshakeDataImpl(
                     channel, true, bedrockData.clone(), config,
@@ -216,15 +217,12 @@ public final class FloodgateHandshakeHandler {
                         bedrockData.getVerifyCode());
             }
 
-            int port = ((InetSocketAddress) channel.remoteAddress()).getPort();
+            var connection = FloodgateConnection.from(bedrockData, handshakeData);
 
-            Connection player = FloodgateConnection.from(bedrockData, handshakeData, port);
+            connectionManager.addConnection(connection);
+            channel.attr(playerAttribute).set(connection);
 
-            api.addPlayer(player);
-
-            channel.attr(playerAttribute).set(player);
-
-            return new HandshakeResult(ResultType.SUCCESS, handshakeData, bedrockData, player);
+            return new HandshakeResult(ResultType.SUCCESS, handshakeData, bedrockData, connection);
         } catch (Exception exception) {
             exception.printStackTrace();
             return callHandlerAndReturnResult(ResultType.EXCEPTION, channel, null, hostname);
@@ -235,8 +233,8 @@ public final class FloodgateHandshakeHandler {
             ResultType resultType,
             Channel channel,
             BedrockData bedrockData,
-            String hostname) {
-
+            String hostname
+    ) {
         HandshakeData handshakeData = new HandshakeDataImpl(channel, bedrockData != null,
                 bedrockData, config, null, hostname);
         handshakeHandlers.callHandshakeHandlers(handshakeData);
@@ -283,9 +281,9 @@ public final class FloodgateHandshakeHandler {
         private final Connection floodgatePlayer;
 
         public InetSocketAddress getNewIp(Channel channel) {
-            if (floodgatePlayer != null) {
-                return floodgatePlayer.socketAddress();
-            }
+//            if (floodgatePlayer != null) {
+//                return floodgatePlayer.socketAddress();
+//            }
             if (handshakeData.getIp() != null) {
                 int port = ((InetSocketAddress) channel.remoteAddress()).getPort();
                 return new InetSocketAddress(handshakeData.getIp(), port);

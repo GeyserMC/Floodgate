@@ -35,8 +35,7 @@ public interface Properties {
                 "datasources.default.username", "sa",
                 "datasources.default.password", "",
                 "datasources.default.driverClassName", "org.h2.Driver",
-                "jpa.default.properties.hibernate.hbm2ddl.auto", "update",
-                "jpa.default.properties.hibernate.show_sql", "true"
+                "datasources.default.schema-generate", "CREATE_DROP"
         );
     }
 }

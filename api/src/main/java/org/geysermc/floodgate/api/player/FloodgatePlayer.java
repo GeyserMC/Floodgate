@@ -121,24 +121,6 @@ public interface FloodgatePlayer {
         return sendForm(formBuilder.build());
     }
 
-    /**
-     * @deprecated since Cumulus 1.1 and will be removed when Cumulus 2.0 releases. Please use the
-     * new form classes instead.
-     */
-    @Deprecated
-    default boolean sendForm(org.geysermc.cumulus.Form<?> form) {
-        return sendForm(form.newForm());
-    }
-
-    /**
-     * @deprecated since Cumulus 1.1 and will be removed when Cumulus 2.0 releases. Please use the
-     * new form classes instead.
-     */
-    @Deprecated
-    default boolean sendForm(org.geysermc.cumulus.util.FormBuilder<?, ?> formBuilder) {
-        return sendForm(formBuilder.build());
-    }
-
     default boolean transfer(String address, int port) {
         return FloodgateApi.getInstance().transferPlayer(getCorrectUniqueId(), address, port);
     }

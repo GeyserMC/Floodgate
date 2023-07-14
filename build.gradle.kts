@@ -23,7 +23,7 @@ val deployProjects = setOf(
     projects.api,
     // for future Floodgate integration + Fabric
     projects.core,
-    projects.database,
+//    projects.database,
     projects.isolation,
     projects.bungee,
     projects.fabric,

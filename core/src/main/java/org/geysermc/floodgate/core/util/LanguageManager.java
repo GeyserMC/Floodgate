@@ -25,15 +25,16 @@
 
 package org.geysermc.floodgate.core.util;
 
-import com.google.common.base.Joiner;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.net.URL;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
@@ -186,7 +187,8 @@ public final class LanguageManager {
         return true;
     }
 
-    private String formatNotFound(String key, Object... args) {
-        return key + " " + Joiner.on(", ").join(args);
+    private String formatNotFound(String key, Object... rawArgs) {
+        var args = Arrays.stream(rawArgs).map(Object::toString).collect(Collectors.joining(", "));
+        return key + " " + args;
     }
 }

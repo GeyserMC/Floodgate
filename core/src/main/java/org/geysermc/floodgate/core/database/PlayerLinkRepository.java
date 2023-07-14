@@ -26,16 +26,17 @@
 package org.geysermc.floodgate.core.database;
 
 import io.micronaut.context.annotation.Requires;
-import io.micronaut.data.annotation.Repository;
-import io.micronaut.data.repository.async.AsyncCrudRepository;
+import io.micronaut.data.jdbc.annotation.JdbcRepository;
+import io.micronaut.data.model.query.builder.sql.Dialect;
+import io.micronaut.data.repository.CrudRepository;
 import jakarta.validation.constraints.NotNull;
 import java.util.Optional;
 import java.util.UUID;
 import org.geysermc.floodgate.core.database.entity.LinkedPlayer;
 
-@Repository
+@JdbcRepository(dialect = Dialect.ANSI)
 @Requires(property = "config.database.enabled", value = "true")
-public interface PlayerLinkRepository extends AsyncCrudRepository<LinkedPlayer, UUID> {
+public interface PlayerLinkRepository extends CrudRepository<LinkedPlayer, UUID> {
     Optional<LinkedPlayer> findByBedrockId(@NotNull UUID bedrockId);
 
     Optional<LinkedPlayer> findByJavaUniqueId(@NotNull UUID javaUniqueId);

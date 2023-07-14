@@ -68,7 +68,7 @@ rootProject.name = "floodgate-parent"
 include(":api")
 include(":core")
 include(":universal")
-include(":database")
+//include(":database")
 include(":isolation")
 
 arrayOf("bungee", "spigot", "velocity", "fabric").forEach { platform ->
