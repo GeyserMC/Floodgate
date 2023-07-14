@@ -29,39 +29,35 @@ import com.mojang.logging.LogUtils;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import net.minecraft.DefaultUncaughtExceptionHandler;
-import net.minecraft.network.Connection;
+import org.geysermc.api.connection.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+import org.geysermc.floodgate.core.addon.data.CommonDataHandler;
+import org.geysermc.floodgate.core.addon.data.PacketBlocker;
+import org.geysermc.floodgate.core.config.FloodgateConfig;
+import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.fabric.MinecraftServerHolder;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.fabric.mixin.ConnectionMixin;
-import org.geysermc.floodgate.fabric.mixin.ClientIntentionPacketMixinInterface;
+import org.geysermc.floodgate.fabric.mixin_interface.ClientIntentionPacketMixinInterface;
 import org.geysermc.floodgate.fabric.mixin_interface.ServerLoginPacketListenerSetter;
 import com.mojang.authlib.GameProfile;
 import io.netty.channel.ChannelHandlerContext;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
-import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.slf4j.Logger;
 
 import java.net.InetSocketAddress;
 
 public final class FabricDataHandler extends CommonDataHandler {
     private static final Logger LOGGER = LogUtils.getLogger();
-
-    private final FloodgateLogger logger;
-    private Connection networkManager;
-    private FloodgatePlayer player;
+    private Object networkManager;
+    private Connection player;
 
     public FabricDataHandler(
             FloodgateHandshakeHandler handshakeHandler,
             FloodgateConfig config,
-            AttributeKey<String> kickMessageAttribute, FloodgateLogger logger) {
+            AttributeKey<String> kickMessageAttribute) {
         super(handshakeHandler, config, kickMessageAttribute, new PacketBlocker());
-        this.logger = logger;
     }
 
     @Override
@@ -78,7 +74,7 @@ public final class FabricDataHandler extends CommonDataHandler {
     }
 
     @Override
-    protected boolean shouldRemoveHandler(HandshakeResult result) {
+    protected boolean shouldRemoveHandler(FloodgateHandshakeHandler.HandshakeResult result) {
         player = result.getFloodgatePlayer();
 
         if (getKickMessage() != null) {
@@ -89,17 +85,12 @@ public final class FabricDataHandler extends CommonDataHandler {
             return true;
         }
 
-        if (result.getResultType() == FloodgateHandshakeHandler.ResultType.SUCCESS) {
-            logger.info("Floodgate player who is logged in as {} {} joined",
-                    player.getCorrectUsername(), player.getCorrectUniqueId());
-        }
-
         // Handler will be removed after the login hello packet is handled
         return false;
     }
 
     @Override
-    protected boolean channelRead(Object packet) {
+    protected boolean channelRead(Object packet) throws Exception {
         if (packet instanceof ClientIntentionPacket intentionPacket) {
             ctx.pipeline().addAfter("splitter", "floodgate_packet_blocker", blocker);
             networkManager = (Connection) ctx.channel().pipeline().get("packet_handler");
@@ -109,7 +100,7 @@ public final class FabricDataHandler extends CommonDataHandler {
         return !checkAndHandleLogin(packet);
     }
 
-    private boolean checkAndHandleLogin(Object packet) {
+    private boolean checkAndHandleLogin(Object packet) throws Exception {
         if (packet instanceof ServerboundHelloPacket) {
             String kickMessage = getKickMessage();
             if (kickMessage != null) {
@@ -124,7 +115,7 @@ public final class FabricDataHandler extends CommonDataHandler {
                 return true;
             }
 
-            GameProfile gameProfile = new GameProfile(player.getCorrectUniqueId(), player.getCorrectUsername());
+            GameProfile gameProfile = new GameProfile(player(), player.getCorrectUsername());
 
             if (player.isLinked() && player.getCorrectUniqueId().version() == 4) {
                 Thread texturesThread = new Thread("Bedrock Linked Player Texture Download") {

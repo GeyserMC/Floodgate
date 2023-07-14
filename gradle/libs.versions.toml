@@ -33,6 +33,8 @@ velocity = "3.1.1"
 fabric_minecraft = "1.19"
 fabric_loader = "0.14.6"
 fabric_api = "0.55.3+1.19"
+fabric_adventure = "5.4.0-SNAPSHOT"
+fabric_permissions_api = "0.2-SNAPSHOT"
 
 # buildSrc
 indra = "3.0.1"
@@ -96,11 +98,13 @@ velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "vel
 
 # fabric
 # check these on https://modmuss50.me/fabric.html
-fabric-minecraft = { group = "com.mojang", name = "minecraft", version.ref = "fabric-minecraft" }
-fabric-loader = { group = "net.fabricmc", name = "fabric-loader", version.ref = "fabric-loader" }
-fabric-api = { group = "net.fabricmc.fabric-api", name = "fabric-api", version.ref = "fabric-api" }
+fabric-minecraft = { group = "com.mojang", name = "minecraft", version.ref = "fabric_minecraft" }
+fabric-loader = { group = "net.fabricmc", name = "fabric-loader", version.ref = "fabric_loader" }
+fabric-api = { group = "net.fabricmc.fabric-api", name = "fabric-api", version.ref = "fabric_api" }
 cloud-fabric = { module = "cloud.commandframework:cloud-fabric", version.ref = "cloud" }
+kyori-adventure = { module = "net.kyori:adventure-platform-fabric", version.ref = "fabric_adventure" }
 loom = { group = "net.fabricmc", name = "fabric-loom", version.ref = "loom" }
+fabric-permissions-api = { module = "me.lucko:fabric-permissions-api", version.ref = "fabric_permissions_api" }
 
 # buildSrc
 checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "checkerframework" }

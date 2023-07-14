@@ -34,13 +34,3 @@ dependencies {
     })
     */
 }
-
-/*
-repositories {
-    // specifically for adventure-platform-fabric:5.4.0-SNAPSHOT
-    maven("https://s01.oss.sonatype.org/content/repositories/snapshots/") {
-        name = "sonatype-oss-snapshots1"
-        mavenContent { snapshotsOnly() }
-    }
-}
-*/

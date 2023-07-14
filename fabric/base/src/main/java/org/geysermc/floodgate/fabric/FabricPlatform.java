@@ -25,15 +25,44 @@
 
 package org.geysermc.floodgate.fabric;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.api.inject.PlatformInjector;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import io.micronaut.context.ApplicationContext;
+import io.micronaut.inject.qualifiers.Qualifiers;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.ModContainer;
+import org.geysermc.floodgate.core.FloodgatePlatform;
+import org.geysermc.floodgate.isolation.library.LibraryManager;
+
+import java.nio.file.Path;
 
 public final class FabricPlatform extends FloodgatePlatform {
-    @Inject
-    public FabricPlatform(FloodgateApi api, PlatformInjector platformInjector, FloodgateLogger logger, Injector guice) {
-        super(api, platformInjector, logger, guice);
+
+    private ApplicationContext context;
+
+    ModInitializer modContainer;
+
+    protected FabricPlatform(LibraryManager manager) {
+        super(manager);
     }
+
+    @Override
+    protected boolean isProxy() {
+        return false;
+    }
+
+    /*
+    TODO: What exactly do we need to do here?
+    @Override
+    protected void onContextCreated(ApplicationContext context) {
+        context.registerSingleton(modContainer)
+                .registerSingleton(
+                        Path.class,
+                        modContainer.getDataFolder().toPath(),
+                        Qualifiers.byName("dataDirectory")
+                );
+        this.context = context;
+    }
+    */
+
+
+
 }

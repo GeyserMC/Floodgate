@@ -2,17 +2,11 @@
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 dependencyResolutionManagement {
-    // repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
     repositories {
-        mavenLocal()
+        mavenCentral()
 
         // Geyser, Cumulus etc.
-        maven("https://repo.opencollab.dev/maven-releases") {
-            mavenContent { releasesOnly() }
-        }
-        maven("https://repo.opencollab.dev/maven-snapshots") {
-            mavenContent { snapshotsOnly() }
-        }
+        maven("https://repo.opencollab.dev/main")
 
         // Paper, Velocity
 //        maven("https://repo.papermc.io/repository/maven-releases") {
@@ -21,6 +15,7 @@ dependencyResolutionManagement {
 //        maven("https://repo.papermc.io/repository/maven-snapshots") {
 //            mavenContent { snapshotsOnly() }
 //        }
+
         maven("https://repo.papermc.io/repository/maven-public")
         // Spigot
         maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots") {
@@ -40,12 +35,11 @@ dependencyResolutionManagement {
         // Fabric
         maven("https://maven.fabricmc.net")
 
-        mavenCentral()
-
         maven("https://jitpack.io") {
             content { includeGroupByRegex("com\\.github\\..*") }
         }
 
+        mavenLocal()
     }
 }
 

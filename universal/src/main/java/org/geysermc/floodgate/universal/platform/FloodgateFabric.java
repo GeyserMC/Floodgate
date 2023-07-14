@@ -28,24 +28,17 @@ package org.geysermc.floodgate.universal.platform;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.universal.UniversalLoader;
 import org.geysermc.floodgate.universal.holder.FloodgateHolder;
 import org.geysermc.floodgate.universal.logger.Slf4jLogger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public final class FloodgateFabric implements ModInitializer {
   private FloodgateHolder holder;
   @Override
   public void onInitialize() {
 
-    // TODO: logger how works
-    new Slf4jLogger();
-
     try {
       holder = new UniversalLoader("fabric", FabricLoader.getInstance().getConfigDir().resolve("floodgate"), new Slf4jLogger()).start();
-      holder.init(new Class[]{JavaPlugin.class}, this);
+      holder.init(new Class[]{ModInitializer.class}, this);
       holder.load();
     } catch (Exception exception) {
       throw new RuntimeException("Failed to load Floodgate", exception);

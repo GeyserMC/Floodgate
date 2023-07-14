@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.fabric.mixin;
+package org.geysermc.floodgate.fabric.mixin_interface;
 
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import org.spongepowered.asm.mixin.Mixin;

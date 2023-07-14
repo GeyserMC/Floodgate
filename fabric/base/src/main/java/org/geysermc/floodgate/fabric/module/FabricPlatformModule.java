@@ -28,7 +28,7 @@ package org.geysermc.floodgate.fabric.module;
 import org.geysermc.floodgate.fabric.inject.fabric.FabricInjector;
 import org.geysermc.floodgate.fabric.listener.FabricEventListener;
 import org.geysermc.floodgate.fabric.listener.FabricEventRegistration;
-import org.geysermc.floodgate.fabric.logger.Log4jFloodgateLogger;
+import org.geysermc.floodgate.fabric.listener.logger.Log4jFloodgateLogger;
 import org.geysermc.floodgate.platform.listener.ListenerRegistration;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.platform.util.PlatformUtils;

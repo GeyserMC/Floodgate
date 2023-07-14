@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.fabric.logger;
+package org.geysermc.floodgate.fabric.listener.logger;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.Level;

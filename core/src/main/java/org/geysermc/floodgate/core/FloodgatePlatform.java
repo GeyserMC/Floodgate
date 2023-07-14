@@ -64,8 +64,8 @@ public abstract class FloodgatePlatform {
 
         GlobalBeanCache.cacheIfAbsent("libraryManager", () -> manager);
 
-        //noinspection unchecked
-        context = ApplicationContext.builder(manager.classLoader())
+            //noinspection unchecked
+            context = ApplicationContext.builder(manager.classLoader())
                 .singletons(manager)
                 .properties(Map.of(
                         "platform.proxy", isProxy()
