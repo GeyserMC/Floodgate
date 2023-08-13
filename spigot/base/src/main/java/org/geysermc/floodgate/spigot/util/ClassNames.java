@@ -27,13 +27,13 @@ package org.geysermc.floodgate.spigot.util;
 
 import static org.geysermc.floodgate.core.util.ReflectionUtils.castedStaticBooleanValue;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getBooleanValue;
-import static org.geysermc.floodgate.core.util.ReflectionUtils.getClassOrFallback;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getClassSilently;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getField;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getFieldOfType;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getMethod;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getValue;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.invoke;
+import static org.geysermc.floodgate.spigot.util.MappingUtils.classFor;
 
 import com.mojang.authlib.GameProfile;
 import io.netty.channel.ChannelHandlerContext;
@@ -43,7 +43,6 @@ import java.lang.reflect.Method;
 import java.net.SocketAddress;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.floodgate.core.util.Constants;
@@ -51,8 +50,6 @@ import org.geysermc.floodgate.core.util.ReflectionUtils;
 
 @SuppressWarnings("PMD.SystemPrintln")
 public class ClassNames {
-    public static final String SPIGOT_MAPPING_PREFIX;
-
     public static final Class<?> MINECRAFT_SERVER;
     public static final Class<?> SERVER_CONNECTION;
     public static final Class<?> HANDSHAKE_PACKET;
@@ -82,63 +79,51 @@ public class ClassNames {
     public static final boolean IS_FOLIA;
 
     static {
-        String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-        SPIGOT_MAPPING_PREFIX = "net.minecraft.server." + version;
-
-
         // SpigotSkinApplier
-        Class<?> craftPlayerClass = ReflectionUtils.getClass(
-                "org.bukkit.craftbukkit." + version + ".entity.CraftPlayer");
+        Class<?> craftPlayerClass = MappingUtils.craftbukkitClass("entity.CraftPlayer");
         GET_PROFILE_METHOD = getMethod(craftPlayerClass, "getProfile");
         requireNonNull(GET_PROFILE_METHOD, "Get profile method");
 
-        String nmsPackage = SPIGOT_MAPPING_PREFIX + '.';
-
 
         // SpigotInjector
-        MINECRAFT_SERVER = getClassOrFallback(
-                "net.minecraft.server.MinecraftServer",
-                nmsPackage + "MinecraftServer"
-        );
+        MINECRAFT_SERVER = classFor("net.minecraft.server", "MinecraftServer");
 
-        SERVER_CONNECTION = getClassOrFallback(
-                "net.minecraft.server.network.ServerConnection",
-                nmsPackage + "ServerConnection"
+        SERVER_CONNECTION = classFor(
+                "net.minecraft.server.network", "ServerConnectionListener", "ServerConnection"
         );
 
         // WhitelistUtils
-        Class<?> craftServerClass = ReflectionUtils.getClass(
-                "org.bukkit.craftbukkit." + version + ".CraftServer");
-        Class<OfflinePlayer> craftOfflinePlayerClass = ReflectionUtils.getCastedClass(
-                "org.bukkit.craftbukkit." + version + ".CraftOfflinePlayer");
+        Class<?> craftServerClass = MappingUtils.craftbukkitClass("CraftServer");
+        Class<OfflinePlayer> craftOfflinePlayerClass = MappingUtils.craftbukkitClass("CraftOfflinePlayer");
 
         CRAFT_OFFLINE_PLAYER_CONSTRUCTOR = ReflectionUtils.getConstructor(
                 craftOfflinePlayerClass, true, craftServerClass, GameProfile.class);
 
         // SpigotDataHandler
-        Class<?> networkManager = getClassOrFallback(
-                "net.minecraft.network.NetworkManager",
-                nmsPackage + "NetworkManager"
-        );
+        Class<?> networkManager =
+                classFor("net.minecraft.network", "Connection", "NetworkManager");
 
         SOCKET_ADDRESS = getFieldOfType(networkManager, SocketAddress.class, false);
 
-        HANDSHAKE_PACKET = getClassOrFallback(
-                "net.minecraft.network.protocol.handshake.PacketHandshakingInSetProtocol",
-                nmsPackage + "PacketHandshakingInSetProtocol"
+        HANDSHAKE_PACKET = classFor(
+                "net.minecraft.network.protocol.handshake",
+                "ClientIntentionPacket",
+                "PacketHandshakingInSetProtocol"
         );
 
         HANDSHAKE_HOST = getFieldOfType(HANDSHAKE_PACKET, String.class);
         requireNonNull(HANDSHAKE_HOST, "Handshake host");
 
-        LOGIN_START_PACKET = getClassOrFallback(
-                "net.minecraft.network.protocol.login.PacketLoginInStart",
-                nmsPackage + "PacketLoginInStart"
+        LOGIN_START_PACKET = classFor(
+                "net.minecraft.network.protocol.login",
+                "ServerboundHelloPacket",
+                "PacketLoginInStart"
         );
 
-        LOGIN_LISTENER = getClassOrFallback(
-                "net.minecraft.server.network.LoginListener",
-                nmsPackage + "LoginListener"
+        LOGIN_LISTENER = classFor(
+                "net.minecraft.server.network",
+                "ServerLoginPacketListenerImpl",
+                "LoginListener"
         );
 
         LOGIN_PROFILE = getFieldOfType(LOGIN_LISTENER, GameProfile.class);
@@ -157,16 +142,14 @@ public class ClassNames {
         INIT_UUID = getMethod(LOGIN_LISTENER, "initUUID");
         requireNonNull(INIT_UUID, "initUUID from LoginListener");
 
-        Class<?> packetListenerClass = getClassOrFallback(
-                "net.minecraft.network.PacketListener",
-                nmsPackage + "PacketListener"
-        );
+        Class<?> packetListenerClass = classFor("net.minecraft.network", "PacketListener");
         PACKET_LISTENER = getFieldOfType(networkManager, packetListenerClass);
         requireNonNull(PACKET_LISTENER, "Packet listener");
 
-        LOGIN_HANDLER = getClassOrFallback(
-                "net.minecraft.server.network.LoginListener$LoginHandler",
-                nmsPackage + "LoginListener$LoginHandler"
+        LOGIN_HANDLER = classFor(
+                "net.minecraft.server.network",
+                "ServerLoginPacketListenerImpl$LoginHandler",
+                "LoginListener$LoginHandler"
         );
 
         LOGIN_HANDLER_CONSTRUCTOR =
