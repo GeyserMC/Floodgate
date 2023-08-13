@@ -42,7 +42,7 @@ fun Project.lastCommitHash(): String? =
     the<IndraGitExtension>().commit()?.name?.substring(0, 7)
 
 fun Project.branchName(): String =
-    the<IndraGitExtension>().branchName() ?: jenkinsBranchName() ?: "local/dev"
+    the<IndraGitExtension>().branchName() ?: "local/dev"
 
 fun Project.shouldAddBranchName(): Boolean =
     System.getenv("IGNORE_BRANCH")?.toBoolean() ?: (branchName() !in arrayOf("master", "local/dev"))
@@ -51,7 +51,7 @@ fun Project.versionWithBranchName(): String =
     branchName().replace(Regex("[^0-9A-Za-z-_]"), "-") + '-' + version
 
 fun buildNumber(): Int =
-    (System.getenv("GITHUB_RUN_NUMBER") ?: jenkinsBuildNumber())?.let { Integer.parseInt(it) } ?: -1
+    System.getenv("GITHUB_RUN_NUMBER")?.let { Integer.parseInt(it) } ?: -1
 
 fun buildNumberAsString(): String =
     buildNumber().takeIf { it != -1 }?.toString() ?: "??"
@@ -86,7 +86,3 @@ fun Project.relocate(pattern: String) =
 
 private fun calcExclusion(section: String, bit: Int, excludedOn: Int): String =
     if (excludedOn and bit > 0) section else ""
-
-// todo remove these when we're not using Jenkins anymore
-private fun jenkinsBranchName(): String? = System.getenv("BRANCH_NAME")
-private fun jenkinsBuildNumber(): String? = System.getenv("BUILD_NUMBER")
