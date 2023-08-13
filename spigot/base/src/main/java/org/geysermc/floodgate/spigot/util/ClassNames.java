@@ -228,7 +228,7 @@ public class ClassNames {
         }
 
         IS_FOLIA = ReflectionUtils.getClassSilently(
-                "io.papermc.paper.threadedregions.scheduler.EntityScheduler"
+                "io.papermc.paper.threadedregions.RegionizedServer"
         ) != null;
     }
 

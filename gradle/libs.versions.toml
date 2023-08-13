@@ -1,6 +1,6 @@
 [versions]
 # parent
-micronaut-gradle = "4.0.0-M8"
+micronaut-gradle = "4.0.2"
 lombok = "8.0.1"
 
 # api
@@ -22,7 +22,7 @@ bstats = "3.0.2"
 bungee = "master-SNAPSHOT"
 
 # spigot
-folia = "1.19.4-R0.1-SNAPSHOT"
+paper = "1.20.1-R0.1-SNAPSHOT"
 authlib = "1.5.21"
 
 # velocity
@@ -80,7 +80,7 @@ bungee = { module = "com.github.SpigotMC.BungeeCord:bungeecord-proxy", version.r
 cloud-bungee = { module = "cloud.commandframework:cloud-bungee", version.ref = "cloud" }
 
 # spigot
-folia-api = { module = "dev.folia:folia-api", version.ref = "folia" }
+paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
 cloud-bukkit = { module = "cloud.commandframework:cloud-bukkit", version.ref = "cloud" }
 authlib = { module = "com.mojang:authlib", version.ref = "authlib" }
 

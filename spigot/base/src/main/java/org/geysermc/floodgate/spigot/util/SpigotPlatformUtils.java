@@ -30,7 +30,7 @@ import org.bukkit.Bukkit;
 import org.geysermc.floodgate.core.platform.util.PlatformUtils;
 
 @Singleton
-public class SpigotPlatformUtils extends PlatformUtils {
+public final class SpigotPlatformUtils extends PlatformUtils {
     @Override
     public AuthType authType() {
         if (Bukkit.getOnlineMode()) {

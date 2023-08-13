@@ -34,7 +34,6 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.UUID;
 import lombok.Getter;
-import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.command.util.Permission;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
@@ -50,7 +49,6 @@ import org.geysermc.floodgate.core.player.audience.ProfileAudienceArgument;
 
 @Singleton
 public class WhitelistCommand implements FloodgateCommand {
-    @Inject FloodgateApi api;
     @Inject FloodgateConfig config;
     @Inject XboxClient xboxClient;
     @Inject FloodgateLogger logger;

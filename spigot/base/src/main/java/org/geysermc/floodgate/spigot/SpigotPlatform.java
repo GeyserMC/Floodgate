@@ -44,17 +44,6 @@ public class SpigotPlatform extends FloodgatePlatform {
     }
 
     @Override
-    public void enable() throws RuntimeException {
-        super.enable();
-
-        // add ProtocolSupport support (hack)
-        if (plugin.getServer().getPluginManager().getPlugin("ProtocolSupport") != null) {
-            context.getBean(SpigotProtocolSupportHandler.class);
-            SpigotProtocolSupportListener.registerHack(plugin);
-        }
-    }
-
-    @Override
     protected void onContextCreated(ApplicationContext context) {
         context.registerSingleton(plugin)
                 .registerSingleton(plugin.getServer())
@@ -65,6 +54,17 @@ public class SpigotPlatform extends FloodgatePlatform {
                         Qualifiers.byName("dataDirectory")
                 );
         this.context = context;
+    }
+
+    @Override
+    public void enable() throws RuntimeException {
+        super.enable();
+
+        // add ProtocolSupport support (hack)
+        if (plugin.getServer().getPluginManager().getPlugin("ProtocolSupport") != null) {
+            context.getBean(SpigotProtocolSupportHandler.class);
+            SpigotProtocolSupportListener.registerHack(plugin);
+        }
     }
 
     @Override

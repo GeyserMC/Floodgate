@@ -39,6 +39,8 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+
+import jakarta.inject.Singleton;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -60,6 +62,7 @@ import org.geysermc.floodgate.core.util.Utils;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.LinkedPlayer;
 
+@Singleton
 public final class FloodgateHandshakeHandler {
     @Inject ConnectionManager connectionManager;
     @Inject HandshakeHandlersImpl handshakeHandlers;

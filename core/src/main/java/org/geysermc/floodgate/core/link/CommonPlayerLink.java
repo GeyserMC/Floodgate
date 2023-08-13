@@ -31,7 +31,7 @@ import java.util.concurrent.CompletableFuture;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.api.GeyserApiBase;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
@@ -49,7 +49,7 @@ public abstract class CommonPlayerLink {
 
     @Inject
     @Getter(AccessLevel.PROTECTED)
-    FloodgateApi api;
+    GeyserApiBase api;
 
     @Inject
     public void commonInit(FloodgateConfig config) {
@@ -68,10 +68,10 @@ public abstract class CommonPlayerLink {
      * @return true if the given player is the player requested
      */
     public boolean isRequestedPlayer(LinkRequest request, UUID bedrockId) {
-        // Java starts the process, Bedrock finishes it. So player can't be null
-        var player = api.getPlayer(bedrockId);
-        return request.bedrockUsername().equals(player.getUsername()) ||
-                request.bedrockUsername().equals(player.getJavaUsername());
+        var player = api.connectionByUuid(bedrockId);
+        //noinspection ConstantConditions Java starts the process, Bedrock finishes it. So player can't be null
+        return request.bedrockUsername().equals(player.bedrockUsername()) ||
+                request.bedrockUsername().equals(player.javaUsername());
     }
 
     public abstract CompletableFuture<LinkedPlayer> addLink(

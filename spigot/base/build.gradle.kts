@@ -1,11 +1,12 @@
 dependencies {
     api(projects.core)
     annotationProcessor(projects.core)
+    annotationProcessor(libs.micronaut.inject.java)
     compileOnlyApi(projects.isolation)
 
     implementation(libs.cloud.bukkit)
 
-    compileOnlyApi(libs.folia.api)
+    compileOnlyApi(libs.paper.api)
 }
 
 relocate("net.kyori")

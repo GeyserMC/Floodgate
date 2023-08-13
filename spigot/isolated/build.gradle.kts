@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     api(projects.isolation)
-    compileOnlyApi(libs.folia.api)
+    compileOnlyApi(libs.paper.api)
 }
 
 tasks {
