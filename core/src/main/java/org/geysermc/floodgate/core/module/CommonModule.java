@@ -40,11 +40,11 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.geysermc.api.connection.Connection;
-import org.geysermc.floodgate.core.crypto.AesCipher;
-import org.geysermc.floodgate.core.crypto.AesKeyProducer;
-import org.geysermc.floodgate.core.crypto.Base64Topping;
-import org.geysermc.floodgate.core.crypto.FloodgateCipher;
+import org.geysermc.floodgate.core.crypto.DataCodecType;
 import org.geysermc.floodgate.core.crypto.KeyProducer;
+import org.geysermc.floodgate.core.crypto.aes.AesKeyProducer;
+import org.geysermc.floodgate.core.crypto.topping.Base64Topping;
+import org.geysermc.floodgate.core.crypto.topping.Topping;
 import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.GlobalBeanCache;
 
@@ -84,8 +84,17 @@ public class CommonModule {
     @Bean
     @BootstrapContextCompatible
     @Singleton
-    public FloodgateCipher cipher() {
-        return GlobalBeanCache.cacheIfAbsent("cipher", () -> new AesCipher(new Base64Topping()));
+    public DataCodecType codecType() {
+        //todo make it a config option and remove this one
+        // just like the topping it shouldn't need BootstrapContextCompatible
+        return GlobalBeanCache.cacheIfAbsent("codecType", () -> DataCodecType.AES);
+    }
+
+    @Bean
+    @BootstrapContextCompatible
+    @Singleton
+    public Topping topping() {
+        return GlobalBeanCache.cacheIfAbsent("topping", Base64Topping::new);
     }
 
     @Bean

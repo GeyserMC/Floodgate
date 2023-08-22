@@ -34,6 +34,9 @@ dependencies {
     compileOnlyApi(libs.jakarta.persistence)
 
     runtimeOnly("com.h2database:h2")
+
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }
 
 // present on all platforms
@@ -49,4 +52,6 @@ tasks {
         replaceToken("branch", branchName())
         replaceToken("buildNumber", buildNumber())
     }
+
+    test { useJUnitPlatform() }
 }

@@ -34,17 +34,17 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Random;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import org.geysermc.floodgate.core.crypto.RandomUtils;
 
 public class Utils {
     private static final Pattern NON_UNIQUE_PREFIX = Pattern.compile("^\\w{0,16}$");
     private static final Pattern DATABASE_NAME = Pattern.compile(Constants.DATABASE_NAME_FORMAT);
-    private static final Random random = new SecureRandom();
+    private static final Random random = RandomUtils.secureRandom();
 
     /**
      * This method is used in Addons.<br> Most addons can be removed once the player associated to

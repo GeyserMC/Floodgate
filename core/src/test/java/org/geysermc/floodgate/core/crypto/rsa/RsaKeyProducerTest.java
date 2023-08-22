@@ -23,30 +23,43 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.api;
+package org.geysermc.floodgate.core.crypto.rsa;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import java.nio.charset.StandardCharsets;
-import org.geysermc.floodgate.core.crypto.FloodgateDataCodec;
-import org.geysermc.floodgate.core.scope.ProxyOnly;
-import org.geysermc.floodgate.util.BedrockData;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
-@ProxyOnly
-@Singleton
-public final class ProxyFloodgateApi extends SimpleFloodgateApi {
-    @Inject FloodgateDataCodec dataCodec;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.Arrays;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
 
-    public byte[] createEncryptedData(BedrockData bedrockData) {
-        try {
-            return dataCodec.encodeFromString(bedrockData.toString());
-        } catch (Exception exception) {
-            throw new IllegalStateException("We failed to create the encrypted data, " +
-                    "but creating encrypted data is mandatory!", exception);
-        }
+final class RsaKeyProducerTest {
+    @Test
+    void produceSingle() {
+        var keys = new RsaKeyProducer().produce();
+        assertEquals(2, keys.size());
+
+        var key = keys.get(0);
+        assertInstanceOf(PrivateKey.class, key);
+        assertEquals("RSA", key.getAlgorithm());
+
+        key = keys.get(1);
+        assertInstanceOf(PublicKey.class, key);
+        assertEquals("RSA", key.getAlgorithm());
     }
 
-    public String createEncryptedDataString(BedrockData bedrockData) {
-        return new String(createEncryptedData(bedrockData), StandardCharsets.UTF_8);
+    @Test
+    void produceUnique() {
+        var sampleSize = 5;
+
+        var producer = new RsaKeyProducer();
+        // ignore the public key
+        var distinctKeys =
+                Stream.generate(() -> producer.produce().get(0))
+                        .limit(sampleSize)
+                        .map(key -> Arrays.toString(key.getEncoded()))
+                        .distinct();
+        assertEquals(sampleSize, distinctKeys.count());
     }
 }

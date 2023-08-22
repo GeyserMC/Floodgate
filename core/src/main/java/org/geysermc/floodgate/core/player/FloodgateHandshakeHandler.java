@@ -35,12 +35,11 @@ import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-
-import jakarta.inject.Singleton;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -52,7 +51,7 @@ import org.geysermc.floodgate.core.addon.data.HandshakeDataImpl;
 import org.geysermc.floodgate.core.addon.data.HandshakeHandlersImpl;
 import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
-import org.geysermc.floodgate.core.crypto.FloodgateCipher;
+import org.geysermc.floodgate.core.crypto.FloodgateDataCodec;
 import org.geysermc.floodgate.core.link.CommonPlayerLink;
 import org.geysermc.floodgate.core.skin.SkinUploadManager;
 import org.geysermc.floodgate.core.util.Constants;
@@ -68,7 +67,7 @@ public final class FloodgateHandshakeHandler {
     @Inject HandshakeHandlersImpl handshakeHandlers;
     @Inject SimpleFloodgateApi api;
     @Inject CommonPlayerLink link;
-    @Inject FloodgateCipher cipher;
+    @Inject FloodgateDataCodec dataCodec;
     @Inject FloodgateConfig config;
     @Inject SkinUploadManager skinUploadManager;
     @Inject
@@ -91,7 +90,7 @@ public final class FloodgateHandshakeHandler {
 
         StringBuilder builder = new StringBuilder();
         for (String value : hostnameItems) {
-            int version = FloodgateCipher.version(value);
+            int version = FloodgateDataCodec.version(value);
             if (floodgateData == null && version != -1) {
                 floodgateData = value;
                 dataVersion = version;
@@ -119,7 +118,7 @@ public final class FloodgateHandshakeHandler {
             String decrypted;
             try {
                 // the actual decryption of the data
-                decrypted = cipher.decryptToString(floodgateData);
+                decrypted = dataCodec.decodeToString(floodgateData);
             } catch (InvalidFormatException e) {
                 // when the Floodgate format couldn't be found
                 throw callHandlerAndReturnResult(

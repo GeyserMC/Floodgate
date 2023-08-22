@@ -23,30 +23,36 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.api;
+package org.geysermc.floodgate.core.crypto.aes;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import java.nio.charset.StandardCharsets;
-import org.geysermc.floodgate.core.crypto.FloodgateDataCodec;
-import org.geysermc.floodgate.core.scope.ProxyOnly;
-import org.geysermc.floodgate.util.BedrockData;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
-@ProxyOnly
-@Singleton
-public final class ProxyFloodgateApi extends SimpleFloodgateApi {
-    @Inject FloodgateDataCodec dataCodec;
+import java.util.Arrays;
+import java.util.stream.Stream;
+import javax.crypto.SecretKey;
+import org.junit.jupiter.api.Test;
 
-    public byte[] createEncryptedData(BedrockData bedrockData) {
-        try {
-            return dataCodec.encodeFromString(bedrockData.toString());
-        } catch (Exception exception) {
-            throw new IllegalStateException("We failed to create the encrypted data, " +
-                    "but creating encrypted data is mandatory!", exception);
-        }
+final class AesKeyProducerTest {
+    @Test
+    void produceSingle() {
+        var keys = new AesKeyProducer().produce();
+        assertEquals(1, keys.size());
+        var key = keys.get(0);
+        assertInstanceOf(SecretKey.class, key);
+        assertEquals("AES", key.getAlgorithm());
     }
 
-    public String createEncryptedDataString(BedrockData bedrockData) {
-        return new String(createEncryptedData(bedrockData), StandardCharsets.UTF_8);
+    @Test
+    void produceUnique() {
+        var sampleSize = 5;
+
+        var producer = new AesKeyProducer();
+        var distinctKeys =
+                Stream.generate(() -> producer.produce().get(0))
+                        .limit(sampleSize)
+                        .map(key -> Arrays.toString(key.getEncoded()))
+                        .distinct();
+        assertEquals(sampleSize, distinctKeys.count());
     }
 }

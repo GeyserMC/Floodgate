@@ -23,18 +23,12 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.crypto;
+package org.geysermc.floodgate.core.crypto.ed25519;
 
-import java.util.Base64;
+import org.geysermc.floodgate.core.crypto.KeyCodecPair;
 
-public final class Base64Topping implements Topping {
-    @Override
-    public byte[] encode(byte[] data) {
-        return Base64.getEncoder().encode(data);
-    }
-
-    @Override
-    public byte[] decode(byte[] data) {
-        return Base64.getDecoder().decode(data);
+public final class Ed25519KeyCodec extends KeyCodecPair {
+    public Ed25519KeyCodec() {
+        super("Ed25519");
     }
 }

@@ -25,16 +25,9 @@
 
 package org.geysermc.floodgate.core.crypto;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.Key;
+import java.util.List;
 
 public interface KeyProducer {
-    Key produce();
-    Key produceFrom(byte[] keyFileData);
-
-    default Key produceFrom(Path keyFileLocation) throws IOException {
-        return produceFrom(Files.readAllBytes(keyFileLocation));
-    }
+    List<Key> produce();
 }

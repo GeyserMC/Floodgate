@@ -23,30 +23,12 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.api;
+package org.geysermc.floodgate.core.crypto.ed25519;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import java.nio.charset.StandardCharsets;
-import org.geysermc.floodgate.core.crypto.FloodgateDataCodec;
-import org.geysermc.floodgate.core.scope.ProxyOnly;
-import org.geysermc.floodgate.util.BedrockData;
+import org.geysermc.floodgate.core.crypto.DataCodecKeyPair;
 
-@ProxyOnly
-@Singleton
-public final class ProxyFloodgateApi extends SimpleFloodgateApi {
-    @Inject FloodgateDataCodec dataCodec;
-
-    public byte[] createEncryptedData(BedrockData bedrockData) {
-        try {
-            return dataCodec.encodeFromString(bedrockData.toString());
-        } catch (Exception exception) {
-            throw new IllegalStateException("We failed to create the encrypted data, " +
-                    "but creating encrypted data is mandatory!", exception);
-        }
-    }
-
-    public String createEncryptedDataString(BedrockData bedrockData) {
-        return new String(createEncryptedData(bedrockData), StandardCharsets.UTF_8);
+public final class Ed25519DataCodec extends DataCodecKeyPair {
+    public Ed25519DataCodec() {
+        super("EdDSA", "Ed25519");
     }
 }

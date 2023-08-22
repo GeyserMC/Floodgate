@@ -72,6 +72,9 @@ jakarta-jsonb = { module = "jakarta.json.bind:jakarta.json.bind-api" }
 
 netty-codec = { module = "io.netty:netty-codec", version.ref = "netty" }
 
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+
 # database types
 h2 = { module = "com.h2database:h2" }
 

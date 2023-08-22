@@ -23,30 +23,23 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.api;
+package org.geysermc.floodgate.core.crypto;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import java.nio.charset.StandardCharsets;
-import org.geysermc.floodgate.core.crypto.FloodgateDataCodec;
-import org.geysermc.floodgate.core.scope.ProxyOnly;
-import org.geysermc.floodgate.util.BedrockData;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import javax.crypto.SecretKey;
 
-@ProxyOnly
-@Singleton
-public final class ProxyFloodgateApi extends SimpleFloodgateApi {
-    @Inject FloodgateDataCodec dataCodec;
-
-    public byte[] createEncryptedData(BedrockData bedrockData) {
-        try {
-            return dataCodec.encodeFromString(bedrockData.toString());
-        } catch (Exception exception) {
-            throw new IllegalStateException("We failed to create the encrypted data, " +
-                    "but creating encrypted data is mandatory!", exception);
-        }
+public interface KeyCodecSingle extends KeyCodec<SecretKey> {
+    default SecretKey decode(Path keyDirectory) throws IOException {
+        return decode(Files.readAllBytes(keyDirectory.resolve("floodgate.key")));
     }
 
-    public String createEncryptedDataString(BedrockData bedrockData) {
-        return new String(createEncryptedData(bedrockData), StandardCharsets.UTF_8);
+    default void encode(SecretKey key, Path keyDirectory) throws IOException {
+        Files.write(keyDirectory.resolve("floodgate.key"), encode(key));
     }
+
+    SecretKey decode(byte[] keyBytes);
+
+    byte[] encode(SecretKey key);
 }

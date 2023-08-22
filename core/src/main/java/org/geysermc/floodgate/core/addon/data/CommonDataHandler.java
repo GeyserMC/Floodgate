@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
-import org.geysermc.floodgate.core.crypto.FloodgateCipher;
+import org.geysermc.floodgate.core.crypto.FloodgateDataCodec;
 import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.core.player.HostnameSeparationResult;
@@ -76,11 +76,11 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
             return;
         }
 
-        if (separation.headerVersion() != FloodgateCipher.VERSION) {
+        if (separation.headerVersion() != FloodgateDataCodec.VERSION) {
             disablePacketQueue(true);
             setKickMessage(String.format(
                     Constants.UNSUPPORTED_DATA_VERSION,
-                    FloodgateCipher.VERSION, separation.headerVersion()
+                    FloodgateDataCodec.VERSION, separation.headerVersion()
             ));
             return;
         }

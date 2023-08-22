@@ -23,30 +23,27 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.api;
+package org.geysermc.floodgate.core.crypto.aes;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import java.nio.charset.StandardCharsets;
-import org.geysermc.floodgate.core.crypto.FloodgateDataCodec;
-import org.geysermc.floodgate.core.scope.ProxyOnly;
-import org.geysermc.floodgate.util.BedrockData;
+import java.util.Base64;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import org.geysermc.floodgate.core.crypto.KeyCodecSingle;
 
-@ProxyOnly
-@Singleton
-public final class ProxyFloodgateApi extends SimpleFloodgateApi {
-    @Inject FloodgateDataCodec dataCodec;
-
-    public byte[] createEncryptedData(BedrockData bedrockData) {
+public final class AesKeyCodec implements KeyCodecSingle {
+    @Override
+    public SecretKey decode(byte[] keyBytes) {
+        // we only started encoding keys with base64 since 3.0
+        // we ignore if it's not valid base64 to allow those old keys to keep working
         try {
-            return dataCodec.encodeFromString(bedrockData.toString());
-        } catch (Exception exception) {
-            throw new IllegalStateException("We failed to create the encrypted data, " +
-                    "but creating encrypted data is mandatory!", exception);
-        }
+            keyBytes = Base64.getDecoder().decode(keyBytes);
+        } catch (IllegalArgumentException ignored) {}
+
+        return new SecretKeySpec(keyBytes, "AES");
     }
 
-    public String createEncryptedDataString(BedrockData bedrockData) {
-        return new String(createEncryptedData(bedrockData), StandardCharsets.UTF_8);
+    @Override
+    public byte[] encode(SecretKey key) {
+        return Base64.getEncoder().encode(key.getEncoded());
     }
 }
