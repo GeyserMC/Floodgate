@@ -27,6 +27,8 @@ package org.geysermc.floodgate.core.connection.codec;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
@@ -47,6 +49,14 @@ final class CodecUtils {
         var bytes = value.getBytes(StandardCharsets.UTF_8);
         writeVarInt(stream, bytes.length);
         stream.write(bytes);
+    }
+
+    public static String readUnsignedLong(ByteBuffer buffer) {
+        return Long.toUnsignedString(buffer.getLong());
+    }
+
+    public static void writeUnsignedLong(DataOutputStream stream, String value) throws IOException {
+        stream.writeLong(Long.parseUnsignedLong(value));
     }
 
     public static int readVarInt(ByteBuffer buffer) {
@@ -79,5 +89,21 @@ final class CodecUtils {
     public static void writeUniqueId(DataOutputStream stream, UUID value) throws IOException {
         stream.writeLong(value.getMostSignificantBits());
         stream.writeLong(value.getLeastSignificantBits());
+    }
+
+    public static InetAddress readIp(ByteBuffer buffer) {
+        var address = new byte[buffer.get()];
+        buffer.get(address);
+        try {
+            return InetAddress.getByAddress(address);
+        } catch (UnknownHostException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
+    public static void writeIp(DataOutputStream stream, InetAddress ip) throws IOException {
+        var address = ip.getAddress();
+        stream.writeByte(address.length);
+        stream.write(address);
     }
 }

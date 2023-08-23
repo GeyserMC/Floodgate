@@ -26,6 +26,8 @@
 package org.geysermc.floodgate.core.addon.data;
 
 import io.netty.channel.Channel;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.Getter;
@@ -82,7 +84,9 @@ public class HandshakeDataImpl implements HandshakeData {
 
     public FloodgateConnection applyChanges(FloodgateConnection connection, String hostname, FloodgateConfig config) {
         var newLink = !Objects.equals(connection.linkedPlayer(), this.linkedPlayer) ? this.linkedPlayer : null;
-        var newIp = !connection.ip().equals(this.ip) ? this.ip : null;
+
+        var thisIp = convertIp(this.ip);
+        var newIp = !connection.ip().equals(thisIp) ? thisIp : null;
 
         // only change when there have been any changes
         if (newLink == null && newIp == null) {
@@ -104,5 +108,24 @@ public class HandshakeDataImpl implements HandshakeData {
     @Override
     public UUID getCorrectUniqueId() {
         return linkedPlayer != null ? linkedPlayer.getJavaUniqueId() : javaUniqueId;
+    }
+
+    private static InetAddress convertIp(String ip) {
+        String[] sections = ip.split("\\.");
+        // if not ipv4, expect ipv6
+        if (sections.length == 1) {
+            sections = ip.split(":");
+        }
+
+        byte[] addressBytes = new byte[sections.length];
+        for (int i = 0; i < sections.length; i++) {
+            addressBytes[i] = (byte) Integer.parseInt(sections[i]);
+        }
+
+        try {
+            return InetAddress.getByAddress(addressBytes);
+        } catch (UnknownHostException exception) {
+            throw new RuntimeException(exception);
+        }
     }
 }

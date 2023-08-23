@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.core.connection;
 
+import java.net.InetAddress;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -55,7 +56,7 @@ public final class FloodgateConnection implements Connection {
     private final String languageCode;
     private final UiProfile uiProfile;
     private final InputMode inputMode;
-    private final String ip;
+    private final InetAddress ip;
     private final LinkedPlayer linkedPlayer;
 
     private final int subscribeId;
@@ -109,7 +110,7 @@ public final class FloodgateConnection implements Connection {
         return inputMode;
     }
 
-    public @NonNull String ip() {
+    public @NonNull InetAddress ip() {
         return ip;
     }
 
@@ -152,7 +153,7 @@ public final class FloodgateConnection implements Connection {
     public BedrockData toBedrockData() {
         return BedrockData.of(
                 version, username, xuid, deviceOs.ordinal(), languageCode, uiProfile.ordinal(),
-                inputMode.ordinal(), ip, linkedPlayer, false, subscribeId, verifyCode
+                inputMode.ordinal(), ip.getHostAddress(), linkedPlayer, false, subscribeId, verifyCode
         );
     }
 

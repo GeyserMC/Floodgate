@@ -26,8 +26,12 @@
 package org.geysermc.floodgate.core.connection.codec;
 
 import static org.geysermc.floodgate.core.connection.codec.CodecUtils.readBool;
+import static org.geysermc.floodgate.core.connection.codec.CodecUtils.readIp;
 import static org.geysermc.floodgate.core.connection.codec.CodecUtils.readString;
+import static org.geysermc.floodgate.core.connection.codec.CodecUtils.readUnsignedLong;
+import static org.geysermc.floodgate.core.connection.codec.CodecUtils.writeIp;
 import static org.geysermc.floodgate.core.connection.codec.CodecUtils.writeString;
+import static org.geysermc.floodgate.core.connection.codec.CodecUtils.writeUnsignedLong;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -60,12 +64,12 @@ public final class FloodgateConnectionCodec {
     private void encode0(FloodgateConnection connection, DataOutputStream stream) throws IOException {
         writeString(stream, connection.version());
         writeString(stream, connection.bedrockUsername());
-        writeString(stream, connection.xuid());
+        writeUnsignedLong(stream, connection.xuid());
         stream.writeByte(connection.platform().ordinal());
         writeString(stream, connection.languageCode());
         stream.writeByte(connection.uiProfile().ordinal());
         stream.writeByte(connection.inputMode().ordinal());
-        writeString(stream, connection.ip());
+        writeIp(stream, connection.ip());
 
         stream.writeBoolean(connection.isLinked());
         if (connection.linkedPlayer() != null) {
@@ -77,12 +81,12 @@ public final class FloodgateConnectionCodec {
         var builder = new FloodgateConnectionBuilder(config)
                 .version(readString(buffer))
                 .username(readString(buffer))
-                .xuid(readString(buffer))
+                .xuid(readUnsignedLong(buffer))
                 .deviceOs(BedrockPlatform.fromId(buffer.get()))
                 .languageCode(readString(buffer))
                 .uiProfile(UiProfile.fromId(buffer.get()))
                 .inputMode(InputMode.fromId(buffer.get()))
-                .ip(readString(buffer));
+                .ip(readIp(buffer));
         if (readBool(buffer)) {
             builder.linkedPlayer(LinkedPlayerCodec.decode(buffer));
         }

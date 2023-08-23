@@ -25,6 +25,7 @@
 
 package org.geysermc.floodgate.core.connection;
 
+import java.net.InetAddress;
 import java.util.Objects;
 import java.util.UUID;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -45,7 +46,7 @@ public class FloodgateConnectionBuilder {
     private String languageCode;
     private UiProfile uiProfile;
     private InputMode inputMode;
-    private String ip;
+    private InetAddress ip;
     private LinkedPlayer linkedPlayer;
 
     public FloodgateConnectionBuilder(FloodgateConfig config) {
@@ -87,7 +88,7 @@ public class FloodgateConnectionBuilder {
         return this;
     }
 
-    public @This FloodgateConnectionBuilder ip(String ip) {
+    public @This FloodgateConnectionBuilder ip(InetAddress ip) {
         this.ip = Objects.requireNonNull(ip);
         return this;
     }
