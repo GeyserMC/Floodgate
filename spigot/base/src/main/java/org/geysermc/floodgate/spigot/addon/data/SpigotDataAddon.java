@@ -32,7 +32,7 @@ import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
-import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
+import org.geysermc.floodgate.core.connection.FloodgateHandshakeHandler;
 
 @Singleton
 public final class SpigotDataAddon implements InjectorAddon {

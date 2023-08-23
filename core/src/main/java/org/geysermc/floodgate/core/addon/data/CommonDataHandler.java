@@ -35,10 +35,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
+import org.geysermc.floodgate.core.connection.FloodgateHandshakeHandler;
+import org.geysermc.floodgate.core.connection.FloodgateHandshakeHandler.HandshakeResult;
+import org.geysermc.floodgate.core.connection.HostnameSeparationResult;
 import org.geysermc.floodgate.core.crypto.FloodgateDataCodec;
-import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
-import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler.HandshakeResult;
-import org.geysermc.floodgate.core.player.HostnameSeparationResult;
 import org.geysermc.floodgate.core.util.Constants;
 
 @RequiredArgsConstructor
@@ -115,7 +115,8 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
                         case DECRYPT_ERROR:
                             setKickMessage(config.disconnect().invalidKey());
                             break;
-                        case INVALID_DATA_LENGTH:
+                        case INVALID_DATA:
+                            //todo the message is not super accurate anymore with its current use
                             setKickMessage(config.disconnect().invalidArgumentsLength());
                             break;
                         default:

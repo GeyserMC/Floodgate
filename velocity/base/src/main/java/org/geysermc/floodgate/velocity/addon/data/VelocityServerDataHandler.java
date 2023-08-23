@@ -42,7 +42,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.core.api.ProxyFloodgateApi;
-import org.geysermc.floodgate.core.player.FloodgateConnection;
+import org.geysermc.floodgate.core.connection.FloodgateConnection;
 import org.geysermc.floodgate.util.BedrockData;
 
 @SuppressWarnings("ConstantConditions")

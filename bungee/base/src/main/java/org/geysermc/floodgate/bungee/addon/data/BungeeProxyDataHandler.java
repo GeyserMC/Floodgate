@@ -40,7 +40,7 @@ import net.md_5.bungee.protocol.packet.Handshake;
 import org.geysermc.floodgate.core.addon.data.CommonDataHandler;
 import org.geysermc.floodgate.core.addon.data.PacketBlocker;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
-import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
+import org.geysermc.floodgate.core.connection.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
 
 @SuppressWarnings("ConstantConditions")

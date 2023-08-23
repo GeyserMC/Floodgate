@@ -28,7 +28,7 @@ package org.geysermc.floodgate.spigot.player;
 import jakarta.inject.Singleton;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.geysermc.floodgate.core.player.ConnectionManager;
+import org.geysermc.floodgate.core.connection.ConnectionManager;
 
 @Singleton
 public class SpigotConnectionManager extends ConnectionManager {

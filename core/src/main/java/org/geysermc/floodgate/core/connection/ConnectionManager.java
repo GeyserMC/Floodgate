@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.player;
+package org.geysermc.floodgate.core.connection;
 
 import jakarta.inject.Inject;
 import java.util.Collection;

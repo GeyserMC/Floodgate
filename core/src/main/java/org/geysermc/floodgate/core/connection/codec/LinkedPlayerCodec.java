@@ -23,27 +23,28 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.player;
+package org.geysermc.floodgate.core.connection.codec;
 
-import cloud.commandframework.execution.preprocessor.CommandPreprocessingContext;
-import cloud.commandframework.execution.preprocessor.CommandPreprocessor;
-import lombok.RequiredArgsConstructor;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.geysermc.floodgate.core.platform.command.CommandUtil;
+import static org.geysermc.floodgate.core.connection.codec.CodecUtils.readString;
+import static org.geysermc.floodgate.core.connection.codec.CodecUtils.readUniqueId;
+import static org.geysermc.floodgate.core.connection.codec.CodecUtils.writeString;
+import static org.geysermc.floodgate.core.connection.codec.CodecUtils.writeUniqueId;
 
-/**
- * Command preprocessor which decorated incoming {@link cloud.commandframework.context.CommandContext}
- * with Floodgate specific objects
- *
- * @param <C> Command sender type
- * @since 2.0
- */
-@RequiredArgsConstructor
-public final class FloodgateCommandPreprocessor<C> implements CommandPreprocessor<C> {
-    private final CommandUtil commandUtil;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import org.geysermc.floodgate.util.LinkedPlayer;
 
-    @Override
-    public void accept(@NonNull CommandPreprocessingContext<C> context) {
-        context.getCommandContext().store("CommandUtil", commandUtil);
+public final class LinkedPlayerCodec {
+    private LinkedPlayerCodec() {}
+
+    public static void encode(LinkedPlayer linkedPlayer, DataOutputStream stream) throws IOException {
+        writeString(stream, linkedPlayer.getJavaUsername());
+        writeUniqueId(stream, linkedPlayer.getJavaUniqueId());
+        writeUniqueId(stream, linkedPlayer.getBedrockId());
+    }
+
+    public static LinkedPlayer decode(ByteBuffer buffer) {
+        return LinkedPlayer.of(readString(buffer), readUniqueId(buffer), readUniqueId(buffer));
     }
 }

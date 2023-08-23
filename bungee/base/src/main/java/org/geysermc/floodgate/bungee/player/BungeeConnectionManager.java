@@ -39,7 +39,7 @@ import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.netty.ChannelWrapper;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.api.connection.Connection;
-import org.geysermc.floodgate.core.player.ConnectionManager;
+import org.geysermc.floodgate.core.connection.ConnectionManager;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
 
 @Singleton

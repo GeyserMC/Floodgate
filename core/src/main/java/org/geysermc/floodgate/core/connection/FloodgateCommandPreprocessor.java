@@ -23,36 +23,27 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.command;
+package org.geysermc.floodgate.core.connection;
 
-import cloud.commandframework.Command;
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.context.CommandContext;
-import jakarta.inject.Singleton;
-import org.geysermc.api.Geyser;
-import org.geysermc.floodgate.core.config.FloodgateConfig;
-import org.geysermc.floodgate.core.connection.UserAudience;
-import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
-import org.geysermc.floodgate.core.util.Constants;
+import cloud.commandframework.execution.preprocessor.CommandPreprocessingContext;
+import cloud.commandframework.execution.preprocessor.CommandPreprocessor;
+import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.floodgate.core.platform.command.CommandUtil;
 
-@Singleton
-public class TestCommand implements FloodgateCommand {
-    @Override
-    public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
-        return commandManager.commandBuilder("floodgate-test")
-                .senderType(UserAudience.class)
-                .handler(this::execute)
-                .build();
-    }
+/**
+ * Command preprocessor which decorated incoming {@link cloud.commandframework.context.CommandContext}
+ * with Floodgate specific objects
+ *
+ * @param <C> Command sender type
+ * @since 2.0
+ */
+@RequiredArgsConstructor
+public final class FloodgateCommandPreprocessor<C> implements CommandPreprocessor<C> {
+    private final CommandUtil commandUtil;
 
     @Override
-    public void execute(CommandContext<UserAudience> context) {
-        int players = Geyser.api().onlineConnectionsCount();
-        context.getSender().sendMessage(String.valueOf(players));
-    }
-
-    @Override
-    public boolean shouldRegister(FloodgateConfig config) {
-        return Constants.DEBUG_MODE;
+    public void accept(@NonNull CommandPreprocessingContext<C> context) {
+        context.getCommandContext().store("CommandUtil", commandUtil);
     }
 }

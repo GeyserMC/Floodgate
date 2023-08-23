@@ -37,7 +37,6 @@ import lombok.Getter;
 import org.geysermc.configutils.ConfigUtilities;
 import org.geysermc.configutils.file.codec.PathFileCodec;
 import org.geysermc.configutils.updater.change.Changes;
-import org.geysermc.floodgate.core.crypto.DataCodec;
 import org.geysermc.floodgate.core.crypto.FloodgateDataCodec;
 import org.geysermc.floodgate.core.scope.ProxyOnly;
 import org.geysermc.floodgate.core.scope.ServerOnly;
@@ -51,11 +50,7 @@ public final class ConfigLoader {
     private final FloodgateDataCodec dataCodec;
 
     @Inject
-    ConfigLoader(
-            @Named("dataDirectory") Path dataDirectory,
-            FloodgateDataCodec dataCodec,
-            DataCodec cipher
-    ) {
+    ConfigLoader(@Named("dataDirectory") Path dataDirectory, FloodgateDataCodec dataCodec) {
         this.dataDirectory = dataDirectory;
         this.dataCodec = dataCodec;
     }

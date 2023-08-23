@@ -28,7 +28,6 @@ package org.geysermc.floodgate.core.crypto;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import jakarta.inject.Named;
-import jakarta.inject.Singleton;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
@@ -36,7 +35,6 @@ import java.util.Objects;
 import org.geysermc.floodgate.core.crypto.topping.Topping;
 import org.geysermc.floodgate.core.util.InvalidFormatException;
 
-@Singleton
 public final class FloodgateDataCodec {
     public static final int VERSION = 2;
     public static final byte[] IDENTIFIER = "^Floodgate^".getBytes(UTF_8);

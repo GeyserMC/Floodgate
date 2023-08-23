@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.player.audience;
+package org.geysermc.floodgate.core.connection.audience;
 
 import cloud.commandframework.arguments.CommandArgument;
 import cloud.commandframework.arguments.parser.ArgumentParseResult;
@@ -37,9 +37,9 @@ import java.util.Queue;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.floodgate.core.connection.UserAudience;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
 import org.geysermc.floodgate.core.platform.util.PlayerType;
-import org.geysermc.floodgate.core.player.UserAudience;
 
 public class ProfileAudienceArgument extends CommandArgument<UserAudience, ProfileAudience> {
     private ProfileAudienceArgument(@NonNull String name, ProfileAudienceParser parser) {

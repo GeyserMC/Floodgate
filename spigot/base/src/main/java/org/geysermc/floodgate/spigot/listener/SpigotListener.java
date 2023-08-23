@@ -34,8 +34,8 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
+import org.geysermc.floodgate.core.connection.ConnectionManager;
 import org.geysermc.floodgate.core.listener.McListener;
-import org.geysermc.floodgate.core.player.ConnectionManager;
 import org.geysermc.floodgate.core.util.LanguageManager;
 
 @Singleton

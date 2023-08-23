@@ -29,7 +29,7 @@ import java.util.UUID;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.player.PropertyKey;
-import org.geysermc.floodgate.core.player.FloodgateConnection;
+import org.geysermc.floodgate.core.connection.FloodgateConnection;
 import org.geysermc.floodgate.util.DeviceOs;
 import org.geysermc.floodgate.util.InputMode;
 import org.geysermc.floodgate.util.LinkedPlayer;

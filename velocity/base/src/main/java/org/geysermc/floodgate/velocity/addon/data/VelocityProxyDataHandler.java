@@ -42,9 +42,9 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.addon.data.CommonDataHandler;
 import org.geysermc.floodgate.core.addon.data.PacketBlocker;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
-import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
-import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler.HandshakeResult;
-import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler.ResultType;
+import org.geysermc.floodgate.core.connection.FloodgateHandshakeHandler;
+import org.geysermc.floodgate.core.connection.FloodgateHandshakeHandler.HandshakeResult;
+import org.geysermc.floodgate.core.connection.FloodgateHandshakeHandler.ResultType;
 
 public final class VelocityProxyDataHandler extends CommonDataHandler {
     private static final Field HANDSHAKE;

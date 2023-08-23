@@ -41,7 +41,7 @@ import net.md_5.bungee.netty.PacketHandler;
 import net.md_5.bungee.protocol.packet.Handshake;
 import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.core.api.ProxyFloodgateApi;
-import org.geysermc.floodgate.core.player.FloodgateConnection;
+import org.geysermc.floodgate.core.connection.FloodgateConnection;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
 import org.geysermc.floodgate.util.BedrockData;
 

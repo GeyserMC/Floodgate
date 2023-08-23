@@ -34,12 +34,12 @@ import jakarta.inject.Singleton;
 import lombok.Getter;
 import org.geysermc.floodgate.core.command.util.Permission;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
+import org.geysermc.floodgate.core.connection.UserAudience;
+import org.geysermc.floodgate.core.connection.UserAudience.PlayerAudience;
 import org.geysermc.floodgate.core.link.CommonPlayerLink;
 import org.geysermc.floodgate.core.link.GlobalPlayerLinking;
 import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
-import org.geysermc.floodgate.core.player.UserAudience;
-import org.geysermc.floodgate.core.player.UserAudience.PlayerAudience;
 import org.geysermc.floodgate.core.util.Constants;
 
 @Singleton

@@ -36,7 +36,7 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.addon.data.PacketBlocker;
 import org.geysermc.floodgate.core.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
-import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
+import org.geysermc.floodgate.core.connection.FloodgateHandshakeHandler;
 
 @Singleton
 public final class VelocityDataAddon implements InjectorAddon {

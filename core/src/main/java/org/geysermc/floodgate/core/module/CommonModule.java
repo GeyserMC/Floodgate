@@ -31,6 +31,7 @@ import io.micronaut.context.annotation.Factory;
 import io.netty.util.AttributeKey;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
@@ -41,8 +42,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.core.crypto.DataCodecType;
-import org.geysermc.floodgate.core.crypto.KeyProducer;
-import org.geysermc.floodgate.core.crypto.aes.AesKeyProducer;
+import org.geysermc.floodgate.core.crypto.FloodgateDataCodec;
 import org.geysermc.floodgate.core.crypto.topping.Base64Topping;
 import org.geysermc.floodgate.core.crypto.topping.Topping;
 import org.geysermc.floodgate.core.util.Constants;
@@ -70,15 +70,9 @@ public class CommonModule {
     @Singleton
     @Named("dataDirectory")
     public Path dataDirectory() {
-        // todo open discussion asking how you can register bootstrap context beans
+        // todo discussion asking how you can register bootstrap context beans
+        //  https://github.com/micronaut-projects/micronaut-core/discussions/9191
         return Paths.get("plugins", "floodgate");
-    }
-
-    @Bean
-    @BootstrapContextCompatible
-    @Singleton
-    public KeyProducer keyProducer() {
-        return GlobalBeanCache.cacheIfAbsent("keyProducer", AesKeyProducer::new);
     }
 
     @Bean
@@ -95,6 +89,24 @@ public class CommonModule {
     @Singleton
     public Topping topping() {
         return GlobalBeanCache.cacheIfAbsent("topping", Base64Topping::new);
+    }
+
+    @Bean
+    @BootstrapContextCompatible
+    @Singleton
+    public FloodgateDataCodec dataCodec(
+            DataCodecType type,
+            Topping topping,
+            @Named("dataDirectory") Path dataDirectory
+    ) {
+        //todo find a way to not use bootstrap context, yuk
+        return GlobalBeanCache.cacheIfAbsent("dataCodec", () -> {
+            try {
+                return new FloodgateDataCodec(type, topping, dataDirectory);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Bean

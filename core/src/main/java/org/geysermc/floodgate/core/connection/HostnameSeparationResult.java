@@ -23,20 +23,29 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.player.audience;
+package org.geysermc.floodgate.core.connection;
 
-import java.util.UUID;
-import lombok.Getter;
-import lombok.experimental.Accessors;
-import org.checkerframework.checker.nullness.qual.Nullable;
+public class HostnameSeparationResult {
+    private final String floodgateData;
+    private final int headerVersion;
+    private final String hostnameRemainder;
 
-@Getter @Accessors(fluent = true)
-public final class ProfileAudience {
-    private final @Nullable UUID uuid;
-    private final @Nullable String username;
+    public HostnameSeparationResult(
+            String floodgateData, int headerVersion, String hostnameRemainder) {
+        this.floodgateData = floodgateData;
+        this.headerVersion = headerVersion;
+        this.hostnameRemainder = hostnameRemainder;
+    }
 
-    public ProfileAudience(@Nullable UUID uuid, @Nullable String username) {
-        this.uuid = uuid;
-        this.username = username;
+    public String floodgateData() {
+        return floodgateData;
+    }
+
+    public int headerVersion() {
+        return headerVersion;
+    }
+
+    public String hostnameRemainder() {
+        return hostnameRemainder;
     }
 }
