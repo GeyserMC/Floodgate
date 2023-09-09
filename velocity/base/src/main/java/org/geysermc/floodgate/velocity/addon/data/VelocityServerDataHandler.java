@@ -71,7 +71,6 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
     }
 
     private final ProxyFloodgateApi api;
-    //private final AttributeKey<FloodgatePlayer> playerAttribute;
 
     public VelocityServerDataHandler(ProxyFloodgateApi api) {
         this.api = api;
@@ -91,13 +90,6 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
             //noinspection ConstantConditions
             Connection player = api.connectionByUuid(velocityPlayer.getUniqueId());
 
-            //todo use something similar to what's written below for a more direct approach
-
-            // get the Proxy <-> Player channel from the Proxy <-> Server channel
-            //MinecraftConnection minecraftConnection = ctx.pipeline().get("handler");
-            //((VelocityServerConnection) minecraftConnection.association).proxyPlayer.connection.channel
-
-            //FloodgatePlayer player = playerChannel.attr(playerAttribute).get();
             if (player != null) {
                 // Player is a Floodgate player
                 BedrockData data = ((FloodgateConnection) player).toBedrockData();

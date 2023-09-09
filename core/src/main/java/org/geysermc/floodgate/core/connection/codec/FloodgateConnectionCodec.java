@@ -28,9 +28,11 @@ package org.geysermc.floodgate.core.connection.codec;
 import static org.geysermc.floodgate.core.connection.codec.CodecUtils.readBool;
 import static org.geysermc.floodgate.core.connection.codec.CodecUtils.readIp;
 import static org.geysermc.floodgate.core.connection.codec.CodecUtils.readString;
+import static org.geysermc.floodgate.core.connection.codec.CodecUtils.readUniqueId;
 import static org.geysermc.floodgate.core.connection.codec.CodecUtils.readUnsignedLong;
 import static org.geysermc.floodgate.core.connection.codec.CodecUtils.writeIp;
 import static org.geysermc.floodgate.core.connection.codec.CodecUtils.writeString;
+import static org.geysermc.floodgate.core.connection.codec.CodecUtils.writeUniqueId;
 import static org.geysermc.floodgate.core.connection.codec.CodecUtils.writeUnsignedLong;
 
 import jakarta.inject.Inject;
@@ -64,6 +66,7 @@ public final class FloodgateConnectionCodec {
     private void encode0(FloodgateConnection connection, DataOutputStream stream) throws IOException {
         writeString(stream, connection.version());
         writeString(stream, connection.bedrockUsername());
+        writeUniqueId(stream, connection.identifier());
         writeUnsignedLong(stream, connection.xuid());
         stream.writeByte(connection.platform().ordinal());
         writeString(stream, connection.languageCode());
@@ -81,6 +84,7 @@ public final class FloodgateConnectionCodec {
         var builder = new FloodgateConnectionBuilder(config)
                 .version(readString(buffer))
                 .username(readString(buffer))
+                .identifier(readUniqueId(buffer))
                 .xuid(readUnsignedLong(buffer))
                 .deviceOs(BedrockPlatform.fromId(buffer.get()))
                 .languageCode(readString(buffer))

@@ -49,9 +49,10 @@ import org.geysermc.floodgate.util.LinkedPlayer;
 public final class FloodgateConnection implements Connection {
     private final String version;
     private final String username;
+    private final UUID identifier;
+    private final String xuid;
     private final String javaUsername;
     private final UUID javaUniqueId;
-    private final String xuid;
     private final BedrockPlatform deviceOs;
     private final String languageCode;
     private final UiProfile uiProfile;
@@ -70,6 +71,15 @@ public final class FloodgateConnection implements Connection {
         return username;
     }
 
+    public @NonNull UUID identifier() {
+        return identifier;
+    }
+
+    @Override
+    public @NonNull String xuid() {
+        return xuid;
+    }
+
     @Override
     public @MonotonicNonNull String javaUsername() {
         return linkedPlayer != null ? linkedPlayer.getJavaUsername() : javaUsername;
@@ -78,11 +88,6 @@ public final class FloodgateConnection implements Connection {
     @Override
     public @MonotonicNonNull UUID javaUuid() {
         return linkedPlayer != null ? linkedPlayer.getJavaUniqueId() : javaUniqueId;
-    }
-
-    @Override
-    public @NonNull String xuid() {
-        return xuid;
     }
 
     @Override
@@ -141,6 +146,7 @@ public final class FloodgateConnection implements Connection {
     public void fillBuilder(FloodgateConnectionBuilder builder) {
         builder.version(version)
                 .username(username)
+                .identifier(identifier)
                 .xuid(xuid)
                 .deviceOs(deviceOs)
                 .languageCode(languageCode)
@@ -159,7 +165,7 @@ public final class FloodgateConnection implements Connection {
 
     public LegacyPlayerWrapper legacySelf() {
         if (legacyPlayer == null) {
-            legacyPlayer = new LegacyPlayerWrapper(this);
+            legacyPlayer = new LegacyPlayerWrapper(this, javaUsername, javaUniqueId);
         }
         return legacyPlayer;
     }

@@ -41,6 +41,7 @@ public class FloodgateConnectionBuilder {
     private final FloodgateConfig config;
     private String version;
     private String username;
+    private UUID identifier;
     private String xuid;
     private BedrockPlatform deviceOs;
     private String languageCode;
@@ -60,6 +61,11 @@ public class FloodgateConnectionBuilder {
 
     public @This FloodgateConnectionBuilder username(String username) {
         this.username = Objects.requireNonNull(username);
+        return this;
+    }
+
+    public @This FloodgateConnectionBuilder identifier(UUID identifier) {
+        this.identifier = Objects.requireNonNull(identifier);
         return this;
     }
 
@@ -105,9 +111,10 @@ public class FloodgateConnectionBuilder {
         return new FloodgateConnection(
                 version,
                 username,
+                identifier,
+                xuid,
                 javaUsername(),
                 javaUniqueId,
-                xuid,
                 deviceOs,
                 languageCode,
                 uiProfile,

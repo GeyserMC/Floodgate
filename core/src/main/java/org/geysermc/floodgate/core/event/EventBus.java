@@ -26,16 +26,12 @@
 package org.geysermc.floodgate.core.event;
 
 import io.micronaut.context.ApplicationContext;
-import io.micronaut.core.annotation.AnnotationMetadata;
-import io.micronaut.inject.qualifiers.Qualifiers;
-import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.event.FireResult;
-import org.geysermc.event.Listener;
 import org.geysermc.event.PostOrder;
 import org.geysermc.event.bus.impl.EventBusImpl;
 import org.geysermc.event.subscribe.Subscribe;
@@ -55,16 +51,6 @@ public class EventBus extends EventBusImpl<Object, FloodgateSubscriber<?>>
         context.getEventPublisher((Class) event.getClass()).publishEvent(event);
         // todo differentiate internal events from public events
         return super.fire(event);
-    }
-
-    @PostConstruct
-    void registerListeners(ApplicationContext context) {
-        // https://github.com/micronaut-projects/micronaut-core/issues/8881
-        // todo this doesn't really seem to work?
-        context.getBeansOfType(
-                Object.class,
-                Qualifiers.byAnnotation(AnnotationMetadata.EMPTY_METADATA, Listener.class)
-        ).forEach(this::register);
     }
 
     @Override
