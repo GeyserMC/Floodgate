@@ -7,24 +7,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository and submodules
-        uses: actions/checkout@v3
+        # See https://github.com/actions/checkout/commits
+        uses: actions/checkout@72f2cec99f417b1a1c5e2e88945068983b7965f9
         with:
           submodules: recursive
 
-      - uses: actions/setup-java@v3
+      - name: Validate Gradle Wrapper
+        # See https://github.com/gradle/wrapper-validation-action/commits
+        uses: gradle/wrapper-validation-action@56b90f209b02bf6d1deae490e9ef18b21a389cd4
+
+        # See https://github.com/actions/setup-java/commits
+      - uses: actions/setup-java@4075bfc1b51bf22876335ae1cd589602d60d8758
         with:
           java-version: 17
           distribution: temurin
 
       - name: Build
-        uses: gradle/gradle-build-action@v2
+        # See https://github.com/gradle/gradle-build-action/commits
+        uses: gradle/gradle-build-action@3bfe3a46584a206fb8361cdedd0647b0c4204232
         with:
           arguments: build
           cache-read-only: ${{ github.ref_name != 'master' && github.ref_name != 'development' }}
 
       - name: Publish to Maven Repository
         if: ${{ github.repository == 'GeyserMC/Floodgate' }}
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@3bfe3a46584a206fb8361cdedd0647b0c4204232
         env:
           ORG_GRADLE_PROJECT_geysermcUsername: ${{ vars.DEPLOY_USER }}
           ORG_GRADLE_PROJECT_geysermcPassword: ${{ secrets.DEPLOY_PASS }}
@@ -65,6 +72,7 @@ jobs:
 
       - name: Notify Discord
         if: ${{ (success() || failure()) && github.repository == 'GeyserMC/Floodgate' }}
-        uses: Tim203/actions-git-discord-webhook@main
+        # See https://github.com/Tim203/actions-git-discord-webhook/commits
+        uses: Tim203/actions-git-discord-webhook@70f38ded3aca51635ec978ab4e1a58cd4cd0c2ff
         with:
           webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
