@@ -21,5 +21,5 @@ provided("com.google.code.gson", "gson", gsonVersion)
 provided("com.google.guava", "guava", guavaVersion)
 
 // PROJECT-G: Override these dependencies present in Geyser
-provided("org.geysermc", "common", Versions.geyserVersion)
+provided("org.geysermc.geyser", "common", Versions.geyserVersion)
 provided("org.geysermc.cumulus", "cumulus", Versions.cumulusVersion)
