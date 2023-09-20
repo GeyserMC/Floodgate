@@ -71,12 +71,15 @@ public final class PlayerLinkHolder {
     private URLClassLoader classLoader;
     private PlayerLink instance;
 
-    @NonNull
-    public PlayerLink load() {
+    public @NonNull PlayerLink load() {
         if (instance != null) {
             return instance;
         }
+        instance = load0();
+        return instance;
+    }
 
+    private @NonNull PlayerLink load0() {
         if (config == null) {
             throw new IllegalStateException("Config cannot be null!");
         }
@@ -189,7 +192,7 @@ public final class PlayerLinkHolder {
             });
             injectorHolder.set(linkInjector);
 
-            instance = linkInjector.getInstance(mainClass);
+            PlayerLink instance = linkInjector.getInstance(mainClass);
 
             // we use our own internal PlayerLinking when global linking is enabled
             if (linkConfig.isEnableGlobalLinking()) {
@@ -220,6 +223,8 @@ public final class PlayerLinkHolder {
     @Subscribe
     public void onShutdown(ShutdownEvent ignored) throws Exception {
         instance.stop();
-        classLoader.close();
+        if (classLoader != null) {
+            classLoader.close();
+        }
     }
 }
