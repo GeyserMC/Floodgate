@@ -74,8 +74,6 @@ public final class SpigotDataHandler extends CommonDataHandler {
                     ClassNames.HANDSHAKE_INTENTION.get(handshakePacket)
                 };
 
-                System.out.println(components + " ");
-
                 return ClassNames.HANDSHAKE_PACKET_CONSTRUCTOR.newInstance(components);
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
@@ -127,7 +125,7 @@ public final class SpigotDataHandler extends CommonDataHandler {
 
     @Override
     public boolean channelRead(Object packet) throws Exception {
-                if (ClassNames.HANDSHAKE_PACKET.isInstance(packet)) {
+        if (ClassNames.HANDSHAKE_PACKET.isInstance(packet)) {
             // ProtocolSupport would break if we added this during the creation of this handler
             ctx.pipeline().addAfter("splitter", "floodgate_packet_blocker", blocker);
 
