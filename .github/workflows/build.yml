@@ -22,6 +22,27 @@ jobs:
           arguments: build
           cache-read-only: ${{ github.ref_name != 'master' && github.ref_name != 'development' }}
 
+      - name: Archive artifacts (Floodgate Bungee)
+        uses: actions/upload-artifact@v2
+        if: success()
+        with:
+          name: Floodgate Bungee
+          path: bungee/build/libs/floodgate-bungee.jar
+  
+      - name: Archive artifacts (Floodgate Spigot)
+        uses: actions/upload-artifact@v2
+        if: success()
+        with:
+          name: Floodgate Spigot
+          path: spigot/build/libs/floodgate-spigot.jar
+  
+      - name: Archive artifacts (Floodgate Velocity)
+        uses: actions/upload-artifact@v2
+        if: success()
+        with:
+          name: Floodgate Velocity
+          path: velocity/build/libs/floodgate-velocity.jar
+
       - name: Publish to Maven Repository
         if: ${{ github.repository == 'GeyserMC/Floodgate' }}
         uses: gradle/gradle-build-action@v2
