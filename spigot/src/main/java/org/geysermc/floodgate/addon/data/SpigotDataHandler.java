@@ -31,6 +31,7 @@ import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
 import com.mojang.authlib.GameProfile;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
@@ -58,8 +59,30 @@ public final class SpigotDataHandler extends CommonDataHandler {
 
     @Override
     protected Object setHostname(Object handshakePacket, String hostname) {
-        setValue(handshakePacket, ClassNames.HANDSHAKE_HOST, hostname);
-        return handshakePacket;
+        if (ClassNames.IS_PRE_1_20_2) {
+            // 1.20.1 and below
+            setValue(handshakePacket, ClassNames.HANDSHAKE_HOST, hostname);
+
+            return handshakePacket;
+        } else {
+            // 1.20.2 and above
+            try {
+                Object[] components = new Object[]{
+                    ClassNames.HANDSHAKE_PORT.get(handshakePacket),
+                    hostname,
+                    ClassNames.HANDSHAKE_PROTOCOL.get(handshakePacket),
+                    ClassNames.HANDSHAKE_INTENTION.get(handshakePacket)
+                };
+
+                System.out.println(components + " ");
+
+                return ClassNames.HANDSHAKE_PACKET_CONSTRUCTOR.newInstance(components);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+
+                return handshakePacket;
+            }
+        }
     }
 
     @Override
@@ -104,7 +127,7 @@ public final class SpigotDataHandler extends CommonDataHandler {
 
     @Override
     public boolean channelRead(Object packet) throws Exception {
-        if (ClassNames.HANDSHAKE_PACKET.isInstance(packet)) {
+                if (ClassNames.HANDSHAKE_PACKET.isInstance(packet)) {
             // ProtocolSupport would break if we added this during the creation of this handler
             ctx.pipeline().addAfter("splitter", "floodgate_packet_blocker", blocker);
 
@@ -154,8 +177,14 @@ public final class SpigotDataHandler extends CommonDataHandler {
             );
             setValue(packetListener, ClassNames.LOGIN_PROFILE, gameProfile);
 
-            // we have to fake the offline player (login) cycle
-            // just like on Spigot:
+                    // we have to fake the offline player (login) cycle
+        // just like on Spigot:
+
+        Object loginHandler =
+                ClassNames.LOGIN_HANDLER_CONSTRUCTOR.newInstance(packetListener);
+
+        if (ClassNames.IS_PRE_1_20_2) {
+            // 1.20.1 and below
 
             // LoginListener#initUUID
             // new LoginHandler().fireEvents();
@@ -163,12 +192,15 @@ public final class SpigotDataHandler extends CommonDataHandler {
             // and the tick of LoginListener will do the rest
 
             ClassNames.INIT_UUID.invoke(packetListener);
-
-            Object loginHandler =
-                    ClassNames.LOGIN_HANDLER_CONSTRUCTOR.newInstance(packetListener);
             ClassNames.FIRE_LOGIN_EVENTS.invoke(loginHandler);
+        } else {
+            // 1.20.2 and above we directly register the profile
+
+            ClassNames.FIRE_LOGIN_EVENTS_GAME_PROFILE.invoke(loginHandler, gameProfile);
+        }
 
             ctx.pipeline().remove(this);
+
             return true;
         }
         return false;

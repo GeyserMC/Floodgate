@@ -1,3 +1,8 @@
+plugins {
+    // allow resolution of compileOnlyApi dependencies in Eclipse
+    id("eclipse")
+}
+
 dependencies {
   provided(projects.core)
 
@@ -15,3 +20,10 @@ description = "The Floodgate database extension for MySQL"
 relocate("com.mysql")
 relocate("com.zaxxer.hikari")
 relocate("org.slf4j")
+
+eclipse {
+    classpath {
+    	configurations.compileOnlyApi.get().setCanBeResolved(true)
+        plusConfigurations.add( configurations.compileOnlyApi.get() )
+   	}
+}
