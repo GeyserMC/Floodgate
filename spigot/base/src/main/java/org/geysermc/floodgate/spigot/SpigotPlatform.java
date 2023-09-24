@@ -33,6 +33,7 @@ import org.geysermc.floodgate.core.FloodgatePlatform;
 import org.geysermc.floodgate.isolation.library.LibraryManager;
 import org.geysermc.floodgate.spigot.util.SpigotProtocolSupportHandler;
 import org.geysermc.floodgate.spigot.util.SpigotProtocolSupportListener;
+import org.slf4j.LoggerFactory;
 
 public class SpigotPlatform extends FloodgatePlatform {
     private final JavaPlugin plugin;
@@ -47,7 +48,7 @@ public class SpigotPlatform extends FloodgatePlatform {
     protected void onContextCreated(ApplicationContext context) {
         context.registerSingleton(plugin)
                 .registerSingleton(plugin.getServer())
-                .registerSingleton(plugin.getSLF4JLogger())
+                .registerSingleton(LoggerFactory.getLogger(plugin.getLogger().getName()))
                 .registerSingleton(
                         Path.class,
                         plugin.getDataFolder().toPath(),
