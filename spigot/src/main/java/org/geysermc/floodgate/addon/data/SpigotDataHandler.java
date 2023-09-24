@@ -46,9 +46,9 @@ public final class SpigotDataHandler extends CommonDataHandler {
     private boolean proxyData;
 
     public SpigotDataHandler(
-            FloodgateHandshakeHandler handshakeHandler,
-            FloodgateConfig config,
-            AttributeKey<String> kickMessageAttribute) {
+                             FloodgateHandshakeHandler handshakeHandler,
+                             FloodgateConfig config,
+                             AttributeKey<String> kickMessageAttribute) {
         super(handshakeHandler, config, kickMessageAttribute, new PacketBlocker());
     }
 
@@ -68,14 +68,15 @@ public final class SpigotDataHandler extends CommonDataHandler {
             // 1.20.2 and above
             try {
                 Object[] components = new Object[]{
-                    ClassNames.HANDSHAKE_PORT.get(handshakePacket),
-                    hostname,
-                    ClassNames.HANDSHAKE_PROTOCOL.get(handshakePacket),
-                    ClassNames.HANDSHAKE_INTENTION.get(handshakePacket)
+                        ClassNames.HANDSHAKE_PORT.get(handshakePacket),
+                        hostname,
+                        ClassNames.HANDSHAKE_PROTOCOL.get(handshakePacket),
+                        ClassNames.HANDSHAKE_INTENTION.get(handshakePacket)
                 };
 
                 return ClassNames.HANDSHAKE_PACKET_CONSTRUCTOR.newInstance(components);
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            } catch (InstantiationException | IllegalAccessException |
+                     InvocationTargetException e) {
                 e.printStackTrace();
 
                 return handshakePacket;
@@ -175,27 +176,26 @@ public final class SpigotDataHandler extends CommonDataHandler {
             );
             setValue(packetListener, ClassNames.LOGIN_PROFILE, gameProfile);
 
-                    // we have to fake the offline player (login) cycle
-        // just like on Spigot:
+            // we have to fake the offline player (login) cycle
+            // just like on Spigot:
 
-        Object loginHandler =
-                ClassNames.LOGIN_HANDLER_CONSTRUCTOR.newInstance(packetListener);
+            Object loginHandler = ClassNames.LOGIN_HANDLER_CONSTRUCTOR.newInstance(packetListener);
 
-        if (ClassNames.IS_PRE_1_20_2) {
-            // 1.20.1 and below
+            if (ClassNames.IS_PRE_1_20_2) {
+                // 1.20.1 and below
 
-            // LoginListener#initUUID
-            // new LoginHandler().fireEvents();
+                // LoginListener#initUUID
+                // new LoginHandler().fireEvents();
 
-            // and the tick of LoginListener will do the rest
+                // and the tick of LoginListener will do the rest
 
-            ClassNames.INIT_UUID.invoke(packetListener);
-            ClassNames.FIRE_LOGIN_EVENTS.invoke(loginHandler);
-        } else {
-            // 1.20.2 and above we directly register the profile
+                ClassNames.INIT_UUID.invoke(packetListener);
+                ClassNames.FIRE_LOGIN_EVENTS.invoke(loginHandler);
+            } else {
+                // 1.20.2 and above we directly register the profile
 
-            ClassNames.FIRE_LOGIN_EVENTS_GAME_PROFILE.invoke(loginHandler, gameProfile);
-        }
+                ClassNames.FIRE_LOGIN_EVENTS_GAME_PROFILE.invoke(loginHandler, gameProfile);
+            }
 
             ctx.pipeline().remove(this);
 

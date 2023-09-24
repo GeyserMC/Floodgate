@@ -94,7 +94,6 @@ public class ClassNames {
         String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
         SPIGOT_MAPPING_PREFIX = "net.minecraft.server." + version;
 
-
         // SpigotSkinApplier
         Class<?> craftPlayerClass = ReflectionUtils.getClass(
                 "org.bukkit.craftbukkit." + version + ".entity.CraftPlayer");
@@ -102,7 +101,6 @@ public class ClassNames {
         checkNotNull(GET_PROFILE_METHOD, "Get profile method");
 
         String nmsPackage = SPIGOT_MAPPING_PREFIX + '.';
-
 
         // SpigotInjector
         MINECRAFT_SERVER = getClassOrFallback(
@@ -169,8 +167,8 @@ public class ClassNames {
 
         if (IS_PRE_1_20_2) {
             Class<?> packetListenerClass = getClassOrFallback(
-                "net.minecraft.network.PacketListener",
-                nmsPackage + "PacketListener"
+                    "net.minecraft.network.PacketListener",
+                    nmsPackage + "PacketListener"
             );
 
             PACKET_LISTENER = getFieldOfType(networkManager, packetListenerClass);
@@ -188,15 +186,16 @@ public class ClassNames {
                 nmsPackage + "LoginListener$LoginHandler"
         );
 
-        LOGIN_HANDLER_CONSTRUCTOR =
-                ReflectionUtils.getConstructor(LOGIN_HANDLER, true, LOGIN_LISTENER);
+        LOGIN_HANDLER_CONSTRUCTOR = ReflectionUtils.getConstructor(LOGIN_HANDLER, true,
+                LOGIN_LISTENER);
         checkNotNull(LOGIN_HANDLER_CONSTRUCTOR, "LoginHandler constructor");
 
         FIRE_LOGIN_EVENTS = getMethod(LOGIN_HANDLER, "fireEvents");
 
         // LoginHandler().fireEvents(GameProfile)
         FIRE_LOGIN_EVENTS_GAME_PROFILE = getMethod(LOGIN_HANDLER, "fireEvents", GameProfile.class);
-        checkNotNull(FIRE_LOGIN_EVENTS, FIRE_LOGIN_EVENTS_GAME_PROFILE, "fireEvents from LoginHandler", "fireEvents(GameProfile) from LoginHandler");
+        checkNotNull(FIRE_LOGIN_EVENTS, FIRE_LOGIN_EVENTS_GAME_PROFILE,
+                "fireEvents from LoginHandler", "fireEvents(GameProfile) from LoginHandler");
 
         PAPER_DISABLE_USERNAME_VALIDATION = getField(LOGIN_LISTENER,
                 "iKnowThisMayNotBeTheBestIdeaButPleaseDisableUsernameValidation");
@@ -241,8 +240,8 @@ public class ClassNames {
             if (paperConfig != null) {
                 Field velocitySupport = getField(paperConfig, "velocitySupport");
                 // velocitySupport field is null pre-1.13
-                PAPER_VELOCITY_SUPPORT = velocitySupport != null ?
-                        () -> castedStaticBooleanValue(velocitySupport) : null;
+                PAPER_VELOCITY_SUPPORT = velocitySupport != null ? () -> castedStaticBooleanValue(
+                        velocitySupport) : null;
             } else {
                 PAPER_VELOCITY_SUPPORT = null;
             }
@@ -251,18 +250,19 @@ public class ClassNames {
         IS_FOLIA = ReflectionUtils.getClassSilently(
                 "io.papermc.paper.threadedregions.RegionizedServer"
         ) != null;
-        
+
         if (!IS_PRE_1_20_2) {
             // PacketHandshakingInSetProtocol is now a record
             // This means its fields are now private and final
             // We therefore must use reflection to obtain the constructor
             CLIENT_INTENT = getClassOrFallback(
-                "net.minecraft.network.protocol.handshake.ClientIntent",
-                nmsPackage + "ClientIntent"
+                    "net.minecraft.network.protocol.handshake.ClientIntent",
+                    nmsPackage + "ClientIntent"
             );
             checkNotNull(CLIENT_INTENT, "Client intent enum");
 
-            HANDSHAKE_PACKET_CONSTRUCTOR = getConstructor(HANDSHAKE_PACKET, false, int.class, String.class, int.class, CLIENT_INTENT);
+            HANDSHAKE_PACKET_CONSTRUCTOR = getConstructor(HANDSHAKE_PACKET, false, int.class,
+                    String.class, int.class, CLIENT_INTENT);
             checkNotNull(HANDSHAKE_PACKET_CONSTRUCTOR, "Handshake packet constructor");
 
             HANDSHAKE_PORT = getField(HANDSHAKE_PACKET, "a");
@@ -272,7 +272,7 @@ public class ClassNames {
             HANDSHAKE_PROTOCOL = getField(HANDSHAKE_PACKET, "c");
             checkNotNull(HANDSHAKE_PROTOCOL, "Handshake protocol");
             makeAccessible(HANDSHAKE_PROTOCOL);
-            
+
             HANDSHAKE_INTENTION = getFieldOfType(HANDSHAKE_PACKET, CLIENT_INTENT);
             checkNotNull(HANDSHAKE_INTENTION, "Handshake intention");
             makeAccessible(HANDSHAKE_INTENTION);
@@ -291,7 +291,8 @@ public class ClassNames {
 
     // Ensure one of two is not null
     private static <T> T checkNotNull(@CheckForNull T toCheck, @CheckForNull T toCheck2,
-                                      @CheckForNull String objectName, @CheckForNull String objectName2) {
+                                      @CheckForNull String objectName,
+                                      @CheckForNull String objectName2) {
         return Preconditions.checkNotNull(toCheck != null ? toCheck : toCheck2,
                 objectName2 + " cannot be null if " + objectName + " is null");
     }
