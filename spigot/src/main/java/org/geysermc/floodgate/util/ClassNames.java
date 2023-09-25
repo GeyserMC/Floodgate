@@ -186,8 +186,8 @@ public class ClassNames {
                 nmsPackage + "LoginListener$LoginHandler"
         );
 
-        LOGIN_HANDLER_CONSTRUCTOR = ReflectionUtils.getConstructor(LOGIN_HANDLER, true,
-                LOGIN_LISTENER);
+        LOGIN_HANDLER_CONSTRUCTOR =
+                ReflectionUtils.getConstructor(LOGIN_HANDLER, true, LOGIN_LISTENER);
         checkNotNull(LOGIN_HANDLER_CONSTRUCTOR, "LoginHandler constructor");
 
         FIRE_LOGIN_EVENTS = getMethod(LOGIN_HANDLER, "fireEvents");
@@ -240,8 +240,8 @@ public class ClassNames {
             if (paperConfig != null) {
                 Field velocitySupport = getField(paperConfig, "velocitySupport");
                 // velocitySupport field is null pre-1.13
-                PAPER_VELOCITY_SUPPORT = velocitySupport != null ? () -> castedStaticBooleanValue(
-                        velocitySupport) : null;
+                PAPER_VELOCITY_SUPPORT = velocitySupport != null ?
+                        () -> castedStaticBooleanValue(velocitySupport) : null;
             } else {
                 PAPER_VELOCITY_SUPPORT = null;
             }

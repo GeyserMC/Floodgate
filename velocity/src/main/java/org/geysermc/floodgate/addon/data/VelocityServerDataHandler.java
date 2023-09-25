@@ -91,8 +91,8 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
     }
 
     @Override
-    public void write(ChannelHandlerContext ctx, Object packet,
-                      ChannelPromise promise) throws Exception {
+    public void write(ChannelHandlerContext ctx, Object packet, ChannelPromise promise)
+            throws Exception {
         if (HANDSHAKE_PACKET.isInstance(packet)) {
             String address = getCastedValue(packet, HANDSHAKE_ADDRESS);
 
@@ -129,8 +129,8 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
                     remaining = address.substring(addressFinished);
                 }
 
-                setValue(packet, HANDSHAKE_ADDRESS, originalAddress + '\0' + encryptedData +
-                        remaining);
+                setValue(packet, HANDSHAKE_ADDRESS, originalAddress + '\0' + encryptedData
+                        + remaining);
             }
 
             ctx.pipeline().remove(this);

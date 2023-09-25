@@ -1,8 +1,0 @@
-{
-    "java.format.enabled": true,
-    "java.settings.url": ".settings/org.eclipse.jdt.core.prefs",
-    "[java]": {
-        "editor.defaultFormatter": "redhat.java"
-    },
-    "diffEditor.ignoreTrimWhitespace": false
-}

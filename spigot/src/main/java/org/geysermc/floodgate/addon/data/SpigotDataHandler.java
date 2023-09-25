@@ -46,9 +46,9 @@ public final class SpigotDataHandler extends CommonDataHandler {
     private boolean proxyData;
 
     public SpigotDataHandler(
-                             FloodgateHandshakeHandler handshakeHandler,
-                             FloodgateConfig config,
-                             AttributeKey<String> kickMessageAttribute) {
+        FloodgateHandshakeHandler handshakeHandler,
+        FloodgateConfig config,
+        AttributeKey<String> kickMessageAttribute) {
         super(handshakeHandler, config, kickMessageAttribute, new PacketBlocker());
     }
 
@@ -68,15 +68,14 @@ public final class SpigotDataHandler extends CommonDataHandler {
             // 1.20.2 and above
             try {
                 Object[] components = new Object[]{
-                        ClassNames.HANDSHAKE_PORT.get(handshakePacket),
-                        hostname,
-                        ClassNames.HANDSHAKE_PROTOCOL.get(handshakePacket),
-                        ClassNames.HANDSHAKE_INTENTION.get(handshakePacket)
+                    ClassNames.HANDSHAKE_PORT.get(handshakePacket),
+                    hostname,
+                    ClassNames.HANDSHAKE_PROTOCOL.get(handshakePacket),
+                    ClassNames.HANDSHAKE_INTENTION.get(handshakePacket)
                 };
 
                 return ClassNames.HANDSHAKE_PACKET_CONSTRUCTOR.newInstance(components);
-            } catch (InstantiationException | IllegalAccessException |
-                     InvocationTargetException e) {
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
 
                 return handshakePacket;
@@ -198,7 +197,6 @@ public final class SpigotDataHandler extends CommonDataHandler {
             }
 
             ctx.pipeline().remove(this);
-
             return true;
         }
         return false;

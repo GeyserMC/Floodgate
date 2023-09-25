@@ -10,7 +10,7 @@ tmp/
 *.swp
 *~.nib
 local.properties
-*org.eclipse.buildship.core.prefs
+.settings/
 .loadpath
 .recommenders
 
