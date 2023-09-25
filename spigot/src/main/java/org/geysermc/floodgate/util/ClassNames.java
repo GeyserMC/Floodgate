@@ -94,6 +94,7 @@ public class ClassNames {
         String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
         SPIGOT_MAPPING_PREFIX = "net.minecraft.server." + version;
 
+
         // SpigotSkinApplier
         Class<?> craftPlayerClass = ReflectionUtils.getClass(
                 "org.bukkit.craftbukkit." + version + ".entity.CraftPlayer");
@@ -102,6 +103,7 @@ public class ClassNames {
 
         String nmsPackage = SPIGOT_MAPPING_PREFIX + '.';
 
+        
         // SpigotInjector
         MINECRAFT_SERVER = getClassOrFallback(
                 "net.minecraft.server.MinecraftServer",

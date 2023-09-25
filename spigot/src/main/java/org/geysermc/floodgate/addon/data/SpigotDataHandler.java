@@ -46,9 +46,9 @@ public final class SpigotDataHandler extends CommonDataHandler {
     private boolean proxyData;
 
     public SpigotDataHandler(
-        FloodgateHandshakeHandler handshakeHandler,
-        FloodgateConfig config,
-        AttributeKey<String> kickMessageAttribute) {
+            FloodgateHandshakeHandler handshakeHandler,
+            FloodgateConfig config,
+            AttributeKey<String> kickMessageAttribute) {
         super(handshakeHandler, config, kickMessageAttribute, new PacketBlocker());
     }
 

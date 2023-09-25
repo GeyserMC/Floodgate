@@ -69,8 +69,7 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
         Class<?> configClass = getPrefixedClass("config.VelocityConfiguration");
 
         GET_FORWARDING_MODE = getMethod(configClass, "getPlayerInfoForwardingMode");
-        checkNotNull(GET_FORWARDING_MODE,
-                "getPlayerInfoForwardingMode in VelocityConfiguration cannot be null");
+        checkNotNull(GET_FORWARDING_MODE, "getPlayerInfoForwardingMode in VelocityConfiguration cannot be null");
 
         Class<?> serverConnection = getPrefixedClass("connection.backend.VelocityServerConnection");
 
