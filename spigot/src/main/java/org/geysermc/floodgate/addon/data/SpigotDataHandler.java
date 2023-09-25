@@ -58,7 +58,7 @@ public final class SpigotDataHandler extends CommonDataHandler {
     }
 
     @Override
-    protected Object setHostname(Object handshakePacket, String hostname) {
+    protected Object setHostname(Object handshakePacket, String hostname) throws IllegalStateException {
         if (ClassNames.IS_PRE_1_20_2) {
             // 1.20.1 and below
             setValue(handshakePacket, ClassNames.HANDSHAKE_HOST, hostname);
@@ -76,9 +76,7 @@ public final class SpigotDataHandler extends CommonDataHandler {
 
                 return ClassNames.HANDSHAKE_PACKET_CONSTRUCTOR.newInstance(components);
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                e.printStackTrace();
-
-                return handshakePacket;
+                throw new IllegalStateException("Failed to create new Handshake packet", e);
             }
         }
     }
