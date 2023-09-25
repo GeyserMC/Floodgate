@@ -103,7 +103,7 @@ public class ClassNames {
 
         String nmsPackage = SPIGOT_MAPPING_PREFIX + '.';
 
-        
+
         // SpigotInjector
         MINECRAFT_SERVER = getClassOrFallback(
                 "net.minecraft.server.MinecraftServer",
@@ -292,9 +292,12 @@ public class ClassNames {
     }
 
     // Ensure one of two is not null
-    private static <T> T checkNotNull(@CheckForNull T toCheck, @CheckForNull T toCheck2,
-                                      @CheckForNull String objectName,
-                                      @CheckForNull String objectName2) {
+    private static <T> T checkNotNull(
+            @CheckForNull T toCheck,
+            @CheckForNull T toCheck2,
+            @CheckForNull String objectName,
+            @CheckForNull String objectName2
+    ) {
         return Preconditions.checkNotNull(toCheck != null ? toCheck : toCheck2,
                 objectName2 + " cannot be null if " + objectName + " is null");
     }
