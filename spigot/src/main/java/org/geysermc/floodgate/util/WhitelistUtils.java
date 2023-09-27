@@ -25,10 +25,17 @@
 
 package org.geysermc.floodgate.util;
 
+import static org.bukkit.Bukkit.getServer;
+
 import com.mojang.authlib.GameProfile;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.geysermc.floodgate.FloodgatePlatform;
+import org.geysermc.floodgate.SpigotPlugin;
+import org.geysermc.floodgate.api.FloodgateApi;
+
+
 
 @SuppressWarnings("ConstantConditions")
 public final class WhitelistUtils {
@@ -45,12 +52,19 @@ public final class WhitelistUtils {
 
         OfflinePlayer player = ReflectionUtils.newInstance(
                 ClassNames.CRAFT_OFFLINE_PLAYER_CONSTRUCTOR,
-                Bukkit.getServer(), profile
+                getServer(), profile
         );
         if (player.isWhitelisted()) {
             return false;
         }
-        player.setWhitelisted(true);
+
+        Bukkit.getScheduler().runTask(getServer().getPluginManager().getPlugin("floodgate"),
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        player.setWhitelisted(true);
+                    }
+                });
         return true;
     }
 
@@ -67,12 +81,20 @@ public final class WhitelistUtils {
 
         OfflinePlayer player = ReflectionUtils.newInstance(
                 ClassNames.CRAFT_OFFLINE_PLAYER_CONSTRUCTOR,
-                Bukkit.getServer(), profile
+                getServer(), profile
         );
         if (!player.isWhitelisted()) {
             return false;
         }
-        player.setWhitelisted(false);
+
+        Bukkit.getScheduler().runTask(getServer().getPluginManager().getPlugin("floodgate"),
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        player.setWhitelisted(false);
+                    }
+                });
+
         return true;
     }
 }
