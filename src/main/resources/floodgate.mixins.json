@@ -8,8 +8,7 @@
     "ClientIntentionPacketMixinInterface",
     "ClientIntentionPacketMixin",
     "ConnectionMixin",
-    "ServerConnectionListenerMixin",
-    "ServerLoginPacketListenerImplMixin"
+    "ServerConnectionListenerMixin"
   ],
   "plugin": "org.geysermc.floodgate.util.MixinConfigPlugin",
   "injectors": {

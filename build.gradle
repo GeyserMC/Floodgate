@@ -48,11 +48,11 @@ dependencies {
         exclude group: "org.ow2.asm", module: "*" // From Events lib
     }
 
-    include(modImplementation('cloud.commandframework:cloud-fabric:1.8.3') {
+    include(modImplementation('cloud.commandframework:cloud-fabric:1.8.4') {
         because "Commands library implementation for Fabric"
     })
 
-    include(modImplementation('net.kyori:adventure-platform-fabric:5.8.0-SNAPSHOT') {
+    include(modImplementation('net.kyori:adventure-platform-fabric:5.10.0') {
         because "Chat library implementation for Fabric that includes methods for communicating with the server"
         // Thanks to zml for this fix
         // The package modifies Brigadier which causes a LinkageError at runtime if included
@@ -159,7 +159,7 @@ modrinth {
     syncBodyFrom = rootProject.file("README.md").text
 
     uploadFile = tasks.getByPath("remappedShadowJar")
-    gameVersions.addAll("1.19.4", "1.20")
+    gameVersions.addAll("1.20.2")
 
     loaders = ["fabric"]
 

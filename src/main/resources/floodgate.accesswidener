@@ -1,7 +1,7 @@
 accessWidener v1 named
 
-# To change login state
-accessible class net/minecraft/server/network/ServerLoginPacketListenerImpl$State
+# For setting gameprofile and starting connection verification
+accessible method net/minecraft/server/network/ServerLoginPacketListenerImpl startClientVerification (Lcom/mojang/authlib/GameProfile;)V
 # For player skin refreshing
 accessible class net/minecraft/server/level/ChunkMap$TrackedEntity
 # To access skins
