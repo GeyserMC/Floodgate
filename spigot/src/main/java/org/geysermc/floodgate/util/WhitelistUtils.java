@@ -29,11 +29,7 @@ import static org.bukkit.Bukkit.getServer;
 
 import com.mojang.authlib.GameProfile;
 import java.util.UUID;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.geysermc.floodgate.FloodgatePlatform;
-import org.geysermc.floodgate.SpigotPlugin;
-import org.geysermc.floodgate.api.FloodgateApi;
 
 
 
@@ -43,11 +39,12 @@ public final class WhitelistUtils {
     /**
      * Whitelist the given Bedrock player.
      *
-     * @param uuid     the UUID of the Bedrock player to be whitelisted
-     * @param username the username of the Bedrock player to be whitelisted
+     * @param uuid              the UUID of the Bedrock player to be whitelisted
+     * @param username          the username of the Bedrock player to be whitelisted
+     * @param spigotCommandUtil
      * @return true if the player has been whitelisted, false if the player is already whitelisted
      */
-    public static boolean addPlayer(UUID uuid, String username) {
+    public static boolean addPlayer(UUID uuid, String username, SpigotCommandUtil spigotCommandUtil) {
         GameProfile profile = new GameProfile(uuid, username);
 
         OfflinePlayer player = ReflectionUtils.newInstance(
@@ -58,25 +55,22 @@ public final class WhitelistUtils {
             return false;
         }
 
-        Bukkit.getScheduler().runTask(getServer().getPluginManager().getPlugin("floodgate"),
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        player.setWhitelisted(true);
-                    }
-                });
+        spigotCommandUtil.setWhitelist(player, true);
+
         return true;
     }
 
     /**
      * Removes the given Bedrock player from the whitelist.
      *
-     * @param uuid     the UUID of the Bedrock player to be removed
-     * @param username the username of the Bedrock player to be removed
+     * @param uuid              the UUID of the Bedrock player to be removed
+     * @param username          the username of the Bedrock player to be removed
+     * @param spigotCommandUtil
      * @return true if the player has been removed from the whitelist, false if the player wasn't
      * whitelisted
      */
-    public static boolean removePlayer(UUID uuid, String username) {
+    public static boolean removePlayer(UUID uuid, String username,
+                                       SpigotCommandUtil spigotCommandUtil) {
         GameProfile profile = new GameProfile(uuid, username);
 
         OfflinePlayer player = ReflectionUtils.newInstance(
@@ -87,13 +81,7 @@ public final class WhitelistUtils {
             return false;
         }
 
-        Bukkit.getScheduler().runTask(getServer().getPluginManager().getPlugin("floodgate"),
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        player.setWhitelisted(false);
-                    }
-                });
+        spigotCommandUtil.setWhitelist(player, false);
 
         return true;
     }
