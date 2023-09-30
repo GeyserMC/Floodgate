@@ -34,9 +34,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.api.GeyserApiBase;
-import org.geysermc.floodgate.core.connection.UserAudience;
-import org.geysermc.floodgate.core.connection.UserAudience.ConsoleAudience;
-import org.geysermc.floodgate.core.connection.UserAudience.PlayerAudience;
+import org.geysermc.floodgate.core.connection.audience.UserAudience;
+import org.geysermc.floodgate.core.connection.audience.UserAudience.ConsoleAudience;
+import org.geysermc.floodgate.core.connection.audience.UserAudience.PlayerAudience;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
 import org.geysermc.floodgate.core.util.LanguageManager;
 

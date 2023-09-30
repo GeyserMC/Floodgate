@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.connection;
+package org.geysermc.floodgate.core.connection.audience;
 
 import java.util.Objects;
 import java.util.UUID;

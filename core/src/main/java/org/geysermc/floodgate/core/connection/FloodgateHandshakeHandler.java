@@ -34,7 +34,6 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -51,6 +50,8 @@ import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.connection.codec.FloodgateConnectionCodec;
 import org.geysermc.floodgate.core.crypto.FloodgateDataCodec;
+import org.geysermc.floodgate.core.crypto.FloodgateFormatCodec;
+import org.geysermc.floodgate.core.crypto.exception.UnsupportedVersionException;
 import org.geysermc.floodgate.core.link.CommonPlayerLink;
 import org.geysermc.floodgate.core.skin.SkinUploadManager;
 import org.geysermc.floodgate.core.util.Constants;
@@ -89,7 +90,7 @@ public final class FloodgateHandshakeHandler {
 
         StringBuilder builder = new StringBuilder();
         for (String value : hostnameItems) {
-            int version = FloodgateDataCodec.version(value);
+            int version = FloodgateFormatCodec.version(value);
             if (floodgateData == null && version != -1) {
                 floodgateData = value;
                 dataVersion = version;
@@ -110,36 +111,32 @@ public final class FloodgateHandshakeHandler {
             @NonNull String floodgateDataString,
             @NonNull String hostname
     ) {
+        System.out.println("received: " + floodgateDataString);
         byte[] floodgateData = floodgateDataString.getBytes(StandardCharsets.UTF_8);
 
         return CompletableFuture.supplyAsync(() -> {
 
-            ByteBuffer decoded;
-            try {
-                // the actual decryption of the data
-                decoded = dataCodec.decode(floodgateData);
-            } catch (InvalidFormatException e) {
-                // when the Floodgate format couldn't be found
-                throw callHandlerAndReturnResult(NOT_FLOODGATE_DATA, channel, hostname);
-            } catch (Exception exception) {
-                // all the other exceptions are caused by invalid/tempered Floodgate data
-                if (config.debug()) {
-                    exception.printStackTrace();
-                }
-
-                throw callHandlerAndReturnResult(ResultType.DECRYPT_ERROR, channel, hostname);
-            }
-
             FloodgateConnection connection;
             try {
-                connection = connectionCodec.decode(decoded);
-            } catch (Exception exception) {
-                // todo probably add a format version as that's the most likely reason for this error
+                // the actual decrypt/verify of the data
+                connection = dataCodec.decode(floodgateData);
+            } catch (InvalidFormatException exception) {
+                // when the Floodgate format couldn't be found
+                throw callHandlerAndReturnResult(NOT_FLOODGATE_DATA, channel, hostname);
+            } catch (UnsupportedVersionException exception) {
+                // unsupported format version
                 if (config.debug()) {
                     exception.printStackTrace();
                 }
 
                 throw callHandlerAndReturnResult(INVALID_DATA, channel,  hostname);
+            } catch (Exception exception) {
+                // all the other exceptions are caused by invalid/tempered Floodgate data
+                if (config.debug() || true) {
+                    exception.printStackTrace();
+                }
+
+                throw callHandlerAndReturnResult(ResultType.DECRYPT_ERROR, channel, hostname);
             }
 
             try {
@@ -206,9 +203,11 @@ public final class FloodgateHandshakeHandler {
 //                        bedrockData.getVerifyCode());
 //            }
 
-            connection = handshakeData.applyChanges(connection, hostname, config);
+            connection = handshakeData.applyChanges(connection, config);
 
             connectionManager.addConnection(connection);
+            //todo when splitting up between netty and non-netty make a NettyConnectionManager which
+            // uses the channel as argument to set the attribute
             channel.attr(playerAttribute).set(connection);
 
             return new HandshakeResult(ResultType.SUCCESS, handshakeData, connection);

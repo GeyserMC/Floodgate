@@ -27,17 +27,11 @@ package org.geysermc.floodgate.core.connection;
 
 import java.net.InetAddress;
 import java.util.UUID;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.common.value.qual.IntRange;
 import org.geysermc.api.Geyser;
 import org.geysermc.api.connection.Connection;
-import org.geysermc.api.util.BedrockPlatform;
-import org.geysermc.api.util.InputMode;
-import org.geysermc.api.util.UiProfile;
 import org.geysermc.cumulus.form.Form;
 import org.geysermc.cumulus.form.util.FormBuilder;
 import org.geysermc.floodgate.core.api.legacy.LegacyPlayerWrapper;
@@ -45,87 +39,19 @@ import org.geysermc.floodgate.core.api.legacy.PropertyGlue;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.LinkedPlayer;
 
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public final class FloodgateConnection implements Connection {
-    private final String version;
-    private final String username;
-    private final UUID identifier;
-    private final String xuid;
-    private final String javaUsername;
-    private final UUID javaUniqueId;
-    private final BedrockPlatform deviceOs;
-    private final String languageCode;
-    private final UiProfile uiProfile;
-    private final InputMode inputMode;
-    private final InetAddress ip;
-    private final LinkedPlayer linkedPlayer;
-
-    private final int subscribeId;
-    private final String verifyCode;
-
+public abstract class FloodgateConnection implements Connection {
     private final PropertyGlue propertyGlue = new PropertyGlue();
     private LegacyPlayerWrapper legacyPlayer;
 
-    @Override
-    public @NonNull String bedrockUsername() {
-        return username;
-    }
+    public abstract @NonNull UUID identity();
 
-    public @NonNull UUID identifier() {
-        return identifier;
-    }
+    public abstract @NonNull InetAddress ip();
 
-    @Override
-    public @NonNull String xuid() {
-        return xuid;
-    }
-
-    @Override
-    public @MonotonicNonNull String javaUsername() {
-        return linkedPlayer != null ? linkedPlayer.getJavaUsername() : javaUsername;
-    }
-
-    @Override
-    public @MonotonicNonNull UUID javaUuid() {
-        return linkedPlayer != null ? linkedPlayer.getJavaUniqueId() : javaUniqueId;
-    }
-
-    @Override
-    public @NonNull String version() {
-        return version;
-    }
-
-    @Override
-    public @NonNull BedrockPlatform platform() {
-        return deviceOs;
-    }
-
-    @Override
-    public @NonNull String languageCode() {
-        return languageCode;
-    }
-
-    @Override
-    public @NonNull UiProfile uiProfile() {
-        return uiProfile;
-    }
-
-    @Override
-    public @NonNull InputMode inputMode() {
-        return inputMode;
-    }
-
-    public @NonNull InetAddress ip() {
-        return ip;
-    }
+    public abstract @MonotonicNonNull LinkedPlayer linkedPlayer();
 
     @Override
     public boolean isLinked() {
-        return linkedPlayer != null;
-    }
-
-    public @Nullable LinkedPlayer linkedPlayer() {
-        return linkedPlayer;
+        return linkedPlayer() != null;
     }
 
     @Override
@@ -143,29 +69,16 @@ public final class FloodgateConnection implements Connection {
         return Geyser.api().transfer(javaUuid(), address, port);
     }
 
-    public void fillBuilder(FloodgateConnectionBuilder builder) {
-        builder.version(version)
-                .username(username)
-                .identifier(identifier)
-                .xuid(xuid)
-                .deviceOs(deviceOs)
-                .languageCode(languageCode)
-                .uiProfile(uiProfile)
-                .inputMode(inputMode)
-                .ip(ip)
-                .linkedPlayer(linkedPlayer);
-    }
-
     public BedrockData toBedrockData() {
         return BedrockData.of(
-                version, username, xuid, deviceOs.ordinal(), languageCode, uiProfile.ordinal(),
-                inputMode.ordinal(), ip.getHostAddress(), linkedPlayer, false, subscribeId, verifyCode
+                version(), bedrockUsername(), xuid(), platform().ordinal(), languageCode(), uiProfile().ordinal(),
+                inputMode().ordinal(), ip().getHostAddress(), linkedPlayer(), false, 0, null
         );
     }
 
     public LegacyPlayerWrapper legacySelf() {
         if (legacyPlayer == null) {
-            legacyPlayer = new LegacyPlayerWrapper(this, javaUsername, javaUniqueId);
+            legacyPlayer = new LegacyPlayerWrapper(this, javaUsername(), javaUuid());
         }
         return legacyPlayer;
     }

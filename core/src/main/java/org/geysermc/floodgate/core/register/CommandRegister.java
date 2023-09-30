@@ -30,7 +30,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.Set;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
-import org.geysermc.floodgate.core.connection.UserAudience;
+import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
 
 /**

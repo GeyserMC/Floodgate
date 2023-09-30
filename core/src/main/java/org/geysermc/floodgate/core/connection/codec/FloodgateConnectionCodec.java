@@ -66,7 +66,7 @@ public final class FloodgateConnectionCodec {
     private void encode0(FloodgateConnection connection, DataOutputStream stream) throws IOException {
         writeString(stream, connection.version());
         writeString(stream, connection.bedrockUsername());
-        writeUniqueId(stream, connection.identifier());
+        writeUniqueId(stream, connection.identity());
         writeUnsignedLong(stream, connection.xuid());
         stream.writeByte(connection.platform().ordinal());
         writeString(stream, connection.languageCode());
@@ -84,7 +84,7 @@ public final class FloodgateConnectionCodec {
         var builder = new FloodgateConnectionBuilder(config)
                 .version(readString(buffer))
                 .username(readString(buffer))
-                .identifier(readUniqueId(buffer))
+                .identity(readUniqueId(buffer))
                 .xuid(readUnsignedLong(buffer))
                 .deviceOs(BedrockPlatform.fromId(buffer.get()))
                 .languageCode(readString(buffer))

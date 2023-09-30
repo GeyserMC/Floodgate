@@ -124,7 +124,7 @@ public abstract class FloodgatePlatform {
         context.close();
     }
 
-    abstract protected boolean isProxy();
+    abstract public boolean isProxy();
 
     public <T> T getBean(Class<T> clazz) {
         return context.getBean(clazz);

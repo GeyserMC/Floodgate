@@ -42,6 +42,7 @@ final class CodecUtils {
 
     public static String readString(ByteBuffer buffer) {
         var bytes = new byte[readVarInt(buffer)];
+        buffer.get(bytes);
         return new String(bytes, StandardCharsets.UTF_8);
     }
 

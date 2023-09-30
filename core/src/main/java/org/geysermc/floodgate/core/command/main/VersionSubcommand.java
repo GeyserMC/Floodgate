@@ -33,7 +33,7 @@ import jakarta.inject.Inject;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.command.WhitelistCommand.Message;
 import org.geysermc.floodgate.core.command.util.Permission;
-import org.geysermc.floodgate.core.connection.UserAudience;
+import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.platform.command.FloodgateSubCommand;
 import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.HttpClient;

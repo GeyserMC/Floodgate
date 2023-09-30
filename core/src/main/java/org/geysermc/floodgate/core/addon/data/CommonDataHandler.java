@@ -38,7 +38,7 @@ import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.connection.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.core.connection.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.core.connection.HostnameSeparationResult;
-import org.geysermc.floodgate.core.crypto.FloodgateDataCodec;
+import org.geysermc.floodgate.core.crypto.FloodgateFormatCodec;
 import org.geysermc.floodgate.core.util.Constants;
 
 @RequiredArgsConstructor
@@ -76,11 +76,11 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
             return;
         }
 
-        if (separation.headerVersion() != FloodgateDataCodec.VERSION) {
+        if (separation.headerVersion() != FloodgateFormatCodec.VERSION) {
             disablePacketQueue(true);
             setKickMessage(String.format(
                     Constants.UNSUPPORTED_DATA_VERSION,
-                    FloodgateDataCodec.VERSION, separation.headerVersion()
+                    FloodgateFormatCodec.VERSION, separation.headerVersion()
             ));
             return;
         }

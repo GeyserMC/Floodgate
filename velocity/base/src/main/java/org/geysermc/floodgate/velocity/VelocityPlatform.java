@@ -63,7 +63,7 @@ public class VelocityPlatform extends FloodgatePlatform {
     }
 
     @Override
-    protected boolean isProxy() {
+    public boolean isProxy() {
         return true;
     }
 }

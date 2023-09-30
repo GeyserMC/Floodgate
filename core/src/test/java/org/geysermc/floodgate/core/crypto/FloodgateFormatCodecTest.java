@@ -25,7 +25,7 @@
 
 package org.geysermc.floodgate.core.crypto;
 
-import static org.geysermc.floodgate.core.crypto.FloodgateDataCodec.VERSION;
+import static org.geysermc.floodgate.core.crypto.FloodgateFormatCodec.VERSION;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import org.geysermc.floodgate.core.crypto.exception.UnsupportedVersionException;
 import org.geysermc.floodgate.core.crypto.topping.Base64Topping;
 import org.geysermc.floodgate.core.util.InvalidFormatException;
 import org.junit.jupiter.api.Test;
@@ -43,7 +44,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-final class FloodgateDataCodecTest {
+final class FloodgateFormatCodecTest {
     @ParameterizedTest
     @CsvSource({
             "^Floodgate^, -1",
@@ -53,7 +54,7 @@ final class FloodgateDataCodecTest {
             "^Floodgate^A, 4",
     })
     void version(ArgumentsAccessor arguments) {
-        assertEquals(arguments.getInteger(1), FloodgateDataCodec.version(arguments.getString(0)));
+        assertEquals(arguments.getInteger(1), FloodgateFormatCodec.version(arguments.getString(0)));
     }
 
     @Test
@@ -63,7 +64,7 @@ final class FloodgateDataCodecTest {
 
     @Test
     void createWithSymmetricalKey() {
-        assertDoesNotThrow(() -> new FloodgateDataCodec(
+        assertDoesNotThrow(() -> new FloodgateFormatCodec(
                 DataCodecType.AES,
                 new Base64Topping(),
                 Path.of("src/test/resources/crypto")
@@ -117,29 +118,40 @@ final class FloodgateDataCodecTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-            "^Floodgate^" + (VERSION - 1),
-            "^Floodgate^" + VERSION,
-            "^Floodgate^" + (VERSION + 1)
-    })
-    void headerValid(String value) throws IOException {
-        var codec = createFloodgateDataCodec();
-        assertDoesNotThrow(() -> codec.checkHeader(value.getBytes(StandardCharsets.UTF_8)));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {
             "^Floodgate^",
             "^Flootgate^="
     })
-    void headerInvalid(String value) throws IOException {
+    void headerInvalidFormat(String content) throws IOException {
         var codec = createFloodgateDataCodec();
+
         assertThrowsExactly(
                 InvalidFormatException.class,
-                () -> codec.checkHeader(value.getBytes(StandardCharsets.UTF_8))
+                () -> codec.validateHeader(content.getBytes(StandardCharsets.UTF_8))
         );
     }
 
-    private FloodgateDataCodec createFloodgateDataCodec() throws IOException {
-        return new FloodgateDataCodec(DataCodecType.ED25519, new Base64Topping(), Path.of("src/test/resources/crypto"));
+    @ParameterizedTest
+    @CsvSource({
+            (VERSION - 1) + ", false",
+            VERSION + ", true",
+            (VERSION + 1) + ", false"
+    })
+    void headerVersionValidation(ArgumentsAccessor arguments) throws IOException {
+        var codec = createFloodgateDataCodec();
+
+        var version = arguments.getInteger(0);
+        var content = ("^Floodgate^" + (char) (version + 0x3D)).getBytes(StandardCharsets.UTF_8);
+
+        var valid = arguments.getBoolean(1);
+
+        if (valid) {
+            assertDoesNotThrow(() -> codec.validateHeader(content));
+        } else {
+            assertThrowsExactly(UnsupportedVersionException.class, () -> codec.validateHeader(content));
+        }
+    }
+
+    private FloodgateFormatCodec createFloodgateDataCodec() throws IOException {
+        return new FloodgateFormatCodec(DataCodecType.ED25519, new Base64Topping(), Path.of("src/test/resources/crypto"));
     }
 }

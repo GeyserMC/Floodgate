@@ -41,7 +41,7 @@ public class FloodgateConnectionBuilder {
     private final FloodgateConfig config;
     private String version;
     private String username;
-    private UUID identifier;
+    private UUID identity;
     private String xuid;
     private BedrockPlatform deviceOs;
     private String languageCode;
@@ -64,8 +64,8 @@ public class FloodgateConnectionBuilder {
         return this;
     }
 
-    public @This FloodgateConnectionBuilder identifier(UUID identifier) {
-        this.identifier = Objects.requireNonNull(identifier);
+    public @This FloodgateConnectionBuilder identity(UUID identity) {
+        this.identity = Objects.requireNonNull(identity);
         return this;
     }
 
@@ -108,10 +108,10 @@ public class FloodgateConnectionBuilder {
         // todo add an option to use identity instead of xuid
         UUID javaUniqueId = Utils.getJavaUuid(xuid);
 
-        return new FloodgateConnection(
+        return new StandaloneFloodgateConnection(
                 version,
                 username,
-                identifier,
+                identity,
                 xuid,
                 javaUsername(),
                 javaUniqueId,
@@ -120,9 +120,7 @@ public class FloodgateConnectionBuilder {
                 uiProfile,
                 inputMode,
                 ip,
-                linkedPlayer,
-                0,
-                null
+                linkedPlayer
         );
     }
 

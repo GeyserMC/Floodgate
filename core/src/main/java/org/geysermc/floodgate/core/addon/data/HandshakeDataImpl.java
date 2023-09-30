@@ -82,7 +82,7 @@ public class HandshakeDataImpl implements HandshakeData {
         this.javaUniqueId = javaUniqueId;
     }
 
-    public FloodgateConnection applyChanges(FloodgateConnection connection, String hostname, FloodgateConfig config) {
+    public FloodgateConnection applyChanges(FloodgateConnection connection, FloodgateConfig config) {
         var newLink = !Objects.equals(connection.linkedPlayer(), this.linkedPlayer) ? this.linkedPlayer : null;
 
         var thisIp = convertIp(this.ip);
@@ -94,7 +94,7 @@ public class HandshakeDataImpl implements HandshakeData {
         }
 
         var builder = new FloodgateConnectionBuilder(config);
-        connection.fillBuilder(builder);
+//        connection.fillBuilder(builder); todo probably remove handshake handlers all together
         if (newLink != null) builder.linkedPlayer(newLink);
         if (newIp != null) builder.ip(newIp);
         return builder.build();

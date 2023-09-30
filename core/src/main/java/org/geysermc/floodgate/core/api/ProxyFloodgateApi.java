@@ -28,14 +28,14 @@ package org.geysermc.floodgate.core.api;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.nio.charset.StandardCharsets;
-import org.geysermc.floodgate.core.crypto.FloodgateDataCodec;
+import org.geysermc.floodgate.core.crypto.FloodgateFormatCodec;
 import org.geysermc.floodgate.core.scope.ProxyOnly;
 import org.geysermc.floodgate.util.BedrockData;
 
 @ProxyOnly
 @Singleton
 public final class ProxyFloodgateApi extends SimpleFloodgateApi {
-    @Inject FloodgateDataCodec dataCodec;
+    @Inject FloodgateFormatCodec dataCodec;
 
     public byte[] createEncryptedData(BedrockData bedrockData) {
         try {

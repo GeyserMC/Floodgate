@@ -37,7 +37,6 @@ import java.util.Queue;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.geysermc.floodgate.core.connection.UserAudience;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
 import org.geysermc.floodgate.core.platform.util.PlayerType;
 

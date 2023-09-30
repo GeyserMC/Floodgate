@@ -35,7 +35,7 @@ import cloud.commandframework.context.CommandContext;
 import jakarta.inject.Singleton;
 import java.util.Locale;
 import org.geysermc.floodgate.core.command.util.Permission;
-import org.geysermc.floodgate.core.connection.UserAudience;
+import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.core.platform.command.FloodgateSubCommand;
 import org.geysermc.floodgate.core.platform.command.SubCommands;

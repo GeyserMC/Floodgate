@@ -35,7 +35,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
 import org.geysermc.floodgate.core.command.util.Permission;
-import org.geysermc.floodgate.core.connection.UserAudience;
+import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.platform.command.FloodgateSubCommand;
 import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.HttpClient;
