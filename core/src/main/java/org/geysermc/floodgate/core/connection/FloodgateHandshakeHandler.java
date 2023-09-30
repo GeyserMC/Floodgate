@@ -111,7 +111,6 @@ public final class FloodgateHandshakeHandler {
             @NonNull String floodgateDataString,
             @NonNull String hostname
     ) {
-        System.out.println("received: " + floodgateDataString);
         byte[] floodgateData = floodgateDataString.getBytes(StandardCharsets.UTF_8);
 
         return CompletableFuture.supplyAsync(() -> {
@@ -132,7 +131,7 @@ public final class FloodgateHandshakeHandler {
                 throw callHandlerAndReturnResult(INVALID_DATA, channel,  hostname);
             } catch (Exception exception) {
                 // all the other exceptions are caused by invalid/tempered Floodgate data
-                if (config.debug() || true) {
+                if (config.debug()) {
                     exception.printStackTrace();
                 }
 
@@ -235,7 +234,7 @@ public final class FloodgateHandshakeHandler {
         return link.fetchLink(Utils.getJavaUuid(data.xuid()))
                 .thenApply(link -> {
                     if (link == null) {
-                        return null;
+                        return data;
                     }
                     var linked = LinkedPlayer.of(link.javaUsername(), link.javaUniqueId(), link.bedrockId());
                     return new FloodgateConnectionBuilder(config).linkedPlayer(linked).build();

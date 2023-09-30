@@ -30,11 +30,9 @@ import io.netty.util.AttributeKey;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
-import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.addon.data.PacketBlocker;
-import org.geysermc.floodgate.core.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.core.connection.FloodgateHandshakeHandler;
 
@@ -42,7 +40,6 @@ import org.geysermc.floodgate.core.connection.FloodgateHandshakeHandler;
 public final class VelocityDataAddon implements InjectorAddon {
     @Inject FloodgateHandshakeHandler handshakeHandler;
     @Inject ProxyFloodgateConfig config;
-    @Inject ProxyFloodgateApi api;
     @Inject FloodgateLogger logger;
 
     @Inject
@@ -62,17 +59,13 @@ public final class VelocityDataAddon implements InjectorAddon {
     AttributeKey<String> kickMessageAttribute;
 
     @Inject
-    @Named("playerAttribute")
-    AttributeKey<Connection> playerAttribute;
+    VelocityServerDataHandler serverDataHandler;
 
     @Override
     public void onInject(Channel channel, boolean toServer) {
         if (toServer) {
             if (config.sendFloodgateData()) {
-                channel.pipeline().addAfter(
-                        packetEncoder, "floodgate_data_handler",
-                        new VelocityServerDataHandler(api)
-                );
+                channel.pipeline().addAfter(packetEncoder, "floodgate_data_handler", serverDataHandler);
             }
             return;
         }

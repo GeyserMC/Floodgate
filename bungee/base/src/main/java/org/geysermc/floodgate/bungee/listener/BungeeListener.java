@@ -44,7 +44,7 @@ import net.md_5.bungee.event.EventPriority;
 import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.bungee.player.BungeeConnectionManager;
-import org.geysermc.floodgate.core.api.ProxyFloodgateApi;
+import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.core.listener.McListener;
 import org.geysermc.floodgate.core.skin.SkinApplier;
@@ -64,7 +64,7 @@ public final class BungeeListener implements Listener, McListener {
 
     @Inject BungeeConnectionManager connectionManager;
     @Inject ProxyFloodgateConfig config;
-    @Inject ProxyFloodgateApi api;
+    @Inject SimpleFloodgateApi api;
     @Inject LanguageManager languageManager;
     @Inject FloodgateLogger logger;
     @Inject SkinApplier skinApplier;

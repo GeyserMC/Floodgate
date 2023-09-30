@@ -46,9 +46,7 @@ import org.geysermc.floodgate.core.http.xbox.XboxClient;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.core.pluginmessage.channel.FormChannel;
 import org.geysermc.floodgate.core.pluginmessage.channel.TransferChannel;
-import org.geysermc.floodgate.core.scope.ServerOnly;
 
-@ServerOnly
 @Singleton
 public class SimpleFloodgateApi implements GeyserApiBase {
     @Inject ConnectionManager connectionManager;
