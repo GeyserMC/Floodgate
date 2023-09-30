@@ -123,23 +123,11 @@ public final class SpigotCommandUtil extends CommandUtil {
 
     @Override
     public boolean whitelistPlayer(UUID uuid, String username) {
-        return WhitelistUtils.addPlayer(uuid, username, this);
+        return WhitelistUtils.addPlayer(uuid, username, versionSpecificMethods);
     }
 
     @Override
     public boolean removePlayerFromWhitelist(UUID uuid, String username) {
-        return WhitelistUtils.removePlayer(uuid, username, this);
-    }
-
-    public void setWhitelist(Object offlinePlayer, Boolean isWhitelisted) {
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                OfflinePlayer player = (OfflinePlayer)offlinePlayer;
-                player.setWhitelisted(isWhitelisted);
-            }
-        };
-
-        versionSpecificMethods.maybeSchedule(runnable);
+        return WhitelistUtils.removePlayer(uuid, username, versionSpecificMethods);
     }
 }
