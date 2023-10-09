@@ -23,17 +23,17 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.connection.codec;
+package org.geysermc.floodgate.core.connection.standalone.codec;
 
-import static org.geysermc.floodgate.core.connection.codec.CodecUtils.readBool;
-import static org.geysermc.floodgate.core.connection.codec.CodecUtils.readIp;
-import static org.geysermc.floodgate.core.connection.codec.CodecUtils.readString;
-import static org.geysermc.floodgate.core.connection.codec.CodecUtils.readUniqueId;
-import static org.geysermc.floodgate.core.connection.codec.CodecUtils.readUnsignedLong;
-import static org.geysermc.floodgate.core.connection.codec.CodecUtils.writeIp;
-import static org.geysermc.floodgate.core.connection.codec.CodecUtils.writeString;
-import static org.geysermc.floodgate.core.connection.codec.CodecUtils.writeUniqueId;
-import static org.geysermc.floodgate.core.connection.codec.CodecUtils.writeUnsignedLong;
+import static org.geysermc.floodgate.core.connection.standalone.codec.CodecUtils.readBool;
+import static org.geysermc.floodgate.core.connection.standalone.codec.CodecUtils.readIp;
+import static org.geysermc.floodgate.core.connection.standalone.codec.CodecUtils.readString;
+import static org.geysermc.floodgate.core.connection.standalone.codec.CodecUtils.readUniqueId;
+import static org.geysermc.floodgate.core.connection.standalone.codec.CodecUtils.readUnsignedLong;
+import static org.geysermc.floodgate.core.connection.standalone.codec.CodecUtils.writeIp;
+import static org.geysermc.floodgate.core.connection.standalone.codec.CodecUtils.writeString;
+import static org.geysermc.floodgate.core.connection.standalone.codec.CodecUtils.writeUniqueId;
+import static org.geysermc.floodgate.core.connection.standalone.codec.CodecUtils.writeUnsignedLong;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -46,7 +46,7 @@ import org.geysermc.api.util.InputMode;
 import org.geysermc.api.util.UiProfile;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.connection.FloodgateConnection;
-import org.geysermc.floodgate.core.connection.FloodgateConnectionBuilder;
+import org.geysermc.floodgate.core.connection.standalone.StandaloneFloodgateConnectionBuilder;
 
 @Singleton
 public final class FloodgateConnectionCodec {
@@ -81,7 +81,7 @@ public final class FloodgateConnectionCodec {
     }
 
     public FloodgateConnection decode(ByteBuffer buffer) {
-        var builder = new FloodgateConnectionBuilder(config)
+        var builder = new StandaloneFloodgateConnectionBuilder(config)
                 .version(readString(buffer))
                 .username(readString(buffer))
                 .identity(readUniqueId(buffer))

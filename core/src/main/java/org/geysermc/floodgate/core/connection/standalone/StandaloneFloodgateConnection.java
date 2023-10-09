@@ -1,18 +1,20 @@
-package org.geysermc.floodgate.core.connection;
+package org.geysermc.floodgate.core.connection.standalone;
 
 import java.net.InetAddress;
 import java.util.UUID;
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.common.returnsreceiver.qual.This;
 import org.geysermc.api.util.BedrockPlatform;
 import org.geysermc.api.util.InputMode;
 import org.geysermc.api.util.UiProfile;
+import org.geysermc.floodgate.core.connection.FloodgateConnection;
 import org.geysermc.floodgate.util.LinkedPlayer;
 
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
 public final class StandaloneFloodgateConnection extends FloodgateConnection {
     private final String version;
     private final String username;
@@ -25,7 +27,7 @@ public final class StandaloneFloodgateConnection extends FloodgateConnection {
     private final UiProfile uiProfile;
     private final InputMode inputMode;
     private final InetAddress ip;
-    private final LinkedPlayer linkedPlayer;
+    private LinkedPlayer linkedPlayer;
 
     @Override
     public @NonNull String bedrockUsername() {
@@ -86,16 +88,9 @@ public final class StandaloneFloodgateConnection extends FloodgateConnection {
         return linkedPlayer;
     }
 
-    public void fillBuilder(FloodgateConnectionBuilder builder) {
-        builder.version(version)
-                .username(username)
-                .identity(identity)
-                .xuid(xuid)
-                .deviceOs(deviceOs)
-                .languageCode(languageCode)
-                .uiProfile(uiProfile)
-                .inputMode(inputMode)
-                .ip(ip)
-                .linkedPlayer(linkedPlayer);
+    @Override
+    public @This FloodgateConnection linkedPlayer(@Nullable LinkedPlayer linkedPlayer) {
+        this.linkedPlayer = linkedPlayer;
+        return this;
     }
 }

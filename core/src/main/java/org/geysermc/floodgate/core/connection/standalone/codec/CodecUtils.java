@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.connection.codec;
+package org.geysermc.floodgate.core.connection.standalone.codec;
 
 import java.io.DataOutputStream;
 import java.io.IOException;

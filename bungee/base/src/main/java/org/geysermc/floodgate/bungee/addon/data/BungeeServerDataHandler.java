@@ -70,8 +70,8 @@ public class BungeeServerDataHandler extends ChannelOutboundHandlerAdapter {
     @Inject FloodgateDataCodec dataCodec;
 
     @Inject
-    @Named("playerAttribute")
-    AttributeKey<Connection> playerAttribute;
+    @Named("connectionAttribute")
+    AttributeKey<Connection> connectionAttribute;
 
     @Override
     public void write(ChannelHandlerContext ctx, Object packet, ChannelPromise promise) throws Exception {
@@ -89,7 +89,7 @@ public class BungeeServerDataHandler extends ChannelOutboundHandlerAdapter {
             UserConnection userConnection = ReflectionUtils.getCastedValue(handler, USER_CONNECTION);
             ChannelWrapper wrapper = ReflectionUtils.getCastedValue(userConnection, CHANNEL_WRAPPER);
 
-            Connection connection = wrapper.getHandle().attr(playerAttribute).get();
+            Connection connection = wrapper.getHandle().attr(connectionAttribute).get();
             if (connection != null) {
                 String encodedData = dataCodec.encodeToString((FloodgateConnection) connection);
 

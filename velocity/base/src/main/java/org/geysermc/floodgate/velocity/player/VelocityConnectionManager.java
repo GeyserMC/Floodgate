@@ -54,8 +54,8 @@ public class VelocityConnectionManager extends ConnectionManager {
     private static final Field CHANNEL;
 
     @Inject
-    @Named("playerAttribute")
-    AttributeKey<Connection> playerAttribute;
+    @Named("connectionAttribute")
+    AttributeKey<Connection> connectionAttribute;
 
     @Override
     protected @Nullable Object platformIdentifierOrConnectionFor(Object input) {
@@ -80,7 +80,7 @@ public class VelocityConnectionManager extends ConnectionManager {
             return getValue(input, CHANNEL);
         }
         if (input instanceof Channel channel) {
-            return channel.attr(playerAttribute).get();
+            return channel.attr(connectionAttribute).get();
         }
         return null;
     }

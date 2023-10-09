@@ -27,8 +27,9 @@ package org.geysermc.floodgate.core.connection;
 
 import java.net.InetAddress;
 import java.util.UUID;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.common.returnsreceiver.qual.This;
 import org.checkerframework.common.value.qual.IntRange;
 import org.geysermc.api.Geyser;
 import org.geysermc.api.connection.Connection;
@@ -47,7 +48,7 @@ public abstract class FloodgateConnection implements Connection {
 
     public abstract @NonNull InetAddress ip();
 
-    public abstract @MonotonicNonNull LinkedPlayer linkedPlayer();
+    public abstract @Nullable LinkedPlayer linkedPlayer();
 
     @Override
     public boolean isLinked() {
@@ -68,6 +69,8 @@ public abstract class FloodgateConnection implements Connection {
     public boolean transfer(@NonNull String address, @IntRange(from = 0L, to = 65535L) int port) {
         return Geyser.api().transfer(javaUuid(), address, port);
     }
+
+    public abstract @This FloodgateConnection linkedPlayer(@Nullable LinkedPlayer linkedPlayer);
 
     public BedrockData toBedrockData() {
         return BedrockData.of(

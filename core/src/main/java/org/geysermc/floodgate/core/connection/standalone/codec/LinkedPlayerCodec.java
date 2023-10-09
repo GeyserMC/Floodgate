@@ -23,29 +23,28 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.connection;
+package org.geysermc.floodgate.core.connection.standalone.codec;
 
-public class HostnameSeparationResult {
-    private final String floodgateData;
-    private final int headerVersion;
-    private final String hostnameRemainder;
+import static org.geysermc.floodgate.core.connection.standalone.codec.CodecUtils.readString;
+import static org.geysermc.floodgate.core.connection.standalone.codec.CodecUtils.readUniqueId;
+import static org.geysermc.floodgate.core.connection.standalone.codec.CodecUtils.writeString;
+import static org.geysermc.floodgate.core.connection.standalone.codec.CodecUtils.writeUniqueId;
 
-    public HostnameSeparationResult(
-            String floodgateData, int headerVersion, String hostnameRemainder) {
-        this.floodgateData = floodgateData;
-        this.headerVersion = headerVersion;
-        this.hostnameRemainder = hostnameRemainder;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import org.geysermc.floodgate.util.LinkedPlayer;
+
+public final class LinkedPlayerCodec {
+    private LinkedPlayerCodec() {}
+
+    public static void encode(LinkedPlayer linkedPlayer, DataOutputStream stream) throws IOException {
+        writeString(stream, linkedPlayer.getJavaUsername());
+        writeUniqueId(stream, linkedPlayer.getJavaUniqueId());
+        writeUniqueId(stream, linkedPlayer.getBedrockId());
     }
 
-    public String floodgateData() {
-        return floodgateData;
-    }
-
-    public int headerVersion() {
-        return headerVersion;
-    }
-
-    public String hostnameRemainder() {
-        return hostnameRemainder;
+    public static LinkedPlayer decode(ByteBuffer buffer) {
+        return LinkedPlayer.of(readString(buffer), readUniqueId(buffer), readUniqueId(buffer));
     }
 }

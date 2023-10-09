@@ -3,7 +3,7 @@ package org.geysermc.floodgate.core.crypto;
 import jakarta.inject.Singleton;
 import java.nio.charset.StandardCharsets;
 import org.geysermc.floodgate.core.connection.FloodgateConnection;
-import org.geysermc.floodgate.core.connection.codec.FloodgateConnectionCodec;
+import org.geysermc.floodgate.core.connection.standalone.codec.FloodgateConnectionCodec;
 
 @Singleton
 public final class FloodgateDataCodec {
@@ -25,5 +25,9 @@ public final class FloodgateDataCodec {
 
     public FloodgateConnection decode(byte[] data) throws Exception {
         return connectionCodec.decode(formatCodec.decode(data));
+    }
+
+    public FloodgateConnection decodeFromString(String data) throws Exception {
+        return decode(data.getBytes(StandardCharsets.UTF_8));
     }
 }

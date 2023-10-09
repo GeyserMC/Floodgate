@@ -81,8 +81,8 @@ public class SpigotProtocolSupportHandler implements PacketHandler {
     }
 
     @Inject
-    @Named("playerAttribute")
-    AttributeKey<Connection> playerAttribute;
+    @Named("connectionAttribute")
+    AttributeKey<Connection> connectionAttribute;
 
     @Inject
     public void register(PacketHandlers packetHandlers) {
@@ -91,7 +91,7 @@ public class SpigotProtocolSupportHandler implements PacketHandler {
 
     @Override
     public Object handle(ChannelHandlerContext ctx, Object packet, boolean serverbound) {
-        Connection player = ctx.channel().attr(playerAttribute).get();
+        Connection player = ctx.channel().attr(connectionAttribute).get();
         if (player == null) {
             return packet;
         }

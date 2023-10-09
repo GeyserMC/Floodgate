@@ -30,17 +30,27 @@ import io.netty.util.AttributeKey;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.addon.data.PacketBlocker;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
-import org.geysermc.floodgate.core.connection.FloodgateHandshakeHandler;
+import org.geysermc.floodgate.core.connection.DataSeeker;
+import org.geysermc.floodgate.core.connection.FloodgateDataHandler;
 
 @Singleton
 public final class VelocityDataAddon implements InjectorAddon {
-    @Inject FloodgateHandshakeHandler handshakeHandler;
-    @Inject ProxyFloodgateConfig config;
-    @Inject FloodgateLogger logger;
+    @Inject
+    DataSeeker dataSeeker;
+
+    @Inject
+    FloodgateDataHandler handshakeHandler;
+
+    @Inject
+    ProxyFloodgateConfig config;
+
+    @Inject
+    FloodgateLogger logger;
 
     @Inject
     @Named("packetHandler")
@@ -53,6 +63,10 @@ public final class VelocityDataAddon implements InjectorAddon {
     @Inject
     @Named("packetEncoder")
     String packetEncoder;
+
+    @Inject
+    @Named("connectionAttribute")
+    AttributeKey<Connection> connectionAttribute;
 
     @Inject
     @Named("kickMessageAttribute")
@@ -73,18 +87,15 @@ public final class VelocityDataAddon implements InjectorAddon {
         PacketBlocker blocker = new PacketBlocker();
         channel.pipeline().addBefore(packetDecoder, "floodgate_packet_blocker", blocker);
 
+        var dataHandler = new VelocityProxyDataHandler(
+                dataSeeker, handshakeHandler, config, blocker, connectionAttribute, kickMessageAttribute, logger);
+
         // The handler is already added so we should add our handler before it
-        channel.pipeline().addBefore(
-                packetHandler, "floodgate_data_handler",
-                new VelocityProxyDataHandler(
-                        config, handshakeHandler, blocker, kickMessageAttribute, logger
-                )
-        );
+        channel.pipeline().addBefore(packetHandler, "floodgate_data_handler", dataHandler);
     }
 
     @Override
-    public void onRemoveInject(Channel channel) {
-    }
+    public void onRemoveInject(Channel channel) {}
 
     @Override
     public boolean shouldInject() {

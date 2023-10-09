@@ -112,8 +112,8 @@ public class CommonModule {
 
     @Bean
     @Singleton
-    @Named("playerAttribute")
-    public AttributeKey<Connection> playerAttribute() {
+    @Named("connectionAttribute")
+    public AttributeKey<Connection> connectionAttribute() {
         return AttributeKey.valueOf("floodgate-player");
     }
 }

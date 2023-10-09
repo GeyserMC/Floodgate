@@ -47,8 +47,8 @@ public final class BungeeConnectionManager extends ConnectionManager {
     private static final Field CHANNEL_WRAPPER;
 
     @Inject
-    @Named("playerAttribute")
-    AttributeKey<Connection> playerAttribute;
+    @Named("connectionAttribute")
+    AttributeKey<Connection> connectionAttribute;
 
     @Override
     protected @Nullable Object platformIdentifierOrConnectionFor(Object input) {
@@ -59,7 +59,7 @@ public final class BungeeConnectionManager extends ConnectionManager {
             return channelFor(pendingConnection);
         }
         if (input instanceof Channel channel) {
-            return channel.attr(playerAttribute).get();
+            return channel.attr(connectionAttribute).get();
         }
         return null;
     }

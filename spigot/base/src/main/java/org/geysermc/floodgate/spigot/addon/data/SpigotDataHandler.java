@@ -33,24 +33,36 @@ import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.net.InetSocketAddress;
 import org.geysermc.api.connection.Connection;
-import org.geysermc.floodgate.core.addon.data.CommonDataHandler;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.core.addon.data.CommonNettyDataHandler;
 import org.geysermc.floodgate.core.addon.data.PacketBlocker;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
-import org.geysermc.floodgate.core.connection.FloodgateHandshakeHandler;
-import org.geysermc.floodgate.core.connection.FloodgateHandshakeHandler.HandshakeResult;
+import org.geysermc.floodgate.core.connection.DataSeeker;
+import org.geysermc.floodgate.core.connection.FloodgateDataHandler;
+import org.geysermc.floodgate.core.connection.FloodgateDataHandler.HandleResult;
 import org.geysermc.floodgate.spigot.util.ClassNames;
 import org.geysermc.floodgate.spigot.util.ProxyUtils;
 
-public final class SpigotDataHandler extends CommonDataHandler {
+public final class SpigotDataHandler extends CommonNettyDataHandler {
     private Object networkManager;
-    private Connection player;
+    private Connection connection;
     private boolean proxyData;
 
     public SpigotDataHandler(
-            FloodgateHandshakeHandler handshakeHandler,
+            DataSeeker dataSeeker,
+            FloodgateDataHandler handshakeHandler,
             FloodgateConfig config,
+            FloodgateLogger logger,
+            AttributeKey<Connection> connectionAttribute,
             AttributeKey<String> kickMessageAttribute) {
-        super(handshakeHandler, config, kickMessageAttribute, new PacketBlocker());
+        super(
+                dataSeeker,
+                handshakeHandler,
+                config,
+                logger,
+                connectionAttribute,
+                kickMessageAttribute,
+                new PacketBlocker());
     }
 
     @Override
@@ -65,14 +77,14 @@ public final class SpigotDataHandler extends CommonDataHandler {
     }
 
     @Override
-    protected boolean shouldRemoveHandler(HandshakeResult result) {
-        player = result.getFloodgatePlayer();
+    protected boolean shouldRemoveHandler(HandleResult result) {
+        connection = result.joinResult() != null ? result.joinResult().connection() : null;
 
         if (getKickMessage() != null) {
             // we also have to keep this handler if we want to kick then with a disconnect message
             return false;
-        } else if (player == null) {
-            // player is not a Floodgate player
+        } else if (connection == null) {
+            // connection is not a Floodgate connection
             return true;
         }
 
@@ -82,7 +94,7 @@ public final class SpigotDataHandler extends CommonDataHandler {
 
         if (!proxyData) {
             // Use a spoofedUUID for initUUID (just like Bungeecord)
-            setValue(networkManager, "spoofedUUID", player.javaUuid());
+            setValue(networkManager, "spoofedUUID", connection.javaUuid());
         }
 
         // we can only remove the handler if the data is proxy data and username validation doesn't
@@ -151,9 +163,7 @@ public final class SpigotDataHandler extends CommonDataHandler {
             }
 
             // set the player his GameProfile, we can't change the username without this
-            GameProfile gameProfile = new GameProfile(
-                    player.javaUuid(), player.javaUsername()
-            );
+            GameProfile gameProfile = new GameProfile(connection.javaUuid(), connection.javaUsername());
             setValue(packetListener, ClassNames.LOGIN_PROFILE, gameProfile);
 
             // we have to fake the offline player (login) cycle
@@ -166,8 +176,7 @@ public final class SpigotDataHandler extends CommonDataHandler {
 
             ClassNames.INIT_UUID.invoke(packetListener);
 
-            Object loginHandler =
-                    ClassNames.LOGIN_HANDLER_CONSTRUCTOR.newInstance(packetListener);
+            Object loginHandler = ClassNames.LOGIN_HANDLER_CONSTRUCTOR.newInstance(packetListener);
             ClassNames.FIRE_LOGIN_EVENTS.invoke(loginHandler);
 
             ctx.pipeline().remove(this);
@@ -182,10 +191,7 @@ public final class SpigotDataHandler extends CommonDataHandler {
             ClassNames.LOGIN_DISCONNECT.invoke(packetListener, kickMessage);
         } else {
             // ProtocolSupport for example has their own PacketLoginInListener implementation
-            ClassNames.NETWORK_EXCEPTION_CAUGHT.invoke(
-                    networkManager,
-                    ctx, new IllegalStateException(kickMessage)
-            );
+            ClassNames.NETWORK_EXCEPTION_CAUGHT.invoke(networkManager, ctx, new IllegalStateException(kickMessage));
         }
     }
 }

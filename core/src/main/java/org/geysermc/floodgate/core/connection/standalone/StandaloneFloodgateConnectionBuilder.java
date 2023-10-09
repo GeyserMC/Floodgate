@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.connection;
+package org.geysermc.floodgate.core.connection.standalone;
 
 import java.net.InetAddress;
 import java.util.Objects;
@@ -34,10 +34,11 @@ import org.geysermc.api.util.BedrockPlatform;
 import org.geysermc.api.util.InputMode;
 import org.geysermc.api.util.UiProfile;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
+import org.geysermc.floodgate.core.connection.FloodgateConnection;
 import org.geysermc.floodgate.core.util.Utils;
 import org.geysermc.floodgate.util.LinkedPlayer;
 
-public class FloodgateConnectionBuilder {
+public class StandaloneFloodgateConnectionBuilder {
     private final FloodgateConfig config;
     private String version;
     private String username;
@@ -50,56 +51,56 @@ public class FloodgateConnectionBuilder {
     private InetAddress ip;
     private LinkedPlayer linkedPlayer;
 
-    public FloodgateConnectionBuilder(FloodgateConfig config) {
+    public StandaloneFloodgateConnectionBuilder(FloodgateConfig config) {
         this.config = Objects.requireNonNull(config);
     }
 
-    public @This FloodgateConnectionBuilder version(String version) {
+    public @This StandaloneFloodgateConnectionBuilder version(String version) {
         this.version = Objects.requireNonNull(version);
         return this;
     }
 
-    public @This FloodgateConnectionBuilder username(String username) {
+    public @This StandaloneFloodgateConnectionBuilder username(String username) {
         this.username = Objects.requireNonNull(username);
         return this;
     }
 
-    public @This FloodgateConnectionBuilder identity(UUID identity) {
+    public @This StandaloneFloodgateConnectionBuilder identity(UUID identity) {
         this.identity = Objects.requireNonNull(identity);
         return this;
     }
 
-    public @This FloodgateConnectionBuilder xuid(String xuid) {
+    public @This StandaloneFloodgateConnectionBuilder xuid(String xuid) {
         this.xuid = Objects.requireNonNull(xuid);
         return this;
     }
 
-    public @This FloodgateConnectionBuilder deviceOs(BedrockPlatform deviceOs) {
+    public @This StandaloneFloodgateConnectionBuilder deviceOs(BedrockPlatform deviceOs) {
         this.deviceOs = Objects.requireNonNull(deviceOs);
         return this;
     }
 
-    public @This FloodgateConnectionBuilder languageCode(String languageCode) {
+    public @This StandaloneFloodgateConnectionBuilder languageCode(String languageCode) {
         this.languageCode = Objects.requireNonNull(languageCode);
         return this;
     }
 
-    public @This FloodgateConnectionBuilder uiProfile(UiProfile uiProfile) {
+    public @This StandaloneFloodgateConnectionBuilder uiProfile(UiProfile uiProfile) {
         this.uiProfile = Objects.requireNonNull(uiProfile);
         return this;
     }
 
-    public @This FloodgateConnectionBuilder inputMode(InputMode inputMode) {
+    public @This StandaloneFloodgateConnectionBuilder inputMode(InputMode inputMode) {
         this.inputMode = Objects.requireNonNull(inputMode);
         return this;
     }
 
-    public @This FloodgateConnectionBuilder ip(InetAddress ip) {
+    public @This StandaloneFloodgateConnectionBuilder ip(InetAddress ip) {
         this.ip = Objects.requireNonNull(ip);
         return this;
     }
 
-    public @This FloodgateConnectionBuilder linkedPlayer(@Nullable LinkedPlayer linkedPlayer) {
+    public @This StandaloneFloodgateConnectionBuilder linkedPlayer(@Nullable LinkedPlayer linkedPlayer) {
         this.linkedPlayer = linkedPlayer;
         return this;
     }

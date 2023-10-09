@@ -57,8 +57,8 @@ public final class VelocityListener implements McListener {
     @Inject FloodgateLogger logger;
 
     @Inject
-    @Named("playerAttribute")
-    AttributeKey<Connection> playerAttribute;
+    @Named("connectionAttribute")
+    AttributeKey<Connection> connectionAttribute;
 
     @Inject
     @Named("kickMessageAttribute")
@@ -70,7 +70,7 @@ public final class VelocityListener implements McListener {
         String kickMessage;
         try {
             Channel channel = connectionManager.channelFor(event.getConnection());
-            player = channel.attr(playerAttribute).get();
+            player = channel.attr(connectionAttribute).get();
             kickMessage = channel.attr(kickMessageAttribute).get();
         } catch (Exception exception) {
             logger.error("Failed get the FloodgatePlayer from the player's channel", exception);

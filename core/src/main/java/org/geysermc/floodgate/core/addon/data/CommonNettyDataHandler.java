@@ -32,19 +32,25 @@ import io.netty.util.AttributeKey;
 import java.net.InetSocketAddress;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.api.handshake.HandshakeData;
+import org.geysermc.api.connection.Connection;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
-import org.geysermc.floodgate.core.connection.FloodgateHandshakeHandler;
-import org.geysermc.floodgate.core.connection.FloodgateHandshakeHandler.HandshakeResult;
-import org.geysermc.floodgate.core.connection.HostnameSeparationResult;
-import org.geysermc.floodgate.core.crypto.FloodgateFormatCodec;
-import org.geysermc.floodgate.core.util.Constants;
+import org.geysermc.floodgate.core.connection.DataSeeker;
+import org.geysermc.floodgate.core.connection.DataSeeker.DataSeekerResult;
+import org.geysermc.floodgate.core.connection.FloodgateDataHandler;
+import org.geysermc.floodgate.core.connection.FloodgateDataHandler.HandleResult;
+import org.geysermc.floodgate.core.crypto.exception.UnsupportedVersionException;
+import org.geysermc.floodgate.core.util.InvalidFormatException;
 
 @RequiredArgsConstructor
-public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
-    protected final FloodgateHandshakeHandler handshakeHandler;
+public abstract class CommonNettyDataHandler extends ChannelInboundHandlerAdapter {
+    protected final DataSeeker dataSeeker;
+    protected final FloodgateDataHandler handshakeHandler;
     protected final FloodgateConfig config;
+    protected final FloodgateLogger logger;
+    protected final AttributeKey<Connection> connectionAttribute;
     protected final AttributeKey<String> kickMessageAttribute;
     protected final PacketBlocker blocker;
 
@@ -58,7 +64,8 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
 
     protected abstract boolean channelRead(Object packet) throws Exception;
 
-    protected boolean shouldRemoveHandler(HandshakeResult result) {
+    //todo rewrite this method
+    protected boolean shouldRemoveHandler(HandleResult result) {
         return true;
     }
 
@@ -68,68 +75,61 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
 
     protected void handle(Object handshakePacket, String hostname) {
         this.handshakePacket = handshakePacket;
-        HostnameSeparationResult separation = handshakeHandler.separateHostname(hostname);
 
-        if (separation.floodgateData() == null) {
+        Channel channel = ctx.channel();
+
+        DataSeekerResult seekResult;
+        try {
+            seekResult = dataSeeker.seekData(hostname, channel);
+        } catch (InvalidFormatException ignored) {
+            disablePacketQueue(new HandleResult(HandleResultType.NOT_FLOODGATE_DATA, null));
+            return;
+        } catch (UnsupportedVersionException versionException) {
+            disablePacketQueue(true);
+            setKickMessage(versionException.getMessage());
+            return;
+        } catch (Exception exception) {
+            if (logger.isDebug()) {
+                logger.error("Exception while handling connection", exception);
+            }
+            disablePacketQueue(new HandleResult(HandleResultType.DECRYPT_ERROR, null));
+            return;
+        }
+
+        if (seekResult.connection() == null) {
             // not a Floodgate player, make sure to resend the cancelled handshake packet
             disablePacketQueue(true);
             return;
         }
 
-        if (separation.headerVersion() != FloodgateFormatCodec.VERSION) {
-            disablePacketQueue(true);
-            setKickMessage(String.format(
-                    Constants.UNSUPPORTED_DATA_VERSION,
-                    FloodgateFormatCodec.VERSION, separation.headerVersion()
-            ));
-            return;
-        }
-
         blocker.enable();
 
-        Channel channel = ctx.channel();
-
-        handshakeHandler
-                .handle(channel, separation.floodgateData(), separation.hostnameRemainder())
-                .thenApply(result -> {
-                    HandshakeData handshakeData = result.getHandshakeData();
+        handshakeHandler.handleConnection(seekResult.connection())
+                .thenAccept(result -> {
+                    var connection = result.connection();
 
                     // we'll change the IP address to the real IP of the client very early on
                     // so that almost every plugin will use the real IP of the client
-                    InetSocketAddress newIp = result.getNewIp(channel);
-                    if (newIp != null) {
-                        setNewIp(channel, newIp);
+                    var port = ((InetSocketAddress) channel.remoteAddress()).getPort();
+                    setNewIp(channel, new InetSocketAddress(connection.ip(), port));
+
+                    this.handshakePacket = setHostname(handshakePacket, seekResult.dataRemainder());
+
+                    if (result.shouldDisconnect()) {
+                        setKickMessage(result.disconnectReason());
+                    } else {
+                        channel.attr(connectionAttribute).set(connection);
                     }
 
-                    this.handshakePacket = setHostname(handshakePacket, handshakeData.getHostname());
-
-                    if (handshakeData.shouldDisconnect()) {
-                        setKickMessage(handshakeData.getDisconnectReason());
-                        return shouldRemoveHandler(result);
-                    }
-
-                    switch (result.getResultType()) {
-                        case EXCEPTION:
-                            setKickMessage(Constants.INTERNAL_ERROR_MESSAGE);
-                            break;
-                        case DECRYPT_ERROR:
-                            setKickMessage(config.disconnect().invalidKey());
-                            break;
-                        case INVALID_DATA:
-                            //todo the message is not super accurate anymore with its current use
-                            setKickMessage(config.disconnect().invalidArgumentsLength());
-                            break;
-                        default:
-                            break;
-                    }
-                    return shouldRemoveHandler(result);
-                }).handle((shouldRemove, error) -> {
-                    if (error != null) {
-                        error.printStackTrace();
-                    }
-                    disablePacketQueue(shouldRemove);
-                    return shouldRemove;
+                    disablePacketQueue(new HandleResult(HandleResultType.SUCCESS, result));
+                }).exceptionally(error -> {
+                    logger.error("Unexpected error occurred", error);
+                    return null;
                 });
+    }
+
+    protected void disablePacketQueue(HandleResult result) {
+        disablePacketQueue(shouldRemoveHandler(result));
     }
 
     protected void disablePacketQueue(boolean removeSelf) {
@@ -153,7 +153,7 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
         ctx.pipeline().remove(this);
     }
 
-    protected final void setKickMessage(String message) {
+    protected final void setKickMessage(@NonNull String message) {
         ctx.channel().attr(kickMessageAttribute).set(message);
     }
 
@@ -191,5 +191,12 @@ public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {
         if (config.debug()) {
             cause.printStackTrace();
         }
+    }
+
+    public enum HandleResultType {
+        NOT_FLOODGATE_DATA,
+        DECRYPT_ERROR,
+        INVALID_DATA, //todo remove from config, unused
+        SUCCESS
     }
 }

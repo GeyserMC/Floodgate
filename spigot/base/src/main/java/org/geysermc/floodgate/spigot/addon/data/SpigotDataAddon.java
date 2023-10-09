@@ -30,18 +30,34 @@ import io.netty.util.AttributeKey;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
-import org.geysermc.floodgate.core.connection.FloodgateHandshakeHandler;
+import org.geysermc.floodgate.core.connection.DataSeeker;
+import org.geysermc.floodgate.core.connection.FloodgateDataHandler;
 
 @Singleton
 public final class SpigotDataAddon implements InjectorAddon {
-    @Inject FloodgateHandshakeHandler handshakeHandler;
-    @Inject FloodgateConfig config;
+    @Inject
+    DataSeeker dataSeeker;
+
+    @Inject
+    FloodgateDataHandler handshakeHandler;
+
+    @Inject
+    FloodgateConfig config;
+
+    @Inject
+    FloodgateLogger logger;
 
     @Inject
     @Named("packetHandler")
     String packetHandlerName;
+
+    @Inject
+    @Named("connectionAttribute")
+    AttributeKey<Connection> connectionAttribute;
 
     @Inject
     @Named("kickMessageAttribute")
@@ -49,16 +65,15 @@ public final class SpigotDataAddon implements InjectorAddon {
 
     @Override
     public void onInject(Channel channel, boolean toServer) {
+        var dataHandler = new SpigotDataHandler(
+                dataSeeker, handshakeHandler, config, logger, connectionAttribute, kickMessageAttribute);
+
         // we have to add the packet blocker in the data handler, otherwise ProtocolSupport breaks
-        channel.pipeline().addBefore(
-                packetHandlerName, "floodgate_data_handler",
-                new SpigotDataHandler(handshakeHandler, config, kickMessageAttribute)
-        );
+        channel.pipeline().addBefore(packetHandlerName, "floodgate_data_handler", dataHandler);
     }
 
     @Override
-    public void onRemoveInject(Channel channel) {
-    }
+    public void onRemoveInject(Channel channel) {}
 
     @Override
     public boolean shouldInject() {

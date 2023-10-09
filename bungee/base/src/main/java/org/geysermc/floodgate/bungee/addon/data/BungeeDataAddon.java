@@ -30,15 +30,27 @@ import io.netty.util.AttributeKey;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.addon.data.PacketBlocker;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
-import org.geysermc.floodgate.core.connection.FloodgateHandshakeHandler;
+import org.geysermc.floodgate.core.connection.DataSeeker;
+import org.geysermc.floodgate.core.connection.FloodgateDataHandler;
 
 @Singleton
 public class BungeeDataAddon implements InjectorAddon {
-    @Inject private FloodgateHandshakeHandler handshakeHandler;
-    @Inject private ProxyFloodgateConfig config;
+    @Inject
+    DataSeeker dataSeeker;
+
+    @Inject
+    FloodgateDataHandler handshakeHandler;
+
+    @Inject
+    private ProxyFloodgateConfig config;
+
+    @Inject
+    FloodgateLogger logger;
 
     @Inject
     @Named("packetHandler")
@@ -53,10 +65,15 @@ public class BungeeDataAddon implements InjectorAddon {
     private String packetEncoder;
 
     @Inject
-    @Named("kickMessageAttribute")
-    private AttributeKey<String> kickMessageAttribute;
+    @Named("connectionAttribute")
+    AttributeKey<Connection> connectionAttribute;
 
-    @Inject BungeeServerDataHandler serverDataHandler;
+    @Inject
+    @Named("kickMessageAttribute")
+    AttributeKey<String> kickMessageAttribute;
+
+    @Inject
+    BungeeServerDataHandler serverDataHandler;
 
     @Override
     public void onInject(Channel channel, boolean toServer) {
@@ -70,15 +87,14 @@ public class BungeeDataAddon implements InjectorAddon {
         PacketBlocker blocker = new PacketBlocker();
         channel.pipeline().addBefore(packetDecoder, "floodgate_packet_blocker", blocker);
 
-        channel.pipeline().addBefore(
-                packetHandler, "floodgate_data_handler",
-                new BungeeProxyDataHandler(handshakeHandler, config, kickMessageAttribute, blocker)
-        );
+        var dataHandler = new BungeeProxyDataHandler(
+                dataSeeker, handshakeHandler, config, logger, connectionAttribute, kickMessageAttribute, blocker);
+
+        channel.pipeline().addBefore(packetHandler, "floodgate_data_handler", dataHandler);
     }
 
     @Override
-    public void onRemoveInject(Channel channel) {
-    }
+    public void onRemoveInject(Channel channel) {}
 
     @Override
     public boolean shouldInject() {

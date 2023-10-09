@@ -81,8 +81,8 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
     @Inject FloodgateDataCodec dataCodec;
 
     @Inject
-    @Named("playerAttribute")
-    AttributeKey<Connection> playerAttribute;
+    @Named("connectionAttribute")
+    AttributeKey<Connection> connectionAttribute;
 
     @Override
     public void write(ChannelHandlerContext ctx, Object packet, ChannelPromise promise) throws Exception {
@@ -97,7 +97,7 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
             Object association = invoke(minecraftConnection, GET_ASSOCIATION);
             Player velocityPlayer = castedInvoke(association, GET_PLAYER);
 
-            Connection connection = api.connectionByUuid(velocityPlayer.getUniqueId());
+            Connection connection = api.connectionByPlatformIdentifier(velocityPlayer);
             if (connection != null) {
                 // Player is a Floodgate player
                 String encodedData = dataCodec.encodeToString((FloodgateConnection) connection);

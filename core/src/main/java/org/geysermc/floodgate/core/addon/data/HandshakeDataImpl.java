@@ -35,7 +35,7 @@ import lombok.Setter;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.connection.FloodgateConnection;
-import org.geysermc.floodgate.core.connection.FloodgateConnectionBuilder;
+import org.geysermc.floodgate.core.connection.standalone.StandaloneFloodgateConnectionBuilder;
 import org.geysermc.floodgate.core.util.Utils;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.LinkedPlayer;
@@ -93,7 +93,7 @@ public class HandshakeDataImpl implements HandshakeData {
             return connection;
         }
 
-        var builder = new FloodgateConnectionBuilder(config);
+        var builder = new StandaloneFloodgateConnectionBuilder(config);
 //        connection.fillBuilder(builder); todo probably remove handshake handlers all together
         if (newLink != null) builder.linkedPlayer(newLink);
         if (newIp != null) builder.ip(newIp);
