@@ -27,6 +27,7 @@ package org.geysermc.floodgate.util;
 
 import java.util.Collection;
 import java.util.UUID;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -122,11 +123,11 @@ public final class SpigotCommandUtil extends CommandUtil {
 
     @Override
     public boolean whitelistPlayer(UUID uuid, String username) {
-        return WhitelistUtils.addPlayer(uuid, username);
+        return WhitelistUtils.addPlayer(uuid, username, versionSpecificMethods);
     }
 
     @Override
     public boolean removePlayerFromWhitelist(UUID uuid, String username) {
-        return WhitelistUtils.removePlayer(uuid, username);
+        return WhitelistUtils.removePlayer(uuid, username, versionSpecificMethods);
     }
 }
