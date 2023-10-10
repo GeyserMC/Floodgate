@@ -25,9 +25,9 @@
 
 package org.geysermc.floodgate.util;
 
-import org.bukkit.Bukkit;
 import com.mojang.authlib.GameProfile;
 import java.util.UUID;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
 @SuppressWarnings("ConstantConditions")
@@ -79,8 +79,6 @@ public final class WhitelistUtils {
     }
 
     static void setWhitelist(OfflinePlayer player, boolean whitelist, SpigotVersionSpecificMethods versionSpecificMethods) {
-        versionSpecificMethods.maybeSchedule(() -> {
-            player.setWhitelisted(whitelist);
-        });
+        versionSpecificMethods.maybeSchedule(() -> player.setWhitelisted(whitelist));
     }
 }
