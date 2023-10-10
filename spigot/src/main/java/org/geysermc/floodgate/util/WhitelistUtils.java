@@ -79,13 +79,8 @@ public final class WhitelistUtils {
     }
 
     static void setWhitelist(OfflinePlayer player, boolean whitelist, SpigotVersionSpecificMethods versionSpecificMethods) {
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                player.setWhitelisted(whitelist);
-            }
-        };
-
-        versionSpecificMethods.maybeSchedule(runnable);
+        versionSpecificMethods.maybeSchedule(() -> {
+            player.setWhitelisted(whitelist);
+        });
     }
 }
