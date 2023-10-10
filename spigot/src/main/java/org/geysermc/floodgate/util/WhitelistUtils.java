@@ -36,11 +36,12 @@ public final class WhitelistUtils {
     /**
      * Whitelist the given Bedrock player.
      *
-     * @param uuid     the UUID of the Bedrock player to be whitelisted
-     * @param username the username of the Bedrock player to be whitelisted
-     * @return true if the player has been whitelisted, false if the player is already whitelisted
+     * @param uuid     the UUID of the Bedrock player to be removed
+     * @param username the username of the Bedrock player to be removed
+     * @param versionSpecificMethods a reference to the SpigotVersionSpecificMethods used in SpigotCommandUtil
+     * @return true if the player has been removed from the whitelist, false if the player wasn't
      */
-    public static boolean addPlayer(UUID uuid, String username) {
+    public static boolean addPlayer(UUID uuid, String username, SpigotVersionSpecificMethods versionSpecificMethods) {
         GameProfile profile = new GameProfile(uuid, username);
 
         OfflinePlayer player = ReflectionUtils.newInstance(
@@ -50,7 +51,7 @@ public final class WhitelistUtils {
         if (player.isWhitelisted()) {
             return false;
         }
-        player.setWhitelisted(true);
+        setWhitelist(player, true, versionSpecificMethods);
         return true;
     }
 
@@ -59,10 +60,11 @@ public final class WhitelistUtils {
      *
      * @param uuid     the UUID of the Bedrock player to be removed
      * @param username the username of the Bedrock player to be removed
+     * @param versionSpecificMethods a reference to the SpigotVersionSpecificMethods used in SpigotCommandUtil
      * @return true if the player has been removed from the whitelist, false if the player wasn't
      * whitelisted
      */
-    public static boolean removePlayer(UUID uuid, String username) {
+    public static boolean removePlayer(UUID uuid, String username, SpigotVersionSpecificMethods versionSpecificMethods) {
         GameProfile profile = new GameProfile(uuid, username);
 
         OfflinePlayer player = ReflectionUtils.newInstance(
@@ -72,7 +74,11 @@ public final class WhitelistUtils {
         if (!player.isWhitelisted()) {
             return false;
         }
-        player.setWhitelisted(false);
+        setWhitelist(player, false, versionSpecificMethods);
         return true;
+    }
+
+    static void setWhitelist(OfflinePlayer player, boolean whitelist, SpigotVersionSpecificMethods versionSpecificMethods) {
+        versionSpecificMethods.maybeSchedule(() -> player.setWhitelisted(whitelist));
     }
 }
