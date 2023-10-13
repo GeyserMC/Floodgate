@@ -25,16 +25,23 @@
 
 package org.geysermc.floodgate.util;
 
+import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.geysermc.floodgate.SpigotPlugin;
+import org.geysermc.floodgate.api.event.skin.SkinApplyEvent;
+import org.geysermc.floodgate.skin.SkinDataImpl;
 
 public final class SpigotVersionSpecificMethods {
     private static final Method GET_SPIGOT;
     private static final Method OLD_GET_LOCALE;
     private static final boolean NEW_VISIBILITY;
+
+    private static final Method NEW_PROPERTY_VALUE;
+    private static final Method NEW_PROPERTY_SIGNATURE;
 
     static {
         GET_SPIGOT = ReflectionUtils.getMethod(Player.class, "spigot");
@@ -44,6 +51,9 @@ public final class SpigotVersionSpecificMethods {
                 Player.class, "hidePlayer",
                 Plugin.class, Player.class
         );
+
+        NEW_PROPERTY_VALUE = ReflectionUtils.getMethod(Property.class, "value");
+        NEW_PROPERTY_SIGNATURE = ReflectionUtils.getMethod(Property.class, "signature");
     }
 
     private final SpigotPlugin plugin;
@@ -68,6 +78,26 @@ public final class SpigotVersionSpecificMethods {
             return;
         }
         hideAndShowPlayer0(on, target);
+    }
+
+    public SkinApplyEvent.SkinData currentSkin(PropertyMap properties) {
+        for (Property property : properties.get("textures")) {
+            String value;
+            String signature;
+            if (NEW_PROPERTY_VALUE != null) {
+                value = ReflectionUtils.castedInvoke(property, NEW_PROPERTY_VALUE);
+                signature = ReflectionUtils.castedInvoke(property, NEW_PROPERTY_SIGNATURE);
+            } else {
+                value = property.getValue();
+                signature = property.getSignature();
+            }
+
+            //noinspection DataFlowIssue
+            if (!value.isEmpty()) {
+                return new SkinDataImpl(value, signature);
+            }
+        }
+        return null;
     }
 
     public void schedule(Runnable runnable, long delay) {

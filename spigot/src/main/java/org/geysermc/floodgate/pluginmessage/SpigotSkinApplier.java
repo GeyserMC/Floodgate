@@ -39,7 +39,6 @@ import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.event.EventBus;
 import org.geysermc.floodgate.event.skin.SkinApplyEventImpl;
 import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.skin.SkinDataImpl;
 import org.geysermc.floodgate.util.ClassNames;
 import org.geysermc.floodgate.util.ReflectionUtils;
 import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
@@ -78,7 +77,7 @@ public final class SpigotSkinApplier implements SkinApplier {
         // MultiMap from Guava. Floodgate relocates Guava.
         PropertyMap properties = profile.getProperties();
 
-        SkinData currentSkin = currentSkin(properties);
+        SkinData currentSkin = versionSpecificMethods.currentSkin(properties);
 
         SkinApplyEvent event = new SkinApplyEventImpl(floodgatePlayer, currentSkin, skinData);
         event.setCancelled(floodgatePlayer.isLinked());
@@ -98,15 +97,6 @@ public final class SpigotSkinApplier implements SkinApplier {
                 }
             }
         });
-    }
-
-    private SkinData currentSkin(PropertyMap properties) {
-        for (Property texture : properties.get("textures")) {
-            if (!texture.getValue().isEmpty()) {
-                return new SkinDataImpl(texture.getValue(), texture.getSignature());
-            }
-        }
-        return null;
     }
 
     private void replaceSkin(PropertyMap properties, SkinData skinData) {
