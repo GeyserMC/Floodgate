@@ -27,14 +27,12 @@ package org.geysermc.floodgate.core.skin;
 
 import com.google.gson.JsonObject;
 import java.util.Objects;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 
-public class SkinDataImpl implements SkinData {
-    private final String value;
-    private final String signature;
-
-    public SkinDataImpl(@NonNull String value, @NonNull String signature) {
+public record SkinDataImpl(String value, String signature) implements SkinData {
+    public SkinDataImpl(@NonNull String value, @MonotonicNonNull String signature) {
         this.value = Objects.requireNonNull(value);
         this.signature = Objects.requireNonNull(signature);
     }
@@ -44,15 +42,5 @@ public class SkinDataImpl implements SkinData {
                 data.get("value").getAsString(),
                 data.get("signature").getAsString()
         );
-    }
-
-    @Override
-    public @NonNull String value() {
-        return value;
-    }
-
-    @Override
-    public @NonNull String signature() {
-        return signature;
     }
 }

@@ -1,5 +1,6 @@
 package org.geysermc.floodgate.spigot.util;
 
+import java.lang.reflect.Field;
 import org.bukkit.Bukkit;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
 
@@ -26,14 +27,28 @@ public class MappingUtils {
         if (legacy != null) {
             return legacy;
         }
-        throw new IllegalStateException(
-                "Could not find class " + mojangPackage + "." + mojangName + ". What server software are you using?"
-        );
+        throw new IllegalStateException(genericMessage("class " + mojangPackage + "." + mojangName));
     }
 
     @SuppressWarnings("unchecked")
     public static <T> Class<T> craftbukkitClass(String className) {
         return (Class<T>) ReflectionUtils.getClassOrThrow(CRAFTBUKKIT_MAPPING_PREFTIX + "." + className);
+    }
+
+    public static Field fieldFor(Class<?> clazz, String mojangName, String spigotName) {
+        var mojmap = ReflectionUtils.getField(clazz, mojangName);
+        if (mojmap != null) {
+            return mojmap;
+        }
+        var spigot = ReflectionUtils.getField(clazz, spigotName);
+        if (spigot != null) {
+            return spigot;
+        }
+        throw new IllegalStateException(genericMessage("field " + mojangName + " for class " + clazz));
+    }
+
+    private static String genericMessage(String specific) {
+        return "Could not find " + specific + ". What server software are you using?";
     }
 
     static {

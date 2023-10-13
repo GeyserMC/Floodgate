@@ -22,11 +22,11 @@ bstats = "3.0.2"
 bungee = "master-SNAPSHOT"
 
 # spigot
-paper = "1.20.1-R0.1-SNAPSHOT"
-authlib = "1.5.21"
+paper = "1.20.2-R0.1-SNAPSHOT"
+authlib = "5.0.47"
 
 # velocity
-velocity = "3.1.1"
+velocity = "3.2.0-SNAPSHOT"
 
 # buildSrc
 indra = "3.1.3"

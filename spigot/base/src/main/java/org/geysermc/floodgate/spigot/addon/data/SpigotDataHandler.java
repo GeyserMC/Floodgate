@@ -31,6 +31,7 @@ import static org.geysermc.floodgate.core.util.ReflectionUtils.setValue;
 import com.mojang.authlib.GameProfile;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -71,9 +72,27 @@ public final class SpigotDataHandler extends CommonNettyDataHandler {
     }
 
     @Override
-    protected Object setHostname(Object handshakePacket, String hostname) {
-        setValue(handshakePacket, ClassNames.HANDSHAKE_HOST, hostname);
-        return handshakePacket;
+    protected Object setHostname(Object handshakePacket, String hostname) throws IllegalStateException {
+        if (ClassNames.IS_PRE_1_20_2) {
+            // 1.20.1 and below
+            setValue(handshakePacket, ClassNames.HANDSHAKE_HOST, hostname);
+
+            return handshakePacket;
+        } else {
+            // 1.20.2 and above
+            try {
+                Object[] components = new Object[]{
+                        ClassNames.HANDSHAKE_PORT.get(handshakePacket),
+                        hostname,
+                        ClassNames.HANDSHAKE_PROTOCOL.get(handshakePacket),
+                        ClassNames.HANDSHAKE_INTENTION.get(handshakePacket)
+                };
+
+                return ClassNames.HANDSHAKE_PACKET_CONSTRUCTOR.newInstance(components);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                throw new IllegalStateException("Failed to create new Handshake packet", e);
+            }
+        }
     }
 
     @Override
@@ -169,15 +188,23 @@ public final class SpigotDataHandler extends CommonNettyDataHandler {
             // we have to fake the offline player (login) cycle
             // just like on Spigot:
 
-            // LoginListener#initUUID
-            // new LoginHandler().fireEvents();
-
-            // and the tick of LoginListener will do the rest
-
-            ClassNames.INIT_UUID.invoke(packetListener);
-
             Object loginHandler = ClassNames.LOGIN_HANDLER_CONSTRUCTOR.newInstance(packetListener);
-            ClassNames.FIRE_LOGIN_EVENTS.invoke(loginHandler);
+
+            if (ClassNames.IS_PRE_1_20_2) {
+                // 1.20.1 and below
+
+                // LoginListener#initUUID
+                // new LoginHandler().fireEvents();
+
+                // and the tick of LoginListener will do the rest
+
+                ClassNames.INIT_UUID.invoke(packetListener);
+                ClassNames.FIRE_LOGIN_EVENTS.invoke(loginHandler);
+            } else {
+                // 1.20.2 and above we directly register the profile
+
+                ClassNames.FIRE_LOGIN_EVENTS_GAME_PROFILE.invoke(loginHandler, gameProfile);
+            }
 
             ctx.pipeline().remove(this);
             return true;

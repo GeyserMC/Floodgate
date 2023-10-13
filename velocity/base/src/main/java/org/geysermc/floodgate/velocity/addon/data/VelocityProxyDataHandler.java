@@ -78,7 +78,13 @@ public final class VelocityProxyDataHandler extends CommonNettyDataHandler {
         SERVER_LOGIN_PACKET = getPrefixedClass("protocol.packet.ServerLogin");
         requireNonNull(SERVER_LOGIN_PACKET, "ServerLogin packet class cannot be null");
 
-        GET_SESSION_HANDLER = getMethodByName(minecraftConnection, "getSessionHandler", true);
+
+        Method sessionHandler = getMethodByName(minecraftConnection, "getActiveSessionHandler", true);
+        if (sessionHandler == null) {
+            // We are pre-1.20.2
+            sessionHandler = getMethodByName(minecraftConnection, "getSessionHandler", true);
+        }
+        GET_SESSION_HANDLER = sessionHandler;
         requireNonNull(GET_SESSION_HANDLER, "getSessionHandler method cannot be null");
 
         INITIAL_LOGIN_SESSION_HANDLER = getPrefixedClass("connection.client.InitialLoginSessionHandler");

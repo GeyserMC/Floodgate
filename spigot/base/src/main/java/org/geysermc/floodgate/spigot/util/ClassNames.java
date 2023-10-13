@@ -28,11 +28,13 @@ package org.geysermc.floodgate.spigot.util;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.castedStaticBooleanValue;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getBooleanValue;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getClassSilently;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getConstructor;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getField;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getFieldOfType;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getMethod;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getValue;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.invoke;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.makeAccessible;
 import static org.geysermc.floodgate.spigot.util.MappingUtils.classFor;
 
 import com.mojang.authlib.GameProfile;
@@ -43,6 +45,7 @@ import java.lang.reflect.Method;
 import java.net.SocketAddress;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
+import javax.annotation.CheckForNull;
 import org.bukkit.OfflinePlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.floodgate.core.util.Constants;
@@ -56,14 +59,20 @@ public class ClassNames {
     public static final Class<?> LOGIN_START_PACKET;
     public static final Class<?> LOGIN_LISTENER;
     public static final Class<?> LOGIN_HANDLER;
+    @Nullable public static final Class<?> CLIENT_INTENT;
 
     public static final Constructor<OfflinePlayer> CRAFT_OFFLINE_PLAYER_CONSTRUCTOR;
     public static final Constructor<?> LOGIN_HANDLER_CONSTRUCTOR;
+    @Nullable public static final Constructor<?> HANDSHAKE_PACKET_CONSTRUCTOR;
 
     public static final Field SOCKET_ADDRESS;
     public static final Field HANDSHAKE_HOST;
     public static final Field LOGIN_PROFILE;
     public static final Field PACKET_LISTENER;
+
+    @Nullable public static final Field HANDSHAKE_PORT;
+    @Nullable public static final Field HANDSHAKE_PROTOCOL;
+    @Nullable public static final Field HANDSHAKE_INTENTION;
 
     @Nullable public static final Field PAPER_DISABLE_USERNAME_VALIDATION;
     @Nullable public static final BooleanSupplier PAPER_VELOCITY_SUPPORT;
@@ -71,12 +80,14 @@ public class ClassNames {
     public static final Method GET_PROFILE_METHOD;
     public static final Method LOGIN_DISCONNECT;
     public static final Method NETWORK_EXCEPTION_CAUGHT;
-    public static final Method INIT_UUID;
-    public static final Method FIRE_LOGIN_EVENTS;
+    @Nullable public static final Method INIT_UUID;
+    @Nullable public static final Method FIRE_LOGIN_EVENTS;
+    @Nullable public static final Method FIRE_LOGIN_EVENTS_GAME_PROFILE;
 
     public static final Field BUNGEE;
 
     public static final boolean IS_FOLIA;
+    public static final boolean IS_PRE_1_20_2;
 
     static {
         // SpigotSkinApplier
@@ -96,7 +107,7 @@ public class ClassNames {
         Class<?> craftServerClass = MappingUtils.craftbukkitClass("CraftServer");
         Class<OfflinePlayer> craftOfflinePlayerClass = MappingUtils.craftbukkitClass("CraftOfflinePlayer");
 
-        CRAFT_OFFLINE_PLAYER_CONSTRUCTOR = ReflectionUtils.getConstructor(
+        CRAFT_OFFLINE_PLAYER_CONSTRUCTOR = getConstructor(
                 craftOfflinePlayerClass, true, craftServerClass, GameProfile.class);
 
         // SpigotDataHandler
@@ -139,11 +150,20 @@ public class ClassNames {
         );
 
         // there are multiple no-arg void methods
+        // Pre 1.20.2 uses initUUID so if it's null, we're on 1.20.2 or later
         INIT_UUID = getMethod(LOGIN_LISTENER, "initUUID");
-        requireNonNull(INIT_UUID, "initUUID from LoginListener");
+        IS_PRE_1_20_2 = INIT_UUID != null;
 
-        Class<?> packetListenerClass = classFor("net.minecraft.network", "PacketListener");
-        PACKET_LISTENER = getFieldOfType(networkManager, packetListenerClass);
+        if (IS_PRE_1_20_2) {
+            Class<?> packetListenerClass = classFor("net.minecraft.network", "PacketListener");
+            PACKET_LISTENER = getFieldOfType(networkManager, packetListenerClass);
+        } else {
+            // We get the field by name on 1.20.2+ as there are now multiple fields of this type in network manager
+
+            // PacketListener packetListener of NetworkManager
+            PACKET_LISTENER = MappingUtils.fieldFor(networkManager, "packetListener", "q");
+            makeAccessible(PACKET_LISTENER);
+        }
         requireNonNull(PACKET_LISTENER, "Packet listener");
 
         LOGIN_HANDLER = classFor(
@@ -153,11 +173,15 @@ public class ClassNames {
         );
 
         LOGIN_HANDLER_CONSTRUCTOR =
-                ReflectionUtils.getConstructor(LOGIN_HANDLER, true, LOGIN_LISTENER);
+                getConstructor(LOGIN_HANDLER, true, LOGIN_LISTENER);
         requireNonNull(LOGIN_HANDLER_CONSTRUCTOR, "LoginHandler constructor");
 
         FIRE_LOGIN_EVENTS = getMethod(LOGIN_HANDLER, "fireEvents");
-        requireNonNull(FIRE_LOGIN_EVENTS, "fireEvents from LoginHandler");
+
+        // LoginHandler().fireEvents(GameProfile)
+        FIRE_LOGIN_EVENTS_GAME_PROFILE = getMethod(LOGIN_HANDLER, "fireEvents", GameProfile.class);
+        requireNonNull(FIRE_LOGIN_EVENTS, FIRE_LOGIN_EVENTS_GAME_PROFILE,
+                "fireEvents from LoginHandler", "fireEvents(GameProfile) from LoginHandler");
 
 
         PAPER_DISABLE_USERNAME_VALIDATION = getField(LOGIN_LISTENER,
@@ -213,9 +237,50 @@ public class ClassNames {
         IS_FOLIA = ReflectionUtils.getClassSilently(
                 "io.papermc.paper.threadedregions.RegionizedServer"
         ) != null;
+
+        if (!IS_PRE_1_20_2) {
+            // PacketHandshakingInSetProtocol is now a record
+            // This means its fields are now private and final
+            // We therefore must use reflection to obtain the constructor
+            CLIENT_INTENT = classFor("net.minecraft.network.protocol.handshake", "ClientIntent");
+            requireNonNull(CLIENT_INTENT, "Client intent enum");
+
+            HANDSHAKE_PACKET_CONSTRUCTOR = getConstructor(HANDSHAKE_PACKET, false, int.class,
+                    String.class, int.class, CLIENT_INTENT);
+            requireNonNull(HANDSHAKE_PACKET_CONSTRUCTOR, "Handshake packet constructor");
+
+            HANDSHAKE_PORT = MappingUtils.fieldFor(HANDSHAKE_PACKET, "port", "a");
+            requireNonNull(HANDSHAKE_PORT, "Handshake port");
+            makeAccessible(HANDSHAKE_PORT);
+
+            HANDSHAKE_PROTOCOL = MappingUtils.fieldFor(HANDSHAKE_PACKET, "protocolVersion", "c");
+            requireNonNull(HANDSHAKE_PROTOCOL, "Handshake protocol");
+            makeAccessible(HANDSHAKE_PROTOCOL);
+
+            HANDSHAKE_INTENTION = getFieldOfType(HANDSHAKE_PACKET, CLIENT_INTENT);
+            requireNonNull(HANDSHAKE_INTENTION, "Handshake intention");
+            makeAccessible(HANDSHAKE_INTENTION);
+        } else {
+            CLIENT_INTENT = null;
+            HANDSHAKE_PACKET_CONSTRUCTOR = null;
+            HANDSHAKE_PORT = null;
+            HANDSHAKE_PROTOCOL = null;
+            HANDSHAKE_INTENTION = null;
+        }
     }
 
     private static <T> T requireNonNull(T toCheck, String objectName) {
         return Objects.requireNonNull(toCheck, objectName + " cannot be null");
+    }
+
+    // Ensure one of two is not null
+    private static <T> T requireNonNull(
+            @CheckForNull T toCheck,
+            @CheckForNull T toCheck2,
+            @CheckForNull String objectName,
+            @CheckForNull String objectName2
+    ) {
+        return Objects.requireNonNull(toCheck != null ? toCheck : toCheck2,
+                objectName2 + " cannot be null if " + objectName + " is null");
     }
 }
