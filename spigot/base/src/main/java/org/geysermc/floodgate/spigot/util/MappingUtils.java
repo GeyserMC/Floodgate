@@ -2,10 +2,11 @@ package org.geysermc.floodgate.spigot.util;
 
 import java.lang.reflect.Field;
 import org.bukkit.Bukkit;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
 
 public class MappingUtils {
-    private static final String LEGACY_MAPPING_PREFIX;
+    private static final @Nullable String LEGACY_MAPPING_PREFIX;
     private static final String CRAFTBUKKIT_MAPPING_PREFTIX;
 
     private MappingUtils() {}
@@ -52,8 +53,15 @@ public class MappingUtils {
     }
 
     static {
-        String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-        LEGACY_MAPPING_PREFIX = "net.minecraft.server." + version;
-        CRAFTBUKKIT_MAPPING_PREFTIX = "org.bukkit.craftbukkit." + version;
+        var craftbukkitPackage = Bukkit.getServer().getClass().getPackage().getName();
+        CRAFTBUKKIT_MAPPING_PREFTIX = craftbukkitPackage;
+
+        // Paper might in the future provide jars without CraftBukkit relocation
+        // Newer versions don't use NMS packages, so if something fails in the future it doesn't matter
+        String legacyPrefix = null;
+        try {
+            legacyPrefix = "net.minecraft.server." + craftbukkitPackage.split("\\.")[3];
+        } catch (Throwable ignored) {}
+        LEGACY_MAPPING_PREFIX = legacyPrefix;
     }
 }
