@@ -107,7 +107,7 @@ public final class SpigotCommandModule extends CommandModule {
 
     public static byte[] serializeCommandDescriptions(Map<String, Command> commands) {
         ByteBuf out = Unpooled.buffer(8192);
-        out.writeInt(commands.size());
+        out.writeShort(commands.size());
 
         for (Map.Entry<String, Command> entry : commands.entrySet()) {
             byte[] commandBytes = entry.getKey().getBytes(StandardCharsets.UTF_8);
