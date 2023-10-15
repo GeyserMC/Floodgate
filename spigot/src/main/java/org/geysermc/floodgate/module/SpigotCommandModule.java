@@ -28,13 +28,13 @@ package org.geysermc.floodgate.module;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.bukkit.BukkitCommandManager;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
-import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -105,6 +105,27 @@ public final class SpigotCommandModule extends CommandModule {
         }
     }
 
+    public static byte[] serializeCommandDescriptions(Map<String, Command> commands) {
+        ByteBuf out = Unpooled.buffer(8192);
+        out.writeInt(commands.size());
+
+        for (Map.Entry<String, Command> entry : commands.entrySet()) {
+            byte[] commandBytes = entry.getKey().getBytes(StandardCharsets.UTF_8);
+            out.writeShort(commandBytes.length);
+            out.writeBytes(commandBytes);
+
+            byte[] descriptionBytes = entry.getValue().getDescription().getBytes(
+                    StandardCharsets.UTF_8);
+            out.writeShort(descriptionBytes.length);
+            out.writeBytes(descriptionBytes);
+        }
+
+        byte[] result = new byte[out.readableBytes()];
+        out.readBytes(result);
+
+        return result;
+    }
+
     public void forwardCommands(UUID playerUuid) {
         CommandMap commandMap = getCommandMap();
 
@@ -112,13 +133,7 @@ public final class SpigotCommandModule extends CommandModule {
             return;
         }
 
-        Map<String, String> commandDescriptions = new HashMap<>();
-        for (Command command : commandMap.getKnownCommands().values()) {
-            commandDescriptions.put(command.getName(), command.getDescription());
-        }
-
-        String json = new Gson().toJson(commandDescriptions);
-        sendMessage(playerUuid, json.getBytes(StandardCharsets.UTF_8));
+        sendMessage(playerUuid, serializeCommandDescriptions(commandMap.getKnownCommands()));
     }
 
 
