@@ -35,11 +35,15 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.module.SpigotCommandModule;
 import org.geysermc.floodgate.util.LanguageManager;
 
 public final class SpigotListener implements Listener {
     @Inject private SimpleFloodgateApi api;
     @Inject private LanguageManager languageManager;
+    @Inject private SpigotCommandModule commandModule;
+    @Inject private FloodgateConfig config;
     @Inject private FloodgateLogger logger;
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -60,6 +64,9 @@ public final class SpigotListener implements Listener {
                     player.getCorrectUsername(), player.getCorrectUniqueId()
             );
             languageManager.loadLocale(player.getLanguageCode());
+            if (config.isForwardCommands()) {
+                commandModule.forwardCommands(player.getJavaUniqueId());
+            }
         }
     }
 
