@@ -26,6 +26,7 @@
 package org.geysermc.floodgate.listener;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import java.util.UUID;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -36,15 +37,16 @@ import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.event.EventBus;
 import org.geysermc.floodgate.module.SpigotCommandModule;
 import org.geysermc.floodgate.util.LanguageManager;
 
 public final class SpigotListener implements Listener {
     @Inject private SimpleFloodgateApi api;
     @Inject private LanguageManager languageManager;
-    @Inject private SpigotCommandModule commandModule;
     @Inject private FloodgateConfig config;
     @Inject private FloodgateLogger logger;
+    @Inject private Injector guice;
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerLogin(PlayerLoginEvent event) {
@@ -65,7 +67,7 @@ public final class SpigotListener implements Listener {
             );
             languageManager.loadLocale(player.getLanguageCode());
             if (config.isForwardCommands()) {
-                commandModule.forwardCommands(player.getJavaUniqueId());
+                guice.getInstance(SpigotCommandModule.class).forwardCommands(player.getJavaUniqueId());
             }
         }
     }
