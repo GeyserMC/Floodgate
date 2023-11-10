@@ -32,7 +32,7 @@ import org.geysermc.api.connection.Connection;
 import org.geysermc.event.util.AbstractCancellable;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.core.player.FloodgateConnection;
+import org.geysermc.floodgate.core.connection.FloodgateConnection;
 
 public class SkinApplyEventImpl extends AbstractCancellable implements SkinApplyEvent {
     private final FloodgatePlayer player;

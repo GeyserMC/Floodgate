@@ -42,7 +42,7 @@ import java.util.Collections;
 import net.kyori.adventure.text.Component;
 import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.core.api.ProxyFloodgateApi;
+import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.core.listener.McListener;
 import org.geysermc.floodgate.core.util.LanguageManager;
@@ -52,13 +52,13 @@ import org.geysermc.floodgate.velocity.player.VelocityConnectionManager;
 public final class VelocityListener implements McListener {
     @Inject VelocityConnectionManager connectionManager;
     @Inject ProxyFloodgateConfig config;
-    @Inject ProxyFloodgateApi api;
+    @Inject SimpleFloodgateApi api;
     @Inject LanguageManager languageManager;
     @Inject FloodgateLogger logger;
 
     @Inject
-    @Named("playerAttribute")
-    AttributeKey<Connection> playerAttribute;
+    @Named("connectionAttribute")
+    AttributeKey<Connection> connectionAttribute;
 
     @Inject
     @Named("kickMessageAttribute")
@@ -70,7 +70,7 @@ public final class VelocityListener implements McListener {
         String kickMessage;
         try {
             Channel channel = connectionManager.channelFor(event.getConnection());
-            player = channel.attr(playerAttribute).get();
+            player = channel.attr(connectionAttribute).get();
             kickMessage = channel.attr(kickMessageAttribute).get();
         } catch (Exception exception) {
             logger.error("Failed get the FloodgatePlayer from the player's channel", exception);

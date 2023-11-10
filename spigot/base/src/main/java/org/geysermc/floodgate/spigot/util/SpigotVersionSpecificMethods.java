@@ -25,6 +25,8 @@
 
 package org.geysermc.floodgate.spigot.util;
 
+import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.lang.reflect.Method;
@@ -32,6 +34,8 @@ import java.util.concurrent.TimeUnit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.geysermc.floodgate.api.event.skin.SkinApplyEvent;
+import org.geysermc.floodgate.core.skin.SkinDataImpl;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
 
 @Singleton
@@ -39,6 +43,9 @@ public final class SpigotVersionSpecificMethods {
     private static final Method GET_SPIGOT;
     private static final Method OLD_GET_LOCALE;
     private static final boolean NEW_VISIBILITY;
+
+    private static final Method OLD_PROPERTY_VALUE;
+    private static final Method OLD_PROPERTY_SIGNATURE;
 
     static {
         GET_SPIGOT = ReflectionUtils.getMethod(Player.class, "spigot");
@@ -48,6 +55,9 @@ public final class SpigotVersionSpecificMethods {
                 Player.class, "hidePlayer",
                 Plugin.class, Player.class
         );
+
+        OLD_PROPERTY_VALUE = ReflectionUtils.getMethod(Property.class, "getValue");
+        OLD_PROPERTY_SIGNATURE = ReflectionUtils.getMethod(Property.class, "getSignature");
     }
 
     @Inject JavaPlugin plugin;
@@ -68,6 +78,26 @@ public final class SpigotVersionSpecificMethods {
             return;
         }
         hideAndShowPlayer0(on, target);
+    }
+
+    public SkinApplyEvent.SkinData currentSkin(PropertyMap properties) {
+        for (Property property : properties.get("textures")) {
+            String value;
+            String signature;
+            if (OLD_PROPERTY_VALUE == null) {
+                value = property.value();
+                signature = property.signature();
+            } else {
+                value = ReflectionUtils.castedInvoke(property, OLD_PROPERTY_VALUE);
+                signature = ReflectionUtils.castedInvoke(property, OLD_PROPERTY_SIGNATURE);
+            }
+
+            //noinspection DataFlowIssue
+            if (!value.isEmpty()) {
+                return new SkinDataImpl(value, signature);
+            }
+        }
+        return null;
     }
 
     public void schedule(Runnable runnable, long delay) {

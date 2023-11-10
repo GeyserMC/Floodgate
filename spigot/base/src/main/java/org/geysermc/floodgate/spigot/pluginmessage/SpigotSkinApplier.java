@@ -39,7 +39,6 @@ import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 import org.geysermc.floodgate.core.event.EventBus;
 import org.geysermc.floodgate.core.event.skin.SkinApplyEventImpl;
 import org.geysermc.floodgate.core.skin.SkinApplier;
-import org.geysermc.floodgate.core.skin.SkinDataImpl;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
 import org.geysermc.floodgate.spigot.util.ClassNames;
 import org.geysermc.floodgate.spigot.util.SpigotVersionSpecificMethods;
@@ -76,14 +75,14 @@ public final class SpigotSkinApplier implements SkinApplier {
 
         PropertyMap properties = profile.getProperties();
 
-        SkinData currentSkin = currentSkin(properties);
+        SkinData currentSkin = versionSpecificMethods.currentSkin(properties);
 
         SkinApplyEvent event = new SkinApplyEventImpl(connection, currentSkin, skinData);
-        event.setCancelled(connection.isLinked());
+        event.cancelled(connection.isLinked());
 
         eventBus.fire(event);
 
-        if (event.isCancelled()) {
+        if (event.cancelled()) {
             return;
         }
 
@@ -96,15 +95,6 @@ public final class SpigotSkinApplier implements SkinApplier {
                 }
             }
         });
-    }
-
-    private SkinData currentSkin(PropertyMap properties) {
-        for (Property texture : properties.get("textures")) {
-            if (!texture.getValue().isEmpty()) {
-                return new SkinDataImpl(texture.getValue(), texture.getSignature());
-            }
-        }
-        return null;
     }
 
     private void replaceSkin(PropertyMap properties, SkinData skinData) {

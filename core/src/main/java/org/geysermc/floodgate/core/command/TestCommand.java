@@ -31,8 +31,8 @@ import cloud.commandframework.context.CommandContext;
 import jakarta.inject.Singleton;
 import org.geysermc.api.Geyser;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
+import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
-import org.geysermc.floodgate.core.player.UserAudience;
 import org.geysermc.floodgate.core.util.Constants;
 
 @Singleton

@@ -25,7 +25,7 @@
 
 package org.geysermc.floodgate.core.util;
 
-public class InvalidFormatException extends Exception {
+public final class InvalidFormatException extends Exception {
     public InvalidFormatException(String message) {
         super(message);
     }

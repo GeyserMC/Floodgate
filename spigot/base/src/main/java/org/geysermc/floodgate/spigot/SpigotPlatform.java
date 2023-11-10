@@ -33,6 +33,7 @@ import org.geysermc.floodgate.core.FloodgatePlatform;
 import org.geysermc.floodgate.isolation.library.LibraryManager;
 import org.geysermc.floodgate.spigot.util.SpigotProtocolSupportHandler;
 import org.geysermc.floodgate.spigot.util.SpigotProtocolSupportListener;
+import org.slf4j.LoggerFactory;
 
 public class SpigotPlatform extends FloodgatePlatform {
     private final JavaPlugin plugin;
@@ -41,6 +42,19 @@ public class SpigotPlatform extends FloodgatePlatform {
     public SpigotPlatform(LibraryManager manager, JavaPlugin plugin) {
         super(manager);
         this.plugin = plugin;
+    }
+
+    @Override
+    protected void onContextCreated(ApplicationContext context) {
+        context.registerSingleton(plugin)
+                .registerSingleton(plugin.getServer())
+                .registerSingleton(LoggerFactory.getLogger(plugin.getLogger().getName()))
+                .registerSingleton(
+                        Path.class,
+                        plugin.getDataFolder().toPath(),
+                        Qualifiers.byName("dataDirectory")
+                );
+        this.context = context;
     }
 
     @Override
@@ -55,20 +69,7 @@ public class SpigotPlatform extends FloodgatePlatform {
     }
 
     @Override
-    protected void onContextCreated(ApplicationContext context) {
-        context.registerSingleton(plugin)
-                .registerSingleton(plugin.getServer())
-                .registerSingleton(plugin.getSLF4JLogger())
-                .registerSingleton(
-                        Path.class,
-                        plugin.getDataFolder().toPath(),
-                        Qualifiers.byName("dataDirectory")
-                );
-        this.context = context;
-    }
-
-    @Override
-    protected boolean isProxy() {
+    public boolean isProxy() {
         return false;
     }
 }

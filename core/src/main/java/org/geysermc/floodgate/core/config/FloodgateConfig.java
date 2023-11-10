@@ -25,7 +25,6 @@
 
 package org.geysermc.floodgate.core.config;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.Key;
@@ -64,13 +63,7 @@ public interface FloodgateConfig extends GenericPostInitializeCallback<ConfigLoa
                     "Copy your key file from Geyser (key.pem) and paste it into " + keyPath);
         }
 
-        try {
-            Key floodgateKey = loader.getKeyProducer().produceFrom(keyPath);
-            loader.getCipher().init(floodgateKey);
-            key(floodgateKey);
-        } catch (IOException exception) {
-            return CallbackResult.failed(exception.getMessage());
-        }
+        //todo remove key file name config option
 
         rawUsernamePrefix(usernamePrefix());
 

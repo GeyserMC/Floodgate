@@ -27,7 +27,7 @@ package org.geysermc.floodgate.core.platform.command;
 
 import cloud.commandframework.context.CommandContext;
 import org.geysermc.floodgate.core.command.util.Permission;
-import org.geysermc.floodgate.core.player.UserAudience;
+import org.geysermc.floodgate.core.connection.audience.UserAudience;
 
 public abstract class FloodgateSubCommand {
     public abstract Class<?> parent();

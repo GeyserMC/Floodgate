@@ -56,7 +56,7 @@ public class BungeePlatform extends FloodgatePlatform {
     }
 
     @Override
-    protected boolean isProxy() {
+    public boolean isProxy() {
         return true;
     }
 }

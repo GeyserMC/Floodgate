@@ -27,6 +27,7 @@ package org.geysermc.floodgate.core;
 
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.context.Qualifier;
+import io.micronaut.core.type.Argument;
 import java.util.Map;
 import java.util.UUID;
 import org.geysermc.api.Geyser;
@@ -64,8 +65,7 @@ public abstract class FloodgatePlatform {
 
         GlobalBeanCache.cacheIfAbsent("libraryManager", () -> manager);
 
-            //noinspection unchecked
-            context = ApplicationContext.builder(manager.classLoader())
+        context = ApplicationContext.builder(manager.classLoader())
                 .singletons(manager)
                 .properties(Map.of(
                         "platform.proxy", isProxy()
@@ -124,12 +124,16 @@ public abstract class FloodgatePlatform {
         context.close();
     }
 
-    abstract protected boolean isProxy();
+    abstract public boolean isProxy();
 
     public <T> T getBean(Class<T> clazz) {
         return context.getBean(clazz);
     }
     public <T> T getBean(Class<T> clazz, Qualifier<T> qualifier) {
         return context.getBean(clazz, qualifier);
+    }
+    public <T, R extends T> R getBean(Argument<T> clazz, Qualifier<T> qualifier) {
+        //noinspection unchecked
+        return (R) context.getBean(clazz, qualifier);
     }
 }

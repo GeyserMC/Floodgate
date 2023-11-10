@@ -35,9 +35,9 @@ import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
+import org.geysermc.floodgate.core.connection.audience.FloodgateCommandPreprocessor;
+import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
-import org.geysermc.floodgate.core.player.FloodgateCommandPreprocessor;
-import org.geysermc.floodgate.core.player.UserAudience;
 
 @Factory
 public class VelocityPlatformModule {

@@ -52,11 +52,11 @@ public class VelocitySkinApplier implements SkinApplier {
             SkinData currentSkin = currentSkin(properties);
 
             SkinApplyEvent event = new SkinApplyEventImpl(connection, currentSkin, skinData);
-            event.setCancelled(connection.isLinked());
+            event.cancelled(connection.isLinked());
 
             eventBus.fire(event);
 
-            if (event.isCancelled()) {
+            if (event.cancelled()) {
                 return;
             }
 

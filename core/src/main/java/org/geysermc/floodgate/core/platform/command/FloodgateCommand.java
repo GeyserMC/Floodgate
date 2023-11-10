@@ -29,7 +29,7 @@ import cloud.commandframework.Command;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.context.CommandContext;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
-import org.geysermc.floodgate.core.player.UserAudience;
+import org.geysermc.floodgate.core.connection.audience.UserAudience;
 
 /** The base class for every Floodgate command. */
 public interface FloodgateCommand {

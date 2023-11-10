@@ -39,9 +39,9 @@ import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.core.command.util.Permission;
+import org.geysermc.floodgate.core.connection.audience.FloodgateCommandPreprocessor;
+import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
-import org.geysermc.floodgate.core.player.FloodgateCommandPreprocessor;
-import org.geysermc.floodgate.core.player.UserAudience;
 
 @Factory
 public class SpigotCommandManager {

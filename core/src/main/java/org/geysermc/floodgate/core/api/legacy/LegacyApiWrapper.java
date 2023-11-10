@@ -37,10 +37,10 @@ import org.geysermc.cumulus.form.util.FormBuilder;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.unsafe.Unsafe;
+import org.geysermc.floodgate.core.connection.FloodgateConnection;
 import org.geysermc.floodgate.core.http.xbox.GetGamertagResult;
 import org.geysermc.floodgate.core.http.xbox.GetXuidResult;
 import org.geysermc.floodgate.core.http.xbox.XboxClient;
-import org.geysermc.floodgate.core.player.FloodgateConnection;
 
 @Singleton
 public final class LegacyApiWrapper implements FloodgateApi {

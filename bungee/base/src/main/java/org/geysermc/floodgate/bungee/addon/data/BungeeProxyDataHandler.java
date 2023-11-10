@@ -37,14 +37,17 @@ import net.md_5.bungee.netty.HandlerBoss;
 import net.md_5.bungee.protocol.DefinedPacket;
 import net.md_5.bungee.protocol.PacketWrapper;
 import net.md_5.bungee.protocol.packet.Handshake;
-import org.geysermc.floodgate.core.addon.data.CommonDataHandler;
+import org.geysermc.api.connection.Connection;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.core.addon.data.CommonNettyDataHandler;
 import org.geysermc.floodgate.core.addon.data.PacketBlocker;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
-import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
+import org.geysermc.floodgate.core.connection.DataSeeker;
+import org.geysermc.floodgate.core.connection.FloodgateDataHandler;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
 
 @SuppressWarnings("ConstantConditions")
-public class BungeeProxyDataHandler extends CommonDataHandler {
+public class BungeeProxyDataHandler extends CommonNettyDataHandler {
     private static final Field HANDLER;
     private static final Field CHANNEL_WRAPPER;
 
@@ -52,17 +55,19 @@ public class BungeeProxyDataHandler extends CommonDataHandler {
         HANDLER = ReflectionUtils.getField(HandlerBoss.class, "handler");
         requireNonNull(HANDLER, "handler field cannot be null");
 
-        CHANNEL_WRAPPER =
-                ReflectionUtils.getFieldOfType(InitialHandler.class, ChannelWrapper.class);
+        CHANNEL_WRAPPER = ReflectionUtils.getFieldOfType(InitialHandler.class, ChannelWrapper.class);
         requireNonNull(CHANNEL_WRAPPER, "ChannelWrapper field cannot be null");
     }
 
     public BungeeProxyDataHandler(
-            FloodgateHandshakeHandler handshakeHandler,
+            DataSeeker dataSeeker,
+            FloodgateDataHandler handshakeHandler,
             ProxyFloodgateConfig config,
+            FloodgateLogger logger,
+            AttributeKey<Connection> connectionAttribute,
             AttributeKey<String> kickMessageAttribute,
             PacketBlocker blocker) {
-        super(handshakeHandler, config, kickMessageAttribute, blocker);
+        super(dataSeeker, handshakeHandler, config, logger, connectionAttribute, kickMessageAttribute, blocker);
     }
 
     @Override

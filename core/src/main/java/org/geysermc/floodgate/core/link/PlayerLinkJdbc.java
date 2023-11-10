@@ -41,6 +41,8 @@ import org.geysermc.floodgate.core.database.PlayerLinkRepository;
 import org.geysermc.floodgate.core.database.entity.LinkRequest;
 import org.geysermc.floodgate.core.database.entity.LinkedPlayer;
 
+@Requires(property = "config.database.enabled", value = "true")
+@Requires(property = "config.playerLink.enabled", value = "true")
 @Requires(property = "config.playerLink.enableOwnLinking", value = "true")
 @Replaces(DisabledPlayerLink.class)
 @Named("localLinking")

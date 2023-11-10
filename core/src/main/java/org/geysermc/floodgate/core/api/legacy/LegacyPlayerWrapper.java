@@ -29,7 +29,7 @@ import java.util.UUID;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.player.PropertyKey;
-import org.geysermc.floodgate.core.player.FloodgateConnection;
+import org.geysermc.floodgate.core.connection.FloodgateConnection;
 import org.geysermc.floodgate.util.DeviceOs;
 import org.geysermc.floodgate.util.InputMode;
 import org.geysermc.floodgate.util.LinkedPlayer;
@@ -37,19 +37,23 @@ import org.geysermc.floodgate.util.UiProfile;
 
 public class LegacyPlayerWrapper implements FloodgatePlayer {
     private final FloodgateConnection connection;
+    private final String javaUsername;
+    private final UUID javaUniqueId;
 
-    public LegacyPlayerWrapper(FloodgateConnection connection) {
+    public LegacyPlayerWrapper(FloodgateConnection connection, String javaUsername, UUID javaUniqueId) {
         this.connection = connection;
+        this.javaUsername = javaUsername;
+        this.javaUniqueId = javaUniqueId;
     }
 
     @Override
     public String getJavaUsername() {
-        throw new UnsupportedOperationException(); //todo
+        return javaUsername;
     }
 
     @Override
     public UUID getJavaUniqueId() {
-        throw new UnsupportedOperationException(); //todo
+        return javaUniqueId;
     }
 
     @Override
@@ -99,7 +103,7 @@ public class LegacyPlayerWrapper implements FloodgatePlayer {
 
     @Override
     public boolean isFromProxy() {
-        throw new UnsupportedOperationException(); //todo
+        return false; // just as in FloodgateConnection#toBedrockData
     }
 
     @Override

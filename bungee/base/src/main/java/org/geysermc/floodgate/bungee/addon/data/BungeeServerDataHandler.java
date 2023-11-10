@@ -27,12 +27,15 @@ package org.geysermc.floodgate.bungee.addon.data;
 
 import static java.util.Objects.requireNonNull;
 
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import io.netty.util.AttributeKey;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import java.lang.reflect.Field;
-import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.ServerConnector;
 import net.md_5.bungee.UserConnection;
 import net.md_5.bungee.netty.ChannelWrapper;
@@ -40,13 +43,13 @@ import net.md_5.bungee.netty.HandlerBoss;
 import net.md_5.bungee.netty.PacketHandler;
 import net.md_5.bungee.protocol.packet.Handshake;
 import org.geysermc.api.connection.Connection;
-import org.geysermc.floodgate.core.api.ProxyFloodgateApi;
-import org.geysermc.floodgate.core.player.FloodgateConnection;
+import org.geysermc.floodgate.core.connection.FloodgateConnection;
+import org.geysermc.floodgate.core.crypto.FloodgateDataCodec;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
-import org.geysermc.floodgate.util.BedrockData;
 
+@Singleton
+@ChannelHandler.Sharable
 @SuppressWarnings("ConstantConditions")
-@RequiredArgsConstructor
 public class BungeeServerDataHandler extends ChannelOutboundHandlerAdapter {
     private static final Field HANDLER;
     private static final Field USER_CONNECTION;
@@ -64,11 +67,14 @@ public class BungeeServerDataHandler extends ChannelOutboundHandlerAdapter {
         requireNonNull(CHANNEL_WRAPPER, "ChannelWrapper field cannot be null");
     }
 
-    private final ProxyFloodgateApi api;
-    private final AttributeKey<Connection> playerAttribute;
+    @Inject FloodgateDataCodec dataCodec;
+
+    @Inject
+    @Named("connectionAttribute")
+    AttributeKey<Connection> connectionAttribute;
 
     @Override
-    public void write(ChannelHandlerContext ctx, Object packet, ChannelPromise promise) {
+    public void write(ChannelHandlerContext ctx, Object packet, ChannelPromise promise) throws Exception {
         if (packet instanceof Handshake) {
             // get the Proxy <-> Player channel from the Proxy <-> Server channel
             HandlerBoss handlerBoss = ctx.pipeline().get(HandlerBoss.class);
@@ -80,14 +86,12 @@ public class BungeeServerDataHandler extends ChannelOutboundHandlerAdapter {
                 return;
             }
 
-            UserConnection connection = ReflectionUtils.getCastedValue(handler, USER_CONNECTION);
-            ChannelWrapper wrapper = ReflectionUtils.getCastedValue(connection, CHANNEL_WRAPPER);
+            UserConnection userConnection = ReflectionUtils.getCastedValue(handler, USER_CONNECTION);
+            ChannelWrapper wrapper = ReflectionUtils.getCastedValue(userConnection, CHANNEL_WRAPPER);
 
-            Connection player = wrapper.getHandle().attr(playerAttribute).get();
-
-            if (player != null) {
-                BedrockData data = ((FloodgateConnection) player).toBedrockData();
-                String encryptedData = api.createEncryptedDataString(data);
+            Connection connection = wrapper.getHandle().attr(connectionAttribute).get();
+            if (connection != null) {
+                String encodedData = dataCodec.encodeToString((FloodgateConnection) connection);
 
                 Handshake handshake = (Handshake) packet;
                 String address = handshake.getHost();
@@ -104,7 +108,7 @@ public class BungeeServerDataHandler extends ChannelOutboundHandlerAdapter {
                     remaining = "";
                 }
 
-                handshake.setHost(originalAddress + '\0' + encryptedData + remaining);
+                handshake.setHost(originalAddress + '\0' + encodedData + remaining);
                 // Bungeecord will add its data after our data
             }
 

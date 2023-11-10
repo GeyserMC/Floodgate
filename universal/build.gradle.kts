@@ -3,7 +3,7 @@ plugins {
 }
 
 provided(libs.bungee)
-provided(libs.folia.api)
+provided(libs.paper.api)
 provided(libs.velocity.api)
 provided(libs.fabric.loader)
 provided(libs.fabric.api)

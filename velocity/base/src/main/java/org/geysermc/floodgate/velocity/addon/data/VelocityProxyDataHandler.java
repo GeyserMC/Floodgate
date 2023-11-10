@@ -38,15 +38,16 @@ import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.core.addon.data.CommonDataHandler;
+import org.geysermc.floodgate.core.addon.data.CommonNettyDataHandler;
 import org.geysermc.floodgate.core.addon.data.PacketBlocker;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
-import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
-import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler.HandshakeResult;
-import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler.ResultType;
+import org.geysermc.floodgate.core.connection.DataSeeker;
+import org.geysermc.floodgate.core.connection.FloodgateDataHandler;
+import org.geysermc.floodgate.core.connection.FloodgateDataHandler.HandleResult;
 
-public final class VelocityProxyDataHandler extends CommonDataHandler {
+public final class VelocityProxyDataHandler extends CommonNettyDataHandler {
     private static final Field HANDSHAKE;
     private static final Class<?> HANDSHAKE_PACKET;
     private static final Field HANDSHAKE_SERVER_ADDRESS;
@@ -77,11 +78,16 @@ public final class VelocityProxyDataHandler extends CommonDataHandler {
         SERVER_LOGIN_PACKET = getPrefixedClass("protocol.packet.ServerLogin");
         requireNonNull(SERVER_LOGIN_PACKET, "ServerLogin packet class cannot be null");
 
-        GET_SESSION_HANDLER = getMethodByName(minecraftConnection, "getSessionHandler", true);
+
+        Method sessionHandler = getMethodByName(minecraftConnection, "getActiveSessionHandler", true);
+        if (sessionHandler == null) {
+            // We are pre-1.20.2
+            sessionHandler = getMethodByName(minecraftConnection, "getSessionHandler", true);
+        }
+        GET_SESSION_HANDLER = sessionHandler;
         requireNonNull(GET_SESSION_HANDLER, "getSessionHandler method cannot be null");
 
-        INITIAL_LOGIN_SESSION_HANDLER =
-                getPrefixedClass("connection.client.InitialLoginSessionHandler");
+        INITIAL_LOGIN_SESSION_HANDLER = getPrefixedClass("connection.client.InitialLoginSessionHandler");
         requireNonNull(INITIAL_LOGIN_SESSION_HANDLER, "InitialLoginSessionHandler cannot be null");
 
         // allowed to be null if it's an old Velocity version
@@ -91,12 +97,14 @@ public final class VelocityProxyDataHandler extends CommonDataHandler {
     private final FloodgateLogger logger;
 
     public VelocityProxyDataHandler(
+            DataSeeker dataSeeker,
+            FloodgateDataHandler handshakeHandler,
             FloodgateConfig config,
-            FloodgateHandshakeHandler handshakeHandler,
             PacketBlocker blocker,
+            AttributeKey<Connection> connectionAttribute,
             AttributeKey<String> kickMessageAttribute,
             FloodgateLogger logger) {
-        super(handshakeHandler, config, kickMessageAttribute, blocker);
+        super(dataSeeker, handshakeHandler, config, logger, connectionAttribute, kickMessageAttribute, blocker);
         this.logger = logger;
     }
 
@@ -112,8 +120,8 @@ public final class VelocityProxyDataHandler extends CommonDataHandler {
     }
 
     @Override
-    protected boolean shouldRemoveHandler(HandshakeResult result) {
-        if (result.getResultType() == ResultType.SUCCESS) {
+    protected boolean shouldRemoveHandler(HandleResult result) {
+        if (result.type() == HandleResultType.SUCCESS) {
             // the way Velocity stores whether to force key authentication
             // we need the login packet to bypass the 'force key authentication'
             return !Boolean.getBoolean("auth.forceSecureProfiles");

@@ -38,9 +38,9 @@ import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.api.GeyserApiBase;
+import org.geysermc.floodgate.core.connection.audience.ProfileAudience;
+import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.platform.util.PlayerType;
-import org.geysermc.floodgate.core.player.UserAudience;
-import org.geysermc.floodgate.core.player.audience.ProfileAudience;
 import org.geysermc.floodgate.core.util.LanguageManager;
 import org.geysermc.floodgate.core.util.Utils;
 

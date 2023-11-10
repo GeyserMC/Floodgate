@@ -10,11 +10,9 @@ dependencies {
 }
 
 relocate("cloud.commandframework")
-// used in cloud
-relocate("io.leangen.geantyref")
+relocate("io.leangen.geantyref") // used in cloud
 
 relocate("org.yaml.snakeyaml")
-
 
 // these dependencies are already present on the platform
 provided(libs.gson)

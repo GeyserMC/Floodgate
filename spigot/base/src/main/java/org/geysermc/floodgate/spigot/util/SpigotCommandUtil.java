@@ -29,16 +29,16 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.Collection;
 import java.util.UUID;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.api.GeyserApiBase;
-import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.floodgate.core.connection.audience.UserAudience;
+import org.geysermc.floodgate.core.connection.audience.UserAudience.ConsoleAudience;
+import org.geysermc.floodgate.core.connection.audience.UserAudience.PlayerAudience;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
-import org.geysermc.floodgate.core.player.UserAudience;
-import org.geysermc.floodgate.core.player.UserAudience.ConsoleAudience;
-import org.geysermc.floodgate.core.player.UserAudience.PlayerAudience;
 import org.geysermc.floodgate.core.util.LanguageManager;
 
 @Singleton
@@ -128,11 +128,11 @@ public final class SpigotCommandUtil extends CommandUtil {
 
     @Override
     public boolean whitelistPlayer(UUID uuid, String username) {
-        return WhitelistUtils.addPlayer(uuid, username);
+        return WhitelistUtils.addPlayer(uuid, username, versionSpecificMethods);
     }
 
     @Override
     public boolean removePlayerFromWhitelist(UUID uuid, String username) {
-        return WhitelistUtils.removePlayer(uuid, username);
+        return WhitelistUtils.removePlayer(uuid, username, versionSpecificMethods);
     }
 }
