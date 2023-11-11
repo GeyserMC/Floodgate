@@ -1,0 +1,3 @@
+architectury {
+    common("fabric")
+}

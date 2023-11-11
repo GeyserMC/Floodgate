@@ -45,9 +45,10 @@ val shadowProjects = setOf(
 ).map { it.dependencyProject }
 
 val moddedProjects = setOf(
-    projects.mod,
+    projects.common,
+    projects.mod.commonBase,
     projects.fabric,
-    projects.mod.fabricBase,
+    projects.mod.fabricBase
 ).map { it.dependencyProject }
 
 //todo re-add checkstyle when we switch back to 2 space indention

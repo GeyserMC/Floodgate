@@ -86,8 +86,6 @@ arrayOf("common", "fabric").forEach { platform ->
         var id = ":mod:$platform-$it"
         // isolated is the new default
         if (id.endsWith("-isolated")) id = ":$platform"
-
-        if (id.startsWith(":mod:common")) id = ":mod"
         println("Including mod project $id")
         include(id)
         project(id).projectDir = file("mod/$platform/$it")

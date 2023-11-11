@@ -7,6 +7,7 @@ architectury {
     fabric()
 }
 
+/**
 dependencies {
     api(projects.isolation)
     compileOnlyApi(libs.fabric.api)
@@ -15,7 +16,8 @@ dependencies {
 
 tasks {
     jar {
-        dependsOn(":mod:fabric-base:build", configurations.runtimeClasspath)
+        dependsOn("mod:common-base:build")
+        dependsOn(":mod:fabric-base:build")
 
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
@@ -36,4 +38,5 @@ tasks {
         //    into("bundled/")
         //}
     }
-}
+ }
+**/
