@@ -31,6 +31,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import org.geysermc.floodgate.isolation.loader.PlatformHolder;
 import org.geysermc.floodgate.isolation.loader.PlatformLoader;
+import net.minecraft.server.MinecraftServer;
 
 public final class IsolatedFabricMod implements ModInitializer {
     private PlatformHolder holder;

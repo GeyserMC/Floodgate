@@ -27,6 +27,7 @@ package org.geysermc.floodgate.fabric.pluginmessage;
 
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.server.level.ChunkMap;
@@ -71,7 +72,7 @@ public final class FabricSkinApplier implements SkinApplier {
                     entry.removePlayer(otherPlayer);
                 }
 
-                otherPlayer.connection.send(new (Collections.singletonList(bedrockPlayer.getUUID())));
+                otherPlayer.connection.send(new ClientboundPlayerInfoRemovePacket(Collections.singletonList(bedrockPlayer.getUUID())));
                 otherPlayer.connection.send(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(Collections.singletonList(bedrockPlayer)));
                 if (samePlayer) {
                     continue;

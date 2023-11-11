@@ -40,12 +40,12 @@ public final class FabricPlatform extends FloodgatePlatform {
 
     ModInitializer modContainer;
 
-    protected FabricPlatform(LibraryManager manager) {
+    private FabricPlatform(LibraryManager manager) {
         super(manager);
     }
 
     @Override
-    protected boolean isProxy() {
+    public boolean isProxy() {
         return false;
     }
 

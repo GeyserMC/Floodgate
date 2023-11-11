@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Geyser
  */
 
-package org.geysermc.floodgate.news;
+package org.geysermc.floodgate.core.news;
 
 public enum NewsItemAction {
     ON_SERVER_STARTED,

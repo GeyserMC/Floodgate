@@ -2,7 +2,6 @@
 # parent
 micronaut-gradle = "4.1.1"
 lombok = "8.0.1"
-loom = "1.2-SNAPSHOT"
 
 # api
 cumulus = "2.0.0-SNAPSHOT"
@@ -36,6 +35,12 @@ fabric_loader = "0.14.6"
 fabric_api = "0.55.3+1.19"
 fabric_adventure = "5.4.0-SNAPSHOT"
 fabric_permissions_api = "0.2-SNAPSHOT"
+
+# forge
+
+# architectury
+architectury_plugin = "3.4-SNAPSHOT"
+architectury_loom = "1.1-SNAPSHOT"
 
 # buildSrc
 indra = "3.1.3"
@@ -107,11 +112,12 @@ fabric-loader = { group = "net.fabricmc", name = "fabric-loader", version.ref = 
 fabric-api = { group = "net.fabricmc.fabric-api", name = "fabric-api", version.ref = "fabric_api" }
 cloud-fabric = { module = "cloud.commandframework:cloud-fabric", version.ref = "cloud" }
 kyori-adventure = { module = "net.kyori:adventure-platform-fabric", version.ref = "fabric_adventure" }
-loom = { group = "net.fabricmc", name = "fabric-loom", version.ref = "loom" }
+# loom = { group = "net.fabricmc", name = "fabric-loom", version.ref = "loom" }
 fabric-permissions-api = { module = "me.lucko:fabric-permissions-api", version.ref = "fabric_permissions_api" }
 
 # buildSrc
 checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "checkerframework" }
+
 # plugins
 indra-common = { module = "net.kyori:indra-common", version.ref = "indra" }
 indra-git = { module = "net.kyori:indra-git", version.ref = "indra" }
@@ -121,7 +127,9 @@ gradle-idea-ext = { module = "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext
 [plugins]
 micronaut = { id = "io.micronaut.library", version.ref = "micronaut-gradle" }
 lombok = { id = "io.freefair.lombok", version.ref = "lombok" }
-loom = { id = "fabric-loom", version.ref = "loom" }
+# loom = { id = "fabric-loom", version.ref = "loom" } # todo remove
+architectury-plugin = { id = "architectury-plugin.gradle.plugin", version.ref = "architectury_plugin" }
+architecury-loom = { id = "dev.architectury.loom.gradle.plugin", version.ref = "architectury_loom" }
 
 [bundles]
 fastutil = ["fastutil-short-object-maps", "fastutil-int-object-maps"]

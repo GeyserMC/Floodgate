@@ -26,10 +26,8 @@ val deployProjects = setOf(
 //    projects.database,
     projects.isolation,
     projects.bungee,
-    projects.fabric,
     projects.spigot,
     projects.velocity,
-    projects.fabricBase,
     projects.bungeeBase,
     projects.spigotBase,
     projects.velocityBase,
@@ -43,8 +41,13 @@ val shadowProjects = setOf(
     projects.bungeeBase,
     projects.spigotBase,
     projects.velocityBase,
-    projects.fabricBase,
     projects.universal
+).map { it.dependencyProject }
+
+val moddedProjects = setOf(
+    projects.mod,
+    projects.fabric,
+    projects.mod.fabricBase,
 ).map { it.dependencyProject }
 
 //todo re-add checkstyle when we switch back to 2 space indention
@@ -59,6 +62,7 @@ subprojects {
 
     when (this) {
         in deployProjects -> plugins.apply("floodgate.publish-conventions")
+        in moddedProjects -> plugins.apply("floodgate.modded-conventions")
         else -> plugins.apply("floodgate.base-conventions")
     }
 

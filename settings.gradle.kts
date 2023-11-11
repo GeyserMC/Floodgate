@@ -34,6 +34,9 @@ dependencyResolutionManagement {
         // Fabric
         maven("https://maven.fabricmc.net")
 
+        // Forge
+        maven("https://maven.minecraftforge.net/")
+
         maven("https://jitpack.io") {
             content { includeGroupByRegex("com\\.github\\..*") }
         }
@@ -48,6 +51,9 @@ pluginManagement {
 
         // Fabric, loom specifically
         maven("https://maven.fabricmc.net")
+
+        // Forge
+        maven("https://maven.minecraftforge.net/")
     }
 
     plugins {
@@ -64,7 +70,7 @@ include(":universal")
 //include(":database")
 include(":isolation")
 
-arrayOf("bungee", "spigot", "velocity", "fabric").forEach { platform ->
+arrayOf("bungee", "spigot", "velocity").forEach { platform ->
     arrayOf("base", "isolated").forEach {
         var id = ":$platform-$it"
         // isolated is the new default
@@ -72,5 +78,18 @@ arrayOf("bungee", "spigot", "velocity", "fabric").forEach { platform ->
 
         include(id)
         project(id).projectDir = file("$platform/$it")
+    }
+}
+
+arrayOf("common", "fabric").forEach { platform ->
+    arrayOf("base", "isolated").forEach {
+        var id = ":mod:$platform-$it"
+        // isolated is the new default
+        if (id.endsWith("-isolated")) id = ":$platform"
+
+        if (id.startsWith(":mod:common")) id = ":mod"
+        println("Including mod project $id")
+        include(id)
+        project(id).projectDir = file("mod/$platform/$it")
     }
 }

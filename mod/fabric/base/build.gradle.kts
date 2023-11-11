@@ -1,21 +1,14 @@
 plugins {
-    java
-    id("fabric-loom") version (libs.versions.loom) apply true
+    application
 }
 
-loom {
-    accessWidenerPath.set(file("src/main/resources/floodgate.accesswidener"))
+architectury {
+    platformSetupLoomIde()
+    fabric()
 }
 
 dependencies {
-    minecraft(libs.fabric.minecraft)
-    mappings(loom.officialMojangMappings())
-
-    api(projects.core)
-    annotationProcessor(projects.core)
-    compileOnlyApi(projects.isolation)
-
-    modImplementation(libs.fabric.api)
+    modApi(libs.fabric.api)
     modImplementation(libs.fabric.loader)
 
     // Commands library implementation for Fabric
