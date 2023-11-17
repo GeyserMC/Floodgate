@@ -35,12 +35,12 @@ import jakarta.inject.Singleton;
 import lombok.SneakyThrows;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.commands.CommandSourceStack;
+import org.geysermc.floodgate.core.connection.audience.FloodgateCommandPreprocessor;
+import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
-import org.geysermc.floodgate.core.player.FloodgateCommandPreprocessor;
-import org.geysermc.floodgate.core.player.UserAudience;
 
 @Factory
-public final class FabricCommandManagerImpl {
+public final class FabricCommandManager {
     @Bean
     @SneakyThrows
     @Singleton

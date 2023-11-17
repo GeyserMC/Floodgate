@@ -35,5 +35,6 @@ public final class FabricEventRegistration implements ListenerRegistration<Fabri
     @Override
     public void register(FabricEventListener listener) {
         ServerPlayConnectionEvents.JOIN.register(listener::onPlayerJoin);
+        ServerPlayConnectionEvents.DISCONNECT.register(listener::onPlayerDisconnect);
     }
 }

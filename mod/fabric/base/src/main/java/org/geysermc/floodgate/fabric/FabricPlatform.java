@@ -27,42 +27,35 @@ package org.geysermc.floodgate.fabric;
 
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.inject.qualifiers.Qualifiers;
-import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.ModContainer;
-import org.geysermc.floodgate.core.FloodgatePlatform;
+import net.minecraft.server.MinecraftServer;
 import org.geysermc.floodgate.isolation.library.LibraryManager;
+import org.geysermc.floodgate.mod.ModPlatform;
 
 import java.nio.file.Path;
 
-public final class FabricPlatform extends FloodgatePlatform {
+public final class FabricPlatform extends ModPlatform {
+    ModContainer modContainer;
 
-    private ApplicationContext context;
-
-    ModInitializer modContainer;
+    MinecraftServer minecraftServer;
 
     private FabricPlatform(LibraryManager manager) {
         super(manager);
     }
 
     @Override
-    public boolean isProxy() {
-        return false;
-    }
-
-    /*
-    TODO: What exactly do we need to do here?
-    @Override
     protected void onContextCreated(ApplicationContext context) {
         context.registerSingleton(modContainer)
                 .registerSingleton(
                         Path.class,
-                        modContainer.getDataFolder().toPath(),
+                        modContainer.getRoot(),
                         Qualifiers.byName("dataDirectory")
+                )
+                .registerSingleton(
+                        MinecraftServer.class,
+                        minecraftServer,
+                        Qualifiers.byName("minecraftServer")
                 );
         this.context = context;
     }
-    */
-
-
-
 }

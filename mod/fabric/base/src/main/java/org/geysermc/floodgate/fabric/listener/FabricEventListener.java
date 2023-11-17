@@ -26,28 +26,40 @@
 package org.geysermc.floodgate.fabric.listener;
 
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import org.geysermc.event.Listener;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
+import org.geysermc.floodgate.core.connection.ConnectionManager;
+import org.geysermc.floodgate.core.listener.McListener;
 import org.geysermc.floodgate.core.util.LanguageManager;
 
-public final class FabricEventListener {
-    @Inject private FloodgateApi api;
+import java.lang.annotation.Annotation;
+
+@Singleton
+public final class FabricEventListener implements McListener {
+
+    @Inject ConnectionManager connectionManager;
+    @Inject private SimpleFloodgateApi api;
+    @Inject private LanguageManager languageManager;
     @Inject private FloodgateLogger logger;
-    @Inject
-    private LanguageManager languageManager;
 
     public void onPlayerJoin(ServerGamePacketListenerImpl networkHandler, PacketSender packetSender, MinecraftServer server) {
-        FloodgatePlayer player = api.getPlayer(networkHandler.player.getUUID());
-        if (player != null) {
-            logger.translatedInfo(
-                    "floodgate.ingame.login_name",
-                    player.getCorrectUsername(), player.getCorrectUniqueId()
-            );
-            languageManager.loadLocale(player.getLanguageCode());
+        var connection = connectionManager.findPendingConnection(networkHandler.player.getUUID());
+        if (connection == null) {
+            return;
         }
+
+        languageManager.loadLocale(connection.languageCode());
+        connectionManager.addAcceptedConnection(connection);
+    }
+
+    public void onPlayerDisconnect(ServerGamePacketListenerImpl listener, MinecraftServer server) {
+        connectionManager.removeConnection(listener.player);
     }
 }

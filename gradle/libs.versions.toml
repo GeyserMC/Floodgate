@@ -38,6 +38,9 @@ fabric_permissions_api = "0.2-SNAPSHOT"
 
 # forge
 
+# mod common
+mixin = "0.8.5"
+
 # architectury
 architectury_plugin = "3.4-SNAPSHOT"
 architectury_loom = "1.1-SNAPSHOT"
@@ -112,8 +115,12 @@ fabric-loader = { group = "net.fabricmc", name = "fabric-loader", version.ref = 
 fabric-api = { group = "net.fabricmc.fabric-api", name = "fabric-api", version.ref = "fabric_api" }
 cloud-fabric = { module = "cloud.commandframework:cloud-fabric", version.ref = "cloud" }
 kyori-adventure = { module = "net.kyori:adventure-platform-fabric", version.ref = "fabric_adventure" }
-# loom = { group = "net.fabricmc", name = "fabric-loom", version.ref = "loom" }
 fabric-permissions-api = { module = "me.lucko:fabric-permissions-api", version.ref = "fabric_permissions_api" }
+
+# forge TODO
+
+# mod common
+mixin = { group = "org.spongepowered", name = "mixin", version.ref = "mixin" }
 
 # buildSrc
 checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "checkerframework" }
@@ -127,7 +134,6 @@ gradle-idea-ext = { module = "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext
 [plugins]
 micronaut = { id = "io.micronaut.library", version.ref = "micronaut-gradle" }
 lombok = { id = "io.freefair.lombok", version.ref = "lombok" }
-# loom = { id = "fabric-loom", version.ref = "loom" } # todo remove
 architectury-plugin = { id = "architectury-plugin.gradle.plugin", version.ref = "architectury_plugin" }
 architecury-loom = { id = "dev.architectury.loom.gradle.plugin", version.ref = "architectury_loom" }
 

@@ -31,11 +31,13 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import org.geysermc.floodgate.core.platform.pluginmessage.PluginMessageUtils;
-import org.geysermc.floodgate.fabric.MinecraftServerHolder;
+import org.geysermc.floodgate.mod.pluginmessage.ModPluginMessageUtil;
+import org.geysermc.floodgate.mod.util.MinecraftServerHolder;
+import org.geysermc.floodgate.mod.util.ModPlatformUtils;
 
 import java.util.UUID;
 
-public class FabricPluginMessageUtils extends PluginMessageUtils {
+public class FabricPluginMessageUtils extends ModPluginMessageUtil {
 
     @Override
     public boolean sendMessage(UUID uuid, String channel, byte[] data) {

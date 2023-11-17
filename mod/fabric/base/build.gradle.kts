@@ -7,8 +7,13 @@ architectury {
     fabric()
 }
 
-/**
+loom {
+    accessWidenerPath.set(project(":mod:common-base").file("src/main/resources/floodgate.accesswidener"))
+}
+
 dependencies {
+    api(projects.mod.commonBase)
+
     modApi(libs.fabric.api)
     modImplementation(libs.fabric.loader)
 
@@ -17,17 +22,12 @@ dependencies {
         because("Commands library implementation for Fabric")
     }
 
-    // TODO: Relocations, provided, fixing dependencies for cloud and adventure
-
-    /*
-    include(modImplementation(libs.kyori.adventure) {
+    modImplementation(libs.kyori.adventure) {
         because("Chat library implementation for Fabric that includes methods for communicating with the server")
         // Thanks to zml for this fix
         // The package modifies Brigadier which causes a LinkageError at runtime if included
         exclude("ca.stellardrift", "colonel")
-    })
-
-     */
+    }
 }
 
 // using loom requires us to re-define all repositories here, lol
@@ -39,4 +39,3 @@ repositories {
     maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
     mavenCentral()
 }
- **/

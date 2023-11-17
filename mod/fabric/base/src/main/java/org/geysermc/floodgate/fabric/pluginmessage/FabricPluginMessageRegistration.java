@@ -29,8 +29,10 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.resources.ResourceLocation;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageRegistration;
+import org.geysermc.floodgate.mod.pluginmessage.ModPluginMessageRegistration;
 
-public class FabricPluginMessageRegistration implements PluginMessageRegistration {
+public class FabricPluginMessageRegistration extends ModPluginMessageRegistration {
+
     @Override
     public void register(PluginMessageChannel channel) {
         ServerPlayNetworking.registerGlobalReceiver(new ResourceLocation(channel.getIdentifier()),
