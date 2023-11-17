@@ -34,6 +34,7 @@ import org.geysermc.floodgate.universal.logger.Slf4jLogger;
 
 public final class FloodgateFabric implements ModInitializer {
   private FloodgateHolder holder;
+
   @Override
   public void onInitialize() {
 
@@ -45,6 +46,7 @@ public final class FloodgateFabric implements ModInitializer {
       throw new RuntimeException("Failed to load Floodgate", exception);
     }
 
+    /*
     ServerLifecycleEvents.SERVER_STARTED.register(server -> {
         holder.enable();
     });
@@ -52,5 +54,6 @@ public final class FloodgateFabric implements ModInitializer {
     ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
         holder.disable();
     });
+    */
   }
 }

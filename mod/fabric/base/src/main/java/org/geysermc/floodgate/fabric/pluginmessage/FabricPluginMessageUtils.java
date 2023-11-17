@@ -26,23 +26,27 @@
 package org.geysermc.floodgate.fabric.pluginmessage;
 
 import io.netty.buffer.Unpooled;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import org.geysermc.floodgate.core.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.mod.pluginmessage.ModPluginMessageUtil;
-import org.geysermc.floodgate.mod.util.MinecraftServerHolder;
-import org.geysermc.floodgate.mod.util.ModPlatformUtils;
 
 import java.util.UUID;
 
 public class FabricPluginMessageUtils extends ModPluginMessageUtil {
 
+    @Inject
+    @Named("minecraftServer")
+    MinecraftServer server;
+
     @Override
     public boolean sendMessage(UUID uuid, String channel, byte[] data) {
         try {
-            ServerPlayer player = MinecraftServerHolder.get().getPlayerList().getPlayer(uuid);
+            ServerPlayer player = server.getPlayerList().getPlayer(uuid);
             ResourceLocation resource = new ResourceLocation(channel); // automatically splits over the :
             FriendlyByteBuf dataBuffer = new FriendlyByteBuf(Unpooled.wrappedBuffer(data));
             ServerPlayNetworking.send(player, resource, dataBuffer);

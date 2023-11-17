@@ -6,16 +6,14 @@ import net.minecraft.SharedConstants;
 import net.minecraft.server.MinecraftServer;
 import org.geysermc.floodgate.core.platform.util.PlatformUtils;
 
-public class ModPlatformUtils extends PlatformUtils {
+public abstract class ModPlatformUtils extends PlatformUtils {
 
     @Inject
     @Named("minecraftServer")
-    private MinecraftServer server;
+    protected MinecraftServer server;
 
     @Override
-    public AuthType authType() {
-        return server.usesAuthentication() ? AuthType.ONLINE : AuthType.OFFLINE;
-    }
+    public abstract AuthType authType();
 
     @Override
     public String minecraftVersion() {

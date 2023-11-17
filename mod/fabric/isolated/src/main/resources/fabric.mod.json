@@ -12,17 +12,12 @@
     "repo": "https://github.com/GeyserMC/Floodgate"
   },
   "license": "MIT",
-  "icon": "assets/floodgate/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "org.geysermc.floodgate.FabricMod"
+      "org.geysermc.floodgate.fabric.IsolatedFabricMod"
     ]
   },
-  "accessWidener": "floodgate.accesswidener",
-  "mixins": [
-    "floodgate.mixins.json"
-  ],
   "depends": {
     "fabricloader": ">=0.14.6",
     "fabric": "*",
