@@ -1,14 +1,14 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "org.geysermc.floodgate.fabric.mixin",
+  "package": "org.geysermc.floodgate.mod.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "ChunkMapMixin",
     "ClientIntentionPacketMixin",
+    "ClientIntentionPacketMixinInterface",
     "ConnectionMixin",
-    "ServerConnectionListenerMixin",
-    "ServerLoginPacketListenerImplMixin"
+    "ServerConnectionListenerMixin"
   ],
   "refmap": "floodgate-fabric-refmap.json",
   "injectors": {

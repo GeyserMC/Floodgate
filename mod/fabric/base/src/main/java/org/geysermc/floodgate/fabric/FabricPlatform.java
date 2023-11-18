@@ -27,6 +27,7 @@ package org.geysermc.floodgate.fabric;
 
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.inject.qualifiers.Qualifiers;
+import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.server.MinecraftServer;
 import org.geysermc.floodgate.isolation.library.LibraryManager;
@@ -48,7 +49,7 @@ public final class FabricPlatform extends ModPlatform {
         context.registerSingleton(modContainer)
                 .registerSingleton(
                         Path.class,
-                        modContainer.getRoot(),
+                        FabricLoader.getInstance().getConfigDir().resolve("Floodgate-Fabric"),
                         Qualifiers.byName("dataDirectory")
                 )
                 .registerSingleton(

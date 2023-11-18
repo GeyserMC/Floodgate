@@ -1,6 +1,5 @@
 package org.geysermc.floodgate.mod.pluginmessage;
 
-import net.minecraft.resources.ResourceLocation;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageRegistration;
 

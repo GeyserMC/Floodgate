@@ -30,24 +30,15 @@ import jakarta.inject.Singleton;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import org.geysermc.event.Listener;
-import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.core.connection.ConnectionManager;
 import org.geysermc.floodgate.core.listener.McListener;
 import org.geysermc.floodgate.core.util.LanguageManager;
-
-import java.lang.annotation.Annotation;
 
 @Singleton
 public final class FabricEventListener implements McListener {
 
     @Inject ConnectionManager connectionManager;
-    @Inject private SimpleFloodgateApi api;
     @Inject private LanguageManager languageManager;
-    @Inject private FloodgateLogger logger;
 
     public void onPlayerJoin(ServerGamePacketListenerImpl networkHandler, PacketSender packetSender, MinecraftServer server) {
         var connection = connectionManager.findPendingConnection(networkHandler.player.getUUID());

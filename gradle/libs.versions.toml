@@ -30,9 +30,9 @@ authlib = "5.0.47"
 velocity = "3.2.0-SNAPSHOT"
 
 # fabric
-fabric_minecraft = "1.19"
-fabric_loader = "0.14.6"
-fabric_api = "0.55.3+1.19"
+fabric_minecraft = "1.20.2"
+fabric_loader = "0.14.20"
+fabric_api = "0.90.7+1.20.2"
 fabric_adventure = "5.4.0-SNAPSHOT"
 fabric_permissions_api = "0.2-SNAPSHOT"
 
@@ -43,7 +43,7 @@ mixin = "0.8.5"
 
 # architectury
 architectury_plugin = "3.4-SNAPSHOT"
-architectury_loom = "1.1-SNAPSHOT"
+architectury_loom = "1.4-SNAPSHOT"
 
 # buildSrc
 indra = "3.1.3"
@@ -130,12 +130,12 @@ indra-common = { module = "net.kyori:indra-common", version.ref = "indra" }
 indra-git = { module = "net.kyori:indra-git", version.ref = "indra" }
 shadow = { module = "com.github.johnrengelman:shadow", version.ref = "shadow" }
 gradle-idea-ext = { module = "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext", version.ref = "gradle-idea-ext" }
+architectury-loom = { group = "dev.architectury.loom", name = "dev.architectury.loom.gradle.plugin", version.ref = "architectury_loom" }
+architectury-plugin = { group = "architectury-plugin", name = "architectury-plugin.gradle.plugin", version.ref = "architectury_plugin" }
 
 [plugins]
 micronaut = { id = "io.micronaut.library", version.ref = "micronaut-gradle" }
 lombok = { id = "io.freefair.lombok", version.ref = "lombok" }
-architectury-plugin = { id = "architectury-plugin.gradle.plugin", version.ref = "architectury_plugin" }
-architecury-loom = { id = "dev.architectury.loom.gradle.plugin", version.ref = "architectury_loom" }
 
 [bundles]
 fastutil = ["fastutil-short-object-maps", "fastutil-int-object-maps"]

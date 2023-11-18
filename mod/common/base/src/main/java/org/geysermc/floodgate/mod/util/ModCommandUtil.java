@@ -3,15 +3,11 @@ package org.geysermc.floodgate.mod.util;
 import com.mojang.authlib.GameProfile;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.UserWhiteListEntry;
-import net.minecraft.world.entity.player.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.api.GeyserApiBase;
 import org.geysermc.floodgate.core.connection.audience.UserAudience;
@@ -19,7 +15,6 @@ import org.geysermc.floodgate.core.platform.command.CommandUtil;
 import org.geysermc.floodgate.core.util.LanguageManager;
 
 import java.util.Collection;
-import java.util.Objects;
 import java.util.UUID;
 
 @Singleton

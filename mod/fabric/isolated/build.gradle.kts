@@ -23,16 +23,16 @@ tasks {
         archiveVersion = ""
         archiveClassifier = ""
 
-        //val fabricBaseJar = project.projects
-        //    .fabricBase.dependencyProject
-        //    .buildDir
-        //    .resolve("libs")
-        //    .resolve("floodgate-fabric-base.jar")
+        val fabricBaseJar = project.projects.mod
+            .fabricBase.dependencyProject
+            .buildDir
+            .resolve("libs")
+            .resolve("floodgate-fabric-base.jar")
 
-        //from(fabricBaseJar.parentFile) {
-        //    include(fabricBaseJar.name)
-        //    rename("floodgate-fabric-base.jar", "platform-base.jar")
-        //    into("bundled/")
-        //}
+        from(fabricBaseJar.parentFile) {
+            include(fabricBaseJar.name)
+            rename("floodgate-fabric-base.jar", "platform-base.jar")
+            into("bundled/")
+        }
     }
  }
