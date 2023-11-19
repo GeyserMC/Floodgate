@@ -62,6 +62,7 @@ public final class SpigotVersionSpecificMethods {
 
     @Inject JavaPlugin plugin;
 
+    @SuppressWarnings("deprecation")
     public String getLocale(Player player) {
         if (OLD_GET_LOCALE == null) {
             return player.getLocale();

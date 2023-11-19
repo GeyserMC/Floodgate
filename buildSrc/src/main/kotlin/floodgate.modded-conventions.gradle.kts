@@ -1,5 +1,5 @@
 plugins {
-    `java-library`
+    id("floodgate.base-conventions")
     id("architectury-plugin") apply true
     id("dev.architectury.loom") apply true
 }

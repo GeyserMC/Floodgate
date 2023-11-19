@@ -19,6 +19,7 @@ allprojects {
 }
 
 //todo differentiate maven publishing from downloads publishing
+//todo add fabric projects to be deployed
 val deployProjects = setOf(
     projects.api,
     // for future Floodgate integration + Fabric
@@ -36,7 +37,6 @@ val deployProjects = setOf(
 
 val shadowProjects = setOf(
     projects.api,
-    // for future Floodgate integration + Fabric
     projects.core,
     projects.bungeeBase,
     projects.spigotBase,
@@ -45,7 +45,6 @@ val shadowProjects = setOf(
 ).map { it.dependencyProject }
 
 val moddedProjects = setOf(
-    projects.common,
     projects.mod.commonBase,
     projects.fabric,
     projects.mod.fabricBase

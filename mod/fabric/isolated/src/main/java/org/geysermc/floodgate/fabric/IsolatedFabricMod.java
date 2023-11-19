@@ -38,8 +38,6 @@ public final class IsolatedFabricMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
-
-        // TODO: logger probably does not work, grrr
         try {
             var libsDirectory = FabricLoader.getInstance().getConfigDir().resolve("floodgate");
             holder = PlatformLoader.loadDefault(getClass().getClassLoader(), libsDirectory);

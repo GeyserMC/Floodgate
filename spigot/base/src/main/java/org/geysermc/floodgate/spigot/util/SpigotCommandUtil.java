@@ -119,6 +119,7 @@ public final class SpigotCommandUtil extends CommandUtil {
     }
 
     @Override
+    @SuppressWarnings("deprecation") // kickPlayer is deprecated in paper; not spigot
     public void kickPlayer(Object player, String message) {
         // can also be console
         if (player instanceof Player) {

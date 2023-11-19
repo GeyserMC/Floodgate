@@ -81,7 +81,10 @@ arrayOf("bungee", "spigot", "velocity").forEach { platform ->
     }
 }
 
-arrayOf("common", "fabric").forEach { platform ->
+include(":mod:common-base")
+project(":mod:common-base").projectDir = file("mod/common/base")
+
+arrayOf("fabric").forEach { platform ->
     arrayOf("base", "isolated").forEach {
         var id = ":mod:$platform-$it"
         // isolated is the new default
