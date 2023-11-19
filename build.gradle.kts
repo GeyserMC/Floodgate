@@ -19,6 +19,7 @@ allprojects {
 }
 
 //todo differentiate maven publishing from downloads publishing
+//todo add fabric projects to be deployed
 val deployProjects = setOf(
     projects.api,
     // for future Floodgate integration + Fabric
@@ -36,12 +37,17 @@ val deployProjects = setOf(
 
 val shadowProjects = setOf(
     projects.api,
-    // for future Floodgate integration + Fabric
     projects.core,
     projects.bungeeBase,
     projects.spigotBase,
     projects.velocityBase,
     projects.universal
+).map { it.dependencyProject }
+
+val moddedProjects = setOf(
+    projects.mod.commonBase,
+    projects.fabric,
+    projects.mod.fabricBase
 ).map { it.dependencyProject }
 
 //todo re-add checkstyle when we switch back to 2 space indention
@@ -56,6 +62,7 @@ subprojects {
 
     when (this) {
         in deployProjects -> plugins.apply("floodgate.publish-conventions")
+        in moddedProjects -> plugins.apply("floodgate.modded-conventions")
         else -> plugins.apply("floodgate.base-conventions")
     }
 

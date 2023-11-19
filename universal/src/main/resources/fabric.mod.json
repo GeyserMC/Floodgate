@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "floodgate",
+  "version": "${version}",
+  "name": "${name}",
+  "description": "${description}",
+  "authors": [
+    "${author}"
+  ],
+  "contact": {
+    "website": "${url}",
+    "repo": "https://github.com/GeyserMC/Floodgate"
+  },
+  "license": "MIT",
+  "icon": "assets/floodgate/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "org.geysermc.floodgate.FabricMod"
+    ]
+  },
+  "accessWidener": "floodgate.accesswidener",
+  "mixins": [
+    "floodgate.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.6",
+    "fabric": "*",
+    "minecraft": ">=1.19"
+  }
+}

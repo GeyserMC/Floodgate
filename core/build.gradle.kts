@@ -33,7 +33,7 @@ dependencies {
     annotationProcessor(libs.micronaut.data.processor)
     compileOnlyApi(libs.jakarta.persistence)
 
-    runtimeOnly("com.h2database:h2")
+    //runtimeOnly("com.h2database:h2")
 
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)

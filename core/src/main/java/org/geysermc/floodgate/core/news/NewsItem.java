@@ -23,14 +23,15 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.news;
+package org.geysermc.floodgate.core.news;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import org.geysermc.floodgate.news.data.ItemData;
+
+import org.geysermc.floodgate.core.news.data.ItemData;
 
 public final class NewsItem {
     private final int id;

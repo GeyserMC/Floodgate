@@ -40,15 +40,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.command.util.Permission;
+import org.geysermc.floodgate.core.news.data.AnnouncementData;
+import org.geysermc.floodgate.core.news.data.BuildSpecificData;
+import org.geysermc.floodgate.core.news.data.CheckAfterData;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
 import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.HttpClient;
 import org.geysermc.floodgate.core.util.HttpClient.HttpResponse;
-import org.geysermc.floodgate.news.NewsItem;
-import org.geysermc.floodgate.news.NewsItemAction;
-import org.geysermc.floodgate.news.data.AnnouncementData;
-import org.geysermc.floodgate.news.data.BuildSpecificData;
-import org.geysermc.floodgate.news.data.CheckAfterData;
 
 @Singleton
 public class NewsChecker {

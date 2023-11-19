@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "floodgate",
+  "version": "${version}",
+  "name": "${name}",
+  "description": "${description}",
+  "authors": [
+    "${author}"
+  ],
+  "contact": {
+    "website": "${url}",
+    "repo": "https://github.com/GeyserMC/Floodgate"
+  },
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "org.geysermc.floodgate.fabric.IsolatedFabricMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.14.6",
+    "fabric": "*",
+    "minecraft": ">=1.19"
+  }
+}

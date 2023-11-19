@@ -32,6 +32,8 @@ import org.geysermc.floodgate.isolation.library.Repository;
 import org.geysermc.floodgate.isolation.util.UrlUtil;
 
 public class PlatformLoader {
+
+    //TODO: Mixins need to be loaded *before* we try to enable/download Floodgate...
     public static LibraryManager createLibraryManager(ClassLoader loader, Path cacheDirectory) {
         return new LibraryManager(loader, cacheDirectory, true)
                 .addLibrary(

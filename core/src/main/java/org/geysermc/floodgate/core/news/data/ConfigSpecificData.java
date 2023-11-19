@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.news.data;
+package org.geysermc.floodgate.core.news.data;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
