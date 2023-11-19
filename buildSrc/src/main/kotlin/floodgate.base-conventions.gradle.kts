@@ -19,6 +19,7 @@ indra {
 
     javaVersions {
         target(17)
+        strictVersions(true)
     }
 }
 
