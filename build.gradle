@@ -52,13 +52,6 @@ dependencies {
         because "Commands library implementation for Fabric"
     })
 
-    include(modImplementation('net.kyori:adventure-platform-fabric:5.10.0') {
-        because "Chat library implementation for Fabric that includes methods for communicating with the server"
-        // Thanks to zml for this fix
-        // The package modifies Brigadier which causes a LinkageError at runtime if included
-        exclude group: 'ca.stellardrift', module: "colonel"
-    })
-
     // Lombok
     compileOnly "org.projectlombok:lombok:${project.lombok_version}"
     annotationProcessor "org.projectlombok:lombok:${project.lombok_version}"
@@ -68,12 +61,6 @@ repositories {
     //mavenLocal()
     maven {
         url = 'https://oss.sonatype.org/content/repositories/snapshots'
-    }
-    // specifically for adventure-platform-fabric:5.4.0-SNAPSHOT
-    maven {
-        name = "sonatype-oss-snapshots1"
-        url = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-        mavenContent { snapshotsOnly() }
     }
     // Standard OpenCollab repositories
     maven {
@@ -160,6 +147,7 @@ publishing {
 tasks.modrinth.dependsOn tasks.remappedModrinthJar
 
 modrinth {
+    token = System.getenv('MODRINTH_TOKEN') // Prevent GitHub Actions from caching empty Modrinth token
     projectId = "bWrNNfkb"
     versionNumber = project.version as String + "-" + System.getenv("GITHUB_RUN_NUMBER")
     versionType = "beta"
@@ -168,7 +156,7 @@ modrinth {
     syncBodyFrom = rootProject.file("README.md").text
 
     uploadFile = tasks.getByPath("remappedModrinthJar")
-    gameVersions.addAll("1.20.2")
+    gameVersions.addAll("1.20.2", "1.20.4")
 
     loaders = ["fabric"]
 
