@@ -59,11 +59,10 @@ public class ClassNames {
     public static final Class<?> HANDSHAKE_PACKET;
     public static final Class<?> LOGIN_START_PACKET;
     public static final Class<?> LOGIN_LISTENER;
-    public static final Class<?> LOGIN_HANDLER;
     @Nullable public static final Class<?> CLIENT_INTENT;
 
     public static final Constructor<OfflinePlayer> CRAFT_OFFLINE_PLAYER_CONSTRUCTOR;
-    public static final Constructor<?> LOGIN_HANDLER_CONSTRUCTOR;
+    @Nullable public static final Constructor<?> LOGIN_HANDLER_CONSTRUCTOR;
     @Nullable public static final Constructor<?> HANDSHAKE_PACKET_CONSTRUCTOR;
 
     public static final Field SOCKET_ADDRESS;
@@ -84,13 +83,17 @@ public class ClassNames {
     @Nullable public static final Method INIT_UUID;
     @Nullable public static final Method FIRE_LOGIN_EVENTS;
     @Nullable public static final Method FIRE_LOGIN_EVENTS_GAME_PROFILE;
+    @Nullable public static final Method CALL_PLAYER_PRE_LOGIN_EVENTS;
+    @Nullable public static final Method START_CLIENT_VERIFICATION;
 
     public static final Field BUNGEE;
 
     public static final boolean IS_FOLIA;
     public static final boolean IS_PRE_1_20_2;
+    public static final boolean IS_POST_LOGIN_HANDLER;
 
     static {
+        // ahhhhhhh, this class should really be reworked at this point
         String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
         SPIGOT_MAPPING_PREFIX = "net.minecraft.server." + version;
 
@@ -167,6 +170,14 @@ public class ClassNames {
         INIT_UUID = getMethod(LOGIN_LISTENER, "initUUID");
         IS_PRE_1_20_2 = INIT_UUID != null;
 
+        // somewhere during 1.20.4 md_5 moved PreLogin logic to CraftBukkit
+        CALL_PLAYER_PRE_LOGIN_EVENTS = getMethod(
+                LOGIN_LISTENER,
+                "callPlayerPreLoginEvents",
+                GameProfile.class
+        );
+        IS_POST_LOGIN_HANDLER = CALL_PLAYER_PRE_LOGIN_EVENTS != null;
+
         if (IS_PRE_1_20_2) {
             Class<?> packetListenerClass = getClassOrFallback(
                     "net.minecraft.network.PacketListener",
@@ -183,21 +194,36 @@ public class ClassNames {
         }
         checkNotNull(PACKET_LISTENER, "Packet listener");
 
-        LOGIN_HANDLER = getClassOrFallback(
-                "net.minecraft.server.network.LoginListener$LoginHandler",
-                nmsPackage + "LoginListener$LoginHandler"
-        );
+        if (IS_POST_LOGIN_HANDLER) {
+            makeAccessible(CALL_PLAYER_PRE_LOGIN_EVENTS);
 
-        LOGIN_HANDLER_CONSTRUCTOR =
-                ReflectionUtils.getConstructor(LOGIN_HANDLER, true, LOGIN_LISTENER);
-        checkNotNull(LOGIN_HANDLER_CONSTRUCTOR, "LoginHandler constructor");
+            START_CLIENT_VERIFICATION = getMethod(LOGIN_LISTENER, "b", GameProfile.class);
+            checkNotNull(START_CLIENT_VERIFICATION, "startClientVerification");
+            makeAccessible(START_CLIENT_VERIFICATION);
 
-        FIRE_LOGIN_EVENTS = getMethod(LOGIN_HANDLER, "fireEvents");
+            LOGIN_HANDLER_CONSTRUCTOR = null;
+            FIRE_LOGIN_EVENTS = null;
+            FIRE_LOGIN_EVENTS_GAME_PROFILE = null;
+        } else {
+            Class<?> loginHandler = getClassOrFallback(
+                    "net.minecraft.server.network.LoginListener$LoginHandler",
+                    nmsPackage + "LoginListener$LoginHandler"
+            );
 
-        // LoginHandler().fireEvents(GameProfile)
-        FIRE_LOGIN_EVENTS_GAME_PROFILE = getMethod(LOGIN_HANDLER, "fireEvents", GameProfile.class);
-        checkNotNull(FIRE_LOGIN_EVENTS, FIRE_LOGIN_EVENTS_GAME_PROFILE,
-                "fireEvents from LoginHandler", "fireEvents(GameProfile) from LoginHandler");
+            LOGIN_HANDLER_CONSTRUCTOR =
+                    ReflectionUtils.getConstructor(loginHandler, true, LOGIN_LISTENER);
+            checkNotNull(LOGIN_HANDLER_CONSTRUCTOR, "LoginHandler constructor");
+
+            FIRE_LOGIN_EVENTS = getMethod(loginHandler, "fireEvents");
+
+            // LoginHandler().fireEvents(GameProfile)
+            FIRE_LOGIN_EVENTS_GAME_PROFILE = getMethod(loginHandler, "fireEvents",
+                    GameProfile.class);
+            checkNotNull(FIRE_LOGIN_EVENTS, FIRE_LOGIN_EVENTS_GAME_PROFILE,
+                    "fireEvents from LoginHandler", "fireEvents(GameProfile) from LoginHandler");
+
+            START_CLIENT_VERIFICATION = null;
+        }
 
         PAPER_DISABLE_USERNAME_VALIDATION = getField(LOGIN_LISTENER,
                 "iKnowThisMayNotBeTheBestIdeaButPleaseDisableUsernameValidation");
