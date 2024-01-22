@@ -28,6 +28,7 @@ package org.geysermc.floodgate.velocity.addon.data;
 import static java.util.Objects.requireNonNull;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.castedInvoke;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getCastedValue;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getClassOrFallbackPrefixed;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getField;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getMethod;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getPrefixedClass;
@@ -60,7 +61,10 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
     private static final Method GET_PLAYER;
 
     static {
-        HANDSHAKE_PACKET = getPrefixedClass("protocol.packet.Handshake");
+        HANDSHAKE_PACKET = getClassOrFallbackPrefixed(
+                "protocol.packet.HandshakePacket",
+                "protocol.packet.Handshake"
+        );
         requireNonNull(HANDSHAKE_PACKET, "Handshake packet class cannot be null");
 
         HANDSHAKE_ADDRESS = getField(HANDSHAKE_PACKET, "serverAddress");

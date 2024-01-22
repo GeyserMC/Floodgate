@@ -27,6 +27,7 @@ package org.geysermc.floodgate.velocity.addon.data;
 
 import static java.util.Objects.requireNonNull;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getCastedValue;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getClassOrFallbackPrefixed;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getField;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getMethodByName;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getPrefixedClass;
@@ -65,7 +66,10 @@ public final class VelocityProxyDataHandler extends CommonNettyDataHandler {
         HANDSHAKE = getField(iic, "handshake");
         requireNonNull(HANDSHAKE, "Handshake field cannot be null");
 
-        HANDSHAKE_PACKET = getPrefixedClass("protocol.packet.Handshake");
+        HANDSHAKE_PACKET = getClassOrFallbackPrefixed(
+                "protocol.packet.HandshakePacket",
+                "protocol.packet.Handshake"
+        );
         requireNonNull(HANDSHAKE_PACKET, "Handshake packet class cannot be null");
 
         HANDSHAKE_SERVER_ADDRESS = getField(HANDSHAKE_PACKET, "serverAddress");
@@ -75,7 +79,10 @@ public final class VelocityProxyDataHandler extends CommonNettyDataHandler {
         REMOTE_ADDRESS = getField(minecraftConnection, "remoteAddress");
         requireNonNull(REMOTE_ADDRESS, "remoteAddress cannot be null");
 
-        SERVER_LOGIN_PACKET = getPrefixedClass("protocol.packet.ServerLogin");
+        SERVER_LOGIN_PACKET = getClassOrFallbackPrefixed(
+                "protocol.packet.ServerLoginPacket",
+                "protocol.packet.ServerLogin"
+        );
         requireNonNull(SERVER_LOGIN_PACKET, "ServerLogin packet class cannot be null");
 
 

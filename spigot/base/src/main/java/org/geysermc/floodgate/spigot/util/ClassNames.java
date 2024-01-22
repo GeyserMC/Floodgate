@@ -36,6 +36,8 @@ import static org.geysermc.floodgate.core.util.ReflectionUtils.getValue;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.invoke;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.makeAccessible;
 import static org.geysermc.floodgate.spigot.util.MappingUtils.classFor;
+import static org.geysermc.floodgate.spigot.util.MappingUtils.fieldFor;
+import static org.geysermc.floodgate.spigot.util.MappingUtils.methodFor;
 
 import com.mojang.authlib.GameProfile;
 import io.netty.channel.ChannelHandlerContext;
@@ -58,11 +60,10 @@ public class ClassNames {
     public static final Class<?> HANDSHAKE_PACKET;
     public static final Class<?> LOGIN_START_PACKET;
     public static final Class<?> LOGIN_LISTENER;
-    public static final Class<?> LOGIN_HANDLER;
     @Nullable public static final Class<?> CLIENT_INTENT;
 
     public static final Constructor<OfflinePlayer> CRAFT_OFFLINE_PLAYER_CONSTRUCTOR;
-    public static final Constructor<?> LOGIN_HANDLER_CONSTRUCTOR;
+    @Nullable public static final Constructor<?> LOGIN_HANDLER_CONSTRUCTOR;
     @Nullable public static final Constructor<?> HANDSHAKE_PACKET_CONSTRUCTOR;
 
     public static final Field SOCKET_ADDRESS;
@@ -83,13 +84,18 @@ public class ClassNames {
     @Nullable public static final Method INIT_UUID;
     @Nullable public static final Method FIRE_LOGIN_EVENTS;
     @Nullable public static final Method FIRE_LOGIN_EVENTS_GAME_PROFILE;
+    @Nullable public static final Method CALL_PLAYER_PRE_LOGIN_EVENTS;
+    @Nullable public static final Method START_CLIENT_VERIFICATION;
 
     public static final Field BUNGEE;
 
     public static final boolean IS_FOLIA;
     public static final boolean IS_PRE_1_20_2;
+    public static final boolean IS_POST_LOGIN_HANDLER;
 
     static {
+        // ahhhhhhh, this class should really be reworked at this point
+
         // SpigotSkinApplier
         Class<?> craftPlayerClass = MappingUtils.craftbukkitClass("entity.CraftPlayer");
         GET_PROFILE_METHOD = getMethod(craftPlayerClass, "getProfile");
@@ -154,6 +160,14 @@ public class ClassNames {
         INIT_UUID = getMethod(LOGIN_LISTENER, "initUUID");
         IS_PRE_1_20_2 = INIT_UUID != null;
 
+        // somewhere during 1.20.4 md_5 moved PreLogin logic to CraftBukkit
+        CALL_PLAYER_PRE_LOGIN_EVENTS = getMethod(
+                LOGIN_LISTENER,
+                "callPlayerPreLoginEvents",
+                GameProfile.class
+        );
+        IS_POST_LOGIN_HANDLER = CALL_PLAYER_PRE_LOGIN_EVENTS != null;
+
         if (IS_PRE_1_20_2) {
             Class<?> packetListenerClass = classFor("net.minecraft.network", "PacketListener");
             PACKET_LISTENER = getFieldOfType(networkManager, packetListenerClass);
@@ -161,28 +175,41 @@ public class ClassNames {
             // We get the field by name on 1.20.2+ as there are now multiple fields of this type in network manager
 
             // PacketListener packetListener of NetworkManager
-            PACKET_LISTENER = MappingUtils.fieldFor(networkManager, "packetListener", "q");
+            PACKET_LISTENER = fieldFor(networkManager, "packetListener", "q");
             makeAccessible(PACKET_LISTENER);
         }
         requireNonNull(PACKET_LISTENER, "Packet listener");
 
-        LOGIN_HANDLER = classFor(
-                "net.minecraft.server.network",
-                "ServerLoginPacketListenerImpl$LoginHandler",
-                "LoginListener$LoginHandler"
-        );
+        if (IS_POST_LOGIN_HANDLER) {
+            makeAccessible(CALL_PLAYER_PRE_LOGIN_EVENTS);
 
-        LOGIN_HANDLER_CONSTRUCTOR =
-                getConstructor(LOGIN_HANDLER, true, LOGIN_LISTENER);
-        requireNonNull(LOGIN_HANDLER_CONSTRUCTOR, "LoginHandler constructor");
+            START_CLIENT_VERIFICATION = methodFor(LOGIN_LISTENER, "startClientVerification", "b", GameProfile.class);
+            requireNonNull(START_CLIENT_VERIFICATION, "startClientVerification");
+            makeAccessible(START_CLIENT_VERIFICATION);
 
-        FIRE_LOGIN_EVENTS = getMethod(LOGIN_HANDLER, "fireEvents");
+            LOGIN_HANDLER_CONSTRUCTOR = null;
+            FIRE_LOGIN_EVENTS = null;
+            FIRE_LOGIN_EVENTS_GAME_PROFILE = null;
+        } else {
+            Class<?> loginHandler = classFor(
+                    "net.minecraft.server.network",
+                    "ServerLoginPacketListenerImpl$LoginHandler",
+                    "LoginListener$LoginHandler"
+            );
 
-        // LoginHandler().fireEvents(GameProfile)
-        FIRE_LOGIN_EVENTS_GAME_PROFILE = getMethod(LOGIN_HANDLER, "fireEvents", GameProfile.class);
-        requireNonNull(FIRE_LOGIN_EVENTS, FIRE_LOGIN_EVENTS_GAME_PROFILE,
-                "fireEvents from LoginHandler", "fireEvents(GameProfile) from LoginHandler");
+            LOGIN_HANDLER_CONSTRUCTOR =
+                    getConstructor(loginHandler, true, LOGIN_LISTENER);
+            requireNonNull(LOGIN_HANDLER_CONSTRUCTOR, "LoginHandler constructor");
 
+            FIRE_LOGIN_EVENTS = getMethod(loginHandler, "fireEvents");
+
+            // LoginHandler().fireEvents(GameProfile)
+            FIRE_LOGIN_EVENTS_GAME_PROFILE = getMethod(loginHandler, "fireEvents", GameProfile.class);
+            requireNonNull(FIRE_LOGIN_EVENTS, FIRE_LOGIN_EVENTS_GAME_PROFILE,
+                    "fireEvents from LoginHandler", "fireEvents(GameProfile) from LoginHandler");
+
+            START_CLIENT_VERIFICATION = null;
+        }
 
         PAPER_DISABLE_USERNAME_VALIDATION = getField(LOGIN_LISTENER,
                 "iKnowThisMayNotBeTheBestIdeaButPleaseDisableUsernameValidation");
@@ -249,11 +276,11 @@ public class ClassNames {
                     String.class, int.class, CLIENT_INTENT);
             requireNonNull(HANDSHAKE_PACKET_CONSTRUCTOR, "Handshake packet constructor");
 
-            HANDSHAKE_PORT = MappingUtils.fieldFor(HANDSHAKE_PACKET, "port", "a");
+            HANDSHAKE_PORT = fieldFor(HANDSHAKE_PACKET, "port", "a");
             requireNonNull(HANDSHAKE_PORT, "Handshake port");
             makeAccessible(HANDSHAKE_PORT);
 
-            HANDSHAKE_PROTOCOL = MappingUtils.fieldFor(HANDSHAKE_PACKET, "protocolVersion", "c");
+            HANDSHAKE_PROTOCOL = fieldFor(HANDSHAKE_PACKET, "protocolVersion", "c");
             requireNonNull(HANDSHAKE_PROTOCOL, "Handshake protocol");
             makeAccessible(HANDSHAKE_PROTOCOL);
 

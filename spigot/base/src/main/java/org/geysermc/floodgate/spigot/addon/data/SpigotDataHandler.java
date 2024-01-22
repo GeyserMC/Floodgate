@@ -181,29 +181,34 @@ public final class SpigotDataHandler extends CommonNettyDataHandler {
                 }
             }
 
-            // set the player his GameProfile, we can't change the username without this
             GameProfile gameProfile = new GameProfile(connection.javaUuid(), connection.javaUsername());
             setValue(packetListener, ClassNames.LOGIN_PROFILE, gameProfile);
 
             // we have to fake the offline player (login) cycle
-            // just like on Spigot:
-
-            Object loginHandler = ClassNames.LOGIN_HANDLER_CONSTRUCTOR.newInstance(packetListener);
 
             if (ClassNames.IS_PRE_1_20_2) {
                 // 1.20.1 and below
-
-                // LoginListener#initUUID
-                // new LoginHandler().fireEvents();
-
+                // - set profile, otherwise the username doesn't change
+                // - LoginListener#initUUID
+                // - new LoginHandler().fireEvents();
                 // and the tick of LoginListener will do the rest
 
+                Object loginHandler = ClassNames.LOGIN_HANDLER_CONSTRUCTOR.newInstance(packetListener);
+                setValue(packetListener, ClassNames.LOGIN_PROFILE, gameProfile);
                 ClassNames.INIT_UUID.invoke(packetListener);
                 ClassNames.FIRE_LOGIN_EVENTS.invoke(loginHandler);
-            } else {
-                // 1.20.2 and above we directly register the profile
+            } else if (!ClassNames.IS_POST_LOGIN_HANDLER) {
+                // 1.20.2 until somewhere in 1.20.4 we can directly register the profile
 
+                Object loginHandler = ClassNames.LOGIN_HANDLER_CONSTRUCTOR.newInstance(packetListener);
                 ClassNames.FIRE_LOGIN_EVENTS_GAME_PROFILE.invoke(loginHandler, gameProfile);
+            } else {
+                // somewhere during 1.20.4 md_5 moved stuff to CraftBukkit
+
+                // LoginListener#callPlayerPreLoginEvents(GameProfile)
+                // LoginListener#startClientVerification(GameProfile)
+                ClassNames.CALL_PLAYER_PRE_LOGIN_EVENTS.invoke(packetListener, gameProfile);
+                ClassNames.START_CLIENT_VERIFICATION.invoke(packetListener, gameProfile);
             }
 
             ctx.pipeline().remove(this);

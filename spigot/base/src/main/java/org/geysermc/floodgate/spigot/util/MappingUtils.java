@@ -1,6 +1,7 @@
 package org.geysermc.floodgate.spigot.util;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import org.bukkit.Bukkit;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
@@ -46,6 +47,18 @@ public class MappingUtils {
             return spigot;
         }
         throw new IllegalStateException(genericMessage("field " + mojangName + " for class " + clazz));
+    }
+
+    public static Method methodFor(Class<?> clazz, String mojangName, String spigotName, Class<?>... args) {
+        var mojmap = ReflectionUtils.getMethod(clazz, mojangName, args);
+        if (mojmap != null) {
+            return mojmap;
+        }
+        var spigot = ReflectionUtils.getMethod(clazz, spigotName, args);
+        if (spigot != null) {
+            return spigot;
+        }
+        throw new IllegalStateException(genericMessage("method " + mojangName + " for class " + clazz));
     }
 
     private static String genericMessage(String specific) {
