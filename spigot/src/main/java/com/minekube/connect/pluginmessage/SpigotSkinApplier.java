@@ -83,8 +83,8 @@ public final class SpigotSkinApplier implements SkinApplier {
         plugin.getServer().getScheduler().runTask(plugin, () -> {
             for (Player p : Bukkit.getOnlinePlayers()) {
                 if (!p.equals(player) && p.canSee(player)) {
-                    versionSpecificMethods.hidePlayer(p, player);
-                    versionSpecificMethods.showPlayer(p, player);
+                    versionSpecificMethods.hideAndShowPlayer(p, player);
+                    versionSpecificMethods.hideAndShowPlayer(p, player);
                 }
             }
         });

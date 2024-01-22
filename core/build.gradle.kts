@@ -13,7 +13,6 @@ dependencies {
 
     api("com.google.inject", "guice", Versions.guiceVersion)
     api("cloud.commandframework", "cloud-core", Versions.cloudVersion)
-    api("org.yaml", "snakeyaml", Versions.snakeyamlVersion)
     api("org.bstats", "bstats-base", Versions.bstatsVersion)
 
     implementation("com.squareup.okhttp3:okhttp:4.9.3")

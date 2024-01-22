@@ -28,11 +28,13 @@ package com.minekube.connect.util;
 import static com.minekube.connect.util.ReflectionUtils.castedStaticBooleanValue;
 import static com.minekube.connect.util.ReflectionUtils.getBooleanValue;
 import static com.minekube.connect.util.ReflectionUtils.getClassSilently;
+import static com.minekube.connect.util.ReflectionUtils.getConstructor;
 import static com.minekube.connect.util.ReflectionUtils.getField;
 import static com.minekube.connect.util.ReflectionUtils.getFieldOfType;
 import static com.minekube.connect.util.ReflectionUtils.getMethod;
 import static com.minekube.connect.util.ReflectionUtils.getValue;
 import static com.minekube.connect.util.ReflectionUtils.invoke;
+import static com.minekube.connect.util.ReflectionUtils.makeAccessible;
 
 import com.google.common.base.Preconditions;
 import com.mojang.authlib.GameProfile;
@@ -56,10 +58,11 @@ public class ClassNames {
     public static final Class<?> HANDSHAKE_PACKET;
     public static final Class<?> LOGIN_START_PACKET;
     public static final Class<?> LOGIN_LISTENER;
-    public static final Class<?> LOGIN_HANDLER;
+    @Nullable public static final Class<?> CLIENT_INTENT;
 
     public static final Constructor<OfflinePlayer> CRAFT_OFFLINE_PLAYER_CONSTRUCTOR;
-    public static final Constructor<?> LOGIN_HANDLER_CONSTRUCTOR;
+    @Nullable public static final Constructor<?> LOGIN_HANDLER_CONSTRUCTOR;
+    @Nullable public static final Constructor<?> HANDSHAKE_PACKET_CONSTRUCTOR;
 
     public static final Field SOCKET_ADDRESS;
     public static final Field HANDSHAKE_HOST;
@@ -67,18 +70,30 @@ public class ClassNames {
     public static final Field LOGIN_PROFILE;
     public static final Field PACKET_LISTENER;
 
+    @Nullable public static final Field HANDSHAKE_PORT;
+    @Nullable public static final Field HANDSHAKE_PROTOCOL;
+    @Nullable public static final Field HANDSHAKE_INTENTION;
+
     @Nullable public static final Field PAPER_DISABLE_USERNAME_VALIDATION;
     @Nullable public static final BooleanSupplier PAPER_VELOCITY_SUPPORT;
 
     public static final Method GET_PROFILE_METHOD;
     public static final Method LOGIN_DISCONNECT;
     public static final Method NETWORK_EXCEPTION_CAUGHT;
-    public static final Method INIT_UUID;
-    public static final Method FIRE_LOGIN_EVENTS;
+    @Nullable public static final Method INIT_UUID;
+    @Nullable public static final Method FIRE_LOGIN_EVENTS;
+    @Nullable public static final Method FIRE_LOGIN_EVENTS_GAME_PROFILE;
+    @Nullable public static final Method CALL_PLAYER_PRE_LOGIN_EVENTS;
+    @Nullable public static final Method START_CLIENT_VERIFICATION;
 
     public static final Field BUNGEE;
 
+    public static final boolean IS_FOLIA;
+    public static final boolean IS_PRE_1_20_2;
+    public static final boolean IS_POST_LOGIN_HANDLER;
+
     static {
+        // ahhhhhhh, this class should really be reworked at this point
         String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
         SPIGOT_MAPPING_PREFIX = "net.minecraft.server." + version;
 
@@ -107,7 +122,7 @@ public class ClassNames {
         Class<OfflinePlayer> craftOfflinePlayerClass = ReflectionUtils.getCastedClass(
                 "org.bukkit.craftbukkit." + version + ".CraftOfflinePlayer");
 
-        CRAFT_OFFLINE_PLAYER_CONSTRUCTOR = ReflectionUtils.getConstructor(
+        CRAFT_OFFLINE_PLAYER_CONSTRUCTOR = getConstructor(
                 craftOfflinePlayerClass, true, craftServerClass, GameProfile.class);
 
         // SpigotDataHandler
@@ -151,27 +166,64 @@ public class ClassNames {
         VELOCITY_LOGIN_MESSAGE_ID = getField(LOGIN_LISTENER, "velocityLoginMessageId");
 
         // there are multiple no-arg void methods
+        // Pre 1.20.2 uses initUUID so if it's null, we're on 1.20.2 or later
         INIT_UUID = getMethod(LOGIN_LISTENER, "initUUID");
-        checkNotNull(INIT_UUID, "initUUID from LoginListener");
+        IS_PRE_1_20_2 = INIT_UUID != null;
 
-        Class<?> packetListenerClass = getClassOrFallback(
-                "net.minecraft.network.PacketListener",
-                nmsPackage + "PacketListener"
+        // somewhere during 1.20.4 md_5 moved PreLogin logic to CraftBukkit
+        CALL_PLAYER_PRE_LOGIN_EVENTS = getMethod(
+                LOGIN_LISTENER,
+                "callPlayerPreLoginEvents",
+                GameProfile.class
         );
-        PACKET_LISTENER = getFieldOfType(networkManager, packetListenerClass);
+        IS_POST_LOGIN_HANDLER = CALL_PLAYER_PRE_LOGIN_EVENTS != null;
+
+
+        if (IS_PRE_1_20_2) {
+            Class<?> packetListenerClass = getClassOrFallback(
+                    "net.minecraft.network.PacketListener",
+                    nmsPackage + "PacketListener"
+            );
+
+            PACKET_LISTENER = getFieldOfType(networkManager, packetListenerClass);
+        } else {
+            // We get the field by name on 1.20.2+ as there are now multiple fields of this type in network manager
+
+            // PacketListener packetListener of NetworkManager
+            PACKET_LISTENER = getField(networkManager, "q");
+            makeAccessible(PACKET_LISTENER);
+        }
         checkNotNull(PACKET_LISTENER, "Packet listener");
 
-        LOGIN_HANDLER = getClassOrFallback(
-                "net.minecraft.server.network.LoginListener$LoginHandler",
-                nmsPackage + "LoginListener$LoginHandler"
-        );
+         if (IS_POST_LOGIN_HANDLER) {
+            makeAccessible(CALL_PLAYER_PRE_LOGIN_EVENTS);
 
-        LOGIN_HANDLER_CONSTRUCTOR =
-                ReflectionUtils.getConstructor(LOGIN_HANDLER, true, LOGIN_LISTENER);
-        checkNotNull(LOGIN_HANDLER_CONSTRUCTOR, "LoginHandler constructor");
+             START_CLIENT_VERIFICATION = getMethod(LOGIN_LISTENER, "b", GameProfile.class);
+            checkNotNull(START_CLIENT_VERIFICATION, "startClientVerification");
+            makeAccessible(START_CLIENT_VERIFICATION);
 
-        FIRE_LOGIN_EVENTS = getMethod(LOGIN_HANDLER, "fireEvents");
-        checkNotNull(FIRE_LOGIN_EVENTS, "fireEvents from LoginHandler");
+            LOGIN_HANDLER_CONSTRUCTOR = null;
+            FIRE_LOGIN_EVENTS = null;
+            FIRE_LOGIN_EVENTS_GAME_PROFILE = null;
+        } else {
+            Class<?> loginHandler = getClassOrFallback(
+                    "net.minecraft.server.network.LoginListener$LoginHandler",
+                    nmsPackage + "LoginListener$LoginHandler"
+            );
+            LOGIN_HANDLER_CONSTRUCTOR =
+                    getConstructor(loginHandler, true, LOGIN_LISTENER);
+            checkNotNull(LOGIN_HANDLER_CONSTRUCTOR, "LoginHandler constructor");
+
+            FIRE_LOGIN_EVENTS = getMethod(loginHandler, "fireEvents");
+
+            // LoginHandler().fireEvents(GameProfile)
+            FIRE_LOGIN_EVENTS_GAME_PROFILE = getMethod(loginHandler, "fireEvents",
+                    GameProfile.class);
+            checkNotNull(FIRE_LOGIN_EVENTS, FIRE_LOGIN_EVENTS_GAME_PROFILE,
+                    "fireEvents from LoginHandler", "fireEvents(GameProfile) from LoginHandler");
+
+            START_CLIENT_VERIFICATION = null;
+        }
 
         PAPER_DISABLE_USERNAME_VALIDATION = getField(LOGIN_LISTENER,
                 "iKnowThisMayNotBeTheBestIdeaButPleaseDisableUsernameValidation");
@@ -222,6 +274,44 @@ public class ClassNames {
                 PAPER_VELOCITY_SUPPORT = null;
             }
         }
+
+        IS_FOLIA = ReflectionUtils.getClassSilently(
+                "io.papermc.paper.threadedregions.RegionizedServer"
+        ) != null;
+
+
+        if (!IS_PRE_1_20_2) {
+            // PacketHandshakingInSetProtocol is now a record
+            // This means its fields are now private and final
+            // We therefore must use reflection to obtain the constructor
+            CLIENT_INTENT = getClassOrFallback(
+                    "net.minecraft.network.protocol.handshake.ClientIntent",
+                    nmsPackage + "ClientIntent"
+            );
+            checkNotNull(CLIENT_INTENT, "Client intent enum");
+
+            HANDSHAKE_PACKET_CONSTRUCTOR = getConstructor(HANDSHAKE_PACKET, false, int.class,
+                    String.class, int.class, CLIENT_INTENT);
+            checkNotNull(HANDSHAKE_PACKET_CONSTRUCTOR, "Handshake packet constructor");
+
+            HANDSHAKE_PORT = getField(HANDSHAKE_PACKET, "a");
+            checkNotNull(HANDSHAKE_PORT, "Handshake port");
+            makeAccessible(HANDSHAKE_PORT);
+
+            HANDSHAKE_PROTOCOL = getField(HANDSHAKE_PACKET, "c");
+            checkNotNull(HANDSHAKE_PROTOCOL, "Handshake protocol");
+            makeAccessible(HANDSHAKE_PROTOCOL);
+
+            HANDSHAKE_INTENTION = getFieldOfType(HANDSHAKE_PACKET, CLIENT_INTENT);
+            checkNotNull(HANDSHAKE_INTENTION, "Handshake intention");
+            makeAccessible(HANDSHAKE_INTENTION);
+        } else {
+            CLIENT_INTENT = null;
+            HANDSHAKE_PACKET_CONSTRUCTOR = null;
+            HANDSHAKE_PORT = null;
+            HANDSHAKE_PROTOCOL = null;
+            HANDSHAKE_INTENTION = null;
+        }
     }
 
     private static Class<?> getClassOrFallback(String className, String fallbackName) {
@@ -245,5 +335,16 @@ public class ClassNames {
 
     private static <T> T checkNotNull(@CheckForNull T toCheck, @CheckForNull String objectName) {
         return Preconditions.checkNotNull(toCheck, objectName + " cannot be null");
+    }
+
+    // Ensure one of two is not null
+    private static <T> T checkNotNull(
+            @CheckForNull T toCheck,
+            @CheckForNull T toCheck2,
+            @CheckForNull String objectName,
+            @CheckForNull String objectName2
+    ) {
+        return Preconditions.checkNotNull(toCheck != null ? toCheck : toCheck2,
+                objectName2 + " cannot be null if " + objectName + " is null");
     }
 }

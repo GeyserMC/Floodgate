@@ -52,7 +52,6 @@ public final class SpigotPlugin extends JavaPlugin {
                 new ServerCommonModule(getDataFolder().toPath()),
                 new SpigotPlatformModule(this)
         );
-
         platform = injector.getInstance(SpigotPlatform.class);
 
         long endCtm = System.currentTimeMillis();

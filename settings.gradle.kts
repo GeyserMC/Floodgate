@@ -1,3 +1,4 @@
+@file:Suppress("UnstableApiUsage")
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 dependencyResolutionManagement {
@@ -12,7 +13,8 @@ dependencyResolutionManagement {
         }
 
         // Paper, Velocity
-        maven("https://papermc.io/repo/repository/maven-public")
+//        maven("https://papermc.io/repo/repository/maven-public")
+        maven("https://repo.papermc.io/repository/maven-public")
         // Spigot
         maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots") {
             mavenContent { snapshotsOnly() }

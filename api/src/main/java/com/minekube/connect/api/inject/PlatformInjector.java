@@ -36,14 +36,13 @@ import java.net.SocketAddress;
 public interface PlatformInjector {
 
     /**
-     * @return
+     * @return the server socket address
      */
     SocketAddress getServerSocketAddress();
 
     /**
      * Injects the server connection.
      *
-     * @return true if the connection has successfully been injected
      * @throws Exception if something went wrong while injecting the server connection
      */
     boolean inject() throws Exception;

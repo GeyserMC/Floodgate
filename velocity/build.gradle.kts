@@ -1,7 +1,13 @@
-var velocityVersion = "3.0.1"
+var velocityVersion = "3.2.0-SNAPSHOT"
 var log4jVersion = "2.11.2"
 var gsonVersion = "2.8.8"
 var guavaVersion = "25.1-jre"
+
+java {
+    // For Velocity API
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
 
 dependencies {
     api(projects.core)

@@ -57,8 +57,4 @@ public final class InstanceHolder {
         return true;
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T extends ConnectApi> T castApi(Class<T> cast) {
-        return (T) api;
-    }
 }
