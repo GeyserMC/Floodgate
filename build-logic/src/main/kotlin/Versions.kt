@@ -24,7 +24,7 @@
  */
 
 object Versions {
-    const val geyserVersion = "2.1.2-SNAPSHOT"
+    const val geyserVersion = "2.2.0-SNAPSHOT"
     const val cumulusVersion = "1.1.2"
     const val eventsVersion = "1.1-SNAPSHOT"
     const val configUtilsVersion = "1.0-SNAPSHOT"
