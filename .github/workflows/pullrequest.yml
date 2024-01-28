@@ -20,7 +20,7 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
-      - name: Build with Maven
+      - name: Build
         run: ./gradlew build
 
       - name: Archive artifacts (Floodgate Bungee)
