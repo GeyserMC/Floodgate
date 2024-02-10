@@ -92,6 +92,7 @@ public class ConnectPlatform {
         config = configLoader.load();
         if (config.isDebug()) {
             logger.enableDebug();
+            logger.debug("Debug mode enabled");
         }
 
         configHolder.set(config);

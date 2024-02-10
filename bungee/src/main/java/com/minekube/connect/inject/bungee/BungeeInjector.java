@@ -97,7 +97,7 @@ public final class BungeeInjector extends CommonPlatformInjector implements List
 
         if (this.localChannel != null) {
             logger.warn(
-                    "Geyser attempted to inject into the server connection handler twice! Please ensure you aren't using /reload or any plugin that (re)loads Geyser after the server has started.");
+                    "Connect attempted to inject into the server connection handler twice! Please ensure you aren't using /reload or any plugin that (re)loads Connect after the server has started.");
             return;
         }
 
@@ -126,8 +126,8 @@ public final class BungeeInjector extends CommonPlatformInjector implements List
         // TODO - allow Geyser to specify its own listener info properties
         if (proxy.getConfig().getListeners().size() != 1) {
             throw new UnsupportedOperationException(
-                    "Geyser does not currently support multiple listeners with injection! " +
-                            "Please reach out to us on our Discord at https://discord.gg/GeyserMC so we can hear feedback on your setup.");
+                    "Connect does not currently support multiple listeners with injection! " +
+                            "Please reach out to us on our Discord at https://minekube.com/discord so we can hear feedback on your setup.");
         }
         ListenerInfo listenerInfo = proxy.getConfig().getListeners().stream().findFirst().orElseThrow(
                 IllegalStateException::new);
@@ -149,6 +149,9 @@ public final class BungeeInjector extends CommonPlatformInjector implements List
             bossGroup = (EventLoopGroup) proxyClass.getField("bossEventLoopGroup").get(proxy);
             workerGroup = (EventLoopGroup) proxyClass.getField("workerEventLoopGroup").get(proxy);
             logger.debug("Waterfall event loop style detected.");
+            if (bossGroup == null || workerGroup == null) {
+                throw new IllegalStateException("Failed to find event loops in Waterfall");
+            }
         }
 
         // Is currently just AttributeKey.valueOf("ListerInfo") but we might as well copy the value itself.
