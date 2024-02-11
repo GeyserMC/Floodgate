@@ -25,76 +25,34 @@
 
 package org.geysermc.floodgate.core.config;
 
-import io.micronaut.context.annotation.BootstrapContextCompatible;
-import io.micronaut.context.env.BootstrapPropertySourceLocator;
-import io.micronaut.context.env.Environment;
 import io.micronaut.context.env.PropertySource;
-import io.micronaut.context.exceptions.ConfigurationException;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import jakarta.inject.Singleton;
 import java.lang.reflect.Proxy;
-import java.nio.file.Path;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import org.geysermc.configutils.node.codec.strategy.object.ProxyEmbodimentStrategy;
-import org.geysermc.floodgate.core.database.loader.DatabaseType;
-import org.geysermc.floodgate.core.util.GlobalBeanCache;
-import org.geysermc.floodgate.isolation.library.LibraryManager;
 
-@Singleton
-@BootstrapContextCompatible
-public class ConfigAsProperties implements BootstrapPropertySourceLocator {
-    @Inject
-    @Named("dataDirectory")
-    Path dataDirectory;
+public final class ConfigAsPropertySource {
+    private ConfigAsPropertySource() {}
 
-    @Inject FloodgateConfig config;
-
-    @Override
-    public Iterable<PropertySource> findPropertySources(Environment environment)
-            throws ConfigurationException {
-        loadDatabase();
-
-        var flat = flattern(Map.of("config", config));
-        flat.forEach((key, value) -> System.out.println(key + ": " + value));
-
-        return Collections.singleton(PropertySource.of(flat));
+    public static PropertySource toPropertySource(FloodgateConfig config) {
+        Objects.requireNonNull(config);
+        return PropertySource.of(flatten(Map.of("config", config)));
     }
 
-    private void loadDatabase() {
-        LibraryManager manager = GlobalBeanCache.get("libraryManager");
-
-        var databaseConfig = config.database();
-        if (!databaseConfig.enabled()) {
-            return;
-        }
-
-        var type = DatabaseType.byId(databaseConfig.type());
-        if (type == null) {
-            throw new IllegalStateException(
-                    "Unable to find database type that matches: " + databaseConfig.type()
-            );
-        }
-
-        type.libraries().forEach(manager::addLibrary);
-        manager.apply();
-    }
-
-    private Map<String, Object> flattern(Map<String, Object> map) {
-        return flattern0(Map.of("", map).get(""));
+    private static Map<String, Object> flatten(Map<String, Object> map) {
+        return flatten0(Map.of("", map).get(""));
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, Object> flattern0(Map<String, Object> map) {
+    private static Map<String, Object> flatten0(Map<String, Object> map) {
         var result = new HashMap<String, Object>();
         map.forEach((key, value) -> {
             if (Proxy.isProxyClass(value.getClass())) {
                 value = new ProxyEmbodimentStrategy().disembody(value);
             }
             if (value instanceof Map<?,?>) {
-                flattern0((Map<String, Object>) value).forEach(
+                flatten0((Map<String, Object>) value).forEach(
                         (key1, value1) -> result.put(key + "." + key1, value1)
                 );
                 return;

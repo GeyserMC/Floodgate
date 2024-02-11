@@ -34,7 +34,6 @@ import jakarta.inject.Singleton;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.function.Supplier;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.core.database.PendingLinkRepository;
 import org.geysermc.floodgate.core.database.PlayerLinkRepository;
@@ -47,7 +46,7 @@ import org.geysermc.floodgate.core.database.entity.LinkedPlayer;
 @Replaces(DisabledPlayerLink.class)
 @Named("localLinking")
 @Singleton
-public class PlayerLinkJdbc extends CommonPlayerLink {
+public class LocalPlayerLinking extends CommonPlayerLink {
     @Inject PlayerLinkRepository linkRepository;
     @Inject PendingLinkRepository pendingLinkRepository;
 
@@ -60,26 +59,22 @@ public class PlayerLinkJdbc extends CommonPlayerLink {
             @NonNull UUID javaUniqueId,
             @NonNull String javaUsername,
             @NonNull UUID bedrockId) {
-        return async(() -> linkRepository.save(
-                new LinkedPlayer()
-                        .javaUniqueId(javaUniqueId)
-                        .javaUsername(javaUsername)
-                        .bedrockId(bedrockId)));
+        return linkRepository.insert(new LinkedPlayer(bedrockId, javaUniqueId, javaUsername));
     }
 
     @Override
     public CompletableFuture<LinkedPlayer> fetchLink(@NonNull UUID uuid) {
-        return async(() -> linkRepository.findByBedrockIdOrJavaUniqueId(uuid, uuid).orElse(null));
+        return linkRepository.findByBedrockIdOrJavaUniqueId(uuid, uuid);
     }
 
     @Override
     public CompletableFuture<Boolean> isLinked(@NonNull UUID uuid) {
-        return async(() -> linkRepository.existsByBedrockIdOrJavaUniqueId(uuid, uuid));
+        return linkRepository.existsByBedrockIdOrJavaUniqueId(uuid, uuid);
     }
 
     @Override
     public CompletableFuture<Void> unlink(@NonNull UUID uuid) {
-        return run(() -> linkRepository.deleteByBedrockIdOrJavaUniqueId(uuid, uuid));
+        return linkRepository.deleteByBedrockIdOrJavaUniqueId(uuid, uuid);
     }
 
     @Override
@@ -88,29 +83,16 @@ public class PlayerLinkJdbc extends CommonPlayerLink {
             @NonNull String javaUsername,
             @NonNull String bedrockUsername,
             @NonNull String code) {
-        return async(() -> pendingLinkRepository.save(
-                new LinkRequest()
-                        .javaUniqueId(javaUniqueId)
-                        .javaUsername(javaUsername)
-                        .bedrockUsername(bedrockUsername)
-                        .linkCode(code)));
+        return pendingLinkRepository.insert(new LinkRequest(javaUniqueId, javaUsername, bedrockUsername, code));
     }
 
     @Override
     public CompletableFuture<LinkRequest> linkRequest(@NonNull String javaUsername) {
-        return async(() -> pendingLinkRepository.findByJavaUsername(javaUsername));
+        return pendingLinkRepository.findByJavaUsername(javaUsername);
     }
 
     @Override
     public CompletableFuture<Void> invalidateLinkRequest(@NonNull LinkRequest request) {
-        return run(() -> pendingLinkRepository.delete(request));
-    }
-
-    private <T> CompletableFuture<T> async(Supplier<T> toExecute) {
-        return CompletableFuture.supplyAsync(toExecute, executor);
-    }
-
-    private CompletableFuture<Void> run(Runnable toExecute) {
-        return CompletableFuture.runAsync(toExecute);
+        return pendingLinkRepository.delete(request);
     }
 }

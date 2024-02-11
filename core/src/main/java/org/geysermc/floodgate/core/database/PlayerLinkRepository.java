@@ -25,32 +25,23 @@
 
 package org.geysermc.floodgate.core.database;
 
-import io.micronaut.context.annotation.Requires;
-import io.micronaut.data.jdbc.annotation.JdbcRepository;
-import io.micronaut.data.model.query.builder.sql.Dialect;
-import io.micronaut.data.repository.CrudRepository;
-import jakarta.validation.constraints.NotNull;
-import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import org.geysermc.databaseutils.IRepository;
+import org.geysermc.databaseutils.meta.Repository;
 import org.geysermc.floodgate.core.database.entity.LinkedPlayer;
 
-@JdbcRepository(dialect = Dialect.ANSI)
-@Requires(property = "config.database.enabled", value = "true")
-public interface PlayerLinkRepository extends CrudRepository<LinkedPlayer, UUID> {
-    Optional<LinkedPlayer> findByBedrockId(@NotNull UUID bedrockId);
+@Repository
+public interface PlayerLinkRepository extends IRepository<LinkedPlayer> {
 
-    Optional<LinkedPlayer> findByJavaUniqueId(@NotNull UUID javaUniqueId);
-
-    Optional<LinkedPlayer> findByBedrockIdOrJavaUniqueId(
+    CompletableFuture<LinkedPlayer> findByBedrockIdOrJavaUniqueId(
             UUID bedrockId,
             UUID javaUniqueId
     );
 
-    Boolean existsByBedrockId(@NotNull UUID bedrockId);
+    CompletableFuture<Boolean> existsByBedrockIdOrJavaUniqueId(UUID bedrockId, UUID javaUniqueId);
 
-    Boolean existsByJavaUniqueId(@NotNull UUID javaUniqueId);
+    CompletableFuture<Void> deleteByBedrockIdOrJavaUniqueId(UUID bedrockId, UUID javaUniqueId);
 
-    Boolean existsByBedrockIdOrJavaUniqueId(UUID bedrockId, UUID javaUniqueId);
-
-    void deleteByBedrockIdOrJavaUniqueId(UUID bedrockId, UUID javaUniqueId);
+    CompletableFuture<LinkedPlayer> insert(LinkedPlayer player);
 }

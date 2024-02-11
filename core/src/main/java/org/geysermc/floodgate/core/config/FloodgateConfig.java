@@ -45,14 +45,14 @@ import org.geysermc.configutils.node.meta.Placeholder;
  * addition to the global configuration like {@link ProxyFloodgateConfig} for the proxies.
  */
 @ConfigVersion(3)
-public interface FloodgateConfig extends GenericPostInitializeCallback<ConfigLoader> {
+public interface FloodgateConfig extends GenericPostInitializeCallback<Path> {
     default boolean proxy() {
         return this instanceof ProxyFloodgateConfig;
     }
 
     @Override
-    default CallbackResult postInitialize(ConfigLoader loader) {
-        Path keyPath = loader.getDataDirectory().resolve(keyFileName());
+    default CallbackResult postInitialize(Path dataDirectory) {
+        Path keyPath = dataDirectory.resolve(keyFileName());
 
         // don't assume that the key always exists with the existence of a config
         if (!Files.exists(keyPath)) {

@@ -25,15 +25,16 @@
 
 package org.geysermc.floodgate.core.database;
 
-import io.micronaut.context.annotation.Requires;
-import io.micronaut.data.jdbc.annotation.JdbcRepository;
-import io.micronaut.data.model.query.builder.sql.Dialect;
-import io.micronaut.data.repository.CrudRepository;
-import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import org.geysermc.databaseutils.IRepository;
+import org.geysermc.databaseutils.meta.Repository;
 import org.geysermc.floodgate.core.database.entity.LinkRequest;
 
-@JdbcRepository(dialect = Dialect.ANSI)
-@Requires(property = "config.database.enabled", value = "true")
-public interface PendingLinkRepository extends CrudRepository<LinkRequest, UUID> {
-    LinkRequest findByJavaUsername(String javaUsername);
+@Repository
+public interface PendingLinkRepository extends IRepository<LinkRequest> {
+    CompletableFuture<LinkRequest> findByJavaUsername(String javaUsername);
+
+    CompletableFuture<LinkRequest> insert(LinkRequest request);
+
+    CompletableFuture<Void> delete(LinkRequest request);
 }

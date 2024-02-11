@@ -26,37 +26,23 @@
 package org.geysermc.floodgate.core.database.loader;
 
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Set;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.isolation.library.Library;
 import org.geysermc.floodgate.isolation.library.Repository;
 
 public enum DatabaseType {
-    H2(
-            DriverCategory.HIBERNATE,
-//            databaseModule(),
-            library("h2", Repository.MAVEN_CENTRAL, "com.h2database", "h2", "1.4.200")
-    );
+    H2(hikariCp(), library("h2", Repository.MAVEN_CENTRAL, "com.h2database", "h2", "2.2.224"));
 
     private static final DatabaseType[] VALUES = values();
-    private final DriverCategory category;
     private final Set<Library> libraries;
 
-    DatabaseType(@NonNull DriverCategory category, @NonNull Library... libraries) {
-        this.category = Objects.requireNonNull(category);
-        this.libraries = Set.of(Objects.requireNonNull(libraries));
+    DatabaseType(@NonNull Library... libraries) {
+        this.libraries = Set.of(libraries);
     }
 
-    static Library databaseModule() {
-        return library(
-                "database",
-                Repository.OPEN_COLLAB,
-                "org.geysermc.floodgate",
-                "database",
-                Constants.VERSION
-        );
+    static Library hikariCp() {
+        return library("HikariCP", Repository.MAVEN_CENTRAL, "com.zaxxer", "HikariCP", "5.1.0");
     }
 
     static Library library(
@@ -83,10 +69,6 @@ public enum DatabaseType {
             }
         }
         return null;
-    }
-
-    public DriverCategory category() {
-        return category;
     }
 
     public Set<Library> libraries() {

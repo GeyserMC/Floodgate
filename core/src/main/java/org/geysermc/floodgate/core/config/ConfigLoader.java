@@ -25,49 +25,20 @@
 
 package org.geysermc.floodgate.core.config;
 
-import io.micronaut.context.annotation.Bean;
-import io.micronaut.context.annotation.BootstrapContextCompatible;
-import io.micronaut.context.annotation.Factory;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import jakarta.inject.Singleton;
+import io.micronaut.context.ApplicationContext;
 import java.nio.file.Path;
 import java.util.UUID;
-import lombok.Getter;
 import org.geysermc.configutils.ConfigUtilities;
 import org.geysermc.configutils.file.codec.PathFileCodec;
 import org.geysermc.configutils.updater.change.Changes;
-import org.geysermc.floodgate.core.scope.ProxyOnly;
-import org.geysermc.floodgate.core.scope.ServerOnly;
-import org.geysermc.floodgate.core.util.GlobalBeanCache;
 
-@Factory
-@Getter
-@BootstrapContextCompatible
 public final class ConfigLoader {
-    private final Path dataDirectory;
-
-    @Inject
-    ConfigLoader(@Named("dataDirectory") Path dataDirectory) {
-        this.dataDirectory = dataDirectory;
-    }
-
-    @Bean
-    @ServerOnly
-    @Singleton
-    FloodgateConfig config() {
-        return GlobalBeanCache.cacheIfAbsent("config", () -> load(FloodgateConfig.class));
-    }
-
-    @Bean
-    @ProxyOnly
-    @Singleton
-    ProxyFloodgateConfig proxyConfig() {
-        return GlobalBeanCache.cacheIfAbsent("config", () -> load(ProxyFloodgateConfig.class));
-    }
+    private ConfigLoader() {}
 
     @SuppressWarnings("unchecked")
-    private <T extends FloodgateConfig> T load(Class<? extends FloodgateConfig> configClass) {
+    public static <T extends FloodgateConfig> T load(Path dataDirectory, boolean isProxy, ApplicationContext context) {
+        var configClass = isProxy ? ProxyFloodgateConfig.class : FloodgateConfig.class;
+
         // it would also be nice to have sections in versionBuilder so that you don't have to
         // provide the path all the time
 
@@ -85,15 +56,24 @@ public final class ConfigLoader {
                                         .keyRenamed("playerLink.type", "database.type"))
                                 .build())
                         .definePlaceholder("metrics.uuid", UUID::randomUUID)
-                        .postInitializeCallbackArgument(this)
+                        .postInitializeCallbackArgument(dataDirectory)
                         .build();
+
+        T config;
         try {
-            return (T) utilities.executeOn(configClass);
+            config = (T) utilities.executeOn(configClass);
         } catch (Throwable throwable) {
             throw new RuntimeException(
                     "Failed to load the config! Try to delete the config file if this error persists",
                     throwable
             );
         }
+
+        // make sure the proxy and the normal config types are registered
+        context.registerSingleton(config);
+        context.registerSingleton(FloodgateConfig.class, config);
+        // make @Requires etc. work
+        context.getEnvironment().addPropertySource(ConfigAsPropertySource.toPropertySource(config));
+        return config;
     }
 }

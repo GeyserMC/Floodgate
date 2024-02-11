@@ -25,75 +25,9 @@
 
 package org.geysermc.floodgate.core.database.entity;
 
-import io.micronaut.core.annotation.AccessorsStyle;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Transient;
-import java.util.Objects;
 import java.util.UUID;
+import org.geysermc.databaseutils.meta.Entity;
+import org.geysermc.databaseutils.meta.Key;
 
-@Entity
-@AccessorsStyle(readPrefixes = "", writePrefixes = "")
-public class LinkedPlayer {
-    @Id
-    private UUID bedrockId;
-    private UUID javaUniqueId;
-    private String javaUsername;
-
-    public UUID bedrockId() {
-        return bedrockId;
-    }
-
-    public LinkedPlayer bedrockId(UUID bedrockId) {
-        this.bedrockId = bedrockId;
-        return this;
-    }
-
-    public UUID javaUniqueId() {
-        return javaUniqueId;
-    }
-
-    public LinkedPlayer javaUniqueId(UUID javaUniqueId) {
-        this.javaUniqueId = javaUniqueId;
-        return this;
-    }
-
-    public String javaUsername() {
-        return javaUsername;
-    }
-
-    public LinkedPlayer javaUsername(String javaUsername) {
-        this.javaUsername = javaUsername;
-        return this;
-    }
-
-    @Override
-    @Transient
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (obj == null || obj.getClass() != this.getClass()) {
-            return false;
-        }
-        var that = (LinkedPlayer) obj;
-        return Objects.equals(this.bedrockId, that.bedrockId) &&
-                Objects.equals(this.javaUniqueId, that.javaUniqueId);
-    }
-
-    @Override
-    @Transient
-    public int hashCode() {
-        return Objects.hash(bedrockId, javaUniqueId);
-    }
-
-    @Override
-    @Transient
-    public String toString() {
-        return "LinkedPlayer[" +
-                "bedrockId=" + bedrockId + ", " +
-                "javaUniqueId=" + javaUniqueId + ", " +
-                "javaUsername=" + javaUsername + ']';
-    }
-
-}
+@Entity("LinkedPlayers")
+public record LinkedPlayer(@Key UUID bedrockId, UUID javaUniqueId, String javaUsername) { }

@@ -28,6 +28,8 @@ package org.geysermc.floodgate.core;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.context.Qualifier;
 import io.micronaut.core.type.Argument;
+import io.micronaut.inject.qualifiers.Qualifiers;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.UUID;
 import org.geysermc.api.Geyser;
@@ -39,7 +41,10 @@ import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
+import org.geysermc.floodgate.core.config.ConfigLoader;
+import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.config.Properties;
+import org.geysermc.floodgate.core.database.loader.DatabaseLoader;
 import org.geysermc.floodgate.core.event.EventBus;
 import org.geysermc.floodgate.core.event.lifecycle.PostEnableEvent;
 import org.geysermc.floodgate.core.event.lifecycle.ShutdownEvent;
@@ -75,6 +80,12 @@ public abstract class FloodgatePlatform {
                 .eagerInitSingletons(true)
                 .build();
         onContextCreated(context);
+
+        // load and register config and database related stuff
+        var dataDirectory = context.getBean(Path.class, Qualifiers.byName("dataDirectory"));
+        FloodgateConfig config = ConfigLoader.load(dataDirectory, isProxy(), context);
+        DatabaseLoader.load(config, manager, dataDirectory, context);
+
         context.start();
 
         injector = context.getBean(PlatformInjector.class);

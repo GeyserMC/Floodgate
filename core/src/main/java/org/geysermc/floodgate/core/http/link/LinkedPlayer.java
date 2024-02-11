@@ -56,9 +56,6 @@ public record LinkedPlayer(
             return null;
         }
 
-        return new org.geysermc.floodgate.core.database.entity.LinkedPlayer()
-                .bedrockId(Utils.getJavaUuid(xuid))
-                .javaUniqueId(uuid)
-                .javaUsername(username);
+        return new org.geysermc.floodgate.core.database.entity.LinkedPlayer(Utils.getJavaUuid(xuid), uuid, username);
     }
 }

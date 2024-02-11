@@ -26,13 +26,10 @@
 package org.geysermc.floodgate.core.module;
 
 import io.micronaut.context.annotation.Bean;
-import io.micronaut.context.annotation.BootstrapContextCompatible;
 import io.micronaut.context.annotation.Factory;
 import io.netty.util.AttributeKey;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -44,10 +41,8 @@ import org.geysermc.floodgate.core.crypto.DataCodecType;
 import org.geysermc.floodgate.core.crypto.topping.Base64Topping;
 import org.geysermc.floodgate.core.crypto.topping.Topping;
 import org.geysermc.floodgate.core.util.Constants;
-import org.geysermc.floodgate.core.util.GlobalBeanCache;
 
 @Factory
-@BootstrapContextCompatible
 public class CommonModule {
     @Bean(preDestroy = "shutdown")
     @Singleton
@@ -64,29 +59,16 @@ public class CommonModule {
     }
 
     @Bean
-    @BootstrapContextCompatible
-    @Singleton
-    @Named("dataDirectory")
-    public Path dataDirectory() {
-        // todo discussion asking how you can register bootstrap context beans
-        //  https://github.com/micronaut-projects/micronaut-core/discussions/9191
-        return Paths.get("plugins", "floodgate");
-    }
-
-    @Bean
-    @BootstrapContextCompatible
     @Singleton
     public DataCodecType codecType() {
         //todo make it a config option and remove this one
-        // just like the topping it shouldn't need BootstrapContextCompatible
-        return GlobalBeanCache.cacheIfAbsent("codecType", () -> DataCodecType.AES);
+        return DataCodecType.AES;
     }
 
     @Bean
-    @BootstrapContextCompatible
     @Singleton
     public Topping topping() {
-        return GlobalBeanCache.cacheIfAbsent("topping", Base64Topping::new);
+        return new Base64Topping();
     }
 
     @Bean

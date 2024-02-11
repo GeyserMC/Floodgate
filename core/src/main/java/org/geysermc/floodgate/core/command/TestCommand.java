@@ -27,28 +27,41 @@ package org.geysermc.floodgate.core.command;
 
 import cloud.commandframework.Command;
 import cloud.commandframework.CommandManager;
+import cloud.commandframework.arguments.standard.StringArgument;
+import cloud.commandframework.arguments.standard.UUIDArgument;
 import cloud.commandframework.context.CommandContext;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import org.geysermc.api.Geyser;
+import java.util.concurrent.ExecutionException;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.connection.audience.UserAudience;
+import org.geysermc.floodgate.core.link.CommonPlayerLink;
 import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.core.util.Constants;
+import org.geysermc.floodgate.core.util.Utils;
 
 @Singleton
 public class TestCommand implements FloodgateCommand {
+    @Inject CommonPlayerLink link;
+
     @Override
     public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
         return commandManager.commandBuilder("floodgate-test")
-                .senderType(UserAudience.class)
+                .senderType(UserAudience.ConsoleAudience.class)
                 .handler(this::execute)
+                .argument(StringArgument.of("xuid"))
+                .argument(UUIDArgument.of("uuid"))
+                .argument(StringArgument.of("name"))
                 .build();
     }
 
     @Override
     public void execute(CommandContext<UserAudience> context) {
-        int players = Geyser.api().onlineConnectionsCount();
-        context.getSender().sendMessage(String.valueOf(players));
+        try {
+            link.addLink(context.get("uuid"), context.get("name"), Utils.getJavaUuid(context.get("xuid"))).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

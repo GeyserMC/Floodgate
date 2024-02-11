@@ -8,8 +8,13 @@ dependencies {
     api(projects.api)
     api(libs.base.api)
     compileOnlyApi(projects.isolation)
-    api(libs.config.utils)
+
     annotationProcessor(libs.config.utils.ap)
+    api(libs.config.utils)
+
+    annotationProcessor(libs.database.utils.ap)
+    api(libs.database.utils)
+    compileOnlyApi(libs.database.utils.sql)
 
     api(libs.bundles.fastutil)
     api(libs.java.websocket)
@@ -27,13 +32,6 @@ dependencies {
     api(libs.micronaut.serde.jsonp)
     compileOnlyApi(libs.jakarta.jsonb)
     annotationProcessor(libs.micronaut.serde.processor)
-
-    api(libs.micronaut.data.jdbc)
-    runtimeOnly(libs.micronaut.hikari)
-    annotationProcessor(libs.micronaut.data.processor)
-    compileOnlyApi(libs.jakarta.persistence)
-
-    runtimeOnly("com.h2database:h2")
 
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)

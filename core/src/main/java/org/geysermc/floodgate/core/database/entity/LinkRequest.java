@@ -25,103 +25,19 @@
 
 package org.geysermc.floodgate.core.database.entity;
 
-import io.micronaut.core.annotation.AccessorsStyle;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Transient;
 import java.time.Instant;
-import java.util.Objects;
 import java.util.UUID;
+import org.geysermc.databaseutils.meta.Entity;
+import org.geysermc.databaseutils.meta.Key;
 
-@Entity
-@AccessorsStyle(readPrefixes = "", writePrefixes = "")
-public class LinkRequest {
-    @Id
-    private UUID javaUniqueId;
-    private String javaUsername;
-    private String bedrockUsername;
-    private String linkCode;
-    private long requestTime = Instant.now().getEpochSecond();
-
-    public UUID javaUniqueId() {
-        return javaUniqueId;
+@Entity("LinkRequests")
+public record LinkRequest(@Key UUID javaUniqueId, String javaUsername, String bedrockUsername, String linkCode, long requestTime) {
+    public LinkRequest(UUID javaUniqueId, String javaUsername, String bedrockUsername, String linkCode) {
+        this(javaUniqueId, javaUsername, bedrockUsername, linkCode, Instant.now().getEpochSecond());
     }
 
-    public LinkRequest javaUniqueId(UUID javaUniqueId) {
-        this.javaUniqueId = javaUniqueId;
-        return this;
-    }
-
-    public String javaUsername() {
-        return javaUsername;
-    }
-
-    public LinkRequest javaUsername(String javaUsername) {
-        this.javaUsername = javaUsername;
-        return this;
-    }
-
-    public String bedrockUsername() {
-        return bedrockUsername;
-    }
-
-    public LinkRequest bedrockUsername(String bedrockUsername) {
-        this.bedrockUsername = bedrockUsername;
-        return this;
-    }
-
-    public String linkCode() {
-        return linkCode;
-    }
-
-    public LinkRequest linkCode(String linkCode) {
-        this.linkCode = linkCode;
-        return this;
-    }
-
-    public long requestTime() {
-        return requestTime;
-    }
-
-    public LinkRequest requestTime(long requestTime) {
-        this.requestTime = requestTime;
-        return this;
-    }
-
-    @Transient
     public boolean isExpired(long linkTimeout) {
         long timePassed = Instant.now().getEpochSecond() - requestTime;
         return timePassed > linkTimeout;
-    }
-
-    @Override
-    @Transient
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        LinkRequest that = (LinkRequest) o;
-        return Objects.equals(javaUniqueId, that.javaUniqueId);
-    }
-
-    @Override
-    @Transient
-    public int hashCode() {
-        return Objects.hash(javaUniqueId);
-    }
-
-    @Override
-    @Transient
-    public String toString() {
-        return "LinkRequest{" +
-                "javaUniqueId=" + javaUniqueId +
-                ", javaUsername='" + javaUsername + '\'' +
-                ", bedrockUsername='" + bedrockUsername + '\'' +
-                ", linkCode='" + linkCode + '\'' +
-                ", requestTime=" + requestTime +
-                '}';
     }
 }
