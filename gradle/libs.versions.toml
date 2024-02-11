@@ -1,6 +1,6 @@
 [versions]
 # parent
-micronaut-gradle = "4.1.1"
+micronaut-gradle = "4.3.2"
 lombok = "8.0.1"
 
 # api
