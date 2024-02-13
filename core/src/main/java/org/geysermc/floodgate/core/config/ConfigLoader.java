@@ -25,12 +25,17 @@
 
 package org.geysermc.floodgate.core.config;
 
+import static org.spongepowered.configurate.NodePath.path;
+
 import io.micronaut.context.ApplicationContext;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.UUID;
-import org.geysermc.configutils.ConfigUtilities;
-import org.geysermc.configutils.file.codec.PathFileCodec;
-import org.geysermc.configutils.updater.change.Changes;
+import org.geysermc.floodgate.core.util.Constants;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.interfaces.InterfaceDefaultOptions;
+import org.spongepowered.configurate.transformation.ConfigurationTransformation;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 public final class ConfigLoader {
     private ConfigLoader() {}
@@ -39,33 +44,38 @@ public final class ConfigLoader {
     public static <T extends FloodgateConfig> T load(Path dataDirectory, boolean isProxy, ApplicationContext context) {
         var configClass = isProxy ? ProxyFloodgateConfig.class : FloodgateConfig.class;
 
-        // it would also be nice to have sections in versionBuilder so that you don't have to
-        // provide the path all the time
-
-        ConfigUtilities utilities =
-                ConfigUtilities.builder()
-                        .fileCodec(PathFileCodec.of(dataDirectory))
-                        .configFile("config.yml")
-                        .changes(Changes.builder()
-                                .version(1, Changes.versionBuilder()
-                                        .keyRenamed("playerLink.enable", "playerLink.enabled")
-                                        .keyRenamed("playerLink.allowLinking", "playerLink.allowed"))
-                                .version(2, Changes.versionBuilder()
-                                        .keyRenamed("playerLink.useGlobalLinking", "playerLink.enableGlobalLinking"))
-                                .version(3, Changes.versionBuilder()
-                                        .keyRenamed("playerLink.type", "database.type"))
-                                .build())
-                        .definePlaceholder("metrics.uuid", UUID::randomUUID)
-                        .postInitializeCallbackArgument(dataDirectory)
-                        .build();
-
+        ConfigurationNode node;
         T config;
         try {
-            config = (T) utilities.executeOn(configClass);
-        } catch (Throwable throwable) {
+            var loader = YamlConfigurationLoader.builder()
+                    .path(dataDirectory.resolve("config.yml"))
+                    .defaultOptions(InterfaceDefaultOptions.get())
+                    .build();
+
+            node = loader.load();
+            // temp fix for node.virtual() being broken
+            var virtual = !Files.exists(dataDirectory.resolve("config.yml"));
+
+                var migrations = ConfigurationTransformation.versionedBuilder()
+                        .addVersion(Constants.CONFIG_VERSION, twoToThree())
+                        .addVersion(2, oneToTwo())
+                        .addVersion(1, zeroToOne())
+                        .build();
+
+                var startVersion = migrations.version(node);
+                migrations.apply(node);
+                var endVersion = migrations.version(node);
+
+            config = (T) node.get(configClass);
+
+            // save default config or save migrated config
+            if (virtual || startVersion != endVersion) {
+                loader.save(node);
+            }
+        } catch (ConfigurateException exception) {
             throw new RuntimeException(
                     "Failed to load the config! Try to delete the config file if this error persists",
-                    throwable
+                    exception
             );
         }
 
@@ -73,7 +83,34 @@ public final class ConfigLoader {
         context.registerSingleton(config);
         context.registerSingleton(FloodgateConfig.class, config);
         // make @Requires etc. work
-        context.getEnvironment().addPropertySource(ConfigAsPropertySource.toPropertySource(config));
+        context.getEnvironment().addPropertySource(ConfigAsPropertySource.toPropertySource(node));
         return config;
+    }
+
+    private static ConfigurationTransformation zeroToOne() {
+        return ConfigurationTransformation.builder()
+                .addAction(path("playerLink", "enable"), (path, value) -> {
+                    return new Object[]{"playerLink", "enabled"};
+                })
+                .addAction(path("playerLink", "allowLinking"), (path, value) -> {
+                    return new Object[]{"playerLink", "allowed"};
+                })
+                .build();
+    }
+
+    private static ConfigurationTransformation oneToTwo() {
+        return ConfigurationTransformation.builder()
+                .addAction(path("playerLink", "useGlobalLinking"), (path, value) -> {
+                    return new Object[]{"playerLink", "enableGlobalLinking"};
+                })
+                .build();
+    }
+
+    private static ConfigurationTransformation twoToThree() {
+        return ConfigurationTransformation.builder()
+                .addAction(path("playerLink", "type"), (path, value) -> {
+                    return new Object[]{"database", "type"};
+                })
+                .build();
     }
 }

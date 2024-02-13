@@ -32,6 +32,8 @@ public final class Constants {
     public static final String GIT_BRANCH = "@branch@";
     public static final int METRICS_ID = 14649;
 
+    public static final int CONFIG_VERSION = 3;
+
     public static final char COLOR_CHAR = '\u00A7';
 
     public static final boolean DEBUG_MODE = false;

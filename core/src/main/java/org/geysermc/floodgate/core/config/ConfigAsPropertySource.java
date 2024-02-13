@@ -26,38 +26,36 @@
 package org.geysermc.floodgate.core.config;
 
 import io.micronaut.context.env.PropertySource;
-import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import org.geysermc.configutils.node.codec.strategy.object.ProxyEmbodimentStrategy;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.util.NamingSchemes;
 
 public final class ConfigAsPropertySource {
     private ConfigAsPropertySource() {}
 
-    public static PropertySource toPropertySource(FloodgateConfig config) {
-        Objects.requireNonNull(config);
-        return PropertySource.of(flatten(Map.of("config", config)));
+    public static PropertySource toPropertySource(ConfigurationNode rootNode) {
+        Objects.requireNonNull(rootNode);
+
+        var root = CommentedConfigurationNode.root();
+        root.node("config").from(rootNode.copy());
+
+        return PropertySource.of(flatten(root));
     }
 
-    private static Map<String, Object> flatten(Map<String, Object> map) {
-        return flatten0(Map.of("", map).get(""));
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Map<String, Object> flatten0(Map<String, Object> map) {
+    private static Map<String, Object> flatten(ConfigurationNode node) {
         var result = new HashMap<String, Object>();
-        map.forEach((key, value) -> {
-            if (Proxy.isProxyClass(value.getClass())) {
-                value = new ProxyEmbodimentStrategy().disembody(value);
-            }
-            if (value instanceof Map<?,?>) {
-                flatten0((Map<String, Object>) value).forEach(
-                        (key1, value1) -> result.put(key + "." + key1, value1)
-                );
+        node.childrenMap().values().forEach(value -> {
+            // we expect the properties in camelCase
+            var key = NamingSchemes.CAMEL_CASE.coerce(value.key().toString());
+
+            if (value.isMap()) {
+                flatten(value).forEach((childKey, childValue) -> result.put(key + "." + childKey, childValue));
                 return;
             }
-            result.put(key, value);
+            result.put(key, value.raw());
         });
         return result;
     }

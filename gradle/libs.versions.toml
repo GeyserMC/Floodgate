@@ -11,7 +11,7 @@ gson = "2.8.5"
 
 # core
 base-api = "feature-floodgate-merge-1.1.0-SNAPSHOT"
-config-utils = "development-2.0-SNAPSHOT"
+configurate = "4.2.0-GeyserMC-SNAPSHOT"
 database-utils = "1.0-SNAPSHOT"
 fastutil = "8.5.3"
 java-websocket = "1.5.2"
@@ -47,8 +47,9 @@ netty-transport = { module = "io.netty:netty-transport", version.ref = "netty" }
 
 # core
 base-api = { module = "org.geysermc.api:base-api", version.ref = "base-api" }
-config-utils = { module = "org.geysermc.configutils:core", version.ref = "config-utils" }
-config-utils-ap = { module = "org.geysermc.configutils:ap", version.ref = "config-utils" }
+configurate-interface-ap = { module = "org.spongepowered:configurate-extra-interface-ap", version.ref = "configurate" }
+configurate-interface = { module = "org.spongepowered:configurate-extra-interface", version.ref = "configurate" }
+configurate-yaml = { module = "org.spongepowered:configurate-yaml", version.ref = "configurate" }
 database-utils = { module = "org.geysermc.databaseutils:core", version.ref = "database-utils" }
 database-utils-sql = { module = "org.geysermc.databaseutils:database-sql", version.ref = "database-utils" }
 database-utils-mongo = { module = "org.geysermc.databaseutils:database-mongo", version.ref = "database-utils" }

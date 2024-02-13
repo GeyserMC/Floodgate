@@ -25,17 +25,19 @@
 
 package org.geysermc.floodgate.core.config;
 
-import org.geysermc.configutils.node.meta.Comment;
-import org.geysermc.configutils.node.meta.ConfigVersion;
-import org.geysermc.configutils.node.meta.Defaults.DefaultBoolean;
-import org.geysermc.configutils.node.meta.Inherit;
+import org.spongepowered.configurate.interfaces.meta.defaults.DefaultBoolean;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 /**
- * The Floodgate configuration used by proxy platforms, currently Velocity and Bungeecord.
+ * The Floodgate configuration used by proxy platforms, currently Velocity and BungeeCord.
  */
-@Inherit(ConfigVersion.class)
+@ConfigSerializable
 public interface ProxyFloodgateConfig extends FloodgateConfig {
-    @Comment
+    @Comment("""
+            Should the proxy send the bedrock player data to the servers it is connecting to?
+            This requires Floodgate to be installed on the servers.
+            You'll get kicked if you don't use the plugin. The default value is false because of it""")
     @DefaultBoolean
     boolean sendFloodgateData();
 }

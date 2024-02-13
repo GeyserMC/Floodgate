@@ -9,8 +9,9 @@ dependencies {
     api(libs.base.api)
     compileOnlyApi(projects.isolation)
 
-    annotationProcessor(libs.config.utils.ap)
-    api(libs.config.utils)
+    annotationProcessor(libs.configurate.`interface`.ap)
+    api(libs.configurate.`interface`)
+    implementation(libs.configurate.yaml)
 
     annotationProcessor(libs.database.utils.ap)
     api(libs.database.utils)
