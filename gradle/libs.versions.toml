@@ -56,7 +56,6 @@ database-utils-mongo = { module = "org.geysermc.databaseutils:database-mongo", v
 database-utils-ap = { module = "org.geysermc.databaseutils:ap", version.ref = "database-utils" }
 fastutil-short-object-maps = { module = "com.nukkitx.fastutil:fastutil-short-object-maps", version.ref = "fastutil" }
 fastutil-int-object-maps = { module = "com.nukkitx.fastutil:fastutil-int-object-maps", version.ref = "fastutil" }
-java-websocket = { module = "org.java-websocket:Java-WebSocket", version.ref = "java-websocket" }
 cloud-core = { module = "cloud.commandframework:cloud-core", version.ref = "cloud" }
 snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "snakeyaml" }
 bstats = { module = "org.bstats:bstats-base", version.ref = "bstats" }
@@ -67,10 +66,6 @@ micronaut-context = { module = "io.micronaut:micronaut-context" }
 micronaut-http-client = { module = "io.micronaut:micronaut-http-client-jdk" }
 micronaut-validation = { module = "io.micronaut.validation:micronaut-validation" }
 micronaut-validation-processor = { module = "io.micronaut.validation:micronaut-validation-processor" }
-micronaut-data-processor = { module = "io.micronaut.data:micronaut-data-processor" }
-micronaut-data-jdbc = { module = "io.micronaut.data:micronaut-data-jdbc" }
-micronaut-hikari = { module = "io.micronaut.sql:micronaut-jdbc-hikari" }
-jakarta-persistence = { module = "jakarta.persistence:jakarta.persistence-api" }
 
 micronaut-serde-jsonp = { module = "io.micronaut.serde:micronaut-serde-jsonp" }
 micronaut-serde-processor = { module = "io.micronaut.serde:micronaut-serde-processor" }
@@ -80,9 +75,6 @@ netty-codec = { module = "io.netty:netty-codec", version.ref = "netty" }
 
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
-
-# database types
-h2 = { module = "com.h2database:h2" }
 
 # bungee
 bungee = { module = "com.github.SpigotMC.BungeeCord:bungeecord-proxy", version.ref = "bungee" }

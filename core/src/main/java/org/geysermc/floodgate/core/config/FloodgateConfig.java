@@ -99,6 +99,10 @@ public interface FloodgateConfig {
     @DefaultString("system")
     String defaultLocale();
 
+    @Hidden
+    @DefaultBoolean
+    boolean debug();
+
     DisconnectMessages disconnect();
 
     DatabaseConfig database();
@@ -111,10 +115,6 @@ public interface FloodgateConfig {
     default int version() {
         return Constants.CONFIG_VERSION;
     }
-
-    @Hidden
-    @DefaultBoolean
-    boolean debug();
 
     @Field Key key();
 

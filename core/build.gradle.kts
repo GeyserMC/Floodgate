@@ -18,7 +18,6 @@ dependencies {
     compileOnlyApi(libs.database.utils.sql)
 
     api(libs.bundles.fastutil)
-    api(libs.java.websocket)
     api(libs.cloud.core)
     api(libs.snakeyaml)
     api(libs.bstats)
