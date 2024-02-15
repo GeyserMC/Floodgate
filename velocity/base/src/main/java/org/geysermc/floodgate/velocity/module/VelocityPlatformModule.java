@@ -25,10 +25,6 @@
 
 package org.geysermc.floodgate.velocity.module;
 
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.execution.CommandExecutionCoordinator;
-import cloud.commandframework.velocity.VelocityCommandManager;
-import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.proxy.ProxyServer;
 import io.micronaut.context.annotation.Bean;
@@ -36,8 +32,12 @@ import io.micronaut.context.annotation.Factory;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import org.geysermc.floodgate.core.connection.audience.FloodgateCommandPreprocessor;
+import org.geysermc.floodgate.core.connection.audience.FloodgateSenderMapper;
 import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
+import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.execution.ExecutionCoordinator;
+import org.incendo.cloud.velocity.VelocityCommandManager;
 
 @Factory
 public class VelocityPlatformModule {
@@ -48,12 +48,11 @@ public class VelocityPlatformModule {
             ProxyServer proxy,
             PluginContainer container
     ) {
-        CommandManager<UserAudience> commandManager = new VelocityCommandManager<>(
+        var commandManager = new VelocityCommandManager<>(
                 container,
                 proxy,
-                CommandExecutionCoordinator.simpleCoordinator(),
-                commandUtil::getUserAudience,
-                audience -> (CommandSource) audience.source()
+                ExecutionCoordinator.simpleCoordinator(),
+                new FloodgateSenderMapper<>(commandUtil)
         );
         commandManager.registerCommandPreProcessor(new FloodgateCommandPreprocessor<>(commandUtil));
         return commandManager;

@@ -25,29 +25,28 @@
 
 package org.geysermc.floodgate.bungee.module;
 
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.bungee.BungeeCommandManager;
-import cloud.commandframework.execution.CommandExecutionCoordinator;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
-import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.geysermc.floodgate.core.connection.audience.FloodgateCommandPreprocessor;
+import org.geysermc.floodgate.core.connection.audience.FloodgateSenderMapper;
 import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
+import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.bungee.BungeeCommandManager;
+import org.incendo.cloud.execution.ExecutionCoordinator;
 
 @Factory
 public final class BungeePlatformModule {
     @Bean
     @Singleton
     public CommandManager<UserAudience> commandManager(CommandUtil commandUtil, Plugin plugin) {
-        CommandManager<UserAudience> commandManager = new BungeeCommandManager<>(
+        var commandManager = new BungeeCommandManager<>(
                 plugin,
-                CommandExecutionCoordinator.simpleCoordinator(),
-                commandUtil::getUserAudience,
-                audience -> (CommandSender) audience.source()
+                ExecutionCoordinator.simpleCoordinator(),
+                new FloodgateSenderMapper<>(commandUtil)
         );
         commandManager.registerCommandPreProcessor(new FloodgateCommandPreprocessor<>(commandUtil));
         return commandManager;

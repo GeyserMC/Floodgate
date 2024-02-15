@@ -27,7 +27,6 @@ package org.geysermc.floodgate.core.command.main;
 
 import static org.geysermc.floodgate.core.util.Constants.COLOR_CHAR;
 
-import cloud.commandframework.context.CommandContext;
 import com.google.gson.JsonElement;
 import jakarta.inject.Inject;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -37,6 +36,7 @@ import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.platform.command.FloodgateSubCommand;
 import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.HttpClient;
+import org.incendo.cloud.context.CommandContext;
 
 public class VersionSubcommand extends FloodgateSubCommand {
     @Inject HttpClient httpClient;
@@ -64,7 +64,7 @@ public class VersionSubcommand extends FloodgateSubCommand {
 
     @Override
     public void execute(CommandContext<UserAudience> context) {
-        UserAudience sender = context.getSender();
+        UserAudience sender = context.sender();
         sender.sendMessage(String.format(
                 COLOR_CHAR + "7You're currently on " + COLOR_CHAR + "b%s" +
                 COLOR_CHAR + "7 (branch: " + COLOR_CHAR + "b%s" + COLOR_CHAR + "7)\n" +

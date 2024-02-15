@@ -9,7 +9,7 @@ dependencies {
     implementation(libs.cloud.velocity)
 }
 
-relocate("cloud.commandframework")
+relocate("org.incendo.cloud")
 relocate("io.leangen.geantyref") // used in cloud
 
 relocate("org.yaml.snakeyaml")

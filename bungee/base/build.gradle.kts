@@ -8,7 +8,7 @@ dependencies {
 }
 
 relocate("net.kyori")
-relocate("cloud.commandframework")
+relocate("org.incendo.cloud")
 relocate("io.leangen.geantyref") // used in cloud
 
 // these dependencies are already present on the platform

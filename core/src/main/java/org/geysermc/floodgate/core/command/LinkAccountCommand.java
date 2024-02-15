@@ -25,11 +25,8 @@
 
 package org.geysermc.floodgate.core.command;
 
-import cloud.commandframework.ArgumentDescription;
-import cloud.commandframework.Command;
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.arguments.standard.StringArgument;
-import cloud.commandframework.context.CommandContext;
+import static org.incendo.cloud.parser.standard.StringParser.stringParser;
+
 import io.micronaut.context.annotation.Secondary;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -40,7 +37,6 @@ import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.core.command.util.Permission;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.connection.audience.ProfileAudience;
-import org.geysermc.floodgate.core.connection.audience.ProfileAudienceArgument;
 import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.connection.audience.UserAudience.PlayerAudience;
 import org.geysermc.floodgate.core.link.CommonPlayerLink;
@@ -50,6 +46,10 @@ import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.Utils;
+import org.incendo.cloud.Command;
+import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.context.CommandContext;
+import org.incendo.cloud.description.Description;
 
 @Singleton
 @Secondary
@@ -59,20 +59,19 @@ public final class LinkAccountCommand implements FloodgateCommand {
     @Inject FloodgateLogger logger;
 
     @Override
-    public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
+    public Command<PlayerAudience> buildCommand(CommandManager<UserAudience> commandManager) {
         return commandManager.commandBuilder("linkaccount",
-                ArgumentDescription.of("Link your Java account with your Bedrock account"))
+                Description.of("Link your Java account with your Bedrock account"))
                 .senderType(PlayerAudience.class)
                 .permission(Permission.COMMAND_LINK.get())
-                .argument(ProfileAudienceArgument.of("player", true))
-                .argument(StringArgument.optional("code"))
+                .argument(ProfileAudience.ofAnyUsernameBoth("player"))
+                .optional("code", stringParser())
                 .handler(this::execute)
                 .build();
     }
 
-    @Override
-    public void execute(CommandContext<UserAudience> context) {
-        UserAudience sender = context.getSender();
+    public void execute(CommandContext<PlayerAudience> context) {
+        UserAudience sender = context.sender();
 
         //todo make this less hacky
         if (link instanceof GlobalPlayerLinking) {

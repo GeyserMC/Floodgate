@@ -4,13 +4,13 @@ dependencies {
     annotationProcessor(libs.micronaut.inject.java)
     compileOnlyApi(projects.isolation)
 
-    implementation(libs.cloud.bukkit)
+    implementation(libs.cloud.paper)
 
     compileOnlyApi(libs.paper.api)
 }
 
 relocate("net.kyori")
-relocate("cloud.commandframework")
+relocate("org.incendo.cloud")
 relocate("io.leangen.geantyref") // used in cloud
 // hack to make (old versions? of) Paper work
 relocate("it.unimi")

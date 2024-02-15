@@ -25,10 +25,6 @@
 
 package org.geysermc.floodgate.core.command;
 
-import cloud.commandframework.ArgumentDescription;
-import cloud.commandframework.Command;
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.context.CommandContext;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -39,13 +35,15 @@ import org.geysermc.floodgate.core.command.util.Permission;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.core.connection.audience.ProfileAudience;
-import org.geysermc.floodgate.core.connection.audience.ProfileAudienceArgument;
 import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.http.xbox.XboxClient;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
 import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
-import org.geysermc.floodgate.core.platform.util.PlayerType;
+import org.incendo.cloud.Command;
+import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.context.CommandContext;
+import org.incendo.cloud.description.Description;
 
 @Singleton
 public class WhitelistCommand implements FloodgateCommand {
@@ -56,23 +54,23 @@ public class WhitelistCommand implements FloodgateCommand {
     @Override
     public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
         Command.Builder<UserAudience> builder = commandManager.commandBuilder("fwhitelist",
-                        ArgumentDescription.of("Easy way to whitelist Bedrock players"))
+                        Description.of("Easy way to whitelist Bedrock players"))
                 .permission(Permission.COMMAND_WHITELIST.get());
 
         commandManager.command(builder
                 .literal("add", "a")
-                .argument(ProfileAudienceArgument.of("player", true, true, PlayerType.ONLY_BEDROCK))
+                .argument(ProfileAudience.ofAnyIdentifierBedrock("player"))
                 .handler(context -> performCommand(context, true)));
 
         return builder
                 .literal("remove", "r")
-                .argument(ProfileAudienceArgument.of("player", true, true, PlayerType.ONLY_BEDROCK))
+                .argument(ProfileAudience.ofAnyIdentifierBedrock("player"))
                 .handler(context -> performCommand(context, false))
                 .build();
     }
 
     public void performCommand(CommandContext<UserAudience> context, boolean add) {
-        UserAudience sender = context.getSender();
+        UserAudience sender = context.sender();
         ProfileAudience profile = context.get("player");
         UUID uuid = profile.uuid();
         String name = profile.username();
@@ -179,11 +177,6 @@ public class WhitelistCommand implements FloodgateCommand {
                         );
                     }
                 });
-    }
-
-    @Override
-    public void execute(CommandContext<UserAudience> context) {
-        // ignored, all the logic is in the other method
     }
 
     @Override
