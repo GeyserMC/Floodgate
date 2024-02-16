@@ -43,12 +43,10 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
 import org.geysermc.floodgate.core.config.ConfigLoader;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
-import org.geysermc.floodgate.core.config.Properties;
 import org.geysermc.floodgate.core.database.loader.DatabaseLoader;
 import org.geysermc.floodgate.core.event.EventBus;
 import org.geysermc.floodgate.core.event.lifecycle.PostEnableEvent;
 import org.geysermc.floodgate.core.event.lifecycle.ShutdownEvent;
-import org.geysermc.floodgate.core.util.GlobalBeanCache;
 import org.geysermc.floodgate.isolation.library.LibraryManager;
 
 public abstract class FloodgatePlatform {
@@ -68,14 +66,9 @@ public abstract class FloodgatePlatform {
     public void load() {
         long startTime = System.currentTimeMillis();
 
-        GlobalBeanCache.cacheIfAbsent("libraryManager", () -> manager);
-
         context = ApplicationContext.builder(manager.classLoader())
                 .singletons(manager)
-                .properties(Map.of(
-                        "platform.proxy", isProxy()
-                ))
-                .propertySources(Properties.defaults())
+                .properties(Map.of("platform.proxy", isProxy()))
                 .environmentPropertySource(false)
                 .eagerInitSingletons(true)
                 .build();

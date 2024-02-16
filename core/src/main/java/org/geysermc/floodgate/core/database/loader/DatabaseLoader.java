@@ -24,6 +24,7 @@ public final class DatabaseLoader {
             type.libraries().forEach(manager::addLibrary);
             manager.apply();
 
+            //todo have a hardcoded list of driver classnames in DatabaseUtils
             try {
                 Class.forName("org.h2.Driver", true, manager.classLoader());
             } catch (ClassNotFoundException e) {
