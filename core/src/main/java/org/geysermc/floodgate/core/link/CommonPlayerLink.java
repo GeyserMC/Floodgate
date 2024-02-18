@@ -97,7 +97,13 @@ public abstract class CommonPlayerLink {
 
     public abstract CompletableFuture<Void> invalidateLinkRequest(@NonNull LinkRequest request);
 
-    public boolean isActive() {
-        return enabled && allowLinking;
+    public PlayerLinkState state() {
+        return new PlayerLinkState(enabled && allowLinking);
+    }
+
+    public record PlayerLinkState(boolean localLinkingActive, boolean globalLinkingEnabled) {
+        public PlayerLinkState(boolean localLinkingActive) {
+            this(localLinkingActive, false);
+        }
     }
 }

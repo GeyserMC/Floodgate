@@ -40,6 +40,7 @@ import org.geysermc.floodgate.core.database.entity.LinkRequest;
 import org.geysermc.floodgate.core.database.entity.LinkedPlayer;
 import org.geysermc.floodgate.core.http.link.GlobalLinkClient;
 
+@Requires(property = "config.playerLink.enabled", value = "true")
 @Requires(property = "config.playerLink.enableGlobalLinking", value = "true")
 @Primary
 @Singleton
@@ -151,8 +152,8 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
     }
 
     @Override
-    public boolean isActive() {
-        return database != null && database.isActive();
+    public PlayerLinkState state() {
+        return new PlayerLinkState(database != null && database.state().localLinkingActive(), true);
     }
 
     private <U> CompletableFuture<U> failedFuture() {

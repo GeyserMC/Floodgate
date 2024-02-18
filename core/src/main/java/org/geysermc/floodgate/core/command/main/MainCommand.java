@@ -25,57 +25,14 @@
 
 package org.geysermc.floodgate.core.command.main;
 
-import static org.geysermc.floodgate.core.util.Constants.COLOR_CHAR;
-import static org.incendo.cloud.description.Description.description;
-
 import jakarta.inject.Singleton;
-import java.util.Locale;
 import org.geysermc.floodgate.core.command.util.Permission;
-import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
-import org.geysermc.floodgate.core.platform.command.FloodgateSubCommand;
 import org.geysermc.floodgate.core.platform.command.SubCommands;
-import org.incendo.cloud.Command;
-import org.incendo.cloud.Command.Builder;
-import org.incendo.cloud.CommandManager;
-import org.incendo.cloud.context.CommandContext;
-import org.incendo.cloud.description.Description;
 
 @Singleton
 public final class MainCommand extends SubCommands implements FloodgateCommand {
-    @Override
-    public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
-        Builder<UserAudience> builder = commandManager.commandBuilder(
-                "floodgate",
-                Description.of("A set of Floodgate related actions in one command"))
-                .senderType(UserAudience.class)
-                .permission(Permission.COMMAND_MAIN.get())
-                .handler(this::execute);
-
-        for (FloodgateSubCommand subCommand : subCommands()) {
-            commandManager.command(builder
-                    .literal(subCommand.name().toLowerCase(Locale.ROOT), description(subCommand.description()))
-                    .permission(subCommand.permission().get())
-                    .handler(subCommand::execute)
-            );
-        }
-
-        // also register /floodgate itself
-        return builder.build();
-    }
-
-    public void execute(CommandContext<UserAudience> context) {
-        StringBuilder helpMessage = new StringBuilder("Available subcommands are:\n");
-
-        for (FloodgateSubCommand subCommand : subCommands()) {
-            if (context.sender().hasPermission(subCommand.permission().get())) {
-                helpMessage.append('\n').append(COLOR_CHAR).append('b')
-                        .append(subCommand.name().toLowerCase(Locale.ROOT))
-                        .append(COLOR_CHAR).append("f - ").append(COLOR_CHAR).append('7')
-                        .append(subCommand.description());
-            }
-        }
-
-        context.sender().sendMessage(helpMessage.toString());
+    MainCommand() {
+        super("floodgate", "A set of Floodgate related actions in one command", Permission.COMMAND_MAIN);
     }
 }

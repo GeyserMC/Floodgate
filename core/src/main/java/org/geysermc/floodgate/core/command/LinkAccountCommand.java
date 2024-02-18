@@ -27,7 +27,6 @@ package org.geysermc.floodgate.core.command;
 
 import static org.incendo.cloud.parser.standard.StringParser.stringParser;
 
-import io.micronaut.context.annotation.Secondary;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.concurrent.CompletableFuture;
@@ -40,7 +39,6 @@ import org.geysermc.floodgate.core.connection.audience.ProfileAudience;
 import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.connection.audience.UserAudience.PlayerAudience;
 import org.geysermc.floodgate.core.link.CommonPlayerLink;
-import org.geysermc.floodgate.core.link.GlobalPlayerLinking;
 import org.geysermc.floodgate.core.link.LinkVerificationException;
 import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
@@ -52,7 +50,6 @@ import org.incendo.cloud.context.CommandContext;
 import org.incendo.cloud.description.Description;
 
 @Singleton
-@Secondary
 public final class LinkAccountCommand implements FloodgateCommand {
     @Inject SimpleFloodgateApi api;
     @Inject CommonPlayerLink link;
@@ -73,21 +70,16 @@ public final class LinkAccountCommand implements FloodgateCommand {
     public void execute(CommandContext<PlayerAudience> context) {
         UserAudience sender = context.sender();
 
-        //todo make this less hacky
-        if (link instanceof GlobalPlayerLinking) {
-            if (((GlobalPlayerLinking) link).getDatabase() != null) {
-                sender.sendMessage(CommonCommandMessage.LOCAL_LINKING_NOTICE,
-                        Constants.LINK_INFO_URL);
+        var linkState = link.state();
+        if (!linkState.localLinkingActive()) {
+            if (!linkState.globalLinkingEnabled()) {
+                sender.sendMessage(CommonCommandMessage.LINKING_DISABLED);
             } else {
-                sender.sendMessage(CommonCommandMessage.GLOBAL_LINKING_NOTICE,
-                        Constants.LINK_INFO_URL);
-                return;
+                sender.sendMessage(CommonCommandMessage.GLOBAL_LINKING_NOTICE, Constants.LINK_INFO_URL);
             }
-        }
-
-        if (!link.isActive()) {
-            sender.sendMessage(CommonCommandMessage.LINKING_DISABLED);
             return;
+        } else if (linkState.globalLinkingEnabled()) {
+            sender.sendMessage(CommonCommandMessage.LOCAL_LINKING_NOTICE, Constants.LINK_INFO_URL);
         }
 
         ProfileAudience targetUser = context.get("player");

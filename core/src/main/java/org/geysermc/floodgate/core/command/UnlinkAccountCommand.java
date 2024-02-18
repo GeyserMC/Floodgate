@@ -33,7 +33,6 @@ import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.connection.audience.UserAudience.PlayerAudience;
 import org.geysermc.floodgate.core.link.CommonPlayerLink;
-import org.geysermc.floodgate.core.link.GlobalPlayerLinking;
 import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.core.util.Constants;
@@ -59,21 +58,16 @@ public final class UnlinkAccountCommand implements FloodgateCommand {
     public void execute(CommandContext<PlayerAudience> context) {
         UserAudience sender = context.sender();
 
-        //todo make this less hacky
-        if (link instanceof GlobalPlayerLinking) {
-            if (((GlobalPlayerLinking) link).getDatabase() != null) {
-                sender.sendMessage(CommonCommandMessage.LOCAL_LINKING_NOTICE,
-                        Constants.LINK_INFO_URL);
+        var linkState = link.state();
+        if (!linkState.localLinkingActive()) {
+            if (!linkState.globalLinkingEnabled()) {
+                sender.sendMessage(CommonCommandMessage.LINKING_DISABLED);
             } else {
-                sender.sendMessage(CommonCommandMessage.GLOBAL_LINKING_NOTICE,
-                        Constants.LINK_INFO_URL);
-                return;
+                sender.sendMessage(CommonCommandMessage.GLOBAL_LINKING_NOTICE, Constants.LINK_INFO_URL);
             }
-        }
-
-        if (!link.isActive()) {
-            sender.sendMessage(CommonCommandMessage.LINKING_DISABLED);
             return;
+        } else if (linkState.globalLinkingEnabled()) {
+            sender.sendMessage(CommonCommandMessage.LOCAL_LINKING_NOTICE, Constants.LINK_INFO_URL);
         }
 
         link.isLinked(sender.uuid())

@@ -27,6 +27,7 @@ package org.geysermc.floodgate.core.platform.command;
 
 import static org.geysermc.floodgate.core.platform.util.PlayerType.ALL_PLAYERS;
 import static org.geysermc.floodgate.core.platform.util.PlayerType.ONLY_BEDROCK;
+import static org.geysermc.floodgate.core.platform.util.PlayerType.ONLY_JAVA;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -130,12 +131,18 @@ public abstract class CommandUtil {
     }
 
     protected Object applyPlayerTypeFilter(Object player, PlayerType filter, Object fallback) {
+        if (player == null) {
+            return fallback;
+        }
         if (filter == ALL_PLAYERS || player instanceof String || player instanceof UUID) {
             return player;
         }
-        return (filter == ONLY_BEDROCK) == api.isBedrockPlayer(getUuidFromSource(player))
-                ? player
-                : fallback;
+        if (filter == ONLY_BEDROCK || filter == ONLY_JAVA) {
+            if (api.isBedrockPlayer(getUuidFromSource(player)) == (filter == ONLY_BEDROCK)) {
+                return player;
+            }
+        }
+        return fallback;
     }
 
     /**
@@ -146,22 +153,6 @@ public abstract class CommandUtil {
      * @return true or false depending on if the player has the permission
      */
     public abstract boolean hasPermission(Object player, String permission);
-
-    /**
-     * Get all online players with the given permission.
-     *
-     * @param permission the permission to check
-     * @return a list of online players that have the given permission
-     */
-    public Collection<Object> getOnlinePlayersWithPermission(String permission) {
-        List<Object> players = new ArrayList<>();
-        for (Object player : getOnlinePlayers()) {
-            if (hasPermission(player, permission)) {
-                players.add(player);
-            }
-        }
-        return players;
-    }
 
     /**
      * Sends a raw message to the specified target, no matter what platform Floodgate is running

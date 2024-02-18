@@ -25,19 +25,66 @@
 
 package org.geysermc.floodgate.core.platform.command;
 
+import static org.geysermc.floodgate.core.util.Constants.COLOR_CHAR;
+import static org.incendo.cloud.description.Description.description;
+
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
+import java.util.Locale;
 import java.util.Set;
+import org.geysermc.floodgate.core.command.util.Permission;
+import org.geysermc.floodgate.core.connection.audience.UserAudience;
+import org.incendo.cloud.Command;
+import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.context.CommandContext;
 
-public abstract class SubCommands {
+public abstract class SubCommands implements FloodgateCommand {
+    private final String name;
+    private final String description;
+    private final Permission permission;
+
     @Inject Set<FloodgateSubCommand> subCommands;
+
+    protected SubCommands(String name, String description, Permission permission) {
+        this.name = name;
+        this.description = description;
+        this.permission = permission;
+    }
+
+    @Override
+    public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
+        var builder = commandManager
+                .commandBuilder(name, description(description))
+                .senderType(UserAudience.class)
+                .permission(permission.get())
+                .handler(this::execute);
+
+        for (FloodgateSubCommand command : subCommands) {
+            commandManager.command(command.onBuild(builder));
+        }
+
+        // also register /floodgate itself
+        return builder.build();
+    }
+
+    public void execute(CommandContext<UserAudience> context) {
+        StringBuilder helpMessage = new StringBuilder("Available subcommands are:\n");
+
+        for (FloodgateSubCommand subCommand : subCommands) {
+            var permission = subCommand.permission();
+            if (permission == null || context.sender().hasPermission(permission.get())) {
+                helpMessage.append('\n').append(COLOR_CHAR).append('b')
+                        .append(subCommand.name().toLowerCase(Locale.ROOT))
+                        .append(COLOR_CHAR).append("f - ").append(COLOR_CHAR).append('7')
+                        .append(subCommand.description());
+            }
+        }
+
+        context.sender().sendMessage(helpMessage.toString());
+    }
 
     @PostConstruct
     public void setup() {
         subCommands.removeIf(subCommand -> !subCommand.parent().isAssignableFrom(this.getClass()));
-    }
-
-    protected Set<FloodgateSubCommand> subCommands() {
-        return subCommands;
     }
 }

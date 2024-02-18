@@ -43,11 +43,23 @@ public record ProfileAudience(@Nullable UUID uuid, @Nullable String username) {
         return of(name, true, true, PlayerType.ONLY_BEDROCK);
     }
 
+    public static CommandComponent.Builder<UserAudience, ProfileAudience> ofAnyIdentifierJava(String name) {
+        return of(name, true, true, PlayerType.ONLY_JAVA);
+    }
+
+    public static CommandComponent.Builder<UserAudience, ProfileAudience> ofAnyIdentifierBoth(String name) {
+        return of(name, true, true, PlayerType.ALL_PLAYERS);
+    }
+
     public static CommandComponent.Builder<UserAudience, ProfileAudience> ofAnyUsernameBoth(String name) {
         return of(name, false, true, PlayerType.ALL_PLAYERS);
     }
 
-    private static CommandComponent.Builder<UserAudience, ProfileAudience> of(String name, boolean allowUuid, boolean allowOffline, PlayerType limitTo) {
+    private static CommandComponent.Builder<UserAudience, ProfileAudience> of(
+            String name,
+            boolean allowUuid,
+            boolean allowOffline,
+            PlayerType limitTo) {
         return CommandComponent.<UserAudience, ProfileAudience>builder()
                 .name(name)
                 .parser(quotedStringParser().flatMapSuccess(ProfileAudience.class, (context, input) -> {

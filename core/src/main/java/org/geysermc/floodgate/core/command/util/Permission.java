@@ -32,6 +32,8 @@ public enum Permission {
     COMMAND_LINK("floodgate.command.linkaccount", PermissionDefault.TRUE),
     COMMAND_UNLINK("floodgate.command.unlinkaccount", PermissionDefault.TRUE),
     COMMAND_WHITELIST("floodgate.command.fwhitelist", PermissionDefault.OP),
+    COMMAND_LINKED("floodgate.command.linkedaccounts", PermissionDefault.OP),
+    COMMAND_LINKED_MANAGE(COMMAND_LINKED, "manage", PermissionDefault.OP),
 
     NEWS_RECEIVE("floodgate.news.receive", PermissionDefault.OP);
 

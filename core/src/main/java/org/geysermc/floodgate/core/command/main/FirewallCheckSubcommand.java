@@ -30,6 +30,7 @@ import static org.geysermc.floodgate.core.util.Constants.COLOR_CHAR;
 import com.google.gson.JsonElement;
 import it.unimi.dsi.fastutil.Pair;
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
@@ -42,27 +43,17 @@ import org.geysermc.floodgate.core.util.HttpClient.HttpResponse;
 import org.geysermc.floodgate.core.util.Utils;
 import org.incendo.cloud.context.CommandContext;
 
+@Singleton
 final class FirewallCheckSubcommand extends FloodgateSubCommand {
     @Inject HttpClient httpProvider;
 
-    @Override
-    public Class<?> parent() {
-        return FirewallCheckSubcommand.class;
-    }
-
-    @Override
-    public String name() {
-        return "firewall";
-    }
-
-    @Override
-    public String description() {
-        return "Check if your outgoing firewall allows Floodgate to work properly";
-    }
-
-    @Override
-    public Permission permission() {
-        return Permission.COMMAND_MAIN_FIREWALL;
+    FirewallCheckSubcommand() {
+        super(
+                MainCommand.class,
+                "firewall",
+                "Check if your outgoing firewall allows Floodgate to work properly",
+                Permission.COMMAND_MAIN_FIREWALL
+        );
     }
 
     @Override

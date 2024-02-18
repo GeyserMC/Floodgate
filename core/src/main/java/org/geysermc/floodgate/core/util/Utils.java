@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Properties;
@@ -43,7 +44,8 @@ import org.geysermc.floodgate.core.crypto.RandomUtils;
 
 public class Utils {
     private static final Pattern NON_UNIQUE_PREFIX = Pattern.compile("^\\w{0,16}$");
-    private static final Random random = RandomUtils.secureRandom();
+    private static final Random RANDOM = RandomUtils.secureRandom();
+    private static final BigInteger MAX_LONG_VALUE = BigInteger.ONE.shiftLeft(64);
 
     /**
      * This method is used in Addons.<br> Most addons can be removed once the player associated to
@@ -92,6 +94,11 @@ public class Utils {
         return getJavaUuid(Long.parseLong(xuid));
     }
 
+    public static UUID fromShortUniqueId(String uuid) {
+        var bigInt = new BigInteger(uuid, 16);
+        return new UUID(bigInt.shiftRight(64).longValue(), bigInt.xor(MAX_LONG_VALUE).longValue());
+    }
+
     public static boolean isUniquePrefix(String prefix) {
         return !NON_UNIQUE_PREFIX.matcher(prefix).matches();
     }
@@ -105,7 +112,7 @@ public class Utils {
     }
 
     public static char generateCodeChar() {
-        var codeChar = random.nextInt() % (10 + 26);
+        var codeChar = RANDOM.nextInt() % (10 + 26);
         if (codeChar < 10) {
             return (char) ('0' + codeChar);
         }

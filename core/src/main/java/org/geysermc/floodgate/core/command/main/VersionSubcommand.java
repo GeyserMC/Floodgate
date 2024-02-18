@@ -29,6 +29,7 @@ import static org.geysermc.floodgate.core.util.Constants.COLOR_CHAR;
 
 import com.google.gson.JsonElement;
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.command.WhitelistCommand.Message;
 import org.geysermc.floodgate.core.command.util.Permission;
@@ -38,28 +39,18 @@ import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.HttpClient;
 import org.incendo.cloud.context.CommandContext;
 
+@Singleton
 public class VersionSubcommand extends FloodgateSubCommand {
     @Inject HttpClient httpClient;
     @Inject FloodgateLogger logger;
 
-    @Override
-    public Class<?> parent() {
-        return MainCommand.class;
-    }
-
-    @Override
-    public String name() {
-        return "version";
-    }
-
-    @Override
-    public String description() {
-        return "Displays version information about Floodgate";
-    }
-
-    @Override
-    public Permission permission() {
-        return Permission.COMMAND_MAIN_VERSION;
+    VersionSubcommand() {
+        super(
+                MainCommand.class,
+                "version",
+                "Displays version information about Floodgate",
+                Permission.COMMAND_MAIN_VERSION
+        );
     }
 
     @Override
