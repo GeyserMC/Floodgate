@@ -29,9 +29,9 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.geysermc.floodgate.addon.debug.ChannelInDebugHandler;
 import org.geysermc.floodgate.addon.debug.ChannelOutDebugHandler;
-import org.geysermc.floodgate.addon.debug.StateChangeDetector;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
@@ -57,16 +57,14 @@ public final class DebugAddon implements InjectorAddon {
     public void onInject(Channel channel, boolean toServer) {
         logger.info("Successfully called onInject. To server? " + toServer);
 
-        StateChangeDetector changeDetector = new StateChangeDetector(
-                channel, packetEncoder, packetDecoder, logger
-        );
+        AtomicInteger packetCount = new AtomicInteger();
 
         channel.pipeline().addBefore(
                 packetEncoder, "floodgate_debug_out",
-                new ChannelOutDebugHandler(implementationName, toServer, changeDetector, logger)
+                new ChannelOutDebugHandler(implementationName, toServer, packetCount, logger)
         ).addBefore(
                 packetDecoder, "floodgate_debug_in",
-                new ChannelInDebugHandler(implementationName, toServer, changeDetector, logger)
+                new ChannelInDebugHandler(implementationName, toServer, packetCount, logger)
         );
     }
 
