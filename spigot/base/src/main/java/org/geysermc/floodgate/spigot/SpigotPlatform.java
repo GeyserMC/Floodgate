@@ -27,13 +27,14 @@ package org.geysermc.floodgate.spigot;
 
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.inject.qualifiers.Qualifiers;
-import java.nio.file.Path;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.core.FloodgatePlatform;
 import org.geysermc.floodgate.isolation.library.LibraryManager;
 import org.geysermc.floodgate.spigot.util.SpigotProtocolSupportHandler;
 import org.geysermc.floodgate.spigot.util.SpigotProtocolSupportListener;
 import org.slf4j.LoggerFactory;
+
+import java.nio.file.Path;
 
 public class SpigotPlatform extends FloodgatePlatform {
     private final JavaPlugin plugin;
@@ -55,6 +56,17 @@ public class SpigotPlatform extends FloodgatePlatform {
                         Qualifiers.byName("dataDirectory")
                 );
         this.context = context;
+    }
+
+    @Override
+    public void load() {
+        try {
+            Class.forName("org.spigotmc.SpigotConfig");
+        } catch (ClassNotFoundException ignored) {
+            throw new IllegalStateException("Floodgate doesn't work on CraftBukkit! Please use Paper or Spigot instead.");
+        }
+
+        super.load();
     }
 
     @Override
