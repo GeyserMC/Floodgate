@@ -42,6 +42,7 @@ public class FloodgateConfig implements GenericPostInitializeCallback<ConfigLoad
     private String keyFileName;
     private String usernamePrefix = "";
     private boolean replaceSpaces;
+    private boolean forwardCommands;
 
     private String defaultLocale;
 

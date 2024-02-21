@@ -11,6 +11,11 @@ username-prefix: "."
 # Should spaces be replaced with '_' in bedrock usernames?
 replace-spaces: true
 
+# Should we forward command descriptions?
+# This is used so standalone geyser can resolve command descriptions
+# Do not enable this unless you are using standalone geyser
+forward-commands: false
+
 # The default locale for Floodgate. By default, Floodgate uses the system locale
 # default-locale: en_US
 

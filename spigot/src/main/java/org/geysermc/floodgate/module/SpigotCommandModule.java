@@ -28,23 +28,35 @@ package org.geysermc.floodgate.module;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.bukkit.BukkitCommandManager;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
+import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandMap;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
 import org.geysermc.floodgate.SpigotPlugin;
 import org.geysermc.floodgate.command.util.Permission;
 import org.geysermc.floodgate.platform.command.CommandUtil;
+import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.player.FloodgateCommandPreprocessor;
 import org.geysermc.floodgate.player.UserAudience;
 
 @RequiredArgsConstructor
 public final class SpigotCommandModule extends CommandModule {
     private final SpigotPlugin plugin;
+    @Inject
+    private PluginMessageUtils pluginMessageUtils;
 
     @Override
     protected void configure() {
@@ -80,5 +92,52 @@ public final class SpigotCommandModule extends CommandModule {
                     permission.get(), defaultValue
             ));
         }
+    }
+
+    private CommandMap getCommandMap() {
+        try {
+            Field cmdMapField = Bukkit.getServer().getClass().getDeclaredField("commandMap");
+            cmdMapField.setAccessible(true);
+            return (CommandMap) cmdMapField.get(Bukkit.getServer());
+        } catch (NoSuchFieldException | IllegalAccessException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    public static byte[] serializeCommandDescriptions(Map<String, Command> commands) {
+        ByteBuf out = Unpooled.buffer(8192);
+        out.writeShort(commands.size());
+
+        for (Map.Entry<String, Command> entry : commands.entrySet()) {
+            byte[] commandBytes = entry.getKey().getBytes(StandardCharsets.UTF_8);
+            out.writeShort(commandBytes.length);
+            out.writeBytes(commandBytes);
+
+            byte[] descriptionBytes = entry.getValue().getDescription().getBytes(
+                    StandardCharsets.UTF_8);
+            out.writeShort(descriptionBytes.length);
+            out.writeBytes(descriptionBytes);
+        }
+
+        byte[] result = new byte[out.readableBytes()];
+        out.readBytes(result);
+
+        return result;
+    }
+
+    public void forwardCommands(UUID playerUuid) {
+        CommandMap commandMap = getCommandMap();
+
+        if (commandMap == null) {
+            return;
+        }
+
+        sendMessage(playerUuid, serializeCommandDescriptions(commandMap.getKnownCommands()));
+    }
+
+
+    private void sendMessage(UUID playerUuid, byte[] message) {
+        pluginMessageUtils.sendMessage(playerUuid, "floodgate:commands", message);
     }
 }
