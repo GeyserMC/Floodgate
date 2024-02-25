@@ -47,9 +47,10 @@ import org.geysermc.floodgate.core.database.loader.DatabaseLoader;
 import org.geysermc.floodgate.core.event.EventBus;
 import org.geysermc.floodgate.core.event.lifecycle.PostEnableEvent;
 import org.geysermc.floodgate.core.event.lifecycle.ShutdownEvent;
+import org.geysermc.floodgate.isolation.IsolatedPlatform;
 import org.geysermc.floodgate.isolation.library.LibraryManager;
 
-public abstract class FloodgatePlatform {
+public abstract class FloodgatePlatform implements IsolatedPlatform {
     private static final UUID KEY = UUID.randomUUID();
 
     private final LibraryManager manager;
@@ -63,6 +64,7 @@ public abstract class FloodgatePlatform {
     protected void onContextCreated(ApplicationContext context) {
     }
 
+    @Override
     public void load() {
         long startTime = System.currentTimeMillis();
 
@@ -100,6 +102,7 @@ public abstract class FloodgatePlatform {
                 .translatedInfo("floodgate.core.finish", endTime - startTime);
     }
 
+    @Override
     public void enable() throws RuntimeException {
         if (injector == null) {
             throw new RuntimeException("Failed to find the platform injector!");
@@ -114,6 +117,7 @@ public abstract class FloodgatePlatform {
         context.getBean(EventBus.class).fire(new PostEnableEvent());
     }
 
+    @Override
     public void disable() {
         context.getBean(EventBus.class).fire(new ShutdownEvent());
 

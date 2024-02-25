@@ -6,7 +6,7 @@ plugins {
 
 dependencies {
     api(projects.api)
-    api(libs.base.api)
+    compileOnlyApi(libs.base.api)
     compileOnlyApi(projects.isolation)
 
     annotationProcessor(libs.configurate.`interface`.ap)

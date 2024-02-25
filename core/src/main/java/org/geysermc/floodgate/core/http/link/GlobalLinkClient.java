@@ -25,7 +25,6 @@
 
 package org.geysermc.floodgate.core.http.link;
 
-import static io.micronaut.http.HttpHeaders.ACCEPT;
 import static io.micronaut.http.HttpHeaders.USER_AGENT;
 
 import io.micronaut.core.async.annotation.SingleResult;
@@ -36,7 +35,6 @@ import java.util.concurrent.CompletableFuture;
 
 @Client("${http.baseUrl}/v2/link")
 @Header(name = USER_AGENT, value = "${http.userAgent}")
-@Header(name = ACCEPT, value = "application/json")
 public interface GlobalLinkClient {
     @Get("/bedrock/{xuid}")
     @SingleResult

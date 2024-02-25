@@ -18,14 +18,12 @@ tasks {
         archiveVersion = ""
         archiveClassifier = ""
 
-        val velocityBaseJar = project.projects
+        val libsDir = project.projects
             .velocityBase.dependencyProject
-            .buildDir
-            .resolve("libs")
-            .resolve("floodgate-velocity-base.jar")
+            .layout.buildDirectory.dir("libs")
 
-        from(velocityBaseJar.parentFile) {
-            include(velocityBaseJar.name)
+        from(libsDir) {
+            include("floodgate-velocity-base.jar")
             rename("floodgate-velocity-base.jar", "platform-base.jar")
             into("bundled/")
         }

@@ -18,14 +18,12 @@ tasks {
         archiveVersion = ""
         archiveClassifier = ""
 
-        val spigotBaseJar = project.projects
+        val libsDir = project.projects
             .spigotBase.dependencyProject
-            .buildDir
-            .resolve("libs")
-            .resolve("floodgate-spigot-base.jar")
+            .layout.buildDirectory.dir("libs")
 
-        from(spigotBaseJar.parentFile) {
-            include(spigotBaseJar.name)
+        from(libsDir) {
+            include("floodgate-spigot-base.jar")
             rename("floodgate-spigot-base.jar", "platform-base.jar")
             into("bundled/")
         }

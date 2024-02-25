@@ -18,14 +18,12 @@ tasks {
         archiveVersion = ""
         archiveClassifier = ""
 
-        val bungeeBaseJar = project.projects
+        val libsDir = project.projects
             .bungeeBase.dependencyProject
-            .buildDir
-            .resolve("libs")
-            .resolve("floodgate-bungee-base.jar")
+            .layout.buildDirectory.dir("libs")
 
-        from(bungeeBaseJar.parentFile) {
-            include(bungeeBaseJar.name)
+        from(libsDir) {
+            include("floodgate-bungee-base.jar")
             rename("floodgate-bungee-base.jar", "platform-base.jar")
             into("bundled/")
         }
