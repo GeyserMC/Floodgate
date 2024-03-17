@@ -5,6 +5,7 @@ dependencies {
     compileOnlyApi(projects.isolation)
 
     implementation(libs.cloud.paper)
+    implementation(libs.adventure.platform.bukkit)
 
     compileOnlyApi(libs.paper.api)
 }

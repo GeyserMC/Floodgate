@@ -1,6 +1,7 @@
 package org.geysermc.floodgate.core.command.linkedaccounts;
 
-import static org.geysermc.floodgate.core.command.linkedaccounts.LinkedAccountsCommand.linkInfoMessage;
+import static org.geysermc.floodgate.core.platform.command.Placeholder.dynamic;
+import static org.geysermc.floodgate.core.platform.command.Placeholder.literal;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -8,15 +9,18 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.command.CommonCommandMessage;
 import org.geysermc.floodgate.core.command.LinkAccountCommand;
+import org.geysermc.floodgate.core.command.linkedaccounts.LinkedAccountsCommand.LinkedAccountsCommonMessage;
 import org.geysermc.floodgate.core.command.util.Permission;
 import org.geysermc.floodgate.core.connection.audience.ProfileAudience;
 import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.http.ProfileFetcher;
 import org.geysermc.floodgate.core.link.LocalPlayerLinking;
+import org.geysermc.floodgate.core.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.platform.command.FloodgateSubCommand;
+import org.geysermc.floodgate.core.platform.command.MessageType;
+import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.core.util.Constants;
 import org.incendo.cloud.Command;
 import org.incendo.cloud.context.CommandContext;
@@ -49,7 +53,7 @@ final class AddLinkedAccountCommand extends FloodgateSubCommand {
 
         var linking = optionalLinking.get();
         if (linking.state().globalLinkingEnabled()) {
-            sender.sendMessage(CommonCommandMessage.LOCAL_LINKING_NOTICE, Constants.LINK_INFO_URL);
+            sender.sendMessage(CommonCommandMessage.LOCAL_LINKING_NOTICE, literal("url", Constants.LINK_INFO_URL));
         }
 
         ProfileAudience bedrockInput = context.get("bedrock");
@@ -61,7 +65,10 @@ final class AddLinkedAccountCommand extends FloodgateSubCommand {
 
         if (bedrockRef.get().uuid() == null) {
             futures.add(fetcher.fetchXuidFor(bedrockRef.get().username()).thenAccept(bedrockRef::set));
+        } else {
+            futures.add(fetcher.fetchGamertagFor(bedrockRef.get().uuid()).thenAccept(bedrockRef::set));
         }
+
         if (javaRef.get().uuid() == null) {
             futures.add(fetcher.fetchUniqueIdFor(javaRef.get().username()).thenAccept(javaRef::set));
         }
@@ -72,10 +79,16 @@ final class AddLinkedAccountCommand extends FloodgateSubCommand {
                     var java = javaRef.get();
 
                     if (bedrock == null) {
-                        sender.sendMessage("Could not find Bedrock account with username " + bedrockInput.username());
+                        sender.sendMessage(
+                                LinkedAccountsCommonMessage.NOT_FOUND,
+                                literal("platform", "Bedrock"),
+                                literal("target", bedrockInput.username()));
                     }
                     if (java == null) {
-                        sender.sendMessage("Could not find Java account with username " + javaInput.username());
+                        sender.sendMessage(
+                                LinkedAccountsCommonMessage.NOT_FOUND,
+                                literal("platform", "Java"),
+                                literal("target", javaInput.username()));
                     }
 
                     linking.addLink(java.uuid(), java.username(), bedrock.uuid()).whenComplete((player, throwable) -> {
@@ -84,8 +97,18 @@ final class AddLinkedAccountCommand extends FloodgateSubCommand {
                             logger.error("Exception while manually linking accounts", throwable);
                             return;
                         }
-                        sender.sendMessage("You've successfully linked:\n" + linkInfoMessage(player));
+                        sender.sendMessage(
+                                Message.ADD_SUCCESS,
+                                dynamic("link_info", LinkedAccountsCommonMessage.LINK_INFO, sender),
+                                literal("bedrock_id", bedrock.uuid()),
+                                literal("bedrock_name", bedrock.username()),
+                                literal("java_name", java.username()),
+                                literal("java_uuid", java.uuid()));
                     });
                 });
+    }
+
+    public static final class Message {
+        public static final TranslatableMessage ADD_SUCCESS = new TranslatableMessage("floodgate.command.linkedaccounts.add.success", MessageType.SUCCESS);
     }
 }

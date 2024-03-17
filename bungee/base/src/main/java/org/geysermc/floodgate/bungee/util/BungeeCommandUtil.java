@@ -29,6 +29,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.Collection;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -38,6 +40,7 @@ import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.connection.audience.UserAudience.ConsoleAudience;
 import org.geysermc.floodgate.core.connection.audience.UserAudience.PlayerAudience;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
+import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.LanguageManager;
 import org.geysermc.floodgate.core.util.Utils;
 
@@ -106,15 +109,25 @@ public final class BungeeCommandUtil extends CommandUtil {
     }
 
     @Override
-    public void sendMessage(Object target, String message) {
-        ((CommandSender) target).sendMessage(message);
+    public void sendMessage(Object target, Component message) {
+        if (target instanceof ProxiedPlayer player && player.getPendingConnection().getVersion() >= Constants.PROTOCOL_HEX_COLOR) {
+            player.sendMessage(BungeeComponentSerializer.get().serialize(message));
+            return;
+        }
+        ((CommandSender) target).sendMessage(BungeeComponentSerializer.legacy().serialize(message));
     }
 
     @Override
-    public void kickPlayer(Object player, String message) {
+    public void kickPlayer(Object target, Component message) {
         // can also be a console
-        if (player instanceof ProxiedPlayer) {
-            ((ProxiedPlayer) player).disconnect(message);
+        if (!(target instanceof ProxiedPlayer player)) {
+            return;
         }
+
+        if (player.getPendingConnection().getVersion() >= Constants.PROTOCOL_HEX_COLOR) {
+            player.disconnect(BungeeComponentSerializer.get().serialize(message));
+            return;
+        }
+        player.disconnect(BungeeComponentSerializer.legacy().serialize(message));
     }
 }

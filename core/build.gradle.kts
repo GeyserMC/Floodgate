@@ -21,6 +21,7 @@ dependencies {
     api(libs.cloud.core)
     api(libs.snakeyaml)
     api(libs.bstats)
+    api(libs.adventure.text.minimessage)
 
     api(libs.micronaut.inject)
     annotationProcessor(libs.micronaut.inject.java)

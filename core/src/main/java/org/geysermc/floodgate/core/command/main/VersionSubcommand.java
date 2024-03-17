@@ -25,16 +25,18 @@
 
 package org.geysermc.floodgate.core.command.main;
 
-import static org.geysermc.floodgate.core.util.Constants.COLOR_CHAR;
+import static org.geysermc.floodgate.core.platform.command.Placeholder.literal;
 
 import com.google.gson.JsonElement;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.core.command.WhitelistCommand.Message;
+import org.geysermc.floodgate.core.command.CommonCommandMessage;
 import org.geysermc.floodgate.core.command.util.Permission;
 import org.geysermc.floodgate.core.connection.audience.UserAudience;
+import org.geysermc.floodgate.core.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.platform.command.FloodgateSubCommand;
+import org.geysermc.floodgate.core.platform.command.MessageType;
+import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.HttpClient;
 import org.incendo.cloud.context.CommandContext;
@@ -56,12 +58,11 @@ public class VersionSubcommand extends FloodgateSubCommand {
     @Override
     public void execute(CommandContext<UserAudience> context) {
         UserAudience sender = context.sender();
-        sender.sendMessage(String.format(
-                COLOR_CHAR + "7You're currently on " + COLOR_CHAR + "b%s" +
-                COLOR_CHAR + "7 (branch: " + COLOR_CHAR + "b%s" + COLOR_CHAR + "7)\n" +
-                COLOR_CHAR + "eFetching latest build info...",
-                Constants.FULL_VERSION, Constants.GIT_BRANCH
-        ));
+        sender.sendMessage(
+                Message.VERSION_INFO,
+                literal("version", Constants.FULL_VERSION),
+                literal("branch", Constants.GIT_BRANCH));
+        sender.sendMessage(Message.VERSION_FETCH_INFO);
 
         String baseUrl = String.format(
                 "https://ci.opencollab.dev/job/GeyserMC/job/Floodgate/job/%s/lastSuccessfulBuild/",
@@ -73,7 +74,7 @@ public class VersionSubcommand extends FloodgateSubCommand {
                 JsonElement.class
         ).whenComplete((result, error) -> {
             if (error != null) {
-                sender.sendMessage(COLOR_CHAR + "cCould not retrieve latest version info!");
+                sender.sendMessage(Message.VERSION_FETCH_ERROR);
                 error.printStackTrace();
                 return;
             }
@@ -84,10 +85,7 @@ public class VersionSubcommand extends FloodgateSubCommand {
             logger.info("{}", result.getHttpCode());
 
             if (result.getHttpCode() == 404) {
-                sender.sendMessage(
-                        COLOR_CHAR + "cGot a 404 (not found) while requesting the latest version." +
-                        " Are you using a custom Floodgate version?"
-                );
+                sender.sendMessage(Message.VERSION_FETCH_NOT_FOUND);
                 return;
             }
 
@@ -97,26 +95,34 @@ public class VersionSubcommand extends FloodgateSubCommand {
                         "Got an error from requesting the latest Floodgate version: {}",
                         response.toString()
                 );
-                sender.sendMessage(Message.UNEXPECTED_ERROR);
+                sender.sendMessage(CommonCommandMessage.UNEXPECTED_ERROR);
                 return;
             }
 
             int buildNumber = response.getAsInt();
 
             if (buildNumber > Constants.BUILD_NUMBER) {
-                sender.sendMessage(String.format(
-                        COLOR_CHAR + "7There is a newer version of Floodgate available!\n" +
-                        COLOR_CHAR + "7You are " + COLOR_CHAR + "e%s " + COLOR_CHAR + "7builds behind.\n" +
-                        COLOR_CHAR + "7Download the latest Floodgate version here: " + COLOR_CHAR + "b%s",
-                        buildNumber - Constants.BUILD_NUMBER, baseUrl
-                ));
+                sender.sendMessage(
+                        Message.VERSION_OUTDATED,
+                        literal("count", buildNumber - Constants.BUILD_NUMBER),
+                        literal("url", baseUrl));
                 return;
             }
             if (buildNumber == Constants.BUILD_NUMBER) {
-                sender.sendMessage(COLOR_CHAR + "aYou're running the latest version of Floodgate!");
+                sender.sendMessage(Message.VERSION_LATEST);
                 return;
             }
-            sender.sendMessage(COLOR_CHAR + "cCannot check version for custom Floodgate versions!");
+            sender.sendMessage(Message.VERSION_CUSTOM);
         });
+    }
+
+    public static final class Message {
+        public static final TranslatableMessage VERSION_INFO = new TranslatableMessage("floodgate.command.main.version.info", MessageType.NORMAL);
+        public static final TranslatableMessage VERSION_FETCH_INFO = new TranslatableMessage("floodgate.command.main.version.fetch.info", MessageType.INFO);
+        public static final TranslatableMessage VERSION_FETCH_ERROR = new TranslatableMessage("floodgate.command.main.version.fetch.error", MessageType.ERROR);
+        public static final TranslatableMessage VERSION_FETCH_NOT_FOUND = new TranslatableMessage("floodgate.command.main.version.fetch.not_found", MessageType.ERROR);
+        public static final TranslatableMessage VERSION_OUTDATED = new TranslatableMessage("floodgate.command.main.version.fetch.result.outdated", MessageType.NORMAL);
+        public static final TranslatableMessage VERSION_LATEST = new TranslatableMessage("floodgate.command.main.version.fetch.result.latest", MessageType.SUCCESS);
+        public static final TranslatableMessage VERSION_CUSTOM = new TranslatableMessage("floodgate.command.main.version.fetch.result.custom", MessageType.ERROR);
     }
 }

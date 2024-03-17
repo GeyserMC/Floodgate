@@ -25,8 +25,6 @@
 
 package org.geysermc.floodgate.bungee.util;
 
-import static org.geysermc.floodgate.core.util.MessageFormatter.format;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
@@ -40,12 +38,13 @@ public class BungeeReflectionUtils {
             unsafeField.setAccessible(true);
             UNSAFE = (sun.misc.Unsafe) unsafeField.get(null);
         } catch (Exception exception) {
-            throw new RuntimeException(format(
-                    "Cannot initialize required reflection setup :/\nJava version: {}\nVendor: {} ({})",
-                    System.getProperty("java.version"),
-                    System.getProperty("java.vendor"),
-                    System.getProperty("java.vendor.url")
-            ), exception);
+            throw new RuntimeException(
+                    String.format(
+                            "Cannot initialize required reflection setup :/\nJava version: %s\nVendor: %s (%s)",
+                            System.getProperty("java.version"),
+                            System.getProperty("java.vendor"),
+                            System.getProperty("java.vendor.url")),
+                    exception);
         }
     }
 
@@ -62,12 +61,14 @@ public class BungeeReflectionUtils {
             } else {
                 UNSAFE.putObject(object, offset, result);
             }
-        } catch (Exception e) {
-            throw new RuntimeException(format(
-                    "Java version: {}\nVendor: {} ({})",
-                    System.getProperty("java.version"),
-                    System.getProperty("java.vendor"),
-                    System.getProperty("java.vendor.url"), e));
+        } catch (Exception exception) {
+            throw new RuntimeException(
+                    String.format(
+                            "Java version: %s\nVendor: %s (%s)",
+                            System.getProperty("java.version"),
+                            System.getProperty("java.vendor"),
+                            System.getProperty("java.vendor.url")),
+                    exception);
         }
     }
 }

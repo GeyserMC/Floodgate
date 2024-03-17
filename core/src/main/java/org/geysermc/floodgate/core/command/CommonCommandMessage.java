@@ -25,32 +25,19 @@
 
 package org.geysermc.floodgate.core.command;
 
-import lombok.Getter;
+import org.geysermc.floodgate.core.platform.command.MessageType;
 import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
 
 /**
  * Messages (or part of messages) that are used in two or more commands and thus are 'commonly
  * used'
  */
-@Getter
-public enum CommonCommandMessage implements TranslatableMessage {
-    LINKING_DISABLED("floodgate.commands.linking_disabled"),
-    NOT_A_PLAYER("floodgate.commands.not_a_player"),
-    CHECK_CONSOLE("floodgate.commands.check_console"),
-    IS_LINKED_ERROR("floodgate.commands.is_linked_error"),
-    LOCAL_LINKING_NOTICE("floodgate.commands.local_linking_notice"),
-    GLOBAL_LINKING_NOTICE("floodgate.commands.global_linking_notice");
-
-    private final String rawMessage;
-    private final String[] translateParts;
-
-    CommonCommandMessage(String rawMessage) {
-        this.rawMessage = rawMessage;
-        this.translateParts = rawMessage.split(" ");
-    }
-
-    @Override
-    public String toString() {
-        return getRawMessage();
-    }
+public class CommonCommandMessage {
+    public static final TranslatableMessage LINKING_DISABLED = new TranslatableMessage("floodgate.commands.linking_disabled", MessageType.ERROR);
+    public static final TranslatableMessage NOT_A_PLAYER = new TranslatableMessage("floodgate.commands.not_a_player", MessageType.ERROR);
+    public static final TranslatableMessage CHECK_CONSOLE = new TranslatableMessage("floodgate.commands.check_console");
+    public static final TranslatableMessage UNEXPECTED_ERROR = new TranslatableMessage("floodgate.commands.unexpected_error " + CommonCommandMessage.CHECK_CONSOLE, MessageType.ERROR);
+    public static final TranslatableMessage IS_LINKED_ERROR = new TranslatableMessage("floodgate.commands.is_linked_error", MessageType.ERROR);
+    public static final TranslatableMessage LOCAL_LINKING_NOTICE = new TranslatableMessage("floodgate.commands.local_linking_notice", MessageType.INFO);
+    public static final TranslatableMessage GLOBAL_LINKING_NOTICE = new TranslatableMessage("floodgate.commands.global_linking_notice", MessageType.INFO);
 }

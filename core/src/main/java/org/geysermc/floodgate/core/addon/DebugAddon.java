@@ -31,11 +31,11 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.addon.debug.ChannelInDebugHandler;
 import org.geysermc.floodgate.core.addon.debug.ChannelOutDebugHandler;
 import org.geysermc.floodgate.core.addon.debug.StateChangeDetector;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
+import org.geysermc.floodgate.core.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.util.Utils;
 
 @Singleton

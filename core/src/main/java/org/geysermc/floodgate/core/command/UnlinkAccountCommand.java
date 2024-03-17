@@ -25,15 +25,17 @@
 
 package org.geysermc.floodgate.core.command;
 
+import static org.geysermc.floodgate.core.platform.command.Placeholder.literal;
+
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import lombok.Getter;
 import org.geysermc.floodgate.core.command.util.Permission;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.connection.audience.UserAudience.PlayerAudience;
 import org.geysermc.floodgate.core.link.CommonPlayerLink;
 import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
+import org.geysermc.floodgate.core.platform.command.MessageType;
 import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.core.util.Constants;
 import org.incendo.cloud.Command;
@@ -63,11 +65,13 @@ public final class UnlinkAccountCommand implements FloodgateCommand {
             if (!linkState.globalLinkingEnabled()) {
                 sender.sendMessage(CommonCommandMessage.LINKING_DISABLED);
             } else {
-                sender.sendMessage(CommonCommandMessage.GLOBAL_LINKING_NOTICE, Constants.LINK_INFO_URL);
+                sender.sendMessage(
+                        CommonCommandMessage.GLOBAL_LINKING_NOTICE,
+                        literal("url", Constants.LINK_INFO_URL));
             }
             return;
         } else if (linkState.globalLinkingEnabled()) {
-            sender.sendMessage(CommonCommandMessage.LOCAL_LINKING_NOTICE, Constants.LINK_INFO_URL);
+            sender.sendMessage(CommonCommandMessage.LOCAL_LINKING_NOTICE, literal("url", Constants.LINK_INFO_URL));
         }
 
         link.isLinked(sender.uuid())
@@ -101,18 +105,9 @@ public final class UnlinkAccountCommand implements FloodgateCommand {
                 (linkConfig.enableOwnLinking() || linkConfig.enableGlobalLinking());
     }
 
-    @Getter
-    public enum Message implements TranslatableMessage {
-        NOT_LINKED("floodgate.command.unlink_account.not_linked"),
-        UNLINK_SUCCESS("floodgate.command.unlink_account.unlink_success"),
-        UNLINK_ERROR("floodgate.command.unlink_account.error " + CommonCommandMessage.CHECK_CONSOLE);
-
-        private final String rawMessage;
-        private final String[] translateParts;
-
-        Message(String rawMessage) {
-            this.rawMessage = rawMessage;
-            this.translateParts = rawMessage.split(" ");
-        }
+    public static final class Message {
+        public static final TranslatableMessage NOT_LINKED = new TranslatableMessage("floodgate.command.unlink_account.not_linked", MessageType.ERROR);
+        public static final TranslatableMessage UNLINK_SUCCESS = new TranslatableMessage("floodgate.command.unlink_account.unlink_success", MessageType.SUCCESS);
+        public static final TranslatableMessage UNLINK_ERROR = new TranslatableMessage("floodgate.command.unlink_account.error " + CommonCommandMessage.CHECK_CONSOLE, MessageType.ERROR);
     }
 }

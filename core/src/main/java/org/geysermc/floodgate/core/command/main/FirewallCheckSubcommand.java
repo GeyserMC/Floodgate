@@ -25,7 +25,7 @@
 
 package org.geysermc.floodgate.core.command.main;
 
-import static org.geysermc.floodgate.core.util.Constants.COLOR_CHAR;
+import static org.geysermc.floodgate.core.platform.command.Placeholder.literal;
 
 import com.google.gson.JsonElement;
 import it.unimi.dsi.fastutil.Pair;
@@ -37,6 +37,8 @@ import java.util.function.BooleanSupplier;
 import org.geysermc.floodgate.core.command.util.Permission;
 import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.platform.command.FloodgateSubCommand;
+import org.geysermc.floodgate.core.platform.command.MessageType;
+import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.HttpClient;
 import org.geysermc.floodgate.core.util.HttpClient.HttpResponse;
@@ -62,10 +64,10 @@ final class FirewallCheckSubcommand extends FloodgateSubCommand {
         executeChecks(
                 globalApiCheck(sender)
         ).whenComplete((response, $) ->
-                sender.sendMessage(String.format(
-                        COLOR_CHAR + "eThe checks have finished. %s/%s were successful",
-                        response.left(), response.left() + response.right()
-                ))
+                sender.sendMessage(
+                        Message.FIREWALL_RESULT,
+                        literal("successful", response.left()),
+                        literal("total", response.left() + response.right()))
         );
     }
 
@@ -88,14 +90,14 @@ final class FirewallCheckSubcommand extends FloodgateSubCommand {
     private BooleanSupplier executeFirewallText(
             UserAudience sender, String name, Runnable runnable) {
         return () -> {
-            sender.sendMessage(COLOR_CHAR + "eTesting " + name + "...");
+            sender.sendMessage(Message.CHECK_START, literal("target", name));
             try {
                 runnable.run();
-                sender.sendMessage(COLOR_CHAR + "aWas able to connect to " + name + "!");
+                sender.sendMessage(Message.CHECK_SUCCESS, literal("target", name));
                 return true;
-            } catch (Exception e) {
-                sender.sendMessage(COLOR_CHAR + "cFailed to connect:");
-                sender.sendMessage(Utils.getStackTrace(e));
+            } catch (Exception exception) {
+                sender.sendMessage(Message.CHECK_FAILED, literal("target", name));
+                sender.sendRaw(Utils.getStackTrace(exception), MessageType.ERROR);
                 return false;
             }
         };
@@ -116,5 +118,12 @@ final class FirewallCheckSubcommand extends FloodgateSubCommand {
 
             return Pair.of(okCount.get(), failCount.get());
         });
+    }
+
+    public static final class Message {
+        public static final TranslatableMessage FIREWALL_RESULT = new TranslatableMessage("floodgate.command.main.firewall.result", MessageType.INFO);
+        public static final TranslatableMessage CHECK_START = new TranslatableMessage("floodgate.command.main.firewall.check.start", MessageType.INFO);
+        public static final TranslatableMessage CHECK_SUCCESS = new TranslatableMessage("floodgate.command.main.firewall.check.success", MessageType.SUCCESS);
+        public static final TranslatableMessage CHECK_FAILED = new TranslatableMessage("floodgate.command.main.firewall.check.failed", MessageType.ERROR);
     }
 }

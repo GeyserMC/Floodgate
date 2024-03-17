@@ -35,13 +35,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.api.connection.Connection;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.connection.DataSeeker;
 import org.geysermc.floodgate.core.connection.DataSeeker.DataSeekerResult;
 import org.geysermc.floodgate.core.connection.FloodgateDataHandler;
 import org.geysermc.floodgate.core.connection.FloodgateDataHandler.HandleResult;
 import org.geysermc.floodgate.core.crypto.exception.UnsupportedVersionException;
+import org.geysermc.floodgate.core.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.util.InvalidFormatException;
 
 @RequiredArgsConstructor

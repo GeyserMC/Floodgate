@@ -34,9 +34,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.event.lifecycle.PostEnableEvent;
+import org.geysermc.floodgate.core.logger.FloodgateLogger;
 
 @Singleton
 public final class PostEnableMessages {
@@ -57,12 +57,13 @@ public final class PostEnableMessages {
         }
         builder.append("**********************************");
 
-        messages.add(MessageFormatter.format(builder.toString(), args));
+        messages.add(String.format(builder.toString(), args));
     }
 
     @PostConstruct
     void registerPrefixMessages() {
         String prefix = config.rawUsernamePrefix();
+        //todo these messages should also be translated
 
         if (prefix.isEmpty()) {
             add(new String[]{
@@ -72,21 +73,21 @@ public final class PostEnableMessages {
             });
         } else if (!Utils.isUniquePrefix(prefix)) {
             add(new String[]{
-                    "The prefix you entered in your Floodgate config ({}) could lead to username conflicts!",
-                    "Should a Java player join with the username {}Notch, and a Bedrock player join as Notch (who will be given the name {}Notch), unwanted results will happen!",
+                    "The prefix you entered in your Floodgate config (%s) could lead to username conflicts!",
+                    "Should a Java player join with the username %sNotch, and a Bedrock player join as Notch (who will be given the name %sNotch), unwanted results will happen!",
                     "We strongly recommend using . as the prefix, but other alternatives that will not conflict include: +, - and *"
-            }, prefix, prefix, prefix, prefix);
+            }, prefix, prefix, prefix);
         }
 
         if (prefix.length() >= 16) {
             add(new String[]{
-                    "The prefix you entered in your Floodgate config ({}) is longer than a Java username can be!",
+                    "The prefix you entered in your Floodgate config (%s) is longer than a Java username can be!",
                     "Because of this, we reset the prefix to the default Floodgate prefix (.)"
             }, prefix);
         } else if (prefix.length() > 2) {
             // we only have to warn them if we haven't replaced the prefix
             add(new String[]{
-                    "The prefix you entered in your Floodgate config ({}) is long! ({} characters)",
+                    "The prefix you entered in your Floodgate config (%s) is long! (%s characters)",
                     "A prefix is there to prevent username conflicts. However, a long prefix makes the chance of username conflicts higher.",
                     "We strongly recommend using . as the prefix, but other alternatives that will not conflict include: +, - and *"
             }, prefix, prefix.length());

@@ -25,20 +25,22 @@
 
 package org.geysermc.floodgate.core.command;
 
+import static org.geysermc.floodgate.core.platform.command.Placeholder.literal;
+
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.UUID;
-import lombok.Getter;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.command.util.Permission;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.core.connection.audience.ProfileAudience;
 import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.http.xbox.XboxClient;
+import org.geysermc.floodgate.core.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
 import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
+import org.geysermc.floodgate.core.platform.command.MessageType;
 import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
 import org.incendo.cloud.Command;
 import org.incendo.cloud.CommandManager;
@@ -76,7 +78,7 @@ public class WhitelistCommand implements FloodgateCommand {
         String name = profile.username();
 
         if (name == null && uuid == null) {
-            sender.sendMessage(Message.UNEXPECTED_ERROR);
+            sender.sendMessage(CommonCommandMessage.UNEXPECTED_ERROR);
             return;
         }
 
@@ -90,16 +92,15 @@ public class WhitelistCommand implements FloodgateCommand {
 
             if (add) {
                 if (commandUtil.whitelistPlayer(uuid, "unknown")) {
-                    sender.sendMessage(Message.PLAYER_ADDED, uuid.toString());
+                    sender.sendMessage(Message.PLAYER_ADDED, literal("target", uuid.toString()));
                 } else {
-                    sender.sendMessage(Message.PLAYER_ALREADY_WHITELISTED,
-                            uuid.toString());
+                    sender.sendMessage(Message.PLAYER_ALREADY_WHITELISTED, literal("target", uuid.toString()));
                 }
             } else {
                 if (commandUtil.removePlayerFromWhitelist(uuid, "unknown")) {
-                    sender.sendMessage(Message.PLAYER_REMOVED, uuid.toString());
+                    sender.sendMessage(Message.PLAYER_REMOVED, literal("target", uuid.toString()));
                 } else {
-                    sender.sendMessage(Message.PLAYER_NOT_WHITELISTED, uuid.toString());
+                    sender.sendMessage(Message.PLAYER_NOT_WHITELISTED, literal("target", uuid.toString()));
                 }
             }
             return;
@@ -132,7 +133,7 @@ public class WhitelistCommand implements FloodgateCommand {
                             error.printStackTrace();
                             return;
                         }
-                        sender.sendMessage(Message.UNEXPECTED_ERROR);
+                        sender.sendMessage(CommonCommandMessage.UNEXPECTED_ERROR);
 
                         //todo proper non-200 status handler
 //                        var response = exception.getResponse().getBody(UnsuccessfulResponse.class);
@@ -149,7 +150,7 @@ public class WhitelistCommand implements FloodgateCommand {
 
                     Long xuid = result.xuid();
                     if (xuid == null) {
-                        sender.sendMessage(Message.USER_NOT_FOUND);
+                        sender.sendMessage(Message.ACCOUNT_NOT_FOUND);
                         return;
                     }
 
@@ -158,16 +159,15 @@ public class WhitelistCommand implements FloodgateCommand {
                     try {
                         if (add) {
                             if (commandUtil.whitelistPlayer(xuid, correctName)) {
-                                sender.sendMessage(Message.PLAYER_ADDED, strippedName);
+                                sender.sendMessage(Message.PLAYER_ADDED, literal("target", strippedName));
                             } else {
-                                sender.sendMessage(Message.PLAYER_ALREADY_WHITELISTED,
-                                        strippedName);
+                                sender.sendMessage(Message.PLAYER_ALREADY_WHITELISTED, literal("target", strippedName));
                             }
                         } else {
                             if (commandUtil.removePlayerFromWhitelist(xuid, correctName)) {
-                                sender.sendMessage(Message.PLAYER_REMOVED, strippedName);
+                                sender.sendMessage(Message.PLAYER_REMOVED, literal("target", strippedName));
                             } else {
-                                sender.sendMessage(Message.PLAYER_NOT_WHITELISTED, strippedName);
+                                sender.sendMessage(Message.PLAYER_NOT_WHITELISTED, literal("target", strippedName));
                             }
                         }
                     } catch (Exception exception) {
@@ -185,23 +185,13 @@ public class WhitelistCommand implements FloodgateCommand {
         return !(config instanceof ProxyFloodgateConfig);
     }
 
-    @Getter
-    public enum Message implements TranslatableMessage {
-        INVALID_USERNAME("floodgate.command.fwhitelist.invalid_username"),
-        API_UNAVAILABLE("floodgate.command.fwhitelist.api_unavailable " + CommonCommandMessage.CHECK_CONSOLE),
-        USER_NOT_FOUND("floodgate.command.fwhitelist.user_not_found"),
-        PLAYER_ADDED("floodgate.command.fwhitelist.player_added"),
-        PLAYER_REMOVED("floodgate.command.fwhitelist.player_removed"),
-        PLAYER_ALREADY_WHITELISTED("floodgate.command.fwhitelist.player_already_whitelisted"),
-        PLAYER_NOT_WHITELISTED("floodgate.command.fwhitelist.player_not_whitelisted"),
-        UNEXPECTED_ERROR("floodgate.command.fwhitelist.unexpected_error " + CommonCommandMessage.CHECK_CONSOLE);
-
-        private final String rawMessage;
-        private final String[] translateParts;
-
-        Message(String rawMessage) {
-            this.rawMessage = rawMessage;
-            this.translateParts = rawMessage.split(" ");
-        }
+    public static final class Message {
+        public static final TranslatableMessage INVALID_USERNAME = new TranslatableMessage("floodgate.command.fwhitelist.invalid_username", MessageType.ERROR);
+        public static final TranslatableMessage API_UNAVAILABLE = new TranslatableMessage("floodgate.command.fwhitelist.api_unavailable " + CommonCommandMessage.CHECK_CONSOLE, MessageType.ERROR);
+        public static final TranslatableMessage ACCOUNT_NOT_FOUND = new TranslatableMessage("floodgate.command.fwhitelist.account_not_found", MessageType.ERROR);
+        public static final TranslatableMessage PLAYER_ADDED = new TranslatableMessage("floodgate.command.fwhitelist.player_added", MessageType.SUCCESS);
+        public static final TranslatableMessage PLAYER_REMOVED = new TranslatableMessage("floodgate.command.fwhitelist.player_removed", MessageType.SUCCESS);
+        public static final TranslatableMessage PLAYER_ALREADY_WHITELISTED = new TranslatableMessage("floodgate.command.fwhitelist.player_already_whitelisted", MessageType.NORMAL);
+        public static final TranslatableMessage PLAYER_NOT_WHITELISTED = new TranslatableMessage("floodgate.command.fwhitelist.player_not_whitelisted", MessageType.NORMAL);
     }
 }

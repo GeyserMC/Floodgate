@@ -25,13 +25,12 @@
 
 package org.geysermc.floodgate.core.command;
 
+import static org.geysermc.floodgate.core.platform.command.Placeholder.literal;
 import static org.incendo.cloud.parser.standard.StringParser.stringParser;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.concurrent.CompletableFuture;
-import lombok.Getter;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.core.command.util.Permission;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
@@ -40,7 +39,9 @@ import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.connection.audience.UserAudience.PlayerAudience;
 import org.geysermc.floodgate.core.link.CommonPlayerLink;
 import org.geysermc.floodgate.core.link.LinkVerificationException;
+import org.geysermc.floodgate.core.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
+import org.geysermc.floodgate.core.platform.command.MessageType;
 import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.Utils;
@@ -75,11 +76,15 @@ public final class LinkAccountCommand implements FloodgateCommand {
             if (!linkState.globalLinkingEnabled()) {
                 sender.sendMessage(CommonCommandMessage.LINKING_DISABLED);
             } else {
-                sender.sendMessage(CommonCommandMessage.GLOBAL_LINKING_NOTICE, Constants.LINK_INFO_URL);
+                sender.sendMessage(
+                        CommonCommandMessage.GLOBAL_LINKING_NOTICE,
+                        literal("url", Constants.LINK_INFO_URL));
             }
             return;
         } else if (linkState.globalLinkingEnabled()) {
-            sender.sendMessage(CommonCommandMessage.LOCAL_LINKING_NOTICE, Constants.LINK_INFO_URL);
+            sender.sendMessage(
+                    CommonCommandMessage.LOCAL_LINKING_NOTICE,
+                    literal("url", Constants.LINK_INFO_URL));
         }
 
         ProfileAudience targetUser = context.get("player");
@@ -89,7 +94,7 @@ public final class LinkAccountCommand implements FloodgateCommand {
         // when the player is a Bedrock player
         if (api.isBedrockPlayer(sender.uuid())) {
             if (!context.contains("code")) {
-                sender.sendMessage(Message.BEDROCK_USAGE);
+                sender.sendMessage(Message.BEDROCK_USAGE, literal("command", "/linkaccount <gamertag>"));
                 return;
             }
 
@@ -121,20 +126,23 @@ public final class LinkAccountCommand implements FloodgateCommand {
                     )
                     .whenComplete(($, throwable) -> {
                         if (throwable instanceof LinkVerificationException exception) {
-                            sender.sendMessage(exception.message());
+                            sender.sendMessage(exception.message(), exception.placeholders());
                             return;
                         }
                         if (throwable != null) {
                             sender.sendMessage(Message.LINK_REQUEST_ERROR);
                             return;
                         }
-                        sender.disconnect(Message.LINK_REQUEST_COMPLETED, targetName);
+                        sender.disconnect(
+                                Message.LINK_REQUEST_COMPLETED,
+                                literal("target", targetName),
+                                literal("command", "/unlinkaccount"));
                     });
             return;
         }
 
         if (context.contains("code")) {
-            sender.sendMessage(Message.JAVA_USAGE);
+            sender.sendMessage(Message.JAVA_USAGE, literal("command", "/linkaccount <gamertag>"));
             return;
         }
 
@@ -147,7 +155,11 @@ public final class LinkAccountCommand implements FloodgateCommand {
                         sender.sendMessage(Message.LINK_REQUEST_ERROR);
                         return;
                     }
-                    sender.sendMessage(Message.LINK_REQUEST_CREATED, targetName, username, code);
+                    sender.sendMessage(
+                            Message.LINK_REQUEST_CREATED,
+                            literal("target", targetName),
+                            literal("command", "/linkaccount " + username + " " + code),
+                            literal("unlink_command", "/unlinkaccount"));
                 });
     }
 
@@ -158,24 +170,15 @@ public final class LinkAccountCommand implements FloodgateCommand {
                 (linkConfig.enableOwnLinking() || linkConfig.enableGlobalLinking());
     }
 
-    @Getter
-    public enum Message implements TranslatableMessage {
-        ALREADY_LINKED("floodgate.command.link_account.already_linked"),
-        JAVA_USAGE("floodgate.command.link_account.java_usage"),
-        LINK_REQUEST_CREATED("floodgate.command.link_account.link_request_created"),
-        BEDROCK_USAGE("floodgate.command.link_account.bedrock_usage"),
-        LINK_REQUEST_EXPIRED("floodgate.command.link_account.link_request_expired"),
-        LINK_REQUEST_COMPLETED("floodgate.command.link_account.link_request_completed"),
-        LINK_REQUEST_ERROR("floodgate.command.link_request.error " + CommonCommandMessage.CHECK_CONSOLE),
-        INVALID_CODE("floodgate.command.link_account.invalid_code"),
-        NO_LINK_REQUESTED("floodgate.command.link_account.no_link_requested");
-
-        private final String rawMessage;
-        private final String[] translateParts;
-
-        Message(String rawMessage) {
-            this.rawMessage = rawMessage;
-            this.translateParts = rawMessage.split(" ");
-        }
+    public static final class Message {
+        public static final TranslatableMessage ALREADY_LINKED = new TranslatableMessage("floodgate.command.link_account.already_linked", MessageType.ERROR);
+        public static final TranslatableMessage JAVA_USAGE = new TranslatableMessage("floodgate.command.link_account.java_usage", MessageType.ERROR);
+        public static final TranslatableMessage LINK_REQUEST_CREATED = new TranslatableMessage("floodgate.command.link_account.link_request_created", MessageType.SUCCESS);
+        public static final TranslatableMessage BEDROCK_USAGE = new TranslatableMessage("floodgate.command.link_account.bedrock_usage", MessageType.ERROR);
+        public static final TranslatableMessage LINK_REQUEST_EXPIRED = new TranslatableMessage("floodgate.command.link_account.link_request_expired", MessageType.ERROR);
+        public static final TranslatableMessage LINK_REQUEST_COMPLETED = new TranslatableMessage("floodgate.command.link_account.link_request_completed", MessageType.SUCCESS);
+        public static final TranslatableMessage LINK_REQUEST_ERROR = new TranslatableMessage("floodgate.command.link_account.link_request_error " + CommonCommandMessage.CHECK_CONSOLE, MessageType.ERROR);
+        public static final TranslatableMessage INVALID_CODE = new TranslatableMessage("floodgate.command.link_account.invalid_code", MessageType.ERROR);
+        public static final TranslatableMessage NO_LINK_REQUESTED = new TranslatableMessage("floodgate.command.link_account.no_link_requested", MessageType.ERROR);
     }
 }

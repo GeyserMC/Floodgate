@@ -32,11 +32,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.api.GeyserApiBase;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.database.entity.LinkRequest;
 import org.geysermc.floodgate.core.database.entity.LinkedPlayer;
+import org.geysermc.floodgate.core.logger.FloodgateLogger;
 
 public abstract class CommonPlayerLink {
     @Getter private boolean enabled;

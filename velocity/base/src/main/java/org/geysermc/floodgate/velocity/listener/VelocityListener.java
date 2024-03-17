@@ -41,10 +41,10 @@ import jakarta.inject.Singleton;
 import java.util.Collections;
 import net.kyori.adventure.text.Component;
 import org.geysermc.api.connection.Connection;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.core.listener.McListener;
+import org.geysermc.floodgate.core.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.util.LanguageManager;
 import org.geysermc.floodgate.velocity.player.VelocityConnectionManager;
 

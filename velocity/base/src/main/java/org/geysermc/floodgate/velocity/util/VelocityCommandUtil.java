@@ -109,14 +109,14 @@ public final class VelocityCommandUtil extends CommandUtil {
     }
 
     @Override
-    public void sendMessage(Object target, String message) {
-        ((CommandSource) target).sendMessage(Component.text(message));
+    public void sendMessage(Object target, Component message) {
+        ((CommandSource) target).sendMessage(message);
     }
 
     @Override
-    public void kickPlayer(Object player, String message) {
+    public void kickPlayer(Object player, Component message) {
         if (player instanceof Player) {
-            ((Player) player).disconnect(Component.text(message));
+            ((Player) player).disconnect(message);
         }
     }
 }

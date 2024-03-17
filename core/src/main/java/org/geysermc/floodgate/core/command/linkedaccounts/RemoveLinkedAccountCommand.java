@@ -1,19 +1,24 @@
 package org.geysermc.floodgate.core.command.linkedaccounts;
 
+import static org.geysermc.floodgate.core.platform.command.Placeholder.literal;
+
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.command.CommonCommandMessage;
 import org.geysermc.floodgate.core.command.LinkAccountCommand;
+import org.geysermc.floodgate.core.command.linkedaccounts.LinkedAccountsCommand.LinkedAccountsCommonMessage;
 import org.geysermc.floodgate.core.command.util.Permission;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.connection.audience.ProfileAudience;
 import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.geysermc.floodgate.core.http.ProfileFetcher;
 import org.geysermc.floodgate.core.link.LocalPlayerLinking;
+import org.geysermc.floodgate.core.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.platform.command.FloodgateSubCommand;
+import org.geysermc.floodgate.core.platform.command.MessageType;
+import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.core.util.Constants;
 import org.incendo.cloud.Command;
 import org.incendo.cloud.context.CommandContext;
@@ -45,7 +50,7 @@ final class RemoveLinkedAccountCommand extends FloodgateSubCommand {
 
         var linking = optionalLinking.get();
         if (linking.state().globalLinkingEnabled()) {
-            sender.sendMessage(CommonCommandMessage.LOCAL_LINKING_NOTICE, Constants.LINK_INFO_URL);
+            sender.sendMessage(CommonCommandMessage.LOCAL_LINKING_NOTICE, literal("url", Constants.LINK_INFO_URL));
         }
 
         ProfileAudience playerInput = context.get("player");
@@ -73,8 +78,10 @@ final class RemoveLinkedAccountCommand extends FloodgateSubCommand {
             }
 
             if (result == null) {
-                sender.sendMessage("Could not find %s user with username %s"
-                        .formatted(platform, playerInput.username()));
+                sender.sendMessage(
+                        LinkedAccountsCommonMessage.NOT_FOUND,
+                        literal("platform", platform),
+                        literal("target", playerInput.username()));
                 return;
             }
 
@@ -84,9 +91,15 @@ final class RemoveLinkedAccountCommand extends FloodgateSubCommand {
                     logger.error("Exception while manually linking accounts", error);
                     return;
                 }
-                sender.sendMessage("You've successfully unlinked %s user %s"
-                        .formatted(platform, playerInput.username()));
+                sender.sendMessage(
+                        Message.REMOVE_SUCCESS,
+                        literal("platform", platform),
+                        literal("target", playerInput.username()));
             });
         });
+    }
+
+    public static final class Message {
+        public static final TranslatableMessage REMOVE_SUCCESS = new TranslatableMessage("floodgate.command.linkedaccounts.remove.success", MessageType.SUCCESS);
     }
 }

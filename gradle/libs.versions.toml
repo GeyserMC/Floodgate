@@ -17,6 +17,8 @@ fastutil = "8.5.3"
 cloud = "2.0.0-beta.2"
 snakeyaml = "2.0"
 bstats = "3.0.2"
+adventure = "4.16.0"
+adventure-platform = "4.3.2"
 
 # bungee
 bungee = "master-SNAPSHOT"
@@ -58,6 +60,10 @@ fastutil-int-object-maps = { module = "com.nukkitx.fastutil:fastutil-int-object-
 cloud-core = { module = "org.incendo:cloud-core", version.ref = "cloud" }
 snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "snakeyaml" }
 bstats = { module = "org.bstats:bstats-base", version.ref = "bstats" }
+
+adventure-text-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure" }
+adventure-platform-bukkit = { module = "net.kyori:adventure-platform-bukkit", version.ref = "adventure-platform"}
+adventure-platform-bungee = { module = "net.kyori:adventure-platform-bungeecord", version.ref = "adventure-platform"}
 
 micronaut-inject = { module = "io.micronaut:micronaut-inject" }
 micronaut-inject-java = { module = "io.micronaut:micronaut-inject-java" }

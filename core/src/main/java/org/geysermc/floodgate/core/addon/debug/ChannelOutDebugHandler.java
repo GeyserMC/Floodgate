@@ -30,7 +30,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.core.logger.FloodgateLogger;
 
 @Sharable
 public final class ChannelOutDebugHandler extends MessageToByteEncoder<ByteBuf> {

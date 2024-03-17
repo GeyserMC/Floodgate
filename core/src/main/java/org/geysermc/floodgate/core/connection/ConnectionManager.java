@@ -25,6 +25,8 @@
 
 package org.geysermc.floodgate.core.connection;
 
+import static org.geysermc.floodgate.core.platform.command.Placeholder.literal;
+
 import jakarta.inject.Inject;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,7 +40,8 @@ import java.util.WeakHashMap;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.api.connection.Connection;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.core.logger.FloodgateLogger;
+import org.geysermc.floodgate.core.platform.CommonPlatformMessages;
 
 public abstract class ConnectionManager {
     private final Set<Connection> connections = Collections.synchronizedSet(new HashSet<>());
@@ -93,9 +96,9 @@ public abstract class ConnectionManager {
         pendingConnections.add(connection);
 
         logger.translatedInfo(
-                "floodgate.ingame.login_name",
-                connection.javaUsername(), connection.javaUuid()
-        );
+                CommonPlatformMessages.CONNECTION_LOGIN,
+                literal("target", connection.javaUsername()),
+                literal("target_uuid", connection.javaUuid()));
     }
 
     public boolean addAcceptedConnection(Connection connection) {
@@ -134,7 +137,9 @@ public abstract class ConnectionManager {
         pendingConnections.remove(connection);
         uuidToConnection.remove(connection.javaUuid(), connection);
         xuidToConnection.remove(connection.xuid(), connection);
-        logger.translatedInfo("floodgate.ingame.disconnect_name", connection.javaUsername());
+        logger.translatedInfo(
+                CommonPlatformMessages.CONNECTION_DISCONNECT,
+                literal("target", connection.javaUsername()));
     }
 
     public Collection<Connection> acceptedConnections() {

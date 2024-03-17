@@ -30,7 +30,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
 import java.nio.charset.StandardCharsets;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.core.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.Utils;
 

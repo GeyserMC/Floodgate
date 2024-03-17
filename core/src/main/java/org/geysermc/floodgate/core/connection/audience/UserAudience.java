@@ -29,9 +29,13 @@ import java.util.Objects;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
+import org.geysermc.floodgate.core.platform.command.MessageType;
+import org.geysermc.floodgate.core.platform.command.Placeholder;
 import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
+import org.geysermc.floodgate.core.util.MiniMessageUtils;
 
 @Getter @Accessors(fluent = true)
 public class UserAudience {
@@ -58,23 +62,30 @@ public class UserAudience {
         return commandUtil.hasPermission(source(), permission);
     }
 
-    public void sendMessage(String message) {
+    /**
+     * This is only meant for development use, before the translations have been added
+     */
+    public void sendRaw(String message, MessageType type, Placeholder... placeholders) {
+        sendMessage(MiniMessageUtils.formatMessage(message, type, placeholders));
+    }
+
+    public void sendMessage(Component message) {
         commandUtil.sendMessage(source(), message);
     }
 
-    public void sendMessage(TranslatableMessage message, Object... args) {
-        sendMessage(translateMessage(message, args));
+    public void sendMessage(TranslatableMessage message, Placeholder... placeholders) {
+        sendMessage(translateMessage(message, placeholders));
     }
 
-    public void disconnect(@NonNull String reason) {
+    public void disconnect(Component reason) {
         commandUtil.kickPlayer(source(), reason);
     }
 
-    public void disconnect(TranslatableMessage message, Object... args) {
+    public void disconnect(TranslatableMessage message, Placeholder... args) {
         disconnect(translateMessage(message, args));
     }
 
-    public String translateMessage(TranslatableMessage message, Object... args) {
+    public Component translateMessage(TranslatableMessage message, Placeholder... args) {
         return commandUtil.translateMessage(locale(), message, args);
     }
 

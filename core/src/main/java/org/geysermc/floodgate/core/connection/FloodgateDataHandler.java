@@ -25,21 +25,25 @@
 
 package org.geysermc.floodgate.core.connection;
 
+import static org.geysermc.floodgate.core.platform.command.Placeholder.literal;
+
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.concurrent.CompletableFuture;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.geysermc.floodgate.api.event.FloodgateEventBus;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.addon.data.CommonNettyDataHandler;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.crypto.FloodgateDataCodec;
 import org.geysermc.floodgate.core.crypto.exception.UnsupportedVersionException;
 import org.geysermc.floodgate.core.event.ConnectionJoinEvent;
 import org.geysermc.floodgate.core.link.CommonPlayerLink;
+import org.geysermc.floodgate.core.logger.FloodgateLogger;
+import org.geysermc.floodgate.core.platform.CommonPlatformMessages;
 import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.InvalidFormatException;
 import org.geysermc.floodgate.core.util.LanguageManager;
@@ -93,11 +97,11 @@ public final class FloodgateDataHandler {
     private JoinResult canJoin(FloodgateConnection connection) {
         String disconnectReason = null;
         if (config.playerLink().requireLink() && !connection.isLinked()) {
-            disconnectReason = languageManager.getString(
-                    "floodgate.core.not_linked",
-                    connection.languageCode(),
-                    Constants.LINK_INFO_URL
-            );
+            disconnectReason = MiniMessage.miniMessage().serialize(
+                    CommonPlatformMessages.NOT_LINKED.translateMessage(
+                            languageManager,
+                            connection.languageCode(),
+                            literal("url", Constants.LINK_INFO_URL)));
         }
 
         var event = new ConnectionJoinEvent(connection, disconnectReason);

@@ -23,7 +23,11 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.api.logger;
+package org.geysermc.floodgate.core.logger;
+
+import net.kyori.adventure.text.Component;
+import org.geysermc.floodgate.core.platform.command.Placeholder;
+import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
 
 public interface FloodgateLogger {
     String LOGGER_NAME = "Floodgate";
@@ -61,7 +65,9 @@ public interface FloodgateLogger {
      */
     void info(String message, Object... args);
 
-    void translatedInfo(String message, Object... args);
+    void info(Component message);
+
+    void translatedInfo(TranslatableMessage message, Placeholder... args);
 
     /**
      * Logs a debug message to the console, with 0 or more arguments.

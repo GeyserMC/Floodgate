@@ -34,8 +34,7 @@ public final class Constants {
 
     public static final int CONFIG_VERSION = 3;
 
-    public static final char COLOR_CHAR = '\u00A7';
-
+    public static final int PROTOCOL_HEX_COLOR = 713; // added in 20w17a (1.16 snapshot)
     public static final boolean DEBUG_MODE = false;
     public static final boolean PRINT_ALL_PACKETS = false;
 

@@ -31,7 +31,7 @@ import java.util.UUID;
 import org.geysermc.floodgate.api.handshake.HandshakeData;
 import org.geysermc.floodgate.api.handshake.HandshakeHandler;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.core.logger.FloodgateLogger;
 import org.geysermc.floodgate.util.BedrockData;
 
 @Singleton

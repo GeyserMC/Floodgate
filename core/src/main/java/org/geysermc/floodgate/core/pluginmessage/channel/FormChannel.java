@@ -35,8 +35,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.geysermc.cumulus.form.Form;
 import org.geysermc.cumulus.form.impl.FormDefinition;
 import org.geysermc.cumulus.form.impl.FormDefinitions;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
+import org.geysermc.floodgate.core.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel;
 

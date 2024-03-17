@@ -29,7 +29,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.Collection;
 import java.util.UUID;
-import org.bukkit.OfflinePlayer;
+import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -114,15 +115,18 @@ public final class SpigotCommandUtil extends CommandUtil {
     }
 
     @Override
-    public void sendMessage(Object target, String message) {
+    public void sendMessage(Object target, Component message) {
         ((CommandSender) target).sendMessage(message);
     }
 
     @Override
-    public void kickPlayer(Object player, String message) {
+    public void kickPlayer(Object target, Component message) {
         // can also be console
-        if (player instanceof Player) {
-            versionSpecificMethods.schedule(() -> ((Player) player).kickPlayer(message), 0);
+        if (target instanceof Player player) {
+            versionSpecificMethods.schedule(() -> {
+                //todo don't include Adventure & use Component variants if/when there will be a Paper platform
+                player.kickPlayer(BukkitComponentSerializer.legacy().serialize( message));
+            }, 0);
         }
     }
 

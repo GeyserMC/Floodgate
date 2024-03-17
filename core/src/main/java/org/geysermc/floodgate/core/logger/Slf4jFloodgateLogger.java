@@ -25,15 +25,17 @@
 
 package org.geysermc.floodgate.core.logger;
 
-import static org.geysermc.floodgate.core.util.MessageFormatter.format;
-
 import io.micronaut.context.BeanProvider;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
+import org.geysermc.floodgate.core.platform.command.Placeholder;
+import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.core.util.LanguageManager;
 import org.slf4j.Logger;
+import org.slf4j.helpers.MessageFormatter;
 
 @Singleton
 public final class Slf4jFloodgateLogger implements FloodgateLogger {
@@ -54,7 +56,7 @@ public final class Slf4jFloodgateLogger implements FloodgateLogger {
 
     @Override
     public void error(String message, Throwable throwable, Object... args) {
-        logger.error(format(message, args), throwable);
+        logger.error(MessageFormatter.basicArrayFormat(message, args), throwable);
     }
 
     @Override
@@ -68,8 +70,16 @@ public final class Slf4jFloodgateLogger implements FloodgateLogger {
     }
 
     @Override
-    public void translatedInfo(String message, Object... args) {
-        logger.info(languageManager.get().getLogString(message, args));
+    public void info(Component message) {
+        //todo check on other platforms if just serializing the component works.
+        // it does on Velocity
+        logger.info(MiniMessage.miniMessage().serialize(message));
+    }
+
+    @Override
+    public void translatedInfo(TranslatableMessage message, Placeholder... args) {
+        var manager = languageManager.get();
+        info(message.translateMessage(manager, manager.getDefaultLocale(), args));
     }
 
     @Override

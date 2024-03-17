@@ -25,13 +25,13 @@
 
 package org.geysermc.floodgate.core.platform.command;
 
-import static org.geysermc.floodgate.core.util.Constants.COLOR_CHAR;
 import static org.incendo.cloud.description.Description.description;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
-import java.util.Locale;
 import java.util.Set;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.geysermc.floodgate.core.command.util.Permission;
 import org.geysermc.floodgate.core.connection.audience.UserAudience;
 import org.incendo.cloud.Command;
@@ -68,19 +68,21 @@ public abstract class SubCommands implements FloodgateCommand {
     }
 
     public void execute(CommandContext<UserAudience> context) {
-        StringBuilder helpMessage = new StringBuilder("Available subcommands are:\n");
+        var helpMessage = Component.text("Available subcommands are:").appendNewline(); //todo add translation
 
+        //todo this should probably follow MessageType as well
         for (FloodgateSubCommand subCommand : subCommands) {
             var permission = subCommand.permission();
             if (permission == null || context.sender().hasPermission(permission.get())) {
-                helpMessage.append('\n').append(COLOR_CHAR).append('b')
-                        .append(subCommand.name().toLowerCase(Locale.ROOT))
-                        .append(COLOR_CHAR).append("f - ").append(COLOR_CHAR).append('7')
-                        .append(subCommand.description());
+                var component = Component.newline()
+                        .append(Component.text(subCommand.name(), NamedTextColor.AQUA))
+                        .append(Component.text(" - "))
+                        .append(Component.text(subCommand.description(), NamedTextColor.GRAY));
+                helpMessage = helpMessage.append(component);
             }
         }
 
-        context.sender().sendMessage(helpMessage.toString());
+        context.sender().sendMessage(helpMessage);
     }
 
     @PostConstruct

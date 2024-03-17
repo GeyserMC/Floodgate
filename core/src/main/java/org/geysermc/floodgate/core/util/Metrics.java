@@ -41,10 +41,10 @@ import org.bstats.charts.SimplePie;
 import org.bstats.charts.SingleLineChart;
 import org.bstats.json.JsonObjectBuilder;
 import org.geysermc.api.GeyserApiBase;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.config.FloodgateConfig.MetricsConfig;
 import org.geysermc.floodgate.core.event.lifecycle.ShutdownEvent;
+import org.geysermc.floodgate.core.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.platform.util.PlatformUtils;
 
 @Singleton

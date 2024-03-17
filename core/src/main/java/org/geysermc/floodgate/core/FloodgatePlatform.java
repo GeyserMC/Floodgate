@@ -39,7 +39,6 @@ import org.geysermc.floodgate.api.InstanceHolder;
 import org.geysermc.floodgate.api.event.FloodgateEventBus;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.inject.PlatformInjector;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
 import org.geysermc.floodgate.core.config.ConfigLoader;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
@@ -47,6 +46,9 @@ import org.geysermc.floodgate.core.database.loader.DatabaseLoader;
 import org.geysermc.floodgate.core.event.EventBus;
 import org.geysermc.floodgate.core.event.lifecycle.PostEnableEvent;
 import org.geysermc.floodgate.core.event.lifecycle.ShutdownEvent;
+import org.geysermc.floodgate.core.logger.FloodgateLogger;
+import org.geysermc.floodgate.core.platform.CommonPlatformMessages;
+import org.geysermc.floodgate.core.platform.command.Placeholder;
 import org.geysermc.floodgate.isolation.IsolatedPlatform;
 import org.geysermc.floodgate.isolation.library.LibraryManager;
 
@@ -98,8 +100,9 @@ public abstract class FloodgatePlatform implements IsolatedPlatform {
         Geyser.set(api);
 
         long endTime = System.currentTimeMillis();
-        context.getBean(FloodgateLogger.class)
-                .translatedInfo("floodgate.core.finish", endTime - startTime);
+        context.getBean(FloodgateLogger.class).translatedInfo(
+                CommonPlatformMessages.CORE_FINISH,
+                Placeholder.literal("time_in_ms", endTime - startTime));
     }
 
     @Override

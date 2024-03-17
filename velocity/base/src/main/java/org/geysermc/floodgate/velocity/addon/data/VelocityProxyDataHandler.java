@@ -40,13 +40,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import org.geysermc.api.connection.Connection;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.addon.data.CommonNettyDataHandler;
 import org.geysermc.floodgate.core.addon.data.PacketBlocker;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.connection.DataSeeker;
 import org.geysermc.floodgate.core.connection.FloodgateDataHandler;
 import org.geysermc.floodgate.core.connection.FloodgateDataHandler.HandleResult;
+import org.geysermc.floodgate.core.logger.FloodgateLogger;
 
 public final class VelocityProxyDataHandler extends CommonNettyDataHandler {
     private static final Field HANDSHAKE;

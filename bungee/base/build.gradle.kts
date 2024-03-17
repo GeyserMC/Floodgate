@@ -5,6 +5,7 @@ dependencies {
     compileOnlyApi(projects.isolation)
 
     implementation(libs.cloud.bungee)
+    implementation(libs.adventure.platform.bungee)
 }
 
 relocate("net.kyori")

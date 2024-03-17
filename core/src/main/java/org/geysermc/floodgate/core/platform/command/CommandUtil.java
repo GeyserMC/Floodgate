@@ -36,6 +36,7 @@ import java.util.Objects;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.api.GeyserApiBase;
@@ -161,18 +162,22 @@ public abstract class CommandUtil {
      * @param target  the player that should receive the message
      * @param message the message
      */
-    public abstract void sendMessage(Object target, String message);
+    public abstract void sendMessage(Object target, Component message);
 
     /**
      * Kicks the given player using the given message as the kick reason.
      *
      * @param player  the player that should be kicked
-     * @param message the command message
+     * @param message the message
      */
-    public abstract void kickPlayer(Object player, String message);
+    public abstract void kickPlayer(Object player, Component message);
 
-    public String translateMessage(String locale, TranslatableMessage message, Object... args) {
+    public Component translateMessage(String locale, TranslatableMessage message, Placeholder... args) {
         return message.translateMessage(manager, locale, args);
+    }
+
+    public LanguageManager languageManager() {
+        return manager;
     }
 
     /**
