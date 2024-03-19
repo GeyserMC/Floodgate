@@ -25,7 +25,6 @@
 
 package org.geysermc.floodgate.core.util;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
 import java.io.IOException;
@@ -117,21 +116,6 @@ public class Utils {
             return (char) ('0' + codeChar);
         }
         return (char) ('A' + codeChar);
-    }
-
-    public static int readVarInt(ByteBuf buffer) {
-        int out = 0;
-        int count = 0;
-        byte current;
-        do {
-            current = buffer.readByte();
-            out |= (current & 0x7F) << (count++ * 7);
-
-            if (count > 5) {
-                throw new RuntimeException("VarInt is bigger then allowed");
-            }
-        } while ((current & 0x80) != 0);
-        return out;
     }
 
     public static String getStackTrace(Throwable throwable) {
