@@ -27,23 +27,23 @@ package org.geysermc.floodgate.core.command.main;
 
 import static org.geysermc.floodgate.core.platform.command.Placeholder.literal;
 
-import com.google.gson.JsonElement;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.geysermc.floodgate.core.command.CommonCommandMessage;
 import org.geysermc.floodgate.core.command.util.Permission;
 import org.geysermc.floodgate.core.connection.audience.UserAudience;
+import org.geysermc.floodgate.core.http.downloads.DownloadClient;
 import org.geysermc.floodgate.core.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.platform.command.FloodgateSubCommand;
 import org.geysermc.floodgate.core.platform.command.MessageType;
 import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.core.util.Constants;
-import org.geysermc.floodgate.core.util.HttpClient;
+import org.geysermc.floodgate.core.util.DynamicConstants;
 import org.incendo.cloud.context.CommandContext;
 
 @Singleton
 public class VersionSubcommand extends FloodgateSubCommand {
-    @Inject HttpClient httpClient;
+    @Inject DownloadClient downloadClient;
     @Inject FloodgateLogger logger;
 
     VersionSubcommand() {
@@ -60,55 +60,33 @@ public class VersionSubcommand extends FloodgateSubCommand {
         UserAudience sender = context.sender();
         sender.sendMessage(
                 Message.VERSION_INFO,
-                literal("version", Constants.FULL_VERSION),
-                literal("branch", Constants.GIT_BRANCH));
+                literal("version", DynamicConstants.FULL_VERSION),
+                literal("branch", DynamicConstants.GIT_BRANCH));
+
         sender.sendMessage(Message.VERSION_FETCH_INFO);
 
-        String baseUrl = String.format(
-                "https://ci.opencollab.dev/job/GeyserMC/job/Floodgate/job/%s/lastSuccessfulBuild/",
-                Constants.GIT_BRANCH
-        );
-
-        httpClient.asyncGet(
-                baseUrl + "buildNumber",
-                JsonElement.class
-        ).whenComplete((result, error) -> {
+        downloadClient.latestBuildFor("floodgate").whenComplete((result, error) -> {
             if (error != null) {
                 sender.sendMessage(Message.VERSION_FETCH_ERROR);
-                error.printStackTrace();
+                logger.error("An error occurred while fetching latest version", error);
                 return;
             }
 
-            JsonElement response = result.getResponse();
-
-            logger.info(String.valueOf(response));
-            logger.info("{}", result.getHttpCode());
-
-            if (result.getHttpCode() == 404) {
+            if (result == null) {
                 sender.sendMessage(Message.VERSION_FETCH_NOT_FOUND);
                 return;
             }
 
-            if (!result.isCodeOk()) {
-                //todo make it more generic instead of using a Whitelist command strings
-                logger.error(
-                        "Got an error from requesting the latest Floodgate version: {}",
-                        response.toString()
-                );
-                sender.sendMessage(CommonCommandMessage.UNEXPECTED_ERROR);
-                return;
-            }
+            int buildNumber = result.build();
 
-            int buildNumber = response.getAsInt();
-
-            if (buildNumber > Constants.BUILD_NUMBER) {
+            if (buildNumber > DynamicConstants.BUILD_NUMBER) {
                 sender.sendMessage(
                         Message.VERSION_OUTDATED,
-                        literal("count", buildNumber - Constants.BUILD_NUMBER),
-                        literal("url", baseUrl));
+                        literal("count", buildNumber - DynamicConstants.BUILD_NUMBER),
+                        literal("url", Constants.LATEST_DOWNLOAD_URL));
                 return;
             }
-            if (buildNumber == Constants.BUILD_NUMBER) {
+            if (buildNumber == DynamicConstants.BUILD_NUMBER) {
                 sender.sendMessage(Message.VERSION_LATEST);
                 return;
             }
@@ -119,7 +97,7 @@ public class VersionSubcommand extends FloodgateSubCommand {
     public static final class Message {
         public static final TranslatableMessage VERSION_INFO = new TranslatableMessage("floodgate.command.main.version.info", MessageType.NORMAL);
         public static final TranslatableMessage VERSION_FETCH_INFO = new TranslatableMessage("floodgate.command.main.version.fetch.info", MessageType.INFO);
-        public static final TranslatableMessage VERSION_FETCH_ERROR = new TranslatableMessage("floodgate.command.main.version.fetch.error", MessageType.ERROR);
+        public static final TranslatableMessage VERSION_FETCH_ERROR = new TranslatableMessage("floodgate.command.main.version.fetch.error " + CommonCommandMessage.CHECK_CONSOLE, MessageType.ERROR);
         public static final TranslatableMessage VERSION_FETCH_NOT_FOUND = new TranslatableMessage("floodgate.command.main.version.fetch.not_found", MessageType.ERROR);
         public static final TranslatableMessage VERSION_OUTDATED = new TranslatableMessage("floodgate.command.main.version.fetch.result.outdated", MessageType.NORMAL);
         public static final TranslatableMessage VERSION_LATEST = new TranslatableMessage("floodgate.command.main.version.fetch.result.latest", MessageType.SUCCESS);

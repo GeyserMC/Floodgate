@@ -1,3 +1,4 @@
 http:
-  baseUrl: https://api.geysermc.org
-  userAgent: GeyserMC/Floodgate
+  baseUrl:
+    api: https://api.geysermc.org
+    download: https://download.geysermc.org

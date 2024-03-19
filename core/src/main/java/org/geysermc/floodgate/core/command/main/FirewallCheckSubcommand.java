@@ -27,7 +27,6 @@ package org.geysermc.floodgate.core.command.main;
 
 import static org.geysermc.floodgate.core.platform.command.Placeholder.literal;
 
-import com.google.gson.JsonElement;
 import it.unimi.dsi.fastutil.Pair;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -36,18 +35,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
 import org.geysermc.floodgate.core.command.util.Permission;
 import org.geysermc.floodgate.core.connection.audience.UserAudience;
+import org.geysermc.floodgate.core.http.api.GlobalApiClient;
 import org.geysermc.floodgate.core.platform.command.FloodgateSubCommand;
 import org.geysermc.floodgate.core.platform.command.MessageType;
 import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
-import org.geysermc.floodgate.core.util.Constants;
-import org.geysermc.floodgate.core.util.HttpClient;
-import org.geysermc.floodgate.core.util.HttpClient.HttpResponse;
 import org.geysermc.floodgate.core.util.Utils;
 import org.incendo.cloud.context.CommandContext;
 
 @Singleton
 final class FirewallCheckSubcommand extends FloodgateSubCommand {
-    @Inject HttpClient httpProvider;
+    @Inject GlobalApiClient globalApiClient;
 
     FirewallCheckSubcommand() {
         super(
@@ -72,19 +69,7 @@ final class FirewallCheckSubcommand extends FloodgateSubCommand {
     }
 
     private BooleanSupplier globalApiCheck(UserAudience sender) {
-        return executeFirewallText(
-                sender, "global api",
-                () -> {
-                    HttpResponse<JsonElement> response =
-                            httpProvider.get(Constants.HEALTH_URL, JsonElement.class);
-
-                    if (!response.isCodeOk()) {
-                        throw new IllegalStateException(String.format(
-                                "Didn't receive an 'ok' http code. Got: %s, response: %s",
-                                response.getHttpCode(), response.getResponse()
-                        ));
-                    }
-                });
+        return executeFirewallText(sender, "global api", () -> globalApiClient.health());
     }
 
     private BooleanSupplier executeFirewallText(

@@ -101,7 +101,7 @@ public final class Metrics {
         );
 
         metricsBase.addCustomChart(
-                new SimplePie("floodgate_version", () -> Constants.FULL_VERSION)
+                new SimplePie("floodgate_version", () -> DynamicConstants.FULL_VERSION)
         );
 
         metricsBase.addCustomChart(

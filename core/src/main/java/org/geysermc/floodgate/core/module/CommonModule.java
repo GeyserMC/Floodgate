@@ -40,7 +40,6 @@ import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.core.crypto.DataCodecType;
 import org.geysermc.floodgate.core.crypto.topping.Base64Topping;
 import org.geysermc.floodgate.core.crypto.topping.Topping;
-import org.geysermc.floodgate.core.util.Constants;
 
 @Factory
 public class CommonModule {
@@ -69,20 +68,6 @@ public class CommonModule {
     @Singleton
     public Topping topping() {
         return new Base64Topping();
-    }
-
-    @Bean
-    @Singleton
-    @Named("gitBranch")
-    public String gitBranch() {
-        return Constants.GIT_BRANCH;
-    }
-
-    @Bean
-    @Singleton
-    @Named("buildNumber")
-    public int buildNumber() {
-        return Constants.BUILD_NUMBER;
     }
 
     @Bean

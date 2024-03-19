@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,25 +23,11 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.http.xbox;
+package org.geysermc.floodgate.core.util;
 
-import io.micronaut.http.HttpHeaders;
-import io.micronaut.http.annotation.Get;
-import io.micronaut.http.annotation.Header;
-import io.micronaut.http.client.annotation.Client;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import java.util.concurrent.CompletableFuture;
-import org.geysermc.floodgate.core.util.Constants;
-
-@Client("${http.baseUrl.api}/v2/xbox")
-@Header(name = HttpHeaders.USER_AGENT, value = Constants.USER_AGENT)
-public interface XboxClient {
-    @Get("/xuid/{gamertag}")
-    CompletableFuture<GetXuidResult> xuidByGamertag(
-            @NotNull @Size(min = 1, max = 16) String gamertag
-    );
-
-    @Get("/gamertag/{xuid}")
-    CompletableFuture<GetGamertagResult> gamertagByXuid(long xuid);
+public final class DynamicConstants {
+    public static final String FULL_VERSION = "@fullVersion@";
+    public static final String VERSION = "@version@";
+    public static final int BUILD_NUMBER = Integer.parseInt("@buildNumber@");
+    public static final String GIT_BRANCH = "@branch@";
 }

@@ -26,10 +26,6 @@
 package org.geysermc.floodgate.core.util;
 
 public final class Constants {
-    public static final String FULL_VERSION = "@fullVersion@";
-    public static final String VERSION = "@version@";
-    public static final int BUILD_NUMBER = Integer.parseInt("@buildNumber@");
-    public static final String GIT_BRANCH = "@branch@";
     public static final int METRICS_ID = 14649;
 
     public static final int CONFIG_VERSION = 3;
@@ -38,25 +34,14 @@ public final class Constants {
     public static final boolean DEBUG_MODE = false;
     public static final boolean PRINT_ALL_PACKETS = false;
 
-    public static final String DATABASE_NAME_FORMAT = "^floodgate-[a-zA-Z0-9_]{0,16}-database.jar$";
-
 
     public static final String USER_AGENT = "GeyserMC/Floodgate";
     private static final String API_BASE_URL = "s://api.geysermc.org";
     public static final String HEALTH_URL = "http" + API_BASE_URL + "/health";
 
-    public static final String WEBSOCKET_URL = "ws" + API_BASE_URL + "/ws";
-    public static final String GET_XUID_URL = "http" + API_BASE_URL + "/v2/xbox/xuid/";
-    public static final String GET_GAMERTAG_URL = "http" + API_BASE_URL + "/v2/xbox/gamertag/";
-    public static final String NEWS_OVERVIEW_URL = "http" + API_BASE_URL + "/v2/news/";
-    public static final String GET_BEDROCK_LINK = "http" + API_BASE_URL + "/v2/link/bedrock/";
-
     public static final String LINK_INFO_URL = "https://link.geysermc.org/";
+    public static final String LATEST_DOWNLOAD_URL = "https://geysermc.org/download";
 
-    public static final String NEWS_PROJECT_NAME = "floodgate";
-
-
-    public static final String NTP_SERVER = "time.cloudflare.com";
     public static final String INTERNAL_ERROR_MESSAGE =
             "An internal error happened while handling Floodgate data." +
             " Try logging in again or contact a server administrator if the issue persists.";
