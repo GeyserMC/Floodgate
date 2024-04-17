@@ -25,17 +25,12 @@
 
 package org.geysermc.floodgate.module;
 
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.execution.CommandExecutionCoordinator;
-import cloud.commandframework.velocity.CloudInjectionModule;
-import cloud.commandframework.velocity.VelocityCommandManager;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.event.EventManager;
 import com.velocitypowered.api.proxy.ProxyServer;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +46,7 @@ import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.platform.util.PlatformUtils;
 import org.geysermc.floodgate.player.FloodgateCommandPreprocessor;
 import org.geysermc.floodgate.player.UserAudience;
+import org.geysermc.floodgate.player.audience.FloodgateSenderMapper;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.pluginmessage.PluginMessageRegistration;
 import org.geysermc.floodgate.pluginmessage.VelocityPluginMessageRegistration;
@@ -59,6 +55,10 @@ import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.util.VelocityCommandUtil;
 import org.geysermc.floodgate.util.VelocityPlatformUtils;
 import org.geysermc.floodgate.util.VelocitySkinApplier;
+import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.execution.ExecutionCoordinator;
+import org.incendo.cloud.velocity.CloudInjectionModule;
+import org.incendo.cloud.velocity.VelocityCommandManager;
 
 @RequiredArgsConstructor
 public final class VelocityPlatformModule extends AbstractModule {
@@ -77,9 +77,8 @@ public final class VelocityPlatformModule extends AbstractModule {
     public CommandManager<UserAudience> commandManager(CommandUtil commandUtil) {
         Injector child = guice.createChildInjector(new CloudInjectionModule<>(
                 UserAudience.class,
-                CommandExecutionCoordinator.simpleCoordinator(),
-                commandUtil::getUserAudience,
-                audience -> (CommandSource) audience.source()
+                ExecutionCoordinator.simpleCoordinator(),
+                new FloodgateSenderMapper<>(commandUtil)
         ));
 
         CommandManager<UserAudience> commandManager =

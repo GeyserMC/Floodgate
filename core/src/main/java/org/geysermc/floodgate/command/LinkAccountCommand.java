@@ -26,12 +26,8 @@
 package org.geysermc.floodgate.command;
 
 import static org.geysermc.floodgate.command.CommonCommandMessage.CHECK_CONSOLE;
+import static org.incendo.cloud.parser.standard.StringParser.stringParser;
 
-import cloud.commandframework.ArgumentDescription;
-import cloud.commandframework.Command;
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.arguments.standard.StringArgument;
-import cloud.commandframework.context.CommandContext;
 import com.google.inject.Inject;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -46,9 +42,13 @@ import org.geysermc.floodgate.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.player.UserAudience.PlayerAudience;
+import org.geysermc.floodgate.player.audience.PlayerAudienceArgument;
 import org.geysermc.floodgate.player.audience.ProfileAudience;
-import org.geysermc.floodgate.player.audience.ProfileAudienceArgument;
 import org.geysermc.floodgate.util.Constants;
+import org.incendo.cloud.Command;
+import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.context.CommandContext;
+import org.incendo.cloud.description.Description;
 
 @NoArgsConstructor
 public final class LinkAccountCommand implements FloodgateCommand {
@@ -56,20 +56,19 @@ public final class LinkAccountCommand implements FloodgateCommand {
     @Inject private FloodgateLogger logger;
 
     @Override
-    public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
+    public Command<PlayerAudience> buildCommand(CommandManager<UserAudience> commandManager) {
         return commandManager.commandBuilder("linkaccount",
-                ArgumentDescription.of("Link your Java account with your Bedrock account"))
+                Description.of("Link your Java account with your Bedrock account"))
                 .senderType(PlayerAudience.class)
                 .permission(Permission.COMMAND_LINK.get())
-                .argument(ProfileAudienceArgument.of("player", true))
-                .argument(StringArgument.optional("code"))
+                .argument(PlayerAudienceArgument.ofAnyUsernameBoth("player"))
+                .optional("code", stringParser())
                 .handler(this::execute)
                 .build();
     }
 
-    @Override
-    public void execute(CommandContext<UserAudience> context) {
-        UserAudience sender = context.getSender();
+    public void execute(CommandContext<PlayerAudience> context) {
+        UserAudience sender = context.sender();
 
         PlayerLink link = api.getPlayerLink();
 

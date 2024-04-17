@@ -25,14 +25,14 @@
 
 package org.geysermc.floodgate.player;
 
-import cloud.commandframework.execution.preprocessor.CommandPreprocessingContext;
-import cloud.commandframework.execution.preprocessor.CommandPreprocessor;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.platform.command.CommandUtil;
+import org.incendo.cloud.execution.preprocessor.CommandPreprocessingContext;
+import org.incendo.cloud.execution.preprocessor.CommandPreprocessor;
 
 /**
- * Command preprocessor which decorated incoming {@link cloud.commandframework.context.CommandContext}
+ * Command preprocessor which decorated incoming {@link org.incendo.cloud.context.CommandContext}
  * with Floodgate specific objects
  *
  * @param <C> Command sender type
@@ -44,6 +44,6 @@ public final class FloodgateCommandPreprocessor<C> implements CommandPreprocesso
 
     @Override
     public void accept(@NonNull CommandPreprocessingContext<C> context) {
-        context.getCommandContext().store("CommandUtil", commandUtil);
+        context.commandContext().store("CommandUtil", commandUtil);
     }
 }

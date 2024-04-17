@@ -12,10 +12,10 @@ indra {
 
 dependencies {
     api(projects.core)
-    implementation("cloud.commandframework", "cloud-velocity", Versions.cloudVersion)
+    implementation("org.incendo", "cloud-velocity", Versions.cloudVersion)
 }
 
-relocate("cloud.commandframework")
+relocate("org.incendo.cloud")
 // used in cloud
 relocate("io.leangen.geantyref")
 

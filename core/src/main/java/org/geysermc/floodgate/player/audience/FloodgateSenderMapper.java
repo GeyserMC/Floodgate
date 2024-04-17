@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2024 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,33 +23,30 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.command;
+package org.geysermc.floodgate.player.audience;
 
-import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.platform.command.FloodgateCommand;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.player.UserAudience;
-import org.geysermc.floodgate.util.Constants;
-import org.incendo.cloud.Command;
-import org.incendo.cloud.CommandManager;
-import org.incendo.cloud.context.CommandContext;
+import org.incendo.cloud.SenderMapper;
 
-public class TestCommand implements FloodgateCommand {
-    @Override
-    public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
-        return commandManager.commandBuilder("floodgate-test")
-                .senderType(UserAudience.class)
-                .handler(this::execute)
-                .build();
-    }
+public class FloodgateSenderMapper<T> implements SenderMapper<T, UserAudience> {
 
-    public void execute(CommandContext<UserAudience> context) {
-        int players = FloodgateApi.getInstance().getPlayers().size();
-        context.sender().sendMessage(String.valueOf(players));
+    private final CommandUtil commandUtil;
+
+    public FloodgateSenderMapper(CommandUtil commandUtil) {
+        this.commandUtil = commandUtil;
     }
 
     @Override
-    public boolean shouldRegister(FloodgateConfig config) {
-        return Constants.DEBUG_MODE;
+    public @NonNull UserAudience map(@NonNull T base) {
+        return this.commandUtil.getUserAudience(base);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public @NonNull T reverse(@NonNull UserAudience mapped) {
+        return (T) mapped.source();
     }
 }

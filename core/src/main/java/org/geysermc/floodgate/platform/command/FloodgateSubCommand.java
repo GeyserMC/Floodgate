@@ -25,9 +25,9 @@
 
 package org.geysermc.floodgate.platform.command;
 
-import cloud.commandframework.context.CommandContext;
 import org.geysermc.floodgate.command.util.Permission;
 import org.geysermc.floodgate.player.UserAudience;
+import org.incendo.cloud.context.CommandContext;
 
 public abstract class FloodgateSubCommand {
     public abstract String name();
