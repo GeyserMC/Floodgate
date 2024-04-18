@@ -56,7 +56,7 @@ public final class MainCommand extends SubCommands implements FloodgateCommand {
 
         for (FloodgateSubCommand subCommand : subCommands()) {
             commandManager.command(builder
-                    .literal(subCommand.name().toLowerCase(Locale.ROOT), subCommand.description())
+                    .literal(subCommand.name().toLowerCase(Locale.ROOT), Description.of(subCommand.description()))
                     .permission(subCommand.permission().get())
                     .handler(subCommand::execute)
             );
