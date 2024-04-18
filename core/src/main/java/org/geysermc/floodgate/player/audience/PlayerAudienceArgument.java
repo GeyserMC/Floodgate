@@ -41,15 +41,6 @@ import org.incendo.cloud.suggestion.Suggestion;
 
 public class PlayerAudienceArgument {
 
-    private UUID uuid;
-
-    private String username;
-
-    public PlayerAudienceArgument(UUID uuid, String username) {
-        this.uuid = uuid;
-        this.username = username;
-    }
-
     public static CommandComponent.Builder<UserAudience, ProfileAudience> ofAnyIdentifierBedrock(String name) {
         return of(name, true, true, PlayerType.ONLY_BEDROCK);
     }

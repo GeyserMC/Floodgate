@@ -12,7 +12,7 @@ tasks {
     named<Jar>("jar") {
         archiveClassifier.set("")
     }
-    val shadowJar = named<ShadowJar>("shadowJar") {
+    named<ShadowJar>("shadowJar") {
         archiveClassifier.set("shaded")
     }
 }
