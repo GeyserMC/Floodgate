@@ -42,7 +42,7 @@ import org.geysermc.floodgate.core.crypto.topping.Base64Topping;
 import org.geysermc.floodgate.core.crypto.topping.Topping;
 
 @Factory
-public class CommonModule {
+public final class CommonModule {
     @Bean(preDestroy = "shutdown")
     @Singleton
     @Named("commonPool")

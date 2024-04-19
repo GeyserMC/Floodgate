@@ -31,7 +31,7 @@ import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 
 @Factory
-public class SpigotPlatformModule {
+public final class SpigotPlatformModule {
     @Bean
     @Named("packetEncoder")
     @Singleton

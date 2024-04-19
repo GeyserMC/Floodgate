@@ -21,7 +21,7 @@ adventure = "4.16.0"
 adventure-platform = "4.3.2"
 
 # bungee
-bungee = "master-SNAPSHOT"
+bungee = "1.20-R0.3-SNAPSHOT"
 
 # spigot
 paper = "1.20.2-R0.1-SNAPSHOT"
@@ -82,7 +82,7 @@ junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 
 # bungee
-bungee = { module = "com.github.SpigotMC.BungeeCord:bungeecord-proxy", version.ref = "bungee" }
+bungee = { module = "net.md-5:bungeecord-proxy", version.ref = "bungee" }
 cloud-bungee = { module = "org.incendo:cloud-bungee", version.ref = "cloud" }
 
 # spigot

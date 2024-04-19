@@ -47,22 +47,22 @@ public class BungeeDataAddon implements InjectorAddon {
     FloodgateDataHandler handshakeHandler;
 
     @Inject
-    private ProxyFloodgateConfig config;
+    ProxyFloodgateConfig config;
 
     @Inject
     FloodgateLogger logger;
 
     @Inject
     @Named("packetHandler")
-    private String packetHandler;
+    String packetHandler;
 
     @Inject
     @Named("packetDecoder")
-    private String packetDecoder;
+    String packetDecoder;
 
     @Inject
     @Named("packetEncoder")
-    private String packetEncoder;
+    String packetEncoder;
 
     @Inject
     @Named("connectionAttribute")

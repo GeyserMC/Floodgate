@@ -40,7 +40,7 @@ import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.velocity.VelocityCommandManager;
 
 @Factory
-public class VelocityPlatformModule {
+public final class VelocityPlatformModule {
     @Bean
     @Singleton
     public CommandManager<UserAudience> commandManager(
