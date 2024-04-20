@@ -107,7 +107,7 @@ public class StandaloneFloodgateConnectionBuilder {
 
     public FloodgateConnection build() {
         // todo add an option to use identity instead of xuid
-        UUID javaUniqueId = Utils.getJavaUuid(xuid);
+        UUID javaUniqueId = Utils.toFloodgateUniqueId(xuid);
 
         return new StandaloneFloodgateConnection(
                 version,

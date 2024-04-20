@@ -72,7 +72,7 @@ public class HandshakeDataImpl implements HandshakeData {
             linkedPlayer = connection.linkedPlayer();
 
             javaUsername = connection.javaUsername();
-            javaUniqueId = Utils.getJavaUuid(bedrockData.getXuid());
+            javaUniqueId = Utils.toFloodgateUniqueId(bedrockData.getXuid());
             this.ip = bedrockData.getIp();
         }
 

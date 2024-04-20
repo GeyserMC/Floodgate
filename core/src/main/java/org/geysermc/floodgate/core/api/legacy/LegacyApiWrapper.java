@@ -41,6 +41,7 @@ import org.geysermc.floodgate.core.connection.FloodgateConnection;
 import org.geysermc.floodgate.core.http.xbox.GetGamertagResult;
 import org.geysermc.floodgate.core.http.xbox.GetXuidResult;
 import org.geysermc.floodgate.core.http.xbox.XboxClient;
+import org.geysermc.floodgate.core.util.Utils;
 
 @Singleton
 public final class LegacyApiWrapper implements FloodgateApi {
@@ -86,7 +87,7 @@ public final class LegacyApiWrapper implements FloodgateApi {
 
     @Override
     public boolean isFloodgateId(UUID uuid) {
-        return uuid.getMostSignificantBits() == 0;
+        return Utils.isFloodgateUniqueId(uuid);
     }
 
     @Override

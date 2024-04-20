@@ -59,7 +59,7 @@ public class TestCommand implements FloodgateCommand {
 
     public void execute(CommandContext<ConsoleAudience> context) {
         try {
-            link.addLink(context.get("uuid"), context.get("name"), Utils.getJavaUuid(context.get("xuid"))).get();
+            link.addLink(context.get("uuid"), context.get("name"), Utils.toFloodgateUniqueId(context.get("xuid"))).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }

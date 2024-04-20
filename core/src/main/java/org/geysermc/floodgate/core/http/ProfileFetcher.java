@@ -30,7 +30,7 @@ public final class ProfileFetcher {
             if (xuid == null) {
                 return null;
             }
-            return new ProfileAudience(Utils.getJavaUuid(xuid), gamertag);
+            return new ProfileAudience(Utils.toFloodgateUniqueId(xuid), gamertag);
         });
     }
 
@@ -40,7 +40,7 @@ public final class ProfileFetcher {
             if (gamertag == null) {
                 return null;
             }
-            return new ProfileAudience(Utils.getJavaUuid(xuid), gamertag);
+            return new ProfileAudience(Utils.toFloodgateUniqueId(xuid), gamertag);
         });
     }
 

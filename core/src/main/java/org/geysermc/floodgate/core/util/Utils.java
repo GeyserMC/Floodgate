@@ -85,12 +85,16 @@ public class Utils {
         return locale.getLanguage() + "_" + locale.getCountry();
     }
 
-    public static UUID getJavaUuid(long xuid) {
+    public static boolean isFloodgateUniqueId(UUID uuid) {
+        return uuid.getMostSignificantBits() == 0;
+    }
+
+    public static UUID toFloodgateUniqueId(long xuid) {
         return new UUID(0, xuid);
     }
 
-    public static UUID getJavaUuid(String xuid) {
-        return getJavaUuid(Long.parseLong(xuid));
+    public static UUID toFloodgateUniqueId(String xuid) {
+        return toFloodgateUniqueId(Long.parseLong(xuid));
     }
 
     public static UUID fromShortUniqueId(String uuid) {

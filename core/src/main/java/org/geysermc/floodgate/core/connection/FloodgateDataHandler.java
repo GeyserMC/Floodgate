@@ -128,7 +128,7 @@ public final class FloodgateDataHandler {
         if (!link.isEnabled() || connection.isLinked()) {
             return CompletableFuture.completedFuture(null);
         }
-        return link.fetchLink(Utils.getJavaUuid(connection.xuid()))
+        return link.fetchLink(Utils.toFloodgateUniqueId(connection.xuid()))
                 .thenApply(link -> {
                     if (link == null) {
                         return null;

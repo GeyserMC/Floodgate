@@ -89,10 +89,6 @@ public class SimpleFloodgateApi implements GeyserApiBase {
         return connectionManager.connectionByXuid(xuid);
     }
 
-    public boolean isFloodgateId(UUID uuid) {
-        return uuid.getMostSignificantBits() == 0;
-    }
-
     @Override
     public boolean sendForm(@NonNull UUID uuid, @NonNull Form form) {
         return pluginMessageManager.get().getChannel(FormChannel.class).sendForm(uuid, form);

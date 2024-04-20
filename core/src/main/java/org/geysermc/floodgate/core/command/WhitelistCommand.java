@@ -42,6 +42,7 @@ import org.geysermc.floodgate.core.platform.command.CommandUtil;
 import org.geysermc.floodgate.core.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.core.platform.command.MessageType;
 import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
+import org.geysermc.floodgate.core.util.Utils;
 import org.incendo.cloud.Command;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
@@ -83,7 +84,7 @@ public class WhitelistCommand implements FloodgateCommand {
         }
 
         if (uuid != null) {
-            if (uuid.getMostSignificantBits() != 0) { // TODO
+            if (!Utils.isFloodgateUniqueId(uuid)) {
                 sender.sendMessage(Message.INVALID_USERNAME);
                 return;
             }

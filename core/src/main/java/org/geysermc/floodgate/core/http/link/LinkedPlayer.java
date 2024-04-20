@@ -34,16 +34,12 @@ import org.geysermc.floodgate.core.util.Utils;
 @Serdeable
 public record LinkedPlayer(
         @JsonbProperty("bedrock_id")
-        @Nullable
-        Long xuid,
-        @Nullable
-        String gamertag,
+        @Nullable Long xuid,
+        @Nullable String gamertag,
         @JsonbProperty("java_id")
-        @Nullable
-        UUID uuid,
+        @Nullable UUID uuid,
         @JsonbProperty("java_name")
-        @Nullable
-        String username
+        @Nullable String username
 ) {
     public boolean isLinked() {
         // everything will be null when the player is not linked, since we return an empty object.
@@ -56,6 +52,6 @@ public record LinkedPlayer(
             return null;
         }
 
-        return new org.geysermc.floodgate.core.database.entity.LinkedPlayer(Utils.getJavaUuid(xuid), uuid, username);
+        return new org.geysermc.floodgate.core.database.entity.LinkedPlayer(Utils.toFloodgateUniqueId(xuid), uuid, username);
     }
 }

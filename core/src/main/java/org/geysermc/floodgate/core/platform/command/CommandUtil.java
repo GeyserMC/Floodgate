@@ -139,7 +139,7 @@ public abstract class CommandUtil {
             return player;
         }
         if (filter == ONLY_BEDROCK || filter == ONLY_JAVA) {
-            if (api.isBedrockPlayer(getUuidFromSource(player)) == (filter == ONLY_BEDROCK)) {
+            if (Utils.isFloodgateUniqueId(getUuidFromSource(player)) == (filter == ONLY_BEDROCK)) {
                 return player;
             }
         }
@@ -189,7 +189,7 @@ public abstract class CommandUtil {
      * Defaults to false when this platform doesn't support whitelisting.
      */
     public boolean whitelistPlayer(long xuid, String username) {
-        UUID uuid = Utils.getJavaUuid(xuid);
+        UUID uuid = Utils.toFloodgateUniqueId(xuid);
         return whitelistPlayer(uuid, username);
     }
 
@@ -214,7 +214,7 @@ public abstract class CommandUtil {
      * whitelisted. Defaults to false when this platform doesn't support whitelisting.
      */
     public boolean removePlayerFromWhitelist(long xuid, String username) {
-        UUID uuid = Utils.getJavaUuid(xuid);
+        UUID uuid = Utils.toFloodgateUniqueId(xuid);
         return removePlayerFromWhitelist(uuid, username);
     }
 
