@@ -9,9 +9,11 @@ jobs:
         PROJECT: 'floodgate'
     steps:
       - name: Set Build Number
+        if: ${{ github.repository == 'GeyserMC/Floodgate' }}
         env:
           BUILD_JSON: ${{ vars.RELEASEACTION_PREVRELEASE }}
         run: |
+          BUILD_JSON=${BUILD_JSON:="{}"}
           BUILD_NUMBER=$(echo $BUILD_JSON | jq --arg branch "${GITHUB_REF_NAME}" 'if .[$branch] == null then 1 else .[$branch] | .t | tonumber + 1 end // 1')
           echo "BUILD_NUMBER=${BUILD_NUMBER}" >> $GITHUB_ENV
 
