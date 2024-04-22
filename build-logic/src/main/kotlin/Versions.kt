@@ -30,7 +30,7 @@ object Versions {
     const val configUtilsVersion = "1.0-SNAPSHOT"
     const val spigotVersion = "1.19.4-R0.1-SNAPSHOT"
     const val fastutilVersion = "8.5.3"
-    const val guiceVersion = "5.1.0"
+    const val guiceVersion = "6.0.0"
     const val nettyVersion = "4.1.49.Final"
     const val snakeyamlVersion = "1.28"
     const val cloudVersion = "2.0.0-beta.2"
