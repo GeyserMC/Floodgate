@@ -49,7 +49,7 @@ fun Project.versionWithBranchName(): String =
     branchName().replace(Regex("[^0-9A-Za-z-_]"), "-") + '-' + version
 
 fun buildNumber(): Int =
-    (System.getenv("GITHUB_RUN_NUMBER") ?: jenkinsBuildNumber())?.let { Integer.parseInt(it) } ?: -1
+    (System.getenv("BUILD_NUMBER"))?.let { Integer.parseInt(it) } ?: -1
 
 fun buildNumberAsString(): String =
     buildNumber().takeIf { it != -1 }?.toString() ?: "??"
@@ -82,4 +82,3 @@ private fun calcExclusion(section: String, bit: Int, excludedOn: Int): String =
 
 // todo remove these when we're not using Jenkins anymore
 private fun jenkinsBranchName(): String? = System.getenv("BRANCH_NAME")
-private fun jenkinsBuildNumber(): String? = System.getenv("BUILD_NUMBER")
