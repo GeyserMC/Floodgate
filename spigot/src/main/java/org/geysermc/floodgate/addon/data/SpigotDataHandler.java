@@ -68,9 +68,9 @@ public final class SpigotDataHandler extends CommonDataHandler {
             // 1.20.2 and above
             try {
                 Object[] components = new Object[]{
-                    ClassNames.HANDSHAKE_PORT.get(handshakePacket),
-                    hostname,
                     ClassNames.HANDSHAKE_PROTOCOL.get(handshakePacket),
+                    hostname,
+                    ClassNames.HANDSHAKE_PORT.get(handshakePacket),
                     ClassNames.HANDSHAKE_INTENTION.get(handshakePacket)
                 };
 

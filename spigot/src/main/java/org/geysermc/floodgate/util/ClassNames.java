@@ -293,13 +293,22 @@ public class ClassNames {
                     String.class, int.class, CLIENT_INTENT);
             checkNotNull(HANDSHAKE_PACKET_CONSTRUCTOR, "Handshake packet constructor");
 
-            HANDSHAKE_PORT = getField(HANDSHAKE_PACKET, "a");
-            checkNotNull(HANDSHAKE_PORT, "Handshake port");
-            makeAccessible(HANDSHAKE_PORT);
+            Field a = getField(HANDSHAKE_PACKET, "a");
+            checkNotNull(a, "Handshake \"a\" field (protocol version, or stream codec)");
 
-            HANDSHAKE_PROTOCOL = getField(HANDSHAKE_PACKET, "c");
+            if (a.getType().isPrimitive()) { // 1.20.2 - 1.20.4: a is the protocol version (int)
+                HANDSHAKE_PROTOCOL = a;
+                HANDSHAKE_PORT = getField(HANDSHAKE_PACKET, "c");
+            } else { // 1.20.5: a is the stream_codec thing, so everything is shifted
+                HANDSHAKE_PROTOCOL = getField(HANDSHAKE_PACKET, "b");
+                HANDSHAKE_PORT = getField(HANDSHAKE_PACKET, "d");
+            }
+
             checkNotNull(HANDSHAKE_PROTOCOL, "Handshake protocol");
             makeAccessible(HANDSHAKE_PROTOCOL);
+
+            checkNotNull(HANDSHAKE_PORT, "Handshake port");
+            makeAccessible(HANDSHAKE_PORT);
 
             HANDSHAKE_INTENTION = getFieldOfType(HANDSHAKE_PACKET, CLIENT_INTENT);
             checkNotNull(HANDSHAKE_INTENTION, "Handshake intention");
