@@ -1,4 +1,4 @@
 [submodule "core/src/main/resources/languages"]
 	path = core/src/main/resources/languages
 	url = https://github.com/GeyserMC/languages
-	branch = l10n_floodgate
+	branch = floodgate
