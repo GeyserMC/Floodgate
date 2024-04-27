@@ -22,7 +22,10 @@ public final class FabricInjector extends CommonPlatformInjector {
             public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                 super.channelRead(ctx, msg);
 
-                Channel channel = (Channel) msg;
+                if (!(msg instanceof Channel channel)) {
+                    return;
+                }
+
                 channel.pipeline().addLast(new ChannelInitializer<Channel>() {
                     @Override
                     protected void initChannel(Channel channel) {
