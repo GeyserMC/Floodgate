@@ -1,4 +1,4 @@
-//var bungeeCommit = "master-SNAPSHOT"
+var bungeeVersion = "1.20-R0.3-SNAPSHOT"
 var gsonVersion = "2.8.0"
 var guavaVersion = "21.0"
 
@@ -16,6 +16,6 @@ relocate("io.leangen.geantyref")
 relocate("org.yaml")
 
 // these dependencies are already present on the platform
-provided("net.md-5", "bungeecord-proxy", "1.20-R0.3-SNAPSHOT")
+provided("net.md-5", "bungeecord-proxy", bungeeVersion)
 provided("com.google.code.gson", "gson", gsonVersion)
 provided("com.google.guava", "guava", guavaVersion)
