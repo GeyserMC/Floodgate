@@ -5,26 +5,69 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+        PROJECT: 'floodgate'
     steps:
+      - name: Set Build Number
+        env:
+          BUILD_JSON: ${{ vars.RELEASEACTION_PREVRELEASE }}
+        run: |
+          BUILD_NUMBER=$(echo $BUILD_JSON | jq --arg branch "${GITHUB_REF_NAME}" 'if .[$branch] == null then 1 else .[$branch] | .t | tonumber + 1 end // 1')
+          echo "BUILD_NUMBER=${BUILD_NUMBER:=$GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
+
       - name: Checkout repository and submodules
-        uses: actions/checkout@v3
+        # See https://github.com/actions/checkout/commits
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           submodules: recursive
 
-      - uses: actions/setup-java@v3
+      - name: Validate Gradle Wrapper
+        # See https://github.com/gradle/wrapper-validation-action/commits
+        uses: gradle/wrapper-validation-action@699bb18358f12c5b78b37bb0111d3a0e2276e0e2 # v2.1.1
+
+        # See https://github.com/actions/setup-java/commits
+      - uses: actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93 # v4.0.0
         with:
           java-version: 17
           distribution: temurin
 
       - name: Build
-        uses: gradle/gradle-build-action@v2
+        # See https://github.com/gradle/actions/commits
+        uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
         with:
           arguments: build
           cache-read-only: ${{ github.ref_name != 'master' && github.ref_name != 'development' }}
 
+      - name: Archive artifacts (Floodgate Bungee)
+        # See https://github.com/actions/upload-artifact/commits
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+        if: success()
+        with:
+          name: Floodgate Bungee
+          path: bungee/build/libs/floodgate-bungee.jar
+          if-no-files-found: error
+
+      - name: Archive artifacts (Floodgate Spigot)
+        # See https://github.com/actions/upload-artifact/commits
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+        if: success()
+        with:
+          name: Floodgate Spigot
+          path: spigot/build/libs/floodgate-spigot.jar
+          if-no-files-found: error
+
+      - name: Archive artifacts (Floodgate Velocity)
+        # See https://github.com/actions/upload-artifact/commits
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+        if: success()
+        with:
+          name: Floodgate Velocity
+          path: velocity/build/libs/floodgate-velocity.jar
+          if-no-files-found: error
+
       - name: Publish to Maven Repository
         if: ${{ github.repository == 'GeyserMC/Floodgate' }}
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5
         env:
           ORG_GRADLE_PROJECT_geysermcUsername: ${{ vars.DEPLOY_USER }}
           ORG_GRADLE_PROJECT_geysermcPassword: ${{ secrets.DEPLOY_PASS }}
@@ -32,8 +75,37 @@ jobs:
           arguments: publish
           cache-read-only: ${{ github.ref_name != 'master' && github.ref_name != 'development' }}
 
+      - name: Get Release Metadata
+        if: ${{ success() && github.repository == 'GeyserMC/Floodgate' && github.ref_name == 'master' }}
+        # See https://github.com/Kas-tle/base-release-action/releases/tag/main-11
+        uses: Kas-tle/base-release-action@b863fa0f89bd15267a96a72efb84aec25f168d4c # main-11
+        with:
+          appID: ${{ secrets.RELEASE_APP_ID }}
+          appPrivateKey: ${{ secrets.RELEASE_APP_PK }}
+          files: |
+            bungee:bungee/build/libs/floodgate-bungee.jar
+            spigot:spigot/build/libs/floodgate-spigot.jar
+            velocity:velocity/build/libs/floodgate-velocity.jar
+          releaseEnabled: false
+          saveMetadata: true
+
+      - name: Update Generated Metadata
+        if: ${{ success() && github.repository == 'GeyserMC/Floodgate' && github.ref_name == 'master' }}
+        run: |
+            cat metadata.json
+            echo
+            mv metadata.json metadata.json.tmp
+            version=$(cat gradle.properties | grep -o "version=[0-9\\.]*" | cut -d"=" -f2)
+            jq --arg project "${PROJECT}" --arg version "${version}" '
+            .
+            | .changes |= map({"commit", "summary", "message"}) 
+            | .downloads |= map_values({"name", "sha256"})
+            | {$project, "repo", $version, "number": .build, "changes", "downloads"}
+            ' metadata.json.tmp > metadata.json
+            cat metadata.json
+
       - name: Publish to Downloads API
-        if: ${{ github.ref_name == 'master' && github.repository == 'GeyserMC/Floodgate' }}
+        if: ${{ success() && github.ref_name == 'master' && github.repository == 'GeyserMC/Floodgate' }}
         shell: bash
         env:
           DOWNLOADS_USERNAME: ${{ vars.DOWNLOADS_USERNAME }}
@@ -43,28 +115,18 @@ jobs:
           # Save the private key to a file
           echo "$DOWNLOADS_PRIVATE_KEY" > id_ecdsa
           chmod 600 id_ecdsa
-          
-          # Set the project
-          project=floodgate
-
-          # Get the version from gradle.properties
-          version=$(cat gradle.properties | grep -o "version=[0-9\\.]*" | cut -d"=" -f2)
-          
           # Create the build folder
-          ssh -o StrictHostKeyChecking=no -i id_ecdsa $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP mkdir -p "~/uploads/$project/$GITHUB_RUN_NUMBER/"
-
+          ssh -o StrictHostKeyChecking=no -i id_ecdsa $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP mkdir -p "~/uploads/$PROJECT/$GITHUB_RUN_NUMBER/"
           # Copy over artifacts
-          rsync -P -e "ssh -o StrictHostKeyChecking=no -i id_ecdsa" **/build/libs/floodgate-*.jar $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP:~/uploads/$project/$GITHUB_RUN_NUMBER/
-
-          # Remove un-needed artifacts
-          ssh -o StrictHostKeyChecking=no -i id_ecdsa $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP rm ./uploads/$project/$GITHUB_RUN_NUMBER/floodgate-api.jar ./uploads/$project/$GITHUB_RUN_NUMBER/floodgate-core.jar
-
-          # Push the metadata
-          echo "{\"project\": \"$project\", \"version\": \"$version\", \"id\": $GITHUB_RUN_NUMBER, \"commit\": \"$GITHUB_SHA\"}" > metadata.json
-          rsync -P -e "ssh -o StrictHostKeyChecking=no -i id_ecdsa" metadata.json $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP:~/uploads/$project/$GITHUB_RUN_NUMBER/
+          rsync -P -e "ssh -o StrictHostKeyChecking=no -i id_ecdsa" bungee/build/libs/floodgate-bungee.jar $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP:~/uploads/$PROJECT/$GITHUB_RUN_NUMBER/
+          rsync -P -e "ssh -o StrictHostKeyChecking=no -i id_ecdsa" spigot/build/libs/floodgate-spigot.jar $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP:~/uploads/$PROJECT/$GITHUB_RUN_NUMBER/
+          rsync -P -e "ssh -o StrictHostKeyChecking=no -i id_ecdsa" velocity/build/libs/floodgate-velocity.jar $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP:~/uploads/$PROJECT/$GITHUB_RUN_NUMBER/
+          # Run the build script
+          rsync -P -e "ssh -o StrictHostKeyChecking=no -i id_ecdsa" metadata.json $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP:~/uploads/$PROJECT/$GITHUB_RUN_NUMBER/
 
       - name: Notify Discord
         if: ${{ (success() || failure()) && github.repository == 'GeyserMC/Floodgate' }}
-        uses: Tim203/actions-git-discord-webhook@main
+        # See https://github.com/Tim203/actions-git-discord-webhook/commits
+        uses: Tim203/actions-git-discord-webhook@70f38ded3aca51635ec978ab4e1a58cd4cd0c2ff
         with:
           webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
