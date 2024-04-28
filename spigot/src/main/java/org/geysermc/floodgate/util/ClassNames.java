@@ -94,13 +94,26 @@ public class ClassNames {
 
     static {
         // ahhhhhhh, this class should really be reworked at this point
-        String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+
+        String[] versionSplit = Bukkit.getServer().getClass().getPackage().getName().split("\\.");
+        // Paper, since 1.20.5, no longer relocates CraftBukkit classes
+        // and NMS classes aren't relocated for a few versions now (both Spigot & Paper)
+        if (versionSplit.length <= 3 && getClassSilently("net.minecraft.server.MinecraftServer") == null) {
+            throw new IllegalStateException(
+                    "Was unable to find net.minecraft.server.MinecraftServer. " +
+                    "We don't support Mojmap yet"
+            );
+        }
+        // Makes it that we don't have to lookup both the new and the old
+        // 'org.bukkit.craftbukkit. + version + CraftPlayer' will be .CraftPlayer on new
+        // versions and .v1_8R3.CraftPlayer on older versions
+        String version = versionSplit.length > 3 ? versionSplit[3] + '.' : "";
         SPIGOT_MAPPING_PREFIX = "net.minecraft.server." + version;
 
 
         // SpigotSkinApplier
         Class<?> craftPlayerClass = ReflectionUtils.getClass(
-                "org.bukkit.craftbukkit." + version + ".entity.CraftPlayer");
+                "org.bukkit.craftbukkit." + version + "entity.CraftPlayer");
         GET_PROFILE_METHOD = getMethod(craftPlayerClass, "getProfile");
         checkNotNull(GET_PROFILE_METHOD, "Get profile method");
 
@@ -120,9 +133,9 @@ public class ClassNames {
 
         // WhitelistUtils
         Class<?> craftServerClass = ReflectionUtils.getClass(
-                "org.bukkit.craftbukkit." + version + ".CraftServer");
+                "org.bukkit.craftbukkit." + version + "CraftServer");
         Class<OfflinePlayer> craftOfflinePlayerClass = ReflectionUtils.getCastedClass(
-                "org.bukkit.craftbukkit." + version + ".CraftOfflinePlayer");
+                "org.bukkit.craftbukkit." + version + "CraftOfflinePlayer");
 
         CRAFT_OFFLINE_PLAYER_CONSTRUCTOR = ReflectionUtils.getConstructor(
                 craftOfflinePlayerClass, true, craftServerClass, GameProfile.class);
