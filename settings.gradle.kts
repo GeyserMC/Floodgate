@@ -42,11 +42,6 @@ dependencyResolutionManagement {
         maven("https://jitpack.io") {
             content { includeGroupByRegex("com\\.github\\..*") }
         }
-
-        // temporary until jitpack builds work again, lol
-        maven("https://repo.codemc.org/repository/maven-public/") {
-            content { includeGroup("net.md-5") }
-        }
     }
 }
 
