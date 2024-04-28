@@ -101,7 +101,7 @@ tasks {
 
     register("remapModrinthJar", RemapJarTask::class) {
         dependsOn(shadowJar)
-        inputFile.set(remapJar.get().archiveFile)
+        inputFile.set(shadowJar.get().archiveFile)
         addNestedDependencies = true
         archiveVersion.set(project.version.toString() + "+build."  + System.getenv("GITHUB_RUN_NUMBER"))
         archiveClassifier.set("")
