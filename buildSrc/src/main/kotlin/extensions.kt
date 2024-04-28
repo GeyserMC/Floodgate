@@ -51,7 +51,7 @@ fun Project.versionWithBranchName(): String =
     branchName().replace(Regex("[^0-9A-Za-z-_]"), "-") + '-' + version
 
 fun buildNumber(): Int =
-    System.getenv("GITHUB_RUN_NUMBER")?.let { Integer.parseInt(it) } ?: -1
+    (System.getenv("BUILD_NUMBER"))?.let { Integer.parseInt(it) } ?: -1
 
 fun buildNumberAsString(): String =
     buildNumber().takeIf { it != -1 }?.toString() ?: "??"
