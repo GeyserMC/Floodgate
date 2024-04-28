@@ -25,11 +25,10 @@
 
 package org.geysermc.floodgate.platform.command;
 
-import cloud.commandframework.Command;
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.context.CommandContext;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.player.UserAudience;
+import org.incendo.cloud.Command;
+import org.incendo.cloud.CommandManager;
 
 /** The base class for every Floodgate command. */
 public interface FloodgateCommand {
@@ -39,14 +38,7 @@ public interface FloodgateCommand {
      * @param commandManager the manager to create a command
      * @return the command to register
      */
-    Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager);
-
-    /**
-     * Called when the command created in {@link #buildCommand(CommandManager)} is executed.
-     *
-     * @param context the context of the executed command
-     */
-    void execute(CommandContext<UserAudience> context);
+    Command<? extends UserAudience> buildCommand(CommandManager<UserAudience> commandManager);
 
     /**
      * Called by the CommandRegister to check if the command should be added given the config.

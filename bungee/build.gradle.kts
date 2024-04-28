@@ -4,12 +4,12 @@ var guavaVersion = "21.0"
 
 dependencies {
     api(projects.core)
-    implementation("cloud.commandframework", "cloud-bungee", Versions.cloudVersion)
+    implementation("org.incendo", "cloud-bungee", Versions.cloudVersion)
 }
 
 relocate("com.google.inject")
 relocate("net.kyori")
-relocate("cloud.commandframework")
+relocate("org.incendo.cloud")
 // used in cloud
 relocate("io.leangen.geantyref")
 // since 1.20

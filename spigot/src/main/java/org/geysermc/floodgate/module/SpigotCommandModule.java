@@ -25,15 +25,11 @@
 
 package org.geysermc.floodgate.module;
 
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.bukkit.BukkitCommandManager;
-import cloud.commandframework.execution.CommandExecutionCoordinator;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
 import org.geysermc.floodgate.SpigotPlugin;
@@ -41,6 +37,10 @@ import org.geysermc.floodgate.command.util.Permission;
 import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.player.FloodgateCommandPreprocessor;
 import org.geysermc.floodgate.player.UserAudience;
+import org.geysermc.floodgate.player.audience.FloodgateSenderMapper;
+import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.execution.ExecutionCoordinator;
+import org.incendo.cloud.paper.PaperCommandManager;
 
 @RequiredArgsConstructor
 public final class SpigotCommandModule extends CommandModule {
@@ -56,11 +56,10 @@ public final class SpigotCommandModule extends CommandModule {
     @Singleton
     @SneakyThrows
     public CommandManager<UserAudience> commandManager(CommandUtil commandUtil) {
-        CommandManager<UserAudience> commandManager = new BukkitCommandManager<>(
+        CommandManager<UserAudience> commandManager = new PaperCommandManager<>(
                 plugin,
-                CommandExecutionCoordinator.simpleCoordinator(),
-                commandUtil::getUserAudience,
-                audience -> (CommandSender) audience.source()
+                ExecutionCoordinator.simpleCoordinator(),
+                new FloodgateSenderMapper<>(commandUtil)
         );
         commandManager.registerCommandPreProcessor(new FloodgateCommandPreprocessor<>(commandUtil));
         return commandManager;

@@ -25,9 +25,6 @@
 
 package org.geysermc.floodgate.module;
 
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.bungee.BungeeCommandManager;
-import cloud.commandframework.execution.CommandExecutionCoordinator;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -35,7 +32,6 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
-import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.geysermc.floodgate.BungeePlugin;
@@ -51,6 +47,7 @@ import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.platform.util.PlatformUtils;
 import org.geysermc.floodgate.player.FloodgateCommandPreprocessor;
 import org.geysermc.floodgate.player.UserAudience;
+import org.geysermc.floodgate.player.audience.FloodgateSenderMapper;
 import org.geysermc.floodgate.pluginmessage.BungeePluginMessageRegistration;
 import org.geysermc.floodgate.pluginmessage.BungeePluginMessageUtils;
 import org.geysermc.floodgate.pluginmessage.BungeeSkinApplier;
@@ -60,6 +57,9 @@ import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.util.BungeeCommandUtil;
 import org.geysermc.floodgate.util.BungeePlatformUtils;
 import org.geysermc.floodgate.util.LanguageManager;
+import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.bungee.BungeeCommandManager;
+import org.incendo.cloud.execution.ExecutionCoordinator;
 
 @RequiredArgsConstructor
 public final class BungeePlatformModule extends AbstractModule {
@@ -88,9 +88,8 @@ public final class BungeePlatformModule extends AbstractModule {
     public CommandManager<UserAudience> commandManager(CommandUtil commandUtil) {
         CommandManager<UserAudience> commandManager = new BungeeCommandManager<>(
                 plugin,
-                CommandExecutionCoordinator.simpleCoordinator(),
-                commandUtil::getUserAudience,
-                audience -> (CommandSender) audience.source()
+                ExecutionCoordinator.simpleCoordinator(),
+                new FloodgateSenderMapper<>(commandUtil)
         );
         commandManager.registerCommandPreProcessor(new FloodgateCommandPreprocessor<>(commandUtil));
         return commandManager;

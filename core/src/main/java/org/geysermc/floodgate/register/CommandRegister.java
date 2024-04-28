@@ -25,7 +25,6 @@
 
 package org.geysermc.floodgate.register;
 
-import cloud.commandframework.CommandManager;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -33,6 +32,7 @@ import java.util.Set;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.player.UserAudience;
+import org.incendo.cloud.CommandManager;
 
 /**
  * This class is responsible for registering commands to the command register of the platform that

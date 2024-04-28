@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     id("floodgate.generate-templates")
 }
@@ -13,10 +15,8 @@ dependencies {
     api("com.nukkitx.fastutil", "fastutil-short-object-maps", Versions.fastutilVersion)
     api("com.nukkitx.fastutil", "fastutil-int-object-maps", Versions.fastutilVersion)
     api("org.java-websocket", "Java-WebSocket", Versions.javaWebsocketVersion)
-    api("cloud.commandframework", "cloud-core", Versions.cloudVersion)
-
-    //todo use official dependency once https://github.com/Bastian/bstats-metrics/pull/118 is merged
-    api("com.github.Konicai.bstats-metrics", "bstats-base", Versions.bstatsVersion)
+    api("org.incendo", "cloud-core", Versions.cloudVersion)
+    api("org.bstats", "bstats-base", Versions.bstatsVersion)
 }
 
 // present on all platforms
@@ -30,5 +30,11 @@ tasks {
         replaceToken("floodgateVersion", fullVersion())
         replaceToken("branch", branchName())
         replaceToken("buildNumber", buildNumber())
+    }
+    named<Jar>("jar") {
+        archiveClassifier.set("")
+    }
+    named<ShadowJar>("shadowJar") {
+        archiveClassifier.set("shaded")
     }
 }

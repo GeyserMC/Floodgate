@@ -112,11 +112,6 @@ public abstract class CommandUtil {
         return usernames;
     }
 
-    /**
-     *
-     * @param uuid
-     * @return
-     */
     public abstract Object getPlayerByUuid(@NonNull UUID uuid);
 
     public Object getPlayerByUuid(@NonNull UUID uuid, PlayerType limitTo) {
@@ -125,15 +120,15 @@ public abstract class CommandUtil {
 
     public abstract Object getPlayerByUsername(@NonNull String username);
 
-    public Object getPlayerByUsername(@NonNull String username, PlayerType limitTo) {
-        return applyPlayerTypeFilter(getPlayerByUsername(username), limitTo, username);
+    public Object getPlayerByUsername(@NonNull String username, PlayerType filter) {
+        return applyPlayerTypeFilter(getPlayerByUsername(username), filter, username);
     }
 
     protected Object applyPlayerTypeFilter(Object player, PlayerType filter, Object fallback) {
         if (filter == ALL_PLAYERS || player instanceof String || player instanceof UUID) {
             return player;
         }
-        return (filter == ONLY_BEDROCK) == api.isFloodgatePlayer(getUuidFromSource(player))
+        return (filter == ONLY_BEDROCK) == api.isFloodgateId(getUuidFromSource(player))
                 ? player
                 : fallback;
     }

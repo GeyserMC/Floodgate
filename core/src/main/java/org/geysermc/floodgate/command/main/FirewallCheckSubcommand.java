@@ -27,7 +27,6 @@ package org.geysermc.floodgate.command.main;
 
 import static org.geysermc.floodgate.util.Constants.COLOR_CHAR;
 
-import cloud.commandframework.context.CommandContext;
 import com.google.gson.JsonElement;
 import com.google.inject.Inject;
 import it.unimi.dsi.fastutil.Pair;
@@ -41,6 +40,7 @@ import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.HttpClient;
 import org.geysermc.floodgate.util.HttpClient.HttpResponse;
 import org.geysermc.floodgate.util.Utils;
+import org.incendo.cloud.context.CommandContext;
 
 final class FirewallCheckSubcommand extends FloodgateSubCommand {
     @Inject
@@ -63,7 +63,7 @@ final class FirewallCheckSubcommand extends FloodgateSubCommand {
 
     @Override
     public void execute(CommandContext<UserAudience> context) {
-        UserAudience sender = context.getSender();
+        UserAudience sender = context.sender();
         executeChecks(
                 globalApiCheck(sender)
         ).whenComplete((response, $) ->

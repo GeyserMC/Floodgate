@@ -27,10 +27,6 @@ package org.geysermc.floodgate.command;
 
 import static org.geysermc.floodgate.command.CommonCommandMessage.CHECK_CONSOLE;
 
-import cloud.commandframework.ArgumentDescription;
-import cloud.commandframework.Command;
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.context.CommandContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
@@ -46,10 +42,14 @@ import org.geysermc.floodgate.platform.command.FloodgateCommand;
 import org.geysermc.floodgate.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.platform.util.PlayerType;
 import org.geysermc.floodgate.player.UserAudience;
+import org.geysermc.floodgate.player.audience.PlayerAudienceArgument;
 import org.geysermc.floodgate.player.audience.ProfileAudience;
-import org.geysermc.floodgate.player.audience.ProfileAudienceArgument;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.HttpClient;
+import org.incendo.cloud.Command;
+import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.context.CommandContext;
+import org.incendo.cloud.description.Description;
 
 public class WhitelistCommand implements FloodgateCommand {
     @Inject private FloodgateConfig config;
@@ -59,23 +59,23 @@ public class WhitelistCommand implements FloodgateCommand {
     @Override
     public Command<UserAudience> buildCommand(CommandManager<UserAudience> commandManager) {
         Command.Builder<UserAudience> builder = commandManager.commandBuilder("fwhitelist",
-                ArgumentDescription.of("Easy way to whitelist Bedrock players"))
+                Description.of("Easy way to whitelist Bedrock players"))
                 .permission(Permission.COMMAND_WHITELIST.get());
 
         commandManager.command(builder
                 .literal("add", "a")
-                .argument(ProfileAudienceArgument.of("player", true, true, PlayerType.ONLY_BEDROCK))
+                .argument(PlayerAudienceArgument.ofAnyIdentifierBedrock("player"))
                 .handler(context -> performCommand(context, true)));
 
         return builder
                 .literal("remove", "r")
-                .argument(ProfileAudienceArgument.of("player", true, true, PlayerType.ONLY_BEDROCK))
+                .argument(PlayerAudienceArgument.ofAnyIdentifierBedrock("player"))
                 .handler(context -> performCommand(context, false))
                 .build();
     }
 
     public void performCommand(CommandContext<UserAudience> context, boolean add) {
-        UserAudience sender = context.getSender();
+        UserAudience sender = context.sender();
         ProfileAudience profile = context.get("player");
         UUID uuid = profile.uuid();
         String name = profile.username();
@@ -114,7 +114,7 @@ public class WhitelistCommand implements FloodgateCommand {
             name = name.substring(config.getUsernamePrefix().length());
         }
 
-        if (name.length() < 1 || name.length() > 16) {
+        if (name.isEmpty() || name.length() > 16) {
             sender.sendMessage(Message.INVALID_USERNAME);
             return;
         }
@@ -179,11 +179,6 @@ public class WhitelistCommand implements FloodgateCommand {
                         );
                     }
                 });
-    }
-
-    @Override
-    public void execute(CommandContext<UserAudience> context) {
-        // ignored, all the logic is in the other method
     }
 
     @Override

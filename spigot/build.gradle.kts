@@ -13,7 +13,9 @@ indra {
 dependencies {
     api(projects.core)
 
-    implementation("cloud.commandframework", "cloud-bukkit", Versions.cloudVersion)
+    // TODO move to release once cloud-paper releases for 1.20.5
+    // https://repo.papermc.io/#browse/browse:maven-public:org%2Fincendo%2Fcloud-paper%2F2.0.0-SNAPSHOT%2F2.0.0-20240427.220226-58
+    implementation("org.incendo", "cloud-paper", "2.0.0-20240427.220226-58")
     // hack to make pre 1.12 work
     implementation("com.google.guava", "guava", guavaVersion)
 
@@ -26,7 +28,7 @@ dependencies {
 
 relocate("com.google.inject")
 relocate("net.kyori")
-relocate("cloud.commandframework")
+relocate("org.incendo.cloud")
 relocate("io.leangen.geantyref") // used in cloud
 // hack to make pre 1.12 work
 relocate("com.google.common")
