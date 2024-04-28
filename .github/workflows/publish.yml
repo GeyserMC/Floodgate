@@ -10,7 +10,7 @@ jobs:
       - uses: actions/setup-java@4075bfc1b51bf22876335ae1cd589602d60d8758
         with:
           distribution: 'temurin'
-          java-version: 17
+          java-version: 21
       - name: Publish to Modrinth
         uses: gradle/gradle-build-action@3bfe3a46584a206fb8361cdedd0647b0c4204232
         env:
