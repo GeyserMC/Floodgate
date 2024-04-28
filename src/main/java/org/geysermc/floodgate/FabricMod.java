@@ -19,7 +19,7 @@ public class FabricMod implements ModInitializer {
                 new FabricPlatformModule()
         );
 
-        FabricPlatform platform = injector.getInstance(FabricPlatform.class);
+        FloodgatePlatform platform = injector.getInstance(FloodgatePlatform.class);
 
         platform.enable(new FabricCommandModule());
 

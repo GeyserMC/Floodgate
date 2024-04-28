@@ -1,5 +1,7 @@
 package org.geysermc.floodgate.module;
 
+import com.google.inject.name.Names;
+import org.apache.logging.log4j.Logger;
 import org.geysermc.floodgate.inject.fabric.FabricInjector;
 import org.geysermc.floodgate.listener.FabricEventListener;
 import org.geysermc.floodgate.listener.FabricEventRegistration;
@@ -32,12 +34,8 @@ public final class FabricPlatformModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(PlatformUtils.class).to(FabricPlatformUtils.class);
-    }
-
-    @Provides
-    @Singleton
-    public FloodgateLogger floodgateLogger(LanguageManager languageManager) {
-        return new Log4jFloodgateLogger(LogManager.getLogger("floodgate"), languageManager);
+        bind(Logger.class).annotatedWith(Names.named("logger")).toInstance(LogManager.getLogger("floodgate"));
+        bind(FloodgateLogger.class).to(Log4jFloodgateLogger.class);
     }
 
     @Provides

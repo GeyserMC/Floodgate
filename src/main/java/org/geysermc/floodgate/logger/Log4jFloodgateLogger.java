@@ -1,18 +1,31 @@
 package org.geysermc.floodgate.logger;
 
-import lombok.RequiredArgsConstructor;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.util.LanguageManager;
 
 import static org.geysermc.floodgate.util.MessageFormatter.format;
 
-@RequiredArgsConstructor
+@Singleton
 public final class Log4jFloodgateLogger implements FloodgateLogger {
-    private final Logger logger;
-    private final LanguageManager languageManager;
+    @Inject
+    @Named("logger")
+    private Logger logger;
+    private LanguageManager languageManager;
+
+    @Inject
+    private void init(LanguageManager languageManager, FloodgateConfig config) {
+        this.languageManager = languageManager;
+        if (config.isDebug() && !logger.isDebugEnabled()) {
+            Configurator.setLevel(logger.getName(), Level.DEBUG);
+        }
+    }
 
     @Override
     public void error(String message, Object... args) {
@@ -47,20 +60,6 @@ public final class Log4jFloodgateLogger implements FloodgateLogger {
     @Override
     public void trace(String message, Object... args) {
         logger.trace(message, args);
-    }
-
-    @Override
-    public void enableDebug() {
-        if (!logger.isDebugEnabled()) {
-            Configurator.setLevel(logger.getName(), Level.DEBUG);
-        }
-    }
-
-    @Override
-    public void disableDebug() {
-        if (logger.isDebugEnabled()) {
-            Configurator.setLevel(logger.getName(), Level.INFO);
-        }
     }
 
     @Override

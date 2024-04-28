@@ -2,6 +2,7 @@ package org.geysermc.floodgate.util;
 
 import com.mojang.authlib.GameProfile;
 import me.lucko.fabric.api.permissions.v0.Permissions;
+import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
@@ -15,6 +16,7 @@ import org.geysermc.floodgate.platform.command.CommandUtil;
 import org.geysermc.floodgate.player.UserAudience;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 public final class FabricCommandUtil extends CommandUtil {
     private final FloodgateLogger logger;
@@ -26,7 +28,7 @@ public final class FabricCommandUtil extends CommandUtil {
     }
 
     @Override
-    public UserAudience getUserAudience(final @NonNull Object sourceObj) {
+    public @NonNull UserAudience getUserAudience(final @NonNull Object sourceObj) {
         if (!(sourceObj instanceof CommandSourceStack stack)) {
             throw new IllegalArgumentException();
         }
@@ -71,7 +73,8 @@ public final class FabricCommandUtil extends CommandUtil {
 
     @Override
     public boolean hasPermission(Object source, String permission) {
-        return Permissions.check((SharedSuggestionProvider) source, permission);
+        return Permissions.check((SharedSuggestionProvider) source,
+                permission, MinecraftServerHolder.get().getOperatorUserPermissionLevel());
     }
 
     @Override

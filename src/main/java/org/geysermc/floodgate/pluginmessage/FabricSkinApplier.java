@@ -7,18 +7,20 @@ import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.MinecraftServerHolder;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.mixin.ChunkMapMixin;
 import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.skin.SkinData;
+
+import static org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 
 import java.util.Collections;
 
 public final class FabricSkinApplier implements SkinApplier {
 
     @Override
-    public void applySkin(FloodgatePlayer floodgatePlayer, SkinData skinData) {
+    public void applySkin(@NonNull FloodgatePlayer floodgatePlayer, @NonNull SkinData skinData) {
         MinecraftServerHolder.get().execute(() -> {
             ServerPlayer bedrockPlayer = MinecraftServerHolder.get().getPlayerList()
                     .getPlayer(floodgatePlayer.getCorrectUniqueId());
@@ -31,7 +33,7 @@ public final class FabricSkinApplier implements SkinApplier {
             PropertyMap properties = bedrockPlayer.getGameProfile().getProperties();
 
             properties.removeAll("textures");
-            properties.put("textures", new Property("textures", skinData.getValue(), skinData.getSignature()));
+            properties.put("textures", new Property("textures", skinData.value(), skinData.signature()));
 
             ChunkMap tracker = ((ServerLevel) bedrockPlayer.level).getChunkSource().chunkMap;
             ChunkMap.TrackedEntity entry = ((ChunkMapMixin) tracker).getEntityMap().get(bedrockPlayer.getId());
