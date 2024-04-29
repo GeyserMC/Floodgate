@@ -52,8 +52,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 @SuppressWarnings("PMD.SystemPrintln")
 public class ClassNames {
-    public static final String SPIGOT_MAPPING_PREFIX;
-
     public static final Class<?> MINECRAFT_SERVER;
     public static final Class<?> SERVER_CONNECTION;
     public static final Class<?> HANDSHAKE_PACKET;
@@ -108,7 +106,7 @@ public class ClassNames {
         // 'org.bukkit.craftbukkit. + version + CraftPlayer' will be .CraftPlayer on new
         // versions and .v1_8R3.CraftPlayer on older versions
         String version = versionSplit.length > 3 ? versionSplit[3] + '.' : "";
-        SPIGOT_MAPPING_PREFIX = "net.minecraft.server." + version;
+        String nmsPackage = "net.minecraft.server." + version;
 
 
         // SpigotSkinApplier
@@ -116,9 +114,6 @@ public class ClassNames {
                 "org.bukkit.craftbukkit." + version + "entity.CraftPlayer");
         GET_PROFILE_METHOD = getMethod(craftPlayerClass, "getProfile");
         checkNotNull(GET_PROFILE_METHOD, "Get profile method");
-
-        String nmsPackage = SPIGOT_MAPPING_PREFIX + '.';
-
 
         // SpigotInjector
         MINECRAFT_SERVER = getClassOrFallback(
