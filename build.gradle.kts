@@ -49,6 +49,9 @@ dependencies {
     include("org.geysermc.event", "events", "1.1-SNAPSHOT")
     include("org.lanternpowered", "lmbda", "2.0.0") // used in events
 
+    // Geyser dependency for the fun injector mixin :)))
+    modImplementation("org.geysermc.geyser:fabric:2.2.3-SNAPSHOT")
+
     // cloud
     include("org.incendo:cloud-fabric:2.0.0-SNAPSHOT")
     modImplementation("org.incendo:cloud-fabric:2.0.0-SNAPSHOT")
@@ -134,7 +137,7 @@ modrinth {
     syncBodyFrom.set(rootProject.file("README.md").readText())
 
     uploadFile.set(tasks.named("remapModrinthJar"))
-    gameVersions.addAll("1.20.5")
+    gameVersions.addAll("1.20.5", "1.20.6")
 
     loaders.add("fabric")
 

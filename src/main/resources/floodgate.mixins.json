@@ -5,9 +5,10 @@
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "ChunkMapMixin",
-    "ClientIntentionPacketMixinInterface",
     "ClientIntentionPacketMixin",
+    "ClientIntentionPacketMixinInterface",
     "ConnectionMixin",
+    "GeyserModInjectorMixin",
     "ServerConnectionListenerMixin"
   ],
   "plugin": "org.geysermc.floodgate.util.MixinConfigPlugin",

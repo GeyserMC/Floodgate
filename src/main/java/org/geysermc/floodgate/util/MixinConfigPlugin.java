@@ -25,6 +25,9 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
             //returns true if fabricproxy-lite is present, therefore loading the mixin. If not present, the mixin will not be loaded.
             return FabricLoader.getInstance().isModLoaded("fabricproxy-lite");
         }
+        if (mixinClassName.equals("org.geysermc.floodgate.mixin.GeyserModInjectorMixin")) {
+            return FabricLoader.getInstance().isModLoaded("geyser-fabric");
+        }
         return true;
     }
 
