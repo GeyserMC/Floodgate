@@ -102,10 +102,10 @@ public class PlayerAudienceArgument {
                     CommandUtil commandUtil = context.get("CommandUtil");
 
                     boolean quoted = input.remainingInput().startsWith("\"");
-                    List<Suggestion> suggestions = new ArrayList<Suggestion>();
+                    List<Suggestion> suggestions = new ArrayList<>();
                     for (final String player : commandUtil.getOnlineUsernames(limitTo)) {
                         suggestions.add(
-                                Suggestion.simple(BrigadierUtils.escapeIfRequired(player, quoted)));
+                                Suggestion.suggestion(BrigadierUtils.escapeIfRequired(player, quoted)));
                     }
                     return CompletableFuture.completedFuture(suggestions);
                 });
