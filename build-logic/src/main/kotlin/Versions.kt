@@ -33,7 +33,8 @@ object Versions {
     const val guiceVersion = "6.0.0"
     const val nettyVersion = "4.1.49.Final"
     const val snakeyamlVersion = "1.28"
-    const val cloudVersion = "2.0.0-beta.2"
+    // TODO move to cloud release once those have 1.20.5 support
+    const val cloudVersion = "2.0.0-20240503.183307-62" // for cloud-minecraft
     const val bstatsVersion = "3.0.2"
 
     const val javaWebsocketVersion = "1.5.2"
