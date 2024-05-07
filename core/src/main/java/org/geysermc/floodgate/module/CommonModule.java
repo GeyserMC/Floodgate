@@ -40,6 +40,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import lombok.RequiredArgsConstructor;
+import org.geysermc.configutils.file.template.ResourceTemplateReader;
+import org.geysermc.configutils.file.template.TemplateReader;
 import org.geysermc.event.PostOrder;
 import org.geysermc.floodgate.addon.data.HandshakeHandlersImpl;
 import org.geysermc.floodgate.api.FloodgateApi;
@@ -75,6 +77,12 @@ import org.geysermc.floodgate.util.LanguageManager;
 public class CommonModule extends AbstractModule {
     private final EventBus eventBus = new EventBus();
     private final Path dataDirectory;
+    private final TemplateReader reader;
+
+    public CommonModule(Path dataDirectory) {
+        this.dataDirectory = dataDirectory;
+        this.reader = ResourceTemplateReader.of(ConfigLoader.class);
+    }
 
     @Override
     protected void configure() {
@@ -154,7 +162,7 @@ public class CommonModule extends AbstractModule {
             @Named("configClass") Class<? extends FloodgateConfig> configClass,
             KeyProducer producer,
             FloodgateCipher cipher) {
-        return new ConfigLoader(dataDirectory, configClass, producer, cipher);
+        return new ConfigLoader(dataDirectory, configClass, producer, cipher, reader);
     }
 
     @Provides
