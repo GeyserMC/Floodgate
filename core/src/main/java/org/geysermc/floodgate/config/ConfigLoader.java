@@ -33,7 +33,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.configutils.ConfigUtilities;
 import org.geysermc.configutils.file.codec.PathFileCodec;
-import org.geysermc.configutils.file.template.ResourceTemplateReader;
+import org.geysermc.configutils.file.template.TemplateReader;
 import org.geysermc.configutils.updater.change.Changes;
 import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.crypto.KeyProducer;
@@ -46,6 +46,7 @@ public final class ConfigLoader {
 
     private final KeyProducer keyProducer;
     private final FloodgateCipher cipher;
+    private final TemplateReader reader;
 
     @SuppressWarnings("unchecked")
     public <T extends FloodgateConfig> T load() {
@@ -64,7 +65,7 @@ public final class ConfigLoader {
                 ConfigUtilities.builder()
                         .fileCodec(PathFileCodec.of(dataDirectory))
                         .configFile("config.yml")
-                        .templateReader(ResourceTemplateReader.of(getClass()))
+                        .templateReader(reader)
                         .template(templateFile)
                         .changes(Changes.builder()
                                 .version(1, Changes.versionBuilder()

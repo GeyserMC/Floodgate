@@ -29,12 +29,18 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import java.nio.file.Path;
+import org.geysermc.configutils.file.template.TemplateReader;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.config.FloodgateConfig;
 
 public final class ServerCommonModule extends CommonModule {
     public ServerCommonModule(Path dataDirectory) {
         super(dataDirectory);
+    }
+
+    // Used in floodgate-fabric to provide it's own reader implementation
+    public ServerCommonModule(Path dataDirectory, TemplateReader reader) {
+        super(dataDirectory, reader);
     }
 
     @Override
