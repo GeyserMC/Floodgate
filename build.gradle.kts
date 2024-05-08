@@ -22,9 +22,9 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:0.97.6+1.20.5")
 
     // Base Floodgate
-    implementation("org.geysermc.floodgate:core:2.2.3-SNAPSHOT")
-    shadow("org.geysermc.floodgate:core:2.2.3-SNAPSHOT") { isTransitive = false }
-    shadow("org.geysermc.floodgate:api:2.2.3-SNAPSHOT") { isTransitive = false }
+    implementation("org.geysermc.floodgate:core:2.2.3-20240508.151752-4")
+    shadow("org.geysermc.floodgate:core:2.2.3-20240508.151752-4") { isTransitive = false }
+    shadow("org.geysermc.floodgate:api:2.2.3-20240508.151752-4") { isTransitive = false }
 
     // Requires relocation
     shadow("org.bstats:bstats-base:3.0.2")
@@ -50,7 +50,7 @@ dependencies {
     include("org.lanternpowered", "lmbda", "2.0.0") // used in events
 
     // Geyser dependency for the fun injector mixin :)))
-    modImplementation("org.geysermc.geyser:fabric:2.2.3-SNAPSHOT")
+    modCompileOnly("org.geysermc.geyser:fabric:2.2.3-SNAPSHOT") { isTransitive = false }
 
     // cloud
     include("org.incendo:cloud-fabric:2.0.0-SNAPSHOT")
@@ -62,7 +62,7 @@ dependencies {
 }
 
 repositories {
-    //mavenLocal()
+    // mavenLocal()
     mavenCentral()
     maven("https://maven.fabricmc.net/")
     maven("https://repo.opencollab.dev/main/")

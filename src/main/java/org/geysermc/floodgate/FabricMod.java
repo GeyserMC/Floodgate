@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.module.*;
+import org.geysermc.floodgate.util.FabricTemplateReader;
 
 public class FabricMod implements ModInitializer {
 
@@ -20,7 +21,7 @@ public class FabricMod implements ModInitializer {
         FabricInjector.setInstance(new FabricInjector());
 
         Injector injector = Guice.createInjector(
-                new ServerCommonModule(FabricLoader.getInstance().getConfigDir().resolve("floodgate")),
+                new ServerCommonModule(FabricLoader.getInstance().getConfigDir().resolve("floodgate"), new FabricTemplateReader()),
                 new FabricPlatformModule()
         );
 
