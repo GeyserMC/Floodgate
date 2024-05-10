@@ -48,8 +48,6 @@ import com.velocitypowered.api.util.GameProfile.Property;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -72,14 +70,12 @@ public final class VelocityListener {
         INITIAL_MINECRAFT_CONNECTION = getFieldOfType(initialConnection, minecraftConnection);
 
         // Since Velocity 3.1.0
-        Class<?> loginInboundConnection =
-                getPrefixedClassSilently("connection.client.LoginInboundConnection");
+        Class<?> loginInboundConnection = getPrefixedClassSilently(
+                "connection.client.LoginInboundConnection");
         if (loginInboundConnection != null) {
             INITIAL_CONNECTION_DELEGATE = getField(loginInboundConnection, "delegate");
-            Objects.requireNonNull(
-                    INITIAL_CONNECTION_DELEGATE,
-                    "initial inbound connection delegate cannot be null"
-            );
+            Objects.requireNonNull(INITIAL_CONNECTION_DELEGATE,
+                    "initial inbound connection delegate cannot be null");
         } else {
             INITIAL_CONNECTION_DELEGATE = null;
         }
@@ -87,11 +83,8 @@ public final class VelocityListener {
         CHANNEL = getFieldOfType(minecraftConnection, Channel.class);
     }
 
-    private final Cache<InboundConnection, FloodgatePlayer> playerCache =
-            CacheBuilder.newBuilder()
-                    .maximumSize(500)
-                    .expireAfterAccess(20, TimeUnit.SECONDS)
-                    .build();
+    private final Cache<InboundConnection, FloodgatePlayer> playerCache = CacheBuilder.newBuilder().maximumSize(
+            500).expireAfterAccess(20, TimeUnit.SECONDS).build();
 
     @Inject private ProxyFloodgateConfig config;
     @Inject private ProxyFloodgateApi api;
@@ -130,8 +123,7 @@ public final class VelocityListener {
 
         if (kickMessage != null) {
             event.setResult(
-                    PreLoginEvent.PreLoginComponentResult.denied(Component.text(kickMessage))
-            );
+                    PreLoginEvent.PreLoginComponentResult.denied(Component.text(kickMessage)));
             return;
         }
 
@@ -147,10 +139,11 @@ public final class VelocityListener {
         if (player != null) {
             playerCache.invalidate(event.getConnection());
 
-            GameProfile profile = new GameProfile(
-                    player.getCorrectUniqueId(),
+            GameProfile profile = new GameProfile(player.getCorrectUniqueId(),
                     player.getCorrectUsername(),
-                    List.of(new Property("textures", Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE, "")) // Otherwise game server will try to fetch the skin from Mojang
+                    List.of(new Property("textures", Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE,
+                            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_SIGNATURE))
+                    // Otherwise game server will try to fetch the skin from Mojang
             );
 
             event.setGameProfile(profile);

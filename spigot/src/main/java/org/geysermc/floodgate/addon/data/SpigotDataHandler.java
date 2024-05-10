@@ -176,7 +176,10 @@ public final class SpigotDataHandler extends CommonDataHandler {
             // Otherwise game server will try to fetch the skin from Mojang
             gameProfile.getProperties().put(
                     "textures",
-                    new Property("textures", Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE, "")
+                    new Property("textures",
+                            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE,
+                            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_SIGNATURE
+                    )
             );
 
             // we have to fake the offline player (login) cycle
