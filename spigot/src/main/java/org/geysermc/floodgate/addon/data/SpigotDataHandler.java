@@ -43,6 +43,13 @@ import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.ProxyUtils;
 
 public final class SpigotDataHandler extends CommonDataHandler {
+
+    private static final Property DEFAULT_TEXTURE_PROPERTY = new Property(
+            "textures",
+            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE,
+            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_SIGNATURE
+    );
+
     private Object networkManager;
     private FloodgatePlayer player;
     private boolean proxyData;
@@ -70,10 +77,10 @@ public final class SpigotDataHandler extends CommonDataHandler {
             // 1.20.2 and above
             try {
                 Object[] components = new Object[]{
-                    ClassNames.HANDSHAKE_PROTOCOL.get(handshakePacket),
-                    hostname,
-                    ClassNames.HANDSHAKE_PORT.get(handshakePacket),
-                    ClassNames.HANDSHAKE_INTENTION.get(handshakePacket)
+                        ClassNames.HANDSHAKE_PROTOCOL.get(handshakePacket),
+                        hostname,
+                        ClassNames.HANDSHAKE_PORT.get(handshakePacket),
+                        ClassNames.HANDSHAKE_INTENTION.get(handshakePacket)
                 };
 
                 return ClassNames.HANDSHAKE_PACKET_CONSTRUCTOR.newInstance(components);
@@ -176,10 +183,7 @@ public final class SpigotDataHandler extends CommonDataHandler {
             // Otherwise game server will try to fetch the skin from Mojang
             gameProfile.getProperties().put(
                     "textures",
-                    new Property("textures",
-                            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE,
-                            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_SIGNATURE
-                    )
+                    DEFAULT_TEXTURE_PROPERTY
             );
 
             // we have to fake the offline player (login) cycle
