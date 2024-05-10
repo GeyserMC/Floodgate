@@ -48,7 +48,9 @@ import com.velocitypowered.api.util.GameProfile.Property;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import net.kyori.adventure.text.Component;
@@ -56,6 +58,7 @@ import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
+import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.LanguageManager;
 
 public final class VelocityListener {
@@ -147,12 +150,9 @@ public final class VelocityListener {
             GameProfile profile = new GameProfile(
                     player.getCorrectUniqueId(),
                     player.getCorrectUsername(),
-                    Collections.emptyList()
+                    List.of(new Property("textures", Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE, "")) // Otherwise game server will try to fetch the skin from Mojang
             );
-            // The texture properties addition is to fix the February 2 2022 Mojang authentication changes
-            if (!config.isSendFloodgateData() && !player.isLinked()) {
-                profile = profile.addProperty(new Property("textures", "", ""));
-            }
+
             event.setGameProfile(profile);
         }
     }
