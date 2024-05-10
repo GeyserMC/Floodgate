@@ -180,11 +180,13 @@ public final class SpigotDataHandler extends CommonDataHandler {
                     player.getCorrectUniqueId(), player.getCorrectUsername()
             );
 
-            // Otherwise game server will try to fetch the skin from Mojang
-            gameProfile.getProperties().put(
-                    "textures",
-                    DEFAULT_TEXTURE_PROPERTY
-            );
+            if (!player.isLinked()) {
+                // Otherwise game server will try to fetch the skin from Mojang
+                gameProfile.getProperties().put(
+                        "textures",
+                        DEFAULT_TEXTURE_PROPERTY
+                );
+            }
 
             // we have to fake the offline player (login) cycle
 
