@@ -49,6 +49,7 @@ import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinDataImpl;
+import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
@@ -131,7 +132,10 @@ public final class BungeeListener implements Listener {
         if (!config.isSendFloodgateData()) {
             FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
             if (player != null && !player.isLinked()) {
-                skinApplier.applySkin(player, new SkinDataImpl("", ""));
+                skinApplier.applySkin(player, new SkinDataImpl(
+                        Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE,
+                        Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE
+                ));
             }
         }
     }

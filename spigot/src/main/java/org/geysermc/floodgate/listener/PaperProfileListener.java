@@ -38,6 +38,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.util.Constants;
 
 public final class PaperProfileListener implements Listener {
     @Inject private SimpleFloodgateApi api;
@@ -62,7 +63,14 @@ public final class PaperProfileListener implements Listener {
         }
 
         Set<ProfileProperty> properties = new HashSet<>(event.getPlayerProfile().getProperties());
-        properties.add(new ProfileProperty("textures", "", ""));
+        properties.add(
+                new ProfileProperty(
+                        "textures",
+                        Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE,
+                        Constants.DEFAULT_MINECRAFT_JAVA_SKIN_SIGNATURE
+                )
+        );
+
         event.setProperties(properties);
     }
 
