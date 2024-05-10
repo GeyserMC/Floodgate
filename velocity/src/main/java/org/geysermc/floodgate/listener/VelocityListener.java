@@ -48,16 +48,21 @@ import com.velocitypowered.api.util.GameProfile.Property;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import net.kyori.adventure.text.Component;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
+import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.util.HttpClient;
 import org.geysermc.floodgate.util.LanguageManager;
+import org.geysermc.floodgate.util.MojangUtils;
 
 public final class VelocityListener {
     private static final Field INITIAL_MINECRAFT_CONNECTION;
@@ -110,6 +115,9 @@ public final class VelocityListener {
     @Named("kickMessageAttribute")
     private AttributeKey<String> kickMessageAttribute;
 
+    @Inject
+    private HttpClient httpClient;
+
     @Subscribe(order = PostOrder.EARLY)
     public void onPreLogin(PreLoginEvent event) {
         FloodgatePlayer player = null;
@@ -154,8 +162,21 @@ public final class VelocityListener {
             GameProfile profile = new GameProfile(
                     player.getCorrectUniqueId(),
                     player.getCorrectUsername(),
-                    List.of(DEFAULT_TEXTURE_PROPERTY) // Otherwise game server will try to fetch the skin from Mojang
+                    player.isLinked() ? Collections.emptyList() : List.of(DEFAULT_TEXTURE_PROPERTY) // Otherwise game server will try to fetch the skin from Mojang
             );
+
+            if (player.isLinked()) {
+                // Do texture lookup to session server
+                try {
+                    SkinData skin = MojangUtils.getSkinCached(httpClient,
+                            player.getJavaUniqueId());
+
+                    profile.addProperty(new Property("textures", skin.value(), skin.signature()));
+                } catch (ExecutionException e) {
+                    logger.error("Failed to get skin for player " + player.getJavaUniqueId() + ", applying default.", e);
+                    profile.addProperty(DEFAULT_TEXTURE_PROPERTY);
+                }
+            }
 
             event.setGameProfile(profile);
         }
