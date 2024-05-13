@@ -26,7 +26,6 @@
 import net.kyori.indra.git.IndraGitExtension
 import org.gradle.api.Project
 import org.gradle.api.artifacts.MinimalExternalModuleDependency
-import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.the
 
@@ -59,23 +58,20 @@ fun buildNumberAsString(): String =
 val providedDependencies = mutableMapOf<String, MutableSet<Pair<String, Any>>>()
 val relocatedPackages = mutableMapOf<String, MutableSet<String>>()
 
-fun Project.provided(pattern: String, name: String, version: String, excludedOn: Int = 0b110) {
-    val format = "${calcExclusion(pattern, 0b100, excludedOn)}:" +
-            "${calcExclusion(name, 0b10, excludedOn)}:" +
-            calcExclusion(version, 0b1, excludedOn)
-
+fun Project.providedDependency(dependency: MinimalExternalModuleDependency) {
+    val format = "${dependency.group}:${dependency.name}:"
     providedDependencies.getOrPut(project.name) { mutableSetOf() }.add(Pair(format, format))
-    dependencies.add("compileOnlyApi", "$pattern:$name:$version")
 }
 
-fun Project.provided(dependency: ProjectDependency) {
-    providedDependencies.getOrPut(project.name) { mutableSetOf() }
-        .add(Pair(dependency.group + ":" + dependency.name, dependency))
-    dependencies.add("compileOnlyApi", dependency)
-}
+fun Project.providedDependency(provider: Provider<MinimalExternalModuleDependency>) =
+    providedDependency(provider.get())
 
-fun Project.provided(dependency: MinimalExternalModuleDependency) =
-    provided(dependency.module.group, dependency.module.name, dependency.versionConstraint.requiredVersion)
+fun Project.provided(dependency: MinimalExternalModuleDependency) {
+    providedDependency(dependency)
+    dependencies.add("compileOnlyApi",
+        "${dependency.group}:${dependency.name}:${dependency.versionConstraint.requiredVersion}"
+    )
+}
 
 fun Project.provided(provider: Provider<MinimalExternalModuleDependency>) =
     provided(provider.get())
@@ -83,6 +79,3 @@ fun Project.provided(provider: Provider<MinimalExternalModuleDependency>) =
 fun Project.relocate(pattern: String) =
     relocatedPackages.getOrPut(project.name) { mutableSetOf() }
         .add(pattern)
-
-private fun calcExclusion(section: String, bit: Int, excludedOn: Int): String =
-    if (excludedOn and bit > 0) section else ""

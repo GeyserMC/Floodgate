@@ -28,98 +28,65 @@ package org.geysermc.floodgate.isolation.util;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Objects;
 import org.geysermc.floodgate.isolation.library.classloader.LibraryClassLoader;
 
-// Based of a Medium article https://medium.com/@isuru89/java-a-child-first-class-loader-cbd9c3d0305
 public class ChildFirstClassLoader extends LibraryClassLoader {
-    private final ClassLoader systemClassLoader;
-
     public ChildFirstClassLoader(ClassLoader parent) {
         super(Objects.requireNonNull(parent));
-        systemClassLoader = getSystemClassLoader();
     }
 
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-        Class<?> loadedClass = findLoadedClass(name);
-        if (loadedClass == null) {
-            try {
-                if (systemClassLoader != null) {
-                    loadedClass = systemClassLoader.loadClass(name);
-                }
-            } catch (ClassNotFoundException ignored) {}
-
-            try {
-                if (loadedClass == null) {
+        synchronized (getClassLoadingLock(name)) {
+            Class<?> loadedClass = findLoadedClass(name);
+            if (loadedClass == null) {
+                // actual Java system classes (like java.lang.Integer) should be loaded by the parent classloader,
+                // which does use the system class loader (unlike us). findClass only returns its own classes.
+                // We don't call the system class loader ourselves since e.g. on Velocity, Velocity is the system.
+                // This resulted in Velocity overriding our own Configurate version for example
+                try {
                     loadedClass = findClass(name);
+                } catch (ClassNotFoundException ignored) {
+                    loadedClass = super.loadClass(name, resolve);
                 }
-            } catch (ClassNotFoundException e) {
-                loadedClass = super.loadClass(name, resolve);
             }
-        }
 
-        if (resolve) {
-            resolveClass(loadedClass);
+            if (resolve) {
+                resolveClass(loadedClass);
+            }
+            return loadedClass;
         }
-        return loadedClass;
     }
 
     @Override
     public Enumeration<URL> getResources(String name) throws IOException {
-        List<URL> allResources = new LinkedList<>();
-
-        Enumeration<URL> systemResources = systemClassLoader.getResources(name);
-        if (systemResources != null) {
-            while (systemResources.hasMoreElements()) {
-                allResources.add(systemResources.nextElement());
-            }
-        }
-
-        Enumeration<URL> thisResources = findResources(name);
-        if (thisResources != null) {
-            while (thisResources.hasMoreElements()) {
-                allResources.add(thisResources.nextElement());
-            }
-        }
-
-        Enumeration<URL> parentResources = getParent().getResources(name);
-        if (parentResources != null) {
-            while (parentResources.hasMoreElements()) {
-                allResources.add(parentResources.nextElement());
-            }
-        }
-
         return new Enumeration<>() {
-            final Iterator<URL> it = allResources.iterator();
+            final Enumeration<URL> thisResources = findResources(name);
+            final Enumeration<URL> parentResources = getParent().getResources(name);
 
             @Override
             public boolean hasMoreElements() {
-                return it.hasNext();
+                return thisResources.hasMoreElements() || parentResources.hasMoreElements();
             }
 
             @Override
             public URL nextElement() {
-                return it.next();
+                return thisResources.hasMoreElements() ? thisResources.nextElement() : parentResources.nextElement();
             }
         };
     }
 
     @Override
     public URL getResource(String name) {
-        URL resource = null;
-        if (systemClassLoader != null) {
-            resource = systemClassLoader.getResource(name);
-        }
-        if (resource == null) {
-            resource = findResource(name);
-        }
+        URL resource = findResource(name);
         if (resource == null) {
             resource = getParent().getResource(name);
         }
         return resource;
+    }
+
+    static {
+        ClassLoader.registerAsParallelCapable();
     }
 }

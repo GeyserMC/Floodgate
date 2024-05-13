@@ -17,3 +17,5 @@ relocate("org.yaml.snakeyaml")
 // these dependencies are already present on the platform
 provided(libs.gson)
 provided(libs.velocity.api)
+provided(libs.velocity.proxy)
+providedDependency(libs.slf4j)

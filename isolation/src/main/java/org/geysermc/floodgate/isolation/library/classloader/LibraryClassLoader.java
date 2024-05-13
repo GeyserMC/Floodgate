@@ -61,4 +61,8 @@ public class LibraryClassLoader extends URLClassLoader {
     public boolean isLoaded(Path path) {
         return loadedPaths.contains(path);
     }
+
+    static {
+        ClassLoader.registerAsParallelCapable();
+    }
 }

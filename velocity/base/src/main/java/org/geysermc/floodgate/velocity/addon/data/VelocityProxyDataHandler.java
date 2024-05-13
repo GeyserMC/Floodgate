@@ -26,18 +26,18 @@
 package org.geysermc.floodgate.velocity.addon.data;
 
 import static java.util.Objects.requireNonNull;
-import static org.geysermc.floodgate.core.util.ReflectionUtils.getCastedValue;
-import static org.geysermc.floodgate.core.util.ReflectionUtils.getClassOrFallbackPrefixed;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getField;
-import static org.geysermc.floodgate.core.util.ReflectionUtils.getMethodByName;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getPrefixedClass;
-import static org.geysermc.floodgate.core.util.ReflectionUtils.invoke;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.setValue;
 
+import com.velocitypowered.proxy.connection.MinecraftConnection;
+import com.velocitypowered.proxy.connection.MinecraftSessionHandler;
+import com.velocitypowered.proxy.connection.client.InitialLoginSessionHandler;
+import com.velocitypowered.proxy.protocol.packet.HandshakePacket;
+import com.velocitypowered.proxy.protocol.packet.ServerLoginPacket;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.core.addon.data.CommonNettyDataHandler;
@@ -49,50 +49,15 @@ import org.geysermc.floodgate.core.connection.FloodgateDataHandler.HandleResult;
 import org.geysermc.floodgate.core.logger.FloodgateLogger;
 
 public final class VelocityProxyDataHandler extends CommonNettyDataHandler {
-    private static final Field HANDSHAKE;
-    private static final Class<?> HANDSHAKE_PACKET;
-    private static final Field HANDSHAKE_SERVER_ADDRESS;
     private static final Field REMOTE_ADDRESS;
 
-    private static final Class<?> SERVER_LOGIN_PACKET;
-    private static final Method GET_SESSION_HANDLER;
     private static final Class<?> INITIAL_LOGIN_SESSION_HANDLER;
     private static final Field FORCE_KEY_AUTHENTICATION;
 
     static {
-        Class<?> iic = getPrefixedClass("connection.client.InitialInboundConnection");
-        requireNonNull(iic, "InitialInboundConnection class cannot be null");
-
-        HANDSHAKE = getField(iic, "handshake");
-        requireNonNull(HANDSHAKE, "Handshake field cannot be null");
-
-        HANDSHAKE_PACKET = getClassOrFallbackPrefixed(
-                "protocol.packet.HandshakePacket",
-                "protocol.packet.Handshake"
-        );
-        requireNonNull(HANDSHAKE_PACKET, "Handshake packet class cannot be null");
-
-        HANDSHAKE_SERVER_ADDRESS = getField(HANDSHAKE_PACKET, "serverAddress");
-        requireNonNull(HANDSHAKE_SERVER_ADDRESS, "Address in the Handshake packet cannot be null");
-
         Class<?> minecraftConnection = getPrefixedClass("connection.MinecraftConnection");
         REMOTE_ADDRESS = getField(minecraftConnection, "remoteAddress");
         requireNonNull(REMOTE_ADDRESS, "remoteAddress cannot be null");
-
-        SERVER_LOGIN_PACKET = getClassOrFallbackPrefixed(
-                "protocol.packet.ServerLoginPacket",
-                "protocol.packet.ServerLogin"
-        );
-        requireNonNull(SERVER_LOGIN_PACKET, "ServerLogin packet class cannot be null");
-
-
-        Method sessionHandler = getMethodByName(minecraftConnection, "getActiveSessionHandler", true);
-        if (sessionHandler == null) {
-            // We are pre-1.20.2
-            sessionHandler = getMethodByName(minecraftConnection, "getSessionHandler", true);
-        }
-        GET_SESSION_HANDLER = sessionHandler;
-        requireNonNull(GET_SESSION_HANDLER, "getSessionHandler method cannot be null");
 
         INITIAL_LOGIN_SESSION_HANDLER = getPrefixedClass("connection.client.InitialLoginSessionHandler");
         requireNonNull(INITIAL_LOGIN_SESSION_HANDLER, "InitialLoginSessionHandler cannot be null");
@@ -122,7 +87,7 @@ public final class VelocityProxyDataHandler extends CommonNettyDataHandler {
 
     @Override
     protected Object setHostname(Object handshakePacket, String hostname) {
-        setValue(handshakePacket, HANDSHAKE_SERVER_ADDRESS, hostname);
+        ((HandshakePacket) handshakePacket).setServerAddress(hostname);
         return handshakePacket;
     }
 
@@ -138,23 +103,21 @@ public final class VelocityProxyDataHandler extends CommonNettyDataHandler {
 
     @Override
     public boolean channelRead(Object packet) {
-        if (HANDSHAKE_PACKET.isInstance(packet)) {
-            handle(packet, getCastedValue(packet, HANDSHAKE_SERVER_ADDRESS));
+        if (packet instanceof HandshakePacket handshake) {
+            handle(packet, handshake.getServerAddress());
             // otherwise, it'll get read twice. once by the packet queue and once by this method
             return false;
         }
 
         // at this point we know that forceKeyAuthentication is enabled
-        if (SERVER_LOGIN_PACKET.isInstance(packet)) {
-            Object minecraftConnection = ctx.pipeline().get("handler");
-            Object sessionHandler = invoke(minecraftConnection, GET_SESSION_HANDLER);
-            if (!INITIAL_LOGIN_SESSION_HANDLER.isInstance(sessionHandler)) {
+        if (packet instanceof ServerLoginPacket) {
+            MinecraftConnection minecraftConnection = (MinecraftConnection) ctx.pipeline().get("handler");
+            MinecraftSessionHandler sessionHandler = minecraftConnection.getActiveSessionHandler();
+            if (!(sessionHandler instanceof InitialLoginSessionHandler)) {
                 logger.error("Expected player's session handler to be InitialLoginSessionHandler");
                 return true;
             }
-            if (FORCE_KEY_AUTHENTICATION != null) {
-                setValue(sessionHandler, FORCE_KEY_AUTHENTICATION, false);
-            }
+            setValue(sessionHandler, FORCE_KEY_AUTHENTICATION, false);
         }
         return true;
     }

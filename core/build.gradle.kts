@@ -41,7 +41,9 @@ dependencies {
 // present on all platforms
 provided(libs.netty.transport)
 provided(libs.netty.codec)
+providedDependency(libs.slf4j)
 
+// we're isolated but bstats doesn't know that
 relocate("org.bstats")
 
 tasks {

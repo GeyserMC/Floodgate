@@ -7,6 +7,8 @@ dependencies {
     compileOnlyApi(libs.velocity.api)
 }
 
+providedDependency(libs.slf4j)
+
 tasks {
     jar {
         dependsOn(":velocity-base:build", configurations.runtimeClasspath)

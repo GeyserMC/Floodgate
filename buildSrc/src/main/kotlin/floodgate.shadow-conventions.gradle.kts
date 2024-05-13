@@ -21,8 +21,8 @@ tasks {
         doFirst {
             mergeServiceFiles()
 
-            providedDependencies[project.name]?.forEach { (name, notation) ->
-                sJar.dependencies {
+            sJar.dependencies {
+                providedDependencies[project.name]?.forEach { (name, notation) ->
                     println("Excluding $name from ${project.name}")
                     exclude(dependency(notation))
                 }

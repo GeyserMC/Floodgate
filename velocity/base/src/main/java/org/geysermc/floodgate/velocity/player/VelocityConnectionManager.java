@@ -26,20 +26,18 @@
 package org.geysermc.floodgate.velocity.player;
 
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getField;
-import static org.geysermc.floodgate.core.util.ReflectionUtils.getFieldOfType;
-import static org.geysermc.floodgate.core.util.ReflectionUtils.getMethod;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getPrefixedClass;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getValue;
-import static org.geysermc.floodgate.core.util.ReflectionUtils.invoke;
 
-import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.proxy.connection.MinecraftConnection;
+import com.velocitypowered.proxy.connection.client.LoginInboundConnection;
+import com.velocitypowered.proxy.connection.util.VelocityInboundConnection;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.core.connection.ConnectionManager;
@@ -48,10 +46,6 @@ import org.geysermc.floodgate.core.connection.ConnectionManager;
 public class VelocityConnectionManager extends ConnectionManager {
     private static final Class<?> LOGIN_INBOUND_CONNECTION;
     private static final Field INITIAL_CONNECTION_DELEGATE;
-    private static final Class<?> INITIAL_INBOUND_CONNECTION;
-    private static final Class<?> MINECRAFT_CONNECTION;
-    private static final Method GET_CONNECTION;
-    private static final Field CHANNEL;
 
     @Inject
     @Named("connectionAttribute")
@@ -59,25 +53,21 @@ public class VelocityConnectionManager extends ConnectionManager {
 
     @Override
     protected @Nullable Object platformIdentifierOrConnectionFor(Object input) {
-        if (input instanceof Player) {
-            // ConnectedPlayer implements VelocityInboundConnection,
-            // just like InitialInboundConnection
-            return invoke(input, GET_CONNECTION);
+        // ConnectedPlayer (Player) implements VelocityInboundConnection,
+        // just like InitialInboundConnection
+        if (input instanceof VelocityInboundConnection connection) {
+            return connection.getConnection();
         }
 
         // LoginInboundConnection doesn't have a direct Channel reference,
         // but it does have an InitialInboundConnection reference
-        if (LOGIN_INBOUND_CONNECTION.isInstance(input)) {
+        if (input instanceof LoginInboundConnection) {
             return getValue(input, INITIAL_CONNECTION_DELEGATE);
         }
 
         // InitialInboundConnection -> MinecraftConnection -> Channel -> FloodgateConnection attribute
-
-        if (INITIAL_INBOUND_CONNECTION.isInstance(input)) {
-            return invoke(input, GET_CONNECTION);
-        }
-        if (MINECRAFT_CONNECTION.isInstance(input)) {
-            return getValue(input, CHANNEL);
+        if (input instanceof MinecraftConnection connection) {
+            return connection.getChannel();
         }
         if (input instanceof Channel channel) {
             return channel.attr(connectionAttribute).get();
@@ -96,13 +86,5 @@ public class VelocityConnectionManager extends ConnectionManager {
     static {
         LOGIN_INBOUND_CONNECTION = getPrefixedClass("connection.client.LoginInboundConnection");
         INITIAL_CONNECTION_DELEGATE = getField(LOGIN_INBOUND_CONNECTION, "delegate");
-
-        INITIAL_INBOUND_CONNECTION = getPrefixedClass("connection.client.InitialInboundConnection");
-        MINECRAFT_CONNECTION = getPrefixedClass("connection.MinecraftConnection");
-
-        Class<?> velocityInboundConnection = getPrefixedClass("connection.util.VelocityInboundConnection");
-        GET_CONNECTION = getMethod(velocityInboundConnection, "getConnection");
-
-        CHANNEL = getFieldOfType(MINECRAFT_CONNECTION, Channel.class);
     }
 }

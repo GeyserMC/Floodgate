@@ -28,7 +28,7 @@ paper = "1.20.2-R0.1-SNAPSHOT"
 authlib = "5.0.47"
 
 # velocity
-velocity = "3.2.0-SNAPSHOT"
+velocity = "3.3.0-SNAPSHOT"
 
 # buildSrc
 indra = "3.1.3"
@@ -93,6 +93,7 @@ authlib = { module = "com.mojang:authlib", version.ref = "authlib" }
 # velocity
 cloud-velocity = { module = "org.incendo:cloud-velocity", version.ref = "cloud" }
 velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "velocity" }
+velocity-proxy = { module = "com.velocitypowered:velocity-proxy", version.ref = "velocity" }
 
 # buildSrc
 checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "checkerframework" }

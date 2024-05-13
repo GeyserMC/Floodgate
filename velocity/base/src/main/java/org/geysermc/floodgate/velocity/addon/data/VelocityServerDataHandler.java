@@ -25,17 +25,9 @@
 
 package org.geysermc.floodgate.velocity.addon.data;
 
-import static java.util.Objects.requireNonNull;
-import static org.geysermc.floodgate.core.util.ReflectionUtils.castedInvoke;
-import static org.geysermc.floodgate.core.util.ReflectionUtils.getCastedValue;
-import static org.geysermc.floodgate.core.util.ReflectionUtils.getClassOrFallbackPrefixed;
-import static org.geysermc.floodgate.core.util.ReflectionUtils.getField;
-import static org.geysermc.floodgate.core.util.ReflectionUtils.getMethod;
-import static org.geysermc.floodgate.core.util.ReflectionUtils.getPrefixedClass;
-import static org.geysermc.floodgate.core.util.ReflectionUtils.invoke;
-import static org.geysermc.floodgate.core.util.ReflectionUtils.setValue;
-
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.proxy.connection.MinecraftConnection;
+import com.velocitypowered.proxy.protocol.packet.HandshakePacket;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
@@ -44,8 +36,6 @@ import io.netty.util.AttributeKey;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.core.connection.FloodgateConnection;
@@ -55,32 +45,6 @@ import org.geysermc.floodgate.core.crypto.FloodgateDataCodec;
 @ChannelHandler.Sharable
 @SuppressWarnings("ConstantConditions")
 public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapter {
-    private static final Class<?> HANDSHAKE_PACKET;
-    private static final Field HANDSHAKE_ADDRESS;
-    private static final Method GET_ASSOCIATION;
-    private static final Method GET_PLAYER;
-
-    static {
-        HANDSHAKE_PACKET = getClassOrFallbackPrefixed(
-                "protocol.packet.HandshakePacket",
-                "protocol.packet.Handshake"
-        );
-        requireNonNull(HANDSHAKE_PACKET, "Handshake packet class cannot be null");
-
-        HANDSHAKE_ADDRESS = getField(HANDSHAKE_PACKET, "serverAddress");
-        requireNonNull(HANDSHAKE_ADDRESS, "Address field of the Handshake packet cannot be null");
-
-        Class<?> minecraftConnection = getPrefixedClass("connection.MinecraftConnection");
-
-        GET_ASSOCIATION = getMethod(minecraftConnection, "getAssociation");
-        requireNonNull(GET_ASSOCIATION, "getAssociation in MinecraftConnection cannot be null");
-
-        Class<?> serverConnection = getPrefixedClass("connection.backend.VelocityServerConnection");
-
-        GET_PLAYER = getMethod(serverConnection, "getPlayer");
-        requireNonNull(GET_PLAYER, "getPlayer in VelocityServerConnection cannot be null");
-    }
-
     @Inject SimpleFloodgateApi api;
     @Inject FloodgateDataCodec dataCodec;
 
@@ -90,16 +54,15 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
 
     @Override
     public void write(ChannelHandlerContext ctx, Object packet, ChannelPromise promise) throws Exception {
-        if (HANDSHAKE_PACKET.isInstance(packet)) {
-            String address = getCastedValue(packet, HANDSHAKE_ADDRESS);
+        if (packet instanceof HandshakePacket handshake) {
+            String address = handshake.getServerAddress();
 
             // The connection to the backend server is not the same connection as the client to the proxy.
             // This gets the client to proxy Connection from the backend server connection.
 
             // get the FloodgatePlayer from the ConnectedPlayer
-            Object minecraftConnection = ctx.pipeline().get("handler");
-            Object association = invoke(minecraftConnection, GET_ASSOCIATION);
-            Player velocityPlayer = castedInvoke(association, GET_PLAYER);
+            MinecraftConnection minecraftConnection = (MinecraftConnection) ctx.pipeline().get("handler");
+            Player velocityPlayer = (Player) minecraftConnection.getAssociation();
 
             Connection connection = api.connectionByPlatformIdentifier(velocityPlayer);
             if (connection != null) {
@@ -120,7 +83,7 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
                     remaining = address.substring(addressFinished);
                 }
 
-                setValue(packet, HANDSHAKE_ADDRESS, originalAddress + '\0' + encodedData + remaining);
+                handshake.setServerAddress(originalAddress + '\0' + encodedData + remaining);
             }
 
             ctx.pipeline().remove(this);

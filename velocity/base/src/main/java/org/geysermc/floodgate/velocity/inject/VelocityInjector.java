@@ -25,12 +25,12 @@
 
 package org.geysermc.floodgate.velocity.inject;
 
-import static org.geysermc.floodgate.core.util.ReflectionUtils.castedInvoke;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getCastedValue;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getMethod;
-import static org.geysermc.floodgate.core.util.ReflectionUtils.getValue;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.invoke;
 
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.proxy.network.ConnectionManager;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import jakarta.inject.Inject;
@@ -46,31 +46,23 @@ public final class VelocityInjector extends CommonPlatformInjector {
     @Getter private boolean injected;
 
     @Override
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"DataFlowIssue", "deprecation"})
     public void inject() {
         if (isInjected()) {
             return;
         }
 
-        Object connectionManager = getValue(server, "cm");
+        ConnectionManager connectionManager = getCastedValue(server, "cm");
 
         // Client <-> Proxy
 
-        Object serverInitializerHolder = getValue(connectionManager, "serverChannelInitializer");
-        ChannelInitializer serverInitializer = castedInvoke(serverInitializerHolder, "get");
-
-        Method serverSetter = getMethod(serverInitializerHolder, "set", ChannelInitializer.class);
-        invoke(serverInitializerHolder, serverSetter,
-                new VelocityChannelInitializer(this, serverInitializer, false));
+        var serverChannelInitializer = connectionManager.serverChannelInitializer;
+        serverChannelInitializer.set(new VelocityChannelInitializer(this, serverChannelInitializer.get(), false));
 
         // Proxy <-> Server
 
-        Object backendInitializerHolder = getValue(connectionManager, "backendChannelInitializer");
-        ChannelInitializer backendInitializer = castedInvoke(backendInitializerHolder, "get");
-
-        Method backendSetter = getMethod(backendInitializerHolder, "set", ChannelInitializer.class);
-        invoke(backendInitializerHolder, backendSetter,
-                new VelocityChannelInitializer(this, backendInitializer, true));
+        var backendChannelInitializer = connectionManager.backendChannelInitializer;
+        backendChannelInitializer.set(new VelocityChannelInitializer(this, backendChannelInitializer.get(), true));
 
         injected = true;
     }
