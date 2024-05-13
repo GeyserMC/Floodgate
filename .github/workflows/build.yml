@@ -44,7 +44,7 @@ jobs:
         if: success()
         with:
           name: Floodgate Bungee
-          path: bungee/build/libs/floodgate-bungee.jar
+          path: bungee/isolated/build/libs/floodgate-bungee.jar
           if-no-files-found: error
 
       - name: Archive artifacts (Floodgate Spigot)
@@ -53,7 +53,7 @@ jobs:
         if: success()
         with:
           name: Floodgate Spigot
-          path: spigot/build/libs/floodgate-spigot.jar
+          path: spigot/isolated/build/libs/floodgate-spigot.jar
           if-no-files-found: error
 
       - name: Archive artifacts (Floodgate Velocity)
@@ -62,7 +62,7 @@ jobs:
         if: success()
         with:
           name: Floodgate Velocity
-          path: velocity/build/libs/floodgate-velocity.jar
+          path: velocity/isolated/build/libs/floodgate-velocity.jar
           if-no-files-found: error
 
       - name: Publish to Maven Repository
@@ -83,9 +83,9 @@ jobs:
           appID: ${{ secrets.RELEASE_APP_ID }}
           appPrivateKey: ${{ secrets.RELEASE_APP_PK }}
           files: |
-            bungee:bungee/build/libs/floodgate-bungee.jar
-            spigot:spigot/build/libs/floodgate-spigot.jar
-            velocity:velocity/build/libs/floodgate-velocity.jar
+            bungee:bungee/isolated/build/libs/floodgate-bungee.jar
+            spigot:spigot/isolated/build/libs/floodgate-spigot.jar
+            velocity:velocity/isolated/build/libs/floodgate-velocity.jar
           releaseEnabled: false
           saveMetadata: true
 
@@ -118,9 +118,9 @@ jobs:
           # Create the build folder
           ssh -o StrictHostKeyChecking=no -i id_ecdsa $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP mkdir -p "~/uploads/$PROJECT/$GITHUB_RUN_NUMBER/"
           # Copy over artifacts
-          rsync -P -e "ssh -o StrictHostKeyChecking=no -i id_ecdsa" bungee/build/libs/floodgate-bungee.jar $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP:~/uploads/$PROJECT/$GITHUB_RUN_NUMBER/
-          rsync -P -e "ssh -o StrictHostKeyChecking=no -i id_ecdsa" spigot/build/libs/floodgate-spigot.jar $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP:~/uploads/$PROJECT/$GITHUB_RUN_NUMBER/
-          rsync -P -e "ssh -o StrictHostKeyChecking=no -i id_ecdsa" velocity/build/libs/floodgate-velocity.jar $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP:~/uploads/$PROJECT/$GITHUB_RUN_NUMBER/
+          rsync -P -e "ssh -o StrictHostKeyChecking=no -i id_ecdsa" bungee/isolated/build/libs/floodgate-bungee.jar $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP:~/uploads/$PROJECT/$GITHUB_RUN_NUMBER/
+          rsync -P -e "ssh -o StrictHostKeyChecking=no -i id_ecdsa" spigot/isolated/build/libs/floodgate-spigot.jar $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP:~/uploads/$PROJECT/$GITHUB_RUN_NUMBER/
+          rsync -P -e "ssh -o StrictHostKeyChecking=no -i id_ecdsa" velocity/isolated/build/libs/floodgate-velocity.jar $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP:~/uploads/$PROJECT/$GITHUB_RUN_NUMBER/
           # Run the build script
           rsync -P -e "ssh -o StrictHostKeyChecking=no -i id_ecdsa" metadata.json $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP:~/uploads/$PROJECT/$GITHUB_RUN_NUMBER/
 

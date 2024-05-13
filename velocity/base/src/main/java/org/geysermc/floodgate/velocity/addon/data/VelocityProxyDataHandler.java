@@ -27,7 +27,6 @@ package org.geysermc.floodgate.velocity.addon.data;
 
 import static java.util.Objects.requireNonNull;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getField;
-import static org.geysermc.floodgate.core.util.ReflectionUtils.getPrefixedClass;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.setValue;
 
 import com.velocitypowered.proxy.connection.MinecraftConnection;
@@ -50,20 +49,14 @@ import org.geysermc.floodgate.core.logger.FloodgateLogger;
 
 public final class VelocityProxyDataHandler extends CommonNettyDataHandler {
     private static final Field REMOTE_ADDRESS;
-
-    private static final Class<?> INITIAL_LOGIN_SESSION_HANDLER;
     private static final Field FORCE_KEY_AUTHENTICATION;
 
     static {
-        Class<?> minecraftConnection = getPrefixedClass("connection.MinecraftConnection");
-        REMOTE_ADDRESS = getField(minecraftConnection, "remoteAddress");
+        REMOTE_ADDRESS = getField(MinecraftConnection.class, "remoteAddress");
         requireNonNull(REMOTE_ADDRESS, "remoteAddress cannot be null");
 
-        INITIAL_LOGIN_SESSION_HANDLER = getPrefixedClass("connection.client.InitialLoginSessionHandler");
-        requireNonNull(INITIAL_LOGIN_SESSION_HANDLER, "InitialLoginSessionHandler cannot be null");
-
-        // allowed to be null if it's an old Velocity version
-        FORCE_KEY_AUTHENTICATION = getField(INITIAL_LOGIN_SESSION_HANDLER, "forceKeyAuthentication");
+        FORCE_KEY_AUTHENTICATION = getField(InitialLoginSessionHandler.class, "forceKeyAuthentication");
+        requireNonNull(FORCE_KEY_AUTHENTICATION, "forceKeyAuthentication cannot be null");
     }
 
     private final FloodgateLogger logger;

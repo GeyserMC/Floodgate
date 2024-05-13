@@ -34,7 +34,6 @@ import io.micronaut.context.ApplicationContext;
 import io.micronaut.inject.qualifiers.Qualifiers;
 import java.nio.file.Path;
 import org.geysermc.floodgate.core.FloodgatePlatform;
-import org.geysermc.floodgate.core.util.ReflectionUtils;
 import org.geysermc.floodgate.isolation.library.LibraryManager;
 import org.slf4j.Logger;
 
@@ -50,7 +49,6 @@ public class VelocityPlatform extends FloodgatePlatform {
     @Inject
     public VelocityPlatform(LibraryManager manager) {
         super(manager);
-        ReflectionUtils.setPrefix("com.velocitypowered.proxy");
     }
 
     @Override

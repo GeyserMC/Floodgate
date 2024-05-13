@@ -26,7 +26,6 @@
 package org.geysermc.floodgate.velocity.player;
 
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getField;
-import static org.geysermc.floodgate.core.util.ReflectionUtils.getPrefixedClass;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getValue;
 
 import com.velocitypowered.proxy.connection.MinecraftConnection;
@@ -44,7 +43,6 @@ import org.geysermc.floodgate.core.connection.ConnectionManager;
 
 @Singleton
 public class VelocityConnectionManager extends ConnectionManager {
-    private static final Class<?> LOGIN_INBOUND_CONNECTION;
     private static final Field INITIAL_CONNECTION_DELEGATE;
 
     @Inject
@@ -84,7 +82,6 @@ public class VelocityConnectionManager extends ConnectionManager {
     }
 
     static {
-        LOGIN_INBOUND_CONNECTION = getPrefixedClass("connection.client.LoginInboundConnection");
-        INITIAL_CONNECTION_DELEGATE = getField(LOGIN_INBOUND_CONNECTION, "delegate");
+        INITIAL_CONNECTION_DELEGATE = getField(LoginInboundConnection.class, "delegate");
     }
 }
