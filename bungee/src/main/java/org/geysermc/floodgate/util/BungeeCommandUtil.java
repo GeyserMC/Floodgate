@@ -64,9 +64,7 @@ public final class BungeeCommandUtil extends CommandUtil {
         ProxiedPlayer player = (ProxiedPlayer) source;
         UUID uuid = player.getUniqueId();
         String username = player.getName();
-
-        // TODO temporary fix for https://github.com/SpigotMC/BungeeCord/issues/3680
-        Locale playerLocale = player.getLocale();
+        Locale playerLocale = player.getLocale(); // Is null during the PostLoginEvent, which can cause https://github.com/GeyserMC/Floodgate/issues/510
         String locale = Utils.getLocale(playerLocale != null ? playerLocale : Locale.getDefault());
 
         return new PlayerAudience(uuid, username, locale, source, this, true);
