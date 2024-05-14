@@ -34,7 +34,8 @@ object Versions {
     const val nettyVersion = "4.1.49.Final"
     const val snakeyamlVersion = "1.28"
     // TODO move to cloud release once those have 1.20.5 support
-    const val cloudVersion = "2.0.0-20240503.183307-62" // for cloud-minecraft
+    const val cloudVersion = "2.0.0-beta.7" // for cloud-minecraft
+    const val cloudCore = "2.0.0-rc.1"
     const val bstatsVersion = "3.0.2"
 
     const val javaWebsocketVersion = "1.5.2"

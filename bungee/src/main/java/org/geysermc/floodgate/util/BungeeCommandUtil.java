@@ -26,6 +26,7 @@
 package org.geysermc.floodgate.util;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.UUID;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
@@ -63,7 +64,10 @@ public final class BungeeCommandUtil extends CommandUtil {
         ProxiedPlayer player = (ProxiedPlayer) source;
         UUID uuid = player.getUniqueId();
         String username = player.getName();
-        String locale = Utils.getLocale(player.getLocale());
+
+        // TODO temporary fix for https://github.com/SpigotMC/BungeeCord/issues/3680
+        Locale playerLocale = player.getLocale();
+        String locale = Utils.getLocale(playerLocale != null ? playerLocale : Locale.getDefault());
 
         return new PlayerAudience(uuid, username, locale, source, this, true);
     }
