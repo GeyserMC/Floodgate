@@ -33,8 +33,6 @@ import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
@@ -51,8 +49,6 @@ import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinDataImpl;
-import org.geysermc.floodgate.util.Constants;
-import org.geysermc.floodgate.util.HttpClient;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.MojangUtils;
 import org.geysermc.floodgate.util.ReflectionUtils;
@@ -85,7 +81,7 @@ public final class BungeeListener implements Listener {
     @Named("kickMessageAttribute")
     private AttributeKey<String> kickMessageAttribute;
 
-    @Inject private HttpClient httpClient;
+    @Inject private MojangUtils mojangUtils;
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPreLogin(PreLoginEvent event) {
@@ -134,7 +130,6 @@ public final class BungeeListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPostLogin(PostLoginEvent event) {
-        // To fix the February 2 2022 Mojang authentication changes
         if (!config.isSendFloodgateData()) {
             FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
 
@@ -142,28 +137,19 @@ public final class BungeeListener implements Listener {
                 return;
             }
 
-            if (!player.isLinked()) {
-                skinApplier.applySkin(player, new SkinDataImpl(
-                        Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE,
-                        Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE
-                ));
+            // Floodgate players are seen as offline mode players, meaning we have to look up
+            // the linked player's textures ourselves
 
+            if (!player.isLinked()) {
+                skinApplier.applySkin(player, SkinDataImpl.DEFAULT_SKIN);
                 return;
             }
 
-            CompletableFuture.supplyAsync(() -> {
-                        try {
-                            return MojangUtils.getSkinCached(httpClient, player.getJavaUniqueId());
-                        } catch (ExecutionException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }).thenAccept(skin -> skinApplier.applySkin(player, skin))
-                    .exceptionally(e -> {
-                        logger.error("Failed to get skin for player " + player.getJavaUniqueId() + ", applying default.", e);
-                        skinApplier.applySkin(player, new SkinDataImpl(
-                                Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE,
-                                Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE
-                        ));
+            mojangUtils.asyncSkinFor(player.getJavaUniqueId())
+                    .thenAccept(skin -> skinApplier.applySkin(player, skin))
+                    .exceptionally(exception -> {
+                        logger.debug("Failed to get skin for player " + player.getJavaUniqueId() + ", applying default.", exception);
+                        skinApplier.applySkin(player, SkinDataImpl.DEFAULT_SKIN);
                         return null;
                     });
         }

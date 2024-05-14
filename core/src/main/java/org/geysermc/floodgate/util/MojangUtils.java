@@ -30,33 +30,48 @@ import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import lombok.NonNull;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 import org.geysermc.floodgate.skin.SkinDataImpl;
 import org.geysermc.floodgate.util.HttpClient.HttpResponse;
 
+@Singleton
 public class MojangUtils {
-
-    private static final String SESSION_SERVER =
-            "https://sessionserver.mojang.com/session/minecraft/profile/%s?unsigned=false";
-
-    private static final Cache<UUID, SkinData> SKIN_CACHE = CacheBuilder.newBuilder()
+    private final Cache<UUID, SkinData> SKIN_CACHE = CacheBuilder.newBuilder()
             .expireAfterWrite(5, TimeUnit.MINUTES)
             .maximumSize(500)
             .build();
 
-    public static @NonNull SkinData getSkinCached(
-            HttpClient httpClient,
-            UUID playerId
-    ) throws ExecutionException {
-        return SKIN_CACHE.get(playerId, () -> getSkin(httpClient, playerId));
+    @Inject private HttpClient httpClient;
+    @Inject
+    @Named("commonPool")
+    private ExecutorService commonPool;
+
+    public @NonNull SkinData skinFor(UUID playerId) throws ExecutionException {
+        return SKIN_CACHE.get(playerId, () -> fetchSkinFor(playerId));
     }
 
-    public static @NonNull SkinData getSkin(HttpClient httpClient, UUID playerId) {
-        final HttpResponse<JsonObject> httpResponse = httpClient.get(String.format(SESSION_SERVER, playerId.toString()));
+    public CompletableFuture<@NonNull SkinData> asyncSkinFor(UUID playerId) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return SKIN_CACHE.get(playerId, () -> fetchSkinFor(playerId));
+            } catch (ExecutionException exception) {
+                throw new RuntimeException(exception.getCause());
+            }
+        }, commonPool);
+    }
+
+    private @NonNull SkinData fetchSkinFor(UUID playerId) {
+        HttpResponse<JsonObject> httpResponse = httpClient.get(
+                String.format(Constants.PROFILE_WITH_PROPERTIES_URL, playerId.toString()));
 
         if (httpResponse.getHttpCode() != 200) {
             return SkinDataImpl.DEFAULT_SKIN;

@@ -43,7 +43,6 @@ import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.ProxyUtils;
 
 public final class SpigotDataHandler extends CommonDataHandler {
-
     private static final Property DEFAULT_TEXTURE_PROPERTY = new Property(
             "textures",
             Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE,
@@ -182,10 +181,7 @@ public final class SpigotDataHandler extends CommonDataHandler {
 
             if (!player.isLinked()) {
                 // Otherwise game server will try to fetch the skin from Mojang
-                gameProfile.getProperties().put(
-                        "textures",
-                        DEFAULT_TEXTURE_PROPERTY
-                );
+                gameProfile.getProperties().put("textures", DEFAULT_TEXTURE_PROPERTY);
             }
 
             // we have to fake the offline player (login) cycle
