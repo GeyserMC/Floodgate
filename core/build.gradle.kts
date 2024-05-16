@@ -15,8 +15,7 @@ dependencies {
     api("com.nukkitx.fastutil", "fastutil-short-object-maps", Versions.fastutilVersion)
     api("com.nukkitx.fastutil", "fastutil-int-object-maps", Versions.fastutilVersion)
     api("org.java-websocket", "Java-WebSocket", Versions.javaWebsocketVersion)
-    // TODO move to cloud release
-    api("org.incendo", "cloud-core", "2.0.0-20240503.181645-64")
+    api("org.incendo", "cloud-core", Versions.cloudCore)
     api("org.bstats", "bstats-base", Versions.bstatsVersion)
 }
 
