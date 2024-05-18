@@ -36,6 +36,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.velocitypowered.api.event.Continuation;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
@@ -48,7 +49,7 @@ import com.velocitypowered.api.util.GameProfile.Property;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
-import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import net.kyori.adventure.text.Component;
@@ -56,12 +57,16 @@ import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
+import org.geysermc.floodgate.skin.SkinDataImpl;
+import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.LanguageManager;
+import org.geysermc.floodgate.util.MojangUtils;
 
 public final class VelocityListener {
     private static final Field INITIAL_MINECRAFT_CONNECTION;
     private static final Field INITIAL_CONNECTION_DELEGATE;
     private static final Field CHANNEL;
+    private static final Property DEFAULT_TEXTURE_PROPERTY;
 
     static {
         Class<?> initialConnection = getPrefixedClass("connection.client.InitialInboundConnection");
@@ -82,6 +87,12 @@ public final class VelocityListener {
         }
 
         CHANNEL = getFieldOfType(minecraftConnection, Channel.class);
+
+        DEFAULT_TEXTURE_PROPERTY = new Property(
+                "textures",
+                Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE,
+                Constants.DEFAULT_MINECRAFT_JAVA_SKIN_SIGNATURE
+        );
     }
 
     private final Cache<InboundConnection, FloodgatePlayer> playerCache =
@@ -102,6 +113,9 @@ public final class VelocityListener {
     @Inject
     @Named("kickMessageAttribute")
     private AttributeKey<String> kickMessageAttribute;
+
+    @Inject
+    private MojangUtils mojangUtils;
 
     @Subscribe(order = PostOrder.EARLY)
     public void onPreLogin(PreLoginEvent event) {
@@ -139,22 +153,38 @@ public final class VelocityListener {
     }
 
     @Subscribe(order = PostOrder.EARLY)
-    public void onGameProfileRequest(GameProfileRequestEvent event) {
+    public void onGameProfileRequest(GameProfileRequestEvent event, Continuation continuation) {
         FloodgatePlayer player = playerCache.getIfPresent(event.getConnection());
-        if (player != null) {
-            playerCache.invalidate(event.getConnection());
+        if (player == null) {
+            return;
+        }
+        playerCache.invalidate(event.getConnection());
 
-            GameProfile profile = new GameProfile(
+        // Skin look up (on Spigot and friends) would result in it failing, so apply a default skin
+        if (!player.isLinked()) {
+            event.setGameProfile(new GameProfile(
                     player.getCorrectUniqueId(),
                     player.getCorrectUsername(),
-                    Collections.emptyList()
-            );
-            // The texture properties addition is to fix the February 2 2022 Mojang authentication changes
-            if (!config.isSendFloodgateData() && !player.isLinked()) {
-                profile = profile.addProperty(new Property("textures", "", ""));
-            }
-            event.setGameProfile(profile);
+                    List.of(DEFAULT_TEXTURE_PROPERTY)
+            ));
+            return;
         }
+
+        // Floodgate players are seen as offline mode players, meaning we have to look up
+        // the linked player's textures ourselves
+
+        mojangUtils.skinFor(player.getJavaUniqueId())
+                .exceptionally(exception -> {
+                    logger.debug("Unexpected skin fetch error for " + player.getJavaUniqueId(), exception);
+                    return SkinDataImpl.DEFAULT_SKIN;
+                }).thenAccept(skin -> {
+                    event.setGameProfile(new GameProfile(
+                            player.getCorrectUniqueId(),
+                            player.getCorrectUsername(),
+                            List.of(new Property("textures", skin.value(), skin.signature()))
+                    ));
+                    continuation.resume();
+                });
     }
 
     @Subscribe(order = PostOrder.LAST)

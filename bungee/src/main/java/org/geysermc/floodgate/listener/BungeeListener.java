@@ -39,6 +39,7 @@ import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
+import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
@@ -46,10 +47,10 @@ import net.md_5.bungee.netty.ChannelWrapper;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinDataImpl;
 import org.geysermc.floodgate.util.LanguageManager;
+import org.geysermc.floodgate.util.MojangUtils;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
 @SuppressWarnings("ConstantConditions")
@@ -66,7 +67,7 @@ public final class BungeeListener implements Listener {
         checkNotNull(PLAYER_NAME, "Initial name field cannot be null");
     }
 
-    @Inject private ProxyFloodgateConfig config;
+    @Inject private Plugin plugin;
     @Inject private ProxyFloodgateApi api;
     @Inject private LanguageManager languageManager;
     @Inject private FloodgateLogger logger;
@@ -79,6 +80,8 @@ public final class BungeeListener implements Listener {
     @Inject
     @Named("kickMessageAttribute")
     private AttributeKey<String> kickMessageAttribute;
+
+    @Inject private MojangUtils mojangUtils;
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPreLogin(PreLoginEvent event) {
@@ -127,13 +130,28 @@ public final class BungeeListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPostLogin(PostLoginEvent event) {
-        // To fix the February 2 2022 Mojang authentication changes
-        if (!config.isSendFloodgateData()) {
-            FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
-            if (player != null && !player.isLinked()) {
-                skinApplier.applySkin(player, new SkinDataImpl("", ""));
-            }
+        FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
+
+        // Skin look up (on Spigot and friends) would result in it failing, so apply a default skin
+        if (!player.isLinked()) {
+            skinApplier.applySkin(player, SkinDataImpl.DEFAULT_SKIN);
+            return;
         }
+
+        // Floodgate players are seen as offline mode players, meaning we have to look up
+        // the linked player's textures ourselves
+
+        event.registerIntent(plugin);
+
+        mojangUtils.skinFor(player.getJavaUniqueId())
+                .exceptionally(exception -> {
+                    logger.debug("Unexpected skin fetch error for " + player.getJavaUniqueId(), exception);
+                    return SkinDataImpl.DEFAULT_SKIN;
+                })
+                .thenAccept(skin -> {
+                    skinApplier.applySkin(player, skin);
+                    event.completeIntent(plugin);
+                });
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

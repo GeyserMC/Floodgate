@@ -29,8 +29,14 @@ import com.google.gson.JsonObject;
 import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
+import org.geysermc.floodgate.util.Constants;
 
 public class SkinDataImpl implements SkinData {
+    public static final SkinData DEFAULT_SKIN = new SkinDataImpl(
+            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE,
+            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_SIGNATURE
+    );
+
     private final String value;
     private final String signature;
 

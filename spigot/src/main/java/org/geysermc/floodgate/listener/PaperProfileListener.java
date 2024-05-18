@@ -26,20 +26,24 @@
 package org.geysermc.floodgate.listener;
 
 import com.destroystokyo.paper.event.profile.PreFillProfileEvent;
-import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
 import com.google.inject.Inject;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.util.Constants;
 
 public final class PaperProfileListener implements Listener {
+    private static final ProfileProperty DEFAULT_TEXTURE_PROPERTY = new ProfileProperty(
+            "textures",
+            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE,
+            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_SIGNATURE
+    );
+
     @Inject private SimpleFloodgateApi api;
 
     @EventHandler
@@ -62,26 +66,8 @@ public final class PaperProfileListener implements Listener {
         }
 
         Set<ProfileProperty> properties = new HashSet<>(event.getPlayerProfile().getProperties());
-        properties.add(new ProfileProperty("textures", "", ""));
+        properties.add(DEFAULT_TEXTURE_PROPERTY);
+
         event.setProperties(properties);
-    }
-
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        Player bukkitPlayer = event.getPlayer();
-        FloodgatePlayer player = api.getPlayer(bukkitPlayer.getUniqueId());
-        if (player == null || player.isLinked()) {
-            return;
-        }
-
-        PlayerProfile profile = bukkitPlayer.getPlayerProfile();
-        if (profile.getProperties().stream().noneMatch(
-                prop -> "textures".equals(prop.getName()) && prop.getValue().isEmpty()
-                        && prop.getSignature() != null && prop.getSignature().isEmpty())) {
-            return;
-        }
-
-        profile.removeProperty("textures");
-        bukkitPlayer.setPlayerProfile(profile);
     }
 }
