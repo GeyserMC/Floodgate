@@ -38,6 +38,7 @@ import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
+import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
@@ -49,6 +50,7 @@ import org.geysermc.floodgate.core.listener.McListener;
 import org.geysermc.floodgate.core.skin.SkinApplier;
 import org.geysermc.floodgate.core.skin.SkinDataImpl;
 import org.geysermc.floodgate.core.util.LanguageManager;
+import org.geysermc.floodgate.core.util.MojangUtils;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
 
 @Singleton
@@ -60,11 +62,13 @@ public final class BungeeListener implements Listener, McListener {
         requireNonNull(PLAYER_NAME, "Initial name field cannot be null");
     }
 
+    @Inject Plugin plugin;
     @Inject BungeeConnectionManager connectionManager;
     @Inject ProxyFloodgateConfig config;
     @Inject SimpleFloodgateApi api;
     @Inject LanguageManager languageManager;
     @Inject SkinApplier skinApplier;
+    @Inject MojangUtils mojangUtils;
 
     @Inject
     @Named("kickMessageAttribute")
@@ -112,13 +116,26 @@ public final class BungeeListener implements Listener, McListener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPostLogin(PostLoginEvent event) {
-        // To fix the February 2 2022 Mojang authentication changes
-        if (!config.sendFloodgateData()) {
-            Connection connection = api.connectionByPlatformIdentifier(event.getPlayer());
-            if (connection != null && !connection.isLinked()) {
-                skinApplier.applySkin(connection, new SkinDataImpl("", ""));
-            }
+        Connection connection = api.connectionByPlatformIdentifier(event.getPlayer());
+        if (connection == null) {
+            return;
         }
+
+        // Skin look up (on Spigot and friends) would result in it failing, so apply a default skin
+        if (!connection.isLinked()) {
+            skinApplier.applySkin(connection, SkinDataImpl.DEFAULT_SKIN);
+            return;
+        }
+
+        // Floodgate players are seen as offline mode players, meaning we have to look up
+        // the linked player's textures ourselves
+
+        event.registerIntent(plugin);
+
+        mojangUtils.skinFor(connection.javaUuid()).thenAccept(skin -> {
+            skinApplier.applySkin(connection, skin);
+            event.completeIntent(plugin);
+        });
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

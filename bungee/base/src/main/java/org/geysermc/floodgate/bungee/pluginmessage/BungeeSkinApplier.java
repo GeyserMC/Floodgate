@@ -92,8 +92,6 @@ public final class BungeeSkinApplier implements SkinApplier {
         SkinData currentSkin = currentSkin(properties);
 
         SkinApplyEvent event = new SkinApplyEventImpl(connection, currentSkin, skinData);
-        event.cancelled(connection.isLinked());
-
         eventBus.fire(event);
 
         if (event.cancelled()) {

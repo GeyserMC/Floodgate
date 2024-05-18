@@ -30,8 +30,14 @@ import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
+import org.geysermc.floodgate.core.util.Constants;
 
 public record SkinDataImpl(String value, String signature) implements SkinData {
+    public static final SkinData DEFAULT_SKIN = new SkinDataImpl(
+            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE,
+            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_SIGNATURE
+    );
+
     public SkinDataImpl(@NonNull String value, @MonotonicNonNull String signature) {
         this.value = Objects.requireNonNull(value);
         this.signature = Objects.requireNonNull(signature);

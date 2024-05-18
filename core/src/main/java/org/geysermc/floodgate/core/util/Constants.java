@@ -34,26 +34,18 @@ public final class Constants {
 
     public static final int MAX_DEBUG_PACKET_COUNT = 20;
     public static final boolean DEBUG_MODE = false;
-    public static final boolean PRINT_ALL_PACKETS = false;
-
 
     public static final String USER_AGENT = "GeyserMC/Floodgate";
     private static final String API_BASE_URL = "s://api.geysermc.org";
-    public static final String HEALTH_URL = "http" + API_BASE_URL + "/health";
 
     public static final String LINK_INFO_URL = "https://link.geysermc.org/";
     public static final String LATEST_DOWNLOAD_URL = "https://geysermc.org/download";
 
-    public static final String INTERNAL_ERROR_MESSAGE =
-            "An internal error happened while handling Floodgate data." +
-            " Try logging in again or contact a server administrator if the issue persists.";
     public static final String UNSUPPORTED_DATA_VERSION =
             "Received an unsupported Floodgate data version." +
             " This Floodgate version is made for data version %s, received %s." +
             " Make sure that Floodgate is up-to-date.";
 
-
-    public static final int HANDSHAKE_PACKET_ID = 0;
-    public static final int LOGIN_SUCCESS_PACKET_ID = 2;
-    public static final int SET_COMPRESSION_PACKET_ID = 3;
+    public static final String DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE = "ewogICJ0aW1lc3RhbXAiIDogMTcxNTcxNzM1NTI2MywKICAicHJvZmlsZUlkIiA6ICIyMWUzNjdkNzI1Y2Y0ZTNiYjI2OTJjNGEzMDBhNGRlYiIsCiAgInByb2ZpbGVOYW1lIiA6ICJHZXlzZXJNQyIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS8zMWY0NzdlYjFhN2JlZWU2MzFjMmNhNjRkMDZmOGY2OGZhOTNhMzM4NmQwNDQ1MmFiMjdmNDNhY2RmMWI2MGNiIgogICAgfQogIH0KfQ";
+    public static final String DEFAULT_MINECRAFT_JAVA_SKIN_SIGNATURE = "dFKIZ5d6vNqCSe1IFGiVLjt3cnW8qh4qNP2umg9zqkX9bvAQawuR1iuO1kCD/+ye8A6GQFv2wRCdxdrjp5+Vrr0SsWqMnsYDN8cEg6CD18mAnaKI1TYDuGbdJaqLyGqN5wqSMdHxchs9iovFkde5ir4aYdvHkA11vOTi11L4kUzETGzJ4iKVuZOv4dq+B7wFAWqp4n8QZfhixyvemFazQHlLmxnuhU+jhpZMvYY9MAaRAJonfy/wJe9LymbTe0EJ8N+NwZQDrEUzgfBFo4OIGDqRZwvydInCqkjhPMtHCSL25VOKwcFocYpRYbk4eIKM4CLjYlBiQGki+XKsPaljwjVhnT0jUupSf7yraGb3T0CsVBjhDbIIIp9nytlbO0GvxHu0TzYjkr4Iji0do5jlCKQ/OasXcL21wd6ozw0t1QZnnzxi9ewSuyYVY9ErmWdkww1OtCIgJilceEBwNAB8+mhJ062WFaYPgJQAmOREM8InW33dbbeENMFhQi4LIO5P7p9ye3B4Lrwm20xtd9wJk3lewzcs8ezh0LUF6jPSDQDivgSKU49mLCTmOi+WZh8zKjjxfVEtNZON2W+3nct0LiWBVsQ55HzlvF0FFxuRVm6pxi6MQK2ernv3DQl0hUqyQ1+RV9nfZXTQOAUzwLjKx3t2zKqyZIiNEKLE+iAXrsE=";
 }

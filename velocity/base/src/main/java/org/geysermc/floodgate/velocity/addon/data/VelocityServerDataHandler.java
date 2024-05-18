@@ -27,6 +27,7 @@ package org.geysermc.floodgate.velocity.addon.data;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.proxy.connection.MinecraftConnection;
+import com.velocitypowered.proxy.connection.backend.VelocityServerConnection;
 import com.velocitypowered.proxy.protocol.packet.HandshakePacket;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -62,7 +63,8 @@ public final class VelocityServerDataHandler extends ChannelOutboundHandlerAdapt
 
             // get the FloodgatePlayer from the ConnectedPlayer
             MinecraftConnection minecraftConnection = (MinecraftConnection) ctx.pipeline().get("handler");
-            Player velocityPlayer = (Player) minecraftConnection.getAssociation();
+            VelocityServerConnection serverConnection = (VelocityServerConnection) minecraftConnection.getAssociation();
+            Player velocityPlayer = serverConnection.getPlayer();
 
             Connection connection = api.connectionByPlatformIdentifier(velocityPlayer);
             if (connection != null) {

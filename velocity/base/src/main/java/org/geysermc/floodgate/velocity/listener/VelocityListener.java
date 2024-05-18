@@ -25,11 +25,13 @@
 
 package org.geysermc.floodgate.velocity.listener;
 
+import com.velocitypowered.api.event.Continuation;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
+import com.velocitypowered.api.event.connection.PreLoginEvent.PreLoginComponentResult;
 import com.velocitypowered.api.event.player.GameProfileRequestEvent;
 import com.velocitypowered.api.util.GameProfile;
 import com.velocitypowered.api.util.GameProfile.Property;
@@ -38,23 +40,32 @@ import io.netty.util.AttributeKey;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
-import java.util.Collections;
 import net.kyori.adventure.text.Component;
 import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.core.listener.McListener;
 import org.geysermc.floodgate.core.logger.FloodgateLogger;
+import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.LanguageManager;
+import org.geysermc.floodgate.core.util.MojangUtils;
 import org.geysermc.floodgate.velocity.player.VelocityConnectionManager;
+
+import java.util.List;
 
 @Singleton
 public final class VelocityListener implements McListener {
+    private static final Property DEFAULT_TEXTURE_PROPERTY = new Property(
+            "textures",
+            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE,
+            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_SIGNATURE);
+
     @Inject VelocityConnectionManager connectionManager;
     @Inject ProxyFloodgateConfig config;
     @Inject SimpleFloodgateApi api;
     @Inject LanguageManager languageManager;
     @Inject FloodgateLogger logger;
+    @Inject MojangUtils mojangUtils;
 
     @Inject
     @Named("connectionAttribute")
@@ -78,34 +89,47 @@ public final class VelocityListener implements McListener {
         }
 
         if (kickMessage != null) {
-            event.setResult(
-                    PreLoginEvent.PreLoginComponentResult.denied(Component.text(kickMessage))
-            );
+            event.setResult(PreLoginComponentResult.denied(Component.text(kickMessage)));
             return;
         }
 
         if (player != null) {
-            event.setResult(PreLoginEvent.PreLoginComponentResult.forceOfflineMode());
+            event.setResult(PreLoginComponentResult.forceOfflineMode());
         }
     }
 
     @Subscribe(order = PostOrder.EARLY)
-    public void onGameProfileRequest(GameProfileRequestEvent event) {
+    public void onGameProfileRequest(GameProfileRequestEvent event, Continuation continuation) {
         Connection connection = connectionManager.connectionByPlatformIdentifier(event.getConnection());
         if (connection == null) {
+            continuation.resume();
             return;
         }
 
-        GameProfile profile = new GameProfile(
-                connection.javaUuid(),
-                connection.javaUsername(),
-                Collections.emptyList()
-        );
-        // The texture properties addition is to fix the February 2 2022 Mojang authentication changes
-        if (!config.sendFloodgateData() && !connection.isLinked()) {
-            profile = profile.addProperty(new Property("textures", "", ""));
+
+        // Skin look up (on Spigot and friends) would result in it failing, so apply a default skin
+        if (!connection.isLinked()) {
+            event.setGameProfile(new GameProfile(
+                    connection.javaUuid(),
+                    connection.javaUsername(),
+                    List.of(DEFAULT_TEXTURE_PROPERTY)
+            ));
+            continuation.resume();
+            return;
         }
-        event.setGameProfile(profile);
+
+        // Floodgate players are seen as offline mode players, meaning we have to look up
+        // the linked player's textures ourselves
+
+        mojangUtils.skinFor(connection.javaUuid())
+                .thenAccept(skin -> {
+                    event.setGameProfile(new GameProfile(
+                            connection.javaUuid(),
+                            connection.javaUsername(),
+                            List.of(new Property("textures", skin.value(), skin.signature()))
+                    ));
+                    continuation.resume();
+                });
     }
 
     @Subscribe(order = PostOrder.FIRST)

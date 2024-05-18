@@ -29,6 +29,7 @@ import static org.geysermc.floodgate.core.util.ReflectionUtils.getCastedValue;
 import static org.geysermc.floodgate.core.util.ReflectionUtils.setValue;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.InvocationTargetException;
@@ -41,10 +42,17 @@ import org.geysermc.floodgate.core.connection.DataSeeker;
 import org.geysermc.floodgate.core.connection.FloodgateDataHandler;
 import org.geysermc.floodgate.core.connection.FloodgateDataHandler.HandleResult;
 import org.geysermc.floodgate.core.logger.FloodgateLogger;
+import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.spigot.util.ClassNames;
 import org.geysermc.floodgate.spigot.util.ProxyUtils;
 
 public final class SpigotDataHandler extends CommonNettyDataHandler {
+    private static final Property DEFAULT_TEXTURE_PROPERTY = new Property(
+            "textures",
+            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE,
+            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_SIGNATURE
+    );
+
     private Object networkManager;
     private Connection connection;
     private boolean proxyData;
@@ -182,6 +190,14 @@ public final class SpigotDataHandler extends CommonNettyDataHandler {
             }
 
             GameProfile gameProfile = new GameProfile(connection.javaUuid(), connection.javaUsername());
+
+            if (!connection.isLinked()) {
+                // Otherwise game server will try to fetch the skin from Mojang.
+                // No need to worry that this overrides proxy data, because those won't reach this
+                // method / are already removed (in the case of username validation)
+                gameProfile.getProperties().put("textures", DEFAULT_TEXTURE_PROPERTY);
+            }
+
             setValue(packetListener, ClassNames.LOGIN_PROFILE, gameProfile);
 
             // we have to fake the offline player (login) cycle

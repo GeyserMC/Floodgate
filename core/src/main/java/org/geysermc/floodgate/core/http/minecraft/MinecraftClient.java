@@ -1,6 +1,5 @@
 package org.geysermc.floodgate.core.http.minecraft;
 
-import static io.micronaut.http.HttpHeaders.ACCEPT;
 import static io.micronaut.http.HttpHeaders.USER_AGENT;
 
 import io.micronaut.http.annotation.Get;
@@ -13,7 +12,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Client("https://api.minecraftservices.com/minecraft")
 @Header(name = USER_AGENT, value = "${http.userAgent}")
-@Header(name = ACCEPT, value = "application/json")
 public interface MinecraftClient {
     @Get("/profile/lookup/name/{name}")
     CompletableFuture<@Nullable ProfileResult> profileByName(@NonNull String name);
