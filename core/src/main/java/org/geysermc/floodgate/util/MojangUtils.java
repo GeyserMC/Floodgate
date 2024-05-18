@@ -55,11 +55,7 @@ public class MojangUtils {
     @Named("commonPool")
     private ExecutorService commonPool;
 
-    public @NonNull SkinData skinFor(UUID playerId) throws ExecutionException {
-        return SKIN_CACHE.get(playerId, () -> fetchSkinFor(playerId));
-    }
-
-    public CompletableFuture<@NonNull SkinData> asyncSkinFor(UUID playerId) {
+    public CompletableFuture<@NonNull SkinData> skinFor(UUID playerId) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return SKIN_CACHE.get(playerId, () -> fetchSkinFor(playerId));
