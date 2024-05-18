@@ -156,6 +156,7 @@ public final class VelocityListener {
     public void onGameProfileRequest(GameProfileRequestEvent event, Continuation continuation) {
         FloodgatePlayer player = playerCache.getIfPresent(event.getConnection());
         if (player == null) {
+            continuation.resume();
             return;
         }
         playerCache.invalidate(event.getConnection());
@@ -167,6 +168,7 @@ public final class VelocityListener {
                     player.getCorrectUsername(),
                     List.of(DEFAULT_TEXTURE_PROPERTY)
             ));
+            continuation.resume();
             return;
         }
 
