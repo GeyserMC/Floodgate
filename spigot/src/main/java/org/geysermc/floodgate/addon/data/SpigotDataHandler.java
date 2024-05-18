@@ -180,7 +180,9 @@ public final class SpigotDataHandler extends CommonDataHandler {
             );
 
             if (!player.isLinked()) {
-                // Otherwise game server will try to fetch the skin from Mojang
+                // Otherwise game server will try to fetch the skin from Mojang.
+                // No need to worry that this overrides proxy data, because those won't reach this
+                // method / are already removed (in the case of username validation)
                 gameProfile.getProperties().put("textures", DEFAULT_TEXTURE_PROPERTY);
             }
 

@@ -132,7 +132,7 @@ public final class BungeeListener implements Listener {
     public void onPostLogin(PostLoginEvent event) {
         FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
 
-        // Skin look up would result in it failing, apply a default skin
+        // Skin look up (on Spigot and friends) would result in it failing, so apply a default skin
         if (!player.isLinked()) {
             skinApplier.applySkin(player, SkinDataImpl.DEFAULT_SKIN);
             return;
