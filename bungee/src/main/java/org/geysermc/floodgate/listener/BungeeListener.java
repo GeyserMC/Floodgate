@@ -131,6 +131,9 @@ public final class BungeeListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPostLogin(PostLoginEvent event) {
         FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
+        if (player == null) {
+            return;
+        }
 
         // Skin look up (on Spigot and friends) would result in it failing, so apply a default skin
         if (!player.isLinked()) {
