@@ -37,8 +37,6 @@ jobs:
 
       - name: Build Floodgate
         run: ./gradlew build
-        env:
-          BUILD_NUMBER: ${{ steps.release-info.outputs.curentRelease }}
 
       - name: Archive artifacts (Floodgate Bungee)
         # See https://github.com/actions/upload-artifact/commits
