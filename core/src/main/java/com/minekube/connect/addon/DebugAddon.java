@@ -29,13 +29,13 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.minekube.connect.addon.debug.ChannelInDebugHandler;
 import com.minekube.connect.addon.debug.ChannelOutDebugHandler;
-import com.minekube.connect.addon.debug.StateChangeDetector;
 import com.minekube.connect.api.inject.InjectorAddon;
 import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.config.ConnectConfig;
 import com.minekube.connect.util.Utils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public final class DebugAddon implements InjectorAddon {
     @Inject private ConnectConfig config;
@@ -57,16 +57,14 @@ public final class DebugAddon implements InjectorAddon {
     public void onInject(Channel channel, boolean toServer) {
         logger.info("Successfully called onInject. To server? " + toServer);
 
-        StateChangeDetector changeDetector = new StateChangeDetector(
-                channel, packetEncoder, packetDecoder, logger
-        );
+        AtomicInteger packetCount = new AtomicInteger();
 
         channel.pipeline().addBefore(
                 packetEncoder, "connect_debug_out",
-                new ChannelOutDebugHandler(platformName, toServer, changeDetector, logger)
+                new ChannelOutDebugHandler(platformName, toServer, packetCount, logger)
         ).addBefore(
                 packetDecoder, "connect_debug_in",
-                new ChannelInDebugHandler(platformName, toServer, changeDetector, logger)
+                new ChannelInDebugHandler(platformName, toServer, packetCount, logger)
         );
     }
 

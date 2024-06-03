@@ -51,8 +51,6 @@ import org.bukkit.OfflinePlayer;
 
 @SuppressWarnings("PMD.SystemPrintln")
 public class ClassNames {
-    public static final String SPIGOT_MAPPING_PREFIX;
-
     public static final Class<?> MINECRAFT_SERVER;
     public static final Class<?> SERVER_CONNECTION;
     public static final Class<?> HANDSHAKE_PACKET;
@@ -94,16 +92,27 @@ public class ClassNames {
 
     static {
         // ahhhhhhh, this class should really be reworked at this point
-        String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-        SPIGOT_MAPPING_PREFIX = "net.minecraft.server." + version;
+
+        String[] versionSplit = Bukkit.getServer().getClass().getPackage().getName().split("\\.");
+        // Paper, since 1.20.5, no longer relocates CraftBukkit classes
+        // and NMS classes aren't relocated for a few versions now (both Spigot & Paper)
+        if (versionSplit.length <= 3 && getClassSilently("net.minecraft.server.MinecraftServer") == null) {
+            throw new IllegalStateException(
+                    "Was unable to find net.minecraft.server.MinecraftServer. " +
+                    "We don't support Mojmap yet"
+            );
+        }
+        // Makes it that we don't have to lookup both the new and the old
+        // 'org.bukkit.craftbukkit. + version + CraftPlayer' will be .CraftPlayer on new
+        // versions and .v1_8R3.CraftPlayer on older versions
+        String version = versionSplit.length > 3 ? versionSplit[3] + '.' : "";
+        String nmsPackage = "net.minecraft.server." + version;
 
         // SpigotSkinApplier
         Class<?> craftPlayerClass = ReflectionUtils.getClass(
-                "org.bukkit.craftbukkit." + version + ".entity.CraftPlayer");
+                "org.bukkit.craftbukkit." + version + "entity.CraftPlayer");
         GET_PROFILE_METHOD = getMethod(craftPlayerClass, "getProfile");
         checkNotNull(GET_PROFILE_METHOD, "Get profile method");
-
-        String nmsPackage = SPIGOT_MAPPING_PREFIX + '.';
 
         // SpigotInjector
         MINECRAFT_SERVER = getClassOrFallback(
@@ -118,9 +127,9 @@ public class ClassNames {
 
         // WhitelistUtils
         Class<?> craftServerClass = ReflectionUtils.getClass(
-                "org.bukkit.craftbukkit." + version + ".CraftServer");
+                "org.bukkit.craftbukkit." + version + "CraftServer");
         Class<OfflinePlayer> craftOfflinePlayerClass = ReflectionUtils.getCastedClass(
-                "org.bukkit.craftbukkit." + version + ".CraftOfflinePlayer");
+                "org.bukkit.craftbukkit." + version + "CraftOfflinePlayer");
 
         CRAFT_OFFLINE_PLAYER_CONSTRUCTOR = getConstructor(
                 craftOfflinePlayerClass, true, craftServerClass, GameProfile.class);
@@ -294,13 +303,22 @@ public class ClassNames {
                     String.class, int.class, CLIENT_INTENT);
             checkNotNull(HANDSHAKE_PACKET_CONSTRUCTOR, "Handshake packet constructor");
 
-            HANDSHAKE_PORT = getField(HANDSHAKE_PACKET, "a");
-            checkNotNull(HANDSHAKE_PORT, "Handshake port");
-            makeAccessible(HANDSHAKE_PORT);
+            Field a = getField(HANDSHAKE_PACKET, "a");
+            checkNotNull(a,"Handshake \"a\" field (protocol version, or stream codec)");
 
-            HANDSHAKE_PROTOCOL = getField(HANDSHAKE_PACKET, "c");
+            if (a.getType().isPrimitive()) { // 1.20.2 - 1.20.4: a is the protocol version (int)
+                HANDSHAKE_PROTOCOL = a;
+                HANDSHAKE_PORT = getField(HANDSHAKE_PACKET, "c");
+            } else { // 1.20.5: a is the stream_codec thing, so everything is shifted
+                HANDSHAKE_PROTOCOL = getField(HANDSHAKE_PACKET, "b");
+                HANDSHAKE_PORT = getField(HANDSHAKE_PACKET, "d");
+            }
+
             checkNotNull(HANDSHAKE_PROTOCOL, "Handshake protocol");
             makeAccessible(HANDSHAKE_PROTOCOL);
+
+            checkNotNull(HANDSHAKE_PORT, "Handshake port");
+            makeAccessible(HANDSHAKE_PORT);
 
             HANDSHAKE_INTENTION = getFieldOfType(HANDSHAKE_PACKET, CLIENT_INTENT);
             checkNotNull(HANDSHAKE_INTENTION, "Handshake intention");

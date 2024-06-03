@@ -26,11 +26,13 @@
 package com.minekube.connect.addon.debug;
 
 import com.minekube.connect.api.logger.ConnectLogger;
+import com.minekube.connect.util.Utils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Sharable
 public final class ChannelOutDebugHandler extends MessageToByteEncoder<ByteBuf> {
@@ -38,17 +40,17 @@ public final class ChannelOutDebugHandler extends MessageToByteEncoder<ByteBuf> 
     private final ConnectLogger logger;
 
     private final boolean toServer;
-    private final StateChangeDetector changeDetector;
+    private final AtomicInteger packetCount;
 
     public ChannelOutDebugHandler(
             String implementationType,
             boolean toServer,
-            StateChangeDetector changeDetector,
+            AtomicInteger changeDetector,
             ConnectLogger logger) {
         this.direction = implementationType + (toServer ? " -> Server" : " -> Player");
         this.logger = logger;
         this.toServer = toServer;
-        this.changeDetector = changeDetector;
+        this.packetCount = changeDetector;
     }
 
     @Override
@@ -56,16 +58,13 @@ public final class ChannelOutDebugHandler extends MessageToByteEncoder<ByteBuf> 
         try {
             int index = msg.readerIndex();
 
-            if (changeDetector.shouldPrintPacket(msg, toServer)) {
+            if (packetCount.getAndIncrement() < Utils.MAX_DEBUG_PACKET_COUNT) {
                 logger.info(
                         "{} {}:\n{}",
                         direction,
-                        changeDetector.getCurrentState(),
+                        packetCount.get(),
                         ByteBufUtil.prettyHexDump(msg)
                 );
-
-                // proxy acts as a client when it connects to a server
-                changeDetector.checkPacket(msg, toServer);
             }
 
             // reset index

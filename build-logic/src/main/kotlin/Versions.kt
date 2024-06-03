@@ -26,7 +26,7 @@
 object Versions {
     const val spigotVersion = "1.19.4-R0.1-SNAPSHOT"
     const val configUtilsVersion = "1.0-SNAPSHOT"
-    const val guiceVersion = "5.0.1"
+    const val guiceVersion = "6.0.0"
     const val nettyVersion = "4.1.49.Final"
     const val snakeyamlVersion = "1.28"
     const val cloudVersion = "1.5.0"
@@ -35,7 +35,7 @@ object Versions {
     const val viaVersionVersion = "4.0.0"
     const val gRPCVersion = "1.44.0"
     const val protocVersion = "3.19.4"
-    const val bstatsVersion = "3.0.0"
+    const val bstatsVersion = "3.0.2"
     const val gsonVersion = "2.8.6"
 
     const val checkerQual = "3.19.0"

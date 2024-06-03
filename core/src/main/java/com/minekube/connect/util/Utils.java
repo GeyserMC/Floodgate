@@ -52,6 +52,8 @@ import java.util.regex.Pattern;
 
 public class Utils {
     private static final Pattern NON_UNIQUE_PREFIX = Pattern.compile("^[a-zA-Z0-9_]{0,16}$");
+    public static final int MAX_DEBUG_PACKET_COUNT = 25;
+
 
     /**
      * This method is used in Addons.<br> Most addons can be removed once the player associated to
@@ -106,21 +108,6 @@ public class Utils {
 
     public static boolean isUniquePrefix(String prefix) {
         return !NON_UNIQUE_PREFIX.matcher(prefix).matches();
-    }
-
-    public static int readVarInt(ByteBuf buffer) {
-        int out = 0;
-        int count = 0;
-        byte current;
-        do {
-            current = buffer.readByte();
-            out |= (current & 0x7F) << (count++ * 7);
-
-            if (count > 5) {
-                throw new RuntimeException("VarInt is bigger then allowed");
-            }
-        } while ((current & 0x80) != 0);
-        return out;
     }
 
 

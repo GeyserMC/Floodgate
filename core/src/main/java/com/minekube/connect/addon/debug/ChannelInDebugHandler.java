@@ -26,11 +26,13 @@
 package com.minekube.connect.addon.debug;
 
 import com.minekube.connect.api.logger.ConnectLogger;
+import com.minekube.connect.util.Utils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Sharable
 public final class ChannelInDebugHandler extends SimpleChannelInboundHandler<ByteBuf> {
@@ -38,17 +40,17 @@ public final class ChannelInDebugHandler extends SimpleChannelInboundHandler<Byt
     private final ConnectLogger logger;
 
     private final boolean toServer;
-    private final StateChangeDetector changeDetector;
+    private final AtomicInteger packetCount;
 
     public ChannelInDebugHandler(
             String implementationType,
             boolean toServer,
-            StateChangeDetector changeDetector,
+            AtomicInteger changeDetector,
             ConnectLogger logger) {
         this.direction = (toServer ? "Server -> " : "Player -> ") + implementationType;
         this.logger = logger;
         this.toServer = toServer;
-        this.changeDetector = changeDetector;
+        this.packetCount = changeDetector;
     }
 
     @Override
@@ -56,14 +58,12 @@ public final class ChannelInDebugHandler extends SimpleChannelInboundHandler<Byt
         try {
             int index = msg.readerIndex();
 
-            if (changeDetector.shouldPrintPacket(msg, !toServer)) {
+            if (packetCount.getAndIncrement() < Utils.MAX_DEBUG_PACKET_COUNT) {
                 logger.info("{} {}:\n{}",
                         direction,
-                        changeDetector.getCurrentState(),
+                        packetCount.get(),
                         ByteBufUtil.prettyHexDump(msg)
                 );
-
-                changeDetector.checkPacket(msg, !toServer);
             }
 
             // reset index
