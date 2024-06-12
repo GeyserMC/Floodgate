@@ -49,7 +49,7 @@ public final class ConfigLoader {
         try {
             var loader = YamlConfigurationLoader.builder()
                     .path(dataDirectory.resolve("config.yml"))
-                    .defaultOptions(InterfaceDefaultOptions.get())
+                    .defaultOptions(InterfaceDefaultOptions::addTo)
                     .build();
 
             node = loader.load();
