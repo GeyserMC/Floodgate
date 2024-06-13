@@ -67,17 +67,12 @@ public final class SpigotPlugin extends JavaPlugin {
         boolean usePaperListener = ReflectionUtils.getClassSilently(
                 "com.destroystokyo.paper.event.profile.PreFillProfileEvent") != null;
 
-        try {
-            platform.enable(
-                    new SpigotCommandModule(this),
-                    new SpigotAddonModule(),
-                    new PluginMessageModule(),
-                    (usePaperListener ? new PaperListenerModule() : new SpigotListenerModule())
-            );
-        } catch (Exception exception) {
-            Bukkit.getPluginManager().disablePlugin(this);
-            throw exception;
-        }
+        platform.enable(
+                new SpigotCommandModule(this),
+                new SpigotAddonModule(),
+                new PluginMessageModule(),
+                (usePaperListener ? new PaperListenerModule() : new SpigotListenerModule())
+        );
 
         injector.getInstance(HandshakeHandlers.class)
                 .addHandshakeHandler(injector.getInstance(SpigotHandshakeHandler.class));
