@@ -14,12 +14,12 @@ loom {
 
 dependencies {
     //to change the versions see the gradle.properties file
-    minecraft("com.mojang:minecraft:1.20.5")
+    minecraft("com.mojang:minecraft:1.21")
     mappings(loom.officialMojangMappings())
-    modImplementation("net.fabricmc:fabric-loader:0.15.10")
+    modImplementation("net.fabricmc:fabric-loader:0.15.11")
 
     // Fabric API. This is technically optional, but you probably want it anyway.
-    modImplementation("net.fabricmc.fabric-api:fabric-api:0.97.6+1.20.5")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:0.100.1+1.21")
 
     // Base Floodgate
     implementation("org.geysermc.floodgate:core:2.2.3-20240508.151752-4")
