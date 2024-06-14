@@ -40,7 +40,7 @@ import org.geysermc.floodgate.player.UserAudience;
 import org.geysermc.floodgate.player.audience.FloodgateSenderMapper;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.execution.ExecutionCoordinator;
-import org.incendo.cloud.paper.PaperCommandManager;
+import org.incendo.cloud.paper.LegacyPaperCommandManager;
 
 @RequiredArgsConstructor
 public final class SpigotCommandModule extends CommandModule {
@@ -56,7 +56,7 @@ public final class SpigotCommandModule extends CommandModule {
     @Singleton
     @SneakyThrows
     public CommandManager<UserAudience> commandManager(CommandUtil commandUtil) {
-        CommandManager<UserAudience> commandManager = new PaperCommandManager<>(
+        CommandManager<UserAudience> commandManager = new LegacyPaperCommandManager<>(
                 plugin,
                 ExecutionCoordinator.simpleCoordinator(),
                 new FloodgateSenderMapper<>(commandUtil)

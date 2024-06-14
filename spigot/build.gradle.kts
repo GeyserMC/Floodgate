@@ -13,7 +13,9 @@ indra {
 dependencies {
     api(projects.core)
 
-    implementation("org.incendo", "cloud-paper", Versions.cloudVersion)
+    //implementation("org.incendo", "cloud-paper", Versions.cloudVersion)
+    // TODO change back after https://github.com/incendo/cloud-minecraft is merged
+    implementation("com.github.onebeastchris.cloud-minecraft", "cloud-paper", "jitpack-SNAPSHOT")
     // hack to make pre 1.12 work
     implementation("com.google.guava", "guava", guavaVersion)
 
