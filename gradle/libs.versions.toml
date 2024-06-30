@@ -61,6 +61,8 @@ cloud-core = { module = "org.incendo:cloud-core", version.ref = "cloud" }
 snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "snakeyaml" }
 bstats = { module = "org.bstats:bstats-base", version.ref = "bstats" }
 
+adventure-api = { module = "net.kyori:adventure-api", version.ref = "adventure" }
+adventure-key = { module = "net.kyori:adventure-key", version.ref = "adventure" }
 adventure-text-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure" }
 adventure-platform-bukkit = { module = "net.kyori:adventure-platform-bukkit", version.ref = "adventure-platform"}
 adventure-platform-bungee = { module = "net.kyori:adventure-platform-bungeecord", version.ref = "adventure-platform"}

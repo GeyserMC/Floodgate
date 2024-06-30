@@ -34,7 +34,7 @@ import org.geysermc.floodgate.core.database.entity.LinkRequest;
 public interface PendingLinkRepository extends IRepository<LinkRequest> {
     CompletableFuture<LinkRequest> findByJavaUsername(String javaUsername);
 
-    CompletableFuture<LinkRequest> insert(LinkRequest request);
+    CompletableFuture<Void> insert(LinkRequest request);
 
     CompletableFuture<Void> delete(LinkRequest request);
 }

@@ -1,6 +1,3 @@
-var log4jVersion = "2.11.2"
-var gsonVersion = "2.8.8"
-
 dependencies {
     api(projects.core)
     annotationProcessor(projects.core)
@@ -19,3 +16,5 @@ provided(libs.gson)
 provided(libs.velocity.api)
 provided(libs.velocity.proxy)
 providedDependency(libs.slf4j)
+providedDependency(libs.adventure.api)
+providedDependency(libs.adventure.key)

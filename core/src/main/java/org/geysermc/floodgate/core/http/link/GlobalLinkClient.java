@@ -32,9 +32,10 @@ import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Header;
 import io.micronaut.http.client.annotation.Client;
 import java.util.concurrent.CompletableFuture;
+import org.geysermc.floodgate.core.util.Constants;
 
-@Client("${http.baseUrl}/v2/link")
-@Header(name = USER_AGENT, value = "${http.userAgent}")
+@Client("${http.baseUrl.api}/v2/link")
+@Header(name = USER_AGENT, value = Constants.USER_AGENT)
 public interface GlobalLinkClient {
     @Get("/bedrock/{xuid}")
     @SingleResult

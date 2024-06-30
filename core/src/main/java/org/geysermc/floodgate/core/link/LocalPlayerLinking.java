@@ -59,7 +59,9 @@ public class LocalPlayerLinking extends CommonPlayerLink {
             @NonNull UUID javaUniqueId,
             @NonNull String javaUsername,
             @NonNull UUID bedrockId) {
-        return linkRepository.insert(new LinkedPlayer(bedrockId, javaUniqueId, javaUsername));
+        //todo allow it to return self again, probably after the entity rework to interfaces?
+        var link = new LinkedPlayer(bedrockId, javaUniqueId, javaUsername);
+        return linkRepository.insert(link).thenApply(v -> link);
     }
 
     @Override
@@ -83,7 +85,8 @@ public class LocalPlayerLinking extends CommonPlayerLink {
             @NonNull String javaUsername,
             @NonNull String bedrockUsername,
             @NonNull String code) {
-        return pendingLinkRepository.insert(new LinkRequest(javaUniqueId, javaUsername, bedrockUsername, code));
+        var linkRequest = new LinkRequest(javaUniqueId, javaUsername, bedrockUsername, code);
+        return pendingLinkRepository.insert(linkRequest).thenApply(v -> linkRequest);
     }
 
     @Override

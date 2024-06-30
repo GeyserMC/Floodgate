@@ -33,7 +33,6 @@ import org.geysermc.floodgate.core.database.entity.LinkedPlayer;
 
 @Repository
 public interface PlayerLinkRepository extends IRepository<LinkedPlayer> {
-
     CompletableFuture<LinkedPlayer> findByBedrockIdOrJavaUniqueId(
             UUID bedrockId,
             UUID javaUniqueId
@@ -43,5 +42,5 @@ public interface PlayerLinkRepository extends IRepository<LinkedPlayer> {
 
     CompletableFuture<Void> deleteByBedrockIdOrJavaUniqueId(UUID bedrockId, UUID javaUniqueId);
 
-    CompletableFuture<LinkedPlayer> insert(LinkedPlayer player);
+    CompletableFuture<Void> insert(LinkedPlayer player);
 }

@@ -25,19 +25,18 @@
 
 package org.geysermc.floodgate.core.database.loader;
 
-import java.util.Locale;
 import java.util.Set;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.databaseutils.DatabaseType;
 import org.geysermc.floodgate.isolation.library.Library;
 import org.geysermc.floodgate.isolation.library.Repository;
 
-public enum DatabaseType {
+public enum DatabaseTypeLibraries {
     H2(hikariCp(), library("h2", Repository.MAVEN_CENTRAL, "com.h2database", "h2", "2.2.224"));
 
-    private static final DatabaseType[] VALUES = values();
     private final Set<Library> libraries;
 
-    DatabaseType(@NonNull Library... libraries) {
+    DatabaseTypeLibraries(@NonNull Library... libraries) {
         this.libraries = Set.of(libraries);
     }
 
@@ -61,14 +60,11 @@ public enum DatabaseType {
                 .build();
     }
 
-    public static DatabaseType byId(String id) {
-        id = id.toUpperCase(Locale.ROOT);
-        for (DatabaseType value : VALUES) {
-            if (value.name().equals(id)) {
-                return value;
-            }
-        }
-        return null;
+    public static DatabaseTypeLibraries byDatabaseType(DatabaseType type) {
+        return switch (type) {
+            case H2 -> H2;
+            default -> null;
+        };
     }
 
     public Set<Library> libraries() {
