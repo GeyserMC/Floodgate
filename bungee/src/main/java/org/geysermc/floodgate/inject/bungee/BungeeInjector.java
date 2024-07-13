@@ -38,9 +38,9 @@ import net.md_5.bungee.protocol.MinecraftEncoder;
 import net.md_5.bungee.protocol.Varint21LengthFieldExtraBufPrepender;
 import net.md_5.bungee.protocol.Varint21LengthFieldPrepender;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.inject.CommonPlatformInjector;
+import org.geysermc.floodgate.core.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.util.BungeeReflectionUtils;
-import org.geysermc.floodgate.util.ReflectionUtils;
+import org.geysermc.floodgate.core.util.ReflectionUtils;
 
 @RequiredArgsConstructor
 public final class BungeeInjector extends CommonPlatformInjector {

@@ -29,13 +29,14 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.core.FloodgatePlatform;
 import org.geysermc.floodgate.module.BungeeAddonModule;
 import org.geysermc.floodgate.module.BungeeListenerModule;
 import org.geysermc.floodgate.module.BungeePlatformModule;
-import org.geysermc.floodgate.module.CommandModule;
-import org.geysermc.floodgate.module.PluginMessageModule;
-import org.geysermc.floodgate.module.ProxyCommonModule;
-import org.geysermc.floodgate.util.ReflectionUtils;
+import org.geysermc.floodgate.core.module.CommandModule;
+import org.geysermc.floodgate.core.module.PluginMessageModule;
+import org.geysermc.floodgate.core.module.ProxyCommonModule;
+import org.geysermc.floodgate.core.util.ReflectionUtils;
 
 public final class BungeePlugin extends Plugin {
     private FloodgatePlatform platform;

@@ -36,11 +36,11 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.event.EventBus;
-import org.geysermc.floodgate.event.skin.SkinApplyEventImpl;
-import org.geysermc.floodgate.skin.SkinApplier;
+import org.geysermc.floodgate.core.event.EventBus;
+import org.geysermc.floodgate.core.event.skin.SkinApplyEventImpl;
+import org.geysermc.floodgate.core.skin.SkinApplier;
 import org.geysermc.floodgate.util.ClassNames;
-import org.geysermc.floodgate.util.ReflectionUtils;
+import org.geysermc.floodgate.core.util.ReflectionUtils;
 import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
 
 @Singleton

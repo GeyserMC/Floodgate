@@ -26,13 +26,13 @@
 package org.geysermc.floodgate.addon.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.geysermc.floodgate.util.ReflectionUtils.getCastedValue;
-import static org.geysermc.floodgate.util.ReflectionUtils.getClassOrFallbackPrefixed;
-import static org.geysermc.floodgate.util.ReflectionUtils.getField;
-import static org.geysermc.floodgate.util.ReflectionUtils.getMethodByName;
-import static org.geysermc.floodgate.util.ReflectionUtils.getPrefixedClass;
-import static org.geysermc.floodgate.util.ReflectionUtils.invoke;
-import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getCastedValue;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getClassOrFallbackPrefixed;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getField;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getMethodByName;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getPrefixedClass;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.invoke;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.setValue;
 
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
@@ -41,10 +41,12 @@ import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
-import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
-import org.geysermc.floodgate.player.FloodgateHandshakeHandler.ResultType;
+import org.geysermc.floodgate.core.addon.data.CommonDataHandler;
+import org.geysermc.floodgate.core.addon.data.PacketBlocker;
+import org.geysermc.floodgate.core.config.FloodgateConfig;
+import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
+import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler.HandshakeResult;
+import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler.ResultType;
 
 public final class VelocityProxyDataHandler extends CommonDataHandler {
     private static final Field HANDSHAKE;

@@ -25,12 +25,12 @@
 
 package org.geysermc.floodgate.listener;
 
-import static org.geysermc.floodgate.util.ReflectionUtils.getCastedValue;
-import static org.geysermc.floodgate.util.ReflectionUtils.getField;
-import static org.geysermc.floodgate.util.ReflectionUtils.getFieldOfType;
-import static org.geysermc.floodgate.util.ReflectionUtils.getPrefixedClass;
-import static org.geysermc.floodgate.util.ReflectionUtils.getPrefixedClassSilently;
-import static org.geysermc.floodgate.util.ReflectionUtils.getValue;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getCastedValue;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getField;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getFieldOfType;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getPrefixedClass;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getPrefixedClassSilently;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getValue;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -53,14 +53,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import net.kyori.adventure.text.Component;
-import org.geysermc.floodgate.api.ProxyFloodgateApi;
+import org.geysermc.floodgate.core.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.config.ProxyFloodgateConfig;
-import org.geysermc.floodgate.skin.SkinDataImpl;
+import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
+import org.geysermc.floodgate.core.skin.SkinDataImpl;
 import org.geysermc.floodgate.util.Constants;
-import org.geysermc.floodgate.util.LanguageManager;
-import org.geysermc.floodgate.util.MojangUtils;
+import org.geysermc.floodgate.core.util.LanguageManager;
+import org.geysermc.floodgate.core.util.MojangUtils;
 
 public final class VelocityListener {
     private static final Field INITIAL_MINECRAFT_CONNECTION;

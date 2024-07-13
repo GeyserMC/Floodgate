@@ -30,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Listener;
 import org.geysermc.floodgate.BungeePlugin;
-import org.geysermc.floodgate.platform.listener.ListenerRegistration;
+import org.geysermc.floodgate.core.platform.listener.ListenerRegistration;
 
 @RequiredArgsConstructor(onConstructor = @__(@Inject))
 public final class BungeeListenerRegistration implements ListenerRegistration<Listener> {

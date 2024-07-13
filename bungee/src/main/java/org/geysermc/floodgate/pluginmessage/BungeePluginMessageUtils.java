@@ -37,9 +37,11 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
-import org.geysermc.floodgate.pluginmessage.PluginMessageChannel.Identity;
-import org.geysermc.floodgate.pluginmessage.PluginMessageChannel.Result;
+import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel;
+import org.geysermc.floodgate.core.pluginmessage.PluginMessageManager;
+import org.geysermc.floodgate.core.platform.pluginmessage.PluginMessageUtils;
+import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel.Identity;
+import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel.Result;
 
 @RequiredArgsConstructor
 public final class BungeePluginMessageUtils extends PluginMessageUtils implements Listener {

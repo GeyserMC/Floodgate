@@ -37,9 +37,11 @@ import net.md_5.bungee.netty.HandlerBoss;
 import net.md_5.bungee.protocol.DefinedPacket;
 import net.md_5.bungee.protocol.PacketWrapper;
 import net.md_5.bungee.protocol.packet.Handshake;
-import org.geysermc.floodgate.config.ProxyFloodgateConfig;
-import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
-import org.geysermc.floodgate.util.ReflectionUtils;
+import org.geysermc.floodgate.core.addon.data.CommonDataHandler;
+import org.geysermc.floodgate.core.addon.data.PacketBlocker;
+import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
+import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
+import org.geysermc.floodgate.core.util.ReflectionUtils;
 
 @SuppressWarnings("ConstantConditions")
 public class BungeeProxyDataHandler extends CommonDataHandler {

@@ -32,10 +32,10 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.geysermc.floodgate.api.SimpleFloodgateApi;
+import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.util.LanguageManager;
+import org.geysermc.floodgate.core.util.LanguageManager;
 
 public final class SpigotListener implements Listener {
     @Inject private SimpleFloodgateApi api;

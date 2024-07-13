@@ -30,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.platform.listener.ListenerRegistration;
+import org.geysermc.floodgate.core.platform.listener.ListenerRegistration;
 
 @RequiredArgsConstructor(onConstructor = @__(@Inject))
 public final class SpigotListenerRegistration implements ListenerRegistration<Listener> {

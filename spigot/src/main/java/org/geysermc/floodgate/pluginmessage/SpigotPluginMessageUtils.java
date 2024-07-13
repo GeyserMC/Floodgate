@@ -29,7 +29,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
+import org.geysermc.floodgate.core.platform.pluginmessage.PluginMessageUtils;
 
 @RequiredArgsConstructor
 public class SpigotPluginMessageUtils extends PluginMessageUtils {

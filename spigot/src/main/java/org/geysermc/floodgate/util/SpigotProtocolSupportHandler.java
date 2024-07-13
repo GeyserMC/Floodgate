@@ -35,6 +35,7 @@ import java.util.UUID;
 import org.geysermc.floodgate.api.packet.PacketHandler;
 import org.geysermc.floodgate.api.packet.PacketHandlers;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.core.util.ReflectionUtils;
 
 public class SpigotProtocolSupportHandler implements PacketHandler {
     private static final Method getFromChannel;

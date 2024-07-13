@@ -39,9 +39,11 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
-import org.geysermc.floodgate.pluginmessage.PluginMessageChannel.Identity;
-import org.geysermc.floodgate.pluginmessage.PluginMessageChannel.Result;
+import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel;
+import org.geysermc.floodgate.core.pluginmessage.PluginMessageManager;
+import org.geysermc.floodgate.core.platform.pluginmessage.PluginMessageUtils;
+import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel.Identity;
+import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel.Result;
 
 @RequiredArgsConstructor
 public class VelocityPluginMessageUtils extends PluginMessageUtils {

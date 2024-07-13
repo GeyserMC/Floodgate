@@ -39,11 +39,11 @@ import net.md_5.bungee.netty.ChannelWrapper;
 import net.md_5.bungee.netty.HandlerBoss;
 import net.md_5.bungee.netty.PacketHandler;
 import net.md_5.bungee.protocol.packet.Handshake;
-import org.geysermc.floodgate.api.ProxyFloodgateApi;
+import org.geysermc.floodgate.core.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.player.FloodgatePlayerImpl;
+import org.geysermc.floodgate.core.player.FloodgatePlayerImpl;
 import org.geysermc.floodgate.util.BedrockData;
-import org.geysermc.floodgate.util.ReflectionUtils;
+import org.geysermc.floodgate.core.util.ReflectionUtils;
 
 @SuppressWarnings("ConstantConditions")
 @RequiredArgsConstructor

@@ -31,7 +31,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.ProvidesIntoSet;
 import org.bukkit.event.Listener;
 import org.geysermc.floodgate.listener.SpigotListener;
-import org.geysermc.floodgate.register.ListenerRegister;
+import org.geysermc.floodgate.core.register.ListenerRegister;
 
 public class SpigotListenerModule extends AbstractModule {
     @Override

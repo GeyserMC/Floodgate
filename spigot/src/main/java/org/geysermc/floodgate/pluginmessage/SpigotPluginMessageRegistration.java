@@ -28,6 +28,8 @@ package org.geysermc.floodgate.pluginmessage;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.Messenger;
+import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel;
+import org.geysermc.floodgate.core.pluginmessage.PluginMessageRegistration;
 
 @RequiredArgsConstructor
 public class SpigotPluginMessageRegistration implements PluginMessageRegistration {

@@ -25,6 +25,8 @@
 
 package org.geysermc.floodgate.util;
 
+import org.geysermc.floodgate.core.util.ReflectionUtils;
+
 public final class ProxyUtils {
 
     public static boolean isProxyData() {

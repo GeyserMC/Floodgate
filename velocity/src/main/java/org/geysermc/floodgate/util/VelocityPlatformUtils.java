@@ -28,7 +28,7 @@ package org.geysermc.floodgate.util;
 import com.google.inject.Inject;
 import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.api.proxy.ProxyServer;
-import org.geysermc.floodgate.platform.util.PlatformUtils;
+import org.geysermc.floodgate.core.platform.util.PlatformUtils;
 
 public final class VelocityPlatformUtils extends PlatformUtils {
     @Inject

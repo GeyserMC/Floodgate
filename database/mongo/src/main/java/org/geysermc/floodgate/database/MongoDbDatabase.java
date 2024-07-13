@@ -51,8 +51,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.api.link.LinkRequest;
 import org.geysermc.floodgate.api.link.LinkRequestResult;
 import org.geysermc.floodgate.database.config.MongoConfig;
-import org.geysermc.floodgate.link.CommonPlayerLink;
-import org.geysermc.floodgate.link.LinkRequestImpl;
+import org.geysermc.floodgate.core.link.CommonPlayerLink;
+import org.geysermc.floodgate.core.link.LinkRequestImpl;
 import org.geysermc.floodgate.util.LinkedPlayer;
 
 public class MongoDbDatabase extends CommonPlayerLink {

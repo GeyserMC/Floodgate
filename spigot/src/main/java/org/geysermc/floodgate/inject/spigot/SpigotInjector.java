@@ -39,9 +39,9 @@ import java.lang.reflect.Type;
 import java.util.List;
 import lombok.Getter;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.inject.CommonPlatformInjector;
+import org.geysermc.floodgate.core.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.util.ClassNames;
-import org.geysermc.floodgate.util.ReflectionUtils;
+import org.geysermc.floodgate.core.util.ReflectionUtils;
 
 @Singleton
 public final class SpigotInjector extends CommonPlatformInjector {

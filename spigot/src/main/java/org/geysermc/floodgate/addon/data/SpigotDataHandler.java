@@ -25,8 +25,8 @@
 
 package org.geysermc.floodgate.addon.data;
 
-import static org.geysermc.floodgate.util.ReflectionUtils.getCastedValue;
-import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getCastedValue;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.setValue;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -35,9 +35,11 @@ import io.netty.util.AttributeKey;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
-import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
+import org.geysermc.floodgate.core.addon.data.CommonDataHandler;
+import org.geysermc.floodgate.core.addon.data.PacketBlocker;
+import org.geysermc.floodgate.core.config.FloodgateConfig;
+import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
+import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.util.ClassNames;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.ProxyUtils;

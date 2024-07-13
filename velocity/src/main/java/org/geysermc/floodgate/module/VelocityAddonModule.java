@@ -28,12 +28,12 @@ package org.geysermc.floodgate.module;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.ProvidesIntoSet;
-import org.geysermc.floodgate.addon.AddonManagerAddon;
-import org.geysermc.floodgate.addon.DebugAddon;
-import org.geysermc.floodgate.addon.PacketHandlerAddon;
+import org.geysermc.floodgate.core.addon.AddonManagerAddon;
+import org.geysermc.floodgate.core.addon.DebugAddon;
+import org.geysermc.floodgate.core.addon.PacketHandlerAddon;
 import org.geysermc.floodgate.addon.data.VelocityDataAddon;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
-import org.geysermc.floodgate.register.AddonRegister;
+import org.geysermc.floodgate.core.register.AddonRegister;
 
 public final class VelocityAddonModule extends AbstractModule {
     @Override

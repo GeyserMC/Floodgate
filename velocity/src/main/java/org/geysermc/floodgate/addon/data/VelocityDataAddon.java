@@ -30,12 +30,13 @@ import com.google.inject.name.Named;
 import com.velocitypowered.api.proxy.ProxyServer;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
-import org.geysermc.floodgate.api.ProxyFloodgateApi;
+import org.geysermc.floodgate.core.addon.data.PacketBlocker;
+import org.geysermc.floodgate.core.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.config.ProxyFloodgateConfig;
-import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
+import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
+import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
 
 public final class VelocityDataAddon implements InjectorAddon {
     @Inject private FloodgateHandshakeHandler handshakeHandler;

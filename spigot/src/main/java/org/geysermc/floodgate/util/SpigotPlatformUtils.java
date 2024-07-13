@@ -26,7 +26,7 @@
 package org.geysermc.floodgate.util;
 
 import org.bukkit.Bukkit;
-import org.geysermc.floodgate.platform.util.PlatformUtils;
+import org.geysermc.floodgate.core.platform.util.PlatformUtils;
 
 public class SpigotPlatformUtils extends PlatformUtils {
     @Override

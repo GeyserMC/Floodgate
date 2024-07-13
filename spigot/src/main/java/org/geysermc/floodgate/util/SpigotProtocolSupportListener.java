@@ -25,8 +25,8 @@
 
 package org.geysermc.floodgate.util;
 
-import static org.geysermc.floodgate.util.ReflectionUtils.getMethod;
-import static org.geysermc.floodgate.util.ReflectionUtils.getPrefixedClass;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getMethod;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getPrefixedClass;
 
 import java.lang.reflect.Method;
 import java.util.UUID;
@@ -35,6 +35,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.floodgate.core.util.ReflectionUtils;
 
 @SuppressWarnings("unchecked")
 public final class SpigotProtocolSupportListener {

@@ -29,6 +29,8 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import lombok.RequiredArgsConstructor;
+import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel;
+import org.geysermc.floodgate.core.pluginmessage.PluginMessageRegistration;
 
 @RequiredArgsConstructor
 public class VelocityPluginMessageRegistration implements PluginMessageRegistration {

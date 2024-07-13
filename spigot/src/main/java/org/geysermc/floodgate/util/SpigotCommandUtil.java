@@ -27,16 +27,16 @@ package org.geysermc.floodgate.util;
 
 import java.util.Collection;
 import java.util.UUID;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.platform.command.CommandUtil;
-import org.geysermc.floodgate.player.UserAudience;
-import org.geysermc.floodgate.player.UserAudience.ConsoleAudience;
-import org.geysermc.floodgate.player.UserAudience.PlayerAudience;
+import org.geysermc.floodgate.core.util.LanguageManager;
+import org.geysermc.floodgate.core.platform.command.CommandUtil;
+import org.geysermc.floodgate.core.player.UserAudience;
+import org.geysermc.floodgate.core.player.UserAudience.ConsoleAudience;
+import org.geysermc.floodgate.core.player.UserAudience.PlayerAudience;
 
 public final class SpigotCommandUtil extends CommandUtil {
     private final Server server;

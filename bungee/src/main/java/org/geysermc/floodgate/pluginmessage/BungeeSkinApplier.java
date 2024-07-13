@@ -26,7 +26,7 @@
 package org.geysermc.floodgate.pluginmessage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.geysermc.floodgate.util.ReflectionUtils.getFieldOfType;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getFieldOfType;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -43,11 +43,11 @@ import org.geysermc.floodgate.api.event.skin.SkinApplyEvent;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.event.EventBus;
-import org.geysermc.floodgate.event.skin.SkinApplyEventImpl;
-import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.skin.SkinDataImpl;
-import org.geysermc.floodgate.util.ReflectionUtils;
+import org.geysermc.floodgate.core.event.EventBus;
+import org.geysermc.floodgate.core.event.skin.SkinApplyEventImpl;
+import org.geysermc.floodgate.core.skin.SkinApplier;
+import org.geysermc.floodgate.core.skin.SkinDataImpl;
+import org.geysermc.floodgate.core.util.ReflectionUtils;
 
 @Singleton
 public final class BungeeSkinApplier implements SkinApplier {

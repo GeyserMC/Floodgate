@@ -25,17 +25,17 @@
 
 package org.geysermc.floodgate.util;
 
-import static org.geysermc.floodgate.util.ReflectionUtils.castedStaticBooleanValue;
-import static org.geysermc.floodgate.util.ReflectionUtils.getBooleanValue;
-import static org.geysermc.floodgate.util.ReflectionUtils.getClassOrFallback;
-import static org.geysermc.floodgate.util.ReflectionUtils.getClassSilently;
-import static org.geysermc.floodgate.util.ReflectionUtils.getConstructor;
-import static org.geysermc.floodgate.util.ReflectionUtils.getField;
-import static org.geysermc.floodgate.util.ReflectionUtils.getFieldOfType;
-import static org.geysermc.floodgate.util.ReflectionUtils.getMethod;
-import static org.geysermc.floodgate.util.ReflectionUtils.getValue;
-import static org.geysermc.floodgate.util.ReflectionUtils.invoke;
-import static org.geysermc.floodgate.util.ReflectionUtils.makeAccessible;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.castedStaticBooleanValue;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getBooleanValue;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getClassOrFallback;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getClassSilently;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getConstructor;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getField;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getFieldOfType;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getMethod;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getValue;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.invoke;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.makeAccessible;
 
 import com.google.common.base.Preconditions;
 import com.mojang.authlib.GameProfile;
@@ -49,6 +49,7 @@ import javax.annotation.CheckForNull;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.geysermc.floodgate.core.util.ReflectionUtils;
 
 @SuppressWarnings("PMD.SystemPrintln")
 public class ClassNames {

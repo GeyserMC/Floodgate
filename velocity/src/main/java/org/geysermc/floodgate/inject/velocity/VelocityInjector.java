@@ -25,10 +25,10 @@
 
 package org.geysermc.floodgate.inject.velocity;
 
-import static org.geysermc.floodgate.util.ReflectionUtils.castedInvoke;
-import static org.geysermc.floodgate.util.ReflectionUtils.getMethod;
-import static org.geysermc.floodgate.util.ReflectionUtils.getValue;
-import static org.geysermc.floodgate.util.ReflectionUtils.invoke;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.castedInvoke;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getMethod;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getValue;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.invoke;
 
 import com.velocitypowered.api.proxy.ProxyServer;
 import io.netty.channel.Channel;
@@ -36,7 +36,7 @@ import io.netty.channel.ChannelInitializer;
 import java.lang.reflect.Method;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.inject.CommonPlatformInjector;
+import org.geysermc.floodgate.core.inject.CommonPlatformInjector;
 
 @RequiredArgsConstructor
 public final class VelocityInjector extends CommonPlatformInjector {

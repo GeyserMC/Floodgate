@@ -25,7 +25,7 @@
 
 package org.geysermc.floodgate.util;
 
-import static org.geysermc.floodgate.util.MessageFormatter.format;
+import static org.geysermc.floodgate.core.util.MessageFormatter.format;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

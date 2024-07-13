@@ -33,7 +33,7 @@ import java.util.Set;
 import java.util.UUID;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.geysermc.floodgate.api.SimpleFloodgateApi;
+import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.util.Constants;
 

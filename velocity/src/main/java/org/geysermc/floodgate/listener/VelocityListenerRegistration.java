@@ -28,7 +28,7 @@ package org.geysermc.floodgate.listener;
 import com.velocitypowered.api.event.EventManager;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.VelocityPlugin;
-import org.geysermc.floodgate.platform.listener.ListenerRegistration;
+import org.geysermc.floodgate.core.platform.listener.ListenerRegistration;
 
 @RequiredArgsConstructor
 public final class VelocityListenerRegistration implements ListenerRegistration<Object> {

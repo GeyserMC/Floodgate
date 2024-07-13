@@ -26,6 +26,8 @@
 package org.geysermc.floodgate.pluginmessage;
 
 import net.md_5.bungee.api.ProxyServer;
+import org.geysermc.floodgate.core.pluginmessage.PluginMessageChannel;
+import org.geysermc.floodgate.core.pluginmessage.PluginMessageRegistration;
 
 public class BungeePluginMessageRegistration implements PluginMessageRegistration {
     @Override

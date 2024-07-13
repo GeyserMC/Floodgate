@@ -33,7 +33,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.geysermc.floodgate.SpigotPlugin;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent;
-import org.geysermc.floodgate.skin.SkinDataImpl;
+import org.geysermc.floodgate.core.skin.SkinDataImpl;
+import org.geysermc.floodgate.core.util.ReflectionUtils;
 
 public final class SpigotVersionSpecificMethods {
     private static final Method GET_SPIGOT;

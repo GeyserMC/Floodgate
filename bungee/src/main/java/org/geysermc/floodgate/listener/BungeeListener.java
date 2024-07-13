@@ -44,14 +44,14 @@ import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import net.md_5.bungee.netty.ChannelWrapper;
-import org.geysermc.floodgate.api.ProxyFloodgateApi;
+import org.geysermc.floodgate.core.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.skin.SkinDataImpl;
-import org.geysermc.floodgate.util.LanguageManager;
-import org.geysermc.floodgate.util.MojangUtils;
-import org.geysermc.floodgate.util.ReflectionUtils;
+import org.geysermc.floodgate.core.skin.SkinApplier;
+import org.geysermc.floodgate.core.skin.SkinDataImpl;
+import org.geysermc.floodgate.core.util.LanguageManager;
+import org.geysermc.floodgate.core.util.MojangUtils;
+import org.geysermc.floodgate.core.util.ReflectionUtils;
 
 @SuppressWarnings("ConstantConditions")
 public final class BungeeListener implements Listener {

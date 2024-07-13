@@ -25,15 +25,15 @@
 
 package org.geysermc.floodgate.logger;
 
-import static org.geysermc.floodgate.util.MessageFormatter.format;
+import static org.geysermc.floodgate.core.util.MessageFormatter.format;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.config.FloodgateConfig;
-import org.geysermc.floodgate.util.LanguageManager;
+import org.geysermc.floodgate.core.config.FloodgateConfig;
+import org.geysermc.floodgate.core.util.LanguageManager;
 import org.slf4j.Logger;
 
 @Singleton

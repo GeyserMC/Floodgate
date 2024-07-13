@@ -26,14 +26,14 @@
 package org.geysermc.floodgate.addon.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.geysermc.floodgate.util.ReflectionUtils.castedInvoke;
-import static org.geysermc.floodgate.util.ReflectionUtils.getCastedValue;
-import static org.geysermc.floodgate.util.ReflectionUtils.getClassOrFallbackPrefixed;
-import static org.geysermc.floodgate.util.ReflectionUtils.getField;
-import static org.geysermc.floodgate.util.ReflectionUtils.getMethod;
-import static org.geysermc.floodgate.util.ReflectionUtils.getPrefixedClass;
-import static org.geysermc.floodgate.util.ReflectionUtils.invoke;
-import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.castedInvoke;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getCastedValue;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getClassOrFallbackPrefixed;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getField;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getMethod;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.getPrefixedClass;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.invoke;
+import static org.geysermc.floodgate.core.util.ReflectionUtils.setValue;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -42,9 +42,9 @@ import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import org.geysermc.floodgate.api.ProxyFloodgateApi;
+import org.geysermc.floodgate.core.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.player.FloodgatePlayerImpl;
+import org.geysermc.floodgate.core.player.FloodgatePlayerImpl;
 import org.geysermc.floodgate.util.BedrockData;
 
 @SuppressWarnings("ConstantConditions")

@@ -29,7 +29,8 @@ import java.lang.reflect.Field;
 import java.util.List;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.protocol.ProtocolConstants;
-import org.geysermc.floodgate.platform.util.PlatformUtils;
+import org.geysermc.floodgate.core.util.ReflectionUtils;
+import org.geysermc.floodgate.core.platform.util.PlatformUtils;
 
 @SuppressWarnings("ConstantConditions")
 public final class BungeePlatformUtils extends PlatformUtils {
