@@ -25,7 +25,7 @@
 
 package org.geysermc.floodgate.core.command.main;
 
-import static org.geysermc.floodgate.util.Constants.COLOR_CHAR;
+import static org.geysermc.floodgate.core.util.Constants.COLOR_CHAR;
 
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
@@ -35,7 +35,7 @@ import org.geysermc.floodgate.core.command.WhitelistCommand.Message;
 import org.geysermc.floodgate.core.command.util.Permission;
 import org.geysermc.floodgate.core.platform.command.FloodgateSubCommand;
 import org.geysermc.floodgate.core.player.UserAudience;
-import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.HttpClient;
 import org.incendo.cloud.context.CommandContext;
 

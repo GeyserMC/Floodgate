@@ -43,7 +43,7 @@ import org.geysermc.floodgate.core.platform.command.TranslatableMessage;
 import org.geysermc.floodgate.core.player.UserAudience;
 import org.geysermc.floodgate.core.player.audience.PlayerAudienceArgument;
 import org.geysermc.floodgate.core.player.audience.ProfileAudience;
-import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.HttpClient;
 import org.incendo.cloud.Command;
 import org.incendo.cloud.CommandManager;

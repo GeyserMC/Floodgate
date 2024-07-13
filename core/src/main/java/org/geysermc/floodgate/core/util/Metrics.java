@@ -46,7 +46,7 @@ import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.config.FloodgateConfig.MetricsConfig;
 import org.geysermc.floodgate.core.event.lifecycle.ShutdownEvent;
 import org.geysermc.floodgate.core.platform.util.PlatformUtils;
-import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.core.util.Constants;
 
 @Listener
 @AutoBind

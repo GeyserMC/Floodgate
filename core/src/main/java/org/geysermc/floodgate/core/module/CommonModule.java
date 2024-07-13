@@ -69,7 +69,7 @@ import org.geysermc.floodgate.core.link.PlayerLinkHolder;
 import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.core.skin.SkinUploadManager;
-import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.HttpClient;
 import org.geysermc.floodgate.core.util.LanguageManager;
 

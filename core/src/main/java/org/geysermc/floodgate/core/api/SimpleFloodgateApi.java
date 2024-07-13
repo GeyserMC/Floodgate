@@ -47,7 +47,7 @@ import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.core.pluginmessage.channel.FormChannel;
 import org.geysermc.floodgate.core.pluginmessage.channel.TransferChannel;
-import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.HttpClient;
 import org.geysermc.floodgate.core.util.Utils;
 

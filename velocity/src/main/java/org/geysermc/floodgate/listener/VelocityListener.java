@@ -58,7 +58,7 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.core.skin.SkinDataImpl;
-import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.LanguageManager;
 import org.geysermc.floodgate.core.util.MojangUtils;
 

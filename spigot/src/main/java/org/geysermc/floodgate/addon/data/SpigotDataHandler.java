@@ -40,8 +40,8 @@ import org.geysermc.floodgate.core.addon.data.PacketBlocker;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler.HandshakeResult;
+import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.util.ClassNames;
-import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.ProxyUtils;
 
 public final class SpigotDataHandler extends CommonDataHandler {

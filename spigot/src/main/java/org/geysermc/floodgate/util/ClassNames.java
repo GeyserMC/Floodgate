@@ -49,6 +49,7 @@ import javax.annotation.CheckForNull;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
 
 @SuppressWarnings("PMD.SystemPrintln")

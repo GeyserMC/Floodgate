@@ -25,7 +25,7 @@
 
 package org.geysermc.floodgate.core.command.main;
 
-import static org.geysermc.floodgate.util.Constants.COLOR_CHAR;
+import static org.geysermc.floodgate.core.util.Constants.COLOR_CHAR;
 
 import java.util.Locale;
 import org.geysermc.floodgate.core.command.util.Permission;

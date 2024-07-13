@@ -25,7 +25,7 @@
 
 package org.geysermc.floodgate.core.link;
 
-import static org.geysermc.floodgate.util.Constants.GET_BEDROCK_LINK;
+import static org.geysermc.floodgate.core.util.Constants.GET_BEDROCK_LINK;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

@@ -42,7 +42,7 @@ import lombok.NonNull;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 import org.geysermc.floodgate.core.skin.SkinDataImpl;
 import org.geysermc.floodgate.core.util.HttpClient.HttpResponse;
-import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.core.util.Constants;
 
 @Singleton
 public class MojangUtils {

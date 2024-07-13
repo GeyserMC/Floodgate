@@ -35,7 +35,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.core.util.Constants;
 
 public final class PaperProfileListener implements Listener {
     private static final ProfileProperty DEFAULT_TEXTURE_PROPERTY = new ProfileProperty(

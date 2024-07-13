@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.util;
+package org.geysermc.floodgate.core.util;
 
 public final class Constants {
     public static final String VERSION = "@floodgateVersion@";

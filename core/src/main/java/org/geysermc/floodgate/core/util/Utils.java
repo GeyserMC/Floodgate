@@ -42,7 +42,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.core.util.Constants;
 
 public class Utils {
     private static final Pattern NON_UNIQUE_PREFIX = Pattern.compile("^\\w{0,16}$");

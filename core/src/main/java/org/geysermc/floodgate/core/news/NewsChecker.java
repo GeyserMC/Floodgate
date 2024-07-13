@@ -45,7 +45,7 @@ import org.geysermc.floodgate.news.data.BuildSpecificData;
 import org.geysermc.floodgate.news.data.CheckAfterData;
 import org.geysermc.floodgate.core.platform.command.CommandUtil;
 import org.geysermc.floodgate.core.util.AutoBind;
-import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.HttpClient;
 import org.geysermc.floodgate.core.util.HttpClient.HttpResponse;
 

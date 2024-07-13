@@ -25,7 +25,7 @@
 
 package org.geysermc.floodgate.core.skin;
 
-import static org.geysermc.floodgate.util.Constants.WEBSOCKET_URL;
+import static org.geysermc.floodgate.core.util.Constants.WEBSOCKET_URL;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;

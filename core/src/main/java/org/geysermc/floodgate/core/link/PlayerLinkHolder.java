@@ -52,7 +52,7 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.config.FloodgateConfig.PlayerLinkConfig;
 import org.geysermc.floodgate.core.event.lifecycle.ShutdownEvent;
-import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.InjectorHolder;
 import org.geysermc.floodgate.core.util.Utils;
 

@@ -33,7 +33,7 @@ import java.lang.reflect.Method;
 import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.Setter;
-import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.core.util.Constants;
 
 @SuppressWarnings("PMD.AvoidBranchingStatementAsLastInLoop")
 public final class ReflectionUtils {

@@ -39,7 +39,7 @@ import org.geysermc.floodgate.crypto.FloodgateCipher;
 import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.core.player.HostnameSeparationResult;
-import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.core.util.Constants;
 
 @RequiredArgsConstructor
 public abstract class CommonDataHandler extends ChannelInboundHandlerAdapter {

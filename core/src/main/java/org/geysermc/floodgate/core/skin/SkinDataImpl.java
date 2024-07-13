@@ -29,7 +29,7 @@ import com.google.gson.JsonObject;
 import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
-import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.core.util.Constants;
 
 public class SkinDataImpl implements SkinData {
     public static final SkinData DEFAULT_SKIN = new SkinDataImpl(
