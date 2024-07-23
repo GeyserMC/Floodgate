@@ -1,5 +1,6 @@
 package org.geysermc.floodgate.pluginmessage.payloads;
 
+import io.netty.buffer.ByteBufUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -11,11 +12,12 @@ public record SkinPayload(byte[] data) implements CustomPacketPayload {
     public static final CustomPacketPayload.Type<SkinPayload> TYPE = new Type<>(ResourceLocation.parse("floodgate:skin"));
 
     private SkinPayload(FriendlyByteBuf friendlyByteBuf) {
-        this(friendlyByteBuf.readByteArray());
+        this(ByteBufUtil.getBytes(friendlyByteBuf));
+        friendlyByteBuf.readerIndex(friendlyByteBuf.readerIndex() + this.data.length);
     }
 
     private void write(FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeByteArray(this.data);
+        friendlyByteBuf.writeBytes(this.data);
     }
 
     @Override

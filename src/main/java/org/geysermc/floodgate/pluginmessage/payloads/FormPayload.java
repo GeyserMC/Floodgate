@@ -1,5 +1,6 @@
 package org.geysermc.floodgate.pluginmessage.payloads;
 
+import io.netty.buffer.ByteBufUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -11,11 +12,12 @@ public record FormPayload(byte[] data) implements CustomPacketPayload {
     public static final CustomPacketPayload.Type<FormPayload> TYPE = new Type<>(ResourceLocation.parse("floodgate:form"));
 
     private FormPayload(FriendlyByteBuf friendlyByteBuf) {
-        this(friendlyByteBuf.readByteArray());
+        this(ByteBufUtil.getBytes(friendlyByteBuf));
+        friendlyByteBuf.readerIndex(friendlyByteBuf.readerIndex() + this.data.length);
     }
 
     private void write(FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeByteArray(this.data);
+        friendlyByteBuf.writeBytes(this.data);
     }
 
     @Override
