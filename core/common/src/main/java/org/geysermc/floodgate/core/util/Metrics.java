@@ -74,7 +74,8 @@ public final class Metrics {
                 logger::info,
                 Constants.DEBUG_MODE,
                 Constants.DEBUG_MODE,
-                Constants.DEBUG_MODE
+                Constants.DEBUG_MODE,
+                true // we're running isolated. No need to check for relocation
         );
 
         metricsBase.addCustomChart(

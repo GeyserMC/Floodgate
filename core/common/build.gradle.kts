@@ -40,9 +40,6 @@ dependencies {
 
 providedDependency(libs.slf4j)
 
-// we're isolated but bstats doesn't know that
-relocate("org.bstats")
-
 tasks {
     templateSources {
         replaceToken("fullVersion", fullVersion())

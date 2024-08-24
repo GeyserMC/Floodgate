@@ -55,7 +55,6 @@ rootProject.name = "floodgate-parent"
 
 include(":api")
 include(":universal")
-//include(":database")
 include(":isolation")
 
 arrayOf("common", "netty4").forEach {
