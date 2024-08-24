@@ -23,41 +23,19 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.api;
+package org.geysermc.floodgate.core.api.packet;
 
-import java.util.UUID;
-import lombok.Getter;
-import org.geysermc.floodgate.api.event.FloodgateEventBus;
-import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
-import org.geysermc.floodgate.api.link.PlayerLink;
-
-public final class InstanceHolder {
-    @Getter private static FloodgateApi api;
-    @Getter private static PlayerLink playerLink;
-    @Getter private static FloodgateEventBus eventBus;
-
-    @Getter private static HandshakeHandlers handshakeHandlers;
-    private static UUID storedKey;
-
-    public static boolean set(
-            FloodgateApi floodgateApi,
-            PlayerLink link,
-            FloodgateEventBus floodgateEventBus,
-            HandshakeHandlers handshakeHandlers,
-            UUID key
-    ) {
-        if (storedKey != null) {
-            if (!storedKey.equals(key)) {
-                return false;
-            }
-        } else {
-            storedKey = key;
-        }
-
-        api = floodgateApi;
-        playerLink = link;
-        eventBus = floodgateEventBus;
-        InstanceHolder.handshakeHandlers = handshakeHandlers;
-        return true;
-    }
+/**
+ * For advanced users only! You shouldn't play with this unless you know what you're doing.
+ */
+public interface PacketHandler<C> {
+    /**
+     * Called when a registered packet has been seen.
+     *
+     * @param ctx         the channel handler context of the connection
+     * @param packet      the packet instance
+     * @param serverbound if the packet is serverbound
+     * @return the packet it should forward. Can be null or a different packet / instance
+     */
+    Object handle(C ctx, Object packet, boolean serverbound);
 }

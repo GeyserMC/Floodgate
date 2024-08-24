@@ -38,10 +38,10 @@ import jakarta.inject.Singleton;
 import java.lang.reflect.Method;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.geysermc.floodgate.core.inject.CommonPlatformInjector;
+import org.geysermc.floodgate.core.inject.Netty4PlatformInjector;
 
 @Singleton
-public final class VelocityInjector extends CommonPlatformInjector {
+public final class VelocityInjector extends Netty4PlatformInjector {
     @Inject ProxyServer server;
     @Getter private boolean injected;
 

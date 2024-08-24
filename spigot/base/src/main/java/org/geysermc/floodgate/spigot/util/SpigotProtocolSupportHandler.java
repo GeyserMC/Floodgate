@@ -33,11 +33,11 @@ import jakarta.inject.Named;
 import java.lang.reflect.Method;
 import java.util.UUID;
 import org.geysermc.api.connection.Connection;
-import org.geysermc.floodgate.api.packet.PacketHandler;
-import org.geysermc.floodgate.api.packet.PacketHandlers;
+import org.geysermc.floodgate.core.api.packet.PacketHandler;
+import org.geysermc.floodgate.core.api.packet.PacketHandlers;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
 
-public class SpigotProtocolSupportHandler implements PacketHandler {
+public class SpigotProtocolSupportHandler implements PacketHandler<ChannelHandlerContext> {
     private static final Method getFromChannel;
     private static final Method getLoginProfile;
 
@@ -85,7 +85,7 @@ public class SpigotProtocolSupportHandler implements PacketHandler {
     AttributeKey<Connection> connectionAttribute;
 
     @Inject
-    public void register(PacketHandlers packetHandlers) {
+    public void register(PacketHandlers<ChannelHandlerContext> packetHandlers) {
         packetHandlers.register(this, ClassNames.LOGIN_START_PACKET);
     }
 

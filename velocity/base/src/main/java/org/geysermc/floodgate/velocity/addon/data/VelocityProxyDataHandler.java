@@ -45,6 +45,7 @@ import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.connection.DataSeeker;
 import org.geysermc.floodgate.core.connection.FloodgateDataHandler;
 import org.geysermc.floodgate.core.connection.FloodgateDataHandler.HandleResult;
+import org.geysermc.floodgate.core.connection.FloodgateDataHandler.HandleResultType;
 import org.geysermc.floodgate.core.logger.FloodgateLogger;
 
 public final class VelocityProxyDataHandler extends CommonNettyDataHandler {

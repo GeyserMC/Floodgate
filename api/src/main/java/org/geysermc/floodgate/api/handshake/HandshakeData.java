@@ -25,7 +25,6 @@
 
 package org.geysermc.floodgate.api.handshake;
 
-import io.netty.channel.Channel;
 import java.util.UUID;
 import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.LinkedPlayer;
@@ -39,11 +38,6 @@ import org.geysermc.floodgate.util.LinkedPlayer;
  */
 @Deprecated
 public interface HandshakeData {
-    /**
-     * Returns the Channel holding the connection between the client and the server.
-     */
-    Channel getChannel();
-
     /**
      * Returns true if the given player is a Floodgate player, false otherwise.
      */

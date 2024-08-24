@@ -31,15 +31,15 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import org.geysermc.api.connection.Connection;
-import org.geysermc.floodgate.api.inject.InjectorAddon;
 import org.geysermc.floodgate.core.addon.data.PacketBlocker;
+import org.geysermc.floodgate.core.api.inject.InjectorAddon;
 import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.core.connection.DataSeeker;
 import org.geysermc.floodgate.core.connection.FloodgateDataHandler;
 import org.geysermc.floodgate.core.logger.FloodgateLogger;
 
 @Singleton
-public class BungeeDataAddon implements InjectorAddon {
+public class BungeeDataAddon implements InjectorAddon<Channel> {
     @Inject
     DataSeeker dataSeeker;
 

@@ -54,10 +54,15 @@ pluginManagement {
 rootProject.name = "floodgate-parent"
 
 include(":api")
-include(":core")
 include(":universal")
 //include(":database")
 include(":isolation")
+
+arrayOf("common", "netty4").forEach {
+    val id = ":core-$it"
+    include(id)
+    project(id).projectDir = file("core/$it")
+}
 
 arrayOf("bungee", "spigot", "velocity").forEach { platform ->
     arrayOf("base", "isolated").forEach {

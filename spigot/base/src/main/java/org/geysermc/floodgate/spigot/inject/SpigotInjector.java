@@ -38,13 +38,13 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 import lombok.Getter;
-import org.geysermc.floodgate.core.inject.CommonPlatformInjector;
+import org.geysermc.floodgate.core.inject.Netty4PlatformInjector;
 import org.geysermc.floodgate.core.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
 import org.geysermc.floodgate.spigot.util.ClassNames;
 
 @Singleton
-public final class SpigotInjector extends CommonPlatformInjector {
+public final class SpigotInjector extends Netty4PlatformInjector {
     @Inject FloodgateLogger logger;
 
     private Object serverConnection;

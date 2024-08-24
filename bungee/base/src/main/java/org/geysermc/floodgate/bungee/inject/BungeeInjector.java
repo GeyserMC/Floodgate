@@ -40,12 +40,12 @@ import net.md_5.bungee.protocol.MinecraftEncoder;
 import net.md_5.bungee.protocol.Varint21LengthFieldExtraBufPrepender;
 import net.md_5.bungee.protocol.Varint21LengthFieldPrepender;
 import org.geysermc.floodgate.bungee.util.BungeeReflectionUtils;
-import org.geysermc.floodgate.core.inject.CommonPlatformInjector;
+import org.geysermc.floodgate.core.inject.Netty4PlatformInjector;
 import org.geysermc.floodgate.core.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
 
 @Singleton
-public final class BungeeInjector extends CommonPlatformInjector {
+public final class BungeeInjector extends Netty4PlatformInjector {
     private static final String BUNGEE_INIT = "floodgate-bungee-init";
 
     @Inject FloodgateLogger logger;

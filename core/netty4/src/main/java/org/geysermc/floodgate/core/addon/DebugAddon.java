@@ -23,60 +23,64 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.spigot.addon.data;
+package org.geysermc.floodgate.core.addon;
 
 import io.netty.channel.Channel;
-import io.netty.util.AttributeKey;
+import io.netty.channel.ChannelPipeline;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
-import org.geysermc.api.connection.Connection;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.geysermc.floodgate.core.Netty4;
+import org.geysermc.floodgate.core.addon.debug.ChannelInDebugHandler;
+import org.geysermc.floodgate.core.addon.debug.ChannelOutDebugHandler;
 import org.geysermc.floodgate.core.api.inject.InjectorAddon;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
-import org.geysermc.floodgate.core.connection.DataSeeker;
-import org.geysermc.floodgate.core.connection.FloodgateDataHandler;
 import org.geysermc.floodgate.core.logger.FloodgateLogger;
 
 @Singleton
-public final class SpigotDataAddon implements InjectorAddon<Channel> {
-    @Inject
-    DataSeeker dataSeeker;
+public final class DebugAddon implements InjectorAddon<Channel> {
+    @Inject FloodgateConfig config;
+    @Inject FloodgateLogger logger;
 
     @Inject
-    FloodgateDataHandler handshakeHandler;
+    @Named("implementationName")
+    String implementationName;
 
     @Inject
-    FloodgateConfig config;
+    @Named("packetEncoder")
+    String packetEncoder;
 
     @Inject
-    FloodgateLogger logger;
-
-    @Inject
-    @Named("packetHandler")
-    String packetHandlerName;
-
-    @Inject
-    @Named("connectionAttribute")
-    AttributeKey<Connection> connectionAttribute;
-
-    @Inject
-    @Named("kickMessageAttribute")
-    AttributeKey<String> kickMessageAttribute;
+    @Named("packetDecoder")
+    String packetDecoder;
 
     @Override
     public void onInject(Channel channel, boolean toServer) {
-        var dataHandler = new SpigotDataHandler(
-                dataSeeker, handshakeHandler, config, logger, connectionAttribute, kickMessageAttribute);
+        logger.info("Successfully called onInject. To server? {} ({})", toServer, channel.id());
 
-        // we have to add the packet blocker in the data handler, otherwise ProtocolSupport breaks
-        channel.pipeline().addBefore(packetHandlerName, "floodgate_data_handler", dataHandler);
+        var packetCount = new AtomicInteger();
+
+        channel.pipeline().addBefore(
+                packetEncoder, "floodgate_debug_out",
+                new ChannelOutDebugHandler(implementationName, toServer, packetCount, logger)
+        ).addBefore(
+                packetDecoder, "floodgate_debug_in",
+                new ChannelInDebugHandler(implementationName, toServer, packetCount, logger)
+        );
     }
 
     @Override
-    public void onRemoveInject(Channel channel) {}
+    public void onRemoveInject(Channel channel) {
+        logger.info("Removing injection ({})", channel.id());
+        ChannelPipeline pipeline = channel.pipeline();
+
+        Netty4.removeHandler(pipeline, "floodgate_debug_out");
+        Netty4.removeHandler(pipeline, "floodgate_debug_in");
+    }
 
     @Override
     public boolean shouldInject() {
-        return true;
+        return config.debug();
     }
 }

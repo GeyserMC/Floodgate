@@ -1,6 +1,6 @@
 dependencies {
-    api(projects.core)
-    annotationProcessor(projects.core)
+    api(projects.coreNetty4)
+    annotationProcessor(projects.coreNetty4)
     annotationProcessor(libs.micronaut.inject.java)
 
     implementation(libs.cloud.velocity)
