@@ -26,12 +26,10 @@
 package org.geysermc.floodgate.api.inject;
 
 /**
- * The global interface of all the Platform Injectors. The injector can be used for various things.
- * It is used internally for getting Floodgate data out of the handshake packet and for debug mode,
- * but there is also an option to add your own addons. Note that every Floodgate platform that
- * supports netty should implement this, but the platform implementation isn't required to implement
- * this.
+ * @deprecated Injector addons will be removed with the launch of Floodgate 3.0. Please look at
+ * <a href="https://github.com/GeyserMC/Floodgate/issues/536">#536</a> for additional context.
  */
+@Deprecated
 public interface PlatformInjector {
     /**
      * Injects the server connection. This will allow various addons (like getting the Floodgate

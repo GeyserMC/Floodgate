@@ -31,11 +31,8 @@ import org.geysermc.floodgate.util.BedrockData;
 import org.geysermc.floodgate.util.LinkedPlayer;
 
 /**
- * For advanced users only! You shouldn't play with this unless you know what you're doing.<br>
- * <br>
- * This class allows you change specific things of a Bedrock player before it is applied to the
- * server. Note that at the time I'm writing this that the HandshakeData is created after requesting
- * the player link. So the link is present here, if applicable.
+ * @deprecated Handshake handlers will be removed with the launch of Floodgate 3.0. Please look at
+ * <a href="https://github.com/GeyserMC/Floodgate/issues/536">#536</a> for additional context.
  */
 @Deprecated
 public interface HandshakeData {

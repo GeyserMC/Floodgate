@@ -26,10 +26,8 @@
 package org.geysermc.floodgate.api.handshake;
 
 /**
- * @deprecated This system has been deprecated and will not be available in the new API that will be
- * introduced when Geyser will include Floodgate (and thus will have some common base API).
- * <br>
- * It might be replaced with an event (probably internal), but that isn't certain yet.
+ * @deprecated Handshake handlers will be removed with the launch of Floodgate 3.0. Please look at
+ * <a href="https://github.com/GeyserMC/Floodgate/issues/536">#536</a> for additional context.
  */
 @Deprecated
 public interface HandshakeHandlers {

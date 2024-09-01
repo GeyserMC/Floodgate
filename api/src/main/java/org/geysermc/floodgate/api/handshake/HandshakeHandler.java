@@ -26,13 +26,8 @@
 package org.geysermc.floodgate.api.handshake;
 
 /**
- * This class allows you to change and/or get specific data of the Bedrock client before Floodgate
- * does something with this data. This means that Floodgate decrypts the data, then calls the
- * handshake handlers and then applies the data to the connection.<br>
- * <br>
- * /!\ Note that this class will be called for both Java and Bedrock connections, but {@link
- * HandshakeData#isFloodgatePlayer()} will be false and Floodgate related methods will return null
- * for Java players
+ * @deprecated Handshake handlers will be removed with the launch of Floodgate 3.0. Please look at
+ * <a href="https://github.com/GeyserMC/Floodgate/issues/536">#536</a> for additional context.
  */
 @Deprecated
 @FunctionalInterface
