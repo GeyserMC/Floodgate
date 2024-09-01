@@ -26,9 +26,10 @@
 package org.geysermc.floodgate.api.link;
 
 /**
- * This enum has all the available result types of both creating a player link request and
- * validating it.
+ * @deprecated The Floodgate API has been deprecated in favor of the GeyserApi, which is shared between Geyser
+ * and Floodgate
  */
+@Deprecated(forRemoval = true, since = "3.0.0")
 public enum LinkRequestResult {
     /**
      * An unknown error encountered while creating / verifying the link request.

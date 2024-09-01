@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.api.handshake;
+package org.geysermc.floodgate.core.api.handshake;
 
 /**
  * @deprecated This system has been deprecated and will not be available in the new API that will be

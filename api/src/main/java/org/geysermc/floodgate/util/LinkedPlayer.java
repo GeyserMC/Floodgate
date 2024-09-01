@@ -30,6 +30,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * @deprecated The Floodgate API has been deprecated in favor of the GeyserApi, which is shared between Geyser
+ * and Floodgate
+ */
+@Deprecated(forRemoval = true, since = "3.0.0")
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class LinkedPlayer implements Cloneable {

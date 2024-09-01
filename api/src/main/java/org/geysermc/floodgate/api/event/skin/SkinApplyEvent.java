@@ -32,10 +32,10 @@ import org.geysermc.event.Cancellable;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
 /**
- * An event that's fired when Floodgate receives a player skin. The event will be cancelled by
- * default when hasSkin is true, as Floodgate by default only applies skins when the player has no
- * skin applied yet.
+ * @deprecated The Floodgate API has been deprecated in favor of the GeyserApi, which is shared between Geyser
+ * and Floodgate
  */
+@Deprecated(forRemoval = true, since = "3.0.0")
 public interface SkinApplyEvent extends Cancellable {
     /**
      * Returns the player that will receive the skin.

@@ -28,7 +28,11 @@ package org.geysermc.floodgate.util;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
-@Deprecated
+/**
+ * @deprecated The Floodgate API has been deprecated in favor of the GeyserApi, which is shared between Geyser
+ * and Floodgate
+ */
+@Deprecated(forRemoval = true, since = "3.0.0")
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public enum DeviceOs {
     UNKNOWN("Unknown"),

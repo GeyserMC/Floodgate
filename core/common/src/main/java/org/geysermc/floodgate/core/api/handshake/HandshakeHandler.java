@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.api.handshake;
+package org.geysermc.floodgate.core.api.handshake;
 
 /**
  * This class allows you to change and/or get specific data of the Bedrock client before Floodgate

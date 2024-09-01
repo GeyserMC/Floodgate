@@ -31,10 +31,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.util.LinkedPlayer;
 
 /**
- * The base class of the PlayerLink database implementation. The implementation is responsible for
- * making a connection with the database and keeping that connection alive so that Floodgate (or a
- * third party plugin) can check for example if a given player is linked.
+ * @deprecated The Floodgate API has been deprecated in favor of the GeyserApi, which is shared between Geyser
+ * and Floodgate
  */
+@Deprecated(forRemoval = true, since = "3.0.0")
 public interface PlayerLink {
     /**
      * Called by Floodgate after the initialization of the class. In this method the implementation

@@ -37,7 +37,6 @@ import org.geysermc.api.GeyserApiBase;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.InstanceHolder;
 import org.geysermc.floodgate.api.event.FloodgateEventBus;
-import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.core.api.inject.PlatformInjector;
 import org.geysermc.floodgate.core.config.ConfigLoader;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
@@ -91,7 +90,6 @@ public abstract class FloodgatePlatform implements IsolatedPlatform {
                 context.getBean(FloodgateApi.class),
                 null, // todo context.getBean(PlayerLink.class),
                 context.getBean(FloodgateEventBus.class),
-                context.getBean(HandshakeHandlers.class),
                 KEY
         );
         Geyser.set(api);

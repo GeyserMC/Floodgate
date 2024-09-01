@@ -34,6 +34,11 @@ import org.geysermc.floodgate.util.InputMode;
 import org.geysermc.floodgate.util.LinkedPlayer;
 import org.geysermc.floodgate.util.UiProfile;
 
+/**
+ * @deprecated The Floodgate API has been deprecated in favor of the GeyserApi, which is shared between Geyser
+ * and Floodgate
+ */
+@Deprecated(forRemoval = true, since = "3.0.0")
 public interface FloodgatePlayer {
     /**
      * Returns the Bedrock username that will be used as username on the server. This includes

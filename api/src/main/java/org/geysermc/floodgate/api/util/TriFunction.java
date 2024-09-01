@@ -29,20 +29,10 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- * Represents a function that accepts three arguments and produces a result. This is the three-arity
- * specialization of {@link Function}.
- *
- * <p>This is a <a href="package-summary.html">functional interface</a>
- * whose functional method is {@link #apply(Object, Object, Object)}.
- *
- * @param <T> the type of the first argument to the function
- * @param <U> the type of the second argument to the function
- * @param <V> the type of the third argument of the function
- * @param <R> the type of the result of the function
- * @see Function
- * @since 1.8
+ * @deprecated The Floodgate API has been deprecated in favor of the GeyserApi, which is shared between Geyser
+ * and Floodgate
  */
-@FunctionalInterface
+@Deprecated(forRemoval = true, since = "3.0.0")
 public interface TriFunction<T, U, V, R> {
     /**
      * Performs this operation on the given arguments.

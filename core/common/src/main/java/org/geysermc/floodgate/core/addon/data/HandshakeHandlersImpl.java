@@ -29,9 +29,9 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import jakarta.inject.Singleton;
 import java.util.Random;
-import org.geysermc.floodgate.api.handshake.HandshakeData;
-import org.geysermc.floodgate.api.handshake.HandshakeHandler;
-import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
+import org.geysermc.floodgate.core.api.handshake.HandshakeData;
+import org.geysermc.floodgate.core.api.handshake.HandshakeHandler;
+import org.geysermc.floodgate.core.api.handshake.HandshakeHandlers;
 
 @Singleton
 public class HandshakeHandlersImpl implements HandshakeHandlers {

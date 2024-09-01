@@ -3,6 +3,7 @@ plugins {
 //    id("net.ltgt.errorprone")
     id("net.kyori.indra")
     id("net.kyori.indra.git")
+    id("floodgate.depsize")
 }
 
 dependencies {

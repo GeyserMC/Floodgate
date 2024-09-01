@@ -27,5 +27,10 @@ package org.geysermc.floodgate.api.event;
 
 import org.geysermc.event.bus.EventBus;
 
+/**
+ * @deprecated The Floodgate API has been deprecated in favor of the GeyserApi, which is shared between Geyser
+ * and Floodgate
+ */
+@Deprecated(forRemoval = true, since = "3.0.0")
 public interface FloodgateEventBus extends EventBus<Object, FloodgateSubscriber<?>> {
 }

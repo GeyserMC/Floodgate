@@ -30,10 +30,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
- * This class contains the raw data send by Geyser to Floodgate or from Floodgate to Floodgate. This
- * class is only used internally, and you should look at FloodgatePlayer instead (FloodgatePlayer is
- * present in the API module of the Floodgate repo)
+ * @deprecated The Floodgate API has been deprecated in favor of the GeyserApi, which is shared between Geyser
+ * and Floodgate
  */
+@Deprecated(forRemoval = true, since = "3.0.0")
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class BedrockData implements Cloneable {

@@ -28,22 +28,24 @@ package org.geysermc.floodgate.api;
 import java.util.UUID;
 import lombok.Getter;
 import org.geysermc.floodgate.api.event.FloodgateEventBus;
-import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.link.PlayerLink;
 
+/**
+ * @deprecated The Floodgate API has been deprecated in favor of the GeyserApi, which is shared between Geyser
+ * and Floodgate
+ */
+@Deprecated(forRemoval = true, since = "3.0.0")
 public final class InstanceHolder {
     @Getter private static FloodgateApi api;
     @Getter private static PlayerLink playerLink;
     @Getter private static FloodgateEventBus eventBus;
 
-    @Getter private static HandshakeHandlers handshakeHandlers;
     private static UUID storedKey;
 
     public static boolean set(
             FloodgateApi floodgateApi,
             PlayerLink link,
             FloodgateEventBus floodgateEventBus,
-            HandshakeHandlers handshakeHandlers,
             UUID key
     ) {
         if (storedKey != null) {
@@ -57,7 +59,6 @@ public final class InstanceHolder {
         api = floodgateApi;
         playerLink = link;
         eventBus = floodgateEventBus;
-        InstanceHolder.handshakeHandlers = handshakeHandlers;
         return true;
     }
 }

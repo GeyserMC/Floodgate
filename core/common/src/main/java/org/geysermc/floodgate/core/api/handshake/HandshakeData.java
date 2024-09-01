@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.api.handshake;
+package org.geysermc.floodgate.core.api.handshake;
 
 import java.util.UUID;
 import org.geysermc.floodgate.util.BedrockData;

@@ -31,7 +31,7 @@ import java.util.Objects;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
-import org.geysermc.floodgate.api.handshake.HandshakeData;
+import org.geysermc.floodgate.core.api.handshake.HandshakeData;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.connection.FloodgateConnection;
 import org.geysermc.floodgate.core.connection.standalone.StandaloneFloodgateConnectionBuilder;

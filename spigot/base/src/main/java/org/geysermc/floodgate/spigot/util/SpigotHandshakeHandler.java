@@ -28,9 +28,9 @@ package org.geysermc.floodgate.spigot.util;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.UUID;
-import org.geysermc.floodgate.api.handshake.HandshakeData;
-import org.geysermc.floodgate.api.handshake.HandshakeHandler;
-import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
+import org.geysermc.floodgate.core.api.handshake.HandshakeData;
+import org.geysermc.floodgate.core.api.handshake.HandshakeHandler;
+import org.geysermc.floodgate.core.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.core.logger.FloodgateLogger;
 import org.geysermc.floodgate.util.BedrockData;
 

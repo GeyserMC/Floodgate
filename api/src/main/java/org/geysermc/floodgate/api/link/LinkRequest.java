@@ -28,6 +28,11 @@ package org.geysermc.floodgate.api.link;
 import java.util.UUID;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
+/**
+ * @deprecated The Floodgate API has been deprecated in favor of the GeyserApi, which is shared between Geyser
+ * and Floodgate
+ */
+@Deprecated(forRemoval = true, since = "3.0.0")
 public interface LinkRequest {
     /**
      * Returns the Java username of the linked player.
