@@ -25,9 +25,9 @@
 
 package org.geysermc.floodgate.core.crypto.ed25519;
 
-import org.geysermc.floodgate.core.crypto.DataCodecKeyPair;
+import org.geysermc.floodgate.core.crypto.DataCodecUsingSignature;
 
-public final class Ed25519DataCodec extends DataCodecKeyPair {
+public final class Ed25519DataCodec extends DataCodecUsingSignature {
     public Ed25519DataCodec() {
         super("EdDSA", "Ed25519");
     }

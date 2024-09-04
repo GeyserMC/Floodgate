@@ -26,7 +26,6 @@
 package org.geysermc.floodgate.core.crypto.aes;
 
 import java.nio.ByteBuffer;
-import java.security.Key;
 import java.security.SecureRandom;
 import java.util.List;
 import javax.crypto.Cipher;
@@ -35,7 +34,7 @@ import javax.crypto.spec.GCMParameterSpec;
 import org.geysermc.floodgate.core.crypto.DataCodec;
 import org.geysermc.floodgate.core.crypto.RandomUtils;
 
-public final class AesDataCodec extends DataCodec {
+public final class AesDataCodec extends DataCodec<SecretKey> {
     private static final String CIPHER_NAME = "AES/GCM/NoPadding";
     private static final int IV_LENGTH = 12;
     private static final int TAG_BIT_LENGTH = 128;
@@ -44,9 +43,9 @@ public final class AesDataCodec extends DataCodec {
     private SecretKey key;
 
     @Override
-    public void init(Key key) {
+    public void init(SecretKey key) {
         ensureAlgorithm("AES", key);
-        this.key = (SecretKey) key;
+        this.key = key;
         this.secureRandom = RandomUtils.secureRandom();
     }
 

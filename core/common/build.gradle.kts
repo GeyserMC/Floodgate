@@ -17,6 +17,7 @@ dependencies {
     api(libs.database.utils)
     compileOnlyApi(libs.database.utils.sql)
 
+    api(libs.gson)
     api(libs.bundles.fastutil)
     api(libs.cloud.core)
     api(libs.snakeyaml)

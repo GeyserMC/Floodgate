@@ -43,27 +43,18 @@ public final class FloodgateFormatCodec {
     public static final byte[] IDENTIFIER = "^Floodgate^".getBytes(UTF_8);
     public static final byte[] HEADER = (new String(IDENTIFIER, UTF_8) + (char) (VERSION + 0x3D)).getBytes(UTF_8);
 
-    private final DataCodec codec;
+    private final DataCodec<?> codec;
 
     private final Topping topping;
 
     public FloodgateFormatCodec(
-            DataCodecType type,
+            DataCodecType<?> type,
             Topping topping,
             @Named("dataDirectory") Path dataDirectory
     ) throws IOException {
         Objects.requireNonNull(type);
-        this.codec = type.dataCodec();
+        this.codec = type.createDataCodec(dataDirectory);
         this.topping = topping;
-
-        var keyCodecBase = type.keyCodec();
-        if (type.asymmetrical()) {
-            var keyPair = ((KeyCodecPair) keyCodecBase).decode(dataDirectory);
-            ((DataCodecKeyPair) codec).init(keyPair);
-        } else {
-            var key = ((KeyCodecSingle) keyCodecBase).decode(dataDirectory);
-            codec.init(key);
-        }
     }
 
     public static int version(String data) {
@@ -142,7 +133,6 @@ public final class FloodgateFormatCodec {
         }
 
         var receivedVersion = data[IDENTIFIER.length] - 0x3D;
-
         if (VERSION != receivedVersion) {
             throw new UnsupportedVersionException(VERSION, receivedVersion);
         }

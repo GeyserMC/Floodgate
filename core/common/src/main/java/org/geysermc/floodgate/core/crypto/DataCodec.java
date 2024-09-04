@@ -34,19 +34,19 @@ import org.geysermc.floodgate.core.crypto.topping.Topping;
  * Responsible for data integrity by either signing or encrypting the data.
  * <p>
  * Unlike {@link KeyProducer}, {@link KeyCodec} and {@link Topping} this class does have state.
- * For every key a new instance should be made, or use {@link #init(Key)} to reset that state.
+ * For every key a new instance should be made, or use {@link #init(Object)} to reset that state.
  * </p>
  */
-public abstract class DataCodec {
+public abstract class DataCodec<K> {
     /**
      * Initializes the instance by giving it the key it needs to sign/verify or encrypt/decrypt data
      *
      * @param key the key used to sign/verify or encrypt/decrypt data
      */
-    public abstract void init(Key key);
+    public abstract void init(K key);
 
     /**
-     * Encodes the given data using the Key provided in {@link #init(Key)}
+     * Encodes the given data using the Key provided in {@link #init(Object)}
      *
      * @param plainText the data to encode
      * @return the encoded data
@@ -55,7 +55,7 @@ public abstract class DataCodec {
     public abstract List<ByteBuffer> encode(ByteBuffer plainText) throws Exception;
 
     /**
-     * Decodes the given data using the Key provided in {@link #init(Key)}
+     * Decodes the given data using the Key provided in {@link #init(Object)}
      *
      * @param dataSections the data sections to decode
      * @return the decoded data

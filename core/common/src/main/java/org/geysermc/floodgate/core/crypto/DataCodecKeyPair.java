@@ -25,37 +25,18 @@
 
 package org.geysermc.floodgate.core.crypto;
 
-import java.nio.ByteBuffer;
-import java.security.Key;
 import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.util.List;
 import java.util.Objects;
 
-public abstract class DataCodecKeyPair extends DataCodec {
-    private final String algorithmName;
-    private final String signatureAlgorithm;
+public abstract class DataCodecKeyPair extends DataCodec<KeyPair> {
+    protected final String algorithmName;
+    protected KeyPair keyPair;
 
-    private KeyPair keyPair;
-
-    public DataCodecKeyPair(String algorithmName, String signatureAlgorithm) {
+    public DataCodecKeyPair(String algorithmName) {
         this.algorithmName = Objects.requireNonNull(algorithmName);
-        this.signatureAlgorithm = Objects.requireNonNull(signatureAlgorithm);
     }
 
     @Override
-    public void init(Key key) {
-        ensureAlgorithm(algorithmName, key);
-        if (key instanceof PrivateKey privateKey) {
-            this.keyPair = new KeyPair(null, privateKey);
-        } else {
-            this.keyPair = new KeyPair((PublicKey) key, null);
-        }
-    }
-
     public void init(KeyPair keyPair) {
         if (keyPair.getPrivate() == null && keyPair.getPublic() == null) {
             throw new IllegalArgumentException(
@@ -67,54 +48,5 @@ public abstract class DataCodecKeyPair extends DataCodec {
         if (keyPair.getPublic() != null)
             ensureAlgorithm(algorithmName, keyPair.getPublic());
         this.keyPair = keyPair;
-    }
-
-    @Override
-    public List<ByteBuffer> encode(ByteBuffer plainText) throws Exception {
-        if (keyPair.getPrivate() == null) {
-            throw new IllegalStateException(
-                    "Cannot sign data with a public key. Did you copy the right key?"
-            );
-        }
-
-        var plainData = plainText.duplicate();
-
-        var signature = Signature.getInstance(signatureAlgorithm);
-        signature.initSign(keyPair.getPrivate());
-        signature.update(plainText);
-        var signatureBuffer = ByteBuffer.wrap(signature.sign());
-
-        return List.of(plainData, signatureBuffer);
-    }
-
-    @Override
-    public ByteBuffer decode(List<ByteBuffer> dataSections) throws Exception {
-        if (keyPair.getPublic() == null) {
-            throw new IllegalStateException(
-                    "Cannot verify data with a private key. Did you copy the right key?"
-            );
-        }
-        ensureSectionCount(2, algorithmName, dataSections);
-        var data = dataSections.get(0);
-        var signatureBuffer = dataSections.get(1);
-
-        var plainData = data.duplicate();
-
-        var signature = Signature.getInstance(signatureAlgorithm);
-        signature.initVerify(keyPair.getPublic());
-        signature.update(data);
-
-        var signatureBytes = new byte[signatureBuffer.remaining()];
-        signatureBuffer.get(signatureBytes);
-
-        var valid = false;
-        try {
-            valid = signature.verify(signatureBytes);
-        } catch (SignatureException ignored) {}
-
-        if (!valid) {
-            throw new IllegalArgumentException("The given signature is not valid");
-        }
-        return plainData;
     }
 }
