@@ -1,7 +1,7 @@
 package org.geysermc.floodgate.core.http.downloads;
 
-import io.micronaut.serde.annotation.Serdeable;
+import io.avaje.jsonb.Json;
 
-@Serdeable
+@Json
 public record LatestBuildResult(int build) {
 }

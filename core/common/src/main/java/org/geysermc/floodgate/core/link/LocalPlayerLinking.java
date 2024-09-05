@@ -27,13 +27,11 @@ package org.geysermc.floodgate.core.link;
 
 import io.micronaut.context.annotation.Replaces;
 import io.micronaut.context.annotation.Requires;
-import io.micronaut.scheduling.TaskExecutors;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.core.database.PendingLinkRepository;
 import org.geysermc.floodgate.core.database.PlayerLinkRepository;
@@ -49,10 +47,6 @@ import org.geysermc.floodgate.core.database.entity.LinkedPlayer;
 public class LocalPlayerLinking extends CommonPlayerLink {
     @Inject PlayerLinkRepository linkRepository;
     @Inject PendingLinkRepository pendingLinkRepository;
-
-    @Inject
-    @Named(TaskExecutors.IO)
-    ExecutorService executor;
 
     @Override
     public CompletableFuture<LinkedPlayer> addLink(

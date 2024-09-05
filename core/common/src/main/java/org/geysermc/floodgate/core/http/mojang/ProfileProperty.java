@@ -1,9 +1,9 @@
 package org.geysermc.floodgate.core.http.mojang;
 
-import io.micronaut.serde.annotation.Serdeable;
-import jakarta.validation.constraints.NotNull;
+import io.avaje.jsonb.Json;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-@Serdeable
-public record ProfileProperty(@NotNull String name, @NotNull String value, @Nullable String signature) {
+@Json
+public record ProfileProperty(@NonNull String name, @NonNull String value, @Nullable String signature) {
 }

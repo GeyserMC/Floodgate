@@ -25,21 +25,21 @@
 
 package org.geysermc.floodgate.core.http.xbox;
 
-import io.micronaut.http.HttpHeaders;
-import io.micronaut.http.annotation.Get;
-import io.micronaut.http.annotation.Header;
-import io.micronaut.http.client.annotation.Client;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import io.avaje.http.api.Client;
+import io.avaje.http.api.Get;
+import io.avaje.http.api.Headers;
 import java.util.concurrent.CompletableFuture;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.core.util.Constants;
+import org.jetbrains.annotations.Range;
 
-@Client("${http.baseUrl.api}/v2/xbox")
-@Header(name = HttpHeaders.USER_AGENT, value = Constants.USER_AGENT)
+@Client
+@Headers({"User-Agent: " + Constants.USER_AGENT})
 public interface XboxClient {
     @Get("/xuid/{gamertag}")
     CompletableFuture<GetXuidResult> xuidByGamertag(
-            @NotNull @Size(min = 1, max = 16) String gamertag
+            @Range(from = 1, to = 16)
+            @NonNull String gamertag
     );
 
     @Get("/gamertag/{xuid}")

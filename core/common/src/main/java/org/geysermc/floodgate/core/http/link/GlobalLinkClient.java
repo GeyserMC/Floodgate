@@ -25,19 +25,15 @@
 
 package org.geysermc.floodgate.core.http.link;
 
-import static io.micronaut.http.HttpHeaders.USER_AGENT;
-
-import io.micronaut.core.async.annotation.SingleResult;
-import io.micronaut.http.annotation.Get;
-import io.micronaut.http.annotation.Header;
-import io.micronaut.http.client.annotation.Client;
+import io.avaje.http.api.Client;
+import io.avaje.http.api.Get;
+import io.avaje.http.api.Headers;
 import java.util.concurrent.CompletableFuture;
 import org.geysermc.floodgate.core.util.Constants;
 
-@Client("${http.baseUrl.api}/v2/link")
-@Header(name = USER_AGENT, value = Constants.USER_AGENT)
+@Client
+@Headers({"User-Agent: " + Constants.USER_AGENT})
 public interface GlobalLinkClient {
     @Get("/bedrock/{xuid}")
-    @SingleResult
     CompletableFuture<LinkedPlayer> bedrockLink(long xuid);
 }

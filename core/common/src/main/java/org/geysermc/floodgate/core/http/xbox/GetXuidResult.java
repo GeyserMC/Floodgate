@@ -25,9 +25,9 @@
 
 package org.geysermc.floodgate.core.http.xbox;
 
-import io.micronaut.serde.annotation.Serdeable;
+import io.avaje.jsonb.Json;
 import jakarta.annotation.Nullable;
 
-@Serdeable
+@Json
 public record GetXuidResult(@Nullable Long xuid) {
 }

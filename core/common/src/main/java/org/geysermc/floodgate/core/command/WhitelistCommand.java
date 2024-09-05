@@ -27,7 +27,7 @@ package org.geysermc.floodgate.core.command;
 
 import static org.geysermc.floodgate.core.platform.command.Placeholder.literal;
 
-import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import io.avaje.http.client.HttpException;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.UUID;
@@ -129,14 +129,14 @@ public class WhitelistCommand implements FloodgateCommand {
         xboxClient.xuidByGamertag(name)
                 .whenComplete((result, error) -> {
                     if (error != null) {
-                        if (!(error instanceof HttpClientResponseException exception)) {
+                        if (!(error instanceof HttpException exception)) {
                             sender.sendMessage(Message.API_UNAVAILABLE);
                             error.printStackTrace();
                             return;
                         }
                         sender.sendMessage(CommonCommandMessage.UNEXPECTED_ERROR);
 
-                        //todo proper non-200 status handler
+                        //todo proper non-200 status handler, for everything tbh
 //                        var response = exception.getResponse().getBody(UnsuccessfulResponse.class);
 //                        var message =
 //                                response.isPresent() ?

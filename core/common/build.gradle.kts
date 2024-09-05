@@ -27,13 +27,14 @@ dependencies {
     api(libs.micronaut.inject)
     annotationProcessor(libs.micronaut.inject.java)
     api(libs.micronaut.context)
-    api(libs.micronaut.http.client)
-    api(libs.micronaut.validation)
-    annotationProcessor(libs.micronaut.validation.processor)
 
-    api(libs.micronaut.serde.jsonp)
-    compileOnlyApi(libs.jakarta.jsonb)
-    annotationProcessor(libs.micronaut.serde.processor)
+    //todo re-add validation
+    api(libs.avaje.http.client)
+    api(libs.avaje.http.api)
+    annotationProcessor(libs.avaje.http.client.generator)
+
+    implementation(libs.avaje.jsonb)
+    annotationProcessor(libs.avaje.jsonb.generator)
 
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)

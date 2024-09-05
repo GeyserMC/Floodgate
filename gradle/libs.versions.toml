@@ -1,6 +1,6 @@
 [versions]
 # parent
-micronaut-gradle = "4.3.2"
+micronaut-gradle = "4.4.2"
 lombok = "8.4"
 
 # api
@@ -19,6 +19,8 @@ snakeyaml = "2.0"
 bstats = "3.0.3"
 adventure = "4.16.0"
 adventure-platform = "4.3.2"
+avaje-http = "2.7"
+avaje-jsonb = "2.1"
 
 # bungee
 bungee = "1.20-R0.3-SNAPSHOT"
@@ -70,13 +72,12 @@ adventure-platform-bungee = { module = "net.kyori:adventure-platform-bungeecord"
 micronaut-inject = { module = "io.micronaut:micronaut-inject" }
 micronaut-inject-java = { module = "io.micronaut:micronaut-inject-java" }
 micronaut-context = { module = "io.micronaut:micronaut-context" }
-micronaut-http-client = { module = "io.micronaut:micronaut-http-client-jdk" }
-micronaut-validation = { module = "io.micronaut.validation:micronaut-validation" }
-micronaut-validation-processor = { module = "io.micronaut.validation:micronaut-validation-processor" }
 
-micronaut-serde-jsonp = { module = "io.micronaut.serde:micronaut-serde-jsonp" }
-micronaut-serde-processor = { module = "io.micronaut.serde:micronaut-serde-processor" }
-jakarta-jsonb = { module = "jakarta.json.bind:jakarta.json.bind-api" }
+avaje-http-client = { module = "io.avaje:avaje-http-client", version.ref = "avaje-http" }
+avaje-http-api = { module = "io.avaje:avaje-http-api", version.ref = "avaje-http" }
+avaje-http-client-generator = { module = "io.avaje:avaje-http-client-generator", version.ref = "avaje-http" }
+avaje-jsonb = { module = "io.avaje:avaje-jsonb", version.ref = "avaje-jsonb" }
+avaje-jsonb-generator = { module = "io.avaje:avaje-jsonb-generator", version.ref = "avaje-jsonb" }
 
 netty-codec = { module = "io.netty:netty-codec", version.ref = "netty" }
 
