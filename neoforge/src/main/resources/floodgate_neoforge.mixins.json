@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "org.geysermc.floodgate.platform.neoforge.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "NeoForgeFloodgateUtilMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

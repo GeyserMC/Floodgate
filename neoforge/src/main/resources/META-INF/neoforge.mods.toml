@@ -1,0 +1,27 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="MIT"
+[[mods]]
+modId="$id"
+version="$version"
+displayName="$name"
+displayURL="$url"
+logoFile= "../assets/floodgate/icon.png"
+authors="$author"
+description="$description"
+[[mixins]]
+config = "floodgate.mixins.json"
+[[mixins]]
+config = "floodgate_neoforge.mixins.json"
+[[dependencies.floodgate]]
+modId="neoforge"
+type="required"
+versionRange="[21.0.0-beta,)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.floodgate]]
+modId="minecraft"
+type="required"
+versionRange="[$minecraft_version,)"
+ordering="NONE"
+side="BOTH"

@@ -1,0 +1,57 @@
+[versions]
+geyser = "2.2.3-SNAPSHOT"
+blossom = "1.2.0"
+indra = "3.1.3"
+shadow = "8.1.1"
+architectury-plugin = "3.4-SNAPSHOT"
+architectury-loom = "1.7-SNAPSHOT"
+minecraft-version = "1.21"
+minotaur = "2.+"
+guice = "6.0.0"
+cloud = "2.0.0-beta.7"
+lombok = "8.6"
+bstats = "3.0.2"
+configutils = "1.0-SNAPSHOT"
+mixin = "0.8.5"
+asm = "5.2"
+floodgate = "core-repackage-2.2.3-SNAPSHOT"
+
+# fabric
+fabric-loader = "0.15.11"
+fabric-api = "0.100.1+1.21"
+
+# neoforge
+neoforge-version = "21.0.87-beta"
+
+[libraries]
+floodgate-core = { group = "org.geysermc.floodgate", name = "core", version.ref = "floodgate" }
+floodgate-api = { group = "org.geysermc.floodgate", name = "api", version.ref = "floodgate" }
+
+geyser-fabric = { group = "org.geysermc.geyser", name = "fabric", version.ref = "geyser" }
+geyser-mod = { group = "org.geysermc.geyser", name = "mod", version.ref = "geyser" }
+geyser-core = { group = "org.geysermc.geyser", name = "core", version.ref = "geyser" }
+indra = { group = "net.kyori", name  = "indra-common", version.ref = "indra" }
+shadow = { group = "com.github.johnrengelman", name = "shadow", version.ref = "shadow" }
+architectury-plugin = { group = "architectury-plugin", name = "architectury-plugin.gradle.plugin", version.ref = "architectury-plugin" }
+architectury-loom = { group = "dev.architectury.loom", name = "dev.architectury.loom.gradle.plugin", version.ref = "architectury-loom" }
+guice = { group = "com.google.inject", name = "guice", version.ref = "guice" }
+bstats = { group = "org.bstats", name = "bstats-base", version.ref = "bstats" }
+configutils = { group = "org.geysermc.configutils", name = "configutils", version.ref = "configutils" }
+cloud-fabric = { group = "org.incendo", name = "cloud-fabric", version.ref = "cloud" }
+cloud-neoforge = { group = "org.incendo", name = "cloud-neoforge", version.ref = "cloud" }
+minotaur = { group = "com.modrinth.minotaur", name = "Minotaur", version.ref = "minotaur" }
+mixin = { group = "org.spongepowered", name = "mixin", version.ref = "mixin" }
+asm = { group = "org.ow2.asm", name = "asm-debug-all", version.ref = "asm" }
+minecraft = { group = "com.mojang", name = "minecraft", version.ref = "minecraft-version" }
+
+# Fabric
+fabric-loader = { group = "net.fabricmc", name = "fabric-loader", version.ref = "fabric-loader" }
+fabric-api = { group = "net.fabricmc.fabric-api", name = "fabric-api", version.ref = "fabric-api" }
+
+# NeoForge
+neoforge = { group = "net.neoforged", name = "neoforge", version.ref = "neoforge-version" }
+
+[plugins]
+lombok = { id = "io.freefair.lombok", version.ref = "lombok" }
+blossom = { id = "net.kyori.blossom", version.ref = "blossom"}
+indra = { id = "net.kyori.indra", version.ref = "indra" }

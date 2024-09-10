@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "org.geysermc.floodgate.mod.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "ChunkMapMixin",
+    "ClientIntentionPacketMixin",
+    "ClientIntentionPacketMixinInterface",
+    "ConnectionMixin",
+    "FloodgateUtilMixin",
+    "GeyserModInjectorMixin",
+    "ServerConnectionListenerMixin"
+  ],
+  "plugin": "org.geysermc.floodgate.mod.util.ModMixinConfigPlugin",
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
