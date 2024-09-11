@@ -11,8 +11,6 @@ authors="$author"
 description="$description"
 [[mixins]]
 config = "floodgate.mixins.json"
-[[mixins]]
-config = "floodgate_neoforge.mixins.json"
 [[dependencies.floodgate]]
 modId="neoforge"
 type="required"

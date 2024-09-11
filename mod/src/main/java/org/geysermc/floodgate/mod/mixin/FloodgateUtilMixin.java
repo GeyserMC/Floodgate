@@ -37,7 +37,7 @@ public class FloodgateUtilMixin {
         Path path = FloodgateMod.INSTANCE.resourcePath(string);
 
         if (path == null) {
-            throw new IllegalStateException("Unable to find annotation class! " + string);
+            throw new IllegalStateException("Unable to find classes marked by annotation class! " + string);
         }
 
         try {
