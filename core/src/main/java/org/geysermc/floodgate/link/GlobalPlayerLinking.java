@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.link;
+package org.geysermc.floodgate.link;
 
 import static org.geysermc.floodgate.core.util.Constants.GET_BEDROCK_LINK;
 

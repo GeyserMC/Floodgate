@@ -65,7 +65,7 @@ import org.geysermc.floodgate.core.event.EventBus;
 import org.geysermc.floodgate.core.event.lifecycle.ShutdownEvent;
 import org.geysermc.floodgate.core.event.util.ListenerAnnotationMatcher;
 import org.geysermc.floodgate.core.inject.CommonPlatformInjector;
-import org.geysermc.floodgate.core.link.PlayerLinkHolder;
+import org.geysermc.floodgate.link.PlayerLinkHolder;
 import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.core.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.core.skin.SkinUploadManager;
