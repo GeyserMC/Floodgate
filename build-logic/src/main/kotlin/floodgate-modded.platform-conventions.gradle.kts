@@ -1,5 +1,3 @@
-import net.fabricmc.loom.task.RemapJarTask
-
 plugins {
     id("floodgate-modded.publish-conventions")
     id("architectury-plugin")
@@ -85,11 +83,17 @@ tasks {
         archiveVersion.set("")
     }
 
-    register("remapModrinthJar", RemapJarTask::class) {
-        dependsOn(shadowJar)
-        inputFile.set(shadowJar.get().archiveFile)
-        archiveVersion.set(versionName(project))
-        archiveClassifier.set("")
+    register<Copy>("renameTask") {
+        dependsOn(remapJar)
+
+        val modrinthFileName = "${versionName(project)}.jar"
+        val libsFile = remapJar.get().destinationDirectory.get().asFile
+
+        from(remapJar.get().archiveFile)
+        rename { modrinthFileName }
+        into(libsFile)
+
+        outputs.file(libsFile.resolve(modrinthFileName))
     }
 
     // Readme sync
@@ -127,7 +131,7 @@ modrinth {
 
     syncBodyFrom.set(rootProject.file("README.md").readText())
 
-    uploadFile.set(tasks.getByPath("remapModrinthJar"))
+    uploadFile.set(tasks.getByPath("renameTask").outputs.files.first())
     gameVersions.add(libs.minecraft.get().version as String)
     gameVersions.add("1.21.1")
     failSilently.set(false)

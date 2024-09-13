@@ -23,7 +23,7 @@ dependencies {
 
 afterEvaluate {
     // We don't need these
-    tasks.named("remapModrinthJar").configure {
+    tasks.named("renameTask").configure {
         enabled = false
     }
 
