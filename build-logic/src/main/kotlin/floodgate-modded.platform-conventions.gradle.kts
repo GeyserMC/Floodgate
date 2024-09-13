@@ -131,7 +131,7 @@ modrinth {
 
     syncBodyFrom.set(rootProject.file("README.md").readText())
 
-    uploadFile.set(tasks.getByPath("renameTask").outputs.files.first())
+    uploadFile.set(tasks.remapJar.get().destinationDirectory.get().asFile.resolve("${versionName(project)}.jar"))
     gameVersions.add(libs.minecraft.get().version as String)
     gameVersions.add("1.21.1")
     failSilently.set(false)
