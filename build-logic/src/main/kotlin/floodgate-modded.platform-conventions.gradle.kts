@@ -98,6 +98,7 @@ tasks {
 
     // Readme sync
     modrinth.get().dependsOn(tasks.modrinthSyncBody)
+    modrinth.get().dependsOn(tasks.getByName("renameTask"))
 }
 
 afterEvaluate {
