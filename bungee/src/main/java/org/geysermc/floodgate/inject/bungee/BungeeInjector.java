@@ -28,9 +28,11 @@ package org.geysermc.floodgate.inject.bungee;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.netty.PipelineUtils;
@@ -52,8 +54,10 @@ public final class BungeeInjector extends CommonPlatformInjector {
     @Override
     public void inject() {
         // Can everyone just switch to Velocity please :)
+        // :( ~BungeeCord Collaborator
 
         // Newer Bungee versions have a separate prepender for backend and client connections
+        // this field is not touched by client -> proxy
         Field serverFramePrepender =
                 ReflectionUtils.getField(PipelineUtils.class, "serverFramePrepender");
         if (serverFramePrepender != null) {
@@ -63,16 +67,39 @@ public final class BungeeInjector extends CommonPlatformInjector {
             BungeeReflectionUtils.setFieldValue(null, serverFramePrepender, customServerPrepender);
         }
 
+        // for backwards compatibility
         Field framePrepender = ReflectionUtils.getField(PipelineUtils.class, "framePrepender");
+        if (framePrepender != null) {
+            logger.warn("You are running an old version of BungeeCord consider updating to a newer version");
+            // Required in order to inject into both Geyser <-> proxy AND proxy <-> server
+            // (Instead of just replacing the ChannelInitializer which is only called for
+            // player <-> proxy)
+            BungeeCustomPrepender customPrepender = new BungeeCustomPrepender(
+                    this, ReflectionUtils.castedStaticValue(framePrepender)
+            );
 
-        // Required in order to inject into both Geyser <-> proxy AND proxy <-> server
-        // (Instead of just replacing the ChannelInitializer which is only called for
-        // player <-> proxy)
-        BungeeCustomPrepender customPrepender = new BungeeCustomPrepender(
-                this, ReflectionUtils.castedStaticValue(framePrepender)
-        );
-
-        BungeeReflectionUtils.setFieldValue(null, framePrepender, customPrepender);
+            BungeeReflectionUtils.setFieldValue(null, framePrepender, customPrepender);
+        } else {
+            // wrap the client -> proxy channel init because the framePrepender field was deleted
+            ChannelInitializer<Channel> original = PipelineUtils.SERVER_CHILD;
+            Field clientChannelInitField = ReflectionUtils.getField(
+                    PipelineUtils.class, "SERVER_CHILD"
+            );
+            Method initChannelMethod = ReflectionUtils.getMethod(
+                    original.getClass(), "initChannel", Channel.class
+            );
+            ChannelInitializer<Channel> wrapper = new ChannelInitializer<Channel>() {
+                @Override
+                protected void initChannel(Channel channel) {
+                    ReflectionUtils.invoke(original, initChannelMethod, channel);
+                    channel.pipeline().addBefore(
+                            PipelineUtils.FRAME_DECODER, BUNGEE_INIT,
+                            new BungeeClientToProxyInjectInitializer(BungeeInjector.this)
+                    );
+                }
+            };
+            BungeeReflectionUtils.setFieldValue(null, clientChannelInitField, wrapper);
+        }
 
         injected = true;
     }
