@@ -38,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.netty.PipelineUtils;
 import net.md_5.bungee.protocol.MinecraftEncoder;
 import net.md_5.bungee.protocol.Varint21LengthFieldExtraBufPrepender;
+import net.md_5.bungee.protocol.Varint21LengthFieldPrepender;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.util.BungeeReflectionUtils;
@@ -66,25 +67,39 @@ public final class BungeeInjector extends CommonPlatformInjector {
             BungeeReflectionUtils.setFieldValue(null, serverFramePrepender, customServerPrepender);
         }
 
-        // wrap the client -> proxy channel init because the framePrepender field was deleted
-        ChannelInitializer<Channel> original = PipelineUtils.SERVER_CHILD;
-        Field clientChannelInitField = ReflectionUtils.getField(
-                PipelineUtils.class, "SERVER_CHILD"
-        );
-        Method initChannelMethod = ReflectionUtils.getMethod(
-                original.getClass(), "initChannel", Channel.class
-        );
-        ChannelInitializer<Channel> wrapper = new ChannelInitializer<Channel>() {
-            @Override
-            protected void initChannel(Channel channel) {
-                ReflectionUtils.invoke(original, initChannelMethod, channel);
-                channel.pipeline().addBefore(
-                        PipelineUtils.FRAME_DECODER, BUNGEE_INIT,
-                        new BungeeClientToProxyInjectInitializer(BungeeInjector.this)
-                );
-            }
-        };
-        BungeeReflectionUtils.setFieldValue(null, clientChannelInitField, wrapper);
+        // for backwards compatibility
+        Field framePrepender = ReflectionUtils.getField(PipelineUtils.class, "framePrepender");
+        if (framePrepender != null) {
+            logger.warn("You are running an old version of BungeeCord consider updating to a newer version");
+            // Required in order to inject into both Geyser <-> proxy AND proxy <-> server
+            // (Instead of just replacing the ChannelInitializer which is only called for
+            // player <-> proxy)
+            BungeeCustomPrepender customPrepender = new BungeeCustomPrepender(
+                    this, ReflectionUtils.castedStaticValue(framePrepender)
+            );
+
+            BungeeReflectionUtils.setFieldValue(null, framePrepender, customPrepender);
+        } else {
+            // wrap the client -> proxy channel init because the framePrepender field was deleted
+            ChannelInitializer<Channel> original = PipelineUtils.SERVER_CHILD;
+            Field clientChannelInitField = ReflectionUtils.getField(
+                    PipelineUtils.class, "SERVER_CHILD"
+            );
+            Method initChannelMethod = ReflectionUtils.getMethod(
+                    original.getClass(), "initChannel", Channel.class
+            );
+            ChannelInitializer<Channel> wrapper = new ChannelInitializer<Channel>() {
+                @Override
+                protected void initChannel(Channel channel) {
+                    ReflectionUtils.invoke(original, initChannelMethod, channel);
+                    channel.pipeline().addBefore(
+                            PipelineUtils.FRAME_DECODER, BUNGEE_INIT,
+                            new BungeeClientToProxyInjectInitializer(BungeeInjector.this)
+                    );
+                }
+            };
+            BungeeReflectionUtils.setFieldValue(null, clientChannelInitField, wrapper);
+        }
 
         injected = true;
     }
@@ -115,6 +130,31 @@ public final class BungeeInjector extends CommonPlatformInjector {
 
         injectAddonsCall(channel, !clientToProxy);
         addInjectedClient(channel);
+    }
+
+    @RequiredArgsConstructor
+    private static final class BungeeCustomPrepender extends Varint21LengthFieldPrepender {
+        private final BungeeInjector injector;
+        private final Varint21LengthFieldPrepender original;
+
+        @Override
+        public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+            original.handlerAdded(ctx);
+            // The Minecraft encoder being in the pipeline isn't present until later
+
+            if (ctx.channel().parent() != null) {
+                // Client <-> Proxy
+                ctx.pipeline().addBefore(
+                        PipelineUtils.FRAME_DECODER, BUNGEE_INIT,
+                        new BungeeClientToProxyInjectInitializer(injector)
+                );
+            } else {
+                // Proxy <-> Server
+                ctx.pipeline().addLast(
+                        BUNGEE_INIT, new BungeeProxyToServerInjectInitializer(injector)
+                );
+            }
+        }
     }
 
     @RequiredArgsConstructor
