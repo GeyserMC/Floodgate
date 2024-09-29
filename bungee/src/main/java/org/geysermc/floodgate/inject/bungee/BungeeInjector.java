@@ -91,6 +91,7 @@ public final class BungeeInjector extends CommonPlatformInjector {
             ChannelInitializer<Channel> wrapper = new ChannelInitializer<Channel>() {
                 @Override
                 protected void initChannel(Channel channel) {
+                    // Check if the channel is open, see #547
                     if (!channel.isOpen()) {
                         return;
                     }
