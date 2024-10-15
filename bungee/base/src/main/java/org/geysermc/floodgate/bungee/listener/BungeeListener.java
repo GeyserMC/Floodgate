@@ -1,28 +1,8 @@
 /*
- * Copyright (c) 2019-2023 GeyserMC. http://geysermc.org
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- * @author GeyserMC
+ * Copyright (c) 2019-2024 GeyserMC
+ * Licensed under the MIT license
  * @link https://github.com/GeyserMC/Floodgate
  */
-
 package org.geysermc.floodgate.bungee.listener;
 
 import static java.util.Objects.requireNonNull;
@@ -32,6 +12,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import java.lang.reflect.Field;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
@@ -49,6 +31,7 @@ import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.core.listener.McListener;
 import org.geysermc.floodgate.core.skin.SkinApplier;
 import org.geysermc.floodgate.core.skin.SkinDataImpl;
+import org.geysermc.floodgate.core.util.Constants;
 import org.geysermc.floodgate.core.util.LanguageManager;
 import org.geysermc.floodgate.core.util.MojangUtils;
 import org.geysermc.floodgate.core.util.ReflectionUtils;
@@ -62,17 +45,30 @@ public final class BungeeListener implements Listener, McListener {
         requireNonNull(PLAYER_NAME, "Initial name field cannot be null");
     }
 
-    @Inject Plugin plugin;
-    @Inject BungeeConnectionManager connectionManager;
-    @Inject ProxyFloodgateConfig config;
-    @Inject SimpleFloodgateApi api;
-    @Inject LanguageManager languageManager;
-    @Inject SkinApplier skinApplier;
-    @Inject MojangUtils mojangUtils;
+    @Inject
+    Plugin plugin;
+
+    @Inject
+    BungeeConnectionManager connectionManager;
+
+    @Inject
+    ProxyFloodgateConfig config;
+
+    @Inject
+    SimpleFloodgateApi api;
+
+    @Inject
+    LanguageManager languageManager;
+
+    @Inject
+    SkinApplier skinApplier;
+
+    @Inject
+    MojangUtils mojangUtils;
 
     @Inject
     @Named("kickMessageAttribute")
-    AttributeKey<String> kickMessageAttribute;
+    AttributeKey<Component> kickMessageAttribute;
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPreLogin(PreLoginEvent event) {
@@ -85,10 +81,14 @@ public final class BungeeListener implements Listener, McListener {
         var channel = connectionManager.channelFor(pendingConnection);
 
         // check if the player has to be kicked
-        String kickReason = channel.attr(kickMessageAttribute).get();
+        Component kickReason = channel.attr(kickMessageAttribute).get();
         if (kickReason != null) {
             event.setCancelled(true);
-            event.setCancelReason(kickReason);
+            if (pendingConnection.getVersion() >= Constants.PROTOCOL_HEX_COLOR) {
+                event.setCancelReason(BungeeComponentSerializer.get().serialize(kickReason));
+            } else {
+                event.setCancelReason(BungeeComponentSerializer.legacy().serialize(kickReason));
+            }
             return;
         }
 

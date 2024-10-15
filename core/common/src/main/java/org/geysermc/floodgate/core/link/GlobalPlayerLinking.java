@@ -1,28 +1,8 @@
 /*
- * Copyright (c) 2019-2023 GeyserMC. http://geysermc.org
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- * @author GeyserMC
+ * Copyright (c) 2019-2024 GeyserMC
+ * Licensed under the MIT license
  * @link https://github.com/GeyserMC/Floodgate
  */
-
 package org.geysermc.floodgate.core.link;
 
 import io.micronaut.context.BeanProvider;
@@ -46,7 +26,8 @@ import org.geysermc.floodgate.core.http.link.GlobalLinkClient;
 @Singleton
 @Getter
 public class GlobalPlayerLinking extends CommonPlayerLink {
-    @Inject GlobalLinkClient linkClient;
+    @Inject
+    GlobalLinkClient linkClient;
 
     private CommonPlayerLink database;
 
@@ -56,8 +37,7 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
     }
 
     @Override
-    @NonNull
-    public CompletableFuture<LinkedPlayer> fetchLink(@NonNull UUID bedrockId) {
+    public @NonNull CompletableFuture<LinkedPlayer> fetchLink(@NonNull UUID bedrockId) {
         if (database == null) {
             return getLinkedPlayer0(bedrockId);
         }
@@ -70,15 +50,14 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
         });
     }
 
-    @NonNull
-    private CompletableFuture<LinkedPlayer> getLinkedPlayer0(@NonNull UUID bedrockId) {
-        return linkClient.bedrockLink(bedrockId.getLeastSignificantBits())
+    private @NonNull CompletableFuture<LinkedPlayer> getLinkedPlayer0(@NonNull UUID bedrockId) {
+        return linkClient
+                .bedrockLink(bedrockId.getLeastSignificantBits())
                 .thenApply(org.geysermc.floodgate.core.http.link.LinkedPlayer::toDatabase);
     }
 
     @Override
-    @NonNull
-    public CompletableFuture<Boolean> isLinked(@NonNull UUID bedrockId) {
+    public @NonNull CompletableFuture<Boolean> isLinked(@NonNull UUID bedrockId) {
         if (database == null) {
             return isLinkedPlayer0(bedrockId);
         }
@@ -91,8 +70,7 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
         });
     }
 
-    @NonNull
-    private CompletableFuture<Boolean> isLinkedPlayer0(@NonNull UUID bedrockId) {
+    private @NonNull CompletableFuture<Boolean> isLinkedPlayer0(@NonNull UUID bedrockId) {
         return getLinkedPlayer0(bedrockId).thenApply(Objects::nonNull);
     }
 
@@ -100,12 +78,8 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
     // so individual servers can't register nor unlink players.
 
     @Override
-    @NonNull
-    public CompletableFuture<LinkedPlayer> addLink(
-            @NonNull UUID javaUniqueId,
-            @NonNull String javaUsername,
-            @NonNull UUID bedrockId
-    ) {
+    public @NonNull CompletableFuture<LinkedPlayer> addLink(
+            @NonNull UUID javaUniqueId, @NonNull String javaUsername, @NonNull UUID bedrockId) {
         if (database != null) {
             return database.addLink(javaUniqueId, javaUsername, bedrockId);
         }
@@ -113,8 +87,7 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
     }
 
     @Override
-    @NonNull
-    public CompletableFuture<Void> unlink(@NonNull UUID javaUniqueId) {
+    public @NonNull CompletableFuture<Void> unlink(@NonNull UUID javaUniqueId) {
         if (database != null) {
             return database.unlink(javaUniqueId);
         }
@@ -122,31 +95,60 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
     }
 
     @Override
-    @NonNull
-    public CompletableFuture<LinkRequest> createLinkRequest(
+    public @NonNull CompletableFuture<Void> createJavaLinkRequest(
             @NonNull UUID javaUniqueId,
             @NonNull String javaUsername,
             @NonNull String bedrockUsername,
-            @NonNull String code
-    ) {
+            @NonNull String code) {
         if (database != null) {
-            return database.createLinkRequest(javaUniqueId, javaUsername, bedrockUsername, code);
+            return database.createJavaLinkRequest(javaUniqueId, javaUsername, bedrockUsername, code);
         }
         return failedFuture();
     }
 
     @Override
-    public CompletableFuture<LinkRequest> linkRequest(@NonNull String javaUsername) {
+    public CompletableFuture<Void> createBedrockLinkRequest(
+            @NonNull UUID bedrockUniqueId,
+            @NonNull String bedrockUsername,
+            @NonNull String javaUsername,
+            @NonNull String code) {
         if (database != null) {
-            return database.linkRequest(javaUsername);
+            return database.createBedrockLinkRequest(bedrockUniqueId, bedrockUsername, javaUsername, code);
         }
         return failedFuture();
     }
 
     @Override
-    public CompletableFuture<Void> invalidateLinkRequest(@NonNull LinkRequest request) {
+    public CompletableFuture<String> createBedrockLinkRequest(
+            @NonNull UUID bedrockUniqueId, @NonNull String bedrockUsername) {
         if (database != null) {
-            return database.invalidateLinkRequest(request);
+            return database.createBedrockLinkRequest(bedrockUniqueId, bedrockUsername);
+        }
+        return failedFuture();
+    }
+
+    @Override
+    public CompletableFuture<LinkRequest> linkRequestForBedrock(
+            @NonNull String javaUsername, @NonNull String bedrockUsername, @NonNull String code) {
+        if (database != null) {
+            return database.linkRequestForBedrock(javaUsername, bedrockUsername, code);
+        }
+        return failedFuture();
+    }
+
+    @Override
+    public CompletableFuture<LinkRequest> linkRequestForJava(
+            @NonNull String javaUsername, @NonNull String bedrockUsername, @NonNull String code) {
+        if (database != null) {
+            return database.linkRequestForJava(javaUsername, bedrockUsername, code);
+        }
+        return failedFuture();
+    }
+
+    @Override
+    public CompletableFuture<LinkRequest> linkRequestForJava(@NonNull String bedrockUsername, @NonNull String code) {
+        if (database != null) {
+            return database.linkRequestForJava(bedrockUsername, code);
         }
         return failedFuture();
     }
@@ -157,8 +159,7 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
     }
 
     private <U> CompletableFuture<U> failedFuture() {
-        return CompletableFuture.failedFuture(new IllegalStateException(
-                "Cannot perform this action when Global Linking is enabled"
-        ));
+        return CompletableFuture.failedFuture(
+                new IllegalStateException("Cannot perform this action when Global Linking is enabled"));
     }
 }

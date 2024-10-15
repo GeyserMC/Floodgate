@@ -1,28 +1,8 @@
 /*
- * Copyright (c) 2019-2023 GeyserMC. http://geysermc.org
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- * @author GeyserMC
+ * Copyright (c) 2019-2024 GeyserMC
+ * Licensed under the MIT license
  * @link https://github.com/GeyserMC/Floodgate
  */
-
 package org.geysermc.floodgate.core.config;
 
 import java.security.Key;
@@ -51,21 +31,21 @@ public interface FloodgateConfig {
 
     @PostProcess
     default void postInitialise() {
-        //todo add postInitialize with argument
-//    @PostProcess
-//    default void postInitialize(Path dataDirectory) throws SerializationException {
-//        Path keyPath = dataDirectory.resolve(keyFileName());
-//
-//        // don't assume that the key always exists with the existence of a config
-//        if (!Files.exists(keyPath)) {
-//            // TODO improve message and also link to article about corrupted keys/WinSCP/FTP
-//            // Like, where is key.pem?
-//            // TODO don't be so noisy with error. It makes it hard to understand what the error is.
-//            throw new SerializationException("Floodgate requires a key file! " +
-//                    "Copy your key file from Geyser (key.pem) and paste it into " + keyPath);
-//        }
+        // todo add postInitialize with argument
+        //    @PostProcess
+        //    default void postInitialize(Path dataDirectory) throws SerializationException {
+        //        Path keyPath = dataDirectory.resolve(keyFileName());
+        //
+        //        // don't assume that the key always exists with the existence of a config
+        //        if (!Files.exists(keyPath)) {
+        //            // TODO improve message and also link to article about corrupted keys/WinSCP/FTP
+        //            // Like, where is key.pem?
+        //            // TODO don't be so noisy with error. It makes it hard to understand what the error is.
+        //            throw new SerializationException("Floodgate requires a key file! " +
+        //                    "Copy your key file from Geyser (key.pem) and paste it into " + keyPath);
+        //        }
 
-        //todo remove key file name config option
+        // todo remove key file name config option
 
         rawUsernamePrefix(usernamePrefix());
 
@@ -75,15 +55,17 @@ public interface FloodgateConfig {
         }
     }
 
-    @Comment("""
+    @Comment(
+            """
             In Floodgate bedrock player data is send encrypted.
             The following value should point to the key Floodgate generated.
             The public key should be used for the Geyser(s) and the private key for the Floodgate(s)""")
     @DefaultString("key.pem")
     String keyFileName();
 
-    @Comment("""
-            Floodgate prepends a prefix to bedrock usernames to avoid conflicts
+    @Comment(
+            """
+            Floodgate prepends a prefix to bedrock usernames to avoid conflicts.
             However, certain conflicts can cause issues with some plugins so this prefix is configurable using the property below
             It is recommended to use a prefix that does not contain alphanumerical to avoid the possibility of duplicate usernames.""")
     @DefaultString(".")
@@ -116,23 +98,31 @@ public interface FloodgateConfig {
         return Constants.CONFIG_VERSION;
     }
 
-    @Field Key key();
+    @Field
+    Key key();
 
-    @Field void key(Key key);
+    @Field
+    void key(Key key);
 
-    @Field String rawUsernamePrefix();
+    @Field
+    String rawUsernamePrefix();
 
-    @Field void rawUsernamePrefix(String usernamePrefix);
+    @Field
+    void rawUsernamePrefix(String usernamePrefix);
 
     @ConfigSerializable
     interface DisconnectMessages {
-        @Comment("The disconnect message Geyser users should get when connecting\n" +
-                "to the server with an invalid key")
+        @Comment(
+                """
+                The disconnect message Geyser users should get when connecting
+                to the server with an invalid key""")
         @DefaultString("Please connect through the official Geyser")
         String invalidKey();
 
-        @Comment("The disconnect message Geyser users should get when connecting\n" +
-                "to the server with the correct key but not with the correct data format")
+        @Comment(
+                """
+                The disconnect message Geyser users should get when connecting
+                to the server with the correct key but not with the correct data format""")
         @DefaultString("Expected {} arguments, got {}. Is Geyser up-to-date?")
         String invalidArgumentsLength();
     }
@@ -150,8 +140,10 @@ public interface FloodgateConfig {
 
     @ConfigSerializable
     interface PlayerLinkConfig {
-        @Comment("Whether to enable the linking system. Turning this off will prevent\n" +
-                "players from using the linking feature even if they are already linked.")
+        @Comment(
+                """
+                Whether to enable the linking system. Turning this off will prevent
+                players from using the linking feature even if they are already linked.""")
         @DefaultBoolean(true)
         boolean enabled();
 
@@ -159,7 +151,8 @@ public interface FloodgateConfig {
         @DefaultBoolean
         boolean requireLink();
 
-        @Comment("""
+        @Comment(
+                """
                 Set the following option to true when you want to host your own linking database.
                 -> This can work in addition to global linking.
                 Note that you have to enable the database in the database section as well.
@@ -167,7 +160,8 @@ public interface FloodgateConfig {
         @DefaultBoolean
         boolean enableOwnLinking();
 
-        @Comment("""
+        @Comment(
+                """
                 The following two options only apply when 'enable-own-linking' is set to 'true'
 
                 Whether to allow the use of /linkaccount and /unlinkaccount
@@ -181,7 +175,16 @@ public interface FloodgateConfig {
         @DefaultNumeric(300)
         long linkCodeTimeout();
 
-        @Comment("""
+        @Comment(
+                """
+                Whether to allow Bedrock servers to create a link request by logging in twice.
+                This requires both 'enable-own-linking' and 'require-link' to be enabled.
+                This option does not work properly with multi-proxy setups.""")
+        @DefaultBoolean
+        boolean allowCreateLinkRequest();
+
+        @Comment(
+                """
                 Whether to enable global linking. Global Linking is a central server where people can link their
                 accounts (Java and Bedrock) and join on servers that have Global Linking enabled. The goal of
                 Global Linking is to make linking easier by not having to link your accounts on every server.

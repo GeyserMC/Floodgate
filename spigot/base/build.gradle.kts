@@ -10,7 +10,6 @@ dependencies {
     compileOnlyApi(libs.paper.api)
 }
 
-relocate("net.kyori")
 relocate("org.incendo.cloud")
 relocate("io.leangen.geantyref") // used in cloud
 // hack to make (old versions? of) Paper work

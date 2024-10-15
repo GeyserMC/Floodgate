@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024 GeyserMC
+ * Licensed under the MIT license
+ * @link https://github.com/GeyserMC/Floodgate
+ */
 package org.geysermc.floodgate.core;
 
 import io.micronaut.context.annotation.Bean;
@@ -7,6 +12,7 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.util.AttributeKey;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
+import net.kyori.adventure.text.Component;
 import org.geysermc.api.connection.Connection;
 
 @Factory
@@ -14,7 +20,7 @@ public final class Netty4 {
     @Bean
     @Singleton
     @Named("kickMessageAttribute")
-    public AttributeKey<String> kickMessageAttribute() {
+    public AttributeKey<Component> kickMessageAttribute() {
         return AttributeKey.valueOf("floodgate-kick-message");
     }
 

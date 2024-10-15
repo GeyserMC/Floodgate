@@ -1,38 +1,21 @@
 /*
- * Copyright (c) 2019-2023 GeyserMC. http://geysermc.org
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- * @author GeyserMC
+ * Copyright (c) 2019-2024 GeyserMC
+ * Licensed under the MIT license
  * @link https://github.com/GeyserMC/Floodgate
  */
-
 package org.geysermc.floodgate.core.connection;
 
 import static org.geysermc.floodgate.core.platform.command.Placeholder.literal;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import lombok.NonNull;
 import lombok.SneakyThrows;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.jodah.expiringmap.ExpiringMap;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.geysermc.floodgate.api.event.FloodgateEventBus;
@@ -51,13 +34,40 @@ import org.geysermc.floodgate.util.LinkedPlayer;
 
 @Singleton
 public final class FloodgateDataHandler {
-    @Inject ConnectionManager connectionManager;
-    @Inject CommonPlayerLink link;
-    @Inject FloodgateConfig config;
-    @Inject FloodgateLogger logger;
-    @Inject LanguageManager languageManager;
-    @Inject FloodgateEventBus eventBus;
-    @Inject FloodgateDataCodec dataCodec;
+    @Inject
+    ConnectionManager connectionManager;
+
+    @Inject
+    CommonPlayerLink link;
+
+    @Inject
+    FloodgateConfig config;
+
+    @Inject
+    FloodgateLogger logger;
+
+    @Inject
+    LanguageManager languageManager;
+
+    @Inject
+    FloodgateEventBus eventBus;
+
+    @Inject
+    FloodgateDataCodec dataCodec;
+
+    ExpiringMap<String, Boolean> nextLoginIsLinkRequest;
+
+    @PostConstruct
+    void init() {
+        var playerLink = config.playerLink();
+        if (playerLink.enabled()
+                && playerLink.enableOwnLinking()
+                && playerLink.requireLink()
+                && playerLink.allowCreateLinkRequest()) {
+            nextLoginIsLinkRequest =
+                    ExpiringMap.builder().expiration(60, TimeUnit.SECONDS).build();
+        }
+    }
 
     /**
      * Decode the given Floodgate data into a FloodgateConnection.
@@ -74,14 +84,12 @@ public final class FloodgateDataHandler {
     }
 
     public CompletableFuture<JoinResult> handleConnection(FloodgateConnection connection) {
-        return handleLink(connection)
-                .thenApplyAsync(this::canJoin)
-                .thenApply(result -> {
-                    if (!result.shouldDisconnect()) {
-                        connectionManager.addConnection(connection);
-                    }
-                    return result;
-                });
+        return handleLink(connection).thenCompose(this::canJoin).thenApply(result -> {
+            if (!result.shouldDisconnect()) {
+                connectionManager.addConnection(connection);
+            }
+            return result;
+        });
     }
 
     private CompletableFuture<FloodgateConnection> handleLink(FloodgateConnection connection) {
@@ -93,14 +101,51 @@ public final class FloodgateDataHandler {
         });
     }
 
-    private JoinResult canJoin(FloodgateConnection connection) {
-        String disconnectReason = null;
-        if (config.playerLink().requireLink() && !connection.isLinked()) {
-            disconnectReason = MiniMessage.miniMessage().serialize(
-                    CommonPlatformMessages.NOT_LINKED.translateMessage(
-                            languageManager,
-                            connection.languageCode(),
-                            literal("url", Constants.LINK_INFO_URL)));
+    private CompletableFuture<JoinResult> canJoin(FloodgateConnection connection) {
+        // todo add a @Requires annotation that requires a specific node to be true in order for the node to not be
+        // false
+        if (config.playerLink().enabled() && config.playerLink().requireLink() && !connection.isLinked()) {
+            if (config.playerLink().allowCreateLinkRequest()) {
+                var alreadyPresent = nextLoginIsLinkRequest.putIfAbsent(connection.xuid(), true) != null;
+
+                if (alreadyPresent) {
+                    return link.createBedrockLinkRequest(
+                                    Utils.toFloodgateUniqueId(connection.xuid()), connection.bedrockUsername())
+                            .handle((code, error) -> {
+                                if (error != null) {
+                                    logger.error("Could not create link request!", error);
+                                    return canJoin(connection, null);
+                                }
+
+                                System.out.println(code + " " + code.getClass());
+                                return canJoin(
+                                        connection,
+                                        Component.text("Your link code is %s, run %s to link with your Java account"
+                                                .formatted(
+                                                        code,
+                                                        "/linkaccount %s %s"
+                                                                .formatted(connection.bedrockUsername(), code))));
+                            });
+                } else {
+                    return CompletableFuture.completedFuture(canJoin(
+                            connection,
+                            Component.text("You can also create a new link request by joining the server once more")));
+                }
+            }
+        }
+        return CompletableFuture.completedFuture(canJoin(connection, null));
+    }
+
+    private JoinResult canJoin(FloodgateConnection connection, Component linkMessage) {
+        Component disconnectReason = null;
+        if (config.playerLink().enabled() && config.playerLink().requireLink() && !connection.isLinked()) {
+            disconnectReason = CommonPlatformMessages.NOT_LINKED.translateMessage(
+                    languageManager, connection.languageCode(), literal("url", Constants.LINK_INFO_URL));
+
+            if (linkMessage != null) {
+                disconnectReason =
+                        disconnectReason.appendNewline().appendNewline().append(linkMessage);
+            }
         }
 
         var event = new ConnectionJoinEvent(connection, disconnectReason);
@@ -110,7 +155,7 @@ public final class FloodgateDataHandler {
         return new JoinResult(connection, event.disconnectReason());
     }
 
-    public record JoinResult(FloodgateConnection connection, @MonotonicNonNull String disconnectReason) {
+    public record JoinResult(FloodgateConnection connection, @MonotonicNonNull Component disconnectReason) {
         public boolean shouldDisconnect() {
             return disconnectReason != null;
         }
@@ -119,15 +164,13 @@ public final class FloodgateDataHandler {
     public enum HandleResultType {
         NOT_FLOODGATE_DATA,
         DECRYPT_ERROR,
-        INVALID_DATA, //todo remove from config, unused
+        INVALID_DATA, // todo remove from config, unused
         SUCCESS
     }
 
     public record HandleResult(
             HandleResultType type,
-            @EnsuresNonNullIf(expression = "type == HandleResultType.SUCCESS", result = true)
-            JoinResult joinResult
-    ) {}
+            @EnsuresNonNullIf(expression = "type == HandleResultType.SUCCESS", result = true) JoinResult joinResult) {}
 
     private CompletableFuture<LinkedPlayer> maybeFetchLink(FloodgateConnection connection) {
         // only fetch link if they're not already linked & linking is enabled
@@ -146,5 +189,4 @@ public final class FloodgateDataHandler {
                     return null;
                 });
     }
-
 }

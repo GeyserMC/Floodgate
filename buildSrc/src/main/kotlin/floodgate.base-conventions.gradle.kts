@@ -3,6 +3,7 @@ plugins {
 //    id("net.ltgt.errorprone")
     id("net.kyori.indra")
     id("net.kyori.indra.git")
+    id("net.kyori.indra.licenser.spotless")
     id("floodgate.depsize")
 }
 
@@ -21,6 +22,15 @@ indra {
     javaVersions {
         target(17)
     }
+
+}
+
+spotless {
+    java {
+        palantirJavaFormat()
+        formatAnnotations()
+    }
+    ratchetFrom("origin/development")
 }
 
 tasks {

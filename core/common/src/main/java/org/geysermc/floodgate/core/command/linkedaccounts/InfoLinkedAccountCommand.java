@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024 GeyserMC
+ * Licensed under the MIT license
+ * @link https://github.com/GeyserMC/Floodgate
+ */
 package org.geysermc.floodgate.core.command.linkedaccounts;
 
 import static org.geysermc.floodgate.core.platform.command.Placeholder.dynamic;
@@ -24,10 +29,17 @@ import org.incendo.cloud.context.CommandContext;
 
 @Singleton
 final class InfoLinkedAccountCommand extends FloodgateSubCommand {
-    @Inject Optional<LocalPlayerLinking> optionalLinking;
-    @Inject FloodgateConfig config;
-    @Inject ProfileFetcher fetcher;
-    @Inject FloodgateLogger logger;
+    @Inject
+    Optional<LocalPlayerLinking> optionalLinking;
+
+    @Inject
+    FloodgateConfig config;
+
+    @Inject
+    ProfileFetcher fetcher;
+
+    @Inject
+    FloodgateLogger logger;
 
     InfoLinkedAccountCommand() {
         super(LinkedAccountsCommand.class, "info", "Gets info about the link status of an user", "i");
@@ -59,7 +71,8 @@ final class InfoLinkedAccountCommand extends FloodgateSubCommand {
         var future = CompletableFuture.completedFuture(playerInput);
         if (playerInput.uuid() == null) {
             if (playerInput.username().startsWith(config.usernamePrefix())) {
-                gamertagInput = playerInput.username().substring(config.usernamePrefix().length());
+                gamertagInput =
+                        playerInput.username().substring(config.usernamePrefix().length());
                 future = fetcher.fetchXuidFor(gamertagInput);
                 bedrock = true;
             } else {
@@ -118,23 +131,25 @@ final class InfoLinkedAccountCommand extends FloodgateSubCommand {
                     }
 
                     sender.sendMessage(
-                        Message.INFO_LINKED,
-                        literal("platform", platform),
-                        literal("target", usernameOrUniqueId),
-                        dynamic("link_info", LinkedAccountsCommonMessage.LINK_INFO, sender),
-                        literal("bedrock_id", link.bedrockId()),
-                        literal("bedrock_name", gamertag),
-                        literal("java_name", link.javaUsername()),
-                        literal("java_uuid", link.javaUniqueId()));
+                            Message.INFO_LINKED,
+                            literal("platform", platform),
+                            literal("target", usernameOrUniqueId),
+                            dynamic("link_info", LinkedAccountsCommonMessage.LINK_INFO, sender),
+                            literal("bedrock_id", link.bedrockId()),
+                            literal("bedrock_name", gamertag),
+                            literal("java_name", link.javaUsername()),
+                            literal("java_uuid", link.javaUniqueId()));
                 });
-
             });
         });
     }
 
     public static final class Message {
-        public static final TranslatableMessage INFO_ERROR = new TranslatableMessage("floodgate.command.linkedaccounts.info.error", MessageType.ERROR);
-        public static final TranslatableMessage INFO_NOT_LINKED = new TranslatableMessage("floodgate.command.linkedaccounts.info.not_linked", MessageType.NORMAL);
-        public static final TranslatableMessage INFO_LINKED = new TranslatableMessage("floodgate.command.linkedaccounts.info.linked", MessageType.NORMAL);
+        public static final TranslatableMessage INFO_ERROR =
+                new TranslatableMessage("floodgate.command.linkedaccounts.info.error", MessageType.ERROR);
+        public static final TranslatableMessage INFO_NOT_LINKED =
+                new TranslatableMessage("floodgate.command.linkedaccounts.info.not_linked", MessageType.NORMAL);
+        public static final TranslatableMessage INFO_LINKED =
+                new TranslatableMessage("floodgate.command.linkedaccounts.info.linked", MessageType.NORMAL);
     }
 }

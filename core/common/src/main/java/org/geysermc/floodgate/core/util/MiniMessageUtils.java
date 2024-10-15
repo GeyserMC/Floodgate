@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024 GeyserMC
+ * Licensed under the MIT license
+ * @link https://github.com/GeyserMC/Floodgate
+ */
 package org.geysermc.floodgate.core.util;
 
 import java.util.Arrays;
@@ -15,6 +20,7 @@ public final class MiniMessageUtils {
                 .map(placeholder -> placeholder.resolver(type))
                 .toArray(TagResolver[]::new);
 
+        // todo don't allow color resolving in the message, only placeholders
         var component = MiniMessage.miniMessage().deserialize(message, styledResolvers);
 
         if (type.primaryColor() != null) {

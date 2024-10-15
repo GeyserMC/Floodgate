@@ -14,13 +14,15 @@ base-api = "feature-floodgate-merge-1.1.0-SNAPSHOT"
 configurate = "4.2.0-GeyserMC-SNAPSHOT"
 database-utils = "1.0-SNAPSHOT"
 fastutil = "8.5.3"
-cloud = "2.0.0-beta.2"
+cloud-core = "2.0.0"
+cloud-platform = "2.0.0-beta.10"
 snakeyaml = "2.0"
 bstats = "3.0.3"
-adventure = "4.16.0"
-adventure-platform = "4.3.2"
+adventure = "4.17.0"
+adventure-platform = "4.3.4"
 avaje-http = "2.7"
 avaje-jsonb = "2.1"
+expiringmap = "0.5.11"
 
 # bungee
 bungee = "1.20-R0.3-SNAPSHOT"
@@ -59,7 +61,7 @@ database-utils-mongo = { module = "org.geysermc.databaseutils:database-mongo", v
 database-utils-ap = { module = "org.geysermc.databaseutils:ap", version.ref = "database-utils" }
 fastutil-short-object-maps = { module = "com.nukkitx.fastutil:fastutil-short-object-maps", version.ref = "fastutil" }
 fastutil-int-object-maps = { module = "com.nukkitx.fastutil:fastutil-int-object-maps", version.ref = "fastutil" }
-cloud-core = { module = "org.incendo:cloud-core", version.ref = "cloud" }
+cloud-core = { module = "org.incendo:cloud-core", version.ref = "cloud-core" }
 snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "snakeyaml" }
 bstats = { module = "org.bstats:bstats-base", version.ref = "bstats" }
 
@@ -84,17 +86,19 @@ netty-codec = { module = "io.netty:netty-codec", version.ref = "netty" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 
+expiringmap = { module = "net.jodah:expiringmap", version.ref = "expiringmap" }
+
 # bungee
 bungee = { module = "net.md-5:bungeecord-proxy", version.ref = "bungee" }
-cloud-bungee = { module = "org.incendo:cloud-bungee", version.ref = "cloud" }
+cloud-bungee = { module = "org.incendo:cloud-bungee", version.ref = "cloud-platform" }
 
 # spigot
 paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
-cloud-paper = { module = "org.incendo:cloud-paper", version.ref = "cloud" }
+cloud-paper = { module = "org.incendo:cloud-paper", version.ref = "cloud-platform" }
 authlib = { module = "com.mojang:authlib", version.ref = "authlib" }
 
 # velocity
-cloud-velocity = { module = "org.incendo:cloud-velocity", version.ref = "cloud" }
+cloud-velocity = { module = "org.incendo:cloud-velocity", version.ref = "cloud-platform" }
 velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "velocity" }
 velocity-proxy = { module = "com.velocitypowered:velocity-proxy", version.ref = "velocity" }
 
@@ -103,6 +107,7 @@ checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "ch
 # plugins
 indra-common = { module = "net.kyori:indra-common", version.ref = "indra" }
 indra-git = { module = "net.kyori:indra-git", version.ref = "indra" }
+indra-licenser-spotless = { module = "net.kyori:indra-licenser-spotless", version.ref = "indra" }
 shadow = { module = "com.github.johnrengelman:shadow", version.ref = "shadow" }
 gradle-idea-ext = { module = "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext", version.ref = "gradle-idea-ext" }
 

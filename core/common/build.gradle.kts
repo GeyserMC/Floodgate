@@ -22,6 +22,7 @@ dependencies {
     api(libs.cloud.core)
     api(libs.snakeyaml)
     api(libs.bstats)
+
     api(libs.adventure.text.minimessage)
 
     api(libs.micronaut.inject)
@@ -38,6 +39,8 @@ dependencies {
 
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
+
+    api(libs.expiringmap)
 }
 
 providedDependency(libs.slf4j)

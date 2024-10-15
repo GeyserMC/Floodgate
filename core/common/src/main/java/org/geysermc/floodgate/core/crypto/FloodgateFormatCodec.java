@@ -1,28 +1,8 @@
 /*
- * Copyright (c) 2019-2023 GeyserMC. http://geysermc.org
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- * @author GeyserMC
+ * Copyright (c) 2019-2024 GeyserMC
+ * Licensed under the MIT license
  * @link https://github.com/GeyserMC/Floodgate
  */
-
 package org.geysermc.floodgate.core.crypto;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -47,11 +27,8 @@ public final class FloodgateFormatCodec {
 
     private final Topping topping;
 
-    public FloodgateFormatCodec(
-            DataCodecType<?> type,
-            Topping topping,
-            @Named("dataDirectory") Path dataDirectory
-    ) throws IOException {
+    public FloodgateFormatCodec(DataCodecType<?> type, Topping topping, @Named("dataDirectory") Path dataDirectory)
+            throws IOException {
         Objects.requireNonNull(type);
         this.codec = type.createDataCodec(dataDirectory);
         this.topping = topping;
@@ -117,18 +94,14 @@ public final class FloodgateFormatCodec {
     public void validateHeader(byte[] data) throws InvalidFormatException, UnsupportedVersionException {
         if (data.length < HEADER.length) {
             throw new InvalidFormatException(
-                    "Data length is smaller then header." +
-                            "Needed " + HEADER.length + ", got " + data.length
-            );
+                    "Data length is smaller then header. Needed " + HEADER.length + ", got " + data.length);
         }
 
         for (int i = 0; i < IDENTIFIER.length; i++) {
             if (IDENTIFIER[i] != data[i]) {
                 String identifier = new String(IDENTIFIER, UTF_8);
                 String received = new String(data, 0, IDENTIFIER.length, UTF_8);
-                throw new InvalidFormatException(
-                        "Expected identifier " + identifier + ", got " + received
-                );
+                throw new InvalidFormatException("Expected identifier " + identifier + ", got " + received);
             }
         }
 

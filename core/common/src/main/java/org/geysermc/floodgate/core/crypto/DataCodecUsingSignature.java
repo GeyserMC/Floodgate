@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024 GeyserMC
+ * Licensed under the MIT license
+ * @link https://github.com/GeyserMC/Floodgate
+ */
 package org.geysermc.floodgate.core.crypto;
 
 import java.nio.ByteBuffer;
@@ -16,9 +21,7 @@ public class DataCodecUsingSignature extends DataCodecKeyPair {
     @Override
     public List<ByteBuffer> encode(ByteBuffer plainText) throws Exception {
         if (keyPair.getPrivate() == null) {
-            throw new IllegalStateException(
-                    "Cannot sign data with a public key. Did you copy the right key?"
-            );
+            throw new IllegalStateException("Cannot sign data with a public key. Did you copy the right key?");
         }
 
         var plainData = plainText.duplicate();
@@ -34,9 +37,7 @@ public class DataCodecUsingSignature extends DataCodecKeyPair {
     @Override
     public ByteBuffer decode(List<ByteBuffer> dataSections) throws Exception {
         if (keyPair.getPublic() == null) {
-            throw new IllegalStateException(
-                    "Cannot verify data with a private key. Did you copy the right key?"
-            );
+            throw new IllegalStateException("Cannot verify data with a private key. Did you copy the right key?");
         }
         ensureSectionCount(2, signatureAlgorithm, dataSections);
         var data = dataSections.get(0);
@@ -54,7 +55,8 @@ public class DataCodecUsingSignature extends DataCodecKeyPair {
         var valid = false;
         try {
             valid = signature.verify(signatureBytes);
-        } catch (SignatureException ignored) {}
+        } catch (SignatureException ignored) {
+        }
 
         if (!valid) {
             throw new IllegalArgumentException("The given signature is not valid");

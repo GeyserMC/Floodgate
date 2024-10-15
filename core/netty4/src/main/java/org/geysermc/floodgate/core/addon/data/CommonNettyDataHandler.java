@@ -1,28 +1,8 @@
 /*
- * Copyright (c) 2019-2023 GeyserMC. http://geysermc.org
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- * @author GeyserMC
+ * Copyright (c) 2019-2024 GeyserMC
+ * Licensed under the MIT license
  * @link https://github.com/GeyserMC/Floodgate
  */
-
 package org.geysermc.floodgate.core.addon.data;
 
 import io.netty.channel.Channel;
@@ -34,6 +14,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import net.kyori.adventure.text.Component;
 import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.connection.DataSeeker;
@@ -52,7 +33,7 @@ public abstract class CommonNettyDataHandler extends ChannelInboundHandlerAdapte
     protected final FloodgateConfig config;
     protected final FloodgateLogger logger;
     protected final AttributeKey<Connection> connectionAttribute;
-    protected final AttributeKey<String> kickMessageAttribute;
+    protected final AttributeKey<Component> kickMessageAttribute;
     protected final PacketBlocker blocker;
 
     protected final Queue<Object> packetQueue = new ConcurrentLinkedQueue<>();
@@ -65,7 +46,7 @@ public abstract class CommonNettyDataHandler extends ChannelInboundHandlerAdapte
 
     protected abstract boolean channelRead(Object packet) throws Exception;
 
-    //todo rewrite this method
+    // todo rewrite this method
     protected boolean shouldRemoveHandler(HandleResult result) {
         return true;
     }
@@ -87,7 +68,7 @@ public abstract class CommonNettyDataHandler extends ChannelInboundHandlerAdapte
             return;
         } catch (UnsupportedVersionException versionException) {
             disablePacketQueue(true);
-            setKickMessage(versionException.getMessage());
+            setKickMessage(Component.text(versionException.getMessage()));
             return;
         } catch (Exception exception) {
             if (logger.isDebug()) {
@@ -105,7 +86,8 @@ public abstract class CommonNettyDataHandler extends ChannelInboundHandlerAdapte
 
         blocker.enable();
 
-        handshakeHandler.handleConnection(seekResult.connection())
+        handshakeHandler
+                .handleConnection(seekResult.connection())
                 .thenAccept(result -> {
                     var connection = result.connection();
 
@@ -123,7 +105,8 @@ public abstract class CommonNettyDataHandler extends ChannelInboundHandlerAdapte
                     }
 
                     disablePacketQueue(new HandleResult(HandleResultType.SUCCESS, result));
-                }).exceptionally(error -> {
+                })
+                .exceptionally(error -> {
                     logger.error("Unexpected error occurred", error);
                     return null;
                 });
@@ -138,14 +121,14 @@ public abstract class CommonNettyDataHandler extends ChannelInboundHandlerAdapte
             ctx.fireChannelRead(handshakePacket);
         }
 
+        if (removeSelf) {
+            removeSelf();
+        }
         Object queuedPacket;
         while ((queuedPacket = packetQueue.poll()) != null) {
             if (shouldCallFireRead(queuedPacket)) {
                 ctx.fireChannelRead(queuedPacket);
             }
-        }
-        if (removeSelf) {
-            removeSelf();
         }
         blocker.disable();
     }
@@ -154,11 +137,11 @@ public abstract class CommonNettyDataHandler extends ChannelInboundHandlerAdapte
         ctx.pipeline().remove(this);
     }
 
-    protected final void setKickMessage(@NonNull String message) {
+    protected final void setKickMessage(@NonNull Component message) {
         ctx.channel().attr(kickMessageAttribute).set(message);
     }
 
-    protected final String getKickMessage() {
+    protected final Component getKickMessage() {
         return ctx.channel().attr(kickMessageAttribute).get();
     }
 

@@ -1,28 +1,8 @@
 /*
- * Copyright (c) 2019-2023 GeyserMC. http://geysermc.org
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- * @author GeyserMC
+ * Copyright (c) 2019-2024 GeyserMC
+ * Licensed under the MIT license
  * @link https://github.com/GeyserMC/Floodgate
  */
-
 package org.geysermc.floodgate.core.link;
 
 import io.micronaut.context.annotation.Replaces;
@@ -37,6 +17,7 @@ import org.geysermc.floodgate.core.database.PendingLinkRepository;
 import org.geysermc.floodgate.core.database.PlayerLinkRepository;
 import org.geysermc.floodgate.core.database.entity.LinkRequest;
 import org.geysermc.floodgate.core.database.entity.LinkedPlayer;
+import org.geysermc.floodgate.core.util.Utils;
 
 @Requires(property = "config.database.enabled", value = "true")
 @Requires(property = "config.playerLink.enabled", value = "true")
@@ -45,15 +26,16 @@ import org.geysermc.floodgate.core.database.entity.LinkedPlayer;
 @Named("localLinking")
 @Singleton
 public class LocalPlayerLinking extends CommonPlayerLink {
-    @Inject PlayerLinkRepository linkRepository;
-    @Inject PendingLinkRepository pendingLinkRepository;
+    @Inject
+    PlayerLinkRepository linkRepository;
+
+    @Inject
+    PendingLinkRepository pendingLinkRepository;
 
     @Override
     public CompletableFuture<LinkedPlayer> addLink(
-            @NonNull UUID javaUniqueId,
-            @NonNull String javaUsername,
-            @NonNull UUID bedrockId) {
-        //todo allow it to return self again, probably after the entity rework to interfaces?
+            @NonNull UUID javaUniqueId, @NonNull String javaUsername, @NonNull UUID bedrockId) {
+        // todo allow it to return self again, probably after the entity rework to interfaces?
         var link = new LinkedPlayer(bedrockId, javaUniqueId, javaUsername);
         return linkRepository.insert(link).thenApply(v -> link);
     }
@@ -74,22 +56,48 @@ public class LocalPlayerLinking extends CommonPlayerLink {
     }
 
     @Override
-    public CompletableFuture<LinkRequest> createLinkRequest(
+    public CompletableFuture<Void> createJavaLinkRequest(
             @NonNull UUID javaUniqueId,
             @NonNull String javaUsername,
             @NonNull String bedrockUsername,
             @NonNull String code) {
-        var linkRequest = new LinkRequest(javaUniqueId, javaUsername, bedrockUsername, code);
-        return pendingLinkRepository.insert(linkRequest).thenApply(v -> linkRequest);
+        var linkRequest = new LinkRequest(javaUniqueId, javaUsername, null, bedrockUsername, code);
+        return pendingLinkRepository.insert(linkRequest);
     }
 
     @Override
-    public CompletableFuture<LinkRequest> linkRequest(@NonNull String javaUsername) {
-        return pendingLinkRepository.findByJavaUsername(javaUsername);
+    public CompletableFuture<Void> createBedrockLinkRequest(
+            @NonNull UUID bedrockUniqueId,
+            @NonNull String bedrockUsername,
+            @NonNull String javaUsername,
+            @NonNull String code) {
+        var linkRequest = new LinkRequest(null, javaUsername, bedrockUniqueId, bedrockUsername, code);
+        return pendingLinkRepository.insert(linkRequest);
     }
 
     @Override
-    public CompletableFuture<Void> invalidateLinkRequest(@NonNull LinkRequest request) {
-        return pendingLinkRepository.delete(request);
+    public CompletableFuture<String> createBedrockLinkRequest(
+            @NonNull UUID bedrockUniqueId, @NonNull String bedrockUsername) {
+        String code = Utils.generateCode(6); // extra long since there is no Java username validation
+
+        var linkRequest = new LinkRequest(null, null, bedrockUniqueId, bedrockUsername, code);
+        return pendingLinkRepository.insert(linkRequest).thenApply(v -> code);
+    }
+
+    @Override
+    public CompletableFuture<LinkRequest> linkRequestForBedrock(
+            @NonNull String javaUsername, @NonNull String bedrockUsername, @NonNull String code) {
+        return pendingLinkRepository.getAndInvalidateLinkRequestForBedrock(javaUsername, bedrockUsername, code);
+    }
+
+    @Override
+    public CompletableFuture<LinkRequest> linkRequestForJava(
+            @NonNull String javaUsername, @NonNull String bedrockUsername, @NonNull String code) {
+        return pendingLinkRepository.getAndInvalidateLinkRequestForJava(javaUsername, bedrockUsername, code);
+    }
+
+    @Override
+    public CompletableFuture<LinkRequest> linkRequestForJava(@NonNull String bedrockUsername, @NonNull String code) {
+        return pendingLinkRepository.getAndInvalidateLinkRequestForJava(bedrockUsername, code);
     }
 }

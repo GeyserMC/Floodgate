@@ -1,28 +1,8 @@
 /*
- * Copyright (c) 2019-2023 GeyserMC. http://geysermc.org
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- * @author GeyserMC
+ * Copyright (c) 2019-2024 GeyserMC
+ * Licensed under the MIT license
  * @link https://github.com/GeyserMC/Floodgate
  */
-
 package org.geysermc.floodgate.velocity.listener;
 
 import com.velocitypowered.api.event.Continuation;
@@ -40,10 +20,10 @@ import io.netty.util.AttributeKey;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
+import java.util.List;
 import net.kyori.adventure.text.Component;
 import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
-import org.geysermc.floodgate.core.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.core.listener.McListener;
 import org.geysermc.floodgate.core.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.util.Constants;
@@ -51,21 +31,25 @@ import org.geysermc.floodgate.core.util.LanguageManager;
 import org.geysermc.floodgate.core.util.MojangUtils;
 import org.geysermc.floodgate.velocity.player.VelocityConnectionManager;
 
-import java.util.List;
-
 @Singleton
 public final class VelocityListener implements McListener {
     private static final Property DEFAULT_TEXTURE_PROPERTY = new Property(
-            "textures",
-            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE,
-            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_SIGNATURE);
+            "textures", Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE, Constants.DEFAULT_MINECRAFT_JAVA_SKIN_SIGNATURE);
 
-    @Inject VelocityConnectionManager connectionManager;
-    @Inject ProxyFloodgateConfig config;
-    @Inject SimpleFloodgateApi api;
-    @Inject LanguageManager languageManager;
-    @Inject FloodgateLogger logger;
-    @Inject MojangUtils mojangUtils;
+    @Inject
+    VelocityConnectionManager connectionManager;
+
+    @Inject
+    SimpleFloodgateApi api;
+
+    @Inject
+    LanguageManager languageManager;
+
+    @Inject
+    FloodgateLogger logger;
+
+    @Inject
+    MojangUtils mojangUtils;
 
     @Inject
     @Named("connectionAttribute")
@@ -73,23 +57,23 @@ public final class VelocityListener implements McListener {
 
     @Inject
     @Named("kickMessageAttribute")
-    AttributeKey<String> kickMessageAttribute;
+    AttributeKey<Component> kickMessageAttribute;
 
     @Subscribe(order = PostOrder.FIRST)
     public void onPreLogin(PreLoginEvent event) {
         Connection player = null;
-        String kickMessage;
+        Component kickMessage;
         try {
             Channel channel = connectionManager.channelFor(event.getConnection());
             player = channel.attr(connectionAttribute).get();
             kickMessage = channel.attr(kickMessageAttribute).get();
         } catch (Exception exception) {
             logger.error("Failed get the FloodgatePlayer from the player's channel", exception);
-            kickMessage = "Failed to get the FloodgatePlayer from the player's Channel";
+            kickMessage = Component.text("Failed to get the FloodgatePlayer from the player's Channel");
         }
 
         if (kickMessage != null) {
-            event.setResult(PreLoginComponentResult.denied(Component.text(kickMessage)));
+            event.setResult(PreLoginComponentResult.denied(kickMessage));
             return;
         }
 
@@ -106,14 +90,10 @@ public final class VelocityListener implements McListener {
             return;
         }
 
-
         // Skin look up (on Spigot and friends) would result in it failing, so apply a default skin
         if (!connection.isLinked()) {
             event.setGameProfile(new GameProfile(
-                    connection.javaUuid(),
-                    connection.javaUsername(),
-                    List.of(DEFAULT_TEXTURE_PROPERTY)
-            ));
+                    connection.javaUuid(), connection.javaUsername(), List.of(DEFAULT_TEXTURE_PROPERTY)));
             continuation.resume();
             return;
         }
@@ -121,15 +101,13 @@ public final class VelocityListener implements McListener {
         // Floodgate players are seen as offline mode players, meaning we have to look up
         // the linked player's textures ourselves
 
-        mojangUtils.skinFor(connection.javaUuid())
-                .thenAccept(skin -> {
-                    event.setGameProfile(new GameProfile(
-                            connection.javaUuid(),
-                            connection.javaUsername(),
-                            List.of(new Property("textures", skin.value(), skin.signature()))
-                    ));
-                    continuation.resume();
-                });
+        mojangUtils.skinFor(connection.javaUuid()).thenAccept(skin -> {
+            event.setGameProfile(new GameProfile(
+                    connection.javaUuid(),
+                    connection.javaUsername(),
+                    List.of(new Property("textures", skin.value(), skin.signature()))));
+            continuation.resume();
+        });
     }
 
     @Subscribe(order = PostOrder.FIRST)

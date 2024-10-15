@@ -1,28 +1,8 @@
 /*
- * Copyright (c) 2019-2023 GeyserMC. http://geysermc.org
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- * @author GeyserMC
+ * Copyright (c) 2019-2024 GeyserMC
+ * Licensed under the MIT license
  * @link https://github.com/GeyserMC/Floodgate
  */
-
 package org.geysermc.floodgate.spigot.addon.data;
 
 import static org.geysermc.floodgate.core.util.ReflectionUtils.getCastedValue;
@@ -34,6 +14,8 @@ import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.core.addon.data.CommonNettyDataHandler;
 import org.geysermc.floodgate.core.addon.data.PacketBlocker;
@@ -48,10 +30,7 @@ import org.geysermc.floodgate.spigot.util.ProxyUtils;
 
 public final class SpigotDataHandler extends CommonNettyDataHandler {
     private static final Property DEFAULT_TEXTURE_PROPERTY = new Property(
-            "textures",
-            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE,
-            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_SIGNATURE
-    );
+            "textures", Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE, Constants.DEFAULT_MINECRAFT_JAVA_SKIN_SIGNATURE);
 
     private Object networkManager;
     private Connection connection;
@@ -63,7 +42,7 @@ public final class SpigotDataHandler extends CommonNettyDataHandler {
             FloodgateConfig config,
             FloodgateLogger logger,
             AttributeKey<Connection> connectionAttribute,
-            AttributeKey<String> kickMessageAttribute) {
+            AttributeKey<Component> kickMessageAttribute) {
         super(
                 dataSeeker,
                 handshakeHandler,
@@ -89,11 +68,11 @@ public final class SpigotDataHandler extends CommonNettyDataHandler {
         } else {
             // 1.20.2 and above
             try {
-                Object[] components = new Object[]{
-                        ClassNames.HANDSHAKE_PORT.get(handshakePacket),
-                        hostname,
-                        ClassNames.HANDSHAKE_PROTOCOL.get(handshakePacket),
-                        ClassNames.HANDSHAKE_INTENTION.get(handshakePacket)
+                Object[] components = new Object[] {
+                    ClassNames.HANDSHAKE_PROTOCOL.get(handshakePacket),
+                    hostname,
+                    ClassNames.HANDSHAKE_PORT.get(handshakePacket),
+                    ClassNames.HANDSHAKE_INTENTION.get(handshakePacket)
                 };
 
                 return ClassNames.HANDSHAKE_PACKET_CONSTRUCTOR.newInstance(components);
@@ -123,6 +102,8 @@ public final class SpigotDataHandler extends CommonNettyDataHandler {
             // Use a spoofedUUID for initUUID (just like Bungeecord)
             setValue(networkManager, "spoofedUUID", connection.javaUuid());
         }
+
+        // todo backend server local linking seems broken atm
 
         // we can only remove the handler if the data is proxy data and username validation doesn't
         // exist. Otherwise, we need to wait and disable it.
@@ -163,9 +144,12 @@ public final class SpigotDataHandler extends CommonNettyDataHandler {
         if (ClassNames.LOGIN_START_PACKET.isInstance(packet)) {
             Object packetListener = ClassNames.PACKET_LISTENER.get(networkManager);
 
-            String kickMessage = getKickMessage();
+            Component kickMessage = getKickMessage();
             if (kickMessage != null) {
-                disconnect(packetListener, kickMessage);
+                // todo also support Paper variant, with Components
+                disconnect(
+                        packetListener,
+                        LegacyComponentSerializer.legacySection().serialize(kickMessage));
                 return true;
             }
 
@@ -197,8 +181,6 @@ public final class SpigotDataHandler extends CommonNettyDataHandler {
                 // method / are already removed (in the case of username validation)
                 gameProfile.getProperties().put("textures", DEFAULT_TEXTURE_PROPERTY);
             }
-
-            setValue(packetListener, ClassNames.LOGIN_PROFILE, gameProfile);
 
             // we have to fake the offline player (login) cycle
 

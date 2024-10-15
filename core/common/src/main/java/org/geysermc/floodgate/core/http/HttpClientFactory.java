@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024 GeyserMC
+ * Licensed under the MIT license
+ * @link https://github.com/GeyserMC/Floodgate
+ */
 package org.geysermc.floodgate.core.http;
 
 import io.avaje.http.client.HttpClient;
@@ -19,8 +24,11 @@ import org.geysermc.floodgate.isolation.library.LibraryManager;
 
 @Factory
 public class HttpClientFactory {
-    @Inject LibraryManager manager;
-    @Named("commonPool") Executor pool;
+    @Inject
+    LibraryManager manager;
+
+    @Named("commonPool")
+    Executor pool;
 
     @Bean
     GlobalApiClient globalApiClient(@Property(name = "http.baseUrl.api") String url) {
