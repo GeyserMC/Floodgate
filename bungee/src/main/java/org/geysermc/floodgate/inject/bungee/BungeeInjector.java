@@ -99,8 +99,7 @@ public final class BungeeInjector extends CommonPlatformInjector {
                     ReflectionUtils.invoke(original, initChannelMethod, channel);
 
                     // Fix of #547 (after testing)
-                    if (!channel.isOpen())
-                    {
+                    if (!channel.isOpen()) {
                         return;
                     }
 
