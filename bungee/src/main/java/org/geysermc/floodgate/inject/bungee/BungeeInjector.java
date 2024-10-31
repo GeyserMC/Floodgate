@@ -91,14 +91,8 @@ public final class BungeeInjector extends CommonPlatformInjector {
             ChannelInitializer<Channel> wrapper = new ChannelInitializer<Channel>() {
                 @Override
                 protected void initChannel(Channel channel) {
-                    /*
-                        Check if the channel is open, see #547
-                        Moved bottom ReflectionUtils.invoke()
-                        Here is always true and it do not work
-                     */
                     ReflectionUtils.invoke(original, initChannelMethod, channel);
-
-                    // Fix of #547 (after testing)
+                    // Check if the channel is open, see #547
                     if (!channel.isOpen()) {
                         return;
                     }
