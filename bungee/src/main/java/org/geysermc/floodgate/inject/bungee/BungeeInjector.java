@@ -91,11 +91,12 @@ public final class BungeeInjector extends CommonPlatformInjector {
             ChannelInitializer<Channel> wrapper = new ChannelInitializer<Channel>() {
                 @Override
                 protected void initChannel(Channel channel) {
+                    ReflectionUtils.invoke(original, initChannelMethod, channel);
                     // Check if the channel is open, see #547
                     if (!channel.isOpen()) {
                         return;
                     }
-                    ReflectionUtils.invoke(original, initChannelMethod, channel);
+
                     channel.pipeline().addBefore(
                             PipelineUtils.FRAME_DECODER, BUNGEE_INIT,
                             new BungeeClientToProxyInjectInitializer(BungeeInjector.this)
