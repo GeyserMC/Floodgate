@@ -90,7 +90,13 @@ public final class ModDataHandler extends CommonDataHandler {
         if (packet instanceof ServerboundHelloPacket) {
             String kickMessage = getKickMessage();
             if (kickMessage != null) {
-                networkManager.disconnect(Component.nullToEmpty(kickMessage));
+                Component message = Component.nullToEmpty(kickMessage);
+                // If possible, disconnect using the "proper" packet listener; otherwise there's no proper disconnect message
+                if (networkManager.getPacketListener() instanceof ServerLoginPacketListenerImpl loginPacketListener) {
+                    loginPacketListener.disconnect(message);
+                } else {
+                    networkManager.disconnect(message);
+                }
                 return true;
             }
 
