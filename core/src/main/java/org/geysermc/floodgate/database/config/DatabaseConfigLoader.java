@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.database.config;
+package org.geysermc.floodgate.database.config;
 
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;

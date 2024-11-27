@@ -23,7 +23,7 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.core.database.config;
+package org.geysermc.floodgate.database.config;
 
 /**
  * Base class for every database related configuration.

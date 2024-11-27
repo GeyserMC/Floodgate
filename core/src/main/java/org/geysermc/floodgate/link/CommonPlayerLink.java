@@ -41,8 +41,8 @@ import org.geysermc.floodgate.api.link.LinkRequest;
 import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
-import org.geysermc.floodgate.core.database.config.DatabaseConfig;
-import org.geysermc.floodgate.core.database.config.DatabaseConfigLoader;
+import org.geysermc.floodgate.database.config.DatabaseConfig;
+import org.geysermc.floodgate.database.config.DatabaseConfigLoader;
 import org.geysermc.floodgate.core.event.lifecycle.ShutdownEvent;
 import org.geysermc.floodgate.core.util.InjectorHolder;
 
