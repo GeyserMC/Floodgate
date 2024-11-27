@@ -134,6 +134,5 @@ modrinth {
 
     uploadFile.set(tasks.remapJar.get().destinationDirectory.get().asFile.resolve("${versionName(project)}.jar"))
     gameVersions.add(libs.minecraft.get().version as String)
-    gameVersions.addAll("1.21.1", "1.21.2", "1.21.3")
     failSilently.set(false)
 }
