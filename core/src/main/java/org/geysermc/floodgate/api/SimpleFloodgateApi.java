@@ -126,6 +126,11 @@ public class SimpleFloodgateApi implements FloodgateApi {
     }
 
     @Override
+    public boolean closeForm(UUID uuid) {
+        return pluginMessageManager.getChannel(FormChannel.class).closeForm(uuid);
+    }
+
+    @Override
     public boolean sendForm(UUID uuid, org.geysermc.cumulus.Form<?> form) {
         return sendForm(uuid, form.newForm());
     }
