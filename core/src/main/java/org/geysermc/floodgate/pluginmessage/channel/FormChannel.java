@@ -93,6 +93,10 @@ public class FormChannel implements PluginMessageChannel {
         return Result.handled();
     }
 
+    public boolean closeForm(UUID player) {
+        return pluginMessageUtils.sendMessage(player, getIdentifier(), new byte[0]);
+    }
+
     public boolean sendForm(UUID player, Form form) {
         byte[] formData = createFormData(form);
         return pluginMessageUtils.sendMessage(player, getIdentifier(), formData);
