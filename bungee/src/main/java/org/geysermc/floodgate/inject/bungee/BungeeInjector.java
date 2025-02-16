@@ -36,12 +36,18 @@ import org.geysermc.floodgate.inject.CommonPlatformInjector;
 
 @RequiredArgsConstructor
 public final class BungeeInjector extends CommonPlatformInjector {
-
     private final FloodgateLogger logger;
     @Getter private boolean injected;
 
     @Override
     public void inject() {
+        try {
+            ProxyServer.getInstance().unsafe();
+        } catch (NoSuchMethodError ignored) {
+            logger.error("You're running an outdated version of BungeeCord. Please update BungeeCord to the latest version!");
+            throw new Error("You're running an outdated version of BungeeCord. Please update BungeeCord to the latest version!");
+        }
+
         Unsafe unsafe = ProxyServer.getInstance().unsafe();
         BungeeChannelInitializer frontend = unsafe.getFrontendChannelInitializer();
         unsafe.setFrontendChannelInitializer(BungeeChannelInitializer.create(channel -> {
@@ -78,6 +84,4 @@ public final class BungeeInjector extends CommonPlatformInjector {
         injectAddonsCall(channel, !clientToProxy);
         addInjectedClient(channel);
     }
-
-
 }
