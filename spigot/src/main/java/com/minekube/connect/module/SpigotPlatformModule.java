@@ -41,8 +41,6 @@ import com.minekube.connect.logger.JavaUtilConnectLogger;
 import com.minekube.connect.platform.command.CommandUtil;
 import com.minekube.connect.platform.listener.ListenerRegistration;
 import com.minekube.connect.platform.util.PlatformUtils;
-import com.minekube.connect.pluginmessage.SpigotSkinApplier;
-import com.minekube.connect.skin.SkinApplier;
 import com.minekube.connect.util.LanguageManager;
 import com.minekube.connect.util.SpigotCommandUtil;
 import com.minekube.connect.util.SpigotPlatformUtils;
@@ -158,12 +156,6 @@ public final class SpigotPlatformModule extends AbstractModule {
 //    public PluginMessageRegistration pluginMessageRegister() {
 //        return new SpigotPluginMessageRegistration(plugin);
 //    }
-
-    @Provides
-    @Singleton
-    public SkinApplier skinApplier(SpigotVersionSpecificMethods versionSpecificMethods) {
-        return new SpigotSkinApplier(versionSpecificMethods, plugin);
-    }
 
     @Provides
     @Singleton

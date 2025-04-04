@@ -1,4 +1,4 @@
-var bungeeVersion = "1.20-R0.3-SNAPSHOT"
+var bungeeVersion = "1.21-R0.1-SNAPSHOT"
 var gsonVersion = "2.8.0"
 var guavaVersion = "21.0"
 

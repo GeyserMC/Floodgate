@@ -32,11 +32,7 @@ import com.minekube.connect.network.netty.LocalSession;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOutboundHandlerAdapter;
-import io.netty.channel.ChannelPromise;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.local.LocalAddress;
 import io.netty.util.AttributeKey;
@@ -46,18 +42,17 @@ import java.util.Set;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.ProxyServer.Unsafe;
 import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.event.ProxyReloadEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.netty.PipelineUtils;
-import net.md_5.bungee.protocol.MinecraftEncoder;
-import net.md_5.bungee.protocol.Varint21LengthFieldPrepender;
+import net.md_5.bungee.protocol.channel.BungeeChannelInitializer;
 
 @RequiredArgsConstructor
 public final class BungeeInjector extends CommonPlatformInjector implements Listener {
-    private static final String BUNGEE_INIT = "connect-bungee-init";
 
     private final ConnectLogger logger;
     private final ProxyServer proxy;
@@ -69,17 +64,27 @@ public final class BungeeInjector extends CommonPlatformInjector implements List
     public boolean inject() {
         try {
             // Can everyone just switch to Velocity please :)
+            // :( ~BungeeCord Collaborator
 
-//            Field framePrepender = ReflectionUtils.getField(PipelineUtils.class, "framePrepender");
-//
-//            // Required in order to inject into both Geyser <-> proxy AND proxy <-> server
-//            // (Instead of just replacing the ChannelInitializer which is only called for
-//            // player <-> proxy)
-//            BungeeCustomPrepender customPrepender = new BungeeCustomPrepender(
-//                    this, ReflectionUtils.castedStaticValue(framePrepender)
-//            );
-//
-//            BungeeReflectionUtils.setFieldValue(null, framePrepender, customPrepender);
+            Unsafe unsafe = ProxyServer.getInstance().unsafe();
+            BungeeChannelInitializer frontend = unsafe.getFrontendChannelInitializer();
+            unsafe.setFrontendChannelInitializer(BungeeChannelInitializer.create(channel -> {
+                if (!frontend.getChannelAcceptor().accept(channel)) {
+                    return false;
+                }
+                injectClient(channel, true);
+                return true;
+            }));
+
+            BungeeChannelInitializer backend = unsafe.getBackendChannelInitializer();
+            unsafe.setBackendChannelInitializer(BungeeChannelInitializer.create(channel -> {
+                if (!backend.getChannelAcceptor().accept(channel)) {
+                    return false;
+                }
+                injectClient(channel, false);
+                return true;
+            }));
+
             initializeLocalChannel0();
             injected = true;
             return true;
@@ -129,6 +134,13 @@ public final class BungeeInjector extends CommonPlatformInjector implements List
                     "Connect does not currently support multiple listeners with injection! " +
                             "Please reach out to us on our Discord at https://minekube.com/discord so we can hear feedback on your setup.");
         }
+
+        try {
+            ProxyServer.class.getMethod("unsafe");
+        } catch (NoSuchMethodException e) {
+            throw new UnsupportedOperationException("You're using an outdated version of BungeeCord - please update. Thank you!");
+        }
+
         ListenerInfo listenerInfo = proxy.getConfig().getListeners().stream().findFirst().orElseThrow(
                 IllegalStateException::new);
 
@@ -202,7 +214,7 @@ public final class BungeeInjector extends CommonPlatformInjector implements List
                         if (channelInitializer == null) {
                             // Proxy has finished initializing; we can safely grab this variable without fear of plugins modifying it
                             // (Older versions of ViaVersion replace this to inject)
-                            channelInitializer = PipelineUtils.SERVER_CHILD;
+                            channelInitializer = proxy.unsafe().getFrontendChannelInitializer().getChannelInitializer();
                         }
                         initChannel.invoke(channelInitializer, ch);
                     }
@@ -258,75 +270,7 @@ public final class BungeeInjector extends CommonPlatformInjector implements List
     // End of logic from GeyserMC
 
     void injectClient(Channel channel, boolean clientToProxy) {
-        if (!channel.isOpen()) {
-            return;
-        }
-
-        if (channel.pipeline().get(MinecraftEncoder.class) == null) {
-            logger.debug(
-                    "Minecraft encoder not found while injecting! {}",
-                    String.join(", ", channel.pipeline().names())
-            );
-            return;
-        }
-
         injectAddonsCall(channel, !clientToProxy);
         addInjectedClient(channel);
-    }
-
-    @RequiredArgsConstructor
-    private static final class BungeeCustomPrepender extends Varint21LengthFieldPrepender {
-        private final BungeeInjector injector;
-        private final Varint21LengthFieldPrepender original;
-
-        @Override
-        public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-            original.handlerAdded(ctx);
-            // The Minecraft encoder being in the pipeline isn't present until later
-
-            if (ctx.channel().parent() != null) {
-                // Client <-> Proxy
-                ctx.pipeline().addBefore(
-                        PipelineUtils.FRAME_DECODER, BUNGEE_INIT,
-                        new BungeeClientToProxyInjectInitializer(injector)
-                );
-            } else {
-                // Proxy <-> Server
-                ctx.pipeline().addLast(
-                        BUNGEE_INIT, new BungeeProxyToServerInjectInitializer(injector)
-                );
-            }
-        }
-    }
-
-    @RequiredArgsConstructor
-    private static final class BungeeClientToProxyInjectInitializer
-            extends ChannelInboundHandlerAdapter {
-
-        private final BungeeInjector injector;
-
-        @Override
-        public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-            injector.injectClient(ctx.channel(), true);
-
-            ctx.pipeline().remove(this);
-            super.channelRead(ctx, msg);
-        }
-    }
-
-    @RequiredArgsConstructor
-    private static final class BungeeProxyToServerInjectInitializer
-            extends ChannelOutboundHandlerAdapter {
-
-        private final BungeeInjector injector;
-
-        @Override
-        public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise)
-                throws Exception {
-            injector.injectClient(ctx.channel(), false);
-
-            ctx.pipeline().remove(this);
-            super.write(ctx, msg, promise);
-        }
     }
 }
