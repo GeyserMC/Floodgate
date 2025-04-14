@@ -157,14 +157,19 @@ public class CommonModule extends AbstractModule {
         @SerializedName("token") final String token;
 
         static Optional<String> load(Path tokenFile) throws IOException {
-            if (Files.exists(tokenFile)) {
-                // Read existing token file
-                try (Reader reader = Files.newBufferedReader(tokenFile)) {
-                    return Optional.ofNullable(new Gson().fromJson(reader, Token.class))
-                            .map(t -> t.token);
+            String TOKEN_ENV = System.getenv("CONNECT_TOKEN");
+            if (TOKEN_ENV != null && !TOKEN_ENV.isEmpty()) {
+                return Optional.of(TOKEN_ENV);
+            } else {
+                if (Files.exists(tokenFile)) {
+                    // Read existing token file
+                    try (Reader reader = Files.newBufferedReader(tokenFile)) {
+                        return Optional.ofNullable(new Gson().fromJson(reader, Token.class))
+                                .map(t -> t.token);
+                    }
                 }
+                return Optional.empty();
             }
-            return Optional.empty();
         }
 
         static void save(Path tokenFile, String token) throws IOException {
