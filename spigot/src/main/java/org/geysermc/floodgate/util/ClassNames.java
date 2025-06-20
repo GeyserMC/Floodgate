@@ -143,10 +143,14 @@ public class ClassNames {
         );
 
         // WhitelistUtils
-        Class<?> craftServerClass = ReflectionUtils.getClass(
-                "org.bukkit.craftbukkit.CraftServer");
-        Class<OfflinePlayer> craftOfflinePlayerClass = ReflectionUtils.getCastedClass(
-                "org.bukkit.craftbukkit.CraftOfflinePlayer");
+        Class<?> craftServerClass = getClassOrFallback(
+                "org.bukkit.craftbukkit.CraftServer",
+                "org.bukkit.craftbukkit." + version + "CraftServer"
+        );
+        Class<OfflinePlayer> craftOfflinePlayerClass = ReflectionUtils.getCastedClassOrFallback(
+                "org.bukkit.craftbukkit.CraftOfflinePlayer",
+                "org.bukkit.craftbukkit." + version + "CraftOfflinePlayer"
+        );
 
         CRAFT_OFFLINE_PLAYER_CONSTRUCTOR = ReflectionUtils.getConstructor(
                 craftOfflinePlayerClass, true, craftServerClass, GameProfile.class);
