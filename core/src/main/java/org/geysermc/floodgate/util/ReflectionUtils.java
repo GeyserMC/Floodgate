@@ -163,6 +163,12 @@ public final class ReflectionUtils {
     }
 
     @Nullable
+    @SuppressWarnings("unchecked")
+    public static <T> Class<T> getCastedClassOrFallback(String className, String fallbackClassName) {
+        return (Class<T>) getClassOrFallback(className, fallbackClassName);
+    }
+
+    @Nullable
     public static <T> Constructor<T> getConstructor(Class<T> clazz, boolean declared, Class<?>... parameters) {
         try {
             Constructor<T> constructor;
