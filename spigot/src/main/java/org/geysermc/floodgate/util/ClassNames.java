@@ -114,8 +114,10 @@ public class ClassNames {
 
 
         // SpigotSkinApplier
-        Class<?> craftPlayerClass = ReflectionUtils.getClass(
-                "org.bukkit.craftbukkit.entity.CraftPlayer");
+        Class<?> craftPlayerClass = getClassOrFallback(
+                "org.bukkit.craftbukkit.entity.CraftPlayer",
+                "org.bukkit.craftbukkit." + version + "entity.CraftPlayer"
+        );
         GET_PROFILE_METHOD = getMethod(craftPlayerClass, "getProfile");
         checkNotNull(GET_PROFILE_METHOD, "Get profile method");
 
