@@ -115,7 +115,7 @@ public class ClassNames {
 
         // SpigotSkinApplier
         Class<?> craftPlayerClass = ReflectionUtils.getClass(
-                "org.bukkit.craftbukkit." + version + "entity.CraftPlayer");
+                "org.bukkit.craftbukkit.entity.CraftPlayer");
         GET_PROFILE_METHOD = getMethod(craftPlayerClass, "getProfile");
         checkNotNull(GET_PROFILE_METHOD, "Get profile method");
 
@@ -135,21 +135,23 @@ public class ClassNames {
         );
 
         SERVER_CONNECTION = getClassOrFallback(
+                "net.minecraft.server.network.ServerConnectionListener",
                 "net.minecraft.server.network.ServerConnection",
                 nmsPackage + "ServerConnection"
         );
 
         // WhitelistUtils
         Class<?> craftServerClass = ReflectionUtils.getClass(
-                "org.bukkit.craftbukkit." + version + "CraftServer");
+                "org.bukkit.craftbukkit.CraftServer");
         Class<OfflinePlayer> craftOfflinePlayerClass = ReflectionUtils.getCastedClass(
-                "org.bukkit.craftbukkit." + version + "CraftOfflinePlayer");
+                "org.bukkit.craftbukkit.CraftOfflinePlayer");
 
         CRAFT_OFFLINE_PLAYER_CONSTRUCTOR = ReflectionUtils.getConstructor(
                 craftOfflinePlayerClass, true, craftServerClass, GameProfile.class);
 
         // SpigotDataHandler
         Class<?> networkManager = getClassOrFallback(
+                "net.minecraft.network.Connection",
                 "net.minecraft.network.NetworkManager",
                 nmsPackage + "NetworkManager"
         );
@@ -157,6 +159,7 @@ public class ClassNames {
         SOCKET_ADDRESS = getFieldOfType(networkManager, SocketAddress.class, false);
 
         HANDSHAKE_PACKET = getClassOrFallback(
+                "net.minecraft.network.protocol.handshake.ClientIntentionPacket",
                 "net.minecraft.network.protocol.handshake.PacketHandshakingInSetProtocol",
                 nmsPackage + "PacketHandshakingInSetProtocol"
         );
@@ -165,11 +168,13 @@ public class ClassNames {
         checkNotNull(HANDSHAKE_HOST, "Handshake host");
 
         LOGIN_START_PACKET = getClassOrFallback(
+                "net.minecraft.network.protocol.login.ServerboundHelloPacket",
                 "net.minecraft.network.protocol.login.PacketLoginInStart",
                 nmsPackage + "PacketLoginInStart"
         );
 
         LOGIN_LISTENER = getClassOrFallback(
+                "net.minecraft.server.network.ServerLoginPacketListenerImpl",
                 "net.minecraft.server.network.LoginListener",
                 nmsPackage + "LoginListener"
         );
@@ -210,7 +215,7 @@ public class ClassNames {
             // We get the field by name on 1.20.2+ as there are now multiple fields of this type in network manager
 
             // PacketListener packetListener of NetworkManager
-            PACKET_LISTENER = getField(networkManager, "q");
+            PACKET_LISTENER = getField(networkManager, "packetListener", "q");
             makeAccessible(PACKET_LISTENER);
         }
         checkNotNull(PACKET_LISTENER, "Packet listener");
@@ -218,7 +223,7 @@ public class ClassNames {
         if (IS_POST_LOGIN_HANDLER) {
             makeAccessible(CALL_PLAYER_PRE_LOGIN_EVENTS);
 
-            START_CLIENT_VERIFICATION = getMethod(LOGIN_LISTENER, "b", GameProfile.class);
+            START_CLIENT_VERIFICATION = getMethod(LOGIN_LISTENER, "startClientVerification", "b", GameProfile.class);
             checkNotNull(START_CLIENT_VERIFICATION, "startClientVerification");
             makeAccessible(START_CLIENT_VERIFICATION);
 
@@ -314,15 +319,15 @@ public class ClassNames {
                     String.class, int.class, CLIENT_INTENT);
             checkNotNull(HANDSHAKE_PACKET_CONSTRUCTOR, "Handshake packet constructor");
 
-            Field a = getField(HANDSHAKE_PACKET, "a");
+            Field a = getField(HANDSHAKE_PACKET, "STREAM_CODEC", "a");
             checkNotNull(a, "Handshake \"a\" field (protocol version, or stream codec)");
 
             if (a.getType().isPrimitive()) { // 1.20.2 - 1.20.4: a is the protocol version (int)
                 HANDSHAKE_PROTOCOL = a;
                 HANDSHAKE_PORT = getField(HANDSHAKE_PACKET, "c");
             } else { // 1.20.5: a is the stream_codec thing, so everything is shifted
-                HANDSHAKE_PROTOCOL = getField(HANDSHAKE_PACKET, "b");
-                HANDSHAKE_PORT = getField(HANDSHAKE_PACKET, "d");
+                HANDSHAKE_PROTOCOL = getField(HANDSHAKE_PACKET, "protocolVersion", "b");
+                HANDSHAKE_PORT = getField(HANDSHAKE_PACKET, "port", "d");
             }
 
             checkNotNull(HANDSHAKE_PROTOCOL, "Handshake protocol");
