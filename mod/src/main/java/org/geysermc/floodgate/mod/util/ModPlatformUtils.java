@@ -12,7 +12,7 @@ public class ModPlatformUtils extends PlatformUtils {
 
     @Override
     public String minecraftVersion() {
-        return SharedConstants.getCurrentVersion().getName();
+        return SharedConstants.getCurrentVersion().name();
     }
 
     @Override
