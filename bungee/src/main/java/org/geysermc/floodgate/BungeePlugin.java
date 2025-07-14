@@ -44,6 +44,13 @@ public final class BungeePlugin extends Plugin {
     public void onLoad() {
         ReflectionUtils.setPrefix("net.md_5.bungee");
 
+        try {
+            Class.forName("net.md_5.bungee.protocol.data.Property");
+        } catch (ClassNotFoundException e) {
+            getLogger().warning("You are running an outdated version of BungeeCord! You must update (BungeeCord build 1990+) for Floodgate to work!");
+            return;
+        }
+
         long ctm = System.currentTimeMillis();
         Injector injector = Guice.createInjector(
                 new ProxyCommonModule(getDataFolder().toPath()),
@@ -61,6 +68,11 @@ public final class BungeePlugin extends Plugin {
 
     @Override
     public void onEnable() {
+        if (platform == null) {
+            getLogger().warning("You are running an outdated version of BungeeCord! You must update for Floodgate to work!");
+            return;
+        }
+
         platform.enable(
                 new CommandModule(),
                 new BungeeListenerModule(),
@@ -71,6 +83,11 @@ public final class BungeePlugin extends Plugin {
 
     @Override
     public void onDisable() {
+        if (platform == null) {
+            getLogger().warning("You are running an outdated version of BungeeCord! You must update for Floodgate to work!");
+            return;
+        }
+
         platform.disable();
     }
 }

@@ -30,7 +30,7 @@ import java.util.UUID;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
@@ -43,11 +43,8 @@ public final class SpigotListener implements Listener {
     @Inject private FloodgateLogger logger;
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerLogin(PlayerLoginEvent event) {
+    public void onPlayerJoin(PlayerJoinEvent event) {
         UUID uniqueId = event.getPlayer().getUniqueId();
-        if (event.getResult() != PlayerLoginEvent.Result.ALLOWED) {
-            return;
-        }
 
         // if there was another player with the same uuid online,
         // he would've been disconnected by now
