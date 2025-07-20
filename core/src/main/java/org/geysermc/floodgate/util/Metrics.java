@@ -46,6 +46,7 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.FloodgateConfig.MetricsConfig;
 import org.geysermc.floodgate.event.lifecycle.ShutdownEvent;
 import org.geysermc.floodgate.platform.util.PlatformUtils;
+import org.geysermc.floodgate.platform.util.PlatformUtils.AuthType;
 
 @Listener
 @AutoBind
@@ -99,6 +100,15 @@ public final class Metrics {
 
         metricsBase.addCustomChart(
                 new SimplePie("floodgate_version", () -> Constants.VERSION)
+        );
+
+        metricsBase.addCustomChart(
+                new SimplePie("using-backend-server-linking", () -> {
+                    if (platformUtils.authType() == AuthType.PROXIED) {
+                        return String.valueOf(config.getPlayerLink().isEnableOwnLinking());
+                    }
+                    return "false";
+                })
         );
 
         metricsBase.addCustomChart(
