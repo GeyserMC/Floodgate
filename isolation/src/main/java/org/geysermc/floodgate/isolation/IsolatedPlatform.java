@@ -6,4 +6,6 @@ public interface IsolatedPlatform {
     void enable();
 
     void disable();
+
+    void shutdown();
 }

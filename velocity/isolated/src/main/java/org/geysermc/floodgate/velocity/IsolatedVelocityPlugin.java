@@ -67,6 +67,6 @@ public final class IsolatedVelocityPlugin {
 
     @Subscribe
     public void onProxyShutdown(ProxyShutdownEvent event) {
-        holder.disable();
+        holder.shutdown();
     }
 }

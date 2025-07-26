@@ -58,6 +58,6 @@ public final class IsolatedSpigotPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        holder.disable();
+        holder.shutdown();
     }
 }

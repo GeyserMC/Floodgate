@@ -52,6 +52,6 @@ public final class IsolatedBungeePlugin extends Plugin {
 
     @Override
     public void onDisable() {
-        holder.disable();
+        holder.shutdown();
     }
 }

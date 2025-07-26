@@ -51,4 +51,12 @@ public class LoaderUtil {
             throw new RuntimeException(exception);
         }
     }
+
+    public static void invokeShutdown(Object platform) {
+        try {
+            platform.getClass().getMethod("shutdown").invoke(platform);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
 }

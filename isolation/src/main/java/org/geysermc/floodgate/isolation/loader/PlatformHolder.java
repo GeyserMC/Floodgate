@@ -66,6 +66,10 @@ public class PlatformHolder {
 
     public void disable() {
         LoaderUtil.invokeDisable(platformInstance);
+    }
+
+    public void shutdown() {
+        LoaderUtil.invokeDisable(platformInstance);
         close();
     }
 

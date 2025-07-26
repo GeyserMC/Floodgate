@@ -117,6 +117,11 @@ public abstract class FloodgatePlatform implements IsolatedPlatform {
 
     @Override
     public void disable() {
+        // could be used to impl reloading; not relevant for floodgate otherwise
+    }
+
+    @Override
+    public void shutdown() {
         context.getBean(EventBus.class).fire(new ShutdownEvent());
 
         if (injector != null && injector.canRemoveInjection()) {
