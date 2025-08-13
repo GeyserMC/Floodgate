@@ -77,25 +77,25 @@ git commit -m "Release version 0.7.0"
 git push origin connect
 ```
 
-### 4. Create Release via GitHub UI
+### 4. Create and Push Tag (Let Workflow Handle Releases)
 
-1. Go to `https://github.com/minekube/connect-java/releases`
-2. Click **"Create a new release"**
-3. **Tag**: Enter `0.7.0` (GitHub will create the tag automatically)
-4. **Target**: Select `connect` branch
-5. **Title**: `Connect Java 0.7.0`
-6. **Description**: Add any specific release notes (optional - workflow will handle artifacts)
-7. Click **"Publish release"**
+The workflow is designed to automatically create releases when tags are pushed. **Do not create releases manually via GitHub UI** - this will conflict with the automated release creation.
 
-This triggers the release workflow, creates the tag, and ensures all artifacts are properly uploaded.
+```bash
+git tag 0.7.0
+git push origin 0.7.0
+```
+
+The workflow will automatically create:
+1. **Versioned release** (`0.7.0`) with JARs named `connect-{platform}-0.7.0.jar`
+2. **Latest release** (`latest`) with standard JAR names
 
 ### 5. Monitor Release
 
 - Check GitHub Actions workflow completion
-- Verify 3 releases created:
-  1. **Your created release** (`0.7.0`) - The one you just created via UI
-  2. **Latest release** (`latest`) - Auto-updated by workflow
-  3. **Latest tag pointer** - Points to your new version
+- Verify 2 releases created:
+  1. **Versioned release** (`0.7.0`) - Created by workflow with versioned JARs
+  2. **Latest release** (`latest`) - Updated by workflow with standard JAR names
 
 ## GitHub Actions Workflow
 
@@ -170,12 +170,11 @@ For testing unreleased changes:
 - **Wrong versions**: Ensure [build.gradle.kts](mdc:build.gradle.kts) version updated
 - **Tag conflicts**: Delete and recreate tags if needed
 
-## GitHub UI Benefits
+## Workflow Design
 
-**Why GitHub UI is required:**
+**Why the workflow uses command-line tags:**
 
-- **Workflow Compatibility**: The [release.yml](mdc:.github/workflows/release.yml) workflow requires a GitHub release to exist for artifact uploads (lines 82-90)
-- **Automatic tag creation**: GitHub creates and manages the tag when you publish the release
-- **Rich release notes**: Better formatting and editing experience with markdown preview
-- **Release management**: Easy to edit, delete, or mark as pre-release later
-- **Immediate visibility**: Release appears instantly in GitHub UI for users to download
+- **Automated release creation**: The workflow creates releases automatically when tags are pushed
+- **Multiple release types**: Creates both versioned (`0.7.0`) and latest (`latest`) releases
+- **Artifact management**: Handles JAR naming and upload automatically
+- **Conflict avoidance**: Manual GitHub UI releases conflict with the automated "Release version" step (lines 82-90)
