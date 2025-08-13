@@ -61,11 +61,32 @@ public final class SpigotDataHandler extends CommonDataHandler {
             if (ProxyUtils.isBungeeData()) {
                 // Server has bungee enabled and expects to receive player data in hostname of handshake packet.
                 // See https://hub.spigotmc.org/stash/projects/SPIGOT/repos/spigot/browse/CraftBukkit-Patches/0031-BungeeCord-Support.patch#70
-                // Let's modify the hostname, and we are done!
                 String hostname = getCastedValue(packet, ClassNames.HANDSHAKE_HOST);
-                setValue(packet,
-                        ClassNames.HANDSHAKE_HOST,
-                        createBungeeForwardingAddress(hostname));
+                String newHostname = createBungeeForwardingAddress(hostname);
+                
+                if (ClassNames.IS_PRE_1_20_2) {
+                    // 1.20.1 and below - can modify final field directly
+                    setValue(packet, ClassNames.HANDSHAKE_HOST, newHostname);
+                } else {
+                    // 1.20.2+ - final fields cannot be modified, create new packet instead
+                    try {
+                        Object[] components = new Object[]{
+                                getCastedValue(packet, ClassNames.HANDSHAKE_PROTOCOL),
+                                newHostname, // new hostname
+                                getCastedValue(packet, ClassNames.HANDSHAKE_PORT),
+                                getCastedValue(packet, ClassNames.HANDSHAKE_INTENTION)
+                        };
+                        Object newPacket = ClassNames.HANDSHAKE_PACKET_CONSTRUCTOR.newInstance(components);
+                        // Replace the packet in the pipeline
+                        ctx.fireChannelRead(newPacket);
+                        if (!SpigotPlugin.isProtocolSupport()) {
+                            removeSelf();
+                        }
+                        return false; // Don't pass the original packet
+                    } catch (Exception e) {
+                        throw new IllegalStateException("Failed to create new Handshake packet", e);
+                    }
+                }
 
                 if (!SpigotPlugin.isProtocolSupport()) { // if we don't check this the player would be kicked with "unexpected hello packet"
                     removeSelf();
