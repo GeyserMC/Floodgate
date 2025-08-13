@@ -1,0 +1,193 @@
+---
+description: 'Connect Java plugin release process and versioning workflow'
+---
+
+# Connect Java Release Process
+
+This rule documents the complete release workflow for Connect Java plugins across all platforms (Velocity, BungeeCord, Spigot/Paper).
+
+## Current Release Configuration
+
+- **Release Branch**: `connect`
+- **Current Version**: Check [build.gradle.kts](mdc:build.gradle.kts) line 9
+- **Platforms**: Velocity, BungeeCord, Spigot/Paper
+- **Automation**: GitHub Actions via [release.yml](mdc:.github/workflows/release.yml)
+
+## Release Artifacts
+
+Each release produces these platform-specific JARs:
+
+- **`connect-spigot.jar`** - For Spigot/Paper servers
+- **`connect-velocity.jar`** - For Velocity proxy
+- **`connect-bungee.jar`** - For BungeeCord proxy
+
+Built via shadow plugin configuration in [connect.shadow-conventions.gradle.kts](mdc:build-logic/src/main/kotlin/connect.shadow-conventions.gradle.kts).
+
+## Release Types
+
+### 1. Versioned Release (Tag-based)
+
+**Trigger**: Push git tag matching `*.*.*` pattern
+**Creates**:
+
+- GitHub release with tag name (e.g., `0.7.0`)
+- JARs named `connect-{platform}-{version}.jar`
+- Updates `latest` release tag
+- Standard JARs named `connect-{platform}.jar`
+
+### 2. Pre-release (Branch-based)
+
+**Trigger**: Push to `connect` branch without tag
+**Creates**:
+
+- GitHub pre-release with `latest-prerelease` tag
+- JARs named `connect-{platform}-prerelease.jar`
+
+## Step-by-Step Release Process
+
+### 1. Pre-Release Checks
+
+```bash
+# Ensure all platforms build successfully
+./gradlew build
+
+# Verify all fixes are working:
+# - Velocity: no event loop incompatibilities
+# - BungeeCord: no "channel not registered" errors
+# - Spigot/Paper: no IllegalAccessException on handshake
+```
+
+### 2. Version Update
+
+Edit [build.gradle.kts](mdc:build.gradle.kts):
+
+```kotlin
+allprojects {
+    group = "com.minekube.connect"
+    version = "0.7.0" // Update this line
+    // ...
+}
+```
+
+### 3. Commit and Tag
+
+```bash
+git add build.gradle.kts
+git commit -m "Release version 0.7.0"
+git tag 0.7.0
+```
+
+### 4. Push Release
+
+```bash
+# Push branch first
+git push origin connect
+
+# Push tag to trigger release workflow
+git push origin 0.7.0
+```
+
+### 5. Monitor Release
+
+- Check GitHub Actions workflow completion
+- Verify 3 releases created:
+  1. Versioned release (`0.7.0`)
+  2. Latest release (`latest`)
+  3. Updated latest tag pointer
+
+## GitHub Actions Workflow
+
+The [release.yml](mdc:.github/workflows/release.yml) workflow:
+
+**Environment**:
+
+- Ubuntu latest
+- JDK 17 (Temurin distribution)
+- Gradle build action
+
+**Build Process**:
+
+1. Checkout code
+2. Setup Java and Gradle
+3. Run `./gradlew build`
+4. Copy JARs from `{platform}/build/libs/connect-{platform}.jar`
+5. Create releases with appropriate naming
+
+**Release Logic**:
+
+- **Tag push**: Creates versioned + latest releases
+- **Branch push**: Creates pre-release only
+
+## Version Numbering
+
+**Pattern**: `MAJOR.MINOR.PATCH` (semantic versioning)
+
+- **MAJOR**: Breaking changes to injection or API
+- **MINOR**: New platform support, significant features
+- **PATCH**: Bug fixes, compatibility updates
+
+**Recent versions**: 0.6.2 → 0.7.0 (next)
+
+## Release Verification
+
+After release, verify:
+
+1. **GitHub Releases**: All 3 releases created with correct JARs
+2. **JAR Integrity**: Download and verify JAR file sizes/contents
+3. **Platform Testing**:
+   - Deploy to test servers
+   - Verify injection works without errors
+   - Test player connections through Connect network
+
+## Rollback Process
+
+If release has critical issues:
+
+```bash
+# Delete problematic tag
+git tag -d 0.7.0
+git push origin :refs/tags/0.7.0
+
+# Delete GitHub releases manually via web interface
+# Fix issues and re-release with patch version (0.7.1)
+```
+
+## Pre-Release Testing
+
+For testing unreleased changes:
+
+1. Push to `connect` branch (without tag)
+2. Use JARs from `latest-prerelease` release
+3. Test on staging environments
+4. When stable, create official release tag
+
+## Common Release Issues
+
+- **Build failures**: Check Java/Gradle compatibility in workflow
+- **Missing JARs**: Verify shadow plugin configuration
+- **Wrong versions**: Ensure [build.gradle.kts](mdc:build.gradle.kts) version updated
+- **Tag conflicts**: Delete and recreate tags if needed
+
+## Release Notes Template
+
+```markdown
+## Connect Java 0.7.0
+
+### Fixed
+
+- BungeeCord LocalServerChannel compatibility via IoHandler delegation
+- Spigot/Paper handshake packet creation for Java 21 + modern versions
+- Velocity event loop integration with LocalSession
+
+### Technical Changes
+
+- Updated Netty to 4.2.3.Final
+- Added LocalSession.setPlatformEventLoopGroup() hook
+- Implemented ConnectIoHandlerWrapper for BungeeCord
+
+### Platforms Supported
+
+- Velocity 3.x
+- BungeeCord/Waterfall
+- Spigot/Paper 1.19.4+
+```
