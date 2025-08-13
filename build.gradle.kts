@@ -1,7 +1,7 @@
 plugins {
     `java-library`
     id("connect.build-logic")
-    id("io.freefair.lombok") version "6.3.0" apply false
+    id("io.freefair.lombok") version "8.6" apply false
 }
 
 allprojects {

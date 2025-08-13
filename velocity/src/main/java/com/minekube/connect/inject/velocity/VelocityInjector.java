@@ -40,8 +40,15 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.IoEventLoop;
+import io.netty.channel.IoHandlerFactory;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
 import io.netty.channel.WriteBufferWaterMark;
 import io.netty.channel.local.LocalAddress;
+import io.netty.channel.local.LocalIoHandler;
+import io.netty.util.concurrent.DefaultThreadFactory;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadFactory;
 import java.lang.reflect.Method;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -86,13 +93,33 @@ public final class VelocityInjector extends CommonPlatformInjector {
         WriteBufferWaterMark serverWriteMark = getCastedValue(connectionManager,
                 "SERVER_WRITE_MARK");
 
-        EventLoopGroup bossGroup = castedInvoke(connectionManager, "getBossGroup");
-        EventLoopGroup workerGroup = getCastedValue(connectionManager, "workerGroup");
+        // Use LocalIoHandler-based event loops that are compatible with LocalServerChannel
+        // while still integrating with Velocity's system (Geyser approach with ConnectWatchedSingleThreadIoEventLoop)
+        EventLoopGroup velocityWorkerGroup = getCastedValue(connectionManager, "workerGroup");
+        
+        EventLoopGroup localBossGroup = new MultiThreadIoEventLoopGroup(LocalIoHandler.newFactory()) {
+            @Override
+            protected ThreadFactory newDefaultThreadFactory() {
+                return new DefaultThreadFactory("Connect Local Boss Group");
+            }
+        };
+        
+        EventLoopGroup localWorkerGroup = new MultiThreadIoEventLoopGroup(LocalIoHandler.newFactory()) {
+            @Override
+            protected ThreadFactory newDefaultThreadFactory() {
+                return new DefaultThreadFactory("Connect Local Worker Group");
+            }
+
+            @Override
+            protected IoEventLoop newChild(Executor executor, IoHandlerFactory ioHandlerFactory, Object... args) {
+                return new ConnectWatchedSingleThreadIoEventLoop(velocityWorkerGroup, this, executor, ioHandlerFactory);
+            }
+        };
 
         ChannelFuture channelFuture = (new ServerBootstrap()
                 .channel(LocalServerChannelWrapper.class)
                 .childHandler(serverInitializer)
-                .group(bossGroup, workerGroup) // Cannot be DefaultEventLoopGroup
+                .group(localBossGroup, localWorkerGroup) // Use LocalIoHandler-based event loops
                 .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK,
                         serverWriteMark) // Required or else rare network freezes can occur
                 .localAddress(LocalAddress.ANY))

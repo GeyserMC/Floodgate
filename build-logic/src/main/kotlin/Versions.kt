@@ -27,7 +27,7 @@ object Versions {
     const val spigotVersion = "1.19.4-R0.1-SNAPSHOT"
     const val configUtilsVersion = "1.0-SNAPSHOT"
     const val guiceVersion = "6.0.0"
-    const val nettyVersion = "4.1.49.Final"
+    const val nettyVersion = "4.2.3.Final"
     const val snakeyamlVersion = "1.28"
     const val cloudVersion = "1.5.0"
     const val adventureApiVersion = "4.10.0"
