@@ -1,0 +1,101 @@
+---
+alwaysApply: false
+description: Connect Java injection + Netty event-loop compatibility playbook across Velocity/Bungee/Spigot
+---
+
+# Connect Java Injection and Netty Event-Loop Playbook
+
+This rule captures our working patterns and pitfalls for platform injection (Velocity, Bungee, Spigot/Paper), Netty compatibility, and how we leverage Floodgate/Geyser learnings. Use this when touching injection code, LocalServerChannel/LocalChannel plumbing, or upgrading Netty/platforms.
+
+## Overview
+
+Minekube Connect is a global proxy network plugin forked from Floodgate that incorporates Geyser's logic. It allows Minecraft servers to be accessible worldwide through edge proxies using local channels and tunneling.
+
+## Core Concepts
+
+- Local server loopback is implemented with `LocalServerChannel`/`LocalChannel` wrappers:
+  - [LocalServerChannelWrapper.java](mdc:core/src/main/java/com/minekube/connect/network/netty/LocalServerChannelWrapper.java)
+  - [LocalChannelWrapper.java](mdc:core/src/main/java/com/minekube/connect/network/netty/LocalChannelWrapper.java)
+  - Session orchestration: [LocalSession.java](mdc:core/src/main/java/com/minekube/connect/network/netty/LocalSession.java)
+- Injection entry points per platform:
+  - Velocity: [VelocityInjector.java](mdc:velocity/src/main/java/com/minekube/connect/inject/velocity/VelocityInjector.java)
+  - Bungee: [BungeeInjector.java](mdc:bungee/src/main/java/com/minekube/connect/inject/bungee/BungeeInjector.java)
+  - Spigot/Paper: data injection/handshake tweaks in [SpigotDataHandler.java](mdc:spigot/src/main/java/com/minekube/connect/addon/data/SpigotDataHandler.java)
+
+## Netty Compatibility
+
+- LocalServerChannel is not compatible with native KQueue/Epoll handlers. Use LocalIoHandler-backed event loops.
+- Align Netty with platform when needed. Velocity uses Netty 4.2.x. Our repo tracks the version in [Versions.kt](mdc:build-logic/src/main/kotlin/Versions.kt). If you require `MultiThreadIoEventLoopGroup(LocalIoHandler.newFactory())`, ensure Netty is recent enough.
+
+## Velocity (Working Pattern)
+
+- Validate event loop type (KQueue/Epoll/NIO). Use LocalIoHandler-backed groups for LocalServerChannel.
+- Proven approach (inspired by Geyser):
+  - Create `MultiThreadIoEventLoopGroup(LocalIoHandler.newFactory())` for LocalServerChannel bootstrap.
+  - Delegate non-local channels to Velocity's native event loops when necessary (see Geyser's WatchedSingleThreadIoEventLoop pattern). Adjust to our Netty version constraints.
+- Keep injection into Velocity's channel initializers intact; do not replace core semantics.
+
+## Bungee (Working Pattern)
+
+- Symptom fixed: `IllegalStateException: channel not registered to an event loop` during upstream connect/close.
+- Root cause: `LocalSession` created its own `DefaultEventLoopGroup`, so its channels weren't registered with Bungee's event loops.
+- Fix (minimal and robust):
+  1. In [BungeeInjector.java](mdc:bungee/src/main/java/com/minekube/connect/inject/bungee/BungeeInjector.java), build a wrapper worker group:
+     - Base group: Bungee/Waterfall worker `MultiThreadIoEventLoopGroup`.
+     - Use `SingleThreadIoEventLoop(finalWorkerGroup, wrapperFactory)` where `wrapperFactory` is an IoHandler that delegates:
+       - Local channels → LocalIoHandler
+       - Native channels → NIO handler
+  2. Implement wrapper IoHandler: [ConnectIoHandlerWrapper.java](mdc:bungee/src/main/java/com/minekube/connect/inject/bungee/ConnectIoHandlerWrapper.java).
+  3. Share the platform event loop group with `LocalSession`:
+     - Add `LocalSession.setPlatformEventLoopGroup(...)` and call it from Bungee injector before establishing the local channel.
+     - `LocalSession` now uses the platform group if set; otherwise falls back to the default.
+
+This keeps LocalServerChannel compatible (LocalIoHandler) while ensuring all channels are managed by Bungee's event loops.
+
+## Spigot/Paper (Handshake Mutation on Newer Versions/Java 21)
+
+- Do not reflectively mutate final fields on modern Java/Paper (e.g., handshake hostname). Instead, construct a new handshake packet for 1.20.2+ using `HANDSHAKE_PACKET_CONSTRUCTOR` and existing fields in [ClassNames.java](mdc:spigot/src/main/java/com/minekube/connect/util/ClassNames.java).
+- Implementation lives in [SpigotDataHandler.java](mdc:spigot/src/main/java/com/minekube/connect/addon/data/SpigotDataHandler.java); mirrors Floodgate's approach for constructing new packets instead of bypassing final.
+
+## Diagnostics and Playbook
+
+1. Clone upstreams into `./tmp` to study internals:
+   - Geyser: `tmp/Geyser` (Velocity/Bungee injectors and Netty helpers)
+   - Floodgate: `tmp/Floodgate` (initializer wrapping and Spigot handshake strategies)
+   - Velocity: `tmp/Velocity`
+   - BungeeCord: `tmp/BungeeCord`
+2. Identify event loop types from logs (kqueue/epoll/nio). If LocalServerChannel present, ensure LocalIoHandler is used for that channel's loops.
+3. If you see:
+   - `IoHandle ... not supported`: LocalServerChannel is being registered on a non-Local handler (fix with LocalIoHandler-backed event loop).
+   - `channel not registered to an event loop`: your local channels are not on the platform's loop. Share platform ELG with `LocalSession.setPlatformEventLoopGroup(...)` (Bungee fix) or adopt a wrapper loop that delegates appropriately.
+   - Phase errors (e.g., LoginSuccess in CONFIGURATION): often caused by event loop/channel mismatch or pipeline ordering; reassess Local vs native handler usage and initializer placement.
+
+## Architectural Principles
+
+- Maintain platform ownership of event loops. Connect should integrate with, not replace, a platform's loop model.
+- Only use LocalIoHandler for LocalServerChannel/LocalChannel compatibility; delegate everything else to the platform-native handlers.
+- Keep `LocalSession` platform-agnostic but allow platforms to inject their event loop group via a single optional hook.
+- Mirror Floodgate/Geyser patterns when possible; they've solved many injection edge cases.
+
+## Changes to Keep Minimal
+
+- Only add:
+  - `LocalSession.setPlatformEventLoopGroup(...)` and selection in `connect()`.
+  - Platform-specific wiring (Bungee) to set the platform ELG and wrapper IoHandler.
+- Avoid broad refactors; do not introduce separate, long-lived event loops per platform unless necessary.
+
+## Release/Verification Checklist
+
+- Build all modules: `./gradlew build`
+- Smoke tests:
+  - Velocity: injects and accepts join through Connect; ensure no loop incompatibilities.
+  - Bungee: no `channel not registered` or `IoHandle not supported`; join succeeds.
+  - Spigot/Paper: no IllegalAccessException on handshake; new-packet path for 1.20.2+ works.
+
+## Commit Guidance
+
+- Title: "platform: fix LocalServerChannel/LocalSession compatibility via IoHandler delegation and platform ELG sharing"
+- Body:
+  - Explain IoHandler wrapper delegation (Local vs native).
+  - Note `LocalSession.setPlatformEventLoopGroup(...)` and platform usage (Bungee).
+  - Reference files: [BungeeInjector.java](mdc:bungee/src/main/java/com/minekube/connect/inject/bungee/BungeeInjector.java), [ConnectIoHandlerWrapper.java](mdc:bungee/src/main/java/com/minekube/connect/inject/bungee/ConnectIoHandlerWrapper.java), [LocalSession.java](mdc:core/src/main/java/com/minekube/connect/network/netty/LocalSession.java).
