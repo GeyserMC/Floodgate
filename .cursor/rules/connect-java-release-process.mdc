@@ -69,31 +69,33 @@ allprojects {
 }
 ```
 
-### 3. Commit and Tag
+### 3. Commit and Push Changes
 
 ```bash
 git add build.gradle.kts
 git commit -m "Release version 0.7.0"
-git tag 0.7.0
-```
-
-### 4. Push Release
-
-```bash
-# Push branch first
 git push origin connect
-
-# Push tag to trigger release workflow
-git push origin 0.7.0
 ```
+
+### 4. Create Release via GitHub UI
+
+1. Go to `https://github.com/minekube/connect-java/releases`
+2. Click **"Create a new release"**
+3. **Tag**: Enter `0.7.0` (GitHub will create the tag automatically)
+4. **Target**: Select `connect` branch
+5. **Title**: `Connect Java 0.7.0`
+6. **Description**: Add any specific release notes (optional - workflow will handle artifacts)
+7. Click **"Publish release"**
+
+This triggers the release workflow, creates the tag, and ensures all artifacts are properly uploaded.
 
 ### 5. Monitor Release
 
 - Check GitHub Actions workflow completion
 - Verify 3 releases created:
-  1. Versioned release (`0.7.0`)
-  2. Latest release (`latest`)
-  3. Updated latest tag pointer
+  1. **Your created release** (`0.7.0`) - The one you just created via UI
+  2. **Latest release** (`latest`) - Auto-updated by workflow
+  3. **Latest tag pointer** - Points to your new version
 
 ## GitHub Actions Workflow
 
@@ -168,26 +170,12 @@ For testing unreleased changes:
 - **Wrong versions**: Ensure [build.gradle.kts](mdc:build.gradle.kts) version updated
 - **Tag conflicts**: Delete and recreate tags if needed
 
-## Release Notes Template
+## GitHub UI Benefits
 
-```markdown
-## Connect Java 0.7.0
+**Why GitHub UI is required:**
 
-### Fixed
-
-- BungeeCord LocalServerChannel compatibility via IoHandler delegation
-- Spigot/Paper handshake packet creation for Java 21 + modern versions
-- Velocity event loop integration with LocalSession
-
-### Technical Changes
-
-- Updated Netty to 4.2.3.Final
-- Added LocalSession.setPlatformEventLoopGroup() hook
-- Implemented ConnectIoHandlerWrapper for BungeeCord
-
-### Platforms Supported
-
-- Velocity 3.x
-- BungeeCord/Waterfall
-- Spigot/Paper 1.19.4+
-```
+- **Workflow Compatibility**: The [release.yml](mdc:.github/workflows/release.yml) workflow requires a GitHub release to exist for artifact uploads (lines 82-90)
+- **Automatic tag creation**: GitHub creates and manages the tag when you publish the release
+- **Rich release notes**: Better formatting and editing experience with markdown preview
+- **Release management**: Easy to edit, delete, or mark as pre-release later
+- **Immediate visibility**: Release appears instantly in GitHub UI for users to download
