@@ -46,6 +46,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.DefaultEventLoopGroup;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.unix.PreferredDirectByteBufAllocator;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -71,6 +72,7 @@ public final class LocalSession {
     private static final int CONNECTION_TIMEOUT = (int) Duration.ofSeconds(30).toMillis();
 
     private static DefaultEventLoopGroup DEFAULT_EVENT_LOOP_GROUP;
+    private static EventLoopGroup PLATFORM_EVENT_LOOP_GROUP; // Platform-specific event loop group
     private static PreferredDirectByteBufAllocator PREFERRED_DIRECT_BYTE_BUF_ALLOCATOR = null;
 
     private final ConnectLogger logger;
@@ -139,8 +141,16 @@ public final class LocalSession {
                 sessionProposal
         );
 
-        if (DEFAULT_EVENT_LOOP_GROUP == null) {
-            DEFAULT_EVENT_LOOP_GROUP = new DefaultEventLoopGroup();
+        // Use platform-specific event loop if available (e.g., BungeeCord's event loops)
+        // Otherwise fall back to default event loop group
+        EventLoopGroup eventLoopGroup;
+        if (PLATFORM_EVENT_LOOP_GROUP != null) {
+            eventLoopGroup = PLATFORM_EVENT_LOOP_GROUP;
+        } else {
+            if (DEFAULT_EVENT_LOOP_GROUP == null) {
+                DEFAULT_EVENT_LOOP_GROUP = new DefaultEventLoopGroup();
+            }
+            eventLoopGroup = DEFAULT_EVENT_LOOP_GROUP;
         }
 
         final Bootstrap bootstrap = new Bootstrap();
@@ -162,7 +172,7 @@ public final class LocalSession {
                         ));
                     }
                 })
-                .group(DEFAULT_EVENT_LOOP_GROUP)
+                .group(eventLoopGroup)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, CONNECTION_TIMEOUT);
 
         if (PREFERRED_DIRECT_BYTE_BUF_ALLOCATOR != null) {
@@ -187,6 +197,17 @@ public final class LocalSession {
         cause.printStackTrace();
         // Reject session proposal in case we are still able to.
         sessionProposal.reject(StatusProto.fromThrowable(cause));
+    }
+
+    /**
+     * Sets the platform-specific event loop group to be used for LocalSession connections.
+     * This should be called by platform injectors (e.g., BungeeInjector) to ensure
+     * LocalSession uses the same event loops as the platform.
+     *
+     * @param eventLoopGroup the platform's event loop group
+     */
+    public static void setPlatformEventLoopGroup(EventLoopGroup eventLoopGroup) {
+        PLATFORM_EVENT_LOOP_GROUP = eventLoopGroup;
     }
 
     /**

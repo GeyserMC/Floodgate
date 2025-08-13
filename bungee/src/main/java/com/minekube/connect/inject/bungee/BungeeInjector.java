@@ -34,8 +34,17 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.IoEventLoop;
+import io.netty.channel.IoEventLoopGroup;
+import io.netty.channel.IoHandlerFactory;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
+import io.netty.channel.SingleThreadIoEventLoop;
 import io.netty.channel.local.LocalAddress;
+import io.netty.channel.local.LocalIoHandler;
 import io.netty.util.AttributeKey;
+import io.netty.util.concurrent.DefaultThreadFactory;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Set;
@@ -146,25 +155,40 @@ public final class BungeeInjector extends CommonPlatformInjector implements List
 
         Class<? extends ProxyServer> proxyClass = proxy.getClass();
         // Using the specified EventLoop is required, or else an error will be thrown
-        EventLoopGroup bossGroup;
-        EventLoopGroup workerGroup;
+        MultiThreadIoEventLoopGroup bungeeWorkerGroup;
         try {
-            EventLoopGroup eventLoops = (EventLoopGroup) proxyClass.getField("eventLoops").get(
-                    proxy);
-            // Netty redirects ServerBootstrap#group(EventLoopGroup) to #group(EventLoopGroup, EventLoopGroup) and uses the same event loop for both.
-            bossGroup = eventLoops;
-            workerGroup = eventLoops;
+            bungeeWorkerGroup = (MultiThreadIoEventLoopGroup) proxyClass.getField("eventLoops").get(proxy);
             logger.debug("BungeeCord event loop style detected.");
         } catch (NoSuchFieldException e) {
             // Waterfall uses two separate event loops
             // https://github.com/PaperMC/Waterfall/blob/fea7ec356dba6c6ac28819ff11be604af6eb484e/BungeeCord-Patches/0022-Use-a-worker-and-a-boss-event-loop-group.patch
-            bossGroup = (EventLoopGroup) proxyClass.getField("bossEventLoopGroup").get(proxy);
-            workerGroup = (EventLoopGroup) proxyClass.getField("workerEventLoopGroup").get(proxy);
+            bungeeWorkerGroup = (MultiThreadIoEventLoopGroup) proxyClass.getField("workerEventLoopGroup").get(proxy);
             logger.debug("Waterfall event loop style detected.");
-            if (bossGroup == null || workerGroup == null) {
-                throw new IllegalStateException("Failed to find event loops in Waterfall");
-            }
         }
+
+        // Use Geyser's approach: create wrapper event loops that delegate properly
+        final IoEventLoopGroup finalWorkerGroup = bungeeWorkerGroup;
+        IoHandlerFactory localFactory = LocalIoHandler.newFactory();
+        IoHandlerFactory nativeFactory = io.netty.channel.nio.NioIoHandler.newFactory();
+
+        IoHandlerFactory wrapperFactory = ioExecutor -> new ConnectIoHandlerWrapper(
+                localFactory.newHandler(ioExecutor),
+                nativeFactory.newHandler(ioExecutor)
+        );
+
+        EventLoopGroup wrapperGroup = new MultiThreadIoEventLoopGroup(localFactory) {
+            @Override
+            protected ThreadFactory newDefaultThreadFactory() {
+                return new DefaultThreadFactory("Connect BungeeCord Worker Group");
+            }
+
+            @Override
+            protected IoEventLoop newChild(Executor executor, IoHandlerFactory ioHandlerFactory, Object... args) {
+                // Use SingleThreadIoEventLoop with the BungeeCord worker group and wrapperFactory
+                // Ensures LocalChannels use LocalIoHandler while native channels use NIO
+                return new SingleThreadIoEventLoop(finalWorkerGroup, executor, wrapperFactory);
+            }
+        };
 
         // Is currently just AttributeKey.valueOf("ListerInfo") but we might as well copy the value itself.
         AttributeKey<ListenerInfo> listener = PipelineUtils.LISTENER;
@@ -220,7 +244,7 @@ public final class BungeeInjector extends CommonPlatformInjector implements List
                     }
                 })
                 .childAttr(listener, listenerInfo)
-                .group(bossGroup, workerGroup)
+                .group(wrapperGroup)
                 .localAddress(LocalAddress.ANY))
                 .bind()
                 .syncUninterruptibly();
@@ -235,6 +259,10 @@ public final class BungeeInjector extends CommonPlatformInjector implements List
             this.eventRegistered = true;
         }
 
+        // Set the platform event loop group for LocalSession to use
+        // This ensures LocalSession connections use BungeeCord's event loops
+        LocalSession.setPlatformEventLoopGroup(wrapperGroup);
+        
         // Only affects Waterfall, but there is no sure way to differentiate between a proxy with this patch and a proxy without this patch
         // Patch causing the issue: https://github.com/PaperMC/Waterfall/blob/7e6af4cef64d5d377a6ffd00a534379e6efa94cf/BungeeCord-Patches/0045-Don-t-use-a-bytebuf-for-packet-decoding.patch
         // If native compression is enabled, then this line is tripped up if a heap buffer is sent over in such a situation
