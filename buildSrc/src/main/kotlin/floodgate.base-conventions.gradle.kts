@@ -3,7 +3,7 @@ plugins {
 //    id("net.ltgt.errorprone")
     id("net.kyori.indra")
     id("net.kyori.indra.git")
-    id("net.kyori.indra.licenser.spotless")
+//    id("net.kyori.indra.licenser.spotless")
     id("floodgate.depsize")
 }
 
@@ -25,13 +25,13 @@ indra {
 
 }
 
-spotless {
-    java {
-        palantirJavaFormat()
-        formatAnnotations()
-    }
-    ratchetFrom("origin/development")
-}
+//spotless {
+//    java {
+//        //palantirJavaFormat()
+//        formatAnnotations()
+//    }
+//    ratchetFrom("origin/development")
+//}
 
 tasks {
     processResources {
