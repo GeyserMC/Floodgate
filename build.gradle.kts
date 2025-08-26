@@ -9,7 +9,6 @@ allprojects {
     description = "Allows Bedrock players to join Java edition servers while keeping the server in online mode"
 
     apply {
-        plugin("floodgate.build-logic")
         plugin("net.kyori.indra.git")
     }
 
@@ -50,7 +49,6 @@ subprojects {
     apply {
         plugin("java-library")
         plugin("io.freefair.lombok")
-        plugin("floodgate.build-logic")
     }
 
     when (this) {
