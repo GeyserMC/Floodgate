@@ -1,5 +1,5 @@
 plugins {
-    id("floodgate.base-conventions")
+    id("floodgate.publish-conventions")
 }
 
 dependencies {

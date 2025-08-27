@@ -110,10 +110,8 @@ indra-git = { module = "net.kyori:indra-git", version.ref = "indra" }
 indra-licenser-spotless = { module = "net.kyori:indra-licenser-spotless", version.ref = "indra" }
 shadow = { group = "com.gradleup.shadow", name = "com.gradleup.shadow.gradle.plugin", version.ref = "shadow" }
 gradle-idea-ext = { module = "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext", version.ref = "gradle-idea-ext" }
-
-[plugins]
-micronaut = { id = "io.micronaut.library", version.ref = "micronaut-gradle" }
-lombok = { id = "io.freefair.lombok", version.ref = "lombok" }
+lombok = { group = "io.freefair.gradle", name = "lombok-plugin", version.ref = "lombok" }
+micronaut = { group = "io.micronaut.library", name = "io.micronaut.library.gradle.plugin", version.ref = "micronaut-gradle" }
 
 [bundles]
 fastutil = ["fastutil-short-object-maps", "fastutil-int-object-maps"]

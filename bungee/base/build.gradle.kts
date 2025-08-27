@@ -1,3 +1,8 @@
+plugins {
+    id("floodgate.shadow-conventions")
+    id("floodgate.publish-conventions")
+}
+
 dependencies {
     api(projects.coreNetty4)
     annotationProcessor(projects.coreNetty4)
