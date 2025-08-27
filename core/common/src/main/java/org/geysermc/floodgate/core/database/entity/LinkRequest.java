@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024 GeyserMC
+ * Copyright (c) 2019-2025 GeyserMC
  * Licensed under the MIT license
  * @link https://github.com/GeyserMC/Floodgate
  */
@@ -9,14 +9,15 @@ import java.time.Instant;
 import java.util.UUID;
 import org.geysermc.databaseutils.meta.Entity;
 import org.geysermc.databaseutils.meta.Key;
+import org.geysermc.databaseutils.meta.Length;
 
 @Entity("LinkRequests")
 public record LinkRequest(
         @Key UUID javaUniqueId,
-        String javaUsername,
+        @Length(max = 16) String javaUsername,
         @Key UUID bedrockUniqueId,
-        String bedrockUsername,
-        String linkCode,
+        @Length(max = 16) String bedrockUsername,
+        @Length(max = 6) String linkCode,
         long requestTime) {
 
     public LinkRequest(
