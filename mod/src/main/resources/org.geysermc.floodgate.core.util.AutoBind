@@ -1,0 +1,3 @@
+org.geysermc.floodgate.core.util.Metrics
+org.geysermc.floodgate.core.news.NewsChecker
+org.geysermc.floodgate.core.util.PostEnableMessages
