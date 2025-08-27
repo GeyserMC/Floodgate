@@ -48,8 +48,28 @@ tasks {
                 "version" to fullVersion(),
                 "description" to project.description,
                 "url" to "https://geysermc.org",
-                "author" to "GeyserMC"
+                "author" to "GeyserMC",
+                "minecraft_version" to libs.versions.minecraft.version.get()
             )
         }
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven("https://repo.opencollab.dev/main/")
+
+    maven("https://maven.fabricmc.net/")
+    maven("https://maven.neoforged.net/releases")
+    maven("https://repo.papermc.io/repository/maven-public")
+
+    // Spigot
+    maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots") {
+        mavenContent { snapshotsOnly() }
+    }
+
+    maven("https://libraries.minecraft.net") {
+        name = "minecraft"
+        mavenContent { releasesOnly() }
     }
 }

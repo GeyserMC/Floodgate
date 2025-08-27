@@ -15,6 +15,7 @@ import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.core.addon.data.CommonDataHandler;
+import org.geysermc.floodgate.core.addon.data.CommonNettyDataHandler;
 import org.geysermc.floodgate.core.addon.data.PacketBlocker;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
@@ -26,7 +27,7 @@ import org.slf4j.Logger;
 
 import java.net.InetSocketAddress;
 
-public final class ModDataHandler extends CommonDataHandler {
+public final class ModDataHandler extends CommonNettyDataHandler {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private final FloodgateLogger logger;

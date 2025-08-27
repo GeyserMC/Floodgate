@@ -55,7 +55,7 @@ tasks {
         archiveBaseName.set("floodgate-neoforge")
     }
 
-    modrinth {
-        loaders.add("neoforge")
-    }
+//    modrinth {
+//        loaders.add("neoforge")
+//    }
 }

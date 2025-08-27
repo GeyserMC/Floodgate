@@ -1,3 +1,7 @@
+plugins {
+    id("floodgate.modded-conventions")
+}
+
 architectury {
     platformSetupLoomIde()
     fabric()
@@ -41,7 +45,8 @@ tasks {
         archiveBaseName.set("floodgate-fabric")
     }
 
-    modrinth {
-        loaders.add("fabric")
-    }
+//    modrinth {
+//        loaders.add("fabric")
+//    }
+
 }

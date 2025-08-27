@@ -1,41 +1,50 @@
 package org.geysermc.floodgate.mod.data;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
-import org.geysermc.floodgate.api.inject.InjectorAddon;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
+import org.geysermc.api.connection.Connection;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
+import org.geysermc.floodgate.core.api.inject.InjectorAddon;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
-import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
+import org.geysermc.floodgate.core.connection.DataSeeker;
+import org.geysermc.floodgate.core.connection.FloodgateDataHandler;
+import org.geysermc.floodgate.core.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.util.Utils;
 
-public final class ModDataAddon implements InjectorAddon {
-    @Inject private FloodgateHandshakeHandler handshakeHandler;
-    @Inject private FloodgateConfig config;
-    @Inject private SimpleFloodgateApi api;
-    @Inject private FloodgateLogger logger;
+@Singleton
+public final class ModDataAddon implements InjectorAddon<Channel> {
+
+    @Inject
+    DataSeeker dataSeeker;
+    @Inject
+    FloodgateDataHandler handshakeHandler;
+
+    @Inject
+    FloodgateConfig config;
+
+    @Inject
+    FloodgateLogger logger;
 
     @Inject
     @Named("packetHandler")
     private String packetHandlerName;
 
     @Inject
+    @Named("connectionAttribute")
+    AttributeKey<Connection> connectionAttribute;
+
+    @Inject
     @Named("kickMessageAttribute")
     private AttributeKey<String> kickMessageAttribute;
 
-    @Inject
-    @Named("playerAttribute")
-    private AttributeKey<FloodgatePlayer> playerAttribute;
-
     @Override
     public void onInject(Channel channel, boolean toServer) {
-        channel.pipeline().addBefore(
-                packetHandlerName, "floodgate_data_handler",
-                new ModDataHandler(handshakeHandler, config, kickMessageAttribute, logger)
-        );
+        var dataHandler = new ModDataHandler(handshakeHandler, config, kickMessageAttribute, logger);
+        channel.pipeline().addBefore(packetHandlerName, "floodgate_data_handler", dataHandler);
     }
 
     @Override

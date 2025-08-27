@@ -12,14 +12,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
-@Mixin(value = GeyserModInjector.class, remap = false)
-public class GeyserModInjectorMixin {
-
-    @Shadow
-    private List<ChannelFuture> allServerChannels;
-
-    @Inject(method = "initializeLocalChannel0", at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
-    public void floodgate$onChannelAdd(GeyserBootstrap bootstrap, CallbackInfo ci) {
-        ModInjector.INSTANCE.injectClient(this.allServerChannels.get(this.allServerChannels.size() - 1));
-    }
-}
+// TODO
+//@Mixin(value = GeyserModInjector.class, remap = false)
+//public class GeyserModInjectorMixin {
+//
+//    @Shadow
+//    private List<ChannelFuture> allServerChannels;
+//
+//    @Inject(method = "initializeLocalChannel0", at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
+//    public void floodgate$onChannelAdd(GeyserBootstrap bootstrap, CallbackInfo ci) {
+//        ModInjector.INSTANCE.injectClient(this.allServerChannels.get(this.allServerChannels.size() - 1));
+//    }
+//}
