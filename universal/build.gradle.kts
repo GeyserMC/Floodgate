@@ -1,5 +1,7 @@
 plugins {
+  id("floodgate.publish-conventions")
   id("floodgate.generate-templates")
+  id("floodgate.shadow-conventions")
 }
 
 provided(libs.bungee)

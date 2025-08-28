@@ -1,49 +1,19 @@
 @file:Suppress("UnstableApiUsage")
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-dependencyResolutionManagement {
-    repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
-    repositories {
-        mavenLocal()
-
-        // Geyser, Cumulus etc.
-        maven("https://repo.opencollab.dev/maven-releases") {
-            mavenContent { releasesOnly() }
-        }
-        maven("https://repo.opencollab.dev/maven-snapshots") {
-            mavenContent { snapshotsOnly() }
-        }
-
-        // Paper, Velocity
-//        maven("https://repo.papermc.io/repository/maven-releases") {
-//            mavenContent { releasesOnly() }
-//        }
-//        maven("https://repo.papermc.io/repository/maven-snapshots") {
-//            mavenContent { snapshotsOnly() }
-//        }
-        maven("https://repo.papermc.io/repository/maven-public")
-        // Spigot
-        maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots") {
-            mavenContent { snapshotsOnly() }
-        }
-
-        // BungeeCord
-        maven("https://oss.sonatype.org/content/repositories/snapshots") {
-            mavenContent { snapshotsOnly() }
-        }
-
-        maven("https://libraries.minecraft.net") {
-            name = "minecraft"
-            mavenContent { releasesOnly() }
-        }
-
-        mavenCentral()
-    }
-}
-
 pluginManagement {
     repositories {
         gradlePluginPortal()
+        maven("https://repo.opencollab.dev/main/")
+        maven("https://jitpack.io") {
+            content {
+                includeGroupByRegex("com\\.github\\..*")
+            }
+        }
+
+        maven("https://maven.architectury.dev/")
+        maven("https://maven.neoforged.net/releases")
+        maven("https://maven.fabricmc.net/")
     }
     plugins {
         id("net.kyori.indra")
@@ -56,6 +26,7 @@ rootProject.name = "floodgate-parent"
 include(":api")
 include(":universal")
 include(":isolation")
+include(":mod")
 
 arrayOf("common", "netty4").forEach {
     val id = ":core-$it"
@@ -63,7 +34,7 @@ arrayOf("common", "netty4").forEach {
     project(id).projectDir = file("core/$it")
 }
 
-arrayOf("bungee", "spigot", "velocity").forEach { platform ->
+arrayOf("bungee", "spigot", "velocity", "fabric").forEach { platform ->
     arrayOf("base", "isolated").forEach {
         var id = ":$platform-$it"
         // isolated is the new default

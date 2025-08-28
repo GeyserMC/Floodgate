@@ -1,3 +1,8 @@
+plugins {
+    id("floodgate.publish-conventions")
+    id("floodgate.shadow-conventions")
+}
+
 dependencies {
     api(projects.coreCommon)
     annotationProcessor(projects.coreCommon)
