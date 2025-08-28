@@ -1,10 +1,12 @@
 package org.geysermc.floodgate.platform.fabric.pluginmessage;
 
+import io.micronaut.context.BeanProvider;
+import jakarta.inject.Inject;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import org.geysermc.floodgate.core.platform.pluginmessage.PluginMessageUtils;
-import org.geysermc.floodgate.mod.MinecraftServerHolder;
 import org.geysermc.floodgate.mod.pluginmessage.payloads.FormPayload;
 import org.geysermc.floodgate.mod.pluginmessage.payloads.PacketPayload;
 import org.geysermc.floodgate.mod.pluginmessage.payloads.SkinPayload;
@@ -15,10 +17,13 @@ import java.util.UUID;
 
 public class FabricPluginMessageUtils extends PluginMessageUtils {
 
+    @Inject
+    private BeanProvider<MinecraftServer> server;
+
     @Override
     public boolean sendMessage(UUID uuid, String channel, byte[] data) {
         try {
-            ServerPlayer player = MinecraftServerHolder.get().getPlayerList().getPlayer(uuid);
+            ServerPlayer player = server.get().getPlayerList().getPlayer(uuid);
             final CustomPacketPayload payload;
             switch (channel) {
                 case "floodgate:form" -> payload = new FormPayload(data);

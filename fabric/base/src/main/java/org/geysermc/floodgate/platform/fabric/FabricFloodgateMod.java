@@ -1,45 +1,41 @@
 package org.geysermc.floodgate.platform.fabric;
 
+import io.micronaut.context.ApplicationContext;
+import io.micronaut.inject.qualifiers.Qualifiers;
 import net.fabricmc.api.EnvType;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.kyori.adventure.platform.modcommon.MinecraftServerAudiences;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.geysermc.floodgate.core.module.PluginMessageModule;
-import org.geysermc.floodgate.core.module.ServerCommonModule;
-import org.geysermc.floodgate.mod.FloodgateMod;
-import org.geysermc.floodgate.mod.util.ModTemplateReader;
-import org.geysermc.floodgate.platform.fabric.module.FabricCommandModule;
-import org.geysermc.floodgate.platform.fabric.module.FabricPlatformModule;
+import org.geysermc.floodgate.isolation.library.LibraryManager;
+import org.geysermc.floodgate.mod.ModPlatform;
 
 import java.nio.file.Path;
 
-public final class FabricFloodgateMod extends FloodgateMod implements ModInitializer {
+public final class FabricFloodgateMod extends ModPlatform {
 
-    private ModContainer container;
+    private final ModContainer container;
+
+    public FabricFloodgateMod(LibraryManager manager, ModContainer container) {
+        super(manager);
+        this.container = container;
+    }
 
     @Override
-    public void onInitialize() {
-        container = FabricLoader.getInstance().getModContainer("floodgate").orElseThrow();
-        init(
-            new ServerCommonModule(
-                    FabricLoader.getInstance().getConfigDir().resolve("floodgate"),
-                    new ModTemplateReader()
-            ),
-            new FabricPlatformModule(),
-            new FabricCommandModule(),
-            new PluginMessageModule()
+    protected void onContextCreated(ApplicationContext context) {
+        super.onContextCreated(context);
+        context.registerSingleton(container)
+            .registerSingleton(
+                Path.class,
+                FabricLoader.getInstance().getConfigDir().resolve("floodgate"),
+                Qualifiers.byName("dataDirectory")
         );
 
-        ServerLifecycleEvents.SERVER_STARTED.register(this::enable);
-
-        if (isClient()) {
-            ClientLifecycleEvents.CLIENT_STOPPING.register($ -> this.disable());
-        } else {
-            ServerLifecycleEvents.SERVER_STOPPING.register($ -> this.disable());
-        }
+        ServerLifecycleEvents.SERVER_STARTED.register((server) -> {
+            context.registerSingleton(server, false);
+            context.registerSingleton(MinecraftServerAudiences.of(server), false);
+        });
     }
 
     @Override

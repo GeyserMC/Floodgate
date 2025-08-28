@@ -7,46 +7,35 @@ architectury {
     fabric()
 }
 
-// Used to extend runtime/compile classpaths
-val common: Configuration by configurations.creating
-// Needed to read mixin config in the runServer task, and for the architectury transformer
-// (e.g. the @ExpectPlatform annotation)
-val developmentFabric: Configuration = configurations.getByName("developmentFabric")
-// Our custom transitive include configuration
-val includeTransitive: Configuration = configurations.getByName("includeTransitive")
-
-configurations {
-    compileClasspath.get().extendsFrom(configurations["common"])
-    runtimeClasspath.get().extendsFrom(configurations["common"])
-    developmentFabric.extendsFrom(configurations["common"])
-}
-
 dependencies {
+    // FIXME why does it break when this is set to api scope???
+    compileOnlyApi(projects.isolation)
+
     modImplementation(libs.fabric.loader)
     modApi(libs.fabric.api)
-    // "namedElements" configuration should be used to depend on different loom projects
-    common(project(":mod", configuration = "namedElements")) { isTransitive = false }
-    // Bundle transformed classes of the common module for production mod jar
-    shadow(project(path = ":mod", configuration = "transformProductionFabric")) {
-        isTransitive = false
-    }
-
-    includeTransitive(libs.floodgate.core)
-    implementation(libs.floodgate.core)
-    implementation(libs.guice)
-
-    modImplementation(libs.cloud.fabric)
     include(libs.cloud.fabric)
     include(libs.fabric.permissions.api)
 }
 
 tasks {
-    remapJar {
-        archiveBaseName.set("floodgate-fabric")
+    jar {
+        dependsOn(":fabric-base:build", configurations.runtimeClasspath)
+
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+
+        archiveBaseName = "floodgate-${project.name}"
+        archiveVersion = ""
+        archiveClassifier = ""
+
+        val libsDir = project.projects
+            .fabricBase.dependencyProject
+            .layout.buildDirectory.dir("libs")
+
+        from(libsDir) {
+            include("floodgate-fabric-base.jar")
+            rename("floodgate-fabric-base.jar", "platform-base.jar")
+            into("bundled/")
+        }
     }
-
-//    modrinth {
-//        loaders.add("fabric")
-//    }
-
 }

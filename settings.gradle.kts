@@ -34,7 +34,7 @@ arrayOf("common", "netty4").forEach {
     project(id).projectDir = file("core/$it")
 }
 
-arrayOf("bungee", "spigot", "velocity").forEach { platform ->
+arrayOf("bungee", "spigot", "velocity", "fabric").forEach { platform ->
     arrayOf("base", "isolated").forEach {
         var id = ":$platform-$it"
         // isolated is the new default

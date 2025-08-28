@@ -9,47 +9,53 @@ import org.geysermc.floodgate.mod.pluginmessage.payloads.PacketPayload;
 import org.geysermc.floodgate.mod.pluginmessage.payloads.SkinPayload;
 import org.geysermc.floodgate.mod.pluginmessage.payloads.TransferPayload;
 
-public class FabricPluginMessageRegistration implements PluginMessageRegistration {
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+
+import java.util.function.Function;
+
+public final class FabricPluginMessageRegistration implements PluginMessageRegistration {
+
     @Override
     public void register(PluginMessageChannel channel) {
-        switch (channel.getIdentifier()) {
-            case "floodgate:form" -> {
-                PayloadTypeRegistry.playC2S().register(FormPayload.TYPE, FormPayload.STREAM_CODEC);
-                PayloadTypeRegistry.playS2C().register(FormPayload.TYPE, FormPayload.STREAM_CODEC);
-                ServerPlayNetworking.registerGlobalReceiver(FormPayload.TYPE,
-                        ((payload, context) -> channel.handleServerCall(
-                                payload.data(),
-                                context.player().getUUID(),
-                                context.player().getGameProfile().getName())));
-            }
-            case "floodgate:packet" -> {
-                PayloadTypeRegistry.playC2S().register(PacketPayload.TYPE, PacketPayload.STREAM_CODEC);
-                PayloadTypeRegistry.playS2C().register(PacketPayload.TYPE, PacketPayload.STREAM_CODEC);
-                ServerPlayNetworking.registerGlobalReceiver(PacketPayload.TYPE,
-                        ((payload, context) -> channel.handleServerCall(
-                                payload.data(),
-                                context.player().getUUID(),
-                                context.player().getGameProfile().getName())));
-            }
-            case "floodgate:skin" -> {
-                PayloadTypeRegistry.playC2S().register(SkinPayload.TYPE, SkinPayload.STREAM_CODEC);
-                PayloadTypeRegistry.playS2C().register(SkinPayload.TYPE, SkinPayload.STREAM_CODEC);
-                ServerPlayNetworking.registerGlobalReceiver(SkinPayload.TYPE,
-                        ((payload, context) -> channel.handleServerCall(
-                                payload.data(),
-                                context.player().getUUID(),
-                                context.player().getGameProfile().getName())));
-            }
-            case "floodgate:transfer" -> {
-                PayloadTypeRegistry.playC2S().register(TransferPayload.TYPE, TransferPayload.STREAM_CODEC);
-                PayloadTypeRegistry.playS2C().register(TransferPayload.TYPE, TransferPayload.STREAM_CODEC);
-                ServerPlayNetworking.registerGlobalReceiver(TransferPayload.TYPE,
-                        ((payload, context) -> channel.handleServerCall(
-                                payload.data(),
-                                context.player().getUUID(),
-                                context.player().getGameProfile().getName())));
-            }
-            default -> throw new IllegalArgumentException("unknown channel: " + channel);
+        final String id = channel.getIdentifier();
+
+        switch (id) {
+            case "floodgate:form" ->
+                registerBoth(channel, FormPayload.TYPE, FormPayload.STREAM_CODEC, FormPayload::data);
+            case "floodgate:packet" ->
+                registerBoth(channel, PacketPayload.TYPE, PacketPayload.STREAM_CODEC, PacketPayload::data);
+            case "floodgate:skin" ->
+                registerBoth(channel, SkinPayload.TYPE, SkinPayload.STREAM_CODEC, SkinPayload::data);
+            case "floodgate:transfer" ->
+                registerBoth(channel, TransferPayload.TYPE, TransferPayload.STREAM_CODEC, TransferPayload::data);
+            default -> throw new IllegalArgumentException("Unknown channel: " + id);
         }
+    }
+
+    /**
+     * Registers payload type/codec for both directions and wires a global receiver that
+     * forwards to the PluginMessageChannel.
+     */
+    private static <T extends CustomPacketPayload> void registerBoth(
+        PluginMessageChannel channel,
+        CustomPacketPayload.Type<T> type,
+        StreamCodec<? super RegistryFriendlyByteBuf, T> codec,
+        Function<T, byte[]> dataExtractor
+    ) {
+        // Bidirectional registration
+        PayloadTypeRegistry.playC2S().register(type, codec);
+        PayloadTypeRegistry.playS2C().register(type, codec);
+
+        // Single handler that delegates to channel.handleServerCall(...)
+        ServerPlayNetworking.registerGlobalReceiver(
+            type,
+            (payload, context) -> channel.handleServerCall(
+                dataExtractor.apply(payload),
+                context.player().getUUID(),
+                context.player().getGameProfile().getName()
+            )
+        );
     }
 }

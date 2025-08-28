@@ -17,9 +17,9 @@ import org.geysermc.floodgate.core.util.Utils;
 
 @Singleton
 public final class ModDataAddon implements InjectorAddon<Channel> {
-
     @Inject
     DataSeeker dataSeeker;
+
     @Inject
     FloodgateDataHandler handshakeHandler;
 
@@ -45,14 +45,6 @@ public final class ModDataAddon implements InjectorAddon<Channel> {
     public void onInject(Channel channel, boolean toServer) {
         var dataHandler = new ModDataHandler(handshakeHandler, config, kickMessageAttribute, logger);
         channel.pipeline().addBefore(packetHandlerName, "floodgate_data_handler", dataHandler);
-    }
-
-    @Override
-    public void onChannelClosed(Channel channel) {
-        FloodgatePlayer player = channel.attr(playerAttribute).get();
-        if (player != null && api.setPendingRemove(player)) {
-            logger.translatedInfo("floodgate.ingame.disconnect_name", player.getCorrectUsername());
-        }
     }
 
     @Override

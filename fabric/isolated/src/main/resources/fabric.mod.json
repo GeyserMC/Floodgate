@@ -9,13 +9,13 @@
   ],
   "contact": {
     "website": "$url",
-    "repo": "https://github.com/GeyserMC/Floodgate-Modded"
+    "repo": "https://github.com/GeyserMC/Floodgate"
   },
   "license": "MIT",
   "environment": "*",
   "entrypoints": {
     "main": [
-        "org.geysermc.floodgate.platform.fabric.FabricFloodgateMod"
+        "org.geysermc.floodgate.fabric.IsolatedFabricMod"
     ]
   },
   "accessWidener": "floodgate.accesswidener",

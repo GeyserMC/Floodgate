@@ -3,24 +3,25 @@ package org.geysermc.floodgate.mod.data;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.logging.LogUtils;
+import io.micronaut.context.BeanProvider;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.AttributeKey;
+import jakarta.inject.Inject;
+import net.kyori.adventure.platform.modcommon.MinecraftServerAudiences;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
-import org.geysermc.floodgate.api.logger.FloodgateLogger;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
-import org.geysermc.floodgate.core.addon.data.CommonDataHandler;
 import org.geysermc.floodgate.core.addon.data.CommonNettyDataHandler;
 import org.geysermc.floodgate.core.addon.data.PacketBlocker;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
-import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler;
-import org.geysermc.floodgate.core.player.FloodgateHandshakeHandler.HandshakeResult;
-import org.geysermc.floodgate.mod.MinecraftServerHolder;
+import org.geysermc.floodgate.core.connection.DataSeeker;
+import org.geysermc.floodgate.core.connection.FloodgateDataHandler;
+import org.geysermc.floodgate.core.logger.FloodgateLogger;
 import org.geysermc.floodgate.mod.mixin.ClientIntentionPacketMixinInterface;
 import org.geysermc.floodgate.mod.mixin.ConnectionMixin;
 import org.slf4j.Logger;
@@ -29,17 +30,33 @@ import java.net.InetSocketAddress;
 
 public final class ModDataHandler extends CommonNettyDataHandler {
     private static final Logger LOGGER = LogUtils.getLogger();
-
-    private final FloodgateLogger logger;
     private Connection networkManager;
-    private FloodgatePlayer player;
+    // stellar, but, won't change this now
+    private org.geysermc.api.connection.Connection connection;
+    private boolean proxyData;
+
+    @Inject
+    BeanProvider<MinecraftServer> server;
+
+    @Inject
+    BeanProvider<MinecraftServerAudiences> audience;
 
     public ModDataHandler(
-            FloodgateHandshakeHandler handshakeHandler,
+            DataSeeker dataSeeker,
+            FloodgateDataHandler dataHandler,
             FloodgateConfig config,
-            AttributeKey<String> kickMessageAttribute, FloodgateLogger logger) {
-        super(handshakeHandler, config, kickMessageAttribute, new PacketBlocker());
-        this.logger = logger;
+            FloodgateLogger logger,
+            AttributeKey<org.geysermc.api.connection.Connection> connectionAttribute,
+            AttributeKey<net.kyori.adventure.text.Component> kickMessageAttribute) {
+        super(
+            dataSeeker,
+            dataHandler,
+            config,
+            logger,
+            connectionAttribute,
+            kickMessageAttribute,
+            new PacketBlocker()
+        );
     }
 
     @Override
@@ -56,21 +73,18 @@ public final class ModDataHandler extends CommonNettyDataHandler {
     }
 
     @Override
-    protected boolean shouldRemoveHandler(HandshakeResult result) {
-        player = result.getFloodgatePlayer();
+    protected boolean shouldRemoveHandler(FloodgateDataHandler.HandleResult result) {
+        connection = result.joinResult() != null ? result.joinResult().connection() : null;
 
         if (getKickMessage() != null) {
             // we also have to keep this handler if we want to kick then with a disconnect message
             return false;
-        } else if (player == null) {
+        } else if (connection == null) {
             // player is not a Floodgate player
             return true;
         }
 
-        if (result.getResultType() == FloodgateHandshakeHandler.ResultType.SUCCESS) {
-            logger.info("Floodgate player who is logged in as {} {} joined",
-                    player.getCorrectUsername(), player.getCorrectUniqueId());
-        }
+        // TODO proxy data handling...?
 
         // Handler will be removed after the login hello packet is handled
         return false;
@@ -89,9 +103,9 @@ public final class ModDataHandler extends CommonNettyDataHandler {
 
     private boolean checkAndHandleLogin(Object packet) {
         if (packet instanceof ServerboundHelloPacket) {
-            String kickMessage = getKickMessage();
+            var kickMessage = getKickMessage();
             if (kickMessage != null) {
-                Component message = Component.nullToEmpty(kickMessage);
+                Component message = audience.get().asNative(kickMessage);
                 // If possible, disconnect using the "proper" packet listener; otherwise there's no proper disconnect message
                 if (networkManager.getPacketListener() instanceof ServerLoginPacketListenerImpl loginPacketListener) {
                     loginPacketListener.disconnect(message);
@@ -108,9 +122,9 @@ public final class ModDataHandler extends CommonNettyDataHandler {
                 return true;
             }
 
-            GameProfile gameProfile = new GameProfile(player.getCorrectUniqueId(), player.getCorrectUsername());
+            GameProfile gameProfile = new GameProfile(connection.javaUuid(), connection.javaUsername());
 
-            if (player.isLinked() && player.getCorrectUniqueId().version() == 4) {
+            if (connection.isLinked() && connection.javaUuid().version() == 4) {
                 verifyLinkedPlayerAsync(packetListener, gameProfile);
             } else {
                 packetListener.startClientVerification(gameProfile);
@@ -135,7 +149,7 @@ public final class ModDataHandler extends CommonNettyDataHandler {
             public void run() {
                 GameProfile effectiveProfile = gameProfile;
                 try {
-                    MinecraftSessionService service = MinecraftServerHolder.get().getSessionService();
+                    MinecraftSessionService service = server.get().getSessionService();
                     effectiveProfile = service.fetchProfile(effectiveProfile.getId(), true).profile();
                 } catch (Exception e) {
                     LOGGER.error("Unable to get Bedrock linked player textures for " + effectiveProfile.getName(), e);
@@ -151,7 +165,7 @@ public final class ModDataHandler extends CommonNettyDataHandler {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         super.exceptionCaught(ctx, cause);
-        if (config.isDebug()) {
+        if (config.debug()) {
             LOGGER.error("Exception caught in FabricDataHandler", cause);
         }
     }

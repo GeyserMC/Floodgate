@@ -17,6 +17,8 @@ dependencies {
     annotationProcessor(libs.micronaut.inject.java)
     compileOnlyApi(projects.isolation)
 
+    modApi(libs.adventure.platform.modded)
+
     compileOnly(libs.mixin)
     compileOnly(libs.asm)
 

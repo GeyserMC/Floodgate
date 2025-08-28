@@ -1,13 +1,20 @@
 package org.geysermc.floodgate.mod.util;
 
+import io.micronaut.context.BeanProvider;
+import jakarta.inject.Inject;
 import net.minecraft.SharedConstants;
+import net.minecraft.server.MinecraftServer;
 import org.geysermc.floodgate.core.platform.util.PlatformUtils;
-import org.geysermc.floodgate.mod.MinecraftServerHolder;
 
 public class ModPlatformUtils extends PlatformUtils {
+
+    @Inject
+    BeanProvider<MinecraftServer> minecraftServer;
+
     @Override
     public AuthType authType() {
-        return MinecraftServerHolder.get().usesAuthentication() ? AuthType.ONLINE : AuthType.OFFLINE;
+        // TODO proxied auth type
+        return minecraftServer.get().usesAuthentication() ? AuthType.ONLINE : AuthType.OFFLINE;
     }
 
     @Override
@@ -17,6 +24,6 @@ public class ModPlatformUtils extends PlatformUtils {
 
     @Override
     public String serverImplementationName() {
-        return MinecraftServerHolder.get().getServerModName();
+        return minecraftServer.get().getServerModName();
     }
 }

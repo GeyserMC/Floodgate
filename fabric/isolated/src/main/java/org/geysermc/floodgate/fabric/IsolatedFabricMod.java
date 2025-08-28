@@ -23,27 +23,34 @@
  * @link https://github.com/GeyserMC/Floodgate
  */
 
-package org.geysermc.floodgate.spigot;
+package org.geysermc.floodgate.fabric;
 
 import java.util.List;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import org.geysermc.floodgate.isolation.loader.PlatformHolder;
 import org.geysermc.floodgate.isolation.loader.PlatformLoader;
 
 public final class IsolatedFabricMod implements ModInitializer {
-    private PlatformHolder holder;
-    private static final isServer = FabricLoader.getInstance().getEnvironmentType().equals(EnvType.SERVER);
+    private static final boolean IS_SERVER = FabricLoader.getInstance().getEnvironmentType().equals(EnvType.SERVER);
 
     @Override
     public void onInitialize() {
+        PlatformHolder holder;
         try {
-            var libsDirectory = getDataFolder().toPath().resolve("libs");
+            ModContainer container = FabricLoader.getInstance().getModContainer("floodgate").orElseThrow();
+            var libsDirectory = FabricLoader.getInstance().getConfigDir().resolve("floodgate").resolve("libs");
             holder = PlatformLoader.loadDefault(getClass().getClassLoader(), libsDirectory);
-            holder.init(List.of(ModContainer.class), List.of(this));
+            holder.init(List.of(ModContainer.class), List.of(container));
         } catch (Exception exception) {
             throw new RuntimeException("Failed to load Floodgate", exception);
         }
 
-        if (isServer) {
+        if (IS_SERVER) {
             ServerLifecycleEvents.SERVER_STARTED.register(($) -> {
                 holder.enable();
             });
@@ -54,7 +61,7 @@ public final class IsolatedFabricMod implements ModInitializer {
         }
 
         ServerLifecycleEvents.SERVER_STOPPING.register(($) -> {
-            if (isServer) {
+            if (IS_SERVER) {
                 holder.shutdown();
             } else {
                 holder.disable();

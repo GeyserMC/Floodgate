@@ -1,5 +1,6 @@
 package org.geysermc.floodgate.platform.fabric.listener;
 
+import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import org.geysermc.floodgate.core.platform.listener.ListenerRegistration;
 import org.geysermc.floodgate.mod.listener.ModEventListener;
