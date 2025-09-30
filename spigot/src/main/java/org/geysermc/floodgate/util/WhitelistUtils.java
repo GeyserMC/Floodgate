@@ -79,6 +79,6 @@ public final class WhitelistUtils {
     }
 
     static void setWhitelist(OfflinePlayer player, boolean whitelist, SpigotVersionSpecificMethods versionSpecificMethods) {
-        versionSpecificMethods.maybeSchedule(() -> player.setWhitelisted(whitelist));
+        versionSpecificMethods.maybeSchedule(() -> player.setWhitelisted(whitelist), true); // Whitelisting is on the global thread
     }
 }

@@ -122,10 +122,19 @@ public final class SpigotVersionSpecificMethods {
     }
 
     public void maybeSchedule(Runnable runnable) {
-        // In Folia we don't have to schedule this as there is no concept of a single main thread.
+        this.maybeSchedule(runnable, false);
+    }
+
+    public void maybeSchedule(Runnable runnable, boolean globalContext) {
+        // In Folia we don't usually have to schedule this as there is no concept of a single main thread.
         // Instead, we have to schedule the task per player.
+        // However, in some cases we may want to access the global region for a global context.
         if (ClassNames.IS_FOLIA) {
-            runnable.run();
+            if (globalContext) {
+                plugin.getServer().getGlobalRegionScheduler().run(plugin, (task) -> runnable.run());
+            } else {
+                runnable.run();
+            }
             return;
         }
         plugin.getServer().getScheduler().runTask(plugin, runnable);
