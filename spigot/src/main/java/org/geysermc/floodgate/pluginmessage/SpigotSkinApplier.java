@@ -25,11 +25,12 @@
 
 package org.geysermc.floodgate.pluginmessage;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import com.mojang.authlib.properties.PropertyMap;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -75,9 +76,7 @@ public final class SpigotSkinApplier implements SkinApplier {
 
         // Need to be careful here - getProperties() returns an authlib PropertyMap, which extends
         // MultiMap from Guava. Floodgate relocates Guava.
-        PropertyMap properties = profile.getProperties();
-
-        SkinData currentSkin = versionSpecificMethods.currentSkin(properties);
+        SkinData currentSkin = versionSpecificMethods.currentSkin(profile);
 
         SkinApplyEvent event = new SkinApplyEventImpl(floodgatePlayer, currentSkin, skinData);
         event.setCancelled(floodgatePlayer.isLinked());
@@ -88,7 +87,7 @@ public final class SpigotSkinApplier implements SkinApplier {
             return;
         }
 
-        replaceSkin(properties, event.newSkin());
+        replaceSkin(player, floodgatePlayer, event.newSkin());
 
         versionSpecificMethods.maybeSchedule(() -> {
             for (Player p : Bukkit.getOnlinePlayers()) {
@@ -99,9 +98,12 @@ public final class SpigotSkinApplier implements SkinApplier {
         });
     }
 
-    private void replaceSkin(PropertyMap properties, SkinData skinData) {
-        properties.removeAll("textures");
-        Property property = new Property("textures", skinData.value(), skinData.signature());
-        properties.put("textures", property);
+    private void replaceSkin(Player player, FloodgatePlayer floodgatePlayer, SkinData skinData) {
+        Multimap<String, Property> newProperties = MultimapBuilder.hashKeys().arrayListValues().build();
+        newProperties.put("textures", new Property("textures", skinData.value(), skinData.signature()));
+        GameProfile profile = versionSpecificMethods.createGameProfile(floodgatePlayer.getCorrectUniqueId(),
+                floodgatePlayer.getCorrectUsername(), newProperties);
+        Object entityHuman = ReflectionUtils.invoke(player, ClassNames.GET_ENTITY_HUMAN_METHOD);
+        ReflectionUtils.setValue(entityHuman, ClassNames.GAME_PROFILE_FIELD, profile);
     }
 }

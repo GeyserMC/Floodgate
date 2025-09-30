@@ -76,6 +76,10 @@ public class ClassNames {
     @Nullable public static final BooleanSupplier PAPER_VELOCITY_SUPPORT;
 
     public static final Method GET_PROFILE_METHOD;
+
+    public static final Method GET_ENTITY_HUMAN_METHOD;
+    public static final Field GAME_PROFILE_FIELD;
+
     public static final Method LOGIN_DISCONNECT;
     public static final Method NETWORK_EXCEPTION_CAUGHT;
     @Nullable public static final Method INIT_UUID;
@@ -114,6 +118,14 @@ public class ClassNames {
                 "org.bukkit.craftbukkit." + version + "entity.CraftPlayer");
         GET_PROFILE_METHOD = getMethod(craftPlayerClass, "getProfile");
         checkNotNull(GET_PROFILE_METHOD, "Get profile method");
+
+        GET_ENTITY_HUMAN_METHOD = getMethod(craftPlayerClass, "getHandle");
+        checkNotNull(GET_ENTITY_HUMAN_METHOD, "getHandle method");
+        Class<?> entityHumanClass = getClassOrFallback("net.minecraft.world.entity.player.EntityHuman",
+                "net.minecraft.world.entity.player.Player");
+        checkNotNull(entityHumanClass, "EntityHuman class");
+        GAME_PROFILE_FIELD = getField(entityHumanClass, "gameProfile");
+        checkNotNull(GAME_PROFILE_FIELD, "EntityHuman.gameProfile field");
 
         // SpigotInjector
         MINECRAFT_SERVER = getClassOrFallback(

@@ -28,6 +28,8 @@ package org.geysermc.floodgate.addon.data;
 import static org.geysermc.floodgate.util.ReflectionUtils.getCastedValue;
 import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import io.netty.channel.Channel;
@@ -41,6 +43,7 @@ import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.util.ClassNames;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.ProxyUtils;
+import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
 
 public final class SpigotDataHandler extends CommonDataHandler {
     private static final Property DEFAULT_TEXTURE_PROPERTY = new Property(
@@ -49,6 +52,7 @@ public final class SpigotDataHandler extends CommonDataHandler {
             Constants.DEFAULT_MINECRAFT_JAVA_SKIN_SIGNATURE
     );
 
+    private final SpigotVersionSpecificMethods versionSpecificMethods;
     private Object networkManager;
     private FloodgatePlayer player;
     private boolean proxyData;
@@ -56,8 +60,10 @@ public final class SpigotDataHandler extends CommonDataHandler {
     public SpigotDataHandler(
             FloodgateHandshakeHandler handshakeHandler,
             FloodgateConfig config,
-            AttributeKey<String> kickMessageAttribute) {
+            AttributeKey<String> kickMessageAttribute,
+            SpigotVersionSpecificMethods versionSpecificMethods) {
         super(handshakeHandler, config, kickMessageAttribute, new PacketBlocker());
+        this.versionSpecificMethods = versionSpecificMethods;
     }
 
     @Override
@@ -175,16 +181,16 @@ public final class SpigotDataHandler extends CommonDataHandler {
                 }
             }
 
-            GameProfile gameProfile = new GameProfile(
-                    player.getCorrectUniqueId(), player.getCorrectUsername()
-            );
+            Multimap<String, Property> properties = MultimapBuilder.hashKeys().arrayListValues().build();
 
             if (!player.isLinked()) {
                 // Otherwise game server will try to fetch the skin from Mojang.
                 // No need to worry that this overrides proxy data, because those won't reach this
                 // method / are already removed (in the case of username validation)
-                gameProfile.getProperties().put("textures", DEFAULT_TEXTURE_PROPERTY);
+                properties.put("textures", DEFAULT_TEXTURE_PROPERTY);
             }
+            GameProfile gameProfile = versionSpecificMethods.createGameProfile(
+                    player.getCorrectUniqueId(), player.getCorrectUsername(), properties);
 
             // we have to fake the offline player (login) cycle
 
