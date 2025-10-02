@@ -25,8 +25,6 @@
 
 package org.geysermc.floodgate.pluginmessage;
 
-import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.mojang.authlib.GameProfile;
