@@ -30,6 +30,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.Setter;
@@ -135,31 +136,31 @@ public final class ReflectionUtils {
         return clazz;
     }
 
-    public static Class<?> getClassOrFallback(String className, String fallbackClassName1, String fallbackClassName2) {
-        Class<?> clazz = getClassSilently(className);
-
-        if (clazz != null) {
-            if (Constants.DEBUG_MODE) {
-                System.out.println("Found class (primary): " + clazz.getName());
+    public static Class<?> getClassOrFallback(String... classNames) {
+        for (String className : classNames) {
+            Class<?> clazz = getClassSilently(className);
+            if (clazz != null) {
+                if (Constants.DEBUG_MODE) {
+                    System.out.println("Found class: " + clazz.getName() + " for choices: " +
+                            Arrays.toString(classNames));
+                }
+                return clazz;
             }
-            return clazz;
         }
 
-        clazz = getClassSilently(fallbackClassName1);
+        throw new IllegalStateException("Could not find class between these choices: " +
+                Arrays.toString(classNames));
+    }
 
-        if (clazz != null) {
-            if (Constants.DEBUG_MODE) {
-                System.out.println("Found class (fallback1): " + clazz.getName());
+    @Nullable
+    public static Class<?> getClassOrFallbackSilently(String... classNames) {
+        for (String className : classNames) {
+            Class<?> clazz = getClassSilently(className);
+            if (clazz != null) {
+                return clazz;
             }
-            return clazz;
         }
-
-        // do throw an exception when both classes couldn't be found
-        clazz = ReflectionUtils.getClassOrThrow(fallbackClassName2);
-        if (Constants.DEBUG_MODE) {
-            System.out.println("Found class (fallback2): " + clazz.getName());
-        }
-        return clazz;
+        return null;
     }
 
     @Nullable

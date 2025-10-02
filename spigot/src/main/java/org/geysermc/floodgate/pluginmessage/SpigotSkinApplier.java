@@ -31,6 +31,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -87,7 +88,12 @@ public final class SpigotSkinApplier implements SkinApplier {
             return;
         }
 
-        replaceSkin(player, floodgatePlayer, event.newSkin());
+        if (ClassNames.GAME_PROFILE_FIELD != null) {
+            replaceSkin(player, floodgatePlayer, event.newSkin());
+        } else {
+            // We're on a version with mutable GameProfiles
+            replaceSkinOld(profile.getProperties(), event.newSkin());
+        }
 
         versionSpecificMethods.maybeSchedule(() -> {
             for (Player p : Bukkit.getOnlinePlayers()) {
@@ -104,5 +110,11 @@ public final class SpigotSkinApplier implements SkinApplier {
                 floodgatePlayer.getCorrectUsername(), skinProperty);
         Object entityHuman = ReflectionUtils.invoke(player, ClassNames.GET_ENTITY_HUMAN_METHOD);
         ReflectionUtils.setValue(entityHuman, ClassNames.GAME_PROFILE_FIELD, profile);
+    }
+
+    private void replaceSkinOld(PropertyMap properties, SkinData skinData) {
+        properties.removeAll("textures");
+        Property property = new Property("textures", skinData.value(), skinData.signature());
+        properties.put("textures", property);
     }
 }

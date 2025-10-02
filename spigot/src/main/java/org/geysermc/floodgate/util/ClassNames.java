@@ -28,6 +28,7 @@ package org.geysermc.floodgate.util;
 import static org.geysermc.floodgate.util.ReflectionUtils.castedStaticBooleanValue;
 import static org.geysermc.floodgate.util.ReflectionUtils.getBooleanValue;
 import static org.geysermc.floodgate.util.ReflectionUtils.getClassOrFallback;
+import static org.geysermc.floodgate.util.ReflectionUtils.getClassOrFallbackSilently;
 import static org.geysermc.floodgate.util.ReflectionUtils.getClassSilently;
 import static org.geysermc.floodgate.util.ReflectionUtils.getConstructor;
 import static org.geysermc.floodgate.util.ReflectionUtils.getField;
@@ -77,8 +78,8 @@ public class ClassNames {
 
     public static final Method GET_PROFILE_METHOD;
 
-    public static final Method GET_ENTITY_HUMAN_METHOD;
-    public static final Field GAME_PROFILE_FIELD;
+    @Nullable public static final Method GET_ENTITY_HUMAN_METHOD;
+    @Nullable public static final Field GAME_PROFILE_FIELD;
 
     public static final Method LOGIN_DISCONNECT;
     public static final Method NETWORK_EXCEPTION_CAUGHT;
@@ -122,13 +123,16 @@ public class ClassNames {
         checkNotNull(GET_PROFILE_METHOD, "Get profile method");
 
         GET_ENTITY_HUMAN_METHOD = getMethod(craftPlayerClass, "getHandle");
-        checkNotNull(GET_ENTITY_HUMAN_METHOD, "getHandle method");
-        Class<?> entityHumanClass = getClassOrFallback("net.minecraft.world.entity.player.EntityHuman",
-                "net.minecraft.world.entity.player.Player");
-        checkNotNull(entityHumanClass, "EntityHuman class");
-        // Since 1.21.9: Spigot obfuscates field name
-        GAME_PROFILE_FIELD = getFieldOfType(entityHumanClass, GameProfile.class);
-        checkNotNull(GAME_PROFILE_FIELD, "EntityHuman.gameProfile field");
+        Class<?> entityHumanClass = getClassOrFallbackSilently(
+                "net.minecraft.world.entity.player.EntityHuman",
+                "net.minecraft.world.entity.player.Player"
+        );
+        if (entityHumanClass != null) {
+            // Spigot obfuscates field name
+            GAME_PROFILE_FIELD = getFieldOfType(entityHumanClass, GameProfile.class);
+        } else {
+            GAME_PROFILE_FIELD = null;
+        }
 
         // SpigotInjector
         MINECRAFT_SERVER = getClassOrFallback(
