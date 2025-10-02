@@ -25,12 +25,13 @@
 
 package org.geysermc.floodgate.util;
 
-import com.google.common.collect.Multimap;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.bukkit.entity.Player;
@@ -49,6 +50,7 @@ public final class SpigotVersionSpecificMethods {
     private static final Method NEW_GAME_PROFILE_PROPERTIES;
     private static final Constructor<GameProfile> RECORD_GAME_PROFILE_CONSTRUCTOR;
     private static final Constructor<PropertyMap> IMMUTABLE_PROPERTY_MAP_CONSTRUCTOR;
+    private static final Method MULTIMAP_FROM_MAP;
 
     static {
         GET_SPIGOT = ReflectionUtils.getMethod(Player.class, "spigot");
@@ -61,11 +63,16 @@ public final class SpigotVersionSpecificMethods {
 
         NEW_PROPERTY_VALUE = ReflectionUtils.getMethod(Property.class, "value");
         NEW_PROPERTY_SIGNATURE = ReflectionUtils.getMethod(Property.class, "signature");
-        NEW_GAME_PROFILE_PROPERTIES = ReflectionUtils.getMethod(GameProfile.class, "properties");
-        RECORD_GAME_PROFILE_CONSTRUCTOR = ReflectionUtils.getConstructor(GameProfile.class, true, UUID.class, String.class, PropertyMap.class);
-        // TODO have to do this here because if we get constructor using Multimap.class we try to look for one that takes our
-        // TODO relocated Multimap, which doesn't exist
-        IMMUTABLE_PROPERTY_MAP_CONSTRUCTOR = (Constructor<PropertyMap>) PropertyMap.class.getConstructors()[0];
+        NEW_GAME_PROFILE_PROPERTIES = ReflectionUtils.getMethod(
+                GameProfile.class, "properties");
+        RECORD_GAME_PROFILE_CONSTRUCTOR = ReflectionUtils.getConstructor(
+                GameProfile.class, true, UUID.class, String.class, PropertyMap.class);
+        IMMUTABLE_PROPERTY_MAP_CONSTRUCTOR = (Constructor<PropertyMap>)
+                PropertyMap.class.getConstructors()[0];
+        // Avoid relocation for this class.
+        Class<?> multimaps = ReflectionUtils.getClass(String.join(".", "com",
+                "google", "common", "collect", "Multimaps"));
+        MULTIMAP_FROM_MAP = ReflectionUtils.getMethod(multimaps, "forMap", Map.class);
     }
 
     private final SpigotPlugin plugin;
@@ -74,15 +81,22 @@ public final class SpigotVersionSpecificMethods {
         this.plugin = plugin;
     }
 
-    public GameProfile createGameProfile(UUID uuid, String name, Multimap<String, Property> properties) {
+    public GameProfile createGameProfile(UUID uuid, String name, Property texturesProperty) {
         if (RECORD_GAME_PROFILE_CONSTRUCTOR != null && IMMUTABLE_PROPERTY_MAP_CONSTRUCTOR != null) {
-            // TODO this breaks, as the passed properties to the IMMUTABLE_PROPERTY_MAP_CONSTRUCTOR
-            // TODO is of our relocated Multimap, and not the one PropertyMap uses
-            return ReflectionUtils.newInstance(RECORD_GAME_PROFILE_CONSTRUCTOR, uuid, name,
-                    ReflectionUtils.newInstance(IMMUTABLE_PROPERTY_MAP_CONSTRUCTOR, properties));
+            if (texturesProperty != null) {
+                Map<String, Property> properties = new HashMap<>();
+                properties.put("textures", texturesProperty);
+                Object multimap = ReflectionUtils.invoke(null, MULTIMAP_FROM_MAP, properties);
+                return ReflectionUtils.newInstanceOrThrow(RECORD_GAME_PROFILE_CONSTRUCTOR, uuid,
+                        name,
+                        ReflectionUtils.newInstanceOrThrow(IMMUTABLE_PROPERTY_MAP_CONSTRUCTOR,
+                                multimap));
+            }
         }
         GameProfile profile = new GameProfile(uuid, name);
-        profile.getProperties().putAll(properties);
+        if (texturesProperty != null) {
+            profile.getProperties().put("textures", texturesProperty);
+        }
         return profile;
     }
 

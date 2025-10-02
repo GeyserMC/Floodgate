@@ -152,6 +152,15 @@ public final class ReflectionUtils {
     }
 
     @Nullable
+    public static <T> T newInstanceOrThrow(Constructor<T> constructor, Object... parameters) {
+        try {
+            return constructor.newInstance(parameters);
+        } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Nullable
     public static <T> T newInstance(Constructor<T> constructor, Object... parameters) {
         try {
             return constructor.newInstance(parameters);

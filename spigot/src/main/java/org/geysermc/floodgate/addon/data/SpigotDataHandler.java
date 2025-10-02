@@ -28,8 +28,6 @@ package org.geysermc.floodgate.addon.data;
 import static org.geysermc.floodgate.util.ReflectionUtils.getCastedValue;
 import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
 
-import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import io.netty.channel.Channel;
@@ -181,16 +179,15 @@ public final class SpigotDataHandler extends CommonDataHandler {
                 }
             }
 
-            Multimap<String, Property> properties = MultimapBuilder.hashKeys().arrayListValues().build();
-
+            Property texturesProperty = null;
             if (!player.isLinked()) {
                 // Otherwise game server will try to fetch the skin from Mojang.
                 // No need to worry that this overrides proxy data, because those won't reach this
                 // method / are already removed (in the case of username validation)
-                properties.put("textures", DEFAULT_TEXTURE_PROPERTY);
+                texturesProperty = DEFAULT_TEXTURE_PROPERTY;
             }
             GameProfile gameProfile = versionSpecificMethods.createGameProfile(
-                    player.getCorrectUniqueId(), player.getCorrectUsername(), properties);
+                    player.getCorrectUniqueId(), player.getCorrectUsername(), texturesProperty);
 
             // we have to fake the offline player (login) cycle
 

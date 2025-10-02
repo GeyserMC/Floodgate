@@ -99,10 +99,9 @@ public final class SpigotSkinApplier implements SkinApplier {
     }
 
     private void replaceSkin(Player player, FloodgatePlayer floodgatePlayer, SkinData skinData) {
-        Multimap<String, Property> newProperties = MultimapBuilder.hashKeys().arrayListValues().build();
-        newProperties.put("textures", new Property("textures", skinData.value(), skinData.signature()));
+        Property skinProperty = new Property("textures", skinData.value(), skinData.signature());
         GameProfile profile = versionSpecificMethods.createGameProfile(floodgatePlayer.getCorrectUniqueId(),
-                floodgatePlayer.getCorrectUsername(), newProperties);
+                floodgatePlayer.getCorrectUsername(), skinProperty);
         Object entityHuman = ReflectionUtils.invoke(player, ClassNames.GET_ENTITY_HUMAN_METHOD);
         ReflectionUtils.setValue(entityHuman, ClassNames.GAME_PROFILE_FIELD, profile);
     }

@@ -124,7 +124,8 @@ public class ClassNames {
         Class<?> entityHumanClass = getClassOrFallback("net.minecraft.world.entity.player.EntityHuman",
                 "net.minecraft.world.entity.player.Player");
         checkNotNull(entityHumanClass, "EntityHuman class");
-        GAME_PROFILE_FIELD = getField(entityHumanClass, "gameProfile");
+        // Since 1.21.9: Spigot obfuscates field name
+        GAME_PROFILE_FIELD = getFieldOfType(entityHumanClass, GameProfile.class);
         checkNotNull(GAME_PROFILE_FIELD, "EntityHuman.gameProfile field");
 
         // SpigotInjector
