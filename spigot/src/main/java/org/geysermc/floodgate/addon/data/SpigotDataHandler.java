@@ -41,6 +41,7 @@ import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.util.ClassNames;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.ProxyUtils;
+import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
 
 public final class SpigotDataHandler extends CommonDataHandler {
     private static final Property DEFAULT_TEXTURE_PROPERTY = new Property(
@@ -49,6 +50,7 @@ public final class SpigotDataHandler extends CommonDataHandler {
             Constants.DEFAULT_MINECRAFT_JAVA_SKIN_SIGNATURE
     );
 
+    private final SpigotVersionSpecificMethods versionSpecificMethods;
     private Object networkManager;
     private FloodgatePlayer player;
     private boolean proxyData;
@@ -56,8 +58,10 @@ public final class SpigotDataHandler extends CommonDataHandler {
     public SpigotDataHandler(
             FloodgateHandshakeHandler handshakeHandler,
             FloodgateConfig config,
-            AttributeKey<String> kickMessageAttribute) {
+            AttributeKey<String> kickMessageAttribute,
+            SpigotVersionSpecificMethods versionSpecificMethods) {
         super(handshakeHandler, config, kickMessageAttribute, new PacketBlocker());
+        this.versionSpecificMethods = versionSpecificMethods;
     }
 
     @Override
@@ -175,16 +179,15 @@ public final class SpigotDataHandler extends CommonDataHandler {
                 }
             }
 
-            GameProfile gameProfile = new GameProfile(
-                    player.getCorrectUniqueId(), player.getCorrectUsername()
-            );
-
+            Property texturesProperty = null;
             if (!player.isLinked()) {
                 // Otherwise game server will try to fetch the skin from Mojang.
                 // No need to worry that this overrides proxy data, because those won't reach this
                 // method / are already removed (in the case of username validation)
-                gameProfile.getProperties().put("textures", DEFAULT_TEXTURE_PROPERTY);
+                texturesProperty = DEFAULT_TEXTURE_PROPERTY;
             }
+            GameProfile gameProfile = versionSpecificMethods.createGameProfile(
+                    player.getCorrectUniqueId(), player.getCorrectUsername(), texturesProperty);
 
             // we have to fake the offline player (login) cycle
 

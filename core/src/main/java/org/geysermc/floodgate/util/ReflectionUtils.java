@@ -30,6 +30,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.Setter;
@@ -135,6 +136,39 @@ public final class ReflectionUtils {
         return clazz;
     }
 
+    public static Class<?> getClassOrFallback(String... classNames) {
+        for (String className : classNames) {
+            Class<?> clazz = getClassSilently(className);
+            if (clazz != null) {
+                if (Constants.DEBUG_MODE) {
+                    System.out.println("Found class: " + clazz.getName() + " for choices: " +
+                            Arrays.toString(classNames));
+                }
+                return clazz;
+            }
+        }
+
+        throw new IllegalStateException("Could not find class between these choices: " +
+                Arrays.toString(classNames));
+    }
+
+    @Nullable
+    public static Class<?> getClassOrFallbackSilently(String... classNames) {
+        for (String className : classNames) {
+            Class<?> clazz = getClassSilently(className);
+            if (clazz != null) {
+                return clazz;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public static <T> Class<T> getCastedClassOrFallback(String className, String fallbackClassName) {
+        return (Class<T>) getClassOrFallback(className, fallbackClassName);
+    }
+
     @Nullable
     public static <T> Constructor<T> getConstructor(Class<T> clazz, boolean declared, Class<?>... parameters) {
         try {
@@ -148,6 +182,15 @@ public final class ReflectionUtils {
             return constructor;
         } catch (NoSuchMethodException e) {
             return null;
+        }
+    }
+
+    @Nullable
+    public static <T> T newInstanceOrThrow(Constructor<T> constructor, Object... parameters) {
+        try {
+            return constructor.newInstance(parameters);
+        } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -199,6 +242,28 @@ public final class ReflectionUtils {
             return field;
         }
         return getField(clazz, fieldName, false);
+    }
+
+    /**
+     * Get a field from a class, it doesn't matter if the field is public or not. This method will
+     * first try to get a declared field and if that failed it'll try to get a public field.
+     *
+     * @param clazz     the class to get the field from
+     * @param fieldName the name of the field
+     * @param fallbackFieldName the fallback incase fieldName doesn't exist
+     * @return the field if found from the name or fallback, otherwise null
+     */
+    @Nullable
+    public static Field getField(Class<?> clazz, String fieldName, String fallbackFieldName) {
+        Field field = getField(clazz, fieldName, true);
+        if (field != null) {
+            return field;
+        }
+        field = getField(clazz, fieldName, false);
+        if (field != null) {
+            return field;
+        }
+        return getField(clazz, fallbackFieldName);
     }
 
     /**
@@ -407,6 +472,29 @@ public final class ReflectionUtils {
             return method;
         }
         return getMethod(clazz, methodName, false, arguments);
+    }
+
+    /**
+     * Get a method from a class, it doesn't matter if the method is public or not. This method will
+     * first try to get a declared method and if that fails it'll try to get a public method.
+     *
+     * @param clazz      the class to get the method from
+     * @param methodName the name of the method to find
+     * @param fallbackName the fallback instead methodName does not exist
+     * @param arguments  the classes of the method arguments
+     * @return the requested method if it has been found, otherwise null
+     */
+    @Nullable
+    public static Method getMethod(Class<?> clazz, String methodName, String fallbackName, Class<?>... arguments) {
+        Method method = getMethod(clazz, methodName, true, arguments);
+        if (method != null) {
+            return method;
+        }
+        method = getMethod(clazz, methodName, false, arguments);
+        if (method != null) {
+            return method;
+        }
+        return getMethod(clazz, fallbackName, arguments);
     }
 
     /**

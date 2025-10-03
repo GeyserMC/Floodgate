@@ -28,6 +28,7 @@ package org.geysermc.floodgate.util;
 import static org.geysermc.floodgate.util.ReflectionUtils.castedStaticBooleanValue;
 import static org.geysermc.floodgate.util.ReflectionUtils.getBooleanValue;
 import static org.geysermc.floodgate.util.ReflectionUtils.getClassOrFallback;
+import static org.geysermc.floodgate.util.ReflectionUtils.getClassOrFallbackSilently;
 import static org.geysermc.floodgate.util.ReflectionUtils.getClassSilently;
 import static org.geysermc.floodgate.util.ReflectionUtils.getConstructor;
 import static org.geysermc.floodgate.util.ReflectionUtils.getField;
@@ -59,7 +60,9 @@ public class ClassNames {
     public static final Class<?> LOGIN_LISTENER;
     @Nullable public static final Class<?> CLIENT_INTENT;
 
-    public static final Constructor<OfflinePlayer> CRAFT_OFFLINE_PLAYER_CONSTRUCTOR;
+    @Nullable public static final Constructor<OfflinePlayer> CRAFT_OFFLINE_PLAYER_CONSTRUCTOR;
+    @Nullable public static final Constructor<OfflinePlayer> CRAFT_NEW_OFFLINE_PLAYER_CONSTRUCTOR;
+    @Nullable public static final Constructor<?> NAME_AND_ID_CONSTRUCTOR;
     @Nullable public static final Constructor<?> LOGIN_HANDLER_CONSTRUCTOR;
     @Nullable public static final Constructor<?> HANDSHAKE_PACKET_CONSTRUCTOR;
 
@@ -76,6 +79,10 @@ public class ClassNames {
     @Nullable public static final BooleanSupplier PAPER_VELOCITY_SUPPORT;
 
     public static final Method GET_PROFILE_METHOD;
+
+    @Nullable public static final Method GET_ENTITY_HUMAN_METHOD;
+    @Nullable public static final Field GAME_PROFILE_FIELD;
+
     public static final Method LOGIN_DISCONNECT;
     public static final Method NETWORK_EXCEPTION_CAUGHT;
     @Nullable public static final Method INIT_UUID;
@@ -110,10 +117,24 @@ public class ClassNames {
 
 
         // SpigotSkinApplier
-        Class<?> craftPlayerClass = ReflectionUtils.getClass(
-                "org.bukkit.craftbukkit." + version + "entity.CraftPlayer");
+        Class<?> craftPlayerClass = getClassOrFallback(
+                "org.bukkit.craftbukkit.entity.CraftPlayer",
+                "org.bukkit.craftbukkit." + version + "entity.CraftPlayer"
+        );
         GET_PROFILE_METHOD = getMethod(craftPlayerClass, "getProfile");
         checkNotNull(GET_PROFILE_METHOD, "Get profile method");
+
+        GET_ENTITY_HUMAN_METHOD = getMethod(craftPlayerClass, "getHandle");
+        Class<?> entityHumanClass = getClassOrFallbackSilently(
+                "net.minecraft.world.entity.player.EntityHuman",
+                "net.minecraft.world.entity.player.Player"
+        );
+        if (entityHumanClass != null) {
+            // Spigot obfuscates field name
+            GAME_PROFILE_FIELD = getFieldOfType(entityHumanClass, GameProfile.class);
+        } else {
+            GAME_PROFILE_FIELD = null;
+        }
 
         // SpigotInjector
         MINECRAFT_SERVER = getClassOrFallback(
@@ -122,21 +143,39 @@ public class ClassNames {
         );
 
         SERVER_CONNECTION = getClassOrFallback(
+                "net.minecraft.server.network.ServerConnectionListener",
                 "net.minecraft.server.network.ServerConnection",
                 nmsPackage + "ServerConnection"
         );
 
         // WhitelistUtils
-        Class<?> craftServerClass = ReflectionUtils.getClass(
-                "org.bukkit.craftbukkit." + version + "CraftServer");
-        Class<OfflinePlayer> craftOfflinePlayerClass = ReflectionUtils.getCastedClass(
-                "org.bukkit.craftbukkit." + version + "CraftOfflinePlayer");
+        Class<?> craftServerClass = getClassOrFallback(
+                "org.bukkit.craftbukkit.CraftServer",
+                "org.bukkit.craftbukkit." + version + "CraftServer"
+        );
+        Class<OfflinePlayer> craftOfflinePlayerClass = ReflectionUtils.getCastedClassOrFallback(
+                "org.bukkit.craftbukkit.CraftOfflinePlayer",
+                "org.bukkit.craftbukkit." + version + "CraftOfflinePlayer"
+        );
 
         CRAFT_OFFLINE_PLAYER_CONSTRUCTOR = ReflectionUtils.getConstructor(
                 craftOfflinePlayerClass, true, craftServerClass, GameProfile.class);
 
+        if (CRAFT_OFFLINE_PLAYER_CONSTRUCTOR == null) { // Changed in 1.21.9
+            Class<?> nameAndIdClass = getClassSilently("net.minecraft.server.players.NameAndId");
+
+            CRAFT_NEW_OFFLINE_PLAYER_CONSTRUCTOR = ReflectionUtils.getConstructor(
+                    craftOfflinePlayerClass, true, craftServerClass, nameAndIdClass);
+
+            NAME_AND_ID_CONSTRUCTOR = ReflectionUtils.getConstructor(nameAndIdClass, true, GameProfile.class);
+        } else {
+            CRAFT_NEW_OFFLINE_PLAYER_CONSTRUCTOR = null;
+            NAME_AND_ID_CONSTRUCTOR = null;
+        }
+
         // SpigotDataHandler
         Class<?> networkManager = getClassOrFallback(
+                "net.minecraft.network.Connection",
                 "net.minecraft.network.NetworkManager",
                 nmsPackage + "NetworkManager"
         );
@@ -144,6 +183,7 @@ public class ClassNames {
         SOCKET_ADDRESS = getFieldOfType(networkManager, SocketAddress.class, false);
 
         HANDSHAKE_PACKET = getClassOrFallback(
+                "net.minecraft.network.protocol.handshake.ClientIntentionPacket",
                 "net.minecraft.network.protocol.handshake.PacketHandshakingInSetProtocol",
                 nmsPackage + "PacketHandshakingInSetProtocol"
         );
@@ -152,11 +192,13 @@ public class ClassNames {
         checkNotNull(HANDSHAKE_HOST, "Handshake host");
 
         LOGIN_START_PACKET = getClassOrFallback(
+                "net.minecraft.network.protocol.login.ServerboundHelloPacket",
                 "net.minecraft.network.protocol.login.PacketLoginInStart",
                 nmsPackage + "PacketLoginInStart"
         );
 
         LOGIN_LISTENER = getClassOrFallback(
+                "net.minecraft.server.network.ServerLoginPacketListenerImpl",
                 "net.minecraft.server.network.LoginListener",
                 nmsPackage + "LoginListener"
         );
@@ -197,7 +239,7 @@ public class ClassNames {
             // We get the field by name on 1.20.2+ as there are now multiple fields of this type in network manager
 
             // PacketListener packetListener of NetworkManager
-            PACKET_LISTENER = getField(networkManager, "q");
+            PACKET_LISTENER = getField(networkManager, "packetListener", "q");
             makeAccessible(PACKET_LISTENER);
         }
         checkNotNull(PACKET_LISTENER, "Packet listener");
@@ -205,7 +247,7 @@ public class ClassNames {
         if (IS_POST_LOGIN_HANDLER) {
             makeAccessible(CALL_PLAYER_PRE_LOGIN_EVENTS);
 
-            START_CLIENT_VERIFICATION = getMethod(LOGIN_LISTENER, "b", GameProfile.class);
+            START_CLIENT_VERIFICATION = getMethod(LOGIN_LISTENER, "startClientVerification", "b", GameProfile.class);
             checkNotNull(START_CLIENT_VERIFICATION, "startClientVerification");
             makeAccessible(START_CLIENT_VERIFICATION);
 
@@ -301,15 +343,15 @@ public class ClassNames {
                     String.class, int.class, CLIENT_INTENT);
             checkNotNull(HANDSHAKE_PACKET_CONSTRUCTOR, "Handshake packet constructor");
 
-            Field a = getField(HANDSHAKE_PACKET, "a");
+            Field a = getField(HANDSHAKE_PACKET, "STREAM_CODEC", "a");
             checkNotNull(a, "Handshake \"a\" field (protocol version, or stream codec)");
 
             if (a.getType().isPrimitive()) { // 1.20.2 - 1.20.4: a is the protocol version (int)
                 HANDSHAKE_PROTOCOL = a;
                 HANDSHAKE_PORT = getField(HANDSHAKE_PACKET, "c");
             } else { // 1.20.5: a is the stream_codec thing, so everything is shifted
-                HANDSHAKE_PROTOCOL = getField(HANDSHAKE_PACKET, "b");
-                HANDSHAKE_PORT = getField(HANDSHAKE_PACKET, "d");
+                HANDSHAKE_PROTOCOL = getField(HANDSHAKE_PACKET, "protocolVersion", "b");
+                HANDSHAKE_PORT = getField(HANDSHAKE_PACKET, "port", "d");
             }
 
             checkNotNull(HANDSHAKE_PROTOCOL, "Handshake protocol");

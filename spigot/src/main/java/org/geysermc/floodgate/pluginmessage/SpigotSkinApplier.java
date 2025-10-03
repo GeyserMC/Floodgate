@@ -75,9 +75,7 @@ public final class SpigotSkinApplier implements SkinApplier {
 
         // Need to be careful here - getProperties() returns an authlib PropertyMap, which extends
         // MultiMap from Guava. Floodgate relocates Guava.
-        PropertyMap properties = profile.getProperties();
-
-        SkinData currentSkin = versionSpecificMethods.currentSkin(properties);
+        SkinData currentSkin = versionSpecificMethods.currentSkin(profile);
 
         SkinApplyEvent event = new SkinApplyEventImpl(floodgatePlayer, currentSkin, skinData);
         event.setCancelled(floodgatePlayer.isLinked());
@@ -88,7 +86,12 @@ public final class SpigotSkinApplier implements SkinApplier {
             return;
         }
 
-        replaceSkin(properties, event.newSkin());
+        if (ClassNames.GAME_PROFILE_FIELD != null) {
+            replaceSkin(player, profile, event.newSkin());
+        } else {
+            // We're on a version with mutable GameProfiles
+            replaceSkinOld(profile.getProperties(), event.newSkin());
+        }
 
         versionSpecificMethods.maybeSchedule(() -> {
             for (Player p : Bukkit.getOnlinePlayers()) {
@@ -99,7 +102,14 @@ public final class SpigotSkinApplier implements SkinApplier {
         });
     }
 
-    private void replaceSkin(PropertyMap properties, SkinData skinData) {
+    private void replaceSkin(Player player, GameProfile oldProfile, SkinData skinData) {
+        Property skinProperty = new Property("textures", skinData.value(), skinData.signature());
+        GameProfile profile = versionSpecificMethods.createGameProfile(oldProfile, skinProperty);
+        Object entityHuman = ReflectionUtils.invoke(player, ClassNames.GET_ENTITY_HUMAN_METHOD);
+        ReflectionUtils.setValue(entityHuman, ClassNames.GAME_PROFILE_FIELD, profile);
+    }
+
+    private void replaceSkinOld(PropertyMap properties, SkinData skinData) {
         properties.removeAll("textures");
         Property property = new Property("textures", skinData.value(), skinData.signature());
         properties.put("textures", property);

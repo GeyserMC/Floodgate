@@ -25,9 +25,15 @@
 
 package org.geysermc.floodgate.util;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -42,6 +48,12 @@ public final class SpigotVersionSpecificMethods {
 
     private static final Method NEW_PROPERTY_VALUE;
     private static final Method NEW_PROPERTY_SIGNATURE;
+    private static final Method NEW_GAME_PROFILE_PROPERTIES;
+    private static final Constructor<GameProfile> RECORD_GAME_PROFILE_CONSTRUCTOR;
+    private static final Constructor<PropertyMap> IMMUTABLE_PROPERTY_MAP_CONSTRUCTOR;
+    private static final Method MULTIMAP_FROM_MAP;
+    private static final Field PROFILE_NAME_FIELD;
+    private static final Field PROFILE_UUID_FIELD;
 
     static {
         GET_SPIGOT = ReflectionUtils.getMethod(Player.class, "spigot");
@@ -54,12 +66,49 @@ public final class SpigotVersionSpecificMethods {
 
         NEW_PROPERTY_VALUE = ReflectionUtils.getMethod(Property.class, "value");
         NEW_PROPERTY_SIGNATURE = ReflectionUtils.getMethod(Property.class, "signature");
+        NEW_GAME_PROFILE_PROPERTIES = ReflectionUtils.getMethod(
+                GameProfile.class, "properties");
+        RECORD_GAME_PROFILE_CONSTRUCTOR = ReflectionUtils.getConstructor(
+                GameProfile.class, true, UUID.class, String.class, PropertyMap.class);
+        IMMUTABLE_PROPERTY_MAP_CONSTRUCTOR = (Constructor<PropertyMap>)
+                PropertyMap.class.getConstructors()[0];
+        PROFILE_NAME_FIELD = ReflectionUtils.getField(GameProfile.class, "name");
+        PROFILE_UUID_FIELD = ReflectionUtils.getField(GameProfile.class, "id");
+        // Avoid relocation for this class.
+        Class<?> multimaps = ReflectionUtils.getClass(String.join(".", "com",
+                "google", "common", "collect", "Multimaps"));
+        MULTIMAP_FROM_MAP = ReflectionUtils.getMethod(multimaps, "forMap", Map.class);
     }
 
     private final SpigotPlugin plugin;
 
     public SpigotVersionSpecificMethods(SpigotPlugin plugin) {
         this.plugin = plugin;
+    }
+
+    public GameProfile createGameProfile(GameProfile oldProfile, Property textureProperty) {
+        String name = (String) ReflectionUtils.getValue(oldProfile, PROFILE_NAME_FIELD);
+        UUID uuid = (UUID) ReflectionUtils.getValue(oldProfile, PROFILE_UUID_FIELD);
+        return createGameProfile(uuid, name, textureProperty);
+    }
+
+    public GameProfile createGameProfile(UUID uuid, String name, Property texturesProperty) {
+        if (RECORD_GAME_PROFILE_CONSTRUCTOR != null && IMMUTABLE_PROPERTY_MAP_CONSTRUCTOR != null) {
+            if (texturesProperty != null) {
+                Map<String, Property> properties = new HashMap<>();
+                properties.put("textures", texturesProperty);
+                Object multimap = ReflectionUtils.invoke(null, MULTIMAP_FROM_MAP, properties);
+                return ReflectionUtils.newInstanceOrThrow(RECORD_GAME_PROFILE_CONSTRUCTOR, uuid,
+                        name,
+                        ReflectionUtils.newInstanceOrThrow(IMMUTABLE_PROPERTY_MAP_CONSTRUCTOR,
+                                multimap));
+            }
+        }
+        GameProfile profile = new GameProfile(uuid, name);
+        if (texturesProperty != null) {
+            profile.getProperties().put("textures", texturesProperty);
+        }
+        return profile;
     }
 
     public String getLocale(Player player) {
@@ -80,7 +129,14 @@ public final class SpigotVersionSpecificMethods {
         hideAndShowPlayer0(on, target);
     }
 
-    public SkinApplyEvent.SkinData currentSkin(PropertyMap properties) {
+    public SkinApplyEvent.SkinData currentSkin(GameProfile profile) {
+        PropertyMap properties;
+        if (NEW_GAME_PROFILE_PROPERTIES != null) {
+            properties = ReflectionUtils.castedInvoke(profile, NEW_GAME_PROFILE_PROPERTIES);
+        } else {
+            properties = profile.getProperties();
+        }
+
         for (Property property : properties.get("textures")) {
             String value;
             String signature;
