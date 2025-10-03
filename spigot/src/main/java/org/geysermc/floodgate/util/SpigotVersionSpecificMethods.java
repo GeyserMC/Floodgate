@@ -29,6 +29,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,6 +52,8 @@ public final class SpigotVersionSpecificMethods {
     private static final Constructor<GameProfile> RECORD_GAME_PROFILE_CONSTRUCTOR;
     private static final Constructor<PropertyMap> IMMUTABLE_PROPERTY_MAP_CONSTRUCTOR;
     private static final Method MULTIMAP_FROM_MAP;
+    private static final Field PROFILE_NAME_FIELD;
+    private static final Field PROFILE_UUID_FIELD;
 
     static {
         GET_SPIGOT = ReflectionUtils.getMethod(Player.class, "spigot");
@@ -69,6 +72,8 @@ public final class SpigotVersionSpecificMethods {
                 GameProfile.class, true, UUID.class, String.class, PropertyMap.class);
         IMMUTABLE_PROPERTY_MAP_CONSTRUCTOR = (Constructor<PropertyMap>)
                 PropertyMap.class.getConstructors()[0];
+        PROFILE_NAME_FIELD = ReflectionUtils.getField(GameProfile.class, "name");
+        PROFILE_UUID_FIELD = ReflectionUtils.getField(GameProfile.class, "id");
         // Avoid relocation for this class.
         Class<?> multimaps = ReflectionUtils.getClass(String.join(".", "com",
                 "google", "common", "collect", "Multimaps"));
@@ -79,6 +84,12 @@ public final class SpigotVersionSpecificMethods {
 
     public SpigotVersionSpecificMethods(SpigotPlugin plugin) {
         this.plugin = plugin;
+    }
+
+    public GameProfile createGameProfile(GameProfile oldProfile, Property textureProperty) {
+        String name = (String) ReflectionUtils.getValue(oldProfile, PROFILE_NAME_FIELD);
+        UUID uuid = (UUID) ReflectionUtils.getValue(oldProfile, PROFILE_UUID_FIELD);
+        return createGameProfile(uuid, name, textureProperty);
     }
 
     public GameProfile createGameProfile(UUID uuid, String name, Property texturesProperty) {

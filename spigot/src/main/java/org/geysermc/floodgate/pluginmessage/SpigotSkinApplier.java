@@ -87,7 +87,7 @@ public final class SpigotSkinApplier implements SkinApplier {
         }
 
         if (ClassNames.GAME_PROFILE_FIELD != null) {
-            replaceSkin(player, floodgatePlayer, event.newSkin());
+            replaceSkin(player, profile, event.newSkin());
         } else {
             // We're on a version with mutable GameProfiles
             replaceSkinOld(profile.getProperties(), event.newSkin());
@@ -102,10 +102,9 @@ public final class SpigotSkinApplier implements SkinApplier {
         });
     }
 
-    private void replaceSkin(Player player, FloodgatePlayer floodgatePlayer, SkinData skinData) {
+    private void replaceSkin(Player player, GameProfile oldProfile, SkinData skinData) {
         Property skinProperty = new Property("textures", skinData.value(), skinData.signature());
-        GameProfile profile = versionSpecificMethods.createGameProfile(floodgatePlayer.getCorrectUniqueId(),
-                floodgatePlayer.getCorrectUsername(), skinProperty);
+        GameProfile profile = versionSpecificMethods.createGameProfile(oldProfile, skinProperty);
         Object entityHuman = ReflectionUtils.invoke(player, ClassNames.GET_ENTITY_HUMAN_METHOD);
         ReflectionUtils.setValue(entityHuman, ClassNames.GAME_PROFILE_FIELD, profile);
     }
