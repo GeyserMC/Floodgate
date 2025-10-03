@@ -60,7 +60,9 @@ public class ClassNames {
     public static final Class<?> LOGIN_LISTENER;
     @Nullable public static final Class<?> CLIENT_INTENT;
 
-    public static final Constructor<OfflinePlayer> CRAFT_OFFLINE_PLAYER_CONSTRUCTOR;
+    @Nullable public static final Constructor<OfflinePlayer> CRAFT_OFFLINE_PLAYER_CONSTRUCTOR;
+    @Nullable public static final Constructor<OfflinePlayer> CRAFT_NEW_OFFLINE_PLAYER_CONSTRUCTOR;
+    @Nullable public static final Constructor<?> NAME_AND_ID_CONSTRUCTOR;
     @Nullable public static final Constructor<?> LOGIN_HANDLER_CONSTRUCTOR;
     @Nullable public static final Constructor<?> HANDSHAKE_PACKET_CONSTRUCTOR;
 
@@ -158,6 +160,18 @@ public class ClassNames {
 
         CRAFT_OFFLINE_PLAYER_CONSTRUCTOR = ReflectionUtils.getConstructor(
                 craftOfflinePlayerClass, true, craftServerClass, GameProfile.class);
+
+        if (CRAFT_OFFLINE_PLAYER_CONSTRUCTOR == null) { // Changed in 1.21.9
+            Class<?> nameAndIdClass = getClassSilently("net.minecraft.server.players.NameAndId");
+
+            CRAFT_NEW_OFFLINE_PLAYER_CONSTRUCTOR = ReflectionUtils.getConstructor(
+                    craftOfflinePlayerClass, true, craftServerClass, nameAndIdClass);
+
+            NAME_AND_ID_CONSTRUCTOR = ReflectionUtils.getConstructor(nameAndIdClass, true, GameProfile.class);
+        } else {
+            CRAFT_NEW_OFFLINE_PLAYER_CONSTRUCTOR = null;
+            NAME_AND_ID_CONSTRUCTOR = null;
+        }
 
         // SpigotDataHandler
         Class<?> networkManager = getClassOrFallback(

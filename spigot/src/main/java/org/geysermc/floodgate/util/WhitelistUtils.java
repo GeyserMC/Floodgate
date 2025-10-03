@@ -29,6 +29,7 @@ import com.mojang.authlib.GameProfile;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Server;
 
 @SuppressWarnings("ConstantConditions")
 public final class WhitelistUtils {
@@ -44,10 +45,7 @@ public final class WhitelistUtils {
     public static boolean addPlayer(UUID uuid, String username, SpigotVersionSpecificMethods versionSpecificMethods) {
         GameProfile profile = new GameProfile(uuid, username);
 
-        OfflinePlayer player = ReflectionUtils.newInstance(
-                ClassNames.CRAFT_OFFLINE_PLAYER_CONSTRUCTOR,
-                Bukkit.getServer(), profile
-        );
+        OfflinePlayer player = getOfflinePlayer(profile);
         if (player.isWhitelisted()) {
             return false;
         }
@@ -67,10 +65,7 @@ public final class WhitelistUtils {
     public static boolean removePlayer(UUID uuid, String username, SpigotVersionSpecificMethods versionSpecificMethods) {
         GameProfile profile = new GameProfile(uuid, username);
 
-        OfflinePlayer player = ReflectionUtils.newInstance(
-                ClassNames.CRAFT_OFFLINE_PLAYER_CONSTRUCTOR,
-                Bukkit.getServer(), profile
-        );
+        OfflinePlayer player = getOfflinePlayer(profile);
         if (!player.isWhitelisted()) {
             return false;
         }
@@ -80,5 +75,24 @@ public final class WhitelistUtils {
 
     static void setWhitelist(OfflinePlayer player, boolean whitelist, SpigotVersionSpecificMethods versionSpecificMethods) {
         versionSpecificMethods.maybeSchedule(() -> player.setWhitelisted(whitelist), true); // Whitelisting is on the global thread
+    }
+
+    static OfflinePlayer getOfflinePlayer(GameProfile profile) {
+        if (ClassNames.CRAFT_NEW_OFFLINE_PLAYER_CONSTRUCTOR != null) {
+            Object nameAndId = ReflectionUtils.newInstance(
+                    ClassNames.NAME_AND_ID_CONSTRUCTOR,
+                    profile
+            );
+
+            return ReflectionUtils.newInstance(
+                    ClassNames.CRAFT_NEW_OFFLINE_PLAYER_CONSTRUCTOR,
+                    Bukkit.getServer(), nameAndId
+            );
+        } else {
+            return ReflectionUtils.newInstance(
+                    ClassNames.CRAFT_OFFLINE_PLAYER_CONSTRUCTOR,
+                    Bukkit.getServer(), profile
+            );
+        }
     }
 }
