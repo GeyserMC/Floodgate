@@ -1,6 +1,8 @@
 plugins {
+    id("floodgate.publish-conventions")
     id("floodgate.generate-templates")
     id("floodgate.dependency-hash")
+    id("floodgate.shadow-conventions")
     id("io.micronaut.library")
 }
 
