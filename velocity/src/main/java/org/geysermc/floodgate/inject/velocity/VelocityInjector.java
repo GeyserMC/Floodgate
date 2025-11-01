@@ -101,6 +101,10 @@ public final class VelocityInjector extends CommonPlatformInjector {
         @Override
         protected void initChannel(Channel channel) {
             invoke(original, initChannel, channel);
+            // Was closed by another handler?
+            if (!channel.isActive()) {
+                return;
+            }
 
             injector.injectAddonsCall(channel, proxyToServer);
             injector.addInjectedClient(channel);
