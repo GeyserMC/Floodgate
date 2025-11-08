@@ -32,6 +32,7 @@ import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.api.link.LinkRequestResult;
@@ -95,6 +96,11 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
 
     @NonNull
     private CompletableFuture<LinkedPlayer> getLinkedPlayer0(@NonNull UUID bedrockId) {
+        ExecutorService executor = getExecutorService();
+        if (executor.isShutdown() || executor.isTerminated()) {
+            return CompletableFuture.completedFuture(null);
+        }
+
         return CompletableFuture.supplyAsync(
                 () -> {
                     DefaultHttpResponse response =
@@ -125,7 +131,7 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
                             UUID.fromString(data.get("java_id").getAsString()),
                             Utils.getJavaUuid(data.get("bedrock_id").getAsLong()));
                 },
-                getExecutorService());
+                executor);
     }
 
     @Override
@@ -145,6 +151,11 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
 
     @NonNull
     private CompletableFuture<Boolean> isLinkedPlayer0(@NonNull UUID bedrockId) {
+        ExecutorService executor = getExecutorService();
+        if (executor.isShutdown() || executor.isTerminated()) {
+            return CompletableFuture.completedFuture(false);
+        }
+
         return CompletableFuture.supplyAsync(
                 () -> {
                     DefaultHttpResponse response =
@@ -161,7 +172,7 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
                     // no link if data is empty, otherwise the player is linked
                     return response.getResponse().entrySet().size() != 0;
                 },
-                getExecutorService());
+                executor);
     }
 
     // player linking and unlinking now goes through the global player linking server.

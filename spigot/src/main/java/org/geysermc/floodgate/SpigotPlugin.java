@@ -27,7 +27,6 @@ package org.geysermc.floodgate;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.floodgate.api.handshake.HandshakeHandlers;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;

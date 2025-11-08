@@ -27,7 +27,6 @@ package org.geysermc.floodgate.util;
 
 import java.util.Collection;
 import java.util.UUID;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;

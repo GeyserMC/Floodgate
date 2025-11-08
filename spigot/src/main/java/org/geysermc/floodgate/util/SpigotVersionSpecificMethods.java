@@ -120,13 +120,17 @@ public final class SpigotVersionSpecificMethods {
     }
 
     public void hideAndShowPlayer(Player on, Player target) {
-        // In Folia we don't have to schedule this as there is no concept of a single main thread.
+        // In Folia, we don't have to schedule this as there is no concept of a single main thread.
         // Instead, we have to schedule the task per player.
+        // We use separate schedulers for hide and show to avoid race conditions that can crash the
+        // server on Folia only.
         if (ClassNames.IS_FOLIA) {
-            on.getScheduler().execute(plugin, () -> hideAndShowPlayer0(on, target), null, 0);
+            on.getScheduler().run(plugin, task -> hideAndShowPlayerHide(on, target), null);
+            on.getScheduler().run(plugin, task -> hideAndShowPlayerShow(on, target), null);
             return;
         }
-        hideAndShowPlayer0(on, target);
+        hideAndShowPlayerHide(on, target);
+        hideAndShowPlayerShow(on, target);
     }
 
     public SkinApplyEvent.SkinData currentSkin(GameProfile profile) {
@@ -167,13 +171,20 @@ public final class SpigotVersionSpecificMethods {
     }
 
     @SuppressWarnings("deprecation")
-    private void hideAndShowPlayer0(Player source, Player target) {
+    private void hideAndShowPlayerHide(Player source, Player target) {
         if (NEW_VISIBILITY) {
             source.hidePlayer(plugin, target);
-            source.showPlayer(plugin, target);
             return;
         }
         source.hidePlayer(target);
+    }
+
+    @SuppressWarnings("deprecation")
+    private void hideAndShowPlayerShow(Player source, Player target) {
+        if (NEW_VISIBILITY) {
+            source.showPlayer(plugin, target);
+            return;
+        }
         source.showPlayer(target);
     }
 
@@ -182,12 +193,12 @@ public final class SpigotVersionSpecificMethods {
     }
 
     public void maybeSchedule(Runnable runnable, boolean globalContext) {
-        // In Folia we don't usually have to schedule this as there is no concept of a single main thread.
+        // In Folia, we don't usually have to schedule this as there is no concept of a single main thread.
         // Instead, we have to schedule the task per player.
         // However, in some cases we may want to access the global region for a global context.
         if (ClassNames.IS_FOLIA) {
             if (globalContext) {
-                plugin.getServer().getGlobalRegionScheduler().run(plugin, (task) -> runnable.run());
+                plugin.getServer().getGlobalRegionScheduler().run(plugin, task -> runnable.run());
             } else {
                 runnable.run();
             }
