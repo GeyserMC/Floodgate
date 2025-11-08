@@ -120,17 +120,13 @@ public final class SpigotVersionSpecificMethods {
     }
 
     public void hideAndShowPlayer(Player on, Player target) {
-        // In Folia, we have to schedule the task per player using the entity scheduler.
-        // We chain the showPlayer call after hidePlayer completes to avoid ordering issues.
+        // In Folia, we don't have to schedule this as there is no concept of a single main thread.
+        // Instead, we have to schedule the task per player.
         if (ClassNames.IS_FOLIA) {
-            on.getScheduler().run(plugin, task -> {
-                hideAndShowPlayerHide(on, target);
-                on.getScheduler().run(plugin, innerTask -> hideAndShowPlayerShow(on, target), null);
-            }, null);
+            target.getScheduler().execute(plugin, () -> hideAndShowPlayer0(on, target), null, 0);
             return;
         }
-        hideAndShowPlayerHide(on, target);
-        hideAndShowPlayerShow(on, target);
+        hideAndShowPlayer0(on, target);
     }
 
     public SkinApplyEvent.SkinData currentSkin(GameProfile profile) {
@@ -171,20 +167,13 @@ public final class SpigotVersionSpecificMethods {
     }
 
     @SuppressWarnings("deprecation")
-    private void hideAndShowPlayerHide(Player source, Player target) {
+    private void hideAndShowPlayer0(Player source, Player target) {
         if (NEW_VISIBILITY) {
             source.hidePlayer(plugin, target);
-            return;
-        }
-        source.hidePlayer(target);
-    }
-
-    @SuppressWarnings("deprecation")
-    private void hideAndShowPlayerShow(Player source, Player target) {
-        if (NEW_VISIBILITY) {
             source.showPlayer(plugin, target);
             return;
         }
+        source.hidePlayer(target);
         source.showPlayer(target);
     }
 
@@ -198,7 +187,7 @@ public final class SpigotVersionSpecificMethods {
         // However, in some cases we may want to access the global region for a global context.
         if (ClassNames.IS_FOLIA) {
             if (globalContext) {
-                plugin.getServer().getGlobalRegionScheduler().run(plugin, task -> runnable.run());
+                plugin.getServer().getGlobalRegionScheduler().run(plugin, (task) -> runnable.run());
             } else {
                 runnable.run();
             }
