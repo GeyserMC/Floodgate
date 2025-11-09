@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.geysermc.floodgate.SpigotPlugin;
@@ -121,9 +122,9 @@ public final class SpigotVersionSpecificMethods {
 
     public void hideAndShowPlayer(Player on, Player target) {
         // In Folia, we don't have to schedule this as there is no concept of a single main thread.
-        // Instead, we have to schedule the task per player and at the player that is hidden/shown.
+        // Instead, we have to schedule the task per player.
         if (ClassNames.IS_FOLIA) {
-            target.getScheduler().execute(plugin, () -> hideAndShowPlayer0(on, target), null, 0);
+            on.getScheduler().execute(plugin, () -> hideAndShowPlayer0(on, target), null, 0);
             return;
         }
         hideAndShowPlayer0(on, target);
@@ -168,6 +169,9 @@ public final class SpigotVersionSpecificMethods {
 
     @SuppressWarnings("deprecation")
     private void hideAndShowPlayer0(Player source, Player target) {
+        if (!Bukkit.isOwnedByCurrentRegion(source) || !Bukkit.isOwnedByCurrentRegion(target)) {
+            return;
+        }
         if (NEW_VISIBILITY) {
             source.hidePlayer(plugin, target);
             source.showPlayer(plugin, target);
