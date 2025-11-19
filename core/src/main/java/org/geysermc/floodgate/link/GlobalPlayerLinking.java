@@ -106,23 +106,29 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
                     DefaultHttpResponse response =
                             httpClient.get(GET_BEDROCK_LINK + bedrockId.getLeastSignificantBits());
 
+                    JsonObject data = response.getResponse();
+
                     // either the global api is down or it failed to return link
-                    if (!response.isCodeOk()) {
-                        if (response.getResponse() != null) {
+                    if (!response.isCodeOk() || data == null) {
+                        if (data != null && data.has("message")) {
                             getLogger().error(
                                     "Failed to request link for {}: {}",
                                     bedrockId.getLeastSignificantBits(),
-                                    response.getResponse().get("message").getAsString()
+                                    data.get("message").getAsString()
+                            );
+                        } else {
+                            getLogger().error(
+                                    "Failed to request link for {}: empty or invalid response (HTTP {})",
+                                    bedrockId.getLeastSignificantBits(),
+                                    response.getHttpCode()
                             );
                         }
                         return null;
                     }
 
-                    JsonObject data = response.getResponse();
-
                     JsonElement javaName = data.get("java_name");
                     // javaName will be null when the player isn't linked
-                    if (javaName == null) {
+                    if (javaName == null || javaName.isJsonNull()) {
                         return null;
                     }
 
@@ -161,16 +167,27 @@ public class GlobalPlayerLinking extends CommonPlayerLink {
                     DefaultHttpResponse response =
                             httpClient.get(GET_BEDROCK_LINK + bedrockId.getLeastSignificantBits());
 
-                    if (!response.isCodeOk()) {
-                        getLogger().error(
-                                "Failed to request link for {}: {}",
-                                bedrockId.getLeastSignificantBits(),
-                                response.getResponse().get("message").getAsString());
+                    JsonObject data = response.getResponse();
+
+                    if (!response.isCodeOk() || data == null) {
+                        if (data != null && data.has("message")) {
+                            getLogger().error(
+                                    "Failed to request link for {}: {}",
+                                    bedrockId.getLeastSignificantBits(),
+                                    data.get("message").getAsString()
+                            );
+                        } else {
+                            getLogger().error(
+                                    "Failed to request link for {}: empty or invalid response (HTTP {})",
+                                    bedrockId.getLeastSignificantBits(),
+                                    response.getHttpCode()
+                            );
+                        }
                         return false;
                     }
 
                     // no link if data is empty, otherwise the player is linked
-                    return response.getResponse().entrySet().size() != 0;
+                    return data.entrySet().size() != 0;
                 },
                 executor);
     }
