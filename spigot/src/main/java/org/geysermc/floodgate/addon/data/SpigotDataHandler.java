@@ -34,12 +34,15 @@ import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
+import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.util.ClassNames;
 import org.geysermc.floodgate.util.Constants;
+import org.geysermc.floodgate.util.MojangUtils;
 import org.geysermc.floodgate.util.ProxyUtils;
 import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
 
@@ -51,6 +54,8 @@ public final class SpigotDataHandler extends CommonDataHandler {
     );
 
     private final SpigotVersionSpecificMethods versionSpecificMethods;
+    private final MojangUtils mojangUtils;
+    private final FloodgateLogger logger;
     private Object networkManager;
     private FloodgatePlayer player;
     private boolean proxyData;
@@ -59,9 +64,14 @@ public final class SpigotDataHandler extends CommonDataHandler {
             FloodgateHandshakeHandler handshakeHandler,
             FloodgateConfig config,
             AttributeKey<String> kickMessageAttribute,
-            SpigotVersionSpecificMethods versionSpecificMethods) {
+            SpigotVersionSpecificMethods versionSpecificMethods,
+            MojangUtils mojangUtils,
+            FloodgateLogger logger
+    ) {
         super(handshakeHandler, config, kickMessageAttribute, new PacketBlocker());
         this.versionSpecificMethods = versionSpecificMethods;
+        this.mojangUtils = mojangUtils;
+        this.logger = logger;
     }
 
     @Override
@@ -185,6 +195,19 @@ public final class SpigotDataHandler extends CommonDataHandler {
                 // No need to worry that this overrides proxy data, because those won't reach this
                 // method / are already removed (in the case of username validation)
                 texturesProperty = DEFAULT_TEXTURE_PROPERTY;
+            } else {
+                // Floodgate players are seen as offline mode players, meaning we have to look up
+                // the linked player's textures ourselves
+                try {
+                    SkinData skinData = mojangUtils.skinFor(player.getCorrectUniqueId()).get();
+                    texturesProperty = new Property(
+                            "textures",
+                            skinData.value(),
+                            skinData.signature()
+                    );
+                } catch(Exception exception) {
+                    logger.debug("Unexpected skin fetch error for " + player.getCorrectUniqueId(), exception);
+                }
             }
             GameProfile gameProfile = versionSpecificMethods.createGameProfile(
                     player.getCorrectUniqueId(), player.getCorrectUsername(), texturesProperty);
