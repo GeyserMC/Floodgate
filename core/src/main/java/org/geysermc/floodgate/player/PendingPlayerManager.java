@@ -46,7 +46,6 @@ public class PendingPlayerManager {
      */
     public void add(InetSocketAddress address, FloodgatePlayer player) {
         pendingByAddress.put(address, player);
-        // Store by raw username (the original Bedrock gamertag, without prefix)
         pendingByUsername.put(player.getUsername().toLowerCase(), player);
     }
 
@@ -71,7 +70,6 @@ public class PendingPlayerManager {
         if (rawUsername == null) return;
         FloodgatePlayer player = pendingByUsername.remove(rawUsername.toLowerCase());
         if (player != null) {
-            // Find and remove from address map
             pendingByAddress.entrySet().removeIf(entry ->
                     entry.getValue().getUsername().equalsIgnoreCase(rawUsername));
         }
