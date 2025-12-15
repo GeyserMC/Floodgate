@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Build Status](https://github.com/GeyserMC/Floodgate/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/GeyserMC/Floodgate/actions/workflows/build.yml?query=branch%3Amaster)
 [![Discord](https://img.shields.io/discord/613163671870242838.svg?color=%237289da&label=discord)](http://discord.geysermc.org/)
-[![HitCount](https://hits.dwyl.com/GeyserMC/Floodgate.svg)](http://hits.dwyl.com/GeyserMC/Floodgate)
+[![Hits](https://hitcount.dev/p/GeyserMC/Floodgate.svg)](https://hitcount.dev/p/GeyserMC/Floodgate)
 
 [Download](https://geysermc.org/download/?project=floodgate)
 
