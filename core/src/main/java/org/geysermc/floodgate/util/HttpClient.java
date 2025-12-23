@@ -26,6 +26,7 @@
 package org.geysermc.floodgate.util;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -135,12 +136,20 @@ public class HttpClient {
             return new DefaultHttpResponse(-1, null);
         }
 
+        int responseCode = -1;
         try {
-            int responseCode = connection.getResponseCode();
-            JsonObject response = gson.fromJson(streamReader, JsonObject.class);
+            responseCode = connection.getResponseCode();
+
+            JsonElement element = gson.fromJson(streamReader, JsonElement.class);
+
+            JsonObject response = null;
+            if (element != null && element.isJsonObject()) {
+                response = element.getAsJsonObject();
+            }
+
             return new DefaultHttpResponse(responseCode, response);
-        } catch (Exception exception) {
-            throw new RuntimeException("Failed to read response", exception);
+        } catch (Exception ignored) {
+            return new DefaultHttpResponse(responseCode, null);
         } finally {
             try {
                 streamReader.close();

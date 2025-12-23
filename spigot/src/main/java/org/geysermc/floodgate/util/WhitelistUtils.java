@@ -29,7 +29,6 @@ import com.mojang.authlib.GameProfile;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.Server;
 
 @SuppressWarnings("ConstantConditions")
 public final class WhitelistUtils {
