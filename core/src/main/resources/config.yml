@@ -8,6 +8,9 @@ key-file-name: key.pem
 # It is recommended to use a prefix that does not contain alphanumerical to avoid the possibility of duplicate usernames.
 username-prefix: "."
 
+# Should Floodgate use the prefix and put it at the end of the username instead?
+prefix-as-suffix: false
+
 # Should spaces be replaced with '_' in bedrock usernames?
 replace-spaces: true
 
@@ -63,4 +66,4 @@ metrics:
   uuid: ${metrics.uuid}
 
 # Do not change this
-config-version: 3
+config-version: 4
