@@ -146,9 +146,9 @@ public final class BungeeListener implements Listener {
 
         event.registerIntent(plugin);
 
-        mojangUtils.skinFor(player.getJavaUniqueId())
+        mojangUtils.skinFor(player.getCorrectUniqueId())
                 .exceptionally(exception -> {
-                    logger.debug("Unexpected skin fetch error for " + player.getJavaUniqueId(), exception);
+                    logger.debug("Unexpected skin fetch error for " + player.getCorrectUniqueId(), exception);
                     return SkinDataImpl.DEFAULT_SKIN;
                 })
                 .thenAccept(skin -> {

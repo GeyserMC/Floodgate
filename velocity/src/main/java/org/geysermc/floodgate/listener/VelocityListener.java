@@ -175,9 +175,9 @@ public final class VelocityListener {
         // Floodgate players are seen as offline mode players, meaning we have to look up
         // the linked player's textures ourselves
 
-        mojangUtils.skinFor(player.getJavaUniqueId())
+        mojangUtils.skinFor(player.getCorrectUniqueId())
                 .exceptionally(exception -> {
-                    logger.debug("Unexpected skin fetch error for " + player.getJavaUniqueId(), exception);
+                    logger.debug("Unexpected skin fetch error for " + player.getCorrectUniqueId(), exception);
                     return SkinDataImpl.DEFAULT_SKIN;
                 }).thenAccept(skin -> {
                     event.setGameProfile(new GameProfile(

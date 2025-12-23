@@ -35,6 +35,7 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
+import org.geysermc.floodgate.util.MojangUtils;
 import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
 
 public final class SpigotDataAddon implements InjectorAddon {
@@ -42,6 +43,7 @@ public final class SpigotDataAddon implements InjectorAddon {
     @Inject private FloodgateConfig config;
     @Inject private SimpleFloodgateApi api;
     @Inject private FloodgateLogger logger;
+    @Inject private MojangUtils mojangUtils;
 
     @Inject
     @Named("packetHandler")
@@ -63,7 +65,7 @@ public final class SpigotDataAddon implements InjectorAddon {
         // we have to add the packet blocker in the data handler, otherwise ProtocolSupport breaks
         channel.pipeline().addBefore(
                 packetHandlerName, "floodgate_data_handler",
-                new SpigotDataHandler(handshakeHandler, config, kickMessageAttribute, versionSpecificMethods)
+                new SpigotDataHandler(handshakeHandler, config, kickMessageAttribute, versionSpecificMethods, mojangUtils, logger)
         );
     }
 
