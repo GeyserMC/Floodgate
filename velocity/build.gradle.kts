@@ -6,7 +6,7 @@ var guavaVersion = "25.1-jre"
 indra {
     javaVersions {
         // For Velocity API
-        target(11)
+        target(21)
     }
 }
 
