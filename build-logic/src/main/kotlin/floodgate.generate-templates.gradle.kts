@@ -3,6 +3,8 @@ import org.gradle.plugins.ide.eclipse.model.EclipseModel
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.jetbrains.gradle.ext.ProjectSettings
 import org.jetbrains.gradle.ext.TaskTriggersConfig
+import javax.inject.Inject
+import org.gradle.api.tasks.Copy
 
 plugins {
     id("org.jetbrains.gradle.plugin.idea-ext")
@@ -73,7 +75,7 @@ inline fun <reified T : Any> ExtensionContainer.findByType(noinline action: T.()
     }
 }
 
-abstract class GenerateAnyTemplates : Copy() {
+abstract class GenerateAnyTemplates @Inject constructor() : Copy() {
     private val replacements = mutableMapOf<String, String>()
 
     fun replaceToken(key: String, value: () -> Any) {
@@ -84,10 +86,8 @@ abstract class GenerateAnyTemplates : Copy() {
         replacements[key] = value.toString()
     }
 
-    fun replacements(): Map<String, String> {
-        return replacements
-    }
+    fun replacements(): Map<String, String> = replacements
 }
 
-open class GenerateResourceTemplates : GenerateAnyTemplates()
-open class GenerateSourceTemplates : GenerateAnyTemplates()
+abstract class GenerateResourceTemplates @Inject constructor() : GenerateAnyTemplates()
+abstract class GenerateSourceTemplates @Inject constructor() : GenerateAnyTemplates()
