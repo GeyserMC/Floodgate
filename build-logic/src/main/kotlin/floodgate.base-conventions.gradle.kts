@@ -19,7 +19,7 @@ indra {
 
     javaVersions {
         // without toolchain & strictVersion sun.misc.Unsafe won't be found
-        minimumToolchain(8)
+        minimumToolchain(21)
         strictVersions(true)
     }
 }
@@ -31,7 +31,7 @@ tasks {
                 "id" to "floodgate",
                 "name" to "floodgate",
                 "version" to fullVersion(),
-                "description" to project.description,
+                "description" to (project.description ?: ""),
                 "url" to "https://geysermc.org",
                 "author" to "GeyserMC"
             )
