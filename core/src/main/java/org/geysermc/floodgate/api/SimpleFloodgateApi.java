@@ -31,18 +31,21 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
+import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.geysermc.cumulus.form.Form;
 import org.geysermc.cumulus.form.util.FormBuilder;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.unsafe.Unsafe;
 import org.geysermc.floodgate.config.FloodgateConfig;
+import org.geysermc.floodgate.player.PendingPlayerManager;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.pluginmessage.channel.FormChannel;
 import org.geysermc.floodgate.pluginmessage.channel.TransferChannel;
@@ -61,6 +64,7 @@ public class SimpleFloodgateApi implements FloodgateApi {
     @Inject private FloodgateConfig config;
     @Inject private HttpClient httpClient;
     @Inject private FloodgateLogger logger;
+    @Inject private PendingPlayerManager pendingPlayerManager;
 
     @Override
     public String getPlayerPrefix() {
@@ -224,5 +228,17 @@ public class SimpleFloodgateApi implements FloodgateApi {
             }
         }
         return null;
+    }
+
+    @Override
+    @Nullable
+    public FloodgatePlayer getPendingPlayer(InetSocketAddress address) {
+        return pendingPlayerManager.get(address);
+    }
+
+    @Override
+    @Nullable
+    public FloodgatePlayer getPendingPlayerByUsername(String rawUsername) {
+        return pendingPlayerManager.getByUsername(rawUsername);
     }
 }

@@ -25,10 +25,10 @@
 
 package org.geysermc.floodgate.api;
 
-import java.util.Collection;
+import java.net.InetSocketAddress;import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import org.geysermc.cumulus.form.Form;
+import org.checkerframework.checker.nullness.qual.Nullable;import org.geysermc.cumulus.form.Form;
 import org.geysermc.cumulus.form.util.FormBuilder;
 import org.geysermc.floodgate.api.event.FloodgateEventBus;
 import org.geysermc.floodgate.api.link.PlayerLink;
@@ -58,6 +58,26 @@ public interface FloodgateApi {
      * Returns the number of Floodgate players who are currently online.
      */
     int getPlayerCount();
+
+    /**
+     * Get a pending FloodgatePlayer by their connection address.
+     * This is useful in PreLoginEvent where UUID is not yet available.
+     *
+     * @param address the InetSocketAddress of the connection
+     * @return FloodgatePlayer if this is a pending Bedrock connection, null otherwise
+     */
+    @Nullable
+    FloodgatePlayer getPendingPlayer(InetSocketAddress address);
+
+    /**
+     * Get a pending FloodgatePlayer by their raw username (without prefix).
+     * This is useful in PreLoginEvent where the username hasn't been modified yet.
+     *
+     * @param rawUsername the raw username without Floodgate prefix
+     * @return FloodgatePlayer if this is a pending Bedrock connection, null otherwise
+     */
+    @Nullable
+    FloodgatePlayer getPendingPlayerByUsername(String rawUsername);
 
     /**
      * Method to determine if the given <b>online</b> player is a bedrock player

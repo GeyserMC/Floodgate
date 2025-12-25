@@ -67,6 +67,7 @@ import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.link.PlayerLinkHolder;
 import org.geysermc.floodgate.packet.PacketHandlersImpl;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
+import org.geysermc.floodgate.player.PendingPlayerManager;
 import org.geysermc.floodgate.pluginmessage.PluginMessageManager;
 import org.geysermc.floodgate.skin.SkinUploadManager;
 import org.geysermc.floodgate.util.Constants;
@@ -175,10 +176,11 @@ public class CommonModule extends AbstractModule {
             SkinUploadManager skinUploadManager,
             @Named("playerAttribute") AttributeKey<FloodgatePlayer> playerAttribute,
             FloodgateLogger logger,
-            LanguageManager languageManager) {
+            LanguageManager languageManager,
+            PendingPlayerManager pendingPlayerManager) {
 
         return new FloodgateHandshakeHandler(handshakeHandlers, api, cipher, config,
-                skinUploadManager, playerAttribute, logger, languageManager);
+                skinUploadManager, playerAttribute, logger, languageManager, pendingPlayerManager);
     }
 
     @Provides

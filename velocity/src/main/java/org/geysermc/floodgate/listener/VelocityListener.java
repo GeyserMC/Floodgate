@@ -57,6 +57,7 @@ import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
+import org.geysermc.floodgate.player.PendingPlayerManager;
 import org.geysermc.floodgate.skin.SkinDataImpl;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.LanguageManager;
@@ -116,6 +117,9 @@ public final class VelocityListener {
 
     @Inject
     private MojangUtils mojangUtils;
+
+    @Inject
+    private PendingPlayerManager pendingPlayerManager;
 
     @Subscribe(order = PostOrder.EARLY)
     public void onPreLogin(PreLoginEvent event) {
@@ -197,10 +201,13 @@ public final class VelocityListener {
                 languageManager.loadLocale(player.getLanguageCode());
             }
         }
+
+        pendingPlayerManager.remove(event.getPlayer().getRemoteAddress());
     }
 
     @Subscribe(order = PostOrder.LAST)
     public void onDisconnect(DisconnectEvent event) {
         api.playerRemoved(event.getPlayer().getUniqueId());
+        pendingPlayerManager.remove(event.getPlayer().getRemoteAddress());
     }
 }
