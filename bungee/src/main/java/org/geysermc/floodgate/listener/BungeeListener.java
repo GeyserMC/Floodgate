@@ -137,7 +137,7 @@ public final class BungeeListener implements Listener {
 
         // Skin look up (on Spigot and friends) would result in it failing, so apply a default skin
         if (!player.isLinked()) {
-            skinApplier.applySkin(player, SkinDataImpl.DEFAULT_SKIN);
+            skinApplier.applySkin(player, SkinDataImpl.DEFAULT_SKIN, true);
             return;
         }
 
@@ -152,7 +152,7 @@ public final class BungeeListener implements Listener {
                     return SkinDataImpl.DEFAULT_SKIN;
                 })
                 .thenAccept(skin -> {
-                    skinApplier.applySkin(player, skin);
+                    skinApplier.applySkin(player, skin, true);
                     event.completeIntent(plugin);
                 });
     }
