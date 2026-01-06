@@ -49,6 +49,29 @@ jobs:
             bungee/build/libs/connect-bungee.jar
             LICENSE
 
+      # Also update "latest" release with stable file names for download sites
+      - name: Update Latest Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: latest
+          name: "Latest Release (${{ github.ref_name }})"
+          prerelease: false
+          files: |
+            spigot/build/libs/connect-spigot.jar
+            velocity/build/libs/connect-velocity.jar
+            bungee/build/libs/connect-bungee.jar
+            LICENSE
+          body: |
+            Latest stable release.
+
+            **Version:** ${{ github.ref_name }}
+
+            Download links (stable URLs):
+            - [connect-spigot.jar](https://github.com/${{ github.repository }}/releases/download/latest/connect-spigot.jar)
+            - [connect-velocity.jar](https://github.com/${{ github.repository }}/releases/download/latest/connect-velocity.jar)
+            - [connect-bungee.jar](https://github.com/${{ github.repository }}/releases/download/latest/connect-bungee.jar)
+
       # For branch push: create/update pre-release
       - name: Prepare Pre-Release Artifacts
         if: github.event_name == 'push'
