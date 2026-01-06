@@ -199,7 +199,12 @@ public class ClassNames {
             // We get the field by name on 1.20.2+ as there are now multiple fields of this type in network manager
 
             // PacketListener packetListener of NetworkManager
-            PACKET_LISTENER = getField(networkManager, "q");
+            // Try Mojang mappings first (Paper 1.20.5+), then fall back to obfuscated name
+            Field packetListenerField = getField(networkManager, "packetListener");
+            if (packetListenerField == null) {
+                packetListenerField = getField(networkManager, "q");
+            }
+            PACKET_LISTENER = packetListenerField;
             makeAccessible(PACKET_LISTENER);
         }
         checkNotNull(PACKET_LISTENER, "Packet listener");
@@ -207,7 +212,12 @@ public class ClassNames {
          if (IS_POST_LOGIN_HANDLER) {
             makeAccessible(CALL_PLAYER_PRE_LOGIN_EVENTS);
 
-             START_CLIENT_VERIFICATION = getMethod(LOGIN_LISTENER, "b", GameProfile.class);
+            // Try Mojang mappings first (Paper 1.20.5+), then fall back to obfuscated name
+            Method startClientVerificationMethod = getMethod(LOGIN_LISTENER, "startClientVerification", GameProfile.class);
+            if (startClientVerificationMethod == null) {
+                startClientVerificationMethod = getMethod(LOGIN_LISTENER, "b", GameProfile.class);
+            }
+            START_CLIENT_VERIFICATION = startClientVerificationMethod;
             checkNotNull(START_CLIENT_VERIFICATION, "startClientVerification");
             makeAccessible(START_CLIENT_VERIFICATION);
 

@@ -53,7 +53,8 @@ public final class SpigotDataAddon implements InjectorAddon {
                     packetHandlerName, "connect_data_handler",
                     new SpigotDataHandler(ctx,
                             packetHandlerName,
-                            config)
+                            config,
+                            logger)
             );
         });
     }

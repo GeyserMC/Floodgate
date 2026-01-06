@@ -59,13 +59,24 @@ public final class DebugAddon implements InjectorAddon {
 
         AtomicInteger packetCount = new AtomicInteger();
 
-        channel.pipeline().addBefore(
-                packetEncoder, "connect_debug_out",
-                new ChannelOutDebugHandler(platformName, toServer, packetCount, logger)
-        ).addBefore(
-                packetDecoder, "connect_debug_in",
-                new ChannelInDebugHandler(platformName, toServer, packetCount, logger)
-        );
+        // Check if handlers exist before trying to add - pipeline may not be fully initialized
+        if (channel.pipeline().get(packetEncoder) != null) {
+            channel.pipeline().addBefore(
+                    packetEncoder, "connect_debug_out",
+                    new ChannelOutDebugHandler(platformName, toServer, packetCount, logger)
+            );
+        } else {
+            logger.debug("Skipping debug out handler - '" + packetEncoder + "' not found in pipeline");
+        }
+
+        if (channel.pipeline().get(packetDecoder) != null) {
+            channel.pipeline().addBefore(
+                    packetDecoder, "connect_debug_in",
+                    new ChannelInDebugHandler(platformName, toServer, packetCount, logger)
+            );
+        } else {
+            logger.debug("Skipping debug in handler - '" + packetDecoder + "' not found in pipeline");
+        }
     }
 
     @Override
