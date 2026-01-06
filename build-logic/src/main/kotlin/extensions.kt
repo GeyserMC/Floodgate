@@ -27,16 +27,99 @@ import net.kyori.indra.git.IndraGitExtension
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.kotlin.dsl.the
+import java.io.ByteArrayOutputStream
+
+/**
+ * Calculates the version from git tags.
+ * - For tagged commits: returns the tag (e.g., "0.7.0")
+ * - For non-tagged commits: returns "{last-tag}-SNAPSHOT" (e.g., "0.7.0-SNAPSHOT")
+ * - For dirty working tree: appends "-dirty"
+ */
+fun Project.gitVersion(): String {
+    // Check if GITHUB_REF_TYPE is "tag" - if so, use the tag name directly
+    val refType = System.getenv("GITHUB_REF_TYPE")
+    val refName = System.getenv("GITHUB_REF_NAME")
+    if (refType == "tag" && !refName.isNullOrEmpty()) {
+        return refName.removePrefix("v")
+    }
+
+    // Try to get version from git describe
+    return try {
+        val stdout = ByteArrayOutputStream()
+        exec {
+            commandLine("git", "describe", "--tags", "--always", "--dirty")
+            standardOutput = stdout
+            isIgnoreExitValue = true
+        }
+        val describe = stdout.toString().trim()
+
+        if (describe.isEmpty()) {
+            "0.0.0-SNAPSHOT"
+        } else {
+            parseGitDescribe(describe)
+        }
+    } catch (e: Exception) {
+        "0.0.0-SNAPSHOT"
+    }
+}
+
+/**
+ * Parses git describe output into a version string.
+ * Examples:
+ * - "0.7.0" -> "0.7.0" (exactly on tag)
+ * - "v0.7.0" -> "0.7.0" (exactly on tag with v prefix)
+ * - "0.7.0-5-gabcdef" -> "0.7.0-SNAPSHOT" (5 commits after tag)
+ * - "0.7.0-5-gabcdef-dirty" -> "0.7.0-SNAPSHOT-dirty" (with uncommitted changes)
+ * - "abcdef" -> "0.0.0-SNAPSHOT" (no tags, just commit hash)
+ * - "abcdef-dirty" -> "0.0.0-SNAPSHOT-dirty"
+ */
+private fun parseGitDescribe(describe: String): String {
+    val isDirty = describe.endsWith("-dirty")
+    val cleanDescribe = describe.removeSuffix("-dirty")
+
+    // Pattern: tag-commits-hash or just tag or just hash
+    val parts = cleanDescribe.split("-")
+
+    val version = when {
+        // Just a hash (no tags exist)
+        parts.size == 1 && parts[0].matches(Regex("[a-f0-9]+")) -> "0.0.0-SNAPSHOT"
+        // Exactly on a tag: "0.7.0" or "v0.7.0"
+        parts.size == 1 -> parts[0].removePrefix("v")
+        // Tag with v prefix split: "v0", "7", "0" - rejoin
+        parts[0] == "v" || parts[0].startsWith("v") -> {
+            // Check if this looks like a versioned tag with commits after
+            if (parts.size >= 3 && parts[parts.size - 1].startsWith("g")) {
+                // Has commits after tag: "v0.7.0-5-gabcdef" or "0.7.0-5-gabcdef"
+                val tagParts = parts.dropLast(2) // Remove commit count and hash
+                tagParts.joinToString("-").removePrefix("v") + "-SNAPSHOT"
+            } else {
+                // Just the tag, possibly with dashes in it
+                cleanDescribe.removePrefix("v")
+            }
+        }
+        // Tag-commits-hash format: "0.7.0-5-gabcdef"
+        parts.size >= 3 && parts[parts.size - 1].startsWith("g") -> {
+            val tagParts = parts.dropLast(2)
+            tagParts.joinToString("-").removePrefix("v") + "-SNAPSHOT"
+        }
+        // Some other format, use as-is
+        else -> cleanDescribe.removePrefix("v")
+    }
+
+    return if (isDirty) "$version-dirty" else version
+}
 
 fun Project.isSnapshot(): Boolean =
-    version.toString().endsWith("-SNAPSHOT")
+    version.toString().contains("-SNAPSHOT")
 
 fun Project.fullVersion(): String {
-    var version = version.toString()
-    if (version.endsWith("-SNAPSHOT")) {
-        version += " (b${buildNumberAsString()}-${lastCommitHash()})"
+    val ver = version.toString()
+    return if (ver.contains("-SNAPSHOT")) {
+        val commitHash = lastCommitHash() ?: "unknown"
+        ver.replace("-SNAPSHOT", "-SNAPSHOT+$commitHash")
+    } else {
+        ver
     }
-    return version
 }
 
 fun Project.lastCommitHash(): String? =
@@ -45,9 +128,9 @@ fun Project.lastCommitHash(): String? =
 // retrieved from https://wiki.jenkins-ci.org/display/JENKINS/Building+a+software+project
 // some properties might be specific to Jenkins
 fun Project.branchName(): String =
-    System.getenv("GIT_BRANCH") ?: "local/dev"
+    System.getenv("GIT_BRANCH") ?: System.getenv("GITHUB_REF_NAME") ?: "local/dev"
 fun Project.buildNumber(): Int =
-    Integer.parseInt(System.getenv("BUILD_NUMBER") ?: "-1")
+    Integer.parseInt(System.getenv("BUILD_NUMBER") ?: System.getenv("GITHUB_RUN_NUMBER") ?: "-1")
 
 fun Project.buildNumberAsString(): String =
     buildNumber().takeIf { it != -1 }?.toString() ?: "??"
