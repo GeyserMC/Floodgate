@@ -25,6 +25,7 @@
 
 import net.kyori.indra.git.IndraGitExtension
 import org.gradle.api.Project
+import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.kotlin.dsl.the
 import java.io.ByteArrayOutputStream
@@ -138,13 +139,16 @@ fun Project.buildNumberAsString(): String =
 val providedDependencies = mutableMapOf<String, MutableSet<Pair<String, Any>>>()
 val relocatedPackages = mutableMapOf<String, MutableSet<String>>()
 
-fun Project.provided(pattern: String, name: String, version: String, excludedOn: Int = 0b110) {
+fun Project.provided(pattern: String, name: String, version: String, excludedOn: Int = 0b110, includeTransitiveDeps: Boolean = true) {
     val format = "${calcExclusion(pattern, 0b100, excludedOn)}:" +
             "${calcExclusion(name, 0b10, excludedOn)}:" +
             calcExclusion(version, 0b1, excludedOn)
 
     providedDependencies.getOrPut(project.name) { mutableSetOf() }.add(Pair(format, format))
-    dependencies.add("compileOnlyApi", "$pattern:$name:$version")
+    val dep = dependencies.add("compileOnlyApi", "$pattern:$name:$version")
+    if (dep is ExternalModuleDependency) {
+        dep.isTransitive = includeTransitiveDeps
+    }
 }
 
 fun Project.provided(dependency: ProjectDependency) {
