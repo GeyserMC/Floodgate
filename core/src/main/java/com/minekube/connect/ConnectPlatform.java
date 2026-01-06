@@ -43,6 +43,7 @@ import com.minekube.connect.module.PostInitializeModule;
 import com.minekube.connect.register.WatcherRegister;
 import com.minekube.connect.tunnel.Tunneler;
 import com.minekube.connect.util.Metrics;
+import com.minekube.connect.util.UpdateChecker;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -126,6 +127,9 @@ public class ConnectPlatform {
             logger.info("Super endpoints: " + String.join(", ", config.getSuperEndpoints()));
         }
         logger.info("Your public address: " + config.getEndpoint() + DOMAIN_SUFFIX);
+
+        // Check for updates asynchronously
+        guice.getInstance(UpdateChecker.class).checkForUpdates();
 
         return true;
     }
