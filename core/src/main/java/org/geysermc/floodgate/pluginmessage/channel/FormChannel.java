@@ -27,7 +27,9 @@ package org.geysermc.floodgate.pluginmessage.channel;
 
 import com.google.common.base.Charsets;
 import com.google.inject.Inject;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMaps;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import java.util.UUID;
@@ -94,6 +96,17 @@ public class FormChannel implements PluginMessageChannel {
     }
 
     public boolean closeForm(UUID player) {
+        ObjectIterator<Entry<Form>> iterator = storedForms.short2ObjectEntrySet().iterator();
+        while (iterator.hasNext()) {
+            Entry<Form> entry = iterator.next();
+            Form form = entry.getValue();
+            try {
+                formDefinitions.definitionFor(form).handleFormResponse(form, "");
+            } catch (Exception e) {
+                logger.error("Error while closing form!", e);
+            }
+            iterator.remove();
+        }
         return pluginMessageUtils.sendMessage(player, getIdentifier(), new byte[0]);
     }
 
