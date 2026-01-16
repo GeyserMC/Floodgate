@@ -100,13 +100,15 @@ public class FormChannel implements PluginMessageChannel {
 
     public boolean closeForm(UUID player) {
         List<Short> formIds = playerToFormMap.remove(player);
-        for (short formId : formIds) {
-            Form form = storedForms.remove(formId);
-            if (form != null) {
-                try {
-                    formDefinitions.definitionFor(form).handleFormResponse(form, "");
-                } catch (Exception e) {
-                    logger.error("Error while closing form!", e);
+        if (formIds != null && !formIds.isEmpty()) {
+            for (short formId : formIds) {
+                Form form = storedForms.remove(formId);
+                if (form != null) {
+                    try {
+                        formDefinitions.definitionFor(form).handleFormResponse(form, "");
+                    } catch (Exception e) {
+                        logger.error("Error while closing form!", e);
+                    }
                 }
             }
         }
