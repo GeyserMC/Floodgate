@@ -27,11 +27,13 @@ package org.geysermc.floodgate.pluginmessage.channel;
 
 import com.google.common.base.Charsets;
 import com.google.inject.Inject;
-import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMaps;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.geysermc.cumulus.form.Form;
@@ -47,6 +49,7 @@ public class FormChannel implements PluginMessageChannel {
     private final Short2ObjectMap<Form> storedForms =
             Short2ObjectMaps.synchronize(new Short2ObjectOpenHashMap<>());
     private final AtomicInteger nextFormId = new AtomicInteger(0);
+    private final Map<UUID, List<Short>> playerToFormMap = new Object2ObjectOpenHashMap<>();
 
     @Inject private PluginMessageUtils pluginMessageUtils;
     @Inject private FloodgateConfig config;
@@ -81,7 +84,7 @@ public class FormChannel implements PluginMessageChannel {
                 return Result.forward();
             }
 
-            if (!callResponseConsumer(data)) {
+            if (!callResponseConsumer(sourceUuid, data)) {
                 logger.error("Couldn't find stored form with id {} for player {}",
                         formId, sourceUsername);
             }
@@ -91,36 +94,37 @@ public class FormChannel implements PluginMessageChannel {
 
     @Override
     public Result handleServerCall(byte[] data, UUID playerUuid, String playerUsername) {
-        callResponseConsumer(data);
+        callResponseConsumer(playerUuid, data);
         return Result.handled();
     }
 
     public boolean closeForm(UUID player) {
-        ObjectIterator<Entry<Form>> iterator = storedForms.short2ObjectEntrySet().iterator();
-        while (iterator.hasNext()) {
-            Entry<Form> entry = iterator.next();
-            Form form = entry.getValue();
-            try {
-                formDefinitions.definitionFor(form).handleFormResponse(form, "");
-            } catch (Exception e) {
-                logger.error("Error while closing form!", e);
+        List<Short> formIds = playerToFormMap.remove(player);
+        for (short formId : formIds) {
+            Form form = storedForms.remove(formId);
+            if (form != null) {
+                try {
+                    formDefinitions.definitionFor(form).handleFormResponse(form, "");
+                } catch (Exception e) {
+                    logger.error("Error while closing form!", e);
+                }
             }
-            iterator.remove();
         }
         return pluginMessageUtils.sendMessage(player, getIdentifier(), new byte[0]);
     }
 
     public boolean sendForm(UUID player, Form form) {
-        byte[] formData = createFormData(form);
+        byte[] formData = createFormData(player, form);
         return pluginMessageUtils.sendMessage(player, getIdentifier(), formData);
     }
 
-    public byte[] createFormData(Form form) {
+    public byte[] createFormData(UUID uuid, Form form) {
         short formId = getNextFormId();
         if (config.isProxy()) {
             formId |= 0x8000;
         }
         storedForms.put(formId, form);
+        playerToFormMap.computeIfAbsent(uuid, k -> new ArrayList<>()).add(formId);
 
         FormDefinition<Form, ?, ?> definition = formDefinitions.definitionFor(form);
 
@@ -137,8 +141,14 @@ public class FormChannel implements PluginMessageChannel {
         return data;
     }
 
-    protected boolean callResponseConsumer(byte[] data) {
-        Form storedForm = storedForms.remove(getFormId(data));
+    protected boolean callResponseConsumer(UUID player, byte[] data) {
+        short formId = getFormId(data);
+        playerToFormMap.computeIfPresent(player, (k, list) -> {
+            list.remove(Short.valueOf(formId)); // remove by value, not index
+            return list.isEmpty() ? null : list;
+        });
+
+        Form storedForm = storedForms.remove(formId);
         if (storedForm != null) {
             String responseData = new String(data, 2, data.length - 2, Charsets.UTF_8);
             try {
