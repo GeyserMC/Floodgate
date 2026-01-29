@@ -58,30 +58,24 @@ fun buildNumberAsString(): String =
 val providedDependencies = mutableMapOf<String, MutableSet<Pair<String, Any>>>()
 val relocatedPackages = mutableMapOf<String, MutableSet<String>>()
 
-fun Project.provided(pattern: String, name: String, version: String, excludedOn: Int = 0b110, includeTransitiveDeps: Boolean = true) {
-    val format = "${calcExclusion(pattern, 0b100, excludedOn)}:" +
-            "${calcExclusion(name, 0b10, excludedOn)}:" +
-            calcExclusion(version, 0b1, excludedOn)
+fun Project.provided(dependency: String, includeTransitiveDeps: Boolean = true) {
+    val lastColonIndex = dependency.lastIndexOf(':')
+    val groupPrefix = dependency.substring(0, lastColonIndex + 1)
 
-    providedDependencies.getOrPut(project.name) { mutableSetOf() }.add(Pair(format, format))
-    dependencies.add("compileOnlyApi", "$pattern:$name:$version") {
+    providedDependencies.getOrPut(project.name) { mutableSetOf() }.add(groupPrefix to groupPrefix)
+    dependencies.add("compileOnlyApi", dependency) {
         isTransitive = includeTransitiveDeps
     }
 }
 
 fun Project.provided(dependency: ProjectDependency) {
     providedDependencies.getOrPut(project.name) { mutableSetOf() }
-        .add(Pair(dependency.group + ":" + dependency.name, dependency))
+        .add(dependency.group + ":" + dependency.name to dependency)
     dependencies.add("compileOnlyApi", dependency)
 }
 
-
 fun Project.relocate(pattern: String) =
-    relocatedPackages.getOrPut(project.name) { mutableSetOf() }
-        .add(pattern)
-
-private fun calcExclusion(section: String, bit: Int, excludedOn: Int): String =
-    if (excludedOn and bit > 0) section else ""
+    relocatedPackages.getOrPut(project.name) { mutableSetOf() }.add(pattern)
 
 // todo remove these when we're not using Jenkins anymore
 private fun jenkinsBranchName(): String? = System.getenv("BRANCH_NAME")

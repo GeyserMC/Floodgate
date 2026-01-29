@@ -18,8 +18,8 @@ dependencies {
 }
 
 // present on all platforms
-provided("io.netty", "netty-transport", Versions.nettyVersion)
-provided("io.netty", "netty-codec", Versions.nettyVersion)
+provided("io.netty:netty-transport:${Versions.nettyVersion}")
+provided("io.netty:netty-codec:${Versions.nettyVersion}")
 
 relocate("org.bstats")
 

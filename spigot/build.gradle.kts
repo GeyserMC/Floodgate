@@ -37,7 +37,7 @@ relocate("it.unimi")
 relocate("org.yaml")
 
 // these dependencies are already present on the platform
-provided("com.mojang", "authlib", authlibVersion)
-provided("io.netty", "netty-transport", Versions.nettyVersion)
-provided("io.netty", "netty-codec", Versions.nettyVersion)
-provided("com.google.code.gson", "gson", gsonVersion)
+provided("com.mojang:authlib:${authlibVersion}")
+provided("io.netty:netty-transport:${Versions.nettyVersion}")
+provided("io.netty:netty-codec:${Versions.nettyVersion}")
+provided("com.google.code.gson:gson:${gsonVersion}")

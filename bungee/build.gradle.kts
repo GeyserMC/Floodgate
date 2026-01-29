@@ -18,7 +18,7 @@ relocate("io.leangen.geantyref")
 relocate("org.yaml")
 
 // these dependencies are already present on the platform
-provided("net.md-5", "bungeecord-proxy", bungeeProxyVersion, includeTransitiveDeps = false)
-provided("net.md-5", "bungeecord-api", bungeeApiVersion)
-provided("com.google.code.gson", "gson", gsonVersion)
-provided("com.google.guava", "guava", guavaVersion)
+provided("net.md-5:bungeecord-proxy:${bungeeProxyVersion}", includeTransitiveDeps = false)
+provided("net.md-5:bungeecord-api:${bungeeApiVersion}")
+provided("com.google.code.gson:gson:${gsonVersion}")
+provided("com.google.guava:guava:${guavaVersion}")
