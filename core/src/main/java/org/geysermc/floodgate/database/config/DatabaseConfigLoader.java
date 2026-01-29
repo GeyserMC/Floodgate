@@ -34,7 +34,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
 import org.yaml.snakeyaml.introspector.BeanAccess;
 
 public class DatabaseConfigLoader {
@@ -58,7 +57,8 @@ public class DatabaseConfigLoader {
 
     @Inject
     public void init() {
-        yaml = new Yaml(new CustomClassLoaderConstructor(classLoader));
+        // TODO: The DatabaseConfigConstructor can be replaced back to CustomClassLoaderConstructor if we bump to snakeyaml 2.0
+        yaml = new Yaml(new DatabaseConfigConstructor(classLoader));
         yaml.setBeanAccess(BeanAccess.FIELD);
     }
 
