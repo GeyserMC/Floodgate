@@ -89,5 +89,5 @@ abstract class GenerateAnyTemplates : Copy() {
     }
 }
 
-open class GenerateResourceTemplates : GenerateAnyTemplates()
-open class GenerateSourceTemplates : GenerateAnyTemplates()
+abstract class GenerateSourceTemplates : GenerateAnyTemplates()
+abstract class GenerateResourceTemplates : GenerateAnyTemplates()

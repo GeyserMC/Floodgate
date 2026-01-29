@@ -38,10 +38,10 @@ fun Project.fullVersion(): String {
 }
 
 fun Project.lastCommitHash(): String? =
-    the<IndraGitExtension>().commit()?.name?.substring(0, 7)
+    the<IndraGitExtension>().commit().orNull?.name?.substring(0, 7)
 
 fun Project.branchName(): String =
-    the<IndraGitExtension>().branchName() ?: jenkinsBranchName() ?: "local/dev"
+    the<IndraGitExtension>().branchName().orNull ?: jenkinsBranchName() ?: "local/dev"
 
 fun Project.shouldAddBranchName(): Boolean =
     System.getenv("IGNORE_BRANCH")?.toBoolean() ?: (branchName() !in arrayOf("master", "local/dev"))

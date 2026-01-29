@@ -2,10 +2,10 @@ dependencies {
   provided(projects.core)
 
   // update HikariCP when we move to Java 11+
-  implementation("com.zaxxer", "HikariCP", "4.0.3")
+  implementation("com.zaxxer:HikariCP:4.0.3")
 
-  implementation("com.mysql", "mysql-connector-j", "8.0.32") {
-    exclude("com.google.protobuf", "protobuf-java")
+  implementation("com.mysql:mysql-connector-j:8.0.32") {
+    exclude("com.google.protobuf:protobuf-java")
   }
 }
 

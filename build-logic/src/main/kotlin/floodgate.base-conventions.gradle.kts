@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-    compileOnly("org.checkerframework", "checker-qual", Versions.checkerQual)
+    compileOnly("org.checkerframework:checker-qual:${Versions.checkerQual}")
 }
 
 indra {
@@ -28,12 +28,14 @@ tasks {
     processResources {
         filesMatching(listOf("plugin.yml", "bungee.yml", "velocity-plugin.json")) {
             expand(
-                "id" to "floodgate",
-                "name" to "floodgate",
-                "version" to fullVersion(),
-                "description" to project.description,
-                "url" to "https://geysermc.org",
-                "author" to "GeyserMC"
+                mapOf(
+                    "id" to "floodgate",
+                    "name" to "floodgate",
+                    "version" to fullVersion(),
+                    "description" to project.description,
+                    "url" to "https://geysermc.org",
+                    "author" to "GeyserMC"
+                )
             )
         }
     }

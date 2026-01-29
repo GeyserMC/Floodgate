@@ -1,7 +1,7 @@
 plugins {
     `java-library`
     id("floodgate.build-logic")
-    id("io.freefair.lombok") version "6.3.0" apply false
+    id("io.freefair.lombok") version "9.2.0" apply false
 }
 
 allprojects {
@@ -17,7 +17,7 @@ val deployProjects = setOf(
     projects.bungee,
     projects.spigot,
     projects.velocity
-).map { it.dependencyProject }
+).map { it.path }
 
 //todo re-add checkstyle when we switch back to 2 space indention
 // and take a look again at spotbugs someday
@@ -36,7 +36,7 @@ subprojects {
         plugins.apply("floodgate.database-conventions")
     }
 
-    when (this) {
+    when (path) {
         in deployProjects -> plugins.apply("floodgate.publish-conventions")
         else -> plugins.apply("floodgate.base-conventions")
     }

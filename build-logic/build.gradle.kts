@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     `kotlin-dsl`
 }
@@ -9,14 +7,8 @@ repositories {
 }
 
 dependencies {
-    implementation("net.kyori", "indra-common", "3.0.1")
-    implementation("net.kyori", "indra-git", "3.0.1")
-    implementation("gradle.plugin.com.github.johnrengelman", "shadow", "7.1.1")
-    implementation("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext", "gradle-idea-ext", "1.1.7")
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
+    implementation("net.kyori:indra-common:4.0.0")
+    implementation("net.kyori:indra-git:4.0.0")
+    implementation("com.gradleup.shadow:shadow-gradle-plugin:9.3.1")
+    implementation("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.7")
 }

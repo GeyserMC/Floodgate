@@ -12,13 +12,12 @@ indra {
 
 dependencies {
     api(projects.core)
-    implementation("org.incendo", "cloud-velocity", Versions.cloudVersion)
+    implementation("org.incendo:cloud-velocity:${Versions.cloudVersion}")
 }
 
 relocate("org.incendo.cloud")
 // used in cloud
 relocate("io.leangen.geantyref")
-
 
 // these dependencies are already present on the platform
 provided("com.google.code.gson", "gson", gsonVersion)

@@ -5,7 +5,8 @@ var guavaVersion = "21.0"
 
 dependencies {
     api(projects.core)
-    implementation("org.incendo", "cloud-bungee", Versions.cloudVersion)
+
+    implementation("org.incendo:cloud-bungee:${Versions.cloudVersion}")
 }
 
 relocate("com.google.inject")

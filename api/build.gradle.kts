@@ -1,18 +1,22 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+plugins {
+    `java-library`
+    id("floodgate.shadow-conventions")
+}
 
 dependencies {
-    api("org.geysermc.geyser", "common", Versions.geyserVersion)
-    api("org.geysermc.cumulus", "cumulus", Versions.cumulusVersion)
-    api("org.geysermc.event", "events", Versions.eventsVersion)
+    api("org.geysermc.geyser:common:${Versions.geyserVersion}")
+    api("org.geysermc.cumulus:cumulus:${Versions.cumulusVersion}")
+    api("org.geysermc.event:events:${Versions.eventsVersion}")
 
-    compileOnly("io.netty", "netty-transport", Versions.nettyVersion)
+    compileOnly("io.netty:netty-transport:${Versions.nettyVersion}")
 }
 
 tasks {
-    named<Jar>("jar") {
+    jar {
         archiveClassifier.set("")
     }
-    named<ShadowJar>("shadowJar") {
+
+    shadowJar {
         archiveClassifier.set("shaded")
     }
 }

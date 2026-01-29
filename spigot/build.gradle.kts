@@ -13,11 +13,11 @@ indra {
 dependencies {
     api(projects.core)
 
-    implementation("org.incendo", "cloud-paper", Versions.cloudVersion)
+    implementation("org.incendo:cloud-paper:${Versions.cloudVersion}")
     // hack to make pre 1.12 work
-    implementation("com.google.guava", "guava", guavaVersion)
+    implementation("com.google.guava:guava:${guavaVersion}")
 
-    compileOnlyApi("dev.folia", "folia-api", Versions.spigotVersion) {
+    compileOnlyApi("dev.folia:folia-api:${Versions.spigotVersion}") {
         attributes {
             attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 17)
         }
