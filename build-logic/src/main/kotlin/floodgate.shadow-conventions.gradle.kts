@@ -14,12 +14,13 @@ tasks {
         archiveVersion.set("")
         archiveClassifier.set("")
 
-        dependencies {
-            exclude { dep ->
-                providedDependencies[project.name]?.any { (name, notation) ->
-                    println("Excluding $name, from ${project.name}")
-                    dep.name.contains(notation.toString())
-                } ?: false
+        providedDependencies[project.name]?.forEach { (name, notation) ->
+            dependencies {
+                exclude { dep ->
+                    val match = dep.name.contains(notation.toString())
+                    if (match) println("Excluding $notation from ${project.name}")
+                    match
+                }
             }
         }
 
