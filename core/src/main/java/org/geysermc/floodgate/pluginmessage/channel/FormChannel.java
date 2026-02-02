@@ -27,14 +27,16 @@ package org.geysermc.floodgate.pluginmessage.channel;
 
 import com.google.common.base.Charsets;
 import com.google.inject.Inject;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMaps;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.geysermc.cumulus.form.Form;
 import org.geysermc.cumulus.form.impl.FormDefinition;
@@ -49,7 +51,7 @@ public class FormChannel implements PluginMessageChannel {
     private final Short2ObjectMap<Form> storedForms =
             Short2ObjectMaps.synchronize(new Short2ObjectOpenHashMap<>());
     private final AtomicInteger nextFormId = new AtomicInteger(0);
-    private final Map<UUID, List<Short>> playerToFormMap = new Object2ObjectOpenHashMap<>();
+    private final Map<UUID, Set<Short>> playerToFormMap = new ConcurrentHashMap<>();
 
     @Inject private PluginMessageUtils pluginMessageUtils;
     @Inject private FloodgateConfig config;
@@ -99,7 +101,7 @@ public class FormChannel implements PluginMessageChannel {
     }
 
     public boolean closeForm(UUID player) {
-        List<Short> formIds = playerToFormMap.remove(player);
+        Set<Short> formIds = playerToFormMap.remove(player);
         if (formIds != null && !formIds.isEmpty()) {
             for (short formId : formIds) {
                 Form form = storedForms.remove(formId);
@@ -126,7 +128,7 @@ public class FormChannel implements PluginMessageChannel {
             formId |= 0x8000;
         }
         storedForms.put(formId, form);
-        playerToFormMap.computeIfAbsent(uuid, k -> new ArrayList<>()).add(formId);
+        playerToFormMap.computeIfAbsent(uuid, k -> ConcurrentHashMap.newKeySet()).add(formId);
 
         FormDefinition<Form, ?, ?> definition = formDefinitions.definitionFor(form);
 
