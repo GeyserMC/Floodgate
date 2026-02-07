@@ -37,7 +37,7 @@ object Versions {
     const val cloudCore = "2.0.0-rc.2"
     const val bstatsVersion = "3.0.2"
 
-    const val javaWebsocketVersion = "1.5.2"
+    const val javaWebsocketVersion = "1.6.0"
 
     const val checkerQual = "3.19.0"
 }

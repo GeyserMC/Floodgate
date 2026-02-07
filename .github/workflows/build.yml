@@ -1,6 +1,14 @@
 name: Build
 
-on: [push]
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - 'LICENSE'
+      - 'README.md'
+      - '.gitignore'
+      - '.idea/copyright/*.xml'
+      - '.github/workflows/pullrequest.yml'
 
 jobs:
   build:

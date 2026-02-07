@@ -94,7 +94,7 @@ public class SkinChannel implements PluginMessageChannel {
         SkinDataImpl skinData = new SkinDataImpl(value, signature);
 
         floodgatePlayer.addProperty(PropertyKey.SKIN_UPLOADED, skinData);
-        skinApplier.applySkin(floodgatePlayer, skinData);
+        skinApplier.applySkin(floodgatePlayer, skinData, false);
 
         return Result.handled();
     }

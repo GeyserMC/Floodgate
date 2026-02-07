@@ -46,14 +46,14 @@ public class VelocitySkinApplier implements SkinApplier {
     @Inject private EventBus eventBus;
 
     @Override
-    public void applySkin(@NonNull FloodgatePlayer floodgatePlayer, @NonNull SkinData skinData) {
+    public void applySkin(@NonNull FloodgatePlayer floodgatePlayer, @NonNull SkinData skinData, boolean internal) {
         server.getPlayer(floodgatePlayer.getCorrectUniqueId()).ifPresent(player -> {
             List<Property> properties = new ArrayList<>(player.getGameProfileProperties());
 
             SkinData currentSkin = currentSkin(properties);
 
             SkinApplyEvent event = new SkinApplyEventImpl(floodgatePlayer, currentSkin, skinData);
-            event.setCancelled(floodgatePlayer.isLinked());
+            event.setCancelled(!internal && floodgatePlayer.isLinked());
 
             eventBus.fire(event);
 

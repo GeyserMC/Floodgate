@@ -236,10 +236,23 @@ public class ClassNames {
 
             PACKET_LISTENER = getFieldOfType(networkManager, packetListenerClass);
         } else {
-            // We get the field by name on 1.20.2+ as there are now multiple fields of this type in network manager
+            // We get the field by name on 1.20.2+ as there are now multiple fields of this type in network manager.
+            // We need the second one, the packetListener. Not disconnectListener
 
-            // PacketListener packetListener of NetworkManager
-            PACKET_LISTENER = getField(networkManager, "packetListener", "q");
+            // Mojang mapping variant
+            Field packetListener = getField(networkManager, "packetListener");
+
+            if (packetListener == null) {
+                // We're most likely on Spigot between 1.20.2 and 26.1 (because obfuscated names are dropped after)
+                packetListener = getField(networkManager, "q");
+
+                if (Boolean.TYPE.equals(packetListener.getType())) {
+                    // In the last version of obfuscated field names of Spigot (1.21.11), the name changed :/
+                    packetListener = getField(networkManager, "n");
+                }
+            }
+
+            PACKET_LISTENER = packetListener;
             makeAccessible(PACKET_LISTENER);
         }
         checkNotNull(PACKET_LISTENER, "Packet listener");

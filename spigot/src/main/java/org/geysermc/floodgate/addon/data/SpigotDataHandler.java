@@ -59,7 +59,8 @@ public final class SpigotDataHandler extends CommonDataHandler {
             FloodgateHandshakeHandler handshakeHandler,
             FloodgateConfig config,
             AttributeKey<String> kickMessageAttribute,
-            SpigotVersionSpecificMethods versionSpecificMethods) {
+            SpigotVersionSpecificMethods versionSpecificMethods
+    ) {
         super(handshakeHandler, config, kickMessageAttribute, new PacketBlocker());
         this.versionSpecificMethods = versionSpecificMethods;
     }
@@ -179,15 +180,13 @@ public final class SpigotDataHandler extends CommonDataHandler {
                 }
             }
 
-            Property texturesProperty = null;
-            if (!player.isLinked()) {
-                // Otherwise game server will try to fetch the skin from Mojang.
-                // No need to worry that this overrides proxy data, because those won't reach this
-                // method / are already removed (in the case of username validation)
-                texturesProperty = DEFAULT_TEXTURE_PROPERTY;
-            }
+            // Apply a default texture even for linked players (where we'd have to look up the skin ourselves)
+            // because it's a blocking operation. We'll just override the skin later
             GameProfile gameProfile = versionSpecificMethods.createGameProfile(
-                    player.getCorrectUniqueId(), player.getCorrectUsername(), texturesProperty);
+                    player.getCorrectUniqueId(),
+                    player.getCorrectUsername(),
+                    DEFAULT_TEXTURE_PROPERTY
+            );
 
             // we have to fake the offline player (login) cycle
 

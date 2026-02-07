@@ -117,7 +117,7 @@ final class SkinUploadSocket extends WebSocketClient {
                     }
 
                     SkinData skinData = SkinDataImpl.from(message.getAsJsonObject("data"));
-                    applier.applySkin(player, skinData);
+                    applier.applySkin(player, skinData, false);
 
                     // legacy stuff,
                     // will be removed shortly after or during the Floodgate-Geyser integration
