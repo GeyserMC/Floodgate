@@ -25,8 +25,8 @@
 
 package org.geysermc.floodgate.database;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -50,6 +50,7 @@ public class SqliteDatabase extends CommonPlayerLink {
     private final Map<String, LinkRequest> activeLinkRequests = new HashMap<>();
     private Connection connection;
 
+    // Use `jakarta` namespace before bumping shaded Guice to 7.0.0
     @Inject
     @Named("dataDirectory")
     private Path dataDirectory;
