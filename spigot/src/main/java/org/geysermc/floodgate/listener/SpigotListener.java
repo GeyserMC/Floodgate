@@ -26,15 +26,18 @@
 package org.geysermc.floodgate.listener;
 
 import com.google.inject.Inject;
+import java.net.InetSocketAddress;
 import java.util.UUID;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.geysermc.floodgate.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.player.PendingPlayerManager;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.MojangUtils;
@@ -43,6 +46,7 @@ public final class SpigotListener implements Listener {
     @Inject private SimpleFloodgateApi api;
     @Inject private LanguageManager languageManager;
     @Inject private FloodgateLogger logger;
+    @Inject private PendingPlayerManager pendingPlayerManager;
 
     @Inject private MojangUtils mojangUtils;
     @Inject private SkinApplier skinApplier;
@@ -76,8 +80,15 @@ public final class SpigotListener implements Listener {
         }
     }
 
+    @EventHandler
+    public void onPlayerLogin(PlayerLoginEvent event) {
+        InetSocketAddress address = event.getPlayer().getAddress();
+        pendingPlayerManager.remove(address);
+    }
+
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
         api.playerRemoved(event.getPlayer().getUniqueId());
+        pendingPlayerManager.remove(event.getPlayer().getAddress());
     }
 }
