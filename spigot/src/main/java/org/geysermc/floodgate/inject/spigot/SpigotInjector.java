@@ -110,16 +110,17 @@ public final class SpigotInjector extends CommonPlatformInjector {
         future.channel().pipeline().addFirst("floodgate-init", new ChannelInboundHandlerAdapter() {
             @Override
             public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-                super.channelRead(ctx, msg);
-
                 Channel channel = (Channel) msg;
-                channel.pipeline().addLast(new ChannelInitializer<Channel>() {
+                channel.pipeline().addLast("floodgate-injector", new ChannelInboundHandlerAdapter() {
                     @Override
-                    protected void initChannel(Channel channel) {
-                        injectAddonsCall(channel, false);
-                        addInjectedClient(channel);
+                    public void channelActive(ChannelHandlerContext childCtx) throws Exception {
+                        injectAddonsCall(childCtx.channel(), false);
+                        addInjectedClient(childCtx.channel());
+                        childCtx.pipeline().remove(this);
+                        super.channelActive(childCtx);
                     }
                 });
+                super.channelRead(ctx, msg);
             }
         });
     }
