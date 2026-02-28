@@ -78,6 +78,16 @@ public class PropertyKey {
         return Result.NOT_EQUALS;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof PropertyKey && key.equals(((PropertyKey) obj).key);
+    }
+
+    @Override
+    public int hashCode() {
+        return key.hashCode();
+    }
+
     public enum Result {
         NOT_EQUALS,
         INVALID_TAGS,
