@@ -30,18 +30,17 @@ import com.google.inject.Inject;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMaps;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.geysermc.cumulus.form.Form;
 import org.geysermc.cumulus.form.impl.FormDefinition;
 import org.geysermc.cumulus.form.impl.FormDefinitions;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
@@ -65,8 +64,7 @@ public class FormChannel implements PluginMessageChannel {
     @Override
     public Result handleProxyCall(
             byte[] data,
-            UUID sourceUuid,
-            String sourceUsername,
+            FloodgatePlayer source,
             Identity sourceIdentity
     ) {
         if (sourceIdentity == Identity.SERVER) {
@@ -86,17 +84,19 @@ public class FormChannel implements PluginMessageChannel {
                 return Result.forward();
             }
 
-            if (!callResponseConsumer(sourceUuid, data)) {
+            if (!callResponseConsumer(source, data)) {
                 logger.error("Couldn't find stored form with id {} for player {}",
-                        formId, sourceUsername);
+                        formId, source.getCorrectUsername());
             }
         }
         return Result.handled();
     }
 
     @Override
-    public Result handleServerCall(byte[] data, UUID playerUuid, String playerUsername) {
-        callResponseConsumer(playerUuid, data);
+    public Result handleServerCall(byte[] data, FloodgatePlayer source) {
+        if (!callResponseConsumer(source, data)) {
+            logger.error("Couldn't find stored form for player {}", source.getCorrectUsername());
+        }
         return Result.handled();
     }
 
@@ -125,7 +125,7 @@ public class FormChannel implements PluginMessageChannel {
     public byte[] createFormData(UUID uuid, Form form) {
         short formId = getNextFormId();
         if (config.isProxy()) {
-            formId |= 0x8000;
+            formId |= (short) 0x8000;
         }
         storedForms.put(formId, form);
         playerToFormMap.computeIfAbsent(uuid, k -> ConcurrentHashMap.newKeySet()).add(formId);
@@ -145,12 +145,17 @@ public class FormChannel implements PluginMessageChannel {
         return data;
     }
 
-    protected boolean callResponseConsumer(UUID player, byte[] data) {
+    protected boolean callResponseConsumer(FloodgatePlayer player, byte[] data) {
         short formId = getFormId(data);
-        playerToFormMap.computeIfPresent(player, (k, list) -> {
-            list.remove(Short.valueOf(formId)); // remove by value, not index
+        AtomicBoolean found = new AtomicBoolean(false);
+        playerToFormMap.computeIfPresent(player.getCorrectUniqueId(), (k, list) -> {
+            found.set(list.remove(formId)); // remove by value, not index
             return list.isEmpty() ? null : list;
         });
+
+        if (!found.get()) {
+            return false;
+        }
 
         Form storedForm = storedForms.remove(formId);
         if (storedForm != null) {

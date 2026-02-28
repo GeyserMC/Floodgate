@@ -135,8 +135,8 @@ public final class SpigotPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public PluginMessageRegistration pluginMessageRegister() {
-        return new SpigotPluginMessageRegistration(plugin);
+    public PluginMessageRegistration pluginMessageRegister(FloodgateApi api) {
+        return new SpigotPluginMessageRegistration(plugin, api);
     }
 
     @Provides

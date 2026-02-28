@@ -27,7 +27,6 @@ package org.geysermc.floodgate.pluginmessage.channel;
 
 import com.google.inject.Inject;
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.player.PropertyKey;
@@ -50,13 +49,12 @@ public class SkinChannel implements PluginMessageChannel {
     @Override
     public Result handleProxyCall(
             byte[] data,
-            UUID sourceUuid,
-            String sourceUsername,
+            FloodgatePlayer source,
             Identity sourceIdentity
     ) {
         // we can only get skins from Geyser (client)
         if (sourceIdentity == Identity.PLAYER) {
-            Result result = handleServerCall(data, sourceUuid, sourceUsername);
+            Result result = handleServerCall(data, source);
             // aka translate 'handled' into 'forward' when send-floodgate-data is enabled
             if (!result.isAllowed() && result.getReason() == null) {
                 if (config.isProxy() && ((ProxyFloodgateConfig) config).isSendFloodgateData()) {
@@ -74,12 +72,7 @@ public class SkinChannel implements PluginMessageChannel {
     }
 
     @Override
-    public Result handleServerCall(byte[] data, UUID playerUuid, String playerUsername) {
-        FloodgatePlayer floodgatePlayer = api.getPlayer(playerUuid);
-        if (floodgatePlayer == null) {
-            return Result.kick("Player sent skins data for a non-Floodgate player");
-        }
-
+    public Result handleServerCall(byte[] data, FloodgatePlayer floodgatePlayer) {
         String message = new String(data, StandardCharsets.UTF_8);
 
         String[] split = message.split("\0");
