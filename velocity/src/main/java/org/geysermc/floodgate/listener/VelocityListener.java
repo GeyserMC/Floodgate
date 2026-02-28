@@ -57,6 +57,7 @@ import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
+import org.geysermc.floodgate.pluginmessage.channel.FormChannel;
 import org.geysermc.floodgate.skin.SkinDataImpl;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.LanguageManager;
@@ -116,6 +117,7 @@ public final class VelocityListener {
 
     @Inject
     private MojangUtils mojangUtils;
+    @Inject private FormChannel formChannel;
 
     @Subscribe(order = PostOrder.EARLY)
     public void onPreLogin(PreLoginEvent event) {
@@ -201,6 +203,11 @@ public final class VelocityListener {
 
     @Subscribe(order = PostOrder.LAST)
     public void onDisconnect(DisconnectEvent event) {
+        FloodgatePlayer player = api.getPendingRemovePlayer(event.getPlayer().getUniqueId());
+        if (player != null) {
+            formChannel.disconnect(player);
+        }
+
         api.playerRemoved(event.getPlayer().getUniqueId());
     }
 }

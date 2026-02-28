@@ -111,8 +111,9 @@ public final class BungeePlatformModule extends AbstractModule {
     @Singleton
     public PluginMessageUtils pluginMessageUtils(
             PluginMessageManager manager,
+            FloodgateApi api,
             FloodgateLogger logger) {
-        return new BungeePluginMessageUtils(manager, logger);
+        return new BungeePluginMessageUtils(manager, api, logger);
     }
 
     @Provides

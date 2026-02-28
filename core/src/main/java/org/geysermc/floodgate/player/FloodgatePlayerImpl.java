@@ -25,9 +25,10 @@
 
 package org.geysermc.floodgate.player;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -176,8 +177,8 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
     @Override
     public <T> T addProperty(PropertyKey key, Object value) {
         if (stringToPropertyKey == null) {
-            stringToPropertyKey = new HashMap<>();
-            propertyKeyToValue = new HashMap<>();
+            stringToPropertyKey = new ConcurrentHashMap<>();
+            propertyKeyToValue = new ConcurrentHashMap<>();
 
             stringToPropertyKey.put(key.getKey(), key);
             propertyKeyToValue.put(key, value);
@@ -202,8 +203,8 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
         PropertyKey propertyKey = new PropertyKey(key, true, true);
 
         if (stringToPropertyKey == null) {
-            stringToPropertyKey = new HashMap<>();
-            propertyKeyToValue = new HashMap<>();
+            stringToPropertyKey = new ConcurrentHashMap<>();
+            propertyKeyToValue = new ConcurrentHashMap<>();
 
             stringToPropertyKey.put(key, propertyKey);
             propertyKeyToValue.put(propertyKey, value);
@@ -222,5 +223,18 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
             propertyKeyToValue.put(propertyKey, value);
             return propertyKey;
         });
+    }
+
+    public <T> T getOrAddProperty(PropertyKey key, Supplier<T> supplier) {
+        if (stringToPropertyKey == null) {
+            stringToPropertyKey = new ConcurrentHashMap<>();
+            propertyKeyToValue = new ConcurrentHashMap<>();
+        }
+
+        // The hashcode & equals of PropertyKey is based on the hashcode of key.
+        // stringToPropertyKey is solely for the updatable & removable checks, which we still handle
+        // correctly by using ifAbsent for both.
+        stringToPropertyKey.putIfAbsent(key.getKey(), key);
+        return (T) propertyKeyToValue.computeIfAbsent(key, (unused) -> supplier.get());
     }
 }

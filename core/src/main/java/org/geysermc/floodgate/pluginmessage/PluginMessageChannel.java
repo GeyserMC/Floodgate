@@ -25,10 +25,10 @@
 
 package org.geysermc.floodgate.pluginmessage;
 
-import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
 public interface PluginMessageChannel {
 
@@ -36,12 +36,11 @@ public interface PluginMessageChannel {
 
     Result handleProxyCall(
             byte[] data,
-            UUID sourceUuid,
-            String sourceUsername,
+            FloodgatePlayer source,
             Identity sourceIdentity
     );
 
-    Result handleServerCall(byte[] data, UUID playerUuid, String playerUsername);
+    Result handleServerCall(byte[] data, FloodgatePlayer source);
 
     @Getter
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
