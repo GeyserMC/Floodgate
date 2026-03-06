@@ -31,8 +31,10 @@ import com.google.inject.name.Named;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
 import org.yaml.snakeyaml.introspector.BeanAccess;
@@ -58,8 +60,31 @@ public class DatabaseConfigLoader {
 
     @Inject
     public void init() {
-        yaml = new Yaml(new CustomClassLoaderConstructor(classLoader));
+        yaml = new Yaml(createClassLoaderConstructor(classLoader));
         yaml.setBeanAccess(BeanAccess.FIELD);
+    }
+
+    /**
+     * Helper method to create a CustomClassLoaderConstructor, which on SnakeYaml 1.X only takes
+     * in a ClassLoader, and on SnakeYaml 2.X takes a ClassLoader and a LoaderOptions object.
+     */
+    private CustomClassLoaderConstructor createClassLoaderConstructor(ClassLoader classLoader) {
+        try {
+            // SnakeYaml 1.X
+            return new CustomClassLoaderConstructor(classLoader);
+        } catch (NoSuchMethodError ignored) {
+            try {
+                // SnakeYaml 2.0+
+                Constructor<CustomClassLoaderConstructor> constructor =
+                        CustomClassLoaderConstructor.class.getConstructor(
+                                ClassLoader.class,
+                                LoaderOptions.class
+                        );
+                return constructor.newInstance(classLoader, new LoaderOptions());
+            } catch (ReflectiveOperationException ex) {
+                throw new RuntimeException("Failed to create CustomClassLoaderConstructor", ex);
+            }
+        }
     }
 
     /**
