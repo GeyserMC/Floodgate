@@ -33,4 +33,5 @@ import lombok.Getter;
 @Getter
 public final class ProxyFloodgateConfig extends FloodgateConfig {
     private boolean sendFloodgateData;
+    private boolean allowOnlineModeAuthentication;
 }
