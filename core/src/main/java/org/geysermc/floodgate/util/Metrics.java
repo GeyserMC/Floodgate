@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.bstats.MetricsBase;
@@ -41,6 +42,7 @@ import org.bstats.json.JsonObjectBuilder;
 import org.geysermc.event.Listener;
 import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.config.FloodgateConfig.MetricsConfig;
@@ -55,7 +57,8 @@ public final class Metrics {
 
     @Inject
     Metrics(FloodgateConfig config, PlatformUtils platformUtils, FloodgateApi api,
-            @Named("implementationName") String implementationName, FloodgateLogger logger) {
+            @Named("implementationName") String implementationName,
+            PlayerLink link, FloodgateLogger logger) {
 
         MetricsConfig metricsConfig = config.getMetrics();
 
@@ -100,6 +103,18 @@ public final class Metrics {
 
         metricsBase.addCustomChart(
                 new SimplePie("floodgate_version", () -> Constants.VERSION)
+        );
+
+        metricsBase.addCustomChart(
+                new SimplePie("local_linking_type", () -> {
+                    if (!config.getPlayerLink().isEnableOwnLinking()) {
+                        return "disabled";
+                    }
+                    if (!Objects.equals(link.getName(), config.getPlayerLink().getType())) {
+                        return "not found (" + config.getPlayerLink().getType() + ")";
+                    }
+                    return link.getName();
+                })
         );
 
         metricsBase.addCustomChart(

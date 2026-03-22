@@ -38,7 +38,9 @@ import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
+import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel.Identity;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel.Result;
@@ -46,6 +48,7 @@ import org.geysermc.floodgate.pluginmessage.PluginMessageChannel.Result;
 @RequiredArgsConstructor
 public class VelocityPluginMessageUtils extends PluginMessageUtils {
     private final PluginMessageManager pluginMessageManager;
+    private final FloodgateApi api;
     private ProxyServer proxy;
     private FloodgateLogger logger;
 
@@ -63,23 +66,26 @@ public class VelocityPluginMessageUtils extends PluginMessageUtils {
             return;
         }
 
-        UUID sourceUuid = null;
-        String sourceUsername = null;
+        FloodgatePlayer fSource = null;
         Identity sourceIdentity = Identity.UNKNOWN;
 
         ChannelMessageSource source = event.getSource();
         if (source instanceof Player) {
             Player player = (Player) source;
-            sourceUuid = player.getUniqueId();
-            sourceUsername = player.getUsername();
+            fSource = api.getPlayer(player.getUniqueId());
             sourceIdentity = Identity.PLAYER;
+
+            if (fSource == null) {
+                logKick(source, "Only Floodgate players can send floodgate messages!");
+                return;
+            }
 
         } else if (source instanceof ServerConnection) {
             sourceIdentity = Identity.SERVER;
         }
 
         Result result = channel.handleProxyCall(
-                event.getData(), sourceUuid, sourceUsername, sourceIdentity
+                event.getData(), fSource, sourceIdentity
         );
 
         event.setResult(result.isAllowed() ? ForwardResult.forward() : ForwardResult.handled());

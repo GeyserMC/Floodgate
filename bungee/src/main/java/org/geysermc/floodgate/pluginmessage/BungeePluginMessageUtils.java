@@ -36,7 +36,9 @@ import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
+import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel.Identity;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel.Result;
@@ -44,6 +46,7 @@ import org.geysermc.floodgate.pluginmessage.PluginMessageChannel.Result;
 @RequiredArgsConstructor
 public final class BungeePluginMessageUtils extends PluginMessageUtils implements Listener {
     private final PluginMessageManager pluginMessageManager;
+    private final FloodgateApi api;
     private final FloodgateLogger logger;
 
     @EventHandler(priority = EventPriority.LOW)
@@ -53,23 +56,26 @@ public final class BungeePluginMessageUtils extends PluginMessageUtils implement
             return;
         }
 
-        UUID sourceUuid = null;
-        String sourceUsername = null;
+        FloodgatePlayer fSource = null;
         Identity sourceIdentity = Identity.UNKNOWN;
 
         Connection source = event.getSender();
         if (source instanceof ProxiedPlayer) {
             ProxiedPlayer player = (ProxiedPlayer) source;
-            sourceUuid = player.getUniqueId();
-            sourceUsername = player.getName();
+            fSource = api.getPlayer(player.getUniqueId());
             sourceIdentity = Identity.PLAYER;
+
+            if (fSource == null) {
+                logKick(source, "Only Floodgate players can send floodgate messages!");
+                return;
+            }
 
         } else if (source instanceof ServerConnection) {
             sourceIdentity = Identity.SERVER;
         }
 
         Result result = channel.handleProxyCall(
-                event.getData(), sourceUuid, sourceUsername, sourceIdentity
+                event.getData(), fSource, sourceIdentity
         );
 
         event.setCancelled(!result.isAllowed());

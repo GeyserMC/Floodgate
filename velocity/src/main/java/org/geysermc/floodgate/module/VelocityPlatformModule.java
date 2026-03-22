@@ -35,6 +35,7 @@ import com.velocitypowered.api.event.EventManager;
 import com.velocitypowered.api.proxy.ProxyServer;
 import lombok.RequiredArgsConstructor;
 import org.geysermc.floodgate.VelocityPlugin;
+import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.inject.velocity.VelocityInjector;
@@ -102,8 +103,8 @@ public final class VelocityPlatformModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public PluginMessageUtils pluginMessageUtils(PluginMessageManager pluginMessageManager) {
-        return new VelocityPluginMessageUtils(pluginMessageManager);
+    public PluginMessageUtils pluginMessageUtils(PluginMessageManager pluginMessageManager, FloodgateApi api) {
+        return new VelocityPluginMessageUtils(pluginMessageManager, api);
     }
 
     @Provides
