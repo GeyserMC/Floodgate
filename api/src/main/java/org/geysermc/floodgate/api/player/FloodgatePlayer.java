@@ -113,6 +113,21 @@ public interface FloodgatePlayer {
      */
     boolean isLinked();
 
+    /**
+     * Returns true if the player is a Minecraft Education Edition client
+     */
+    boolean isEducationPlayer();
+
+    /**
+     * Returns the M365 tenant ID of the education player, or empty string if not an edu player
+     */
+    String getTenantId();
+
+    /**
+     * Returns the AD role of the education player (0 = student, 1 = teacher), or -1 if not edu
+     */
+    int getAdRole();
+
     default boolean sendForm(Form form) {
         return FloodgateApi.getInstance().sendForm(getCorrectUniqueId(), form);
     }

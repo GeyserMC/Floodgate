@@ -66,14 +66,25 @@ public class HandshakeDataImpl implements HandshakeData {
         UUID javaUniqueId = null;
 
         if (bedrockData != null) {
-            String prefix = config.getUsernamePrefix();
-            int usernameLength = Math.min(bedrockData.getUsername().length(), 16 - prefix.length());
-            javaUsername = prefix + bedrockData.getUsername().substring(0, usernameLength);
+            if (bedrockData.isEducation()) {
+                String prefix = config.getEducationPrefix();
+                String tenantHash = Utils.getTenantHash(bedrockData.getTenantId());
+                // Format: <prefix><name><4-char-hash>, truncate name if needed
+                int maxNameLength = 16 - prefix.length() - tenantHash.length();
+                int nameLength = Math.min(bedrockData.getUsername().length(), maxNameLength);
+                javaUsername = prefix + bedrockData.getUsername().substring(0, nameLength) + tenantHash;
+
+                javaUniqueId = Utils.getEducationUuid(bedrockData.getTenantId(), bedrockData.getUsername());
+            } else {
+                String prefix = config.getUsernamePrefix();
+                int usernameLength = Math.min(bedrockData.getUsername().length(), 16 - prefix.length());
+                javaUsername = prefix + bedrockData.getUsername().substring(0, usernameLength);
+
+                javaUniqueId = Utils.getJavaUuid(bedrockData.getXuid());
+            }
             if (config.isReplaceSpaces()) {
                 javaUsername = javaUsername.replace(" ", "_");
             }
-
-            javaUniqueId = Utils.getJavaUuid(bedrockData.getXuid());
             this.ip = bedrockData.getIp();
         }
 

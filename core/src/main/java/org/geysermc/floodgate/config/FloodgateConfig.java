@@ -41,6 +41,7 @@ import org.geysermc.configutils.loader.callback.GenericPostInitializeCallback;
 public class FloodgateConfig implements GenericPostInitializeCallback<ConfigLoader> {
     private String keyFileName;
     private String usernamePrefix = "";
+    private String educationPrefix = "+";
     private boolean replaceSpaces;
 
     private String defaultLocale;
@@ -82,6 +83,11 @@ public class FloodgateConfig implements GenericPostInitializeCallback<ConfigLoad
         // Java usernames can't be longer than 16 chars
         if (usernamePrefix.length() >= 16) {
             usernamePrefix = ".";
+        }
+
+        // Education prefix + 4 char hash must leave room for at least 1 char username
+        if (educationPrefix.length() + 4 >= 16) {
+            educationPrefix = "+";
         }
 
         return CallbackResult.ok();

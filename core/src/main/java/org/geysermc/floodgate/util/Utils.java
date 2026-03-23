@@ -35,6 +35,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
@@ -93,6 +95,36 @@ public class Utils {
 
     public static UUID getJavaUuid(String xuid) {
         return getJavaUuid(Long.parseLong(xuid));
+    }
+
+    private static final long EDUCATION_UUID_MSB = 0x0000000100000001L;
+
+    public static UUID getEducationUuid(String tenantId, String username) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest((tenantId + ":" + username).getBytes(StandardCharsets.UTF_8));
+            long lsb = 0;
+            for (int i = 0; i < 8; i++) {
+                lsb = (lsb << 8) | (hash[i] & 0xFF);
+            }
+            return new UUID(EDUCATION_UUID_MSB, lsb);
+        } catch (NoSuchAlgorithmException e) {
+            throw new AssertionError("SHA-256 not available", e);
+        }
+    }
+
+    public static boolean isEducationId(UUID uuid) {
+        return uuid.getMostSignificantBits() == EDUCATION_UUID_MSB;
+    }
+
+    public static String getTenantHash(String tenantId) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(tenantId.getBytes(StandardCharsets.UTF_8));
+            return String.format("%02x%02x", hash[0], hash[1]);
+        } catch (NoSuchAlgorithmException e) {
+            throw new AssertionError("SHA-256 not available", e);
+        }
     }
 
     public static boolean isUniquePrefix(String prefix) {

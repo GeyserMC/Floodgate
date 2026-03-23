@@ -262,7 +262,8 @@ public final class FloodgateHandshakeHandler {
     }
 
     private CompletableFuture<Pair<BedrockData, LinkedPlayer>> fetchLinkedPlayer(BedrockData data) {
-        if (!api.getPlayerLink().isEnabled()) {
+        // Education players have no Xbox account, skip linking
+        if (!api.getPlayerLink().isEnabled() || data.isEducation()) {
             return CompletableFuture.completedFuture(new ObjectObjectImmutablePair<>(data, null));
         }
         return api.getPlayerLink().getLinkedPlayer(Utils.getJavaUuid(data.getXuid()))

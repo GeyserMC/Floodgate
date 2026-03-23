@@ -8,6 +8,10 @@ key-file-name: key.pem
 # It is recommended to use a prefix that does not contain alphanumerical to avoid the possibility of duplicate usernames.
 username-prefix: "."
 
+# The prefix used for Education Edition players. A 4-character tenant hash is also appended
+# to distinguish players from different M365 tenants.
+education-prefix: "+"
+
 # Should spaces be replaced with '_' in bedrock usernames?
 replace-spaces: true
 

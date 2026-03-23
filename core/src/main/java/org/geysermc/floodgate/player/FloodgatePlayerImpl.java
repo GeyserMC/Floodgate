@@ -66,6 +66,10 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
     private final int subscribeId;
     private final String verifyCode;
 
+    private final boolean education;
+    private final String tenantId;
+    private final int adRole;
+
     @Getter(AccessLevel.PRIVATE)
     private Map<PropertyKey, Object> propertyKeyToValue;
     @Getter(AccessLevel.PRIVATE)
@@ -74,7 +78,12 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
     static FloodgatePlayerImpl from(BedrockData data, HandshakeData handshakeData) {
         FloodgateApi api = FloodgateApi.getInstance();
 
-        UUID javaUniqueId = Utils.getJavaUuid(data.getXuid());
+        UUID javaUniqueId;
+        if (data.isEducation()) {
+            javaUniqueId = Utils.getEducationUuid(data.getTenantId(), data.getUsername());
+        } else {
+            javaUniqueId = Utils.getJavaUuid(data.getXuid());
+        }
 
         DeviceOs deviceOs = DeviceOs.fromId(data.getDeviceOs());
         UiProfile uiProfile = UiProfile.fromId(data.getUiProfile());
@@ -86,7 +95,8 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
                 data.getVersion(), data.getUsername(), handshakeData.getJavaUsername(),
                 javaUniqueId, data.getXuid(), deviceOs, data.getLanguageCode(), uiProfile,
                 inputMode, data.getIp(), data.isFromProxy(), api instanceof ProxyFloodgateApi,
-                linkedPlayer, data.getSubscribeId(), data.getVerifyCode());
+                linkedPlayer, data.getSubscribeId(), data.getVerifyCode(),
+                data.isEducation(), data.getTenantId(), data.getAdRole());
     }
 
     @Override
@@ -104,10 +114,25 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
         return linkedPlayer != null;
     }
 
+    @Override
+    public boolean isEducationPlayer() {
+        return education;
+    }
+
+    @Override
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    public int getAdRole() {
+        return adRole;
+    }
+
     public BedrockData toBedrockData() {
         return BedrockData.of(version, username, xuid, deviceOs.ordinal(), languageCode,
                 uiProfile.ordinal(), inputMode.ordinal(), ip, linkedPlayer, proxy, subscribeId,
-                verifyCode);
+                verifyCode, education, tenantId, adRole);
     }
 
     @Override
