@@ -31,7 +31,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelInitializer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -45,6 +44,17 @@ import org.geysermc.floodgate.util.ReflectionUtils;
 
 @Singleton
 public final class SpigotInjector extends CommonPlatformInjector {
+    private static final String[] EARLY_LOAD_CLASSES = {
+            "org.geysermc.floodgate.inject.spigot.SpigotInjector$ServerChannelHandler",
+            "org.geysermc.floodgate.inject.spigot.SpigotInjector$ChildChannelHandler",
+            "org.geysermc.floodgate.addon.data.PacketBlocker",
+            "org.geysermc.floodgate.addon.data.SpigotDataHandler",
+            "org.geysermc.floodgate.addon.packethandler.ChannelInPacketHandler",
+            "org.geysermc.floodgate.addon.packethandler.ChannelOutPacketHandler",
+            "org.geysermc.floodgate.addon.debug.ChannelInDebugHandler",
+            "org.geysermc.floodgate.addon.debug.ChannelOutDebugHandler"
+    };
+
     @Inject private FloodgateLogger logger;
 
     private Object serverConnection;
@@ -58,6 +68,8 @@ public final class SpigotInjector extends CommonPlatformInjector {
         if (isInjected()) {
             return;
         }
+
+        warmupRuntimeClasses();
 
         Object serverConnection = getServerConnection();
         if (serverConnection == null) {
@@ -107,22 +119,7 @@ public final class SpigotInjector extends CommonPlatformInjector {
     }
 
     public void injectClient(ChannelFuture future) {
-        future.channel().pipeline().addFirst("floodgate-init", new ChannelInboundHandlerAdapter() {
-            @Override
-            public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-                Channel channel = (Channel) msg;
-                channel.pipeline().addLast("floodgate-injector", new ChannelInboundHandlerAdapter() {
-                    @Override
-                    public void channelActive(ChannelHandlerContext childCtx) throws Exception {
-                        injectAddonsCall(childCtx.channel(), false);
-                        addInjectedClient(childCtx.channel());
-                        childCtx.pipeline().remove(this);
-                        super.channelActive(childCtx);
-                    }
-                });
-                super.channelRead(ctx, msg);
-            }
-        });
+        future.channel().pipeline().addFirst("floodgate-init", new ServerChannelHandler(this));
     }
 
     @Override
@@ -183,5 +180,47 @@ public final class SpigotInjector extends CommonPlatformInjector {
         serverConnection = ReflectionUtils.invoke(minecraftServerInstance, method);
 
         return serverConnection;
+    }
+
+    private static void warmupRuntimeClasses() {
+        ClassLoader classLoader = SpigotInjector.class.getClassLoader();
+        for (String className : EARLY_LOAD_CLASSES) {
+            try {
+                Class.forName(className, false, classLoader);
+            } catch (ClassNotFoundException exception) {
+                throw new IllegalStateException("Failed to preload runtime class " + className, exception);
+            }
+        }
+    }
+
+    private static final class ServerChannelHandler extends ChannelInboundHandlerAdapter {
+        private final SpigotInjector injector;
+
+        private ServerChannelHandler(SpigotInjector injector) {
+            this.injector = injector;
+        }
+
+        @Override
+        public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+            Channel channel = (Channel) msg;
+            channel.pipeline().addLast("floodgate-injector", new ChildChannelHandler(injector));
+            super.channelRead(ctx, msg);
+        }
+    }
+
+    private static final class ChildChannelHandler extends ChannelInboundHandlerAdapter {
+        private final SpigotInjector injector;
+
+        private ChildChannelHandler(SpigotInjector injector) {
+            this.injector = injector;
+        }
+
+        @Override
+        public void channelActive(ChannelHandlerContext childCtx) throws Exception {
+            injector.injectAddonsCall(childCtx.channel(), false);
+            injector.addInjectedClient(childCtx.channel());
+            childCtx.pipeline().remove(this);
+            super.channelActive(childCtx);
+        }
     }
 }

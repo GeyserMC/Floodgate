@@ -145,7 +145,7 @@ public final class LanguageManager {
      * @return translated string or "key arg1, arg2 (etc.)" if it was not found in the given locale
      */
     public String getString(String key, String locale, Object... values) {
-        Properties properties = localeMappings.get(locale);
+        Properties properties = localeMappings.get(formatLocale(locale));
         String formatString = null;
 
         if (properties != null) {
@@ -153,9 +153,11 @@ public final class LanguageManager {
         }
 
         // try and get the key from the default locale
-        if (formatString == null) {
+        if (formatString == null && defaultLocale != null) {
             properties = localeMappings.get(defaultLocale);
-            formatString = properties.getProperty(key);
+            if (properties != null) {
+                formatString = properties.getProperty(key);
+            }
         }
 
         // key wasn't found
