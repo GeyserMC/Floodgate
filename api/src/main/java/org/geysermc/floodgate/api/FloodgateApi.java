@@ -97,6 +97,8 @@ public interface FloodgateApi {
 
     boolean sendForm(UUID uuid, FormBuilder<?, ?, ?> formBuilder);
 
+    boolean closeForm(UUID uuid);
+
     /**
      * @deprecated since Cumulus 1.1 and will be removed when Cumulus 2.0 releases. Please use the
      * new form classes instead.

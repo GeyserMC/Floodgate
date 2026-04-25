@@ -27,6 +27,11 @@ package org.geysermc.floodgate.api.inject;
 
 import io.netty.channel.Channel;
 
+/**
+ * @deprecated Injector addons will be removed with the launch of Floodgate 3.0. Please look at
+ * <a href="https://github.com/GeyserMC/Floodgate/issues/536">#536</a> for additional context.
+ */
+@Deprecated
 public interface InjectorAddon {
     /**
      * Called when injecting a specific channel (every client that is connected to the server has

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.bstats.MetricsBase;
@@ -41,12 +42,13 @@ import org.bstats.json.JsonObjectBuilder;
 import org.geysermc.event.Listener;
 import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.floodgate.api.link.PlayerLink;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.core.config.FloodgateConfig;
 import org.geysermc.floodgate.core.config.FloodgateConfig.MetricsConfig;
 import org.geysermc.floodgate.core.event.lifecycle.ShutdownEvent;
 import org.geysermc.floodgate.core.platform.util.PlatformUtils;
-import org.geysermc.floodgate.core.util.Constants;
+import org.geysermc.floodgate.core.platform.util.PlatformUtils.AuthType;
 
 @Listener
 @AutoBind
@@ -55,7 +57,8 @@ public final class Metrics {
 
     @Inject
     Metrics(FloodgateConfig config, PlatformUtils platformUtils, FloodgateApi api,
-            @Named("implementationName") String implementationName, FloodgateLogger logger) {
+            @Named("implementationName") String implementationName,
+            PlayerLink link, FloodgateLogger logger) {
 
         MetricsConfig metricsConfig = config.getMetrics();
 
@@ -100,6 +103,27 @@ public final class Metrics {
 
         metricsBase.addCustomChart(
                 new SimplePie("floodgate_version", () -> Constants.VERSION)
+        );
+
+        metricsBase.addCustomChart(
+                new SimplePie("local_linking_type", () -> {
+                    if (!config.getPlayerLink().isEnableOwnLinking()) {
+                        return "disabled";
+                    }
+                    if (!Objects.equals(link.getName(), config.getPlayerLink().getType())) {
+                        return "not found (" + config.getPlayerLink().getType() + ")";
+                    }
+                    return link.getName();
+                })
+        );
+
+        metricsBase.addCustomChart(
+                new SimplePie("using-backend-server-linking", () -> {
+                    if (platformUtils.authType() == AuthType.PROXIED) {
+                        return String.valueOf(config.getPlayerLink().isEnableOwnLinking());
+                    }
+                    return "false";
+                })
         );
 
         metricsBase.addCustomChart(

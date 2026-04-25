@@ -28,6 +28,11 @@ package org.geysermc.floodgate.api.packet;
 import io.netty.channel.ChannelHandlerContext;
 import org.geysermc.floodgate.api.util.TriFunction;
 
+/**
+ * @deprecated Packet handlers will be removed with the launch of Floodgate 3.0. Please look at
+ * <a href="https://github.com/GeyserMC/Floodgate/issues/536">#536</a> for additional context.
+ */
+@Deprecated
 public interface PacketHandlers {
     /**
      * Register a specific class for a specific consumer.

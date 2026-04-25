@@ -28,8 +28,10 @@ package org.geysermc.floodgate.api.packet;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
- * For advanced users only! You shouldn't play with this unless you know what you're doing.
+ * @deprecated Packet handlers will be removed with the launch of Floodgate 3.0. Please look at
+ * <a href="https://github.com/GeyserMC/Floodgate/issues/536">#536</a> for additional context.
  */
+@Deprecated
 public interface PacketHandler {
     /**
      * Called when a registered packet has been seen.

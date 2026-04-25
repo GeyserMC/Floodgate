@@ -30,24 +30,28 @@ import java.util.UUID;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.geysermc.floodgate.core.api.SimpleFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.core.pluginmessage.channel.FormChannel;
+import org.geysermc.floodgate.core.skin.SkinApplier;
 import org.geysermc.floodgate.core.util.LanguageManager;
+import org.geysermc.floodgate.core.util.MojangUtils;
 
 public final class SpigotListener implements Listener {
     @Inject private SimpleFloodgateApi api;
     @Inject private LanguageManager languageManager;
     @Inject private FloodgateLogger logger;
 
+    @Inject private MojangUtils mojangUtils;
+    @Inject private SkinApplier skinApplier;
+    @Inject private FormChannel formChannel;
+
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerLogin(PlayerLoginEvent event) {
+    public void onPlayerJoin(PlayerJoinEvent event) {
         UUID uniqueId = event.getPlayer().getUniqueId();
-        if (event.getResult() != PlayerLoginEvent.Result.ALLOWED) {
-            return;
-        }
 
         // if there was another player with the same uuid online,
         // he would've been disconnected by now
@@ -60,11 +64,27 @@ public final class SpigotListener implements Listener {
                     player.getCorrectUsername(), player.getCorrectUniqueId()
             );
             languageManager.loadLocale(player.getLanguageCode());
+
+            // If the player is linked, we need to look up the skin
+            if (player.isLinked()) {
+                mojangUtils.skinFor(player.getCorrectUniqueId()).whenComplete((skin, exception) -> {
+                    if (exception != null) {
+                        logger.debug("Unexpected skin fetch error for " + player.getCorrectUniqueId(), exception);
+                        return;
+                    }
+                    skinApplier.applySkin(player, skin, true);
+                });
+            }
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
+        FloodgatePlayer player = api.getPendingRemovePlayer(event.getPlayer().getUniqueId());
+        if (player != null) {
+            formChannel.disconnect(player);
+        }
+
         api.playerRemoved(event.getPlayer().getUniqueId());
     }
 }

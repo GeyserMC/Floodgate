@@ -38,9 +38,9 @@ public final class InstanceHolder {
     @Getter private static PlayerLink playerLink;
     @Getter private static FloodgateEventBus eventBus;
 
-    @Getter private static PlatformInjector injector;
-    @Getter private static PacketHandlers packetHandlers;
-    @Getter private static HandshakeHandlers handshakeHandlers;
+    private static PlatformInjector injector;
+    private static PacketHandlers packetHandlers;
+    private static HandshakeHandlers handshakeHandlers;
     private static UUID storedKey;
 
     public static boolean set(
@@ -67,5 +67,32 @@ public final class InstanceHolder {
         InstanceHolder.packetHandlers = packetHandlers;
         InstanceHolder.handshakeHandlers = handshakeHandlers;
         return true;
+    }
+
+    /**
+     * @deprecated Injector addons will be removed with the launch of Floodgate 3.0. Please look at
+     * <a href="https://github.com/GeyserMC/Floodgate/issues/536">#536</a> for additional context.
+     */
+    @Deprecated
+    public static PlatformInjector getInjector() {
+        return InstanceHolder.injector;
+    }
+
+    /**
+     * @deprecated Packet handlers will be removed with the launch of Floodgate 3.0. Please look at
+     * <a href="https://github.com/GeyserMC/Floodgate/issues/536">#536</a> for additional context.
+     */
+    @Deprecated
+    public static PacketHandlers getPacketHandlers() {
+        return InstanceHolder.packetHandlers;
+    }
+
+    /**
+     * @deprecated Handshake handlers will be removed with the launch of Floodgate 3.0. Please look at
+     * <a href="https://github.com/GeyserMC/Floodgate/issues/536">#536</a> for additional context.
+     */
+    @Deprecated
+    public static HandshakeHandlers getHandshakeHandlers() {
+        return InstanceHolder.handshakeHandlers;
     }
 }

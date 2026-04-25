@@ -49,18 +49,18 @@ public final class SpigotSkinApplier implements SkinApplier {
     @Inject private EventBus eventBus;
 
     @Override
-    public void applySkin(@NonNull FloodgatePlayer floodgatePlayer, @NonNull SkinData skinData) {
-        applySkin0(floodgatePlayer, skinData, true);
+    public void applySkin(@NonNull FloodgatePlayer floodgatePlayer, @NonNull SkinData skinData, boolean internal) {
+        applySkin0(floodgatePlayer, skinData, internal, true);
     }
 
-    private void applySkin0(FloodgatePlayer floodgatePlayer, SkinData skinData, boolean firstTry) {
+    private void applySkin0(FloodgatePlayer floodgatePlayer, SkinData skinData, boolean internal, boolean firstTry) {
         Player player = Bukkit.getPlayer(floodgatePlayer.getCorrectUniqueId());
 
         // player is probably not logged in yet
         if (player == null) {
             if (firstTry) {
                 versionSpecificMethods.schedule(
-                        () -> applySkin0(floodgatePlayer, skinData, false),
+                        () -> applySkin0(floodgatePlayer, skinData, internal, false),
                         10 * 20
                 );
             }
@@ -75,12 +75,10 @@ public final class SpigotSkinApplier implements SkinApplier {
 
         // Need to be careful here - getProperties() returns an authlib PropertyMap, which extends
         // MultiMap from Guava. Floodgate relocates Guava.
-        PropertyMap properties = profile.getProperties();
-
-        SkinData currentSkin = versionSpecificMethods.currentSkin(properties);
+        SkinData currentSkin = versionSpecificMethods.currentSkin(profile);
 
         SkinApplyEvent event = new SkinApplyEventImpl(floodgatePlayer, currentSkin, skinData);
-        event.setCancelled(floodgatePlayer.isLinked());
+        event.setCancelled(!internal && floodgatePlayer.isLinked());
 
         eventBus.fire(event);
 
@@ -88,7 +86,12 @@ public final class SpigotSkinApplier implements SkinApplier {
             return;
         }
 
-        replaceSkin(properties, event.newSkin());
+        if (ClassNames.GAME_PROFILE_FIELD != null) {
+            replaceSkin(player, profile, event.newSkin());
+        } else {
+            // We're on a version with mutable GameProfiles
+            replaceSkinOld(profile.getProperties(), event.newSkin());
+        }
 
         versionSpecificMethods.maybeSchedule(() -> {
             for (Player p : Bukkit.getOnlinePlayers()) {
@@ -99,7 +102,14 @@ public final class SpigotSkinApplier implements SkinApplier {
         });
     }
 
-    private void replaceSkin(PropertyMap properties, SkinData skinData) {
+    private void replaceSkin(Player player, GameProfile oldProfile, SkinData skinData) {
+        Property skinProperty = new Property("textures", skinData.value(), skinData.signature());
+        GameProfile profile = versionSpecificMethods.createGameProfile(oldProfile, skinProperty);
+        Object entityHuman = ReflectionUtils.invoke(player, ClassNames.GET_ENTITY_HUMAN_METHOD);
+        ReflectionUtils.setValue(entityHuman, ClassNames.GAME_PROFILE_FIELD, profile);
+    }
+
+    private void replaceSkinOld(PropertyMap properties, SkinData skinData) {
         properties.removeAll("textures");
         Property property = new Property("textures", skinData.value(), skinData.signature());
         properties.put("textures", property);
