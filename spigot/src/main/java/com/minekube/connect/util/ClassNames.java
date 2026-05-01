@@ -120,10 +120,21 @@ public class ClassNames {
                 nmsPackage + "MinecraftServer"
         );
 
-        SERVER_CONNECTION = getClassOrFallback(
-                "net.minecraft.server.network.ServerConnection",
-                nmsPackage + "ServerConnection"
-        );
+        // Paper 1.20.5+ uses Mojang mappings: ServerConnection -> ServerConnectionListener
+        Class<?> serverConnectionClass = getClassSilently(
+                "net.minecraft.server.network.ServerConnectionListener");
+        if (serverConnectionClass == null) {
+            serverConnectionClass = getClassSilently(
+                    "net.minecraft.server.network.ServerConnection");
+        }
+        if (serverConnectionClass == null) {
+            serverConnectionClass = getClassSilently(nmsPackage + "ServerConnection");
+        }
+        if (serverConnectionClass == null) {
+            throw new IllegalStateException(
+                    "Could not find ServerConnection/ServerConnectionListener class.");
+        }
+        SERVER_CONNECTION = serverConnectionClass;
 
         // WhitelistUtils
         Class<?> craftServerClass = ReflectionUtils.getClass(
@@ -135,30 +146,66 @@ public class ClassNames {
                 craftOfflinePlayerClass, true, craftServerClass, GameProfile.class);
 
         // SpigotDataHandler
-        Class<?> networkManager = getClassOrFallback(
-                "net.minecraft.network.NetworkManager",
-                nmsPackage + "NetworkManager"
-        );
+        // Paper 1.20.5+ uses Mojang mappings: NetworkManager -> Connection
+        Class<?> networkManager = getClassSilently("net.minecraft.network.Connection");
+        if (networkManager == null) {
+            networkManager = getClassSilently("net.minecraft.network.NetworkManager");
+        }
+        if (networkManager == null) {
+            networkManager = getClassSilently(nmsPackage + "NetworkManager");
+        }
+        if (networkManager == null) {
+            throw new IllegalStateException("Could not find NetworkManager/Connection class.");
+        }
 
         SOCKET_ADDRESS = getFieldOfType(networkManager, SocketAddress.class, false);
 
-        HANDSHAKE_PACKET = getClassOrFallback(
-                "net.minecraft.network.protocol.handshake.PacketHandshakingInSetProtocol",
-                nmsPackage + "PacketHandshakingInSetProtocol"
-        );
+        // Paper 1.20.5+ uses Mojang mappings: PacketHandshakingInSetProtocol -> ClientIntentionPacket
+        Class<?> handshakePacket = getClassSilently(
+                "net.minecraft.network.protocol.handshake.ClientIntentionPacket");
+        if (handshakePacket == null) {
+            handshakePacket = getClassSilently(
+                    "net.minecraft.network.protocol.handshake.PacketHandshakingInSetProtocol");
+        }
+        if (handshakePacket == null) {
+            handshakePacket = getClassSilently(nmsPackage + "PacketHandshakingInSetProtocol");
+        }
+        if (handshakePacket == null) {
+            throw new IllegalStateException("Could not find HandshakePacket class.");
+        }
+        HANDSHAKE_PACKET = handshakePacket;
 
         HANDSHAKE_HOST = getFieldOfType(HANDSHAKE_PACKET, String.class);
         checkNotNull(HANDSHAKE_HOST, "Handshake host");
 
-        LOGIN_START_PACKET = getClassOrFallback(
-                "net.minecraft.network.protocol.login.PacketLoginInStart",
-                nmsPackage + "PacketLoginInStart"
-        );
+        // Paper 1.20.5+ uses Mojang mappings: PacketLoginInStart -> ServerboundHelloPacket
+        Class<?> loginStartPacket = getClassSilently(
+                "net.minecraft.network.protocol.login.ServerboundHelloPacket");
+        if (loginStartPacket == null) {
+            loginStartPacket = getClassSilently(
+                    "net.minecraft.network.protocol.login.PacketLoginInStart");
+        }
+        if (loginStartPacket == null) {
+            loginStartPacket = getClassSilently(nmsPackage + "PacketLoginInStart");
+        }
+        if (loginStartPacket == null) {
+            throw new IllegalStateException("Could not find LoginStartPacket class.");
+        }
+        LOGIN_START_PACKET = loginStartPacket;
 
-        LOGIN_LISTENER = getClassOrFallback(
-                "net.minecraft.server.network.LoginListener",
-                nmsPackage + "LoginListener"
-        );
+        // Paper 1.20.5+ uses Mojang mappings: LoginListener -> ServerLoginPacketListenerImpl
+        Class<?> loginListener = getClassSilently(
+                "net.minecraft.server.network.ServerLoginPacketListenerImpl");
+        if (loginListener == null) {
+            loginListener = getClassSilently("net.minecraft.server.network.LoginListener");
+        }
+        if (loginListener == null) {
+            loginListener = getClassSilently(nmsPackage + "LoginListener");
+        }
+        if (loginListener == null) {
+            throw new IllegalStateException("Could not find LoginListener class.");
+        }
+        LOGIN_LISTENER = loginListener;
 
         LOGIN_PROFILE = getFieldOfType(LOGIN_LISTENER, GameProfile.class);
         checkNotNull(LOGIN_PROFILE, "Profile from LoginListener");
@@ -189,10 +236,12 @@ public class ClassNames {
 
 
         if (IS_PRE_1_20_2) {
-            Class<?> packetListenerClass = getClassOrFallback(
-                    "net.minecraft.network.PacketListener",
-                    nmsPackage + "PacketListener"
-            );
+            Class<?> packetListenerClass = getClassSilently(
+                    "net.minecraft.network.PacketListener");
+            if (packetListenerClass == null) {
+                packetListenerClass = ReflectionUtils.getClassOrThrow(
+                        nmsPackage + "PacketListener");
+            }
 
             PACKET_LISTENER = getFieldOfType(networkManager, packetListenerClass);
         } else {
@@ -225,10 +274,17 @@ public class ClassNames {
             FIRE_LOGIN_EVENTS = null;
             FIRE_LOGIN_EVENTS_GAME_PROFILE = null;
         } else {
-            Class<?> loginHandler = getClassOrFallback(
-                    "net.minecraft.server.network.LoginListener$LoginHandler",
-                    nmsPackage + "LoginListener$LoginHandler"
-            );
+            // Paper 1.20.5+ uses Mojang mappings: LoginListener$LoginHandler -> ServerLoginPacketListenerImpl$LoginHandler
+            Class<?> loginHandler = getClassSilently(
+                    "net.minecraft.server.network.ServerLoginPacketListenerImpl$LoginHandler");
+            if (loginHandler == null) {
+                loginHandler = getClassSilently(
+                        "net.minecraft.server.network.LoginListener$LoginHandler");
+            }
+            if (loginHandler == null) {
+                loginHandler = ReflectionUtils.getClassOrThrow(
+                        nmsPackage + "LoginListener$LoginHandler");
+            }
             LOGIN_HANDLER_CONSTRUCTOR =
                     getConstructor(loginHandler, true, LOGIN_LISTENER);
             checkNotNull(LOGIN_HANDLER_CONSTRUCTOR, "LoginHandler constructor");
@@ -313,15 +369,30 @@ public class ClassNames {
                     String.class, int.class, CLIENT_INTENT);
             checkNotNull(HANDSHAKE_PACKET_CONSTRUCTOR, "Handshake packet constructor");
 
-            Field a = getField(HANDSHAKE_PACKET, "a");
-            checkNotNull(a,"Handshake \"a\" field (protocol version, or stream codec)");
+            // Paper 1.20.5+ Mojang mappings expose real field names; older Spigot uses obfuscated a/b/c/d.
+            // Try Mojang name first, then obfuscated.
+            Field protocolField = getField(HANDSHAKE_PACKET, "protocolVersion");
+            if (protocolField == null) {
+                protocolField = getField(HANDSHAKE_PACKET, "a");
+            }
+            checkNotNull(protocolField, "Handshake \"a\" field (protocol version, or stream codec)");
 
-            if (a.getType().isPrimitive()) { // 1.20.2 - 1.20.4: a is the protocol version (int)
-                HANDSHAKE_PROTOCOL = a;
-                HANDSHAKE_PORT = getField(HANDSHAKE_PACKET, "c");
-            } else { // 1.20.5: a is the stream_codec thing, so everything is shifted
+            if (protocolField.getType().isPrimitive()) {
+                // Mojang on 1.20.5+ OR obfuscated 1.20.2-1.20.4: int field is the protocol version
+                HANDSHAKE_PROTOCOL = protocolField;
+                Field portField = getField(HANDSHAKE_PACKET, "port");
+                if (portField == null) {
+                    portField = getField(HANDSHAKE_PACKET, "c");
+                }
+                HANDSHAKE_PORT = portField;
+            } else {
+                // Obfuscated 1.20.5: a is the stream_codec, everything is shifted
                 HANDSHAKE_PROTOCOL = getField(HANDSHAKE_PACKET, "b");
-                HANDSHAKE_PORT = getField(HANDSHAKE_PACKET, "d");
+                Field portField = getField(HANDSHAKE_PACKET, "port");
+                if (portField == null) {
+                    portField = getField(HANDSHAKE_PACKET, "d");
+                }
+                HANDSHAKE_PORT = portField;
             }
 
             checkNotNull(HANDSHAKE_PROTOCOL, "Handshake protocol");
@@ -330,7 +401,12 @@ public class ClassNames {
             checkNotNull(HANDSHAKE_PORT, "Handshake port");
             makeAccessible(HANDSHAKE_PORT);
 
-            HANDSHAKE_INTENTION = getFieldOfType(HANDSHAKE_PACKET, CLIENT_INTENT);
+            // Try Mojang field name first, then fall back to type-based lookup (obfuscated)
+            Field intentionField = getField(HANDSHAKE_PACKET, "intention");
+            if (intentionField == null) {
+                intentionField = getFieldOfType(HANDSHAKE_PACKET, CLIENT_INTENT);
+            }
+            HANDSHAKE_INTENTION = intentionField;
             checkNotNull(HANDSHAKE_INTENTION, "Handshake intention");
             makeAccessible(HANDSHAKE_INTENTION);
         } else {
