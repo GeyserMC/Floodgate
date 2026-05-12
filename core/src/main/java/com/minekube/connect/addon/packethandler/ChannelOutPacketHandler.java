@@ -47,7 +47,7 @@ public class ChannelOutPacketHandler extends MessageToMessageEncoder<Object> {
                 packetHandlers.getPacketHandlers(msg.getClass())) {
 
             Object res = consumer.apply(ctx, msg, toServer);
-            if (!res.equals(msg)) {
+            if (res != msg) {
                 packet = res;
             }
         }

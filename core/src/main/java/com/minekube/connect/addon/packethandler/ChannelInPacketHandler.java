@@ -46,7 +46,7 @@ public class ChannelInPacketHandler extends SimpleChannelInboundHandler<Object> 
                 packetHandlers.getPacketHandlers(msg.getClass())) {
 
             Object res = consumer.apply(ctx, msg, toServer);
-            if (!res.equals(msg)) {
+            if (res != msg) {
                 packet = res;
             }
         }

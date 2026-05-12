@@ -20,6 +20,19 @@ dependencies {
     implementation("io.grpc", "grpc-protobuf", Versions.gRPCVersion)
     implementation("io.grpc", "grpc-stub", Versions.gRPCVersion)
     implementation("javax.annotation", "javax.annotation-api", "1.3.2")
+
+    // Test deps — pinned to versions still compatible with the Java 8 source target.
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.5")
+    testImplementation("org.mockito:mockito-core:4.11.0")
+    testImplementation("org.awaitility:awaitility:4.2.2")
+    testImplementation("io.netty", "netty-transport", Versions.nettyVersion)
+    testImplementation("io.netty", "netty-codec", Versions.nettyVersion)
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.9.3")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 // present on all platforms

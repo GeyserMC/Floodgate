@@ -69,7 +69,7 @@ import org.jetbrains.annotations.NotNull;
  */
 @RequiredArgsConstructor
 public final class LocalSession {
-    private static final int CONNECTION_TIMEOUT = (int) Duration.ofSeconds(30).toMillis();
+    private static final int CONNECTION_TIMEOUT = (int) Duration.ofSeconds(10).toMillis();
 
     private static DefaultEventLoopGroup DEFAULT_EVENT_LOOP_GROUP;
     private static EventLoopGroup PLATFORM_EVENT_LOOP_GROUP; // Platform-specific event loop group

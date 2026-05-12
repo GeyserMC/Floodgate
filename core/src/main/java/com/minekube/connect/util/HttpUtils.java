@@ -28,6 +28,7 @@ package com.minekube.connect.util;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import io.netty.util.concurrent.DefaultThreadFactory;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -48,7 +49,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 // resources are properly closed and ignoring the original stack trace is intended
 @SuppressWarnings({"PMD.CloseResource", "PMD.PreserveStackTrace"})
 public class HttpUtils {
-    private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(
+            4, new DefaultThreadFactory("connect-http-worker", true));
 
     private static final Gson GSON = new Gson();
     private static final String USER_AGENT = "Minekube/Connect";

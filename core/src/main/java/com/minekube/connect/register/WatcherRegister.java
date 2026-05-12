@@ -40,9 +40,13 @@ import com.minekube.connect.watch.SessionProposal;
 import com.minekube.connect.watch.SessionProposal.State;
 import com.minekube.connect.watch.WatchClient;
 import com.minekube.connect.watch.Watcher;
+import io.netty.util.concurrent.DefaultThreadFactory;
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Timer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import okhttp3.WebSocket;
 
@@ -56,13 +60,23 @@ public class WatcherRegister {
     @Inject private ConnectLogger logger;
     @Inject private SimpleConnectApi api;
 
-    private WebSocket ws;
+    // volatile: written from injection thread (start/stop) and read from the
+    // scheduler thread (retry) and OkHttp dispatcher (WatcherImpl callbacks).
+    private volatile WebSocket ws;
     private ExponentialBackOff backOffPolicy;
     private final AtomicBoolean started = new AtomicBoolean();
+
+    // Lazily created in start() so a stop()/start() cycle reuses cleanly,
+    // and so the daemon thread isn't allocated if start() is never called.
+    // java.util.Timer would leak one OS thread per reconnect cycle.
+    private volatile ScheduledExecutorService scheduler;
+    private volatile ScheduledFuture<?> retryFuture;
 
     @Inject
     public void start() {
         if (started.compareAndSet(false, true)) {
+            scheduler = Executors.newSingleThreadScheduledExecutor(
+                    new DefaultThreadFactory("connect-watcher-scheduler", true));
             backOffPolicy = new ExponentialBackOff.Builder()
                     .setInitialIntervalMillis(1000) // 1 second
                     .setMaxElapsedTimeMillis(Integer.MAX_VALUE) // 24.8 days
@@ -78,61 +92,57 @@ public class WatcherRegister {
     }
 
     public void stop() {
+        // Gate the whole teardown so a concurrent stop() races safely.
+        // A stop() before start() is a no-op (started is already false).
+        if (!started.compareAndSet(true, false)) {
+            return;
+        }
+        logger.info("Stopped watching for sessions");
+        if (retryFuture != null) {
+            retryFuture.cancel(false);
+            retryFuture = null;
+        }
+        if (scheduler != null) {
+            scheduler.shutdownNow();
+            scheduler = null;
+        }
         if (ws != null) {
-            if (started.compareAndSet(true, false)) {
-                logger.info("Stopped watching for sessions");
-            }
-            if (timer != null) {
-                timer.cancel();
-                timer = null;
-            }
-            if (retryTask != null) {
-                retryTask.cancel();
-                retryTask = null;
-            }
             ws.close(1000, "watcher stopped");
             ws = null;
         }
     }
 
-    private Timer timer;
-    private TimerTask retryTask;
-
     private void retry() {
-        if (started.get()) {
-            if (retryTask != null) {
-                retryTask.cancel();
-            }
-            if (timer == null) {
-                timer = new Timer();
-            }
-            long millis;
-            try {
-                millis = backOffPolicy.nextBackOffMillis();
-                if (millis == BackOff.STOP) {
-                    stop();
-                    return;
-                }
-            } catch (IOException e) {
-                logger.error("nextBackOffMillis error", e);
+        if (!started.get()) {
+            return;
+        }
+        if (retryFuture != null) {
+            retryFuture.cancel(false);
+        }
+        long millis;
+        try {
+            millis = backOffPolicy.nextBackOffMillis();
+            if (millis == BackOff.STOP) {
+                stop();
                 return;
             }
-            retryTask = new TimerTask();
-            logger.info("Trying to reconnect in {}...",
-                    Utils.humanReadableFormat(Duration.ofMillis(millis)));
-            timer.schedule(retryTask, millis);
+        } catch (IOException e) {
+            logger.error("nextBackOffMillis error", e);
+            return;
         }
-    }
-
-    private class TimerTask extends java.util.TimerTask {
-        @Override
-        public void run() {
+        // Snapshot to avoid NPE if stop() races with a late callback that triggered retry().
+        ScheduledExecutorService s = scheduler;
+        if (s == null) {
+            return;
+        }
+        logger.info("Trying to reconnect in {}...",
+                Utils.humanReadableFormat(Duration.ofMillis(millis)));
+        retryFuture = s.schedule(() -> {
             if (started.get()) {
                 watch();
             }
-        }
+        }, millis, TimeUnit.MILLISECONDS);
     }
-
 
     private void watch() {
         if (ws != null) {
@@ -146,8 +156,6 @@ public class WatcherRegister {
         @Override
         public void onOpen() {
             logger.translatedInfo("connect.watch.started");
-
-            // Reset the retry backoff after the connection is healthy for some seconds
             startResetBackOffTimer();
         }
 
@@ -172,7 +180,7 @@ public class WatcherRegister {
                 return;
             }
 
-            if (logger.isDebug()) { // skipping a lot of proposal.toString operations
+            if (logger.isDebug()) {
                 logger.debug("Received {}", proposal);
             }
 
@@ -180,7 +188,6 @@ public class WatcherRegister {
                 return;
             }
 
-            // Try establishing connection
             new LocalSession(logger, api, tunneler,
                     platformInjector.getServerSocketAddress(),
                     proposal
@@ -205,29 +212,27 @@ public class WatcherRegister {
             retry();
         }
 
-        private Timer resetBackOffTimer;
+        private volatile ScheduledFuture<?> resetBackOffFuture;
 
         void startResetBackOffTimer() {
-            if (resetBackOffTimer != null) {
-                resetBackOffTimer.cancel();
+            cancelResetBackOffTimer();
+            // Snapshot: a late onOpen after stop() can land here with scheduler == null.
+            ScheduledExecutorService s = scheduler;
+            if (s == null || !started.get()) {
+                return;
             }
-            resetBackOffTimer = new Timer();
-            resetBackOffTimer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    if (started.get()) {
-                        resetBackOff();
-                    }
+            resetBackOffFuture = s.schedule(() -> {
+                if (started.get()) {
+                    resetBackOff();
                 }
-            }, Duration.ofSeconds(10).toMillis());
+            }, Duration.ofSeconds(10).toMillis(), TimeUnit.MILLISECONDS);
         }
 
         void cancelResetBackOffTimer() {
-            if (resetBackOffTimer != null) {
-                resetBackOffTimer.cancel();
-                resetBackOffTimer = null;
+            if (resetBackOffFuture != null) {
+                resetBackOffFuture.cancel(false);
+                resetBackOffFuture = null;
             }
         }
-
     }
 }

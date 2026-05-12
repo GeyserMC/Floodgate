@@ -80,7 +80,7 @@ public abstract class CommandUtil {
 
     public @NonNull Collection<String> getOnlineUsernames() {
         Collection<String> usernames = new ArrayList<>();
-        getOnlinePlayers().forEach(this::getUsernameFromSource);
+        getOnlinePlayers().forEach(player -> usernames.add(getUsernameFromSource(player)));
         return usernames;
     }
 

@@ -106,8 +106,17 @@ public class Tunneler implements Closeable {
             public void onMessage(@NotNull WebSocket webSocket, @NotNull ByteString bytes) {
                 // handler.onReceive(bytes.toByteArray()); // would copy
 
-                // zero-copy get byte array
-                handler.onReceive(ReflectionUtils.getCastedValue(bytes, DATA));
+                // Zero-copy fast path with safe fallback. DATA is null if the field
+                // can't be located (e.g. after Okio relocation); getCastedValue can
+                // also return null at runtime because IllegalAccessException is
+                // swallowed inside ReflectionUtils.getValue. Without this guard,
+                // onReceive(null) flows into Unpooled.wrappedBuffer(null), NPE-ing
+                // the OkHttp dispatcher thread and dropping every tunnel on it.
+                byte[] rawBytes = DATA != null ? ReflectionUtils.getCastedValue(bytes, DATA) : null;
+                if (rawBytes == null) {
+                    rawBytes = bytes.toByteArray();
+                }
+                handler.onReceive(rawBytes);
             }
 
             @Override

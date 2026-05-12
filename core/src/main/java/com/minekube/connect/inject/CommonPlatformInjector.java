@@ -30,10 +30,9 @@ import com.minekube.connect.api.inject.PlatformInjector;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import java.net.SocketAddress;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.AccessLevel;
 import lombok.Getter;
 
@@ -65,10 +64,12 @@ public abstract class CommonPlatformInjector implements PlatformInjector {
         }
     }
 
+    // Both registries are mutated from Netty I/O threads (per-channel) and iterated
+    // concurrently, so they must be thread-safe.
     @Getter(AccessLevel.PROTECTED)
-    private final Set<Channel> injectedClients = new HashSet<>();
+    private final Set<Channel> injectedClients = ConcurrentHashMap.newKeySet();
 
-    private final Map<Class<?>, InjectorAddon> addons = new HashMap<>();
+    private final Map<Class<?>, InjectorAddon> addons = new ConcurrentHashMap<>();
 
     protected boolean addInjectedClient(Channel channel) {
         return injectedClients.add(channel);

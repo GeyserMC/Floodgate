@@ -29,21 +29,25 @@ import com.minekube.connect.api.packet.PacketHandler;
 import com.minekube.connect.api.packet.PacketHandlers;
 import com.minekube.connect.api.util.TriFunction;
 import io.netty.channel.ChannelHandlerContext;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 public final class PacketHandlersImpl implements PacketHandlers {
-    private final Map<PacketHandler, List<HandlerEntry>> handlers = new HashMap<>();
-    private final Set<TriFunction<ChannelHandlerContext, Object, Boolean, Object>> globalPacketHandlers = new HashSet<>();
-    private final Map<Class<?>, Set<TriFunction<ChannelHandlerContext, Object, Boolean, Object>>> packetHandlers = new HashMap<>();
+    // CopyOnWriteArraySet for the per-class fanout: reads happen on every packet
+    // (hot path, must be lock-free); writes only on register/deregister.
+    private final Map<PacketHandler, List<HandlerEntry>> handlers = new ConcurrentHashMap<>();
+    private final Set<TriFunction<ChannelHandlerContext, Object, Boolean, Object>> globalPacketHandlers =
+            new CopyOnWriteArraySet<>();
+    private final Map<Class<?>, Set<TriFunction<ChannelHandlerContext, Object, Boolean, Object>>> packetHandlers =
+            new ConcurrentHashMap<>();
 
     @Override
     public void register(
@@ -55,10 +59,10 @@ public final class PacketHandlersImpl implements PacketHandlers {
             return;
         }
 
-        handlers.computeIfAbsent(handler, $ -> new ArrayList<>())
+        handlers.computeIfAbsent(handler, $ -> new CopyOnWriteArrayList<>())
                 .add(new HandlerEntry(packetClass, consumer));
 
-        packetHandlers.computeIfAbsent(packetClass, $ -> new HashSet<>(globalPacketHandlers))
+        packetHandlers.computeIfAbsent(packetClass, $ -> new CopyOnWriteArraySet<>(globalPacketHandlers))
                 .add(consumer);
     }
 
@@ -70,7 +74,7 @@ public final class PacketHandlersImpl implements PacketHandlers {
 
         TriFunction<ChannelHandlerContext, Object, Boolean, Object> packetHandler = handler::handle;
 
-        handlers.computeIfAbsent(handler, $ -> new ArrayList<>())
+        handlers.computeIfAbsent(handler, $ -> new CopyOnWriteArrayList<>())
                 .add(new HandlerEntry(null, packetHandler));
 
         globalPacketHandlers.add(packetHandler);
@@ -88,13 +92,19 @@ public final class PacketHandlersImpl implements PacketHandlers {
         List<HandlerEntry> values = handlers.remove(handler);
         if (values != null) {
             for (HandlerEntry value : values) {
-                Set<?> handlers = packetHandlers.get(value.getPacket());
-
-                if (handlers != null) {
-                    handlers.removeIf(o -> o.equals(value.getHandler()));
-                    if (handlers.isEmpty()) {
-                        packetHandlers.remove(value.getPacket());
-                    }
+                // registerAll() stores HandlerEntry with packetClass == null.
+                // ConcurrentHashMap rejects null keys, so skip the per-class
+                // lookup for global handlers (the old HashMap returned null
+                // silently for the same case).
+                Class<?> packetClass = value.getPacket();
+                if (packetClass != null) {
+                    // computeIfPresent atomically removes the entry only if it's
+                    // still empty after our removal, so a concurrent register()
+                    // that re-populates the set in between isn't dropped.
+                    packetHandlers.computeIfPresent(packetClass, (k, set) -> {
+                        set.removeIf(o -> o.equals(value.getHandler()));
+                        return set.isEmpty() ? null : set;
+                    });
                 }
 
                 globalPacketHandlers.remove(value.getHandler());
