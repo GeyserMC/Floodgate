@@ -67,8 +67,10 @@ public class HandshakeDataImpl implements HandshakeData {
 
         if (bedrockData != null) {
             String prefix = config.getUsernamePrefix();
-            int usernameLength = Math.min(bedrockData.getUsername().length(), 16 - prefix.length());
-            javaUsername = prefix + bedrockData.getUsername().substring(0, usernameLength);
+            String suffix = config.getUsernameSuffix();
+            int available = 16 - prefix.length() - suffix.length();
+            int usernameLength = Math.min(bedrockData.getUsername().length(), Math.max(available, 1));
+            javaUsername = prefix + bedrockData.getUsername().substring(0, usernameLength) + suffix;
             if (config.isReplaceSpaces()) {
                 javaUsername = javaUsername.replace(" ", "_");
             }
