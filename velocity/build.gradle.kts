@@ -12,11 +12,19 @@ java {
 dependencies {
     api(projects.core)
     implementation("cloud.commandframework", "cloud-velocity", Versions.cloudVersion)
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.5")
+    testImplementation("io.netty", "netty-transport", Versions.nettyVersion)
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 relocate("cloud.commandframework")
 // used in cloud
 relocate("io.leangen.geantyref")
+
+tasks.test {
+    useJUnitPlatform()
+}
 
 
 // these dependencies are already present on the platform

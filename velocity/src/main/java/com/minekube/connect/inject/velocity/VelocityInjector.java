@@ -75,7 +75,7 @@ public final class VelocityInjector extends CommonPlatformInjector {
 
         Method serverSetter = getMethod(serverInitializerHolder, "set", ChannelInitializer.class);
         invoke(serverInitializerHolder, serverSetter,
-                new VelocityChannelInitializer(this, serverInitializer, false));
+                new VelocityChannelInitializer(this, serverInitializer, false, false));
 
         // Proxy <-> Server
 //        Object backendInitializerHolder = getValue(connectionManager, "backendChannelInitializer");
@@ -118,7 +118,7 @@ public final class VelocityInjector extends CommonPlatformInjector {
 
         ChannelFuture channelFuture = (new ServerBootstrap()
                 .channel(LocalServerChannelWrapper.class)
-                .childHandler(serverInitializer)
+                .childHandler(new VelocityChannelInitializer(this, serverInitializer, false, true))
                 .group(localBossGroup, localWorkerGroup) // Use LocalIoHandler-based event loops
                 .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK,
                         serverWriteMark) // Required or else rare network freezes can occur
@@ -146,11 +146,13 @@ public final class VelocityInjector extends CommonPlatformInjector {
         private final VelocityInjector injector;
         private final ChannelInitializer original;
         private final boolean proxyToServer;
+        private final boolean connectTunnel;
 
         @Override
         protected void initChannel(Channel channel) {
             invoke(original, initChannel, channel);
 
+            VelocityChatSessionPacketFilter.inject(channel, connectTunnel);
             injector.injectAddonsCall(channel, proxyToServer);
             injector.addInjectedClient(channel);
         }

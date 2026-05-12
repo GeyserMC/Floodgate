@@ -56,6 +56,13 @@ public final class SpigotDataAddon implements InjectorAddon {
                             config,
                             logger)
             );
+            if (channel.pipeline().get(SpigotChatSessionPacketFilter.HANDLER_NAME) == null) {
+                channel.pipeline().addBefore(
+                        packetHandlerName,
+                        SpigotChatSessionPacketFilter.HANDLER_NAME,
+                        new SpigotChatSessionPacketFilter()
+                );
+            }
         });
     }
 
