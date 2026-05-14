@@ -22,6 +22,21 @@ dependencies {
             attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 17)
         }
     }
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.5")
+    testImplementation("com.mojang", "authlib", authlibVersion)
+    testImplementation("dev.folia", "folia-api", Versions.spigotVersion) {
+        attributes {
+            attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 17)
+        }
+    }
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks {
+    test {
+        useJUnitPlatform()
+    }
 }
 
 relocate("com.google.inject")

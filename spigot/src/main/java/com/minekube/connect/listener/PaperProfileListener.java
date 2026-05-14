@@ -29,6 +29,7 @@ import com.destroystokyo.paper.event.profile.PreFillProfileEvent;
 import com.destroystokyo.paper.profile.ProfileProperty;
 import com.google.inject.Inject;
 import com.minekube.connect.api.SimpleConnectApi;
+import com.minekube.connect.api.player.ConnectPlayer;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -41,16 +42,20 @@ public final class PaperProfileListener implements Listener {
     @EventHandler // TODO robin: remove or replace with session proposal player props
     public void onFill(PreFillProfileEvent event) {
         UUID id = event.getPlayerProfile().getId();
+        ConnectPlayer player = id != null ? this.api.getPlayer(id) : null;
         // back when this event got added the PlayerProfile class didn't have the
         // hasProperty / hasTextures methods
-        if (id == null || !this.api.isConnectPlayer(id) ||
+        if (player == null ||
                 event.getPlayerProfile().getProperties().stream().anyMatch(
                         prop -> "textures".equals(prop.getName()))) {
             return;
         }
 
         Set<ProfileProperty> properties = new HashSet<>(event.getPlayerProfile().getProperties());
-        properties.add(new ProfileProperty("textures", "", ""));
+        properties.addAll(PaperProfileProperties.fromConnectProfile(player.getGameProfile()));
+        if (properties.stream().noneMatch(prop -> "textures".equals(prop.getName()))) {
+            properties.add(new ProfileProperty("textures", "", ""));
+        }
         event.setProperties(properties);
     }
 }

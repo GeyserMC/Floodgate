@@ -35,6 +35,7 @@ import com.minekube.connect.config.ConnectConfig;
 import com.minekube.connect.network.netty.LocalSession.Context;
 import com.minekube.connect.util.ClassNames;
 import com.minekube.connect.util.ProxyUtils;
+import com.minekube.connect.util.SpigotGameProfiles;
 import com.mojang.authlib.GameProfile;
 import java.net.InetSocketAddress;
 import java.util.function.UnaryOperator;
@@ -180,11 +181,8 @@ public final class SpigotDataHandler extends CommonDataHandler {
                 setValue(packetListener, ClassNames.VELOCITY_LOGIN_MESSAGE_ID, 0);
             }
 
-            // Set the player's correct GameProfile
-            GameProfile gameProfile = new GameProfile(
-                    sessionCtx.getPlayer().getUniqueId(),
-                    sessionCtx.getPlayer().getUsername()
-            );
+            // Set the player's correct GameProfile, including signed texture properties for skins.
+            GameProfile gameProfile = SpigotGameProfiles.fromConnectProfile(sessionCtx.getPlayer().getGameProfile());
 
             // We have to fake the offline player (login) cycle
             if (ClassNames.IS_PRE_1_20_2) {
