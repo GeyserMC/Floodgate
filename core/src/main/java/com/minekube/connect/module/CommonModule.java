@@ -45,6 +45,7 @@ import com.minekube.connect.config.ConnectConfig;
 import com.minekube.connect.inject.CommonPlatformInjector;
 import com.minekube.connect.packet.PacketHandlersImpl;
 import com.minekube.connect.platform.util.PlatformUtils;
+import com.minekube.connect.util.Constants;
 import com.minekube.connect.util.HttpUtils;
 import com.minekube.connect.util.LanguageManager;
 import com.minekube.connect.util.Metrics;
@@ -139,6 +140,7 @@ public class CommonModule extends AbstractModule {
                         .addHeader("Connect-TotalPlayers",
                                 String.valueOf(platformUtils.getPlayerCount()))
                         .addHeader("Connect-Players", String.valueOf(api.getPlayerCount()))
+                        .addHeader("Connect-Version", Constants.VERSION)
                         .addHeader("Connect-AuthType", platformUtils.authType().name())
                         .addHeader("Connect-Platform", implementationName)
                         .addHeader("Connect-Platform", platformUtils.serverImplementationName())
@@ -186,4 +188,3 @@ public class CommonModule extends AbstractModule {
         }
     }
 }
-
