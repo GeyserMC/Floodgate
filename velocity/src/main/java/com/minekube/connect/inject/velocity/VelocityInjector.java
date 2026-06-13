@@ -41,13 +41,19 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.IoEventLoop;
+import io.netty.channel.IoEventLoopGroup;
+import io.netty.channel.IoHandler;
 import io.netty.channel.IoHandlerFactory;
 import io.netty.channel.MultiThreadIoEventLoopGroup;
+import io.netty.channel.SingleThreadIoEventLoop;
 import io.netty.channel.WriteBufferWaterMark;
 import io.netty.channel.local.LocalAddress;
 import io.netty.channel.local.LocalIoHandler;
+import io.netty.channel.nio.NioIoHandler;
+import io.netty.util.concurrent.ThreadAwareExecutor;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 import java.util.concurrent.ThreadFactory;
 import java.lang.reflect.Method;
 import lombok.Getter;
@@ -93,18 +99,26 @@ public final class VelocityInjector extends CommonPlatformInjector {
         WriteBufferWaterMark serverWriteMark = getCastedValue(connectionManager,
                 "SERVER_WRITE_MARK");
 
-        // Use LocalIoHandler-based event loops that are compatible with LocalServerChannel
-        // while still integrating with Velocity's system (Geyser approach with ConnectWatchedSingleThreadIoEventLoop)
-        EventLoopGroup velocityWorkerGroup = getCastedValue(connectionManager, "workerGroup");
-        
+        IoEventLoopGroup velocityWorkerGroup = getCastedValue(connectionManager, "workerGroup");
+        IoHandlerFactory localFactory = LocalIoHandler.newFactory();
+        IoHandlerFactory nativeFactory = getNativeHandlerFactory();
+        IoHandlerFactory wrapperFactory = new IoHandlerFactory() {
+            @Override
+            public IoHandler newHandler(ThreadAwareExecutor ioExecutor) {
+                return new IoHandlerWrapper(
+                        localFactory.newHandler(ioExecutor),
+                        nativeFactory.newHandler(ioExecutor));
+            }
+        };
+
         EventLoopGroup localBossGroup = new MultiThreadIoEventLoopGroup(LocalIoHandler.newFactory()) {
             @Override
             protected ThreadFactory newDefaultThreadFactory() {
                 return new DefaultThreadFactory("Connect Local Boss Group");
             }
         };
-        
-        EventLoopGroup localWorkerGroup = new MultiThreadIoEventLoopGroup(LocalIoHandler.newFactory()) {
+
+        EventLoopGroup localWorkerGroup = new MultiThreadIoEventLoopGroup(localFactory) {
             @Override
             protected ThreadFactory newDefaultThreadFactory() {
                 return new DefaultThreadFactory("Connect Local Worker Group");
@@ -112,14 +126,14 @@ public final class VelocityInjector extends CommonPlatformInjector {
 
             @Override
             protected IoEventLoop newChild(Executor executor, IoHandlerFactory ioHandlerFactory, Object... args) {
-                return new ConnectWatchedSingleThreadIoEventLoop(velocityWorkerGroup, this, executor, ioHandlerFactory);
+                return new SingleThreadIoEventLoop(velocityWorkerGroup, executor, wrapperFactory);
             }
         };
 
         ChannelFuture channelFuture = (new ServerBootstrap()
                 .channel(LocalServerChannelWrapper.class)
                 .childHandler(new VelocityChannelInitializer(this, serverInitializer, false, true))
-                .group(localBossGroup, localWorkerGroup) // Use LocalIoHandler-based event loops
+                .group(localBossGroup, localWorkerGroup)
                 .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK,
                         serverWriteMark) // Required or else rare network freezes can occur
                 .localAddress(LocalAddress.ANY))
@@ -132,6 +146,22 @@ public final class VelocityInjector extends CommonPlatformInjector {
         // End of logic from GeyserMC
 
         return injected = true;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static IoHandlerFactory getNativeHandlerFactory() {
+        try {
+            Class<?> transportType = Class.forName("com.velocitypowered.proxy.network.TransportType");
+            Object bestType = transportType.getMethod("bestType").invoke(null);
+            java.lang.reflect.Field supplierField =
+                    transportType.getDeclaredField("ioHandlerFactorySupplier");
+            supplierField.setAccessible(true);
+            Supplier<IoHandlerFactory> supplier =
+                    (Supplier<IoHandlerFactory>) supplierField.get(bestType);
+            return supplier.get();
+        } catch (ReflectiveOperationException | LinkageError ignored) {
+            return NioIoHandler.newFactory();
+        }
     }
 
     @RequiredArgsConstructor
