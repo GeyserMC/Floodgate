@@ -37,6 +37,8 @@ object Versions {
     const val protocVersion = "3.19.4"
     const val bstatsVersion = "3.0.2"
     const val gsonVersion = "2.8.6"
+    const val jvmLibp2pVersion = "1.3.2-RELEASE"
+    const val kotlinStdlibVersion = "1.9.22"
 
     const val checkerQual = "3.19.0"
 }

@@ -109,11 +109,18 @@ public class LocalChannelInboundHandler extends SimpleChannelInboundHandler<Byte
     @Override
     public void channelActive(@NotNull ChannelHandlerContext ctx) throws Exception {
         // Start tunnel from downstream server -> upstream TunnelService
-        tunnelConn = tunneler.tunnel(
-                tunnelSvcAddr(),
-                context.getSessionProposal().getSession().getId(),
-                new TunnelHandler(logger, ctx.channel())
-        );
+        if (FORCE_TUNNEL_SERVICE_ADDR != null && !FORCE_TUNNEL_SERVICE_ADDR.isEmpty()) {
+            tunnelConn = tunneler.tunnel(
+                    tunnelSvcAddr(),
+                    context.getSessionProposal().getSession().getId(),
+                    new TunnelHandler(logger, ctx.channel())
+            );
+        } else {
+            tunnelConn = tunneler.tunnel(
+                    context.getSessionProposal().getSession(),
+                    new TunnelHandler(logger, ctx.channel())
+            );
+        }
         context.tunnelConn.set(tunnelConn);
         super.channelActive(ctx);
     }

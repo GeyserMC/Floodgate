@@ -32,6 +32,7 @@ import com.google.gson.annotations.SerializedName;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Named;
 import com.minekube.connect.api.ConnectApi;
 import com.minekube.connect.api.SimpleConnectApi;
@@ -73,7 +74,9 @@ public class CommonModule extends AbstractModule {
 
         bind(PacketHandlers.class).to(PacketHandlersImpl.class);
         bind(PacketHandlersImpl.class).asEagerSingleton();
-        bind(TunnelClientTransport.class).to(WebSocketTunnelTransport.class);
+        Multibinder.newSetBinder(binder(), TunnelClientTransport.class)
+                .addBinding()
+                .to(WebSocketTunnelTransport.class);
     }
 
     @Provides

@@ -15,13 +15,20 @@ import com.minekube.connect.api.SimpleConnectApi;
 import com.minekube.connect.api.inject.PlatformInjector;
 import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.tunnel.Tunneler;
+import com.minekube.connect.watch.SessionProposal;
 import com.minekube.connect.watch.WatchClient;
 import com.minekube.connect.watch.Watcher;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
 import java.util.Timer;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
+import minekube.connect.v1alpha1.WatchServiceOuterClass.GameProfile;
+import minekube.connect.v1alpha1.WatchServiceOuterClass.Player;
+import minekube.connect.v1alpha1.WatchServiceOuterClass.Session;
+import minekube.connect.v1alpha1.WatchServiceOuterClass.TunnelTransport;
+import minekube.connect.v1alpha1.WatchServiceOuterClass.TunnelTransport.Type;
 import okhttp3.WebSocket;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -127,6 +134,38 @@ class WatcherRegisterTest {
         }
     }
 
+    @Test
+    void acceptsLibp2pOnlyProposalWithoutLegacyTunnelServiceAddr() throws Exception {
+        Fixture fixture = newFixture();
+        register = fixture.register;
+        register.start();
+        ArgumentCaptor<Watcher> watcher = ArgumentCaptor.forClass(Watcher.class);
+        verify(fixture.watchClient).watch(watcher.capture());
+
+        Session session = Session.newBuilder()
+                .setId("session-libp2p")
+                .setPlayer(Player.newBuilder()
+                        .setAddr("127.0.0.1")
+                        .setProfile(GameProfile.newBuilder()
+                                .setId("00000000-0000-0000-0000-000000000001")
+                                .setName("Player")
+                                .build())
+                        .build())
+                .addTunnelTransports(TunnelTransport.newBuilder()
+                        .setType(Type.TYPE_LIBP2P)
+                        .setAddress("/ip4/127.0.0.1/tcp/1/p2p/test")
+                        .build())
+                .build();
+        SessionProposal proposal = new SessionProposal(session, reason -> {
+            throw new AssertionError("proposal should not be rejected: " + reason);
+        });
+
+        watcher.getValue().onProposal(proposal);
+
+        verify(fixture.tunneler).prepare(session);
+        verify(fixture.platformInjector).getServerSocketAddress();
+    }
+
     private static WatcherRegister newRegister() throws Exception {
         return newFixture().register;
     }
@@ -141,7 +180,10 @@ class WatcherRegisterTest {
         inject(register, "platformInjector", mock(PlatformInjector.class));
         inject(register, "logger", mock(ConnectLogger.class));
         inject(register, "api", mock(SimpleConnectApi.class));
-        return new Fixture(register, watchClient);
+        when(((PlatformInjector) getField(register, "platformInjector")).getServerSocketAddress())
+                .thenReturn(new InetSocketAddress("127.0.0.1", 25565));
+        return new Fixture(register, watchClient, (Tunneler) getField(register, "tunneler"),
+                (PlatformInjector) getField(register, "platformInjector"));
     }
 
     private static void inject(WatcherRegister register, String fieldName, Object value)
@@ -152,15 +194,17 @@ class WatcherRegisterTest {
     }
 
     private static ScheduledExecutorService scheduler(WatcherRegister register) throws Exception {
-        Field field = WatcherRegister.class.getDeclaredField("scheduler");
-        field.setAccessible(true);
-        return (ScheduledExecutorService) field.get(register);
+        return (ScheduledExecutorService) getField(register, "scheduler");
     }
 
     private static AtomicBoolean started(WatcherRegister register) throws Exception {
-        Field field = WatcherRegister.class.getDeclaredField("started");
+        return (AtomicBoolean) getField(register, "started");
+    }
+
+    private static Object getField(WatcherRegister register, String fieldName) throws Exception {
+        Field field = WatcherRegister.class.getDeclaredField(fieldName);
         field.setAccessible(true);
-        return (AtomicBoolean) field.get(register);
+        return field.get(register);
     }
 
     private static void invokeRetry(WatcherRegister register) throws Exception {
@@ -179,10 +223,19 @@ class WatcherRegisterTest {
     private static final class Fixture {
         private final WatcherRegister register;
         private final WatchClient watchClient;
+        private final Tunneler tunneler;
+        private final PlatformInjector platformInjector;
 
-        private Fixture(WatcherRegister register, WatchClient watchClient) {
+        private Fixture(
+                WatcherRegister register,
+                WatchClient watchClient,
+                Tunneler tunneler,
+                PlatformInjector platformInjector
+        ) {
             this.register = register;
             this.watchClient = watchClient;
+            this.tunneler = tunneler;
+            this.platformInjector = platformInjector;
         }
     }
 }

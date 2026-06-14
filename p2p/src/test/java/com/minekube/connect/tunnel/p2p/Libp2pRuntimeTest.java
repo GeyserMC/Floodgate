@@ -23,21 +23,17 @@
  * @link https://github.com/minekube/connect-java
  */
 
-package com.minekube.connect.tunnel;
+package com.minekube.connect.tunnel.p2p;
 
-import java.io.Closeable;
-import minekube.connect.v1alpha1.WatchServiceOuterClass.TunnelTransport.Type;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public interface TunnelClientTransport extends Closeable {
+import org.junit.jupiter.api.Test;
 
-    Type type();
+class Libp2pRuntimeTest {
 
-    default void prepare(String address) {
-    }
-
-    TunnelConn tunnel(String address, String sessionId, TunnelConn.Handler handler);
-
-    @Override
-    default void close() {
+    @Test
+    void resolvesJvmLibp2pHostClass() {
+        assertEquals(11, Libp2pRuntime.minimumJavaFeatureVersion());
+        assertEquals("io.libp2p.core.Host", Libp2pRuntime.hostClassName());
     }
 }

@@ -161,7 +161,8 @@ public class WatcherRegister {
 
         @Override
         public void onProposal(SessionProposal proposal) {
-            if (proposal.getSession().getTunnelServiceAddr().isEmpty()) {
+            if (proposal.getSession().getTunnelServiceAddr().isEmpty()
+                    && proposal.getSession().getTunnelTransportsCount() == 0) {
                 logger.info("Got session proposal with empty tunnel service address " +
                         "from WatchService, rejecting it");
                 proposal.reject(Status.newBuilder()
@@ -188,6 +189,7 @@ public class WatcherRegister {
                 return;
             }
 
+            tunneler.prepare(proposal.getSession());
             new LocalSession(logger, api, tunneler,
                     platformInjector.getServerSocketAddress(),
                     proposal

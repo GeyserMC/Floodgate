@@ -35,6 +35,7 @@ import com.minekube.connect.module.SpigotCommandModule;
 import com.minekube.connect.module.SpigotListenerModule;
 import com.minekube.connect.module.SpigotPlatformModule;
 import com.minekube.connect.module.WatcherModule;
+import com.minekube.connect.tunnel.OptionalTunnelModules;
 import com.minekube.connect.util.ReflectionUtils;
 import com.minekube.connect.util.SpigotProtocolSupportHandler;
 import com.minekube.connect.util.SpigotProtocolSupportListener;
@@ -64,12 +65,12 @@ public final class SpigotPlugin extends JavaPlugin {
         boolean usePaperListener = ReflectionUtils.getClassSilently(
                 "com.destroystokyo.paper.event.profile.PreFillProfileEvent") != null;
 
-        platform.enable(
+        platform.enable(OptionalTunnelModules.append(
                 new SpigotCommandModule(this),
                 new SpigotAddonModule(),
                 (usePaperListener ? new PaperListenerModule() : new SpigotListenerModule()),
                 new WatcherModule()
-        );
+        ));
 
         //todo add proper support for disabling things on shutdown and enabling this on enable
 

@@ -9,7 +9,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicReference;
+import minekube.connect.v1alpha1.WatchServiceOuterClass.Session;
+import minekube.connect.v1alpha1.WatchServiceOuterClass.TunnelTransport;
+import minekube.connect.v1alpha1.WatchServiceOuterClass.TunnelTransport.Type;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
 import okhttp3.WebSocket;
@@ -24,7 +29,7 @@ class TunnelerTest {
 
     @Test
     void delegatesToConfiguredTransport() {
-        RecordingTransport transport = new RecordingTransport();
+        RecordingTransport transport = new RecordingTransport(Type.TYPE_WEBSOCKET);
         TunnelConn expected = new TunnelConn() {
             @Override
             public void write(byte[] data) {
@@ -47,6 +52,89 @@ class TunnelerTest {
         if (!transport.closed) {
             fail("transport was not closed");
         }
+    }
+
+    @Test
+    void prefersAdvertisedLibp2pTransportOverWebsocketFallback() {
+        RecordingTransport websocket = new RecordingTransport(Type.TYPE_WEBSOCKET);
+        RecordingTransport libp2p = new RecordingTransport(Type.TYPE_LIBP2P);
+        TunnelConn expected = new TunnelConn() {
+            @Override
+            public void write(byte[] data) {
+            }
+
+            @Override
+            public void close(Throwable t) {
+            }
+        };
+        websocket.next = new TunnelConn() {
+            @Override
+            public void write(byte[] data) {
+            }
+
+            @Override
+            public void close(Throwable t) {
+            }
+        };
+        libp2p.next = expected;
+        CapturingHandler handler = new CapturingHandler();
+        Tunneler tunneler = new Tunneler(new HashSet<>(Arrays.asList(websocket, libp2p)));
+
+        TunnelConn actual = tunneler.tunnel(session(
+                "session-456",
+                "ws://connect.example/tunnel",
+                transport(Type.TYPE_LIBP2P, "/ip4/127.0.0.1/tcp/1/p2p/test")
+        ), handler);
+
+        assertSame(expected, actual);
+        assertSame(handler, libp2p.handler);
+        assertArrayEquals(new String[] {"/ip4/127.0.0.1/tcp/1/p2p/test", "session-456"},
+                libp2p.args);
+        if (websocket.args != null) {
+            fail("websocket fallback should not be used when libp2p succeeds");
+        }
+    }
+
+    @Test
+    void fallsBackToTunnelServiceAddrWhenAdvertisedTransportIsUnavailable() {
+        RecordingTransport websocket = new RecordingTransport(Type.TYPE_WEBSOCKET);
+        TunnelConn expected = new TunnelConn() {
+            @Override
+            public void write(byte[] data) {
+            }
+
+            @Override
+            public void close(Throwable t) {
+            }
+        };
+        websocket.next = expected;
+        Tunneler tunneler = new Tunneler(websocket);
+
+        TunnelConn actual = tunneler.tunnel(session(
+                "session-789",
+                "ws://connect.example/fallback",
+                transport(Type.TYPE_LIBP2P, "/ip4/127.0.0.1/tcp/1/p2p/test")
+        ), new CapturingHandler());
+
+        assertSame(expected, actual);
+        assertArrayEquals(new String[] {"ws://connect.example/fallback", "session-789"},
+                websocket.args);
+    }
+
+    @Test
+    void preparesSelectedTransports() {
+        RecordingTransport websocket = new RecordingTransport(Type.TYPE_WEBSOCKET);
+        RecordingTransport libp2p = new RecordingTransport(Type.TYPE_LIBP2P);
+        Tunneler tunneler = new Tunneler(new HashSet<>(Arrays.asList(websocket, libp2p)));
+
+        tunneler.prepare(session(
+                "session-prepare",
+                "ws://connect.example/fallback",
+                transport(Type.TYPE_LIBP2P, "/ip4/127.0.0.1/tcp/1/p2p/test")
+        ));
+
+        assertArrayEquals(new String[] {"/ip4/127.0.0.1/tcp/1/p2p/test"},
+                libp2p.prepared);
     }
 
     @Test
@@ -156,11 +244,44 @@ class TunnelerTest {
         }
     }
 
+    private static Session session(String id, String tunnelServiceAddr, TunnelTransport... transports) {
+        Session.Builder builder = Session.newBuilder()
+                .setId(id)
+                .setTunnelServiceAddr(tunnelServiceAddr);
+        for (TunnelTransport transport : transports) {
+            builder.addTunnelTransports(transport);
+        }
+        return builder.build();
+    }
+
+    private static TunnelTransport transport(Type type, String address) {
+        return TunnelTransport.newBuilder()
+                .setType(type)
+                .setAddress(address)
+                .build();
+    }
+
     private static final class RecordingTransport implements TunnelClientTransport {
+        private final Type type;
         private TunnelConn next;
         private String[] args;
+        private String[] prepared;
         private TunnelConn.Handler handler;
         private boolean closed;
+
+        private RecordingTransport(Type type) {
+            this.type = type;
+        }
+
+        @Override
+        public Type type() {
+            return type;
+        }
+
+        @Override
+        public void prepare(String address) {
+            this.prepared = new String[] {address};
+        }
 
         @Override
         public TunnelConn tunnel(String address, String sessionId, TunnelConn.Handler handler) {

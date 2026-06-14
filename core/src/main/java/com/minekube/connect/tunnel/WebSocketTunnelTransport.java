@@ -37,6 +37,7 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
+import minekube.connect.v1alpha1.WatchServiceOuterClass.TunnelTransport.Type;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -56,6 +57,11 @@ public class WebSocketTunnelTransport implements TunnelClientTransport {
     @Inject
     public WebSocketTunnelTransport(@Named("connectHttpClient") OkHttpClient httpClient) {
         this.httpClient = httpClient;
+    }
+
+    @Override
+    public Type type() {
+        return Type.TYPE_WEBSOCKET;
     }
 
     @Override

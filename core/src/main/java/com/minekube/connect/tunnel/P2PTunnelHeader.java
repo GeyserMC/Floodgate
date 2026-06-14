@@ -28,13 +28,13 @@ package com.minekube.connect.tunnel;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-final class P2PTunnelHeader {
+public final class P2PTunnelHeader {
     private static final char[] HEX = "0123456789abcdef".toCharArray();
 
     private P2PTunnelHeader() {
     }
 
-    static byte[] encode(String sessionId) {
+    public static byte[] encode(String sessionId) {
         if (sessionId == null || sessionId.isEmpty()) {
             throw new IllegalArgumentException("sessionId must not be empty");
         }

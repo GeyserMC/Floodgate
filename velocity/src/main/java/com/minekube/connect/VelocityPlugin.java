@@ -33,6 +33,7 @@ import com.minekube.connect.module.ProxyCommonModule;
 import com.minekube.connect.module.VelocityListenerModule;
 import com.minekube.connect.module.VelocityPlatformModule;
 import com.minekube.connect.module.WatcherModule;
+import com.minekube.connect.tunnel.OptionalTunnelModules;
 import com.minekube.connect.util.ReflectionUtils;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
@@ -61,11 +62,11 @@ public final class VelocityPlugin {
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
-        platform.enable(
+        platform.enable(OptionalTunnelModules.append(
                 new CommandModule(),
                 new VelocityListenerModule(),
 //                new VelocityAddonModule(), - don't need proxy-side data injection
                 new WatcherModule()
-        );
+        ));
     }
 }
