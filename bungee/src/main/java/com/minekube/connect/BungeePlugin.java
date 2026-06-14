@@ -33,7 +33,7 @@ import com.minekube.connect.module.BungeePlatformModule;
 import com.minekube.connect.module.CommandModule;
 import com.minekube.connect.module.ProxyCommonModule;
 import com.minekube.connect.module.WatcherModule;
-import com.minekube.connect.tunnel.OptionalTunnelModules;
+import com.minekube.connect.tunnel.p2p.Libp2pTunnelModule;
 import com.minekube.connect.util.ReflectionUtils;
 import net.md_5.bungee.api.plugin.Plugin;
 
@@ -61,12 +61,13 @@ public final class BungeePlugin extends Plugin {
 
     @Override
     public void onEnable() {
-        platform.enable(OptionalTunnelModules.append(
+        platform.enable(
                 new CommandModule(),
                 new BungeeListenerModule(),
 //                new BungeeAddonModule(), - don't need proxy-side data injection
+                new Libp2pTunnelModule(),
                 new WatcherModule()
-        ));
+        );
     }
 
     @Override

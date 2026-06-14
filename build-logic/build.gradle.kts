@@ -11,16 +11,14 @@ repositories {
 dependencies {
     implementation("net.kyori", "indra-common", "2.0.6")
     implementation("org.jfrog.buildinfo", "build-info-extractor-gradle", "4.26.1")
-    implementation("gradle.plugin.com.github.johnrengelman", "shadow", "7.1.1")
+    implementation("com.gradleup.shadow:shadow-gradle-plugin:8.3.11")
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
+    kotlinOptions.jvmTarget = "11"
 }
