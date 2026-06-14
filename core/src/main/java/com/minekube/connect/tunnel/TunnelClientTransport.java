@@ -25,25 +25,13 @@
 
 package com.minekube.connect.tunnel;
 
-import com.google.inject.Inject;
-import com.minekube.connect.tunnel.TunnelConn.Handler;
 import java.io.Closeable;
 
-public class Tunneler implements Closeable {
+public interface TunnelClientTransport extends Closeable {
 
-    private final TunnelClientTransport transport;
-
-    @Inject
-    public Tunneler(TunnelClientTransport transport) {
-        this.transport = transport;
-    }
-
-    public TunnelConn tunnel(final String tunnelServiceAddr, String sessionId, Handler handler) {
-        return transport.tunnel(tunnelServiceAddr, sessionId, handler);
-    }
+    TunnelConn tunnel(String address, String sessionId, TunnelConn.Handler handler);
 
     @Override
-    public void close() {
-        transport.close();
+    default void close() {
     }
 }

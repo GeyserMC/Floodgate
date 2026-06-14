@@ -4,6 +4,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.reflect.Field;
@@ -22,6 +23,33 @@ import org.junit.jupiter.api.Test;
 class TunnelerTest {
 
     @Test
+    void delegatesToConfiguredTransport() {
+        RecordingTransport transport = new RecordingTransport();
+        TunnelConn expected = new TunnelConn() {
+            @Override
+            public void write(byte[] data) {
+            }
+
+            @Override
+            public void close(Throwable t) {
+            }
+        };
+        transport.next = expected;
+        CapturingHandler handler = new CapturingHandler();
+        Tunneler tunneler = new Tunneler(transport);
+
+        TunnelConn actual = tunneler.tunnel("ws://connect.example/tunnel", "session-123", handler);
+        tunneler.close();
+
+        assertSame(expected, actual);
+        assertSame(handler, transport.handler);
+        assertArrayEquals(new String[] {"ws://connect.example/tunnel", "session-123"}, transport.args);
+        if (!transport.closed) {
+            fail("transport was not closed");
+        }
+    }
+
+    @Test
     void receivesBinaryFrameFromTunnelService() throws Exception {
         byte[] sent = new byte[] {1, 2, 3, 4, 5};
 
@@ -33,7 +61,7 @@ class TunnelerTest {
     @Test
     void receivesBinaryFrameWhenByteStringDataFieldIsUnavailable() throws Exception {
         byte[] sent = new byte[] {9, 8, 7, 6};
-        Field dataField = Tunneler.class.getDeclaredField("DATA");
+        Field dataField = WebSocketTunnelTransport.class.getDeclaredField("DATA");
         dataField.setAccessible(true);
         Field originalData = (Field) dataField.get(null);
 
@@ -62,7 +90,8 @@ class TunnelerTest {
             }));
             server.start();
 
-            conn = new Tunneler(client).tunnel(webSocketUrl(server), "test-session", handler);
+            conn = new Tunneler(new WebSocketTunnelTransport(client))
+                    .tunnel(webSocketUrl(server), "test-session", handler);
 
             return handler.awaitReceived();
         } finally {
@@ -124,6 +153,25 @@ class TunnelerTest {
                 assertNotNull(received.get());
             });
             return received.get();
+        }
+    }
+
+    private static final class RecordingTransport implements TunnelClientTransport {
+        private TunnelConn next;
+        private String[] args;
+        private TunnelConn.Handler handler;
+        private boolean closed;
+
+        @Override
+        public TunnelConn tunnel(String address, String sessionId, TunnelConn.Handler handler) {
+            this.args = new String[] {address, sessionId};
+            this.handler = handler;
+            return next;
+        }
+
+        @Override
+        public void close() {
+            closed = true;
         }
     }
 }

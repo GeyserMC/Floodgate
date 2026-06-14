@@ -45,6 +45,8 @@ import com.minekube.connect.config.ConnectConfig;
 import com.minekube.connect.inject.CommonPlatformInjector;
 import com.minekube.connect.packet.PacketHandlersImpl;
 import com.minekube.connect.platform.util.PlatformUtils;
+import com.minekube.connect.tunnel.TunnelClientTransport;
+import com.minekube.connect.tunnel.WebSocketTunnelTransport;
 import com.minekube.connect.util.Constants;
 import com.minekube.connect.util.HttpUtils;
 import com.minekube.connect.util.LanguageManager;
@@ -71,6 +73,7 @@ public class CommonModule extends AbstractModule {
 
         bind(PacketHandlers.class).to(PacketHandlersImpl.class);
         bind(PacketHandlersImpl.class).asEagerSingleton();
+        bind(TunnelClientTransport.class).to(WebSocketTunnelTransport.class);
     }
 
     @Provides
