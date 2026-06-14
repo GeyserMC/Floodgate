@@ -49,6 +49,25 @@ message Session {
   // The authentication termination of the session connection.
   // See Authentication for more documentation.
   Authentication auth = 4;
+  // Additional transport-specific addresses for establishing the player connection.
+  // Older clients ignore this field and continue using tunnel_service_addr.
+  repeated TunnelTransport tunnel_transports = 5;
+}
+
+message TunnelTransport {
+  enum Type {
+    TYPE_UNSPECIFIED = 0;
+    TYPE_WEBSOCKET = 1;
+    TYPE_LIBP2P = 2;
+  }
+
+  Type type = 1;
+  // The transport address.
+  //
+  // For TYPE_WEBSOCKET, this is a ws:// or wss:// URL in the same format
+  // as tunnel_service_addr.
+  // For TYPE_LIBP2P, this is a full libp2p multiaddr including /p2p/<peer-id>.
+  string address = 2;
 }
 
 message Player {
