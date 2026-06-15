@@ -67,6 +67,7 @@ public final class Libp2pTunnelTransport implements TunnelClientTransport {
 
     private final Host host;
     private final ConcurrentMap<PeerId, Connection> warmConnections = new ConcurrentHashMap<>();
+    private boolean started;
 
     @Inject
     public Libp2pTunnelTransport() {
@@ -76,7 +77,6 @@ public final class Libp2pTunnelTransport implements TunnelClientTransport {
     Libp2pTunnelTransport(Host host) {
         this.host = Objects.requireNonNull(host, "host");
         this.host.addProtocolHandler(new TunnelProtocolBinding());
-        await(host.start(), START_TIMEOUT_SECONDS, "start libp2p host");
     }
 
     static Host createHost() {
@@ -138,6 +138,14 @@ public final class Libp2pTunnelTransport implements TunnelClientTransport {
     @Override
     public void close() {
         warmConnections.clear();
+        Host host;
+        synchronized (this) {
+            if (!started) {
+                return;
+            }
+            host = this.host;
+            started = false;
+        }
         await(host.stop(), START_TIMEOUT_SECONDS, "stop libp2p host");
     }
 
@@ -151,15 +159,23 @@ public final class Libp2pTunnelTransport implements TunnelClientTransport {
     }
 
     private Connection connect(PeerId peerId, Multiaddr multiaddr) {
-        return await(host.getNetwork().connect(peerId, multiaddr),
+        return await(startedHost().getNetwork().connect(peerId, multiaddr),
                 CONNECT_TIMEOUT_SECONDS, "connect libp2p peer " + peerId);
     }
 
     private Stream openStream(Connection connection) {
-        StreamPromise<Object> promise = host.newStream(Arrays.asList(PROTOCOL_ID), connection);
+        StreamPromise<Object> promise = startedHost().newStream(Arrays.asList(PROTOCOL_ID), connection);
         Stream stream = await(promise.getStream(), STREAM_TIMEOUT_SECONDS, "open libp2p tunnel stream");
         await(stream.getProtocol(), STREAM_TIMEOUT_SECONDS, "negotiate libp2p tunnel protocol");
         return stream;
+    }
+
+    private synchronized Host startedHost() {
+        if (!started) {
+            await(host.start(), START_TIMEOUT_SECONDS, "start libp2p host");
+            started = true;
+        }
+        return host;
     }
 
     private static PeerId requirePeerId(Multiaddr multiaddr, String address) {
