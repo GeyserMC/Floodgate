@@ -35,7 +35,6 @@ import com.minekube.connect.module.SpigotCommandModule;
 import com.minekube.connect.module.SpigotListenerModule;
 import com.minekube.connect.module.SpigotPlatformModule;
 import com.minekube.connect.module.WatcherModule;
-import com.minekube.connect.tunnel.p2p.Libp2pTunnelModule;
 import com.minekube.connect.util.ReflectionUtils;
 import com.minekube.connect.util.SpigotProtocolSupportHandler;
 import com.minekube.connect.util.SpigotProtocolSupportListener;
@@ -69,7 +68,6 @@ public final class SpigotPlugin extends JavaPlugin {
                 new SpigotCommandModule(this),
                 new SpigotAddonModule(),
                 (usePaperListener ? new PaperListenerModule() : new SpigotListenerModule()),
-                new Libp2pTunnelModule(),
                 new WatcherModule()
         );
 

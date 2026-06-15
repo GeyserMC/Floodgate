@@ -48,6 +48,7 @@ import com.minekube.connect.packet.PacketHandlersImpl;
 import com.minekube.connect.platform.util.PlatformUtils;
 import com.minekube.connect.tunnel.TunnelClientTransport;
 import com.minekube.connect.tunnel.WebSocketTunnelTransport;
+import com.minekube.connect.tunnel.p2p.Libp2pTunnelTransport;
 import com.minekube.connect.util.Constants;
 import com.minekube.connect.util.HttpUtils;
 import com.minekube.connect.util.LanguageManager;
@@ -74,9 +75,10 @@ public class CommonModule extends AbstractModule {
 
         bind(PacketHandlers.class).to(PacketHandlersImpl.class);
         bind(PacketHandlersImpl.class).asEagerSingleton();
-        Multibinder.newSetBinder(binder(), TunnelClientTransport.class)
-                .addBinding()
-                .to(WebSocketTunnelTransport.class);
+        Multibinder<TunnelClientTransport> transports =
+                Multibinder.newSetBinder(binder(), TunnelClientTransport.class);
+        transports.addBinding().to(WebSocketTunnelTransport.class);
+        transports.addBinding().to(Libp2pTunnelTransport.class);
     }
 
     @Provides
