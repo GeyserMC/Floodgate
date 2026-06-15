@@ -46,6 +46,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
@@ -72,6 +74,7 @@ public final class NativeLibp2pEndpoint {
     private NativeLibp2pEndpointConfig nativeConfig;
     private Host host;
     private EndpointPeerIdentity identity;
+    private ScheduledExecutorService statusExecutor;
     private boolean started;
 
     @Inject
@@ -104,6 +107,7 @@ public final class NativeLibp2pEndpoint {
                     identity.privateKey(),
                     nativeConfig.listenAddrs().toArray(String[]::new));
             installRegisterProtocol(host);
+            NativeStatusReporter.installStatusProtocol(host);
             installSessionResponder(host);
             await(host.start(), START_TIMEOUT_SECONDS, "start native libp2p endpoint host");
             started = true;
@@ -116,6 +120,7 @@ public final class NativeLibp2pEndpoint {
             PeerRegisterResult result = registerOnce(offlineMode);
             logger.info("Native Connect libp2p endpoint registered: "
                     + result.getEndpointId() + " (" + identity.peerId() + ")");
+            startStatusReporter(result);
         } catch (Exception e) {
             stop();
             logger.error("Failed to start native Connect libp2p endpoint", e);
@@ -123,6 +128,10 @@ public final class NativeLibp2pEndpoint {
     }
 
     public synchronized void stop() {
+        if (statusExecutor != null) {
+            statusExecutor.shutdownNow();
+            statusExecutor = null;
+        }
         if (!started || host == null) {
             return;
         }
@@ -256,5 +265,26 @@ public final class NativeLibp2pEndpoint {
         } catch (Exception e) {
             throw new IllegalStateException("failed to " + action, e);
         }
+    }
+
+    private void startStatusReporter(PeerRegisterResult result) {
+        NativeStatusReporter reporter = new NativeStatusReporter(
+                host,
+                identity.peerId(),
+                nativeConfig.registerAddrs(),
+                result,
+                platformUtils,
+                logger);
+        reporter.reportSafely();
+        statusExecutor = Executors.newSingleThreadScheduledExecutor(runnable -> {
+            Thread thread = new Thread(runnable, "connect-native-libp2p-status-report");
+            thread.setDaemon(true);
+            return thread;
+        });
+        statusExecutor.scheduleWithFixedDelay(
+                reporter::reportSafely,
+                30,
+                30,
+                TimeUnit.SECONDS);
     }
 }

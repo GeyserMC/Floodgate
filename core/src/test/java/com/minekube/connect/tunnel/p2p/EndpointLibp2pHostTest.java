@@ -36,6 +36,17 @@ class EndpointLibp2pHostTest {
 
     @Test
     void endpointHostCanOpenRegisterProtocolStream() throws Exception {
+        endpointHostCanOpenProtocolStream(NativeLibp2pEndpoint.REGISTER_PROTOCOL_ID, host ->
+                NativeLibp2pEndpoint.installRegisterProtocol(host));
+    }
+
+    @Test
+    void endpointHostCanOpenStatusProtocolStream() throws Exception {
+        endpointHostCanOpenProtocolStream(NativeStatusReporter.PROTOCOL_ID, host ->
+                NativeStatusReporter.installStatusProtocol(host));
+    }
+
+    private void endpointHostCanOpenProtocolStream(String protocolID, java.util.function.Consumer<Host> installer) throws Exception {
         Host endpoint = Libp2pTunnelTransport.createHost(
                 EndpointPeerIdentity.loadOrCreate(tempDir.resolve("endpoint.key")).privateKey(),
                 "/ip4/127.0.0.1/tcp/0");
@@ -44,9 +55,9 @@ class EndpointLibp2pHostTest {
                 "/ip4/127.0.0.1/tcp/0");
         CountDownLatch accepted = new CountDownLatch(1);
 
-        NativeLibp2pEndpoint.installRegisterProtocol(endpoint);
+        installer.accept(endpoint);
         moxy.addProtocolHandler(new io.libp2p.core.multistream.StrictProtocolBinding<Void>(
-                NativeLibp2pEndpoint.REGISTER_PROTOCOL_ID,
+                protocolID,
                 new io.libp2p.protocol.ProtocolHandler<Void>(Long.MAX_VALUE, Long.MAX_VALUE) {
                     @Override
                     protected CompletableFuture<Void> onStartInitiator(Stream stream) {
@@ -70,7 +81,7 @@ class EndpointLibp2pHostTest {
                     .connect(PeerId.fromBase58(moxy.getPeerId().toBase58()), io.libp2p.core.multiformats.Multiaddr.fromString(address))
                     .get(10, TimeUnit.SECONDS);
             StreamPromise<Object> promise = endpoint.newStream(
-                    Arrays.asList(NativeLibp2pEndpoint.REGISTER_PROTOCOL_ID),
+                    Arrays.asList(protocolID),
                     connection);
             Stream stream = promise.getStream().get(10, TimeUnit.SECONDS);
             stream.getProtocol().get(10, TimeUnit.SECONDS);
