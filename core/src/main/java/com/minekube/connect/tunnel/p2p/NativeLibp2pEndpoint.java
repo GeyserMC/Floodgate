@@ -107,7 +107,13 @@ public final class NativeLibp2pEndpoint {
             installSessionResponder(host);
             await(host.start(), START_TIMEOUT_SECONDS, "start native libp2p endpoint host");
             started = true;
-            PeerRegisterResult result = registerOnce();
+            PlatformUtils.AuthType authType = platformUtils.authType();
+            OfflineMode offlineMode = offlineMode(authType);
+            logger.info("Native Connect libp2p offline mode: "
+                    + offlineMode
+                    + " (allowOfflineModePlayers=" + connectConfig.getAllowOfflineModePlayers()
+                    + ", authType=" + authType + ")");
+            PeerRegisterResult result = registerOnce(offlineMode);
             logger.info("Native Connect libp2p endpoint registered: "
                     + result.getEndpointId() + " (" + identity.peerId() + ")");
         } catch (Exception e) {
@@ -168,7 +174,7 @@ public final class NativeLibp2pEndpoint {
         });
     }
 
-    private PeerRegisterResult registerOnce() {
+    private PeerRegisterResult registerOnce(OfflineMode offlineMode) {
         RuntimeException lastError = null;
         for (String address : nativeConfig.registerAddrs()) {
             try {
@@ -181,7 +187,7 @@ public final class NativeLibp2pEndpoint {
                         connectConfig.getSuperEndpoints() == null
                                 ? Collections.emptyList()
                                 : connectConfig.getSuperEndpoints(),
-                        offlineMode(),
+                        offlineMode,
                         Arrays.asList("session", "status"),
                         PeerCapacity.newBuilder()
                                 .setMaxSessions(512)
@@ -226,13 +232,13 @@ public final class NativeLibp2pEndpoint {
                 .collect(Collectors.toList());
     }
 
-    private OfflineMode offlineMode() {
+    private OfflineMode offlineMode(PlatformUtils.AuthType authType) {
         if (connectConfig.getAllowOfflineModePlayers() != null) {
             return connectConfig.getAllowOfflineModePlayers()
                     ? OfflineMode.OFFLINE_MODE_ALLOWED
                     : OfflineMode.OFFLINE_MODE_DENIED;
         }
-        return platformUtils.authType() == PlatformUtils.AuthType.OFFLINE
+        return authType == PlatformUtils.AuthType.OFFLINE
                 ? OfflineMode.OFFLINE_MODE_ALLOWED
                 : OfflineMode.OFFLINE_MODE_DENIED;
     }
