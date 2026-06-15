@@ -32,6 +32,7 @@ import com.minekube.connect.tunnel.TunnelConn;
 import io.libp2p.core.Connection;
 import io.libp2p.core.Host;
 import io.libp2p.core.PeerId;
+import io.libp2p.core.crypto.PrivKey;
 import io.libp2p.core.Stream;
 import io.libp2p.core.StreamPromise;
 import io.libp2p.core.crypto.KeyType;
@@ -80,13 +81,30 @@ public final class Libp2pTunnelTransport implements TunnelClientTransport {
     }
 
     static Host createHost() {
-        return new HostBuilder(HostBuilder.DefaultMode.None)
-                .keyType(KeyType.ED25519)
+        return createHost(null, new String[0]);
+    }
+
+    static Host createHost(PrivKey privateKey) {
+        return createHost(privateKey, new String[0]);
+    }
+
+    static Host createHost(PrivKey privateKey, String... listenAddrs) {
+        HostBuilder builder = new HostBuilder(HostBuilder.DefaultMode.None)
                 .transport(TcpTransport::new)
                 .secureChannel(NoiseXXSecureChannel::new)
                 .muxer(StreamMuxerProtocol::getYamux)
                 .secureTransport((priv, protocols) ->
-                        QuicTransport.Ed25519(priv, protocols, new QuicConfig()))
+                        QuicTransport.Ed25519(priv, protocols, new QuicConfig()));
+        if (listenAddrs != null && listenAddrs.length > 0) {
+            builder.listen(listenAddrs);
+        }
+        if (privateKey == null) {
+            return builder
+                    .keyType(KeyType.ED25519)
+                    .build();
+        }
+        return builder
+                .builderModifier(builderJ -> builderJ.getIdentity().setFactory(() -> privateKey))
                 .build();
     }
 

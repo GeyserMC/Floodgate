@@ -122,24 +122,29 @@ public class CommonModule extends AbstractModule {
 
     @Provides
     @Singleton
+    @Named("connectToken")
+    public String connectToken() throws IOException {
+        Path tokenFile = dataDirectory.resolve("token.json");
+
+        Optional<String> token = Token.load(tokenFile);
+        if (!token.isPresent()) {
+            String t = Token.generate();
+            Token.save(tokenFile, t);
+            token = Optional.of(t);
+        }
+        return token.get();
+    }
+
+    @Provides
+    @Singleton
     @Named("connectHttpClient")
     public OkHttpClient connectOkHttpClient(
             @Named("defaultHttpClient") OkHttpClient defaultOkHttpClient,
             PlatformUtils platformUtils,
             @Named("platformName") String implementationName,
-            ConnectApi api
-    ) throws IOException {
-        Path tokenFile = dataDirectory.resolve("token.json");
-
-        Optional<String> token = Token.load(tokenFile);
-        if (!token.isPresent()) {
-            // Generate and save new token
-            String t = Token.generate();
-            Token.save(tokenFile, t);
-            token = Optional.of(t);
-        }
-        final String apiToken = token.get();
-
+            ConnectApi api,
+            @Named("connectToken") String apiToken
+    ) {
         return defaultOkHttpClient.newBuilder()
                 .addInterceptor(chain -> chain.proceed(chain.request().newBuilder()
                         // Add authorization token to every request

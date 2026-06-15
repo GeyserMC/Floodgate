@@ -29,6 +29,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.module.CommandModule;
+import com.minekube.connect.module.NativeLibp2pEndpointModule;
 import com.minekube.connect.module.ProxyCommonModule;
 import com.minekube.connect.module.VelocityListenerModule;
 import com.minekube.connect.module.VelocityPlatformModule;
@@ -65,6 +66,7 @@ public final class VelocityPlugin {
                 new CommandModule(),
                 new VelocityListenerModule(),
 //                new VelocityAddonModule(), - don't need proxy-side data injection
+                new NativeLibp2pEndpointModule(),
                 new WatcherModule()
         );
     }

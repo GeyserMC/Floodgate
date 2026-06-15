@@ -1,6 +1,7 @@
 package com.minekube.connect.module;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,7 +35,8 @@ class CommonModuleTest {
                 module.defaultOkHttpClient(),
                 platformUtils,
                 "spigot",
-                new SimpleConnectApi(mock(ConnectLogger.class))
+                new SimpleConnectApi(mock(ConnectLogger.class)),
+                module.connectToken()
         );
 
         try (MockWebServer server = new MockWebServer()) {
@@ -52,5 +54,16 @@ class CommonModuleTest {
                 assertEquals("Paper", recorded.getHeaders().values("Connect-Platform").get(1));
             }
         }
+    }
+
+    @Test
+    void connectTokenIsPersistedForAllConnectClients() throws Exception {
+        CommonModule module = new CommonModule(tempDir);
+
+        String token = module.connectToken();
+
+        assertTrue(token.startsWith("T-"));
+        assertEquals(token, module.connectToken());
+        assertTrue(java.nio.file.Files.readString(tempDir.resolve("token.json")).contains(token));
     }
 }

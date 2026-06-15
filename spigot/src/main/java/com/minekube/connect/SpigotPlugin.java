@@ -29,6 +29,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.module.PaperListenerModule;
+import com.minekube.connect.module.NativeLibp2pEndpointModule;
 import com.minekube.connect.module.ServerCommonModule;
 import com.minekube.connect.module.SpigotAddonModule;
 import com.minekube.connect.module.SpigotCommandModule;
@@ -68,6 +69,7 @@ public final class SpigotPlugin extends JavaPlugin {
                 new SpigotCommandModule(this),
                 new SpigotAddonModule(),
                 (usePaperListener ? new PaperListenerModule() : new SpigotListenerModule()),
+                new NativeLibp2pEndpointModule(),
                 new WatcherModule()
         );
 

@@ -31,6 +31,7 @@ import com.minekube.connect.api.logger.ConnectLogger;
 import com.minekube.connect.module.BungeeListenerModule;
 import com.minekube.connect.module.BungeePlatformModule;
 import com.minekube.connect.module.CommandModule;
+import com.minekube.connect.module.NativeLibp2pEndpointModule;
 import com.minekube.connect.module.ProxyCommonModule;
 import com.minekube.connect.module.WatcherModule;
 import com.minekube.connect.util.ReflectionUtils;
@@ -64,6 +65,7 @@ public final class BungeePlugin extends Plugin {
                 new CommandModule(),
                 new BungeeListenerModule(),
 //                new BungeeAddonModule(), - don't need proxy-side data injection
+                new NativeLibp2pEndpointModule(),
                 new WatcherModule()
         );
     }
