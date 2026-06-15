@@ -17,6 +17,9 @@ dependencies {
 
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
     implementation("io.libp2p:jvm-libp2p:${Versions.jvmLibp2pVersion}")
+    api("io.netty", "netty-transport", Versions.nettyVersion)
+    api("io.netty", "netty-codec", Versions.nettyVersion)
+    api("io.netty", "netty-transport-native-unix-common", Versions.nettyVersion)
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlinStdlibVersion}")
     runtimeOnly("io.grpc", "grpc-netty-shaded", Versions.gRPCVersion)
     implementation("io.grpc", "grpc-protobuf", Versions.gRPCVersion)
@@ -35,11 +38,6 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
-
-// present on all platforms
-provided("io.netty", "netty-transport", Versions.nettyVersion)
-provided("io.netty", "netty-codec", Versions.nettyVersion)
-provided("io.netty", "netty-transport-native-unix-common", Versions.nettyVersion)
 
 relocate("org.bstats")
 
