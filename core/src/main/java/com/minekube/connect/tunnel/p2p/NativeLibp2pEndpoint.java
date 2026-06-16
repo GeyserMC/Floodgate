@@ -74,7 +74,9 @@ public final class NativeLibp2pEndpoint {
     private NativeLibp2pEndpointConfig nativeConfig;
     private Host host;
     private EndpointPeerIdentity identity;
+    private ScheduledExecutorService registrationExecutor;
     private ScheduledExecutorService statusExecutor;
+    private ActiveRegistration activeRegistration;
     private boolean started;
 
     @Inject
@@ -117,10 +119,7 @@ public final class NativeLibp2pEndpoint {
                     + offlineMode
                     + " (allowOfflineModePlayers=" + connectConfig.getAllowOfflineModePlayers()
                     + ", authType=" + authType + ")");
-            PeerRegisterResult result = registerOnce(offlineMode);
-            logger.info("Native Connect libp2p endpoint registered: "
-                    + result.getEndpointId() + " (" + identity.peerId() + ")");
-            startStatusReporter(result);
+            startRegistrationLoop(offlineMode);
         } catch (Exception e) {
             stop();
             logger.error("Failed to start native Connect libp2p endpoint", e);
@@ -128,6 +127,14 @@ public final class NativeLibp2pEndpoint {
     }
 
     public synchronized void stop() {
+        if (registrationExecutor != null) {
+            registrationExecutor.shutdownNow();
+            registrationExecutor = null;
+        }
+        if (activeRegistration != null) {
+            activeRegistration.close();
+            activeRegistration = null;
+        }
         if (statusExecutor != null) {
             statusExecutor.shutdownNow();
             statusExecutor = null;
@@ -183,9 +190,10 @@ public final class NativeLibp2pEndpoint {
         });
     }
 
-    private PeerRegisterResult registerOnce(OfflineMode offlineMode) {
+    private ActiveRegistration registerOnce(OfflineMode offlineMode) {
         RuntimeException lastError = null;
         for (String address : nativeConfig.registerAddrs()) {
+            PeerRegistrationClient client = null;
             try {
                 Stream stream = openRegisterStream(address);
                 PeerRegistrationHandshake handshake = new PeerRegistrationHandshake(
@@ -202,20 +210,79 @@ public final class NativeLibp2pEndpoint {
                                 .setMaxSessions(512)
                                 .setActiveSessions(platformUtils.getPlayerCount())
                                 .build());
-                return await(new PeerRegistrationClient(handshake).install(
+                client = new PeerRegistrationClient(handshake);
+                PeerRegisterResult result = await(client.install(
                                 stream,
                                 observedAddrs(),
                                 sequence.incrementAndGet(),
                                 System.currentTimeMillis()),
                         CONNECT_TIMEOUT_SECONDS,
                         "register native libp2p endpoint");
+                return new ActiveRegistration(client, result);
             } catch (RuntimeException e) {
+                if (client != null) {
+                    client.close();
+                }
                 lastError = e;
             }
         }
         throw lastError == null
                 ? new IllegalStateException("no native libp2p moxy register addresses configured")
                 : lastError;
+    }
+
+    private void startRegistrationLoop(OfflineMode offlineMode) {
+        registrationExecutor = Executors.newSingleThreadScheduledExecutor(runnable -> {
+            Thread thread = new Thread(runnable, "connect-native-libp2p-registration");
+            thread.setDaemon(true);
+            return thread;
+        });
+        registerAndWatch(offlineMode);
+    }
+
+    private void scheduleRegisterRetry(OfflineMode offlineMode, long delaySeconds) {
+        ScheduledExecutorService executor;
+        synchronized (this) {
+            if (!started || registrationExecutor == null || registrationExecutor.isShutdown()) {
+                return;
+            }
+            executor = registrationExecutor;
+        }
+        executor.schedule(() -> {
+            try {
+                registerAndWatch(offlineMode);
+            } catch (RuntimeException e) {
+                logger.error("Failed to refresh native Connect libp2p registration", e);
+                scheduleRegisterRetry(offlineMode, 5);
+            }
+        }, delaySeconds, TimeUnit.SECONDS);
+    }
+
+    private void registerAndWatch(OfflineMode offlineMode) {
+        ActiveRegistration registration = registerOnce(offlineMode);
+        ActiveRegistration previous;
+        synchronized (this) {
+            if (!started) {
+                registration.close();
+                return;
+            }
+            previous = activeRegistration;
+            activeRegistration = registration;
+            logger.info("Native Connect libp2p endpoint registered: "
+                    + registration.result().getEndpointId() + " (" + identity.peerId() + ")");
+            startStatusReporter(registration.result());
+        }
+        if (previous != null) {
+            previous.close();
+        }
+        registration.client().closedFuture().whenComplete((ignored, error) -> {
+            if (error == null) {
+                logger.info("Native Connect libp2p registration stream closed; reconnecting");
+            } else {
+                logger.error("Native Connect libp2p registration stream failed; reconnecting", error);
+            }
+            scheduleRegisterRetry(offlineMode, 1);
+        });
     }
 
     private Stream openRegisterStream(String address) {
@@ -268,6 +335,10 @@ public final class NativeLibp2pEndpoint {
     }
 
     private void startStatusReporter(PeerRegisterResult result) {
+        if (statusExecutor != null) {
+            statusExecutor.shutdownNow();
+            statusExecutor = null;
+        }
         NativeStatusReporter reporter = new NativeStatusReporter(
                 host,
                 identity.peerId(),
@@ -286,5 +357,27 @@ public final class NativeLibp2pEndpoint {
                 30,
                 30,
                 TimeUnit.SECONDS);
+    }
+
+    private static final class ActiveRegistration {
+        private final PeerRegistrationClient client;
+        private final PeerRegisterResult result;
+
+        private ActiveRegistration(PeerRegistrationClient client, PeerRegisterResult result) {
+            this.client = client;
+            this.result = result;
+        }
+
+        private PeerRegistrationClient client() {
+            return client;
+        }
+
+        private PeerRegisterResult result() {
+            return result;
+        }
+
+        private void close() {
+            client.close();
+        }
     }
 }

@@ -44,6 +44,8 @@ import minekube.connect.v1alpha1.ConnectLibp2P.PeerRegisterResult;
 final class PeerRegistrationClient {
     private final PeerRegistrationHandshake handshake;
     private final ScheduledExecutorService renewExecutor;
+    private final CompletableFuture<Void> closed = new CompletableFuture<>();
+    private volatile Stream stream;
 
     PeerRegistrationClient(PeerRegistrationHandshake handshake) {
         this.handshake = Objects.requireNonNull(handshake, "handshake");
@@ -59,6 +61,7 @@ final class PeerRegistrationClient {
             List<String> observedAddrs,
             long sequence,
             long nowUnixMs) {
+        this.stream = stream;
         CompletableFuture<PeerRegisterResult> result = new CompletableFuture<>();
         P2PFrameDecoder<PeerRegisterChallenge> challengeDecoder = new P2PFrameDecoder<>(
                 PeerRegisterChallenge.parser(),
@@ -73,6 +76,19 @@ final class PeerRegistrationClient {
                 result));
         writeFrame(stream, handshake.init(observedAddrs));
         return result;
+    }
+
+    CompletableFuture<Void> closedFuture() {
+        return closed;
+    }
+
+    void close() {
+        renewExecutor.shutdownNow();
+        Stream current = stream;
+        if (current != null) {
+            current.close();
+        }
+        closed.complete(null);
     }
 
     private void installResultHandler(
@@ -133,6 +149,7 @@ final class PeerRegistrationClient {
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
             result.completeExceptionally(cause);
+            closed.completeExceptionally(cause);
             stream.close();
             ctx.close();
         }
@@ -190,12 +207,14 @@ final class PeerRegistrationClient {
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
             result.completeExceptionally(cause);
             renewExecutor.shutdownNow();
+            closed.completeExceptionally(cause);
             ctx.close();
         }
 
         @Override
         public void channelInactive(ChannelHandlerContext ctx) throws Exception {
             renewExecutor.shutdownNow();
+            closed.complete(null);
             super.channelInactive(ctx);
         }
     }

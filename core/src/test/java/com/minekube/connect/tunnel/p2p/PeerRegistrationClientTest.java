@@ -97,6 +97,51 @@ class PeerRegistrationClientTest {
     }
 
     @Test
+    void completesClosedFutureWhenRegistrationStreamCloses() throws Exception {
+        EndpointPeerIdentity identity = EndpointPeerIdentity.loadOrCreate(tempDir.resolve("native-peer.key"));
+        PeerRegistrationHandshake handshake = new PeerRegistrationHandshake(
+                identity,
+                "endpoint",
+                "token",
+                "instance",
+                Collections.emptyList(),
+                OfflineMode.OFFLINE_MODE_ALLOWED,
+                Arrays.asList("session", "status"),
+                PeerCapacity.newBuilder().setMaxSessions(100).build());
+        Stream stream = mock(Stream.class);
+        PeerRegistrationClient client = new PeerRegistrationClient(handshake);
+
+        client.install(
+                stream,
+                Collections.singletonList("/ip4/127.0.0.1/tcp/1234/p2p/" + identity.peerId()),
+                9,
+                1_000);
+
+        ArgumentCaptor<ChannelHandler> handlers = ArgumentCaptor.forClass(ChannelHandler.class);
+        verify(stream, times(2)).pushHandler(handlers.capture());
+        EmbeddedChannel channel = new EmbeddedChannel(handlers.getAllValues().toArray(ChannelHandler[]::new));
+        channel.writeInbound(frame(PeerRegisterChallenge.newBuilder()
+                .setEndpointId("endpoint-id")
+                .setEndpointHash("endpoint-hash")
+                .setPublisherId("publisher")
+                .setPublisherPeerId("publisher-peer")
+                .setRegion("local")
+                .setKvTtlMs(45_000)
+                .setRenewIntervalMs(60_000)
+                .setNonce(ByteString.copyFromUtf8("nonce"))
+                .build()));
+        channel.writeInbound(frame(PeerRegisterResult.newBuilder()
+                .setEndpointId("endpoint-id")
+                .setEndpointHash("endpoint-hash")
+                .setKvRevision(42)
+                .build()));
+
+        channel.close().syncUninterruptibly();
+
+        assertTrue(client.closedFuture().isDone());
+    }
+
+    @Test
     void computesRenewDelayFromChallenge() {
         assertEquals(20_000, PeerRegistrationClient.renewDelayMillis(PeerRegisterChallenge.newBuilder()
                 .setRenewIntervalMs(20_000)
