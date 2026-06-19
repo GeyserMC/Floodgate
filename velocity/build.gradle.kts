@@ -2,6 +2,7 @@ var velocityVersion = "3.2.0-SNAPSHOT"
 var log4jVersion = "2.11.2"
 var gsonVersion = "2.8.8"
 var guavaVersion = "25.1-jre"
+var cloudVersion = "2.0.0-20260617.222640-43"
 
 indra {
     javaVersions {
@@ -12,7 +13,7 @@ indra {
 
 dependencies {
     api(projects.core)
-    implementation("org.incendo", "cloud-velocity", Versions.cloudVersion)
+    implementation("org.incendo", "cloud-velocity", cloudVersion)
 }
 
 relocate("org.incendo.cloud")

@@ -2,10 +2,11 @@ var bungeeProxyVersion = "1.21-R0.1-SNAPSHOT"
 var bungeeApiVersion = "1.21-R0.1"
 var gsonVersion = "2.8.0"
 var guavaVersion = "21.0"
+var cloudVersion = "2.0.0-20260617.222640-44"
 
 dependencies {
     api(projects.core)
-    implementation("org.incendo", "cloud-bungee", Versions.cloudVersion)
+    implementation("org.incendo", "cloud-bungee", cloudVersion)
 }
 
 relocate("com.google.inject")
