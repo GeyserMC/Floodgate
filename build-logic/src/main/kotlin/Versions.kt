@@ -33,6 +33,7 @@ object Versions {
     const val guiceVersion = "6.0.0"
     const val nettyVersion = "4.1.49.Final"
     const val snakeyamlVersion = "1.28"
+    const val cloudVersion = "2.0.0-beta.16" // for cloud-minecraft
     const val cloudCore = "2.0.0"
     const val bstatsVersion = "3.0.2"
 

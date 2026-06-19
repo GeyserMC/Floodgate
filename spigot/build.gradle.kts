@@ -1,7 +1,6 @@
 var authlibVersion = "1.5.21"
 var guavaVersion = "21.0"
 var gsonVersion = "2.8.5"
-var cloudVersion = "2.0.0-20260617.222640-43"
 
 indra {
     javaVersions {
@@ -14,7 +13,7 @@ indra {
 dependencies {
     api(projects.core)
 
-    implementation("org.incendo", "cloud-paper", cloudVersion)
+    implementation("org.incendo", "cloud-paper", Versions.cloudVersion)
     // hack to make pre 1.12 work
     implementation("com.google.guava", "guava", guavaVersion)
 
