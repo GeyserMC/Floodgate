@@ -27,24 +27,25 @@ package org.geysermc.floodgate.pluginmessage.channel;
 
 import com.google.common.base.Charsets;
 import com.google.inject.Inject;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectMaps;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
-import java.util.UUID;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.geysermc.cumulus.form.Form;
 import org.geysermc.cumulus.form.impl.FormDefinition;
 import org.geysermc.cumulus.form.impl.FormDefinitions;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.api.player.PropertyKey;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
+import org.geysermc.floodgate.player.FloodgatePlayerImpl;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
 
 public class FormChannel implements PluginMessageChannel {
+    private static final PropertyKey PROPERTY_LAST_FORM_ID = new PropertyKey("floodgate:last_form_id", true, false);
+    private static final PropertyKey PROPERTY_ACTIVE_FORMS = new PropertyKey("floodgate:active_forms", true, true);
+
     private final FormDefinitions formDefinitions = FormDefinitions.instance();
-    private final Short2ObjectMap<Form> storedForms =
-            Short2ObjectMaps.synchronize(new Short2ObjectOpenHashMap<>());
-    private final AtomicInteger nextFormId = new AtomicInteger(0);
 
     @Inject private PluginMessageUtils pluginMessageUtils;
     @Inject private FloodgateConfig config;
@@ -58,8 +59,7 @@ public class FormChannel implements PluginMessageChannel {
     @Override
     public Result handleProxyCall(
             byte[] data,
-            UUID sourceUuid,
-            String sourceUsername,
+            FloodgatePlayer source,
             Identity sourceIdentity
     ) {
         if (sourceIdentity == Identity.SERVER) {
@@ -79,35 +79,54 @@ public class FormChannel implements PluginMessageChannel {
                 return Result.forward();
             }
 
-            if (!callResponseConsumer(data)) {
+            if (!callResponseConsumer(source, data)) {
                 logger.error("Couldn't find stored form with id {} for player {}",
-                        formId, sourceUsername);
+                        formId, source.getCorrectUsername());
             }
         }
         return Result.handled();
     }
 
     @Override
-    public Result handleServerCall(byte[] data, UUID playerUuid, String playerUsername) {
-        callResponseConsumer(data);
+    public Result handleServerCall(byte[] data, FloodgatePlayer source) {
+        if (!callResponseConsumer(source, data)) {
+            logger.error("Couldn't find stored form for player {}", source.getCorrectUsername());
+        }
         return Result.handled();
     }
 
-    public boolean closeForm(UUID player) {
-        return pluginMessageUtils.sendMessage(player, getIdentifier(), new byte[0]);
+    public boolean closeForm(FloodgatePlayer player) {
+        closeForms0(player);
+        return pluginMessageUtils.sendMessage(player.getCorrectUniqueId(), getIdentifier(), new byte[0]);
     }
 
-    public boolean sendForm(UUID player, Form form) {
-        byte[] formData = createFormData(form);
-        return pluginMessageUtils.sendMessage(player, getIdentifier(), formData);
-    }
-
-    public byte[] createFormData(Form form) {
-        short formId = getNextFormId();
-        if (config.isProxy()) {
-            formId |= 0x8000;
+    private void closeForms0(FloodgatePlayer player) {
+        Map<Short, Form> forms = player.removeProperty(PROPERTY_ACTIVE_FORMS);
+        if (forms != null && !forms.isEmpty()) {
+            for (Form form : forms.values()) {
+                try {
+                    formDefinitions.definitionFor(form).handleFormResponse(form, "");
+                } catch (Exception e) {
+                    logger.error("Error while closing form!", e);
+                }
+            }
         }
-        storedForms.put(formId, form);
+    }
+
+    public boolean sendForm(FloodgatePlayer player, Form form) {
+        byte[] formData = createFormData(player, form);
+        return pluginMessageUtils.sendMessage(player.getCorrectUniqueId(), getIdentifier(), formData);
+    }
+
+    public byte[] createFormData(FloodgatePlayer player, Form form) {
+        short formId = getNextFormId(player);
+        if (config.isProxy()) {
+            formId |= (short) 0x8000;
+        }
+
+        ((FloodgatePlayerImpl) player)
+                .getOrAddProperty(PROPERTY_ACTIVE_FORMS, ConcurrentHashMap::new)
+                .put(formId, form);
 
         FormDefinition<Form, ?, ?> definition = formDefinitions.definitionFor(form);
 
@@ -124,8 +143,15 @@ public class FormChannel implements PluginMessageChannel {
         return data;
     }
 
-    protected boolean callResponseConsumer(byte[] data) {
-        Form storedForm = storedForms.remove(getFormId(data));
+    protected boolean callResponseConsumer(FloodgatePlayer player, byte[] data) {
+        short formId = getFormId(data);
+
+        Map<Short, Form> forms = player.getProperty(PROPERTY_ACTIVE_FORMS);
+        if (forms == null) {
+            return false;
+        }
+
+        Form storedForm = forms.remove(formId);
         if (storedForm != null) {
             String responseData = new String(data, 2, data.length - 2, Charsets.UTF_8);
             try {
@@ -139,11 +165,18 @@ public class FormChannel implements PluginMessageChannel {
         return false;
     }
 
-    protected short getFormId(byte[] data) {
+    public void disconnect(FloodgatePlayer player) {
+        closeForms0(player);
+    }
+
+    private short getFormId(byte[] data) {
         return (short) ((data[0] & 0xFF) << 8 | data[1] & 0xFF);
     }
 
-    protected short getNextFormId() {
+    private short getNextFormId(FloodgatePlayer player) {
+        AtomicInteger nextFormId =
+                ((FloodgatePlayerImpl) player).getOrAddProperty(PROPERTY_LAST_FORM_ID, AtomicInteger::new);
+
         // signed bit is used to check if the form is from a proxy or a server
         return (short) nextFormId.getAndUpdate(
                 (number) -> number == Short.MAX_VALUE ? 0 : number + 1);

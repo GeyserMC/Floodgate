@@ -28,10 +28,14 @@ package org.geysermc.floodgate.pluginmessage;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.Messenger;
+import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.pluginmessage.PluginMessageChannel.Result;
 
 @RequiredArgsConstructor
 public class SpigotPluginMessageRegistration implements PluginMessageRegistration {
     private final JavaPlugin plugin;
+    private final FloodgateApi api;
 
     @Override
     public void register(PluginMessageChannel channel) {
@@ -40,8 +44,18 @@ public class SpigotPluginMessageRegistration implements PluginMessageRegistratio
         messenger.registerIncomingPluginChannel(
                 plugin,
                 channel.getIdentifier(),
-                (channel1, player, message) ->
-                        channel.handleServerCall(message, player.getUniqueId(), player.getName()));
+                (channel1, player, message) -> {
+                    FloodgatePlayer fPlayer = api.getPlayer(player.getUniqueId());
+                    if (fPlayer == null) {
+                        player.kickPlayer("Only Floodgate players can send floodgate messages!");
+                        return;
+                    }
+
+                    Result result = channel.handleServerCall(message, fPlayer);
+                    if (!result.isAllowed() && result.getReason() != null) {
+                        player.kickPlayer(result.getReason());
+                    }
+                });
 
         messenger.registerOutgoingPluginChannel(plugin, channel.getIdentifier());
     }

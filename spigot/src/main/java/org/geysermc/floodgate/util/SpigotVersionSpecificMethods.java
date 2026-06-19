@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.geysermc.floodgate.SpigotPlugin;
@@ -123,7 +124,17 @@ public final class SpigotVersionSpecificMethods {
         // In Folia we don't have to schedule this as there is no concept of a single main thread.
         // Instead, we have to schedule the task per player.
         if (ClassNames.IS_FOLIA) {
-            on.getScheduler().execute(plugin, () -> hideAndShowPlayer0(on, target), null, 0);
+            on.getScheduler().execute(plugin, () -> {
+                // This is a defensive check. The source should always be on the same region, as this is requested
+                // from that player's context. The target however can be in a different region, which seems to trigger
+                // ChunkMap$TrackedEntity.updatePlayer in a different thread for a thread-unsafe HashSet.
+                // This should result in the skin not showing up for those specific players, but it's better than an
+                // exception.
+                if (!Bukkit.isOwnedByCurrentRegion(on) || !Bukkit.isOwnedByCurrentRegion(target)) {
+                    return;
+                }
+                hideAndShowPlayer0(on, target);
+            }, null, 0);
             return;
         }
         hideAndShowPlayer0(on, target);
