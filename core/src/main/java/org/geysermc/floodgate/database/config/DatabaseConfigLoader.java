@@ -36,6 +36,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
 import org.yaml.snakeyaml.introspector.BeanAccess;
 
 public class DatabaseConfigLoader {
