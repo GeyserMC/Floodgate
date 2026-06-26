@@ -73,6 +73,30 @@ jobs:
           path: velocity/build/libs/floodgate-velocity.jar
           if-no-files-found: error
 
+      - name: Archive artifacts (Floodgate Mongo Database)
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808
+        if: success()
+        with:
+          name: Floodgate Mongo Database
+          path: database/mongo/build/libs/floodgate-mongo-database.jar
+          if-no-files-found: error
+
+      - name: Archive artifacts (Floodgate MySQL Database)
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808
+        if: success()
+        with:
+          name: Floodgate MySQL Database
+          path: database/mysql/build/libs/floodgate-mysql-database.jar
+          if-no-files-found: error
+
+      - name: Archive artifacts (Floodgate SQLite Database)
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808
+        if: success()
+        with:
+          name: Floodgate SQLite Database
+          path: database/sqlite/build/libs/floodgate-sqlite-database.jar
+          if-no-files-found: error
+
       - name: Publish to Maven Repository
         if: ${{ github.repository == 'GeyserMC/Floodgate' }}
         run: ./gradlew publish
