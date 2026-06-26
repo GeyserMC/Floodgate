@@ -123,6 +123,9 @@ jobs:
             bungee:bungee/build/libs/floodgate-bungee.jar
             spigot:spigot/build/libs/floodgate-spigot.jar
             velocity:velocity/build/libs/floodgate-velocity.jar
+            mongo:database/mongo/build/libs/floodgate-mongo-database.jar
+            mysql:database/mysql/build/libs/floodgate-mysql-database.jar
+            sqlite:database/sqlite/build/libs/floodgate-sqlite-database.jar
           releaseEnabled: false
           saveMetadata: true
           releaseProject: 'floodgate'
@@ -139,6 +142,9 @@ jobs:
             bungee/build/libs/floodgate-bungee.jar
             spigot/build/libs/floodgate-spigot.jar
             velocity/build/libs/floodgate-velocity.jar
+            mongo:database/mongo/build/libs/floodgate-mongo-database.jar
+            mysql:database/mysql/build/libs/floodgate-mysql-database.jar
+            sqlite:database/sqlite/build/libs/floodgate-sqlite-database.jar
 
       - name: Notify Discord
         if: ${{ (success() || failure()) && github.repository == 'GeyserMC/Floodgate' }}
