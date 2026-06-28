@@ -111,7 +111,7 @@ jobs:
           appID: ${{ secrets.RELEASE_APP_ID }}
           appPrivateKey: ${{ secrets.RELEASE_APP_PK }}
           files: |
-            mongo:database/mongo/build/libs/floodgate-mongo-database.jar
+            mongodb:database/mongo/build/libs/floodgate-mongo-database.jar
             mysql:database/mysql/build/libs/floodgate-mysql-database.jar
             sqlite:database/sqlite/build/libs/floodgate-sqlite-database.jar
           releaseEnabled: false
