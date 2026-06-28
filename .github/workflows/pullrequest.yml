@@ -38,27 +38,14 @@ jobs:
       - name: Build Floodgate
         run: ./gradlew build
 
-      - name: Archive artifacts (Floodgate Bungee)
-        # See https://github.com/actions/upload-artifact/commits
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+      - name: Archive Artifacts
+        uses: GeyserMC/actions/upload-multi-artifact@master
         if: success()
         with:
-          name: Floodgate Bungee
-          path: bungee/build/libs/floodgate-bungee.jar
-          if-no-files-found: error
-
-      - name: Archive artifacts (Floodgate Spigot)
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808
-        if: success()
-        with:
-          name: Floodgate Spigot
-          path: spigot/build/libs/floodgate-spigot.jar
-          if-no-files-found: error
-
-      - name: Archive artifacts (Floodgate Velocity)
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808
-        if: success()
-        with:
-          name: Floodgate Velocity
-          path: velocity/build/libs/floodgate-velocity.jar
-          if-no-files-found: error
+          artifacts: |
+            bungee/build/libs/floodgate-bungee.jar
+            spigot/build/libs/floodgate-spigot.jar
+            velocity/build/libs/floodgate-velocity.jar
+            database/mongo/build/libs/floodgate-mongo-database.jar
+            database/mysql/build/libs/floodgate-mysql-database.jar
+            database/sqlite/build/libs/floodgate-sqlite-database.jar
