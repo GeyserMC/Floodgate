@@ -27,12 +27,15 @@ package org.geysermc.floodgate.listener;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
@@ -47,7 +50,9 @@ import net.md_5.bungee.netty.ChannelWrapper;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.pluginmessage.channel.FormChannel;
+import org.geysermc.floodgate.player.FloodgatePlayerImpl;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinDataImpl;
 import org.geysermc.floodgate.util.LanguageManager;
@@ -59,6 +64,12 @@ public final class BungeeListener implements Listener {
     private static final Field CHANNEL_WRAPPER;
     private static final Field PLAYER_NAME;
 
+    private final Cache<PendingConnection, FloodgatePlayer> playerCache =
+            CacheBuilder.newBuilder()
+                    .maximumSize(500)
+                    .expireAfterAccess(20, TimeUnit.SECONDS)
+                    .build();
+
     static {
         CHANNEL_WRAPPER =
                 ReflectionUtils.getFieldOfType(InitialHandler.class, ChannelWrapper.class);
@@ -69,6 +80,7 @@ public final class BungeeListener implements Listener {
     }
 
     @Inject private Plugin plugin;
+    @Inject private ProxyFloodgateConfig config;
     @Inject private ProxyFloodgateApi api;
     @Inject private LanguageManager languageManager;
     @Inject private FloodgateLogger logger;
@@ -107,9 +119,13 @@ public final class BungeeListener implements Listener {
 
         FloodgatePlayer player = channel.attr(playerAttribute).get();
         if (player != null) {
-            connection.setOnlineMode(false);
-            connection.setUniqueId(player.getCorrectUniqueId());
-            ReflectionUtils.setValue(connection, PLAYER_NAME, player.getCorrectUsername());
+            if (config.isAllowOnlineModeAuthentication()) {
+                playerCache.put(connection, player);
+            } else {
+                connection.setOnlineMode(false);
+                connection.setUniqueId(player.getCorrectUniqueId());
+                ReflectionUtils.setValue(connection, PLAYER_NAME, player.getCorrectUsername());
+            }
         }
     }
 
@@ -119,6 +135,18 @@ public final class BungeeListener implements Listener {
         // he has been disconnected by now
         UUID uniqueId = event.getConnection().getUniqueId();
         FloodgatePlayer player = api.getPlayer(uniqueId);
+
+        if (player == null && config.isAllowOnlineModeAuthentication()) {
+            player = playerCache.getIfPresent(event.getConnection());
+            if (player != null) {
+                playerCache.invalidate(event.getConnection());
+                if (player instanceof FloodgatePlayerImpl) {
+                    FloodgatePlayerImpl floodgatePlayer = (FloodgatePlayerImpl) player;
+                    floodgatePlayer.setOnlineModeProfile(uniqueId, event.getConnection().getName());
+                }
+            }
+        }
+
         if (player != null) {
             //todo we should probably move this log message earlier in the process, so that we know
             // that Floodgate has done its job
