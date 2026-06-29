@@ -115,8 +115,10 @@ jobs:
             mysql:database/mysql/build/libs/floodgate-mysql-database.jar
             sqlite:database/sqlite/build/libs/floodgate-sqlite-database.jar
           releaseEnabled: false
+          tagIncrement: false
           saveMetadata: true
-          releaseProject: 'floodgate-db'
+          metadataName: 'metadata_floodgatedb.json'
+          releaseProject: 'floodgatedb'
           releaseVersion: ${{ steps.get-version.outputs.VERSION }}
 
       - name: Publish DBs to Downloads API
@@ -126,6 +128,7 @@ jobs:
           username: ${{ vars.DOWNLOADS_USERNAME }}
           privateKey: ${{ secrets.DOWNLOADS_PRIVATE_KEY }}
           host: ${{ secrets.DOWNLOADS_SERVER_IP }}
+          metadata: 'metadata_floodgatedb.json'
           files: |
             database/mongo/build/libs/floodgate-mongo-database.jar
             database/mysql/build/libs/floodgate-mysql-database.jar
