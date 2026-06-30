@@ -35,7 +35,9 @@ import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent;
 import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.event.EventBus;
 import org.geysermc.floodgate.event.skin.SkinApplyEventImpl;
 import org.geysermc.floodgate.skin.SkinApplier;
@@ -47,9 +49,14 @@ import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
 public final class SpigotSkinApplier implements SkinApplier {
     @Inject private SpigotVersionSpecificMethods versionSpecificMethods;
     @Inject private EventBus eventBus;
+    @Inject private FloodgateLogger logger;
+    @Inject private FloodgateConfig config;
 
     @Override
     public void applySkin(@NonNull FloodgatePlayer floodgatePlayer, @NonNull SkinData skinData, boolean internal) {
+        logSkinDebug("Starting skin apply for player={} internal={} valueLength={} signatureLength={}",
+                floodgatePlayer.getCorrectUsername(), internal,
+                skinData.value().length(), skinData.signature().length());
         applySkin0(floodgatePlayer, skinData, internal, true);
     }
 
@@ -59,10 +66,15 @@ public final class SpigotSkinApplier implements SkinApplier {
         // player is probably not logged in yet
         if (player == null) {
             if (firstTry) {
+                logSkinDebug("Player {} not online yet; scheduling delayed skin apply retry",
+                        floodgatePlayer.getCorrectUsername());
                 versionSpecificMethods.schedule(
                         () -> applySkin0(floodgatePlayer, skinData, internal, false),
                         10 * 20
                 );
+            } else {
+                logSkinDebug("Player {} still unavailable after delayed retry; skin apply aborted",
+                        floodgatePlayer.getCorrectUsername());
             }
             return;
         }
@@ -76,29 +88,41 @@ public final class SpigotSkinApplier implements SkinApplier {
         // Need to be careful here - getProperties() returns an authlib PropertyMap, which extends
         // MultiMap from Guava. Floodgate relocates Guava.
         SkinData currentSkin = versionSpecificMethods.currentSkin(profile);
+        logSkinDebug("Current skin for {} present={}", player.getName(), currentSkin != null);
 
         SkinApplyEvent event = new SkinApplyEventImpl(floodgatePlayer, currentSkin, skinData);
         event.setCancelled(!internal && floodgatePlayer.isLinked());
+        logSkinDebug("Skin event initial cancelled={} (linked={} internal={})",
+                event.isCancelled(), floodgatePlayer.isLinked(), internal);
 
         eventBus.fire(event);
+        logSkinDebug("Skin event after listeners cancelled={} for {}",
+                event.isCancelled(), player.getName());
 
         if (event.isCancelled()) {
+            logSkinDebug("Skin apply cancelled for {} by event pipeline", player.getName());
             return;
         }
 
         if (ClassNames.GAME_PROFILE_FIELD != null) {
+            logSkinDebug("Applying skin through immutable GameProfile path for {}", player.getName());
             replaceSkin(player, profile, event.newSkin());
         } else {
             // We're on a version with mutable GameProfiles
+            logSkinDebug("Applying skin through mutable GameProfile path for {}", player.getName());
             replaceSkinOld(profile.getProperties(), event.newSkin());
         }
 
         versionSpecificMethods.maybeSchedule(() -> {
+            int refreshedViewers = 0;
             for (Player p : Bukkit.getOnlinePlayers()) {
                 if (!p.equals(player) && p.canSee(player)) {
                     versionSpecificMethods.hideAndShowPlayer(p, player);
+                    refreshedViewers++;
                 }
             }
+            logSkinDebug("Completed hide/show refresh for {} viewers of {}", refreshedViewers,
+                    player.getName());
         });
     }
 
@@ -113,5 +137,11 @@ public final class SpigotSkinApplier implements SkinApplier {
         properties.removeAll("textures");
         Property property = new Property("textures", skinData.value(), skinData.signature());
         properties.put("textures", property);
+    }
+
+    private void logSkinDebug(String message, Object... args) {
+        if (config.isSkinUploadDebug()) {
+            logger.info("[skin-upload-debug] " + message, args);
+        }
     }
 }

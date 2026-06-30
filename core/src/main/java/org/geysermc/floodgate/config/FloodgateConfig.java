@@ -50,6 +50,7 @@ public class FloodgateConfig implements GenericPostInitializeCallback<ConfigLoad
     private MetricsConfig metrics;
 
     private boolean debug;
+    private boolean skinUploadDebug;
     private int configVersion;
 
 

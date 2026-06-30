@@ -46,6 +46,7 @@ public final class Constants {
     public static final String WEBSOCKET_URL = "ws" + API_BASE_URL + "/ws";
     public static final String GET_XUID_URL = "http" + API_BASE_URL + "/v2/xbox/xuid/";
     public static final String GET_GAMERTAG_URL = "http" + API_BASE_URL + "/v2/xbox/gamertag/";
+    public static final String GET_BEDROCK_SKIN_URL = "http" + API_BASE_URL + "/v2/skin/";
     public static final String NEWS_OVERVIEW_URL = "http" + API_BASE_URL + "/v2/news/";
     public static final String GET_BEDROCK_LINK = "http" + API_BASE_URL + "/v2/link/bedrock/";
 

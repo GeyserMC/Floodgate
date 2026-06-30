@@ -30,40 +30,104 @@ import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import java.util.Objects;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import org.geysermc.event.Listener;
 import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
+import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.event.lifecycle.ShutdownEvent;
+import org.geysermc.floodgate.player.FloodgatePlayerImpl;
 
 @Listener
 @Singleton
 public final class SkinUploadManager {
+    private static final int RECONNECT_DELAY_SECONDS = 2;
+
     private final Int2ObjectMap<SkinUploadSocket> connections =
             Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>());
+    private final ScheduledExecutorService reconnectExecutor =
+            Executors.newSingleThreadScheduledExecutor(task -> {
+                Thread thread = new Thread(task, "floodgate-skin-reconnect");
+                thread.setDaemon(true);
+                return thread;
+            });
+    private volatile boolean shuttingDown;
 
     @Inject private FloodgateApi api;
     @Inject private SkinApplier applier;
+    @Inject private MinecraftServerSkinFallback minecraftServerSkinFallback;
     @Inject private FloodgateLogger logger;
+    @Inject private FloodgateConfig config;
 
     public void addConnectionIfNeeded(int id, String verifyCode) {
-        connections.computeIfAbsent(id, (ignored) -> {
+        connections.computeIfAbsent(id, ignored -> {
             SkinUploadSocket socket =
-                    new SkinUploadSocket(id, verifyCode, this, api, applier, logger);
+                    new SkinUploadSocket(id, verifyCode, this, api, applier,
+                            minecraftServerSkinFallback, logger,
+                        config.isSkinUploadDebug());
             socket.connect();
             return socket;
         });
     }
 
-    public void removeConnection(int id, SkinUploadSocket socket) {
-        connections.remove(id, socket);
+    public void removeConnection(int id, SkinUploadSocket socket, boolean shouldReconnect) {
+        if (!connections.remove(id, socket) || shuttingDown) {
+            return;
+        }
+
+        if (!shouldReconnect) {
+            return;
+        }
+
+        String verifyCode = socket.getVerifyCode();
+        if (!hasMatchingOnlinePlayer(id, verifyCode)) {
+            return;
+        }
+
+        reconnectExecutor.schedule(() -> {
+            if (shuttingDown || !hasMatchingOnlinePlayer(id, verifyCode)) {
+                return;
+            }
+            addConnectionIfNeeded(id, verifyCode);
+        }, RECONNECT_DELAY_SECONDS, TimeUnit.SECONDS);
+    }
+
+    void scheduleRetry(Runnable task, long delay, TimeUnit unit) {
+        reconnectExecutor.schedule(() -> {
+            if (!shuttingDown) {
+                task.run();
+            }
+        }, delay, unit);
     }
 
     public void closeAllSockets() {
+        shuttingDown = true;
+        reconnectExecutor.shutdownNow();
+
         for (SkinUploadSocket socket : connections.values()) {
             socket.close();
         }
         connections.clear();
+    }
+
+    private boolean hasMatchingOnlinePlayer(int id, String verifyCode) {
+        for (FloodgatePlayer player : api.getPlayers()) {
+            if (!(player instanceof FloodgatePlayerImpl)) {
+                continue;
+            }
+
+            FloodgatePlayerImpl floodgatePlayer = (FloodgatePlayerImpl) player;
+            if (floodgatePlayer.getSubscribeId() == id &&
+                    Objects.equals(verifyCode, floodgatePlayer.getVerifyCode())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Subscribe

@@ -14,6 +14,11 @@ replace-spaces: true
 # The default locale for Floodgate. By default, Floodgate uses the system locale
 # default-locale: en_US
 
+# Enables extra diagnostics for skin upload websocket traffic.
+# Useful to inspect what Floodgate receives from api.geysermc.org and why skin apply can fail.
+# Keep disabled in production unless you are troubleshooting skin issues.
+skin-upload-debug: false
+
 disconnect:
   # The disconnect message Geyser users should get when connecting
   # to the server with an invalid key
