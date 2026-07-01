@@ -68,6 +68,11 @@ public class SimpleFloodgateApi implements FloodgateApi {
     }
 
     @Override
+    public String getPlayerSuffix() {
+        return config.getUsernameSuffix();
+    }
+
+    @Override
     public Collection<FloodgatePlayer> getPlayers() {
         return ImmutableSet.copyOf(players.values());
     }
