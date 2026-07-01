@@ -32,6 +32,8 @@ import com.google.inject.name.Named;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.UUID;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.event.LoginEvent;
@@ -47,6 +49,7 @@ import net.md_5.bungee.netty.ChannelWrapper;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.player.PendingPlayerManager;
 import org.geysermc.floodgate.pluginmessage.channel.FormChannel;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinDataImpl;
@@ -83,6 +86,7 @@ public final class BungeeListener implements Listener {
     private AttributeKey<String> kickMessageAttribute;
 
     @Inject private MojangUtils mojangUtils;
+    @Inject private PendingPlayerManager pendingPlayerManager;
     @Inject private FormChannel formChannel;
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -132,6 +136,13 @@ public final class BungeeListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPostLogin(PostLoginEvent event) {
+        SocketAddress socketAddress = event.getPlayer().getSocketAddress();
+
+        if (socketAddress instanceof InetSocketAddress) {
+            InetSocketAddress inetSocketAddress = (InetSocketAddress) socketAddress;
+            pendingPlayerManager.remove(inetSocketAddress);
+        }
+
         FloodgatePlayer player = api.getPlayer(event.getPlayer().getUniqueId());
         if (player == null) {
             return;
@@ -167,5 +178,12 @@ public final class BungeeListener implements Listener {
         }
 
         api.playerRemoved(event.getPlayer().getUniqueId());
+
+        SocketAddress socketAddress = event.getPlayer().getSocketAddress();
+
+        if (socketAddress instanceof InetSocketAddress) {
+            InetSocketAddress inetSocketAddress = (InetSocketAddress) socketAddress;
+            pendingPlayerManager.remove(inetSocketAddress);
+        }
     }
 }
