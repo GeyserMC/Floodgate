@@ -21,3 +21,7 @@ provided("net.md-5", "bungeecord-proxy", bungeeProxyVersion, includeTransitiveDe
 provided("net.md-5", "bungeecord-api", bungeeApiVersion)
 provided("com.google.code.gson", "gson", gsonVersion)
 provided("com.google.guava", "guava", guavaVersion)
+
+// Excluded as Geyser *must* be present
+provided("org.geysermc.geyser", "common", Versions.geyserVersion)
+provided("org.geysermc.cumulus", "cumulus", Versions.cumulusVersion)

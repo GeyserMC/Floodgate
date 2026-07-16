@@ -3,3 +3,5 @@ description: ${description}
 version: ${version}
 author: ${author}
 main: org.geysermc.floodgate.BungeePlugin
+depends:
+  - "Geyser-BungeeCord"
