@@ -47,7 +47,14 @@ fun Project.shouldAddBranchName(): Boolean =
     System.getenv("IGNORE_BRANCH")?.toBoolean() ?: (branchName() !in arrayOf("master", "local/dev"))
 
 fun Project.versionWithBranchName(): String =
-    branchName().replace(Regex("[^0-9A-Za-z-_]"), "-") + '-' + version
+    branchNameFormatted() + '-' + version
+
+fun Project.branchNameFormatted(): String {
+    if (branchName() == "feat/fix_proxy_library_clash") {
+        return "proxy";
+    }
+    return branchName().replace(Regex("[^0-9A-Za-z-_]"), "-");
+}
 
 fun buildNumber(): Int =
     (System.getenv("BUILD_NUMBER"))?.let { Integer.parseInt(it) } ?: -1
