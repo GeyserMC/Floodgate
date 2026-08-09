@@ -152,18 +152,22 @@ final class SkinUploadSocket extends WebSocketClient {
     @Override
     public void onClose(int code, String reason, boolean remote) {
         if (reason != null && !reason.isEmpty()) {
-            JsonObject message = gson.fromJson(reason, JsonObject.class);
+            try {
+                JsonObject message = gson.fromJson(reason, JsonObject.class);
 
-            // info means that the uploader itself did nothing wrong
-            if (message.has("info")) {
-                String info = message.get("info").getAsString();
-                logger.debug("Got disconnected from the skin uploader: {}", info);
-            }
+                // info means that the uploader itself did nothing wrong
+                if (message.has("info")) {
+                    String info = message.get("info").getAsString();
+                    logger.debug("Got disconnected from the skin uploader: {}", info);
+                }
 
-            // error means that the uploader did something wrong
-            if (message.has("error")) {
-                String error = message.get("error").getAsString();
-                logger.info("Got disconnected from the skin uploader: {}", error);
+                // error means that the uploader did something wrong
+                if (message.has("error")) {
+                    String error = message.get("error").getAsString();
+                    logger.info("Got disconnected from the skin uploader: {}", error);
+                }
+            } catch (JsonSyntaxException ignored) {
+                // Ignore invalid JSON
             }
         }
 
