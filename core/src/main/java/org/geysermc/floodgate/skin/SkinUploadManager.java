@@ -47,6 +47,11 @@ public final class SkinUploadManager {
     @Inject private FloodgateLogger logger;
 
     public void addConnectionIfNeeded(int id, String verifyCode) {
+        // Don't attempt to connect if it's been disabled
+        if (id == -1) {
+            return;
+        }
+
         connections.computeIfAbsent(id, (ignored) -> {
             SkinUploadSocket socket =
                     new SkinUploadSocket(id, verifyCode, this, api, applier, logger);
