@@ -24,6 +24,6 @@ relocate("io.leangen.geantyref")
 provided("com.google.code.gson", "gson", gsonVersion)
 provided("com.google.guava", "guava", guavaVersion)
 provided("com.google.inject", "guice", Versions.guiceVersion)
-provided("org.yaml", "snakeyaml", Versions.snakeyamlVersion) // included in Configurate
+provided("org.yaml", "snakeyaml", Versions.snakeyamlVersion) // included in Velocity
 provided("com.velocitypowered", "velocity-api", velocityVersion)
 provided("org.apache.logging.log4j", "log4j-core", log4jVersion)
