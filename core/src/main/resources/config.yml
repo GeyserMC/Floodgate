@@ -8,6 +8,9 @@ key-file-name: key.pem
 # It is recommended to use a prefix that does not contain alphanumerical to avoid the possibility of duplicate usernames.
 username-prefix: "."
 
+# Optional suffix appended after a bedrock player's name. Leave empty to disable.
+username-suffix: ""
+
 # Should spaces be replaced with '_' in bedrock usernames?
 replace-spaces: true
 

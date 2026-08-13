@@ -50,6 +50,14 @@ public interface FloodgateApi {
     String getPlayerPrefix();
 
     /**
+     * Returns the character(s) that will be appended at the end of a Bedrock player's name to
+     * prevent username duplicates. Returns an empty string if no suffix is configured.
+     */
+    default String getPlayerSuffix() {
+        return "";
+    }
+
+    /**
      * Returns all the online Floodgate players.
      */
     Collection<FloodgatePlayer> getPlayers();
