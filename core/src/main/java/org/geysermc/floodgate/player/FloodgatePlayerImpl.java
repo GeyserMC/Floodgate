@@ -66,6 +66,9 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
     private final int subscribeId;
     private final String verifyCode;
 
+    private UUID onlineModeUniqueId;
+    private String onlineModeUsername;
+
     @Getter(AccessLevel.PRIVATE)
     private Map<PropertyKey, Object> propertyKeyToValue;
     @Getter(AccessLevel.PRIVATE)
@@ -91,12 +94,25 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
 
     @Override
     public UUID getCorrectUniqueId() {
-        return linkedPlayer != null ? linkedPlayer.getJavaUniqueId() : javaUniqueId;
+        if (linkedPlayer != null) {
+            return linkedPlayer.getJavaUniqueId();
+        }
+
+        return onlineModeUniqueId != null ? onlineModeUniqueId : javaUniqueId;
     }
 
     @Override
     public String getCorrectUsername() {
-        return linkedPlayer != null ? linkedPlayer.getJavaUsername() : javaUsername;
+        if (linkedPlayer != null) {
+            return linkedPlayer.getJavaUsername();
+        }
+
+        return onlineModeUsername != null ? onlineModeUsername : javaUsername;
+    }
+
+    public void setOnlineModeProfile(UUID uniqueId, String username) {
+        this.onlineModeUniqueId = uniqueId;
+        this.onlineModeUsername = username;
     }
 
     @Override
@@ -105,8 +121,18 @@ public final class FloodgatePlayerImpl implements FloodgatePlayer {
     }
 
     public BedrockData toBedrockData() {
+        LinkedPlayer forwardedLinkedPlayer = this.linkedPlayer;
+        if (forwardedLinkedPlayer == null) {
+            UUID correctUniqueId = getCorrectUniqueId();
+            String correctUsername = getCorrectUsername();
+
+            if (!javaUniqueId.equals(correctUniqueId) || !javaUsername.equals(correctUsername)) {
+                forwardedLinkedPlayer = LinkedPlayer.of(correctUsername, correctUniqueId, javaUniqueId);
+            }
+        }
+
         return BedrockData.of(version, username, xuid, deviceOs.ordinal(), languageCode,
-                uiProfile.ordinal(), inputMode.ordinal(), ip, linkedPlayer, proxy, subscribeId,
+                uiProfile.ordinal(), inputMode.ordinal(), ip, forwardedLinkedPlayer, proxy, subscribeId,
                 verifyCode);
     }
 

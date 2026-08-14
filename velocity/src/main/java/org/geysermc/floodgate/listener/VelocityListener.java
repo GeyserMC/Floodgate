@@ -58,6 +58,7 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.pluginmessage.channel.FormChannel;
+import org.geysermc.floodgate.player.FloodgatePlayerImpl;
 import org.geysermc.floodgate.skin.SkinDataImpl;
 import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.LanguageManager;
@@ -149,7 +150,9 @@ public final class VelocityListener {
         }
 
         if (player != null) {
-            event.setResult(PreLoginEvent.PreLoginComponentResult.forceOfflineMode());
+            if (!config.isAllowOnlineModeAuthentication()) {
+                event.setResult(PreLoginEvent.PreLoginComponentResult.forceOfflineMode());
+            }
             playerCache.put(event.getConnection(), player);
         }
     }
@@ -162,6 +165,16 @@ public final class VelocityListener {
             return;
         }
         playerCache.invalidate(event.getConnection());
+
+        if (config.isAllowOnlineModeAuthentication()) {
+            GameProfile profile = event.getGameProfile();
+            if (player instanceof FloodgatePlayerImpl) {
+                FloodgatePlayerImpl floodgatePlayer = (FloodgatePlayerImpl) player;
+                floodgatePlayer.setOnlineModeProfile(profile.getId(), profile.getName());
+            }
+            continuation.resume();
+            return;
+        }
 
         // Skin look up (on Spigot and friends) would result in it failing, so apply a default skin
         if (!player.isLinked()) {
