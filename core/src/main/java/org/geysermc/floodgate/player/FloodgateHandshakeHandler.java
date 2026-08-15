@@ -67,6 +67,7 @@ public final class FloodgateHandshakeHandler {
     private final AttributeKey<FloodgatePlayer> playerAttribute;
     private final FloodgateLogger logger;
     private final LanguageManager languageManager;
+    private final PendingPlayerManager pendingPlayerManager;
 
     public FloodgateHandshakeHandler(
             HandshakeHandlersImpl handshakeHandlers,
@@ -76,7 +77,8 @@ public final class FloodgateHandshakeHandler {
             SkinUploadManager skinUploadManager,
             AttributeKey<FloodgatePlayer> playerAttribute,
             FloodgateLogger logger,
-            LanguageManager languageManager) {
+            LanguageManager languageManager,
+            PendingPlayerManager pendingPlayerManager) {
 
         this.handshakeHandlers = handshakeHandlers;
         this.api = api;
@@ -86,6 +88,7 @@ public final class FloodgateHandshakeHandler {
         this.playerAttribute = playerAttribute;
         this.logger = logger;
         this.languageManager = languageManager;
+        this.pendingPlayerManager = pendingPlayerManager;
     }
 
     /**
@@ -240,6 +243,8 @@ public final class FloodgateHandshakeHandler {
             int port = ((InetSocketAddress) channel.remoteAddress()).getPort();
             InetSocketAddress socketAddress = new InetSocketAddress(handshakeData.getIp(), port);
             player.addProperty(PropertyKey.SOCKET_ADDRESS, socketAddress);
+
+            pendingPlayerManager.add(socketAddress, player);
 
             return new HandshakeResult(ResultType.SUCCESS, handshakeData, bedrockData, player);
         } catch (Exception exception) {
