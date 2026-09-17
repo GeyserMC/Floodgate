@@ -25,7 +25,7 @@
 
 object Versions {
     const val geyserVersion = "2.2.1-SNAPSHOT"
-    const val cumulusVersion = "1.1.2"
+    const val cumulusVersion = "2.0.0-SNAPSHOT"
     const val eventsVersion = "1.1-SNAPSHOT"
     const val configUtilsVersion = "1.0-SNAPSHOT"
     const val spigotVersion = "1.19.4-R0.1-SNAPSHOT"
@@ -36,6 +36,7 @@ object Versions {
     const val cloudVersion = "2.0.1" // for cloud-minecraft
     const val cloudCore = "2.0.0"
     const val bstatsVersion = "3.0.2"
+    const val mathVersion = "2.0"
 
     const val javaWebsocketVersion = "1.6.0"
 
