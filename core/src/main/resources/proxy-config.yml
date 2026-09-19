@@ -5,5 +5,10 @@
 # You'll get kicked if you don't use the plugin. The default value is false because of it
 send-floodgate-data: false
 
+# If enabled, Floodgate will not force Bedrock players into offline mode on the proxy.
+# This is useful when Geyser is configured for auth-type: online and you still want
+# Floodgate API support for Bedrock-only plugins.
+allow-online-mode-authentication: false
+
 >>|
 >>*
