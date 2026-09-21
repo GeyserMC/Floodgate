@@ -36,6 +36,7 @@ import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
+import org.geysermc.floodgate.util.Utils;
 
 public final class SpigotDataAddon implements InjectorAddon {
     @Inject private FloodgateHandshakeHandler handshakeHandler;
@@ -77,6 +78,7 @@ public final class SpigotDataAddon implements InjectorAddon {
 
     @Override
     public void onRemoveInject(Channel channel) {
+        Utils.removeHandler(channel.pipeline(), "floodgate_data_handler");
     }
 
     @Override

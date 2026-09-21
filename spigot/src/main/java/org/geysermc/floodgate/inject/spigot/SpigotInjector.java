@@ -42,6 +42,7 @@ import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.inject.CommonPlatformInjector;
 import org.geysermc.floodgate.util.ClassNames;
 import org.geysermc.floodgate.util.ReflectionUtils;
+import org.geysermc.floodgate.util.Utils;
 
 @Singleton
 public final class SpigotInjector extends CommonPlatformInjector {
@@ -143,16 +144,20 @@ public final class SpigotInjector extends CommonPlatformInjector {
                 // the original list is up-to-date, so we don't have to clear/add/whatever anything
                 CustomList customList = (CustomList) value;
                 ReflectionUtils.setValue(serverConnection, field, customList.getOriginalList());
-                return;
-            }
 
-            // we could replace all references of CustomList that are directly in 'value', but that
-            // only brings you so far. ProtocolLib for example stores the original value
-            // (which would be our CustomList e.g.) in a separate object
-            logger.debug(
-                    "Unable to remove all references of Floodgate due to {}! ",
-                    value.getClass().getName()
-            );
+                for (Object object : customList.getOriginalList()) {
+                    Channel channel = ((ChannelFuture) object).channel();
+                    Utils.removeHandler(channel.pipeline(), "floodgate-init");
+                }
+            } else {
+                // we could replace all references of CustomList that are directly in 'value',
+                // but that only brings you so far. ProtocolLib for example stores the original
+                // value (which would be our CustomList e.g.) in a separate object
+                logger.debug(
+                        "Unable to remove all references of Floodgate due to {}! ",
+                        value.getClass().getName()
+                );
+            }
         }
 
         // remove injection from clients
