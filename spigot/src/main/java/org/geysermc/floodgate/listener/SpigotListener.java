@@ -57,12 +57,6 @@ public final class SpigotListener implements Listener {
         // he would've been disconnected by now
         FloodgatePlayer player = api.getPlayer(uniqueId);
         if (player != null) {
-            //todo we should probably move this log message earlier in the process, so that we know
-            // that Floodgate has done its job
-            logger.translatedInfo(
-                    "floodgate.ingame.login_name",
-                    player.getCorrectUsername(), player.getCorrectUniqueId()
-            );
             languageManager.loadLocale(player.getLanguageCode());
 
             // If the player is linked, we need to look up the skin

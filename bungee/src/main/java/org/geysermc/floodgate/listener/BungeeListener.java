@@ -120,12 +120,6 @@ public final class BungeeListener implements Listener {
         UUID uniqueId = event.getConnection().getUniqueId();
         FloodgatePlayer player = api.getPlayer(uniqueId);
         if (player != null) {
-            //todo we should probably move this log message earlier in the process, so that we know
-            // that Floodgate has done its job
-            logger.translatedInfo(
-                    "floodgate.ingame.login_name",
-                    player.getCorrectUsername(), uniqueId
-            );
             languageManager.loadLocale(player.getLanguageCode());
         }
     }
