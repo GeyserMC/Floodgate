@@ -241,6 +241,15 @@ public final class FloodgateHandshakeHandler {
             InetSocketAddress socketAddress = new InetSocketAddress(handshakeData.getIp(), port);
             player.addProperty(PropertyKey.SOCKET_ADDRESS, socketAddress);
 
+            // logged here instead of on join, so that it also shows up for players that are
+            // refused later on (e.g. by the whitelist) and can then be whitelisted by UUID
+            if (!handshakeData.shouldDisconnect()) {
+                logger.translatedInfo(
+                        "floodgate.ingame.login_name",
+                        player.getCorrectUsername(), player.getCorrectUniqueId()
+                );
+            }
+
             return new HandshakeResult(ResultType.SUCCESS, handshakeData, bedrockData, player);
         } catch (Exception exception) {
             exception.printStackTrace();
